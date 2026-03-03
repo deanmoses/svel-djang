@@ -36,11 +36,16 @@
 	// -----------------------------------------------------------------------
 	let filters = $state(filtersFromParams(page.url.searchParams));
 
+	let initialRun = true;
 	$effect(() => {
-		const url = new URL(page.url);
-		filtersToParams(filters, url.searchParams);
+		const sp = filtersToParams(filters, new URLSearchParams());
+		const search = sp.toString();
+		if (initialRun) {
+			initialRun = false;
+			return;
+		}
 		// eslint-disable-next-line svelte/no-navigation-without-resolve -- resolve() is used in the template literal
-		replaceState(`${resolve('/titles')}${url.search}`, {});
+		replaceState(`${resolve('/titles')}${search ? `?${search}` : ''}`, {});
 	});
 
 	let filteredTitles = $derived(filterTitles(titles.data, filters));
