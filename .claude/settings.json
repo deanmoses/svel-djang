@@ -26,7 +26,7 @@
       "Bash(make:*)",
       "Bash(uv run ruff format:*)",
       "Bash(uv run ruff:*)",
-      "Webfetch:*",
+      "WebFetch",
       "WebSearch"
     ]
   },
