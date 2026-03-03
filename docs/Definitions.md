@@ -18,7 +18,7 @@ A distinct pinball game design — the canonical identity of a game regardless o
 
 **Examples**:
 
-- _Medieval Madness_
+- _Medieval Madness_: both the 1997 original as well as the 2014 Chicago Gaming remakes that are 1-to-1 clones.
 - _Eight Ball Deluxe_
 - _The Addams Family_
 
