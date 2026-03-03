@@ -6,9 +6,12 @@ from apps.catalog.cache import MODELS_ALL_KEY
 from apps.catalog.models import (
     CorporateEntity,
     DesignCredit,
+    DisplayType,
+    Franchise,
     MachineModel,
     Manufacturer,
     Person,
+    Series,
     System,
     TechnologyGeneration,
     Theme,
@@ -546,3 +549,135 @@ class TestSystemsAPI:
     def test_get_system_404(self, client, db):
         resp = client.get("/api/systems/nonexistent")
         assert resp.status_code == 404
+
+
+class TestTitlesAllFacets:
+    """Test that /api/titles/all/ returns enriched facet data."""
+
+    @pytest.fixture
+    def faceted_title(self, db, manufacturer, solid_state):
+        title = Title.objects.create(
+            name="Medieval Madness", opdb_id="G5pe4", short_name="MM"
+        )
+        franchise = Franchise.objects.create(name="Castle Games")
+        title.franchise = franchise
+        title.save()
+        series = Series.objects.create(name="Castle Series")
+        series.titles.add(title)
+
+        dmd = DisplayType.objects.create(name="DMD", slug="dmd")
+        wpc = System.objects.create(name="WPC-95", slug="wpc-95")
+        person = Person.objects.create(name="Pat Lawlor")
+        theme = Theme.objects.create(name="Medieval", slug="medieval")
+
+        m1 = MachineModel.objects.create(
+            name="Medieval Madness",
+            manufacturer=manufacturer,
+            year=1997,
+            title=title,
+            technology_generation=solid_state,
+            display_type=dmd,
+            system=wpc,
+            player_count=4,
+            ipdb_rating=8.5,
+        )
+        m1.themes.add(theme)
+        DesignCredit.objects.create(model=m1, person=person, role="design")
+
+        # Second model with different year to test year_min/year_max
+        MachineModel.objects.create(
+            name="Medieval Madness (Remake)",
+            manufacturer=manufacturer,
+            year=2015,
+            title=title,
+            technology_generation=solid_state,
+            player_count=4,
+        )
+        return title
+
+    def test_all_titles_returns_facet_fields(self, client, faceted_title):
+        resp = client.get("/api/titles/all/")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert len(data) == 1
+        item = data[0]
+
+        # Basic fields
+        assert item["name"] == "Medieval Madness"
+        assert item["manufacturer_slug"] == "williams"
+
+        # Tech generations
+        assert len(item["tech_generations"]) == 1
+        assert item["tech_generations"][0]["slug"] == "solid-state"
+
+        # Display types
+        assert len(item["display_types"]) == 1
+        assert item["display_types"][0]["slug"] == "dmd"
+
+        # Player counts
+        assert item["player_counts"] == [4]
+
+        # Systems
+        assert len(item["systems"]) == 1
+        assert item["systems"][0]["slug"] == "wpc-95"
+
+        # Themes
+        assert len(item["themes"]) == 1
+        assert item["themes"][0]["slug"] == "medieval"
+
+        # Persons
+        assert len(item["persons"]) == 1
+        assert item["persons"][0]["slug"] == "pat-lawlor"
+
+        # Franchise
+        assert item["franchise"]["slug"] == "castle-games"
+
+        # Series
+        assert len(item["series"]) == 1
+        assert item["series"][0]["slug"] == "castle-series"
+
+        # Year range from two models (1997 and 2015)
+        assert item["year_min"] == 1997
+        assert item["year_max"] == 2015
+
+        # Rating
+        assert item["ipdb_rating_max"] == 8.5
+
+    def test_all_titles_deduplicates_tech_generations(self, client, faceted_title):
+        """Two models with the same tech gen should yield one entry."""
+        resp = client.get("/api/titles/all/")
+        data = resp.json()
+        # Both models are solid-state, but should be deduped to 1
+        assert len(data[0]["tech_generations"]) == 1
+
+    def test_all_titles_excludes_alias_models(self, client, faceted_title):
+        """Alias models should not contribute facet data."""
+        parent = MachineModel.objects.get(name="Medieval Madness")
+        lcd = DisplayType.objects.create(name="LCD", slug="lcd")
+        MachineModel.objects.create(
+            name="Medieval Madness (LE)",
+            title=faceted_title,
+            alias_of=parent,
+            display_type=lcd,
+        )
+        resp = client.get("/api/titles/all/")
+        data = resp.json()
+        display_slugs = [d["slug"] for d in data[0]["display_types"]]
+        assert "lcd" not in display_slugs
+
+    def test_all_titles_empty_title(self, client, db):
+        """Title with no models returns empty facet arrays."""
+        Title.objects.create(name="Empty", opdb_id="EMPTY", short_name="E")
+        resp = client.get("/api/titles/all/")
+        data = resp.json()
+        item = data[0]
+        assert item["tech_generations"] == []
+        assert item["display_types"] == []
+        assert item["player_counts"] == []
+        assert item["themes"] == []
+        assert item["persons"] == []
+        assert item["franchise"] is None
+        assert item["series"] == []
+        assert item["year_min"] is None
+        assert item["year_max"] is None
+        assert item["ipdb_rating_max"] is None

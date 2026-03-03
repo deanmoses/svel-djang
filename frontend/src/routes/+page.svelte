@@ -5,12 +5,12 @@
 	import { SvelteSet } from 'svelte/reactivity';
 	import client from '$lib/api/client';
 	import { createAsyncLoader } from '$lib/async-loader.svelte';
-	import CardGrid from '$lib/components/CardGrid.svelte';
-	import MachineCard from '$lib/components/MachineCard.svelte';
-	import ManufacturerCard from '$lib/components/ManufacturerCard.svelte';
-	import PersonCard from '$lib/components/PersonCard.svelte';
+	import CardGrid from '$lib/components/grid/CardGrid.svelte';
+	import MachineCard from '$lib/components/cards/MachineCard.svelte';
+	import ManufacturerCard from '$lib/components/cards/ManufacturerCard.svelte';
+	import PersonCard from '$lib/components/cards/PersonCard.svelte';
 	import SearchBox from '$lib/components/SearchBox.svelte';
-	import TitleCard from '$lib/components/TitleCard.svelte';
+	import TitleCard from '$lib/components/cards/TitleCard.svelte';
 	import { SITE_NAME } from '$lib/constants';
 	import { normalizeText } from '$lib/util';
 

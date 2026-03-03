@@ -1,6 +1,6 @@
 <script lang="ts">
-	import FilterableGrid from '$lib/components/FilterableGrid.svelte';
-	import MachineCard from '$lib/components/MachineCard.svelte';
+	import SearchableGrid from '$lib/components/grid/SearchableGrid.svelte';
+	import MachineCard from '$lib/components/cards/MachineCard.svelte';
 
 	let { data } = $props();
 	let person = $derived(data.person);
@@ -67,7 +67,7 @@
 {/if}
 
 {#if person.machines.length > 0}
-	<FilterableGrid
+	<SearchableGrid
 		items={person.machines}
 		filterFields={(item) => [item.model_name]}
 		placeholder="Search models..."
@@ -82,7 +82,7 @@
 				roles={machine.roles}
 			/>
 		{/snippet}
-	</FilterableGrid>
+	</SearchableGrid>
 {:else}
 	<p class="empty">No credits listed.</p>
 {/if}

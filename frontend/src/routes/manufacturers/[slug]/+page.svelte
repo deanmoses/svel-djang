@@ -1,6 +1,6 @@
 <script lang="ts">
-	import FilterableGrid from '$lib/components/FilterableGrid.svelte';
-	import MachineCard from '$lib/components/MachineCard.svelte';
+	import SearchableGrid from '$lib/components/grid/SearchableGrid.svelte';
+	import MachineCard from '$lib/components/cards/MachineCard.svelte';
 
 	let { data } = $props();
 	let mfr = $derived(data.manufacturer);
@@ -59,7 +59,7 @@
 {:else}
 	<section>
 		<h2>Models ({mfr.models.length})</h2>
-		<FilterableGrid
+		<SearchableGrid
 			items={mfr.models}
 			filterFields={(item) => [item.name]}
 			placeholder="Search models..."
@@ -74,7 +74,7 @@
 					machineType={model.technology_generation_name}
 				/>
 			{/snippet}
-		</FilterableGrid>
+		</SearchableGrid>
 	</section>
 {/if}
 

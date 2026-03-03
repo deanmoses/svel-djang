@@ -18,7 +18,7 @@ from .helpers import _extract_image_urls
 # ---------------------------------------------------------------------------
 
 
-class TitleListSchema(Schema):
+class TitleRefSchema(Schema):
     name: str
     slug: str
     short_name: str
@@ -38,7 +38,7 @@ class FranchiseDetailSchema(Schema):
     name: str
     slug: str
     description: str = ""
-    titles: list[TitleListSchema]
+    titles: list[TitleRefSchema]
 
 
 # ---------------------------------------------------------------------------

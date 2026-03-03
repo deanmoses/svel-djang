@@ -1,6 +1,6 @@
 <script lang="ts">
-	import CardGrid from '$lib/components/CardGrid.svelte';
-	import TitleCard from '$lib/components/TitleCard.svelte';
+	import CardGrid from '$lib/components/grid/CardGrid.svelte';
+	import TitleCard from '$lib/components/cards/TitleCard.svelte';
 	import { pageTitle } from '$lib/constants';
 
 	let { data } = $props();

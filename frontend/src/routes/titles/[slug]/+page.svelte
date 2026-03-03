@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import CardGrid from '$lib/components/CardGrid.svelte';
-	import MachineCard from '$lib/components/MachineCard.svelte';
+	import CardGrid from '$lib/components/grid/CardGrid.svelte';
+	import MachineCard from '$lib/components/cards/MachineCard.svelte';
 	import { pageTitle } from '$lib/constants';
 
 	let { data } = $props();

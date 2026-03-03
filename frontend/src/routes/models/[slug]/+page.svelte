@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import MachineCard from '$lib/components/MachineCard.svelte';
+	import MachineCard from '$lib/components/cards/MachineCard.svelte';
 
 	let { data } = $props();
 	let model = $derived(data.model);
