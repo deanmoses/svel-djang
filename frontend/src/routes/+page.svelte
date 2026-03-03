@@ -207,12 +207,7 @@
 				<h2>Titles <span class="group-count">{matchedTitles.length}</span></h2>
 				<CardGrid>
 					{#each items as title (title.slug)}
-						<TitleCard
-							slug={title.slug}
-							name={title.name}
-							thumbnailUrl={title.thumbnail_url}
-							short_name={title.short_name}
-						/>
+						<TitleCard slug={title.slug} name={title.name} thumbnailUrl={title.thumbnail_url} />
 					{/each}
 				</CardGrid>
 				{#if matchedTitles.length > PREVIEW_SIZE}

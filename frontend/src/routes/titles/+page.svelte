@@ -66,12 +66,7 @@
 			<main class="results">
 				<InfiniteGrid items={filteredTitles} entityName="title">
 					{#snippet children(title)}
-						<TitleCard
-							slug={title.slug}
-							name={title.name}
-							thumbnailUrl={title.thumbnail_url}
-							short_name={title.short_name}
-						/>
+						<TitleCard slug={title.slug} name={title.name} thumbnailUrl={title.thumbnail_url} />
 					{/snippet}
 				</InfiniteGrid>
 			</main>

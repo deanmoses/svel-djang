@@ -26,12 +26,7 @@
 			<h2>Titles ({series.titles.length})</h2>
 			<CardGrid>
 				{#each series.titles as title (title.slug)}
-					<TitleCard
-						slug={title.slug}
-						name={title.name}
-						thumbnailUrl={title.thumbnail_url}
-						short_name={title.short_name}
-					/>
+					<TitleCard slug={title.slug} name={title.name} thumbnailUrl={title.thumbnail_url} />
 				{/each}
 			</CardGrid>
 		</section>
