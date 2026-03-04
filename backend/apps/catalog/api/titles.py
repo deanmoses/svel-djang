@@ -13,6 +13,7 @@ from ninja.pagination import PageNumberPagination, paginate
 
 from .constants import DEFAULT_PAGE_SIZE
 from .helpers import _extract_image_urls, _serialize_title_machine
+from .machine_models import DesignCreditSchema
 from .schemas import SeriesRefSchema, TitleMachineSchema
 
 # ---------------------------------------------------------------------------
@@ -62,6 +63,7 @@ class TitleDetailSchema(Schema):
     review_links: list[ReviewLinkSchema] = []
     machines: list[TitleMachineSchema]
     series: list[SeriesRefSchema] = []
+    credits: list[DesignCreditSchema] = []
 
 
 # ---------------------------------------------------------------------------
@@ -201,6 +203,24 @@ def _serialize_title_detail(title) -> dict:
         for s in getattr(title, "series_list", None) or title.series.all()
     ]
     review_links = _build_review_links(title) if title.needs_review else []
+
+    # Aggregate credits from all models, deduplicating by (person, role)
+    seen: set[tuple[str, str]] = set()
+    credits: list[dict] = []
+    for pm in title.machine_models.all():
+        for c in pm.credits.all():
+            key = (c.person.slug, c.role)
+            if key not in seen:
+                seen.add(key)
+                credits.append(
+                    {
+                        "person_name": c.person.name,
+                        "person_slug": c.person.slug,
+                        "role": c.role,
+                        "role_display": c.get_role_display(),
+                    }
+                )
+
     return {
         "name": title.name,
         "slug": title.slug,
@@ -210,6 +230,7 @@ def _serialize_title_detail(title) -> dict:
         "review_links": review_links,
         "machines": machines,
         "series": series,
+        "credits": credits,
     }
 
 

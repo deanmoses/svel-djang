@@ -2,6 +2,7 @@
 	import { resolve } from '$app/paths';
 	import CardGrid from '$lib/components/grid/CardGrid.svelte';
 	import MachineCard from '$lib/components/cards/MachineCard.svelte';
+	import CreditsList from '$lib/components/CreditsList.svelte';
 	import { pageTitle } from '$lib/constants';
 	import { resolveHref } from '$lib/utils';
 
@@ -66,6 +67,8 @@
 			</CardGrid>
 		</section>
 	{/if}
+
+	<CreditsList credits={title.credits} />
 </article>
 
 <style>
