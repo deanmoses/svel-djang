@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import MachineCard from '$lib/components/cards/MachineCard.svelte';
+	import CreditsList from '$lib/components/CreditsList.svelte';
 
 	let { data } = $props();
 	let model = $derived(data.model);
@@ -158,19 +159,7 @@
 	</section>
 {/if}
 
-{#if model.credits.length > 0}
-	<section class="credits">
-		<h2>Credits</h2>
-		<ul>
-			{#each model.credits as credit (credit.person_slug + credit.role)}
-				<li>
-					<a href={resolve(`/people/${credit.person_slug}`)}>{credit.person_name}</a>
-					<span class="role">{credit.role_display}</span>
-				</li>
-			{/each}
-		</ul>
-	</section>
-{/if}
+<CreditsList credits={model.credits} />
 
 <style>
 	h2 {
@@ -246,24 +235,6 @@
 		color: var(--color-text-muted);
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-	}
-
-	.credits ul {
-		list-style: none;
-		padding: 0;
-	}
-
-	.credits li {
-		display: flex;
-		justify-content: space-between;
-		padding: var(--size-2) 0;
-		border-bottom: 1px solid var(--color-border-soft);
-		font-size: var(--font-size-1);
-	}
-
-	.role {
-		color: var(--color-text-muted);
-		font-size: var(--font-size-0);
 	}
 
 	.title-models-grid {

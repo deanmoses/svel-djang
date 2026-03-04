@@ -1,6 +1,7 @@
 <script lang="ts">
 	import CardGrid from '$lib/components/grid/CardGrid.svelte';
 	import TitleCard from '$lib/components/cards/TitleCard.svelte';
+	import CreditsList from '$lib/components/CreditsList.svelte';
 	import { pageTitle } from '$lib/constants';
 
 	let { data } = $props();
@@ -37,6 +38,8 @@
 			</CardGrid>
 		</section>
 	{/if}
+
+	<CreditsList credits={series.credits} />
 </article>
 
 <style>

@@ -11,6 +11,7 @@ from ninja import Router, Schema
 from ninja.decorators import decorate_view
 
 from .helpers import _extract_image_urls
+from .machine_models import DesignCreditSchema
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -40,6 +41,7 @@ class SeriesDetailSchema(Schema):
     slug: str
     description: str = ""
     titles: list[TitleRefSchema]
+    credits: list[DesignCreditSchema] = []
 
 
 # ---------------------------------------------------------------------------
@@ -117,7 +119,7 @@ def list_series(request):
 @series_router.get("/{slug}", response=SeriesDetailSchema)
 @decorate_view(cache_control(public=True, max_age=300))
 def get_series(request, slug: str):
-    from ..models import MachineModel, Series, Title
+    from ..models import DesignCredit, MachineModel, Series, Title
 
     titles_qs = Title.objects.annotate(
         machine_count=Count(
@@ -132,8 +134,14 @@ def get_series(request, slug: str):
             .order_by("year", "name"),
         )
     )
+    credits_qs = DesignCredit.objects.filter(
+        series__isnull=False,
+    ).select_related("person")
     series = get_object_or_404(
-        Series.objects.prefetch_related(Prefetch("titles", queryset=titles_qs)),
+        Series.objects.prefetch_related(
+            Prefetch("titles", queryset=titles_qs),
+            Prefetch("credits", queryset=credits_qs),
+        ),
         slug=slug,
     )
     return {
@@ -141,4 +149,13 @@ def get_series(request, slug: str):
         "slug": series.slug,
         "description": series.description,
         "titles": [_serialize_title_list(t) for t in series.titles.all()],
+        "credits": [
+            {
+                "person_name": c.person.name,
+                "person_slug": c.person.slug,
+                "role": c.role,
+                "role_display": c.get_role_display(),
+            }
+            for c in series.credits.all()
+        ],
     }
