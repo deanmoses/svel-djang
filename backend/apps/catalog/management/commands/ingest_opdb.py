@@ -38,7 +38,7 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--groups",
-            default="../data/dump1/opdb_export_groups.json",
+            default="",
             help="Path to OPDB groups JSON dump.",
         )
         parser.add_argument(
