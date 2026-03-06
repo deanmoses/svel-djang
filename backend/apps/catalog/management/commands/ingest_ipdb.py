@@ -35,7 +35,7 @@ from apps.catalog.models import (
     Person,
     Theme,
 )
-from apps.catalog.resolve import resolve_credits, resolve_themes
+from apps.catalog.resolve import resolve_all_credits, resolve_all_themes
 from apps.provenance.models import Claim, Source
 
 logger = logging.getLogger(__name__)
@@ -562,8 +562,7 @@ class Command(BaseCommand):
         )
 
         # Resolve credit claims into materialized DesignCredit rows.
-        for machine in MachineModel.objects.filter(pk__in=all_model_ids):
-            resolve_credits(machine)
+        resolve_all_credits([], model_ids=all_model_ids)
 
     def _bulk_create_themes(
         self,
@@ -638,5 +637,4 @@ class Command(BaseCommand):
         )
 
         # Resolve theme claims into materialized M2M rows.
-        for machine in MachineModel.objects.filter(pk__in=all_model_ids):
-            resolve_themes(machine)
+        resolve_all_themes([], model_ids=all_model_ids)

@@ -317,10 +317,10 @@ def resolve_all() -> int:
     MachineModel.objects.bulk_update(all_models, update_fields, batch_size=100)
 
     # 8. Bulk-resolve credit relationships.
-    _resolve_all_credits(all_models)
+    resolve_all_credits(all_models)
 
     # 9. Bulk-resolve theme relationships.
-    _resolve_all_themes(all_models)
+    resolve_all_themes(all_models)
 
     # 10. Bulk-resolve gameplay feature relationships.
     _resolve_all_gameplay_features(all_models)
@@ -933,12 +933,20 @@ def resolve_tags(machine_model: MachineModel) -> None:
 
 
 # ------------------------------------------------------------------
-# Bulk resolution for credits (used by resolve_all)
+# Bulk resolution for credits
 # ------------------------------------------------------------------
 
 
-def _resolve_all_credits(all_models: list[MachineModel]) -> None:
-    """Bulk-resolve credit claims into DesignCredit rows for all models."""
+def resolve_all_credits(
+    all_models: list[MachineModel],
+    *,
+    model_ids: set[int] | None = None,
+) -> None:
+    """Bulk-resolve credit claims into DesignCredit rows.
+
+    If *model_ids* is given, only claims and rows for those models are
+    queried.  Otherwise all models in *all_models* are processed.
+    """
     from django.contrib.contenttypes.models import ContentType
 
     ct = ContentType.objects.get_for_model(MachineModel)
@@ -948,10 +956,14 @@ def _resolve_all_credits(all_models: list[MachineModel]) -> None:
     for slug, pk in Person.objects.values_list("slug", "pk"):
         person_lookup[slug] = pk
 
-    # Pre-fetch all active credit claims with priority annotation.
+    # Pre-fetch active credit claims with priority annotation.
+    credit_qs = Claim.objects.filter(
+        is_active=True, content_type=ct, field_name="credit"
+    )
+    if model_ids is not None:
+        credit_qs = credit_qs.filter(object_id__in=model_ids)
     credit_claims = (
-        Claim.objects.filter(is_active=True, content_type=ct, field_name="credit")
-        .select_related("source", "user__profile")
+        credit_qs.select_related("source", "user__profile")
         .annotate(
             effective_priority=Case(
                 When(source__isnull=False, then=F("source__priority")),
@@ -992,14 +1004,13 @@ def _resolve_all_credits(all_models: list[MachineModel]) -> None:
         desired_by_model[model_id] = desired
 
     # Pre-fetch existing DesignCredit rows (model-linked only, not series credits).
+    all_model_ids = model_ids if model_ids is not None else {pm.pk for pm in all_models}
     existing_by_model: dict[int, set[tuple[int, str]]] = {}
-    for dc in DesignCredit.objects.filter(model_id__isnull=False).values_list(
-        "model_id", "person_id", "role"
-    ):
+    dc_qs = DesignCredit.objects.filter(model_id__in=all_model_ids)
+    for dc in dc_qs.values_list("model_id", "person_id", "role"):
         existing_by_model.setdefault(dc[0], set()).add((dc[1], dc[2]))
 
     # Diff and apply.
-    all_model_ids = {pm.pk for pm in all_models}
     to_create: list[DesignCredit] = []
     to_delete_pks: list[int] = []
 
@@ -1027,13 +1038,15 @@ def _resolve_all_credits(all_models: list[MachineModel]) -> None:
         DesignCredit.objects.bulk_create(to_create, batch_size=2000)
 
 
-def _resolve_all_themes(all_models: list[MachineModel]) -> None:
-    """Bulk-resolve theme claims into M2M rows for all models.
+def resolve_all_themes(
+    all_models: list[MachineModel],
+    *,
+    model_ids: set[int] | None = None,
+) -> None:
+    """Bulk-resolve theme claims into M2M rows.
 
-    Follows the same pattern as ``_resolve_all_credits()``: queries the M2M
-    through table directly, diffs desired vs existing for ALL model IDs
-    (including those with empty desired sets to clear stale rows), then
-    bulk-creates additions and bulk-deletes removals.
+    If *model_ids* is given, only claims and rows for those models are
+    queried.  Otherwise all models in *all_models* are processed.
     """
     from django.contrib.contenttypes.models import ContentType
 
@@ -1042,10 +1055,12 @@ def _resolve_all_themes(all_models: list[MachineModel]) -> None:
     # Pre-fetch theme slug→pk lookup.
     theme_lookup: dict[str, int] = dict(Theme.objects.values_list("slug", "pk"))
 
-    # Pre-fetch all active theme claims with priority annotation.
+    # Pre-fetch active theme claims with priority annotation.
+    theme_qs = Claim.objects.filter(is_active=True, content_type=ct, field_name="theme")
+    if model_ids is not None:
+        theme_qs = theme_qs.filter(object_id__in=model_ids)
     theme_claims = (
-        Claim.objects.filter(is_active=True, content_type=ct, field_name="theme")
-        .select_related("source", "user__profile")
+        theme_qs.select_related("source", "user__profile")
         .annotate(
             effective_priority=Case(
                 When(source__isnull=False, then=F("source__priority")),
@@ -1086,13 +1101,15 @@ def _resolve_all_themes(all_models: list[MachineModel]) -> None:
         desired_by_model[model_id] = desired
 
     # Pre-fetch existing M2M through-table rows.
+    all_model_ids = model_ids if model_ids is not None else {pm.pk for pm in all_models}
     through = MachineModel.themes.through
     existing_by_model: dict[int, set[int]] = {}
-    for row in through.objects.values_list("machinemodel_id", "theme_id"):
+    for row in through.objects.filter(machinemodel_id__in=all_model_ids).values_list(
+        "machinemodel_id", "theme_id"
+    ):
         existing_by_model.setdefault(row[0], set()).add(row[1])
 
-    # Diff and apply for ALL models.
-    all_model_ids = {pm.pk for pm in all_models}
+    # Diff and apply.
     to_create = []
     to_delete_pks: list[int] = []
 
@@ -1121,7 +1138,7 @@ def _resolve_all_themes(all_models: list[MachineModel]) -> None:
 def _resolve_all_gameplay_features(all_models: list[MachineModel]) -> None:
     """Bulk-resolve gameplay feature claims into M2M rows for all models.
 
-    Follows the same pattern as ``_resolve_all_themes()``.
+    Follows the same pattern as ``resolve_all_themes()``.
     """
     from django.contrib.contenttypes.models import ContentType
 
@@ -1215,7 +1232,7 @@ def _resolve_all_gameplay_features(all_models: list[MachineModel]) -> None:
 def _resolve_all_tags(all_models: list[MachineModel]) -> None:
     """Bulk-resolve tag claims into M2M rows for all models.
 
-    Follows the same pattern as ``_resolve_all_themes()``.
+    Follows the same pattern as ``resolve_all_themes()``.
     """
     from django.contrib.contenttypes.models import ContentType
 

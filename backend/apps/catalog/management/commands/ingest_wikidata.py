@@ -29,7 +29,7 @@ from apps.catalog.ingestion.wikidata_sparql import (
 )
 from apps.catalog.claims import build_relationship_claim, make_authoritative_scope
 from apps.catalog.models import MachineModel, Person
-from apps.catalog.resolve import resolve_credits, resolve_person
+from apps.catalog.resolve import resolve_all_credits, resolve_person
 from apps.provenance.models import Claim, Source
 
 logger = logging.getLogger(__name__)
@@ -186,8 +186,7 @@ class Command(BaseCommand):
                 f"{credit_stats['swept']} swept"
             )
             # Resolve credit claims into materialized DesignCredit rows.
-            for machine in MachineModel.objects.filter(pk__in=matched_machine_ids):
-                resolve_credits(machine)
+            resolve_all_credits([], model_ids=matched_machine_ids)
         else:
             self.stdout.write("  Credit claims: 0 (no matches)")
         if unmatched_machines:
