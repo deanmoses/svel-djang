@@ -51,7 +51,7 @@ class TestIngestOpdb:
         field_names = set(claims.values_list("field_name", flat=True))
         assert "name" in field_names
         assert "display_type" in field_names
-        assert "machine_type" in field_names
+        assert "technology_generation" in field_names
         assert "year" in field_names
 
     def test_opdb_display_type_claim(self):
@@ -60,7 +60,7 @@ class TestIngestOpdb:
         display_claim = pm.claims.get(
             source=source, field_name="display_type", is_active=True
         )
-        assert display_claim.value == "dmd"
+        assert display_claim.value == "dot-matrix"
 
     def test_opdb_manufacturer_claim(self):
         pm = MachineModel.objects.get(opdb_id="G1111-MTest1")
@@ -68,7 +68,9 @@ class TestIngestOpdb:
         mfr_claim = pm.claims.get(
             source=source, field_name="manufacturer", is_active=True
         )
-        assert mfr_claim.value == 7
+        # OPDB resolves manufacturer name "Williams" to slug at ingest time.
+        # IPDB runs first and auto-creates the Williams manufacturer.
+        assert mfr_claim.value == "williams"
 
     def test_idempotent(self):
         initial_count = MachineModel.objects.count()

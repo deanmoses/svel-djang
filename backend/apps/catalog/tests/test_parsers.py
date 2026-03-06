@@ -5,6 +5,7 @@ from apps.catalog.ingestion.parsers import (
     map_opdb_type,
     parse_credit_string,
     parse_ipdb_date,
+    parse_ipdb_location,
     parse_ipdb_machine_type,
     parse_ipdb_manufacturer_string,
     parse_opdb_date,
@@ -46,10 +47,10 @@ class TestParseOpdbDate:
 
 class TestParseIpdbMachineType:
     def test_em(self):
-        assert parse_ipdb_machine_type("EM") == "EM"
+        assert parse_ipdb_machine_type("EM") == "electromechanical"
 
     def test_ss(self):
-        assert parse_ipdb_machine_type("SS") == "SS"
+        assert parse_ipdb_machine_type("SS") == "solid-state"
 
     def test_none(self):
         assert parse_ipdb_machine_type(None) == ""
@@ -58,13 +59,13 @@ class TestParseIpdbMachineType:
         assert parse_ipdb_machine_type("XX") == ""
 
     def test_pure_mechanical_from_type_full(self):
-        assert parse_ipdb_machine_type(None, "Pure Mechanical") == "PM"
+        assert parse_ipdb_machine_type(None, "Pure Mechanical") == "pure-mechanical"
 
     def test_pure_mechanical_from_type_full_empty_short(self):
-        assert parse_ipdb_machine_type("", "Pure Mechanical") == "PM"
+        assert parse_ipdb_machine_type("", "Pure Mechanical") == "pure-mechanical"
 
     def test_type_short_takes_precedence(self):
-        assert parse_ipdb_machine_type("SS", "Pure Mechanical") == "SS"
+        assert parse_ipdb_machine_type("SS", "Pure Mechanical") == "solid-state"
 
 
 class TestParseIpdbManufacturerString:
@@ -75,6 +76,7 @@ class TestParseIpdbManufacturerString:
         assert result["company_name"] == "D. Gottlieb & Company"
         assert result["trade_name"] == "Gottlieb"
         assert result["years_active"] == "1931-1977"
+        assert result["location"] == "Chicago, Illinois"
 
     def test_no_trade_name(self):
         result = parse_ipdb_manufacturer_string(
@@ -131,13 +133,13 @@ class TestParseCreditString:
 
 class TestMapOpdbType:
     def test_em(self):
-        assert map_opdb_type("em") == "EM"
+        assert map_opdb_type("em") == "electromechanical"
 
     def test_ss(self):
-        assert map_opdb_type("ss") == "SS"
+        assert map_opdb_type("ss") == "solid-state"
 
     def test_me(self):
-        assert map_opdb_type("me") == "PM"
+        assert map_opdb_type("me") == "pure-mechanical"
 
     def test_empty(self):
         assert map_opdb_type("") == ""
@@ -148,13 +150,13 @@ class TestMapOpdbType:
 
 class TestMapOpdbDisplay:
     def test_reels(self):
-        assert map_opdb_display("reels") == "reels"
+        assert map_opdb_display("reels") == "score-reels"
 
     def test_alphanumeric(self):
-        assert map_opdb_display("alphanumeric") == "alpha"
+        assert map_opdb_display("alphanumeric") == "alphanumeric"
 
     def test_dmd(self):
-        assert map_opdb_display("dmd") == "dmd"
+        assert map_opdb_display("dmd") == "dot-matrix"
 
     def test_lcd(self):
         assert map_opdb_display("lcd") == "lcd"
@@ -163,10 +165,36 @@ class TestMapOpdbDisplay:
         assert map_opdb_display("cga") == "cga"
 
     def test_lights(self):
-        assert map_opdb_display("lights") == "lights"
+        assert map_opdb_display("lights") == "backglass-lights"
 
     def test_empty(self):
         assert map_opdb_display("") == ""
 
     def test_none(self):
         assert map_opdb_display(None) == ""
+
+
+class TestParseIpdbLocation:
+    def test_us_city_state(self):
+        result = parse_ipdb_location("Chicago, Illinois")
+        assert result == {"city": "Chicago", "state": "Illinois", "country": "USA"}
+
+    def test_three_parts(self):
+        result = parse_ipdb_location("Chicago, Illinois, USA")
+        assert result == {"city": "Chicago", "state": "Illinois", "country": "USA"}
+
+    def test_non_us_two_parts(self):
+        result = parse_ipdb_location("Bologna, Italy")
+        assert result == {"city": "Bologna", "state": "", "country": "Italy"}
+
+    def test_single_us_state(self):
+        result = parse_ipdb_location("Illinois")
+        assert result == {"city": "", "state": "Illinois", "country": "USA"}
+
+    def test_single_non_us(self):
+        result = parse_ipdb_location("Germany")
+        assert result == {"city": "", "state": "", "country": "Germany"}
+
+    def test_empty(self):
+        result = parse_ipdb_location("")
+        assert result == {"city": "", "state": "", "country": ""}

@@ -1,0 +1,47 @@
+[
+  {
+    "slug": "george-christian",
+    "name": "George Christian"
+  },
+  {
+    "slug": "joe-joos-jr",
+    "name": "Joe Joos Jr."
+  },
+  {
+    "slug": "keith-p-johnson",
+    "name": "Keith P. Johnson",
+    "aliases": ["Keith Johnson"]
+  },
+  {
+    "slug": "linda-deal",
+    "name": "Linda Deal (aka Doane)",
+    "aliases": ["Linda Doane (aka Deal)"]
+  },
+  {
+    "slug": "lyman-f-sheats-jr",
+    "name": "Lyman F. Sheats Jr.",
+    "aliases": ["Lyman Sheats"]
+  },
+  {
+    "slug": "mark-sprenger",
+    "name": "Mark Sprenger"
+  },
+  {
+    "slug": "python-anghelo",
+    "name": "Python Anghelo"
+  },
+  {
+    "slug": "robert-quinn",
+    "name": "Robert Quinn",
+    "aliases": ["Rob Quinn"]
+  },
+  {
+    "slug": "steve-ritchie",
+    "name": "Steve Ritchie"
+  },
+  {
+    "slug": "wendell-mcadams",
+    "name": "Wendell McAdams",
+    "aliases": ["Wendel McAdams"]
+  }
+]

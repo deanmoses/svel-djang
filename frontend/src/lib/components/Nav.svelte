@@ -1,18 +1,17 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
-	import { faBars, faXmark } from '@fortawesome/free-solid-svg-icons';
+	import { faBars, faMagnifyingGlass, faXmark } from '@fortawesome/free-solid-svg-icons';
 	import FaIcon from './FaIcon.svelte';
 	import { SITE_NAME } from '$lib/constants';
+	import { resolveHref } from '$lib/utils';
 
 	let mobileNavOpen = $state(false);
 
 	const navItems = [
-		{ href: '/games' as const, label: 'Games' },
-		{ href: '/series' as const, label: 'Series' },
+		{ href: '/titles' as const, label: 'Titles' },
 		{ href: '/manufacturers' as const, label: 'Manufacturers' },
 		{ href: '/people' as const, label: 'People' },
-		{ href: '/systems' as const, label: 'Systems' },
 		{ href: '/api-docs' as const, label: 'API' }
 	];
 
@@ -27,15 +26,6 @@
 	<div class="header-inner">
 		<a href={resolve('/')} class="site-title">{SITE_NAME}</a>
 
-		<button
-			class="mobile-toggle"
-			onclick={() => (mobileNavOpen = !mobileNavOpen)}
-			aria-label="Toggle navigation"
-			aria-expanded={mobileNavOpen}
-		>
-			<FaIcon icon={toggleIcon} class="icon" />
-		</button>
-
 		<nav class="site-nav" class:open={mobileNavOpen}>
 			{#each navItems as { href, label } (href)}
 				<a
@@ -48,6 +38,26 @@
 				</a>
 			{/each}
 		</nav>
+
+		<div class="header-actions">
+			<a
+				href={resolveHref('/search')}
+				class="search-link"
+				class:active={isActive('/search')}
+				aria-label="Search"
+			>
+				<FaIcon icon={faMagnifyingGlass} />
+			</a>
+
+			<button
+				class="mobile-toggle"
+				onclick={() => (mobileNavOpen = !mobileNavOpen)}
+				aria-label="Toggle navigation"
+				aria-expanded={mobileNavOpen}
+			>
+				<FaIcon icon={toggleIcon} />
+			</button>
+		</div>
 	</div>
 </header>
 
@@ -106,6 +116,33 @@
 		border-bottom-color: var(--color-accent);
 	}
 
+	.header-actions {
+		display: flex;
+		align-items: center;
+		gap: var(--size-3);
+	}
+
+	.search-link {
+		color: var(--color-text-muted);
+		padding: var(--size-1);
+		display: flex;
+		align-items: center;
+		transition: color 0.15s var(--ease-2);
+	}
+
+	.search-link:hover {
+		color: var(--color-text-primary);
+	}
+
+	.search-link.active {
+		color: var(--color-accent);
+	}
+
+	.search-link :global(svg) {
+		width: 1.1rem;
+		height: 1.1rem;
+	}
+
 	.mobile-toggle {
 		display: none;
 		background: none;
@@ -115,7 +152,7 @@
 		padding: var(--size-1);
 	}
 
-	:global(.mobile-toggle .icon) {
+	.mobile-toggle :global(svg) {
 		width: 1.25rem;
 		height: 1.25rem;
 	}

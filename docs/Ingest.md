@@ -4,13 +4,13 @@ Pinbase is populated from several external data sources via Django management co
 
 ## Data sources
 
-| Source           | File                        | Command        |
-| ---------------- | --------------------------- | -------------- |
-| IPDB             | `ipdbdatabase.json`         | `ingest_ipdb`  |
-| OPDB machines    | `opdb_export_machines.json` | `ingest_opdb`  |
-| OPDB groups      | `opdb_export_groups.json`   | `ingest_opdb`  |
-| OPDB changelog   | `opdb_changelog.json`       | `ingest_opdb`  |
-| Museum sign copy | `machine_sign_copy.csv`     | `ingest_signs` |
+| Source           | File                        | Command                |
+| ---------------- | --------------------------- | ---------------------- |
+| IPDB             | `ipdbdatabase.json`         | `ingest_ipdb`          |
+| OPDB machines    | `opdb_export_machines.json` | `ingest_opdb`          |
+| OPDB groups      | `opdb_export_groups.json`   | `ingest_opdb`          |
+| OPDB changelog   | `opdb_changelog.json`       | `ingest_opdb`          |
+| Museum sign copy | `machine_sign_copy.csv`     | `ingest_pinbase_signs` |
 
 All source files live in `data/dump1/` and are **not committed** to the repo.
 They are stored in a private GitHub Gist:

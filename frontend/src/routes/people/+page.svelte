@@ -1,8 +1,8 @@
 <script lang="ts">
 	import client from '$lib/api/client';
 	import { createAsyncLoader } from '$lib/async-loader.svelte';
-	import FilterableGrid from '$lib/components/FilterableGrid.svelte';
-	import PersonCard from '$lib/components/PersonCard.svelte';
+	import SearchableGrid from '$lib/components/grid/SearchableGrid.svelte';
+	import PersonCard from '$lib/components/cards/PersonCard.svelte';
 	import { pageTitle } from '$lib/constants';
 
 	const people = createAsyncLoader(async () => {
@@ -16,7 +16,7 @@
 	<link rel="preload" as="fetch" href="/api/people/all/" crossorigin="anonymous" />
 </svelte:head>
 
-<FilterableGrid
+<SearchableGrid
 	items={people.data}
 	loading={people.loading}
 	error={people.error}
@@ -33,4 +33,4 @@
 			creditCount={person.credit_count}
 		/>
 	{/snippet}
-</FilterableGrid>
+</SearchableGrid>

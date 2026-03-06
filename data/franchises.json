@@ -1,0 +1,622 @@
+[
+  {
+    "slug": "24",
+    "name": "24",
+    "description": "Pinball adaptation of the 24 television series, produced by Stern (2009)."
+  },
+  {
+    "slug": "ac-dc",
+    "name": "AC/DC",
+    "description": "Pinball machines themed around the rock band AC/DC, produced by Stern (2012–2018)."
+  },
+  {
+    "slug": "aerosmith",
+    "name": "Aerosmith",
+    "description": "Pinball machines themed around the rock band Aerosmith, produced by Stern (2017)."
+  },
+  {
+    "slug": "alice-cooper",
+    "name": "Alice Cooper",
+    "description": "Pinball themed around rock musician Alice Cooper, produced by Spooky Pinball (2018)."
+  },
+  {
+    "slug": "alien",
+    "name": "Alien",
+    "description": "Pinball adaptations of the Alien film franchise, produced by Heighway Pinball (2017) and Pinball Brothers (2021)."
+  },
+  {
+    "slug": "apollo-13",
+    "name": "Apollo 13",
+    "description": "Pinball adaptation of the Apollo 13 film, produced by Sega (1995)."
+  },
+  {
+    "slug": "austin-powers",
+    "name": "Austin Powers",
+    "description": "Pinball adaptation of the Austin Powers film franchise, produced by Stern (2001)."
+  },
+  {
+    "slug": "avatar",
+    "name": "Avatar",
+    "description": "Pinball adaptation of James Cameron's Avatar, produced by Stern (2010)."
+  },
+  {
+    "slug": "back-to-the-future",
+    "name": "Back to the Future",
+    "description": "Pinball adaptation of the Back to the Future film franchise, produced by Data East (1990)."
+  },
+  {
+    "slug": "barb-wire",
+    "name": "Barb Wire",
+    "description": "Pinball adaptation of the Barb Wire film, produced by Gottlieb (1996)."
+  },
+  {
+    "slug": "batman",
+    "name": "Batman",
+    "description": "Pinball adaptations of the Batman franchise, produced by Data East (1991), Sega (1995), and Stern (2008, 2016)."
+  },
+  {
+    "slug": "baywatch",
+    "name": "Baywatch",
+    "description": "Pinball adaptation of the Baywatch television series, produced by Sega (1995)."
+  },
+  {
+    "slug": "big-buck-hunter",
+    "name": "Big Buck Hunter",
+    "description": "Pinball adaptation of the Big Buck Hunter arcade game, produced by Stern (2010)."
+  },
+  {
+    "slug": "black-velvet",
+    "name": "Black Velvet",
+    "description": "Pinball machine themed around the Black Velvet whiskey brand, produced by Game Plan (1978)."
+  },
+  {
+    "slug": "camel",
+    "name": "Camel",
+    "description": "Pinball machine themed around the Camel cigarette brand, produced by Premier Technology (1990)."
+  },
+  {
+    "slug": "charlies-angels",
+    "name": "Charlie's Angels",
+    "description": "Pinball adaptation of the Charlie's Angels television series, produced by Gottlieb (1978)."
+  },
+  {
+    "slug": "close-encounters",
+    "name": "Close Encounters of the Third Kind",
+    "description": "Pinball adaptation of Close Encounters of the Third Kind, produced by Gottlieb (1978)."
+  },
+  {
+    "slug": "congo",
+    "name": "Congo",
+    "description": "Pinball adaptation of the Congo film, produced by Williams (1995)."
+  },
+  {
+    "slug": "csi",
+    "name": "CSI",
+    "description": "Pinball adaptation of the CSI: Crime Scene Investigation television series, produced by Stern (2008)."
+  },
+  {
+    "slug": "deadpool",
+    "name": "Deadpool",
+    "description": "Pinball adaptation of Marvel's Deadpool, produced by Stern (2018)."
+  },
+  {
+    "slug": "demolition-man",
+    "name": "Demolition Man",
+    "description": "Pinball adaptation of the Demolition Man film, produced by Williams (1994)."
+  },
+  {
+    "slug": "dirty-harry",
+    "name": "Dirty Harry",
+    "description": "Pinball adaptation of the Dirty Harry film franchise, produced by Williams (1995)."
+  },
+  {
+    "slug": "doctor-who",
+    "name": "Doctor Who",
+    "description": "Pinball adaptation of the Doctor Who television series, produced by Bally (1992)."
+  },
+  {
+    "slug": "dolly-parton",
+    "name": "Dolly Parton",
+    "description": "Pinball machine themed around Dolly Parton, produced by Bally (1979)."
+  },
+  {
+    "slug": "dominos",
+    "name": "Domino's",
+    "description": "Pinball machine themed around the Domino's Pizza brand, produced by Bally (1993)."
+  },
+  {
+    "slug": "dracula",
+    "name": "Dracula",
+    "description": "Pinball adaptation of Bram Stoker's Dracula, produced by Williams (1993)."
+  },
+  {
+    "slug": "dune",
+    "name": "Dune",
+    "description": "Pinball adaptation of the Dune franchise, produced by Gottlieb (1984)."
+  },
+  {
+    "slug": "elton-john",
+    "name": "Elton John",
+    "description": "Pinball themed around musician Elton John, produced by Bally (1976)."
+  },
+  {
+    "slug": "elvira",
+    "name": "Elvira",
+    "description": "Pinball machines featuring Elvira, Mistress of the Dark, produced by Bally (1989, 1996) and Stern (2019)."
+  },
+  {
+    "slug": "elvis",
+    "name": "Elvis",
+    "description": "Pinball machines themed around Elvis Presley, produced by Stern (2004)."
+  },
+  {
+    "slug": "evel-knievel",
+    "name": "Evel Knievel",
+    "description": "Pinball machine themed around stunt performer Evel Knievel, produced by Bally (1977)."
+  },
+  {
+    "slug": "family-guy",
+    "name": "Family Guy",
+    "description": "Pinball adaptation of the Family Guy animated series, produced by Stern (2007)."
+  },
+  {
+    "slug": "flash-gordon",
+    "name": "Flash Gordon",
+    "description": "Pinball adaptation of Flash Gordon, produced by Bally (1981)."
+  },
+  {
+    "slug": "frankenstein",
+    "name": "Frankenstein",
+    "description": "Pinball adaptation of Mary Shelley's Frankenstein, produced by Sega (1995)."
+  },
+  {
+    "slug": "game-of-thrones",
+    "name": "Game of Thrones",
+    "description": "Pinball adaptation of the Game of Thrones television series, produced by Stern (2015)."
+  },
+  {
+    "slug": "ghostbusters",
+    "name": "Ghostbusters",
+    "description": "Pinball adaptations of the Ghostbusters franchise, produced by Stern (2016)."
+  },
+  {
+    "slug": "gilligans-island",
+    "name": "Gilligan's Island",
+    "description": "Pinball adaptation of the Gilligan's Island television series, produced by Bally (1991)."
+  },
+  {
+    "slug": "godzilla",
+    "name": "Godzilla",
+    "description": "Pinball adaptations of the Godzilla franchise, produced by Sega (1998) and Stern (2021)."
+  },
+  {
+    "slug": "guardians-of-the-galaxy",
+    "name": "Guardians of the Galaxy",
+    "description": "Pinball adaptation of Marvel's Guardians of the Galaxy, produced by Stern (2017)."
+  },
+  {
+    "slug": "guns-n-roses",
+    "name": "Guns N' Roses",
+    "description": "Pinball machines themed around the rock band Guns N' Roses, produced by Data East (1994) and Jersey Jack Pinball (2021)."
+  },
+  {
+    "slug": "harlem-globetrotters",
+    "name": "Harlem Globetrotters",
+    "description": "Pinball machine themed around the Harlem Globetrotters, produced by Bally (1979)."
+  },
+  {
+    "slug": "harley-davidson",
+    "name": "Harley Davidson",
+    "description": "Pinball machines themed around the Harley-Davidson motorcycle brand, produced by Bally in 1991 and Stern across multiple editions from 1999–2004."
+  },
+  {
+    "slug": "heavy-metal",
+    "name": "Heavy Metal",
+    "description": "Pinball adaptation of the Heavy Metal franchise, produced by Stern (2020)."
+  },
+  {
+    "slug": "hook",
+    "name": "Hook",
+    "description": "Pinball adaptation of the Hook film, produced by Data East (1992)."
+  },
+  {
+    "slug": "hot-wheels",
+    "name": "Hot Wheels",
+    "description": "Pinball machine themed around the Hot Wheels brand, produced by American Pinball (2020)."
+  },
+  {
+    "slug": "independence-day",
+    "name": "Independence Day",
+    "description": "Pinball adaptation of the Independence Day film, produced by Sega (1996)."
+  },
+  {
+    "slug": "indiana-jones",
+    "name": "Indiana Jones",
+    "description": "Pinball adaptations of the Indiana Jones film franchise, produced by Williams in 1993 and Stern in 2008."
+  },
+  {
+    "slug": "iron-maiden",
+    "name": "Iron Maiden",
+    "description": "Pinball themed around the rock band Iron Maiden, produced by Stern (2018)."
+  },
+  {
+    "slug": "iron-man",
+    "name": "Iron Man",
+    "description": "Pinball adaptation of Marvel's Iron Man, produced by Stern (2010)."
+  },
+  {
+    "slug": "james-bond",
+    "name": "James Bond",
+    "description": "Pinball adaptations of the James Bond franchise, produced by Gottlieb (1980, 1995), Sega (1996), and Stern (2022)."
+  },
+  {
+    "slug": "johnny-mnemonic",
+    "name": "Johnny Mnemonic",
+    "description": "Pinball adaptation of the Johnny Mnemonic film, produced by Williams (1995)."
+  },
+  {
+    "slug": "judge-dredd",
+    "name": "Judge Dredd",
+    "description": "Pinball adaptation of the Judge Dredd comic franchise, produced by Bally (1993)."
+  },
+  {
+    "slug": "jurassic-park",
+    "name": "Jurassic Park",
+    "description": "Pinball adaptations of the Jurassic Park franchise, produced by Data East in 1993, Sega in 1997, and Stern in 2019."
+  },
+  {
+    "slug": "kiss",
+    "name": "KISS",
+    "description": "Pinball machines based on the rock band KISS, produced by Bally in 1979 and Stern in 2015."
+  },
+  {
+    "slug": "last-action-hero",
+    "name": "Last Action Hero",
+    "description": "Pinball adaptation of the Last Action Hero film, produced by Data East (1993)."
+  },
+  {
+    "slug": "led-zeppelin",
+    "name": "Led Zeppelin",
+    "description": "Pinball themed around the rock band Led Zeppelin, produced by Stern (2020)."
+  },
+  {
+    "slug": "lethal-weapon",
+    "name": "Lethal Weapon",
+    "description": "Pinball adaptation of the Lethal Weapon film franchise, produced by Data East (1992)."
+  },
+  {
+    "slug": "looney-tunes",
+    "name": "Looney Tunes",
+    "description": "Pinball machines featuring Looney Tunes characters, produced by Bally (1989) and Atari (1979)."
+  },
+  {
+    "slug": "lord-of-the-rings",
+    "name": "Lord of the Rings",
+    "description": "Pinball adaptations of the Lord of the Rings and Hobbit franchises, produced by Stern (2003) and Jersey Jack Pinball (2016)."
+  },
+  {
+    "slug": "lost-in-space",
+    "name": "Lost in Space",
+    "description": "Pinball adaptation of the Lost in Space television series, produced by Sega (1998)."
+  },
+  {
+    "slug": "maverick",
+    "name": "Maverick",
+    "description": "Pinball adaptation of the Maverick film, produced by Data East (1994)."
+  },
+  {
+    "slug": "metallica",
+    "name": "Metallica",
+    "description": "Pinball themed around the rock band Metallica, produced by Stern (2013)."
+  },
+  {
+    "slug": "monopoly",
+    "name": "Monopoly",
+    "description": "Pinball adaptation of the Monopoly board game, produced by Stern (2001)."
+  },
+  {
+    "slug": "muhammad-ali",
+    "name": "Muhammad Ali",
+    "description": "Pinball machine themed around boxer Muhammad Ali, produced by Stern Electronics (1980)."
+  },
+  {
+    "slug": "mustang",
+    "name": "Mustang",
+    "description": "Pinball machine themed around the Ford Mustang, produced by Stern (2014)."
+  },
+  {
+    "slug": "nascar",
+    "name": "NASCAR",
+    "description": "Pinball machine themed around the NASCAR racing series, produced by Stern (2005)."
+  },
+  {
+    "slug": "nba",
+    "name": "NBA",
+    "description": "Pinball machines themed around the NBA, produced by Stern (1997, 2009)."
+  },
+  {
+    "slug": "nightmare-on-elm-street",
+    "name": "A Nightmare on Elm Street",
+    "description": "Pinball adaptation of A Nightmare on Elm Street, produced by Gottlieb (1994)."
+  },
+  {
+    "slug": "no-fear",
+    "name": "No Fear",
+    "description": "Pinball machine themed around the No Fear brand, produced by Williams (1995)."
+  },
+  {
+    "slug": "pabst-blue-ribbon",
+    "name": "Pabst Blue Ribbon",
+    "description": "Pinball machine themed around Pabst Blue Ribbon, produced by Stern (2015–2018)."
+  },
+  {
+    "slug": "pirates-of-the-caribbean",
+    "name": "Pirates of the Caribbean",
+    "description": "Pinball adaptations of the Pirates of the Caribbean film franchise, produced by Stern in 2006 and Jersey Jack Pinball in 2018."
+  },
+  {
+    "slug": "playboy",
+    "name": "Playboy",
+    "description": "Pinball machines themed around the Playboy brand, produced by Rally (1967), Bally (1978, 2002), and Stern (2002)."
+  },
+  {
+    "slug": "popeye",
+    "name": "Popeye",
+    "description": "Pinball adaptation of the Popeye franchise, produced by Bally (1994)."
+  },
+  {
+    "slug": "rick-and-morty",
+    "name": "Rick and Morty",
+    "description": "Pinball adaptation of the Rick and Morty animated series, produced by Spooky Pinball (2020)."
+  },
+  {
+    "slug": "ripleys-believe-it-or-not",
+    "name": "Ripley's Believe It or Not!",
+    "description": "Pinball adaptation of the Ripley's Believe It or Not! brand, produced by Stern (2004)."
+  },
+  {
+    "slug": "rob-zombie",
+    "name": "Rob Zombie",
+    "description": "Pinball themed around musician Rob Zombie, produced by Spooky Pinball (2016)."
+  },
+  {
+    "slug": "robocop",
+    "name": "RoboCop",
+    "description": "Pinball adaptation of the RoboCop film franchise, produced by Data East (1989)."
+  },
+  {
+    "slug": "rocky",
+    "name": "Rocky",
+    "description": "Pinball adaptation of the Rocky film franchise, produced by Gottlieb (1982)."
+  },
+  {
+    "slug": "rocky-and-bullwinkle",
+    "name": "Rocky and Bullwinkle",
+    "description": "Pinball adaptation of The Adventures of Rocky and Bullwinkle, produced by Data East (1993)."
+  },
+  {
+    "slug": "rollercoaster-tycoon",
+    "name": "RollerCoaster Tycoon",
+    "description": "Pinball adaptation of the RollerCoaster Tycoon video game, produced by Stern (2002)."
+  },
+  {
+    "slug": "rollergames",
+    "name": "Rollergames",
+    "description": "Pinball adaptation of the Rollergames television series, produced by Williams (1990)."
+  },
+  {
+    "slug": "rush",
+    "name": "Rush",
+    "description": "Pinball themed around the rock band Rush, produced by Stern (2022)."
+  },
+  {
+    "slug": "shaq",
+    "name": "Shaq",
+    "description": "Pinball machine themed around Shaquille O'Neal, produced by Gottlieb (1995)."
+  },
+  {
+    "slug": "south-park",
+    "name": "South Park",
+    "description": "Pinball adaptation of the South Park animated series, produced by Sega (1999)."
+  },
+  {
+    "slug": "space-jam",
+    "name": "Space Jam",
+    "description": "Pinball adaptation of the Space Jam film, produced by Sega (1996)."
+  },
+  {
+    "slug": "spider-man",
+    "name": "Spider-Man",
+    "description": "Pinball adaptations of the Spider-Man franchise, produced by Gottlieb in 1980 and Stern in 2007."
+  },
+  {
+    "slug": "star-trek",
+    "name": "Star Trek",
+    "description": "Pinball adaptations of the Star Trek franchise across four decades, produced by Bally (1979), Data East (1991), Williams (1993), and Stern (2013)."
+  },
+  {
+    "slug": "star-wars",
+    "name": "Star Wars",
+    "description": "Pinball adaptations of the Star Wars franchise, produced by Hankin (1980), Sonic (1987), Data East (1992), Sega (1997), Williams (1999), and Stern (2017–2025)."
+  },
+  {
+    "slug": "stargate",
+    "name": "Stargate",
+    "description": "Pinball adaptation of the Stargate film, produced by Gottlieb (1995)."
+  },
+  {
+    "slug": "starship-troopers",
+    "name": "Starship Troopers",
+    "description": "Pinball adaptation of the Starship Troopers film, produced by Sega (1997)."
+  },
+  {
+    "slug": "stranger-things",
+    "name": "Stranger Things",
+    "description": "Pinball adaptation of the Stranger Things television series, produced by Stern (2019)."
+  },
+  {
+    "slug": "super-mario-bros",
+    "name": "Super Mario Bros.",
+    "description": "Pinball adaptation of Super Mario Bros., produced by Gottlieb (1992)."
+  },
+  {
+    "slug": "superman",
+    "name": "Superman",
+    "description": "Pinball adaptations of the Superman franchise, produced by Atari (1979) and Stern (2024)."
+  },
+  {
+    "slug": "tales-from-the-crypt",
+    "name": "Tales from the Crypt",
+    "description": "Pinball adaptation of Tales from the Crypt, produced by Data East (1993)."
+  },
+  {
+    "slug": "ted-nugent",
+    "name": "Ted Nugent",
+    "description": "Pinball themed around musician Ted Nugent, produced by Stern Electronics (1978)."
+  },
+  {
+    "slug": "teenage-mutant-ninja-turtles",
+    "name": "Teenage Mutant Ninja Turtles",
+    "description": "Pinball adaptation of the Teenage Mutant Ninja Turtles franchise, produced by Stern (2020)."
+  },
+  {
+    "slug": "terminator",
+    "name": "Terminator",
+    "description": "Pinball adaptations of the Terminator film franchise, produced by Williams (T2, 1991) and Stern (T3, 2003)."
+  },
+  {
+    "slug": "the-addams-family",
+    "name": "The Addams Family",
+    "description": "Pinball adaptations of The Addams Family franchise, produced by Bally (1992)."
+  },
+  {
+    "slug": "the-avengers",
+    "name": "The Avengers",
+    "description": "Pinball adaptations of the Avengers franchise, produced by Stern (2012, 2020)."
+  },
+  {
+    "slug": "the-beatles",
+    "name": "The Beatles",
+    "description": "Pinball machines themed around The Beatles, produced by Stern (2018)."
+  },
+  {
+    "slug": "the-big-lebowski",
+    "name": "The Big Lebowski",
+    "description": "Pinball adaptation of The Big Lebowski film, produced by Dutch Pinball (2016)."
+  },
+  {
+    "slug": "the-flintstones",
+    "name": "The Flintstones",
+    "description": "Pinball adaptations of The Flintstones animated series, produced by Williams (1994) and Hanna-Barbera licensees."
+  },
+  {
+    "slug": "the-incredible-hulk",
+    "name": "The Incredible Hulk",
+    "description": "Pinball adaptation of Marvel's The Incredible Hulk, produced by Gottlieb (1979)."
+  },
+  {
+    "slug": "the-jetsons",
+    "name": "The Jetsons",
+    "description": "Pinball adaptation of The Jetsons animated series, produced by The Pinball Company (2017)."
+  },
+  {
+    "slug": "the-munsters",
+    "name": "The Munsters",
+    "description": "Pinball adaptation of The Munsters television series, produced by Stern (2019)."
+  },
+  {
+    "slug": "the-rolling-stones",
+    "name": "The Rolling Stones",
+    "description": "Pinball machines themed around the rock band The Rolling Stones, produced by Bally (1980) and Stern (2011)."
+  },
+  {
+    "slug": "the-shadow",
+    "name": "The Shadow",
+    "description": "Pinball adaptation of The Shadow, produced by Bally (1994)."
+  },
+  {
+    "slug": "the-simpsons",
+    "name": "The Simpsons",
+    "description": "Pinball adaptations of The Simpsons animated series, produced by Data East (1990) and Stern (2003)."
+  },
+  {
+    "slug": "the-sopranos",
+    "name": "The Sopranos",
+    "description": "Pinball adaptation of The Sopranos television series, produced by Stern (2005)."
+  },
+  {
+    "slug": "the-walking-dead",
+    "name": "The Walking Dead",
+    "description": "Pinball adaptation of The Walking Dead franchise, produced by Stern (2014)."
+  },
+  {
+    "slug": "the-who",
+    "name": "The Who",
+    "description": "Pinball machines themed around The Who, produced by Bally (1975) and Data East (1994)."
+  },
+  {
+    "slug": "the-wizard-of-oz",
+    "name": "The Wizard of Oz",
+    "description": "Pinball adaptations of The Wizard of Oz, produced by Jersey Jack Pinball (2013)."
+  },
+  {
+    "slug": "the-x-files",
+    "name": "The X-Files",
+    "description": "Pinball adaptation of The X-Files television series, produced by Sega (1997)."
+  },
+  {
+    "slug": "transformers",
+    "name": "Transformers",
+    "description": "Pinball adaptations of the Transformers franchise, produced by Stern (2011–2012)."
+  },
+  {
+    "slug": "tron",
+    "name": "TRON",
+    "description": "Pinball adaptation of the TRON franchise, produced by Stern (2011)."
+  },
+  {
+    "slug": "twilight-zone",
+    "name": "Twilight Zone",
+    "description": "Pinball adaptation of The Twilight Zone television series, produced by Bally (1993)."
+  },
+  {
+    "slug": "twister",
+    "name": "Twister",
+    "description": "Pinball adaptation of the Twister film, produced by Sega (1996)."
+  },
+  {
+    "slug": "universal-monsters",
+    "name": "Universal Monsters",
+    "description": "Pinball machines featuring Universal Studios classic monsters, produced by Bally (1992, 1998)."
+  },
+  {
+    "slug": "waterworld",
+    "name": "Waterworld",
+    "description": "Pinball adaptation of the Waterworld film, produced by Gottlieb (1995)."
+  },
+  {
+    "slug": "wheel-of-fortune",
+    "name": "Wheel of Fortune",
+    "description": "Pinball adaptation of the Wheel of Fortune game show, produced by Stern (2007)."
+  },
+  {
+    "slug": "willy-wonka",
+    "name": "Willy Wonka",
+    "description": "Pinball adaptation of Willy Wonka & The Chocolate Factory, produced by Jersey Jack Pinball (2019)."
+  },
+  {
+    "slug": "world-poker-tour",
+    "name": "World Poker Tour",
+    "description": "Pinball adaptation of the World Poker Tour, produced by Stern (2006)."
+  },
+  {
+    "slug": "wwf",
+    "name": "WWF",
+    "description": "Pinball adaptation of the WWF professional wrestling franchise, produced by Data East (1994)."
+  },
+  {
+    "slug": "x-men",
+    "name": "X-Men",
+    "description": "Pinball adaptations of Marvel's X-Men, produced by Stern (2012)."
+  }
+]

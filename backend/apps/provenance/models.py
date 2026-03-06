@@ -172,6 +172,8 @@ class ClaimManager(models.Manager):
                 old
                 and old.value == new_claim.value
                 and old.citation == new_claim.citation
+                and old.needs_review == new_claim.needs_review
+                and old.needs_review_notes == new_claim.needs_review_notes
             ):
                 continue  # Already correct
             if old:
@@ -272,6 +274,14 @@ class Claim(models.Model):
     value = models.JSONField()
     citation = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
+    needs_review = models.BooleanField(
+        default=False,
+        help_text="Flag for low-confidence claims that need human review.",
+    )
+    needs_review_notes = models.TextField(
+        blank=True,
+        help_text="Context for reviewers about why this claim needs attention.",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

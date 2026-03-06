@@ -1,0 +1,23 @@
+[
+  {
+    "slug": "pure-mechanical",
+    "title": "Pure Mechanical",
+    "display_order": 1,
+    "description": "Pinball's earliest ancestors were purely mechanical devices — no electricity, no electronics, just gravity, springs, and pins. Descended from the 18th-century French parlor game of bagatelle, these tabletop amusements invited players to launch a ball up an inclined playfield and watch it careen among brass pins into scoring pockets below. There were no flippers, no bumpers, no bells — chance ruled almost completely.\n\nThe machines that appeared in American penny arcades during the 1920s and early 1930s were simple affairs: a spring-loaded plunger, a sloped playfield studded with pins, and a handful of numbered scoring holes. Their simplicity made them cheap to build and easy to understand, and their randomness made them easy to condemn — several American cities banned them outright as gambling devices, a stigma the industry spent decades trying to escape.\n\nThis era established pinball's physical vocabulary: the plunger, the pin-studded playfield, the glass-topped wooden cabinet. Every element that would evolve and elaborate over the following century was already present in embryonic form.",
+    "technology_generation": "PM"
+  },
+  {
+    "slug": "electromechanical",
+    "title": "Electromechanical",
+    "display_order": 2,
+    "description": "The electromechanical era transformed pinball from a passive amusement into an interactive spectacle. Beginning in the early 1930s and lasting through the late 1970s, EM machines wired their playfields with relays, solenoids, and stepping motors to keep score, advance bonus ladders, and fire bumpers. Rotating drum score reels clicked and clattered as points accumulated. Bells rang. Pop bumpers snapped the ball in unexpected directions. The machines came alive.\n\nIn 1947, Gottlieb's *Humpty Dumpty* introduced player-controlled flippers — the single most important innovation in pinball history. Flippers gave skill a fighting chance against chance, transforming pinball from a coin-eating lottery into a game worth mastering. Cities began repealing their bans. Pinball became respectable.\n\nThe great EM manufacturers — Gottlieb, Bally, Williams — competed fiercely on playfield ingenuity, each mechanism a small marvel of cam-and-lever engineering. Rules were encoded not in software but in the physical geometry of relay ladders and stepping switches. Every machine was, in a sense, a miniature electromechanical computer.\n\nWhen solid-state electronics rendered relays obsolete in the late 1970s, the EM era ended quietly — but its machines remain beloved for their warm analog character: the sound of real bells, the satisfying clunk of mechanical score reels, the sense of a cabinet that hums with something like a heartbeat.",
+    "technology_generation": "EM"
+  },
+  {
+    "slug": "solid-state",
+    "title": "Solid State",
+    "display_order": 3,
+    "description": "The solid-state revolution arrived in 1977 when Bally shipped *Freedom*, one of the first mass-market pinball machines to replace electromechanical relays with a microprocessor. The shift was seismic. Scores climbed into the millions, then the billions, as software freed designers from the physical constraints of relay logic. Speech synthesis gave machines voices. Alphanumeric displays replaced mechanical score reels, and dot-matrix displays followed, opening the playfield to animation, humor, and cinematic storytelling.\n\nMultiball. Wizard modes. Stacking rules of bewildering depth. Video modes, light shows, licensed themes drawn from Hollywood blockbusters. None of this would have been conceivable in relay logic. Williams and Bally dominated the 1980s and 1990s with titles — *The Addams Family*, *Twilight Zone*, *Medieval Madness* — whose rule sheets rewarded years of study and whose high scores were measured in billions of points.\n\nThe solid-state era did not end — it is still unfolding. Today's machines descend directly from this digital lineage, their logic traced in thousands of lines of code rather than hundreds of relay contacts, their displays now full LCD screens, their sound systems rivaling a home theater. The microprocessor that arrived in 1977 is still at the heart of every machine built today.",
+    "technology_generation": "SS"
+  }
+]

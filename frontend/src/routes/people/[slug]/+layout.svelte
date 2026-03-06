@@ -29,7 +29,7 @@
 	</header>
 
 	<nav class="tabs" aria-label="Page sections">
-		<a class="tab" class:active={isDetail} href={resolve(`/people/${slug}`)}>Detail</a>
+		<a class="tab" class:active={isDetail} href={resolve(`/people/${slug}`)}>Titles</a>
 		{#if auth.isAuthenticated}
 			<a class="tab" class:active={isEdit} href={resolve(`/people/${slug}/edit`)}>Edit</a>
 		{/if}

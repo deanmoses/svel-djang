@@ -1,6 +1,6 @@
 <script lang="ts">
-	import CardGrid from '$lib/components/CardGrid.svelte';
-	import MachineCard from '$lib/components/MachineCard.svelte';
+	import CardGrid from '$lib/components/grid/CardGrid.svelte';
+	import MachineCard from '$lib/components/cards/MachineCard.svelte';
 	import { pageTitle } from '$lib/constants';
 
 	let { data } = $props();
@@ -32,7 +32,6 @@
 						thumbnailUrl={machine.thumbnail_url}
 						manufacturerName={machine.manufacturer_name}
 						year={machine.year}
-						machineType={machine.machine_type}
 					/>
 				{/each}
 			</CardGrid>

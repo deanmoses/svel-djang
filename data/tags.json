@@ -1,0 +1,38 @@
+[
+  {
+    "slug": "home-use",
+    "name": "Home Use",
+    "display_order": 1,
+    "description": "Machines designed or marketed specifically for home use rather than commercial coin-operated routes. Home models were typically stripped of coin mechanisms, sometimes simplified in playfield design, and occasionally offered in furniture-grade cabinets intended to blend into a living room rather than stand out in an arcade. Manufacturers pursued the home market most aggressively in the late 1970s and early 1980s, and again in the 2010s as boutique manufacturers and major producers like Stern began offering home-edition variants of popular titles at lower price points."
+  },
+  {
+    "slug": "prototype",
+    "name": "Prototype",
+    "display_order": 2,
+    "description": "Machines built as engineering samples, design proofs, or pre-production test units that never reached full commercial manufacture. Prototypes range from rough playfield mockups used to test a game concept to fully finished machines identical to a planned production run that was cancelled before it began. Some prototypes were shown at trade shows, some were tested on location to gauge player response, and some never left the factory floor. Surviving prototypes are among the rarest objects in pinball collecting, valued both for their scarcity and for the window they offer into designs that might have been."
+  },
+  {
+    "slug": "widebody",
+    "name": "Widebody",
+    "display_order": 3,
+    "description": "Machines built in a cabinet roughly four inches wider than the standard body, giving designers a larger playfield to work with. The widebody format appeared intermittently from the late 1970s onward, used when a game's design demanded more room than the standard 20.25-inch playfield width could provide. Widebody machines are heavier, harder to move, and require more floor space on location — trade-offs that limited their adoption but gave designers like Steve Ritchie and Pat Lawlor the canvas they needed for ambitious layouts. The format never displaced the standard body as the industry default, but it produced some of the most celebrated playfield designs in the medium's history."
+  },
+  {
+    "slug": "remake",
+    "name": "Remake",
+    "display_order": 4,
+    "description": "Machines that are newly manufactured recreations of an earlier title, typically reproducing the original playfield design with updated electronics, improved components, or enhanced features. Remakes are distinguished from restored originals by the fact that they are new production runs, not refurbished vintage machines. Chicago Gaming Company's remakes of *Medieval Madness* and *Attack from Mars* are prominent examples — new machines built from new parts, faithful to the original designs but manufactured decades after the originals left the factory."
+  },
+  {
+    "slug": "conversion-kit",
+    "name": "Conversion Kit",
+    "display_order": 5,
+    "description": "A game sold not as a complete machine but as a kit of parts — playfield, backglass, ROMs, and documentation — designed to be installed into the cabinet of an existing machine on the same platform. Conversion kits allowed operators to refresh their game lineups without purchasing entirely new cabinets, and they allowed manufacturers to sell new titles at a lower price point. The practice was common during the WPC and early Stern eras, where a stable cabinet and electronics platform could host multiple different games over its service life."
+  },
+  {
+    "slug": "export",
+    "name": "Export",
+    "display_order": 6,
+    "description": "Machines manufactured specifically for markets outside the United States, often with modifications to comply with local regulations or adapt to regional preferences. Export models might feature different coin mechanisms calibrated for local currency, language changes on the backglass or display, or gameplay adjustments to satisfy jurisdictions with stricter rules about replays and free games. Some export editions are visually identical to their domestic counterparts; others carry distinct artwork, cabinet colors, or feature sets that make them recognizably different machines."
+  }
+]

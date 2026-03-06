@@ -1,8 +1,8 @@
 <script lang="ts">
 	import client from '$lib/api/client';
 	import { createAsyncLoader } from '$lib/async-loader.svelte';
-	import FilterableGrid from '$lib/components/FilterableGrid.svelte';
-	import ManufacturerCard from '$lib/components/ManufacturerCard.svelte';
+	import SearchableGrid from '$lib/components/grid/SearchableGrid.svelte';
+	import ManufacturerCard from '$lib/components/cards/ManufacturerCard.svelte';
 	import { pageTitle } from '$lib/constants';
 
 	const manufacturers = createAsyncLoader(async () => {
@@ -16,7 +16,7 @@
 	<link rel="preload" as="fetch" href="/api/manufacturers/all/" crossorigin="anonymous" />
 </svelte:head>
 
-<FilterableGrid
+<SearchableGrid
 	items={manufacturers.data}
 	loading={manufacturers.loading}
 	error={manufacturers.error}
@@ -33,4 +33,4 @@
 			modelCount={mfr.model_count}
 		/>
 	{/snippet}
-</FilterableGrid>
+</SearchableGrid>

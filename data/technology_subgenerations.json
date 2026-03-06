@@ -1,0 +1,23 @@
+[
+  {
+    "slug": "ss-discrete",
+    "name": "Discrete",
+    "display_order": 1,
+    "description": "The first generation of solid-state pinball, spanning roughly 1977–1990. Manufacturers built their own CPU boards from off-the-shelf microprocessors — the Motorola 6800, 6802, and 6803 families were ubiquitous — wired together with discrete logic on custom PCBs. Each company developed its own architecture independently: Williams had System 3 through System 9, Gottlieb had System 1 and System 80, Bally had its AS-2518 series, Stern had MPU-100 and MPU-200.\n\nScoring displays progressed from seven-segment LEDs to sixteen-segment alphanumeric panels capable of showing text and simple animations. Sound evolved from basic tones to speech synthesis chips. Rules grew more complex with each generation, but the hardware remained fundamentally simple: a single-board computer running a program stored in ROM, talking to solenoid drivers and lamp matrices through direct I/O.\n\nThese machines represent the bridge between the relay logic of the EM era and the integrated platforms that would follow. Every board was a bespoke design, and repairing them today requires component-level electronics knowledge that the later integrated systems largely abstracted away.",
+    "technology_generation_slug": "solid-state"
+  },
+  {
+    "slug": "ss-integrated",
+    "name": "Integrated",
+    "display_order": 2,
+    "description": "Beginning with Williams' System 11 in 1986 and reaching full maturity with the WPC platform in 1990, the integrated era saw pinball hardware consolidate into cohesive, purpose-built computing platforms. Instead of discrete CPU boards wired to separate sound and display circuits, manufacturers designed tightly integrated systems where CPU, sound, display controller, and I/O were engineered as a unified whole.\n\nThe Williams WPC platform — spanning WPC Alphanumeric through WPC-95 — defined the era and produced many of the most celebrated pinball machines ever made. Its plasma dot-matrix display enabled animations and storytelling that transformed the medium. The DCS sound system delivered CD-quality audio. Software complexity exploded: multiball stacking, wizard modes, deep rule sheets that rewarded hundreds of hours of play.\n\nData East, Sega, and Gottlieb (as Premier Technology) developed their own integrated platforms during this period. Stern's Whitestar and SAM systems carried the approach into the 2000s and 2010s. The defining characteristic of the era is purpose-built pinball hardware designed as a platform — a stable foundation that could host dozens of different game designs without redesigning the electronics for each title.",
+    "technology_generation_slug": "solid-state"
+  },
+  {
+    "slug": "ss-pc",
+    "name": "PC-Based",
+    "display_order": 3,
+    "description": "The most recent evolution in solid-state pinball replaces purpose-built pinball computing hardware with general-purpose processors running commodity operating systems. Jersey Jack Pinball's *The Wizard of Oz* (2013) was among the first major titles to ship with an Intel Celeron processor running Linux. Stern's SPIKE platform, introduced in 2014, uses ARM-based processors. Multimorphic's P3-ROC is essentially a PC motherboard in a pinball cabinet.\n\nThe shift to commodity hardware brought capabilities that purpose-built platforms could never offer: HD and 4K LCD displays, networked firmware updates pushed over the internet, USB peripherals, standard development toolchains. Game code is now written in high-level languages and can be patched months or years after a machine ships — a dramatic change from the ROM-based systems of the integrated era, where the code burned into the chip at the factory was the code you lived with.\n\nCritics note that commodity hardware ages differently than purpose-built systems: operating systems require security updates, storage media degrades, and the long-term repairability that made 1990s WPC boards relatively straightforward to service may not carry over to machines built around consumer PC components. The tradeoff between capability and longevity is still playing out.",
+    "technology_generation_slug": "solid-state"
+  }
+]

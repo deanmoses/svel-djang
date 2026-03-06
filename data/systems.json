@@ -3,438 +3,587 @@
     "name": "Atari System 1",
     "slug": "atari-system-1",
     "manufacturer_slug": "atari",
-    "mpu_strings": ["Atari Generation/System 1"]
+    "mpu_strings": [
+      "Atari Generation/System 1"
+    ]
   },
   {
     "name": "Atari System 2",
     "slug": "atari-system-2",
     "manufacturer_slug": "atari",
-    "mpu_strings": ["Atari Generation/System 2"]
+    "mpu_strings": [
+      "Atari Generation/System 2"
+    ]
   },
   {
     "name": "Atari System 3",
     "slug": "atari-system-3",
     "manufacturer_slug": "atari",
-    "mpu_strings": ["Atari Generation/System 3"]
+    "mpu_strings": [
+      "Atari Generation/System 3"
+    ]
   },
   {
     "name": "Bally AS-2518-17",
     "slug": "bally-as2518-17",
     "manufacturer_slug": "bally",
-    "mpu_strings": ["Bally MPU AS-2518-17"]
+    "mpu_strings": [
+      "Bally MPU AS-2518-17"
+    ]
   },
   {
     "name": "Bally AS-2518-35",
     "slug": "bally-as2518-35",
     "manufacturer_slug": "bally",
-    "mpu_strings": ["Bally MPU AS-2518-35"]
+    "mpu_strings": [
+      "Bally MPU AS-2518-35"
+    ]
   },
   {
     "name": "Bally AS-2518-133",
     "slug": "bally-as2518-133",
     "manufacturer_slug": "bally",
-    "mpu_strings": ["Bally MPU AS-2518-133"]
+    "mpu_strings": [
+      "Bally MPU AS-2518-133"
+    ]
   },
   {
     "name": "Bally 6802",
     "slug": "bally-6802",
     "manufacturer_slug": "bally",
-    "mpu_strings": ["Bally MPU A080-91638-D000 (6802)"]
+    "mpu_strings": [
+      "Bally MPU A080-91638-D000 (6802)"
+    ]
   },
   {
     "name": "Bally 6803",
     "slug": "bally-6803",
     "manufacturer_slug": "bally",
-    "mpu_strings": ["Bally MPU A084-91786-AH06 (6803)"]
+    "mpu_strings": [
+      "Bally MPU A084-91786-AH06 (6803)"
+    ]
   },
   {
     "name": "Capcom A0015405",
     "slug": "capcom-a0015405",
     "manufacturer_slug": "capcom",
-    "mpu_strings": ["Capcom A0015405"]
+    "mpu_strings": [
+      "Capcom A0015405"
+    ]
   },
   {
     "name": "CGC Pinball Controller/OS",
     "slug": "cgc-pinball-controller-os",
     "manufacturer_slug": "chicago-gaming",
-    "mpu_strings": ["CGC Pinball Controller/OS"]
+    "mpu_strings": [
+      "CGC Pinball Controller/OS"
+    ]
   },
   {
     "name": "Data East/Sega Version 1",
     "slug": "data-east-v1",
     "manufacturer_slug": "data-east",
-    "mpu_strings": ["DataEast/Sega Version 1"]
+    "mpu_strings": [
+      "DataEast/Sega Version 1"
+    ]
   },
   {
     "name": "Data East/Sega Version 2",
     "slug": "data-east-v2",
     "manufacturer_slug": "data-east",
-    "mpu_strings": ["DataEast/Sega Version 2"]
+    "mpu_strings": [
+      "DataEast/Sega Version 2"
+    ]
   },
   {
     "name": "Data East/Sega Version 3",
     "slug": "data-east-v3",
     "manufacturer_slug": "data-east",
-    "mpu_strings": ["DataEast/Sega Version 3"]
+    "mpu_strings": [
+      "DataEast/Sega Version 3"
+    ]
   },
   {
     "name": "Data East/Sega Version 3b",
     "slug": "data-east-v3b",
     "manufacturer_slug": "data-east",
-    "mpu_strings": ["DataEast/Sega Version 3b"]
+    "mpu_strings": [
+      "DataEast/Sega Version 3b"
+    ]
   },
   {
     "name": "Day One D1PSB",
     "slug": "day-one-d1psb",
     "manufacturer_slug": "day-one",
-    "mpu_strings": ["Day One D1PSB"]
+    "mpu_strings": [
+      "Day One D1PSB"
+    ]
   },
   {
     "name": "Game Plan MPU-1",
     "slug": "game-plan-mpu-1",
     "manufacturer_slug": "game-plan",
-    "mpu_strings": ["Game Plan MPU-1"]
+    "mpu_strings": [
+      "Game Plan MPU-1"
+    ]
   },
   {
     "name": "Game Plan MPU-2",
     "slug": "game-plan-mpu-2",
     "manufacturer_slug": "game-plan",
-    "mpu_strings": ["Game Plan MPU-2"]
+    "mpu_strings": [
+      "Game Plan MPU-2"
+    ]
   },
   {
     "name": "Gottlieb System 1",
     "slug": "gottlieb-system-1",
     "manufacturer_slug": "gottlieb",
-    "mpu_strings": ["Gottlieb System 1"]
+    "mpu_strings": [
+      "Gottlieb System 1"
+    ]
   },
   {
     "name": "Gottlieb System 80",
     "slug": "gottlieb-system-80",
     "manufacturer_slug": "gottlieb",
-    "mpu_strings": ["Gottlieb System 80"]
+    "mpu_strings": [
+      "Gottlieb System 80"
+    ]
   },
   {
     "name": "Gottlieb System 80A",
     "slug": "gottlieb-system-80a",
     "manufacturer_slug": "gottlieb",
-    "mpu_strings": ["Gottlieb System 80A"]
+    "mpu_strings": [
+      "Gottlieb System 80A"
+    ]
   },
   {
     "name": "Gottlieb System 80B",
     "slug": "gottlieb-system-80b",
     "manufacturer_slug": "gottlieb",
-    "mpu_strings": ["Gottlieb System 80B"]
+    "mpu_strings": [
+      "Gottlieb System 80B"
+    ]
   },
   {
     "name": "Gottlieb System 3",
     "slug": "gottlieb-system-3",
     "manufacturer_slug": "gottlieb",
-    "mpu_strings": ["Gottlieb System 3"]
+    "mpu_strings": [
+      "Gottlieb System 3"
+    ]
   },
   {
     "name": "Homepin H-0012",
     "slug": "homepin-h-0012",
     "manufacturer_slug": "homepin",
-    "mpu_strings": ["Homepin H-0012"]
+    "mpu_strings": [
+      "Homepin H-0012"
+    ]
   },
   {
     "name": "Jersey Jack",
     "slug": "jersey-jack",
     "manufacturer_slug": "jersey-jack",
-    "mpu_strings": ["Intel Celeron"]
+    "mpu_strings": [
+      "Intel Celeron"
+    ]
   },
   {
     "name": "MAC System IV",
     "slug": "mac-system-iv",
     "manufacturer_slug": "mac-sa",
-    "mpu_strings": ["MAC System IV"]
+    "mpu_strings": [
+      "MAC System IV"
+    ]
   },
   {
     "name": "ManilaMatic System 80A",
     "slug": "manilamatic-system-80a",
     "manufacturer_slug": "manilamatic",
-    "mpu_strings": ["ManilaMatic System 80A Combi"]
+    "mpu_strings": [
+      "ManilaMatic System 80A Combi"
+    ]
   },
   {
     "name": "ManilaMatic System 80B",
     "slug": "manilamatic-system-80b",
     "manufacturer_slug": "manilamatic",
-    "mpu_strings": ["ManilaMatic System 80B Combi"]
+    "mpu_strings": [
+      "ManilaMatic System 80B Combi"
+    ]
   },
   {
     "name": "Mr. Game 1B11188/0",
     "slug": "mr-game-1b11188-0",
     "manufacturer_slug": "mr-game",
-    "mpu_strings": ["Mr. Game 1B11188/0"]
+    "mpu_strings": [
+      "Mr. Game 1B11188/0"
+    ]
   },
   {
     "name": "Multimorphic P-ROC",
     "slug": "multimorphic-p-roc",
     "manufacturer_slug": "multimorphic",
-    "mpu_strings": ["Multimorphic P-ROC"]
+    "mpu_strings": [
+      "Multimorphic P-ROC"
+    ]
   },
   {
     "name": "Multimorphic P3-ROC",
     "slug": "multimorphic-p3-roc",
     "manufacturer_slug": "multimorphic",
-    "mpu_strings": ["Multimorphic P3-ROC"]
+    "mpu_strings": [
+      "Multimorphic P3-ROC"
+    ]
   },
   {
     "name": "NSM Control-Unit 217838",
     "slug": "nsm-control-unit-217838",
     "manufacturer_slug": "nsm",
-    "mpu_strings": ["NSM Control-Unit 217838"]
+    "mpu_strings": [
+      "NSM Control-Unit 217838"
+    ]
   },
   {
     "name": "Playmatic MPU-1",
     "slug": "playmatic-mpu-1",
     "manufacturer_slug": "playmatic",
-    "mpu_strings": ["Playmatic MPU 1"]
+    "mpu_strings": [
+      "Playmatic MPU 1"
+    ]
   },
   {
     "name": "Playmatic MPU-3",
     "slug": "playmatic-mpu-3",
     "manufacturer_slug": "playmatic",
-    "mpu_strings": ["Playmatic MPU 3"]
+    "mpu_strings": [
+      "Playmatic MPU 3"
+    ]
   },
   {
     "name": "Playmatic MPU-4",
     "slug": "playmatic-mpu-4",
     "manufacturer_slug": "playmatic",
-    "mpu_strings": ["Playmatic MPU 4"]
+    "mpu_strings": [
+      "Playmatic MPU 4"
+    ]
   },
   {
     "name": "Playmatic MPU-5",
     "slug": "playmatic-mpu-5",
     "manufacturer_slug": "playmatic",
-    "mpu_strings": ["Playmatic MPU 5"]
+    "mpu_strings": [
+      "Playmatic MPU 5"
+    ]
   },
   {
     "name": "Playmatic MPU-C",
     "slug": "playmatic-mpu-c",
     "manufacturer_slug": "playmatic",
-    "mpu_strings": ["Playmatic MPU-C"]
+    "mpu_strings": [
+      "Playmatic MPU-C"
+    ]
   },
   {
     "name": "Quetzal QPC",
     "slug": "quetzal-qpc",
     "manufacturer_slug": "quetzal",
-    "mpu_strings": ["QPC System", "QPC Mini System"]
+    "mpu_strings": [
+      "QPC System",
+      "QPC Mini System"
+    ]
   },
   {
     "name": "Recel System III",
     "slug": "recel-system-iii",
     "manufacturer_slug": "recel",
-    "mpu_strings": ["Recel System III"]
+    "mpu_strings": [
+      "Recel System III"
+    ]
   },
   {
     "name": "Sega 95534",
     "slug": "sega-95534",
-    "manufacturer_slug": "sega-enterprises",
-    "mpu_strings": ["Sega 95534"]
+    "manufacturer_slug": "sega",
+    "mpu_strings": [
+      "Sega 95534"
+    ]
   },
   {
     "name": "Sega 95680",
     "slug": "sega-95680",
-    "manufacturer_slug": "sega-enterprises",
-    "mpu_strings": ["Sega 95680"]
+    "manufacturer_slug": "sega",
+    "mpu_strings": [
+      "Sega 95680"
+    ]
   },
   {
     "name": "Sega 96054",
     "slug": "sega-96054",
-    "manufacturer_slug": "sega-enterprises",
-    "mpu_strings": ["Sega 96054"]
+    "manufacturer_slug": "sega",
+    "mpu_strings": [
+      "Sega 96054"
+    ]
   },
   {
     "name": "Sega Whitestar",
     "slug": "sega-whitestar",
     "manufacturer_slug": "sega",
-    "mpu_strings": ["Sega/Stern Whitestar"]
+    "mpu_strings": [
+      "Sega/Stern Whitestar"
+    ]
   },
   {
     "name": "Spooky PinHeck",
     "slug": "spooky-pinheck",
     "manufacturer_slug": "spooky",
-    "mpu_strings": ["PinHeck System"]
+    "mpu_strings": [
+      "PinHeck System"
+    ]
   },
   {
     "name": "Stern MPU-100",
     "slug": "stern-mpu-100",
     "manufacturer_slug": "stern-electronics",
-    "mpu_strings": ["Stern M-100 MPU"]
+    "mpu_strings": [
+      "Stern M-100 MPU"
+    ]
   },
   {
     "name": "Stern MPU-200",
     "slug": "stern-mpu-200",
     "manufacturer_slug": "stern-electronics",
-    "mpu_strings": ["Stern M-200 MPU"]
+    "mpu_strings": [
+      "Stern M-200 MPU"
+    ]
   },
   {
     "name": "Stern Whitestar",
     "slug": "stern-whitestar",
-    "manufacturer_slug": "stern",
-    "mpu_strings": ["Stern Whitestar (modified)"]
+    "manufacturer_slug": "stern-pinball",
+    "mpu_strings": [
+      "Stern Whitestar (modified)"
+    ]
   },
   {
     "name": "Stern SAM",
     "slug": "stern-sam",
-    "manufacturer_slug": "stern",
-    "mpu_strings": ["Stern S.A.M. Board System"]
+    "manufacturer_slug": "stern-pinball",
+    "mpu_strings": [
+      "Stern S.A.M. Board System"
+    ]
   },
   {
     "name": "Stern SPIKE",
-    "slug": "stern-spike",
-    "manufacturer_slug": "stern",
-    "mpu_strings": ["Stern SPIKE System"]
+    "slug": "stern-spike-1",
+    "manufacturer_slug": "stern-pinball",
+    "mpu_strings": [
+      "Stern SPIKE System",
+      "Stern SPIKE\ufffd System"
+    ]
   },
   {
     "name": "Stern SPIKE 2",
     "slug": "stern-spike-2",
-    "manufacturer_slug": "stern",
-    "mpu_strings": ["Stern SPIKE 2 System"]
+    "manufacturer_slug": "stern-pinball",
+    "mpu_strings": [
+      "Stern SPIKE 2 System",
+      "Stern SPIKE\ufffd 2 System"
+    ]
   },
   {
     "name": "Team Pinball Rboard v2",
     "slug": "team-pinball-rboard-v2",
     "manufacturer_slug": "team-pinball",
-    "mpu_strings": ["Team Pinball Rboard v2"]
+    "mpu_strings": [
+      "Team Pinball Rboard v2"
+    ]
   },
   {
     "name": "Tecnoplay \"2-2C 8008 LS\" (68000 CPU)",
     "slug": "tecnoplay-2-2c-8008-ls-68000-cpu",
     "manufacturer_slug": "tecnoplay",
-    "mpu_strings": ["Technoplay \"2-2C 8008 LS\" (68000 CPU)"]
+    "mpu_strings": [
+      "Technoplay \"2-2C 8008 LS\" (68000 CPU)"
+    ]
   },
   {
     "name": "Williams System 3",
     "slug": "williams-system-3",
     "manufacturer_slug": "williams",
-    "mpu_strings": ["Williams System 3"]
+    "mpu_strings": [
+      "Williams System 3"
+    ]
   },
   {
     "name": "Williams System 4",
     "slug": "williams-system-4",
     "manufacturer_slug": "williams",
-    "mpu_strings": ["Williams System 4"]
+    "mpu_strings": [
+      "Williams System 4"
+    ]
   },
   {
     "name": "Williams System 6",
     "slug": "williams-system-6",
     "manufacturer_slug": "williams",
-    "mpu_strings": ["Williams System 6"]
+    "mpu_strings": [
+      "Williams System 6"
+    ]
   },
   {
     "name": "Williams System 6A",
     "slug": "williams-system-6a",
     "manufacturer_slug": "williams",
-    "mpu_strings": ["Williams System 6A"]
+    "mpu_strings": [
+      "Williams System 6A"
+    ]
   },
   {
     "name": "Williams System 7",
     "slug": "williams-system-7",
     "manufacturer_slug": "williams",
-    "mpu_strings": ["Williams System 7"]
+    "mpu_strings": [
+      "Williams System 7"
+    ]
   },
   {
     "name": "Williams System 8",
     "slug": "williams-system-8",
     "manufacturer_slug": "williams",
-    "mpu_strings": ["Williams System 8"]
+    "mpu_strings": [
+      "Williams System 8"
+    ]
   },
   {
     "name": "Williams System 9",
     "slug": "williams-system-9",
     "manufacturer_slug": "williams",
-    "mpu_strings": ["Williams System 9"]
+    "mpu_strings": [
+      "Williams System 9"
+    ]
   },
   {
     "name": "Williams System 10",
     "slug": "williams-system-10",
     "manufacturer_slug": "williams",
-    "mpu_strings": ["Williams System 10"]
+    "mpu_strings": [
+      "Williams System 10"
+    ]
   },
   {
     "name": "Williams System 11",
     "slug": "williams-system-11",
     "manufacturer_slug": "williams",
-    "mpu_strings": ["Williams System 11"]
+    "mpu_strings": [
+      "Williams System 11"
+    ]
   },
   {
     "name": "Williams System 11A",
     "slug": "williams-system-11a",
     "manufacturer_slug": "williams",
-    "mpu_strings": ["Williams System 11A"]
+    "mpu_strings": [
+      "Williams System 11A"
+    ]
   },
   {
     "name": "Williams System 11B",
     "slug": "williams-system-11b",
     "manufacturer_slug": "williams",
-    "mpu_strings": ["Williams System 11B"]
+    "mpu_strings": [
+      "Williams System 11B"
+    ]
   },
   {
     "name": "Williams System 11C",
     "slug": "williams-system-11c",
     "manufacturer_slug": "williams",
-    "mpu_strings": ["Williams System 11C"]
+    "mpu_strings": [
+      "Williams System 11C"
+    ]
   },
   {
     "name": "Williams WPC Alphanumeric",
     "slug": "williams-wpc-alphanumeric",
     "manufacturer_slug": "williams",
-    "mpu_strings": ["Williams WPC (Alpha Numeric)"]
+    "mpu_strings": [
+      "Williams WPC (Alpha Numeric)"
+    ]
   },
   {
     "name": "Williams WPC Dot Matrix",
     "slug": "williams-wpc-dot-matrix",
     "manufacturer_slug": "williams",
-    "mpu_strings": ["Williams WPC (Dot Matrix)"]
+    "mpu_strings": [
+      "Williams WPC (Dot Matrix)"
+    ]
   },
   {
     "name": "Williams WPC Fliptronics",
     "slug": "williams-wpc-fliptronics",
     "manufacturer_slug": "williams",
-    "mpu_strings": ["Williams WPC (Fliptronics 1)"]
+    "mpu_strings": [
+      "Williams WPC (Fliptronics 1)"
+    ]
   },
   {
     "name": "Williams WPC Fliptronics II",
     "slug": "williams-wpc-fliptronics-2",
     "manufacturer_slug": "williams",
-    "mpu_strings": ["Williams WPC (Fliptronics 2)"]
+    "mpu_strings": [
+      "Williams WPC (Fliptronics 2)"
+    ]
   },
   {
     "name": "Williams WPC-DCS",
     "slug": "williams-wpc-dcs",
     "manufacturer_slug": "williams",
-    "mpu_strings": ["Williams WPC (DCS)"]
+    "mpu_strings": [
+      "Williams WPC (DCS)"
+    ]
   },
   {
     "name": "Williams WPC-S",
     "slug": "williams-wpc-s",
     "manufacturer_slug": "williams",
-    "mpu_strings": ["Williams WPC Security (WPC-S)"]
+    "mpu_strings": [
+      "Williams WPC Security (WPC-S)"
+    ]
   },
   {
     "name": "Williams WPC-95",
     "slug": "wpc-95",
     "manufacturer_slug": "williams",
-    "mpu_strings": ["Williams WPC-95"]
+    "mpu_strings": [
+      "Williams WPC-95"
+    ]
   },
   {
     "name": "Williams Pinball 2000",
     "slug": "williams-pinball-2000",
     "manufacturer_slug": "williams",
-    "mpu_strings": ["Williams Pinball 2000"]
+    "mpu_strings": [
+      "Williams Pinball 2000"
+    ]
   },
   {
     "name": "Zaccaria Generation 1",
     "slug": "zaccaria-gen-1",
     "manufacturer_slug": "zaccaria",
-    "mpu_strings": ["Zaccaria Generation 1"]
+    "mpu_strings": [
+      "Zaccaria Generation 1"
+    ]
   },
   {
     "name": "Zaccaria Generation 2",
     "slug": "zaccaria-gen-2",
     "manufacturer_slug": "zaccaria",
-    "mpu_strings": ["Zaccaria Generation 2"]
+    "mpu_strings": [
+      "Zaccaria Generation 2"
+    ]
   }
 ]

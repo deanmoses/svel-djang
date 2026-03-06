@@ -1,7 +1,8 @@
 """Orchestrate the full ingestion pipeline.
 
-Runs: ingest_machine_types_seed → ingest_manufacturers_seed → ingest_manufacturers →
-      ingest_systems → ingest_ipdb → ingest_opdb → ingest_series → ingest_signs →
+Runs: ingest_pinbase_taxonomy → ingest_pinbase_manufacturers →
+      ingest_pinbase_corporate_entities → ingest_pinbase_systems → ingest_ipdb →
+      ingest_opdb → ingest_pinbase_series → ingest_pinbase_titles → ingest_pinbase_signs →
       resolve_claims.
 """
 
@@ -12,15 +13,16 @@ from django.core.management.base import BaseCommand
 
 
 STEPS = [
-    "ingest_machine_types_seed",
-    "ingest_display_types_seed",
-    "ingest_manufacturers_seed",
-    "ingest_manufacturers",
-    "ingest_systems",
+    "ingest_pinbase_taxonomy",
+    "ingest_pinbase_manufacturers",
+    "ingest_pinbase_corporate_entities",
+    "ingest_pinbase_systems",
     "ingest_ipdb",
     "ingest_opdb",
-    "ingest_series",
-    "ingest_signs",
+    "generate_ipdb_titles",
+    "ingest_pinbase_series",
+    "ingest_pinbase_titles",
+    "ingest_pinbase_signs",
     "resolve_claims",
 ]
 
@@ -52,7 +54,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--csv",
             default="../data/dump1/machine_sign_copy.csv",
-            help="Path to machine_sign_copy.csv for ingest_signs.",
+            help="Path to machine_sign_copy.csv for ingest_pinbase_signs.",
         )
 
     def handle(self, *args, **options):
@@ -68,9 +70,7 @@ class Command(BaseCommand):
             for step in STEPS:
                 self.stdout.write(self.style.MIGRATE_HEADING(f"Running {step}..."))
                 kwargs = {}
-                if step == "ingest_manufacturers":
-                    kwargs = {"ipdb": ipdb_path, "opdb": opdb_path}
-                elif step == "ingest_ipdb":
+                if step == "ingest_ipdb":
                     kwargs = {"ipdb": ipdb_path}
                 elif step == "ingest_opdb":
                     kwargs = {
@@ -78,7 +78,7 @@ class Command(BaseCommand):
                         "groups": opdb_groups,
                         "changelog": opdb_changelog,
                     }
-                elif step == "ingest_signs":
+                elif step == "ingest_pinbase_signs":
                     kwargs = {"csv": csv_path}
                 call_command(step, stdout=self.stdout, stderr=self.stderr, **kwargs)
         finally:

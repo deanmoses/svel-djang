@@ -5,17 +5,20 @@
 	let {
 		value = $bindable(''),
 		placeholder = 'Search...',
-		disabled = false
+		disabled = false,
+		autofocus = false
 	}: {
 		value?: string;
 		placeholder?: string;
 		disabled?: boolean;
+		autofocus?: boolean;
 	} = $props();
 </script>
 
 <form class="search-box" onsubmit={(e) => e.preventDefault()}>
-	<FaIcon icon={faMagnifyingGlass} class="search-icon" />
-	<input type="search" {placeholder} aria-label={placeholder} bind:value {disabled} />
+	<FaIcon icon={faMagnifyingGlass} />
+	<!-- svelte-ignore a11y_autofocus -->
+	<input type="search" {placeholder} aria-label={placeholder} bind:value {disabled} {autofocus} />
 </form>
 
 <style>
@@ -25,7 +28,7 @@
 		margin: 0 auto var(--size-4);
 	}
 
-	:global(.search-icon) {
+	.search-box :global(svg) {
 		position: absolute;
 		left: var(--size-4);
 		top: 50%;

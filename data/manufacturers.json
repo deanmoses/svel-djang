@@ -1,8 +1,20 @@
 [
   {
+    "name": "Allied Leisure",
+    "slug": "allied-leisure"
+  },
+  {
+    "name": "Alvin G.",
+    "slug": "alvin-g"
+  },
+  {
     "name": "American Pinball",
     "slug": "american-pinball",
     "description": "American Pinball entered the market in 2016 as a fresh challenger to the established order. Backed by the Polish Reh family — investors with deep roots in amusement machinery — the company set up operations in Chicago, inheriting the city's long tradition of pinball manufacturing. Their approach combined modern LCD display technology with an emphasis on value, offering feature-rich machines at a price point below the premium tier.\n\nTheir debut title, Houdini: Master of Mystery (2018), demonstrated a commitment to clever mechanical design and immersive theming. Subsequent releases including Oktoberfest (2019) and Legends of Valhalla (2022) built on that foundation, earning American Pinball a loyal following among operators and collectors who appreciate a thoughtfully engineered game at an accessible price."
+  },
+  {
+    "name": "Arkon",
+    "slug": "arkon"
   },
   {
     "name": "Atari",
@@ -10,14 +22,42 @@
     "description": "The name Atari conjures images of video game dominance, but for a brief period in the late 1970s the Silicon Valley giant made a serious push into pinball. Between 1976 and 1980, Atari produced roughly sixteen pinball titles, hoping to leverage its engineering talent and brand recognition in the coin-op amusement sector.\n\nThe results were mixed. Atari's machines featured innovative solid-state electronics — the company was an early adopter — but struggled to distinguish themselves in a market dominated by the established giants of Chicago. Titles like Superman (1979) and Hercules (1979) — the latter featuring an enormous 4-by-8-foot playfield — showed ambition but failed to find lasting commercial success. By 1980, Atari had exited pinball entirely to focus on its booming video game division. Their machines are now prized by collectors for their rarity and the novelty of the Atari name on a flipper game."
   },
   {
+    "name": "Automaticos",
+    "slug": "automaticos"
+  },
+  {
     "name": "Bally",
     "slug": "bally",
     "description": "Few names carry more weight in the history of pinball than Bally. Founded in 1931 by Raymond Moloney — who named the company after his breakthrough success, the Ballyhoo — Bally Manufacturing Corporation grew from a Chicago novelty shop operation into one of the most dominant forces in the amusement industry. For more than five decades, Bally machines set the standard for quality, innovation, and style.\n\nBally was a defining voice in the electromechanical era, producing iconic tables through the 1950s and 1960s and helping to normalize pinball as a fixture of arcades and taverns across America. The company's greatest technological leap came in 1977 with Freedom, widely credited as the first commercially successful solid-state pinball machine. That transition to microprocessors opened new frontiers in gameplay complexity, and Bally raced to exploit them — multiball, talking machines, and increasingly elaborate rule sets all followed in quick succession.\n\nIn 1988, Bally merged its pinball and amusement operations with those of Williams Electronics, forming WMS Industries. The two brands continued producing machines under their separate names — Bally tending toward licensed pop-culture themes, Williams toward complex gameplay — until WMS shuttered its pinball division in 1999. The Bally name was later licensed to Stern Pinball for use on a number of titles, a tribute to the brand's enduring resonance."
   },
   {
+    "name": "Bell Games",
+    "slug": "bell-games"
+  },
+  {
+    "name": "Briarwood",
+    "slug": "briarwood"
+  },
+  {
+    "name": "Brunswick",
+    "slug": "brunswick"
+  },
+  {
+    "name": "C.E.A.",
+    "slug": "cea"
+  },
+  {
     "name": "Capcom",
     "slug": "capcom",
     "description": "Capcom is best known for the video games that defined a generation — Street Fighter, Mega Man, Resident Evil — but between 1994 and 1996 the Japanese publisher made a brief, ambitious foray into physical pinball. Partnering with a small US team, Capcom Coin-Op produced just eight pinball titles, each featuring the bright, character-driven aesthetics familiar from the company's gaming catalog.\n\nThe machines were technically proficient and featured art packages drawn directly from Capcom's properties. Titles like Pinball Magic (1995) and Big Bang Bar (1996) are now genuinely scarce — production runs were small, the venture was abandoned before it found its footing, and many machines were destroyed unsold. That rarity has made Capcom pins highly sought-after collector pieces, with Big Bang Bar in particular commanding remarkable prices among serious enthusiasts. The company's brief pinball chapter stands as a fascinating what-if in the hobby's history."
+  },
+  {
+    "name": "Centro Matic",
+    "slug": "centro-matic"
+  },
+  {
+    "name": "Chicago Coin",
+    "slug": "chicago-coin"
   },
   {
     "name": "Chicago Gaming",
@@ -40,9 +80,21 @@
     "description": "Dutch Pinball B.V. is a Netherlands-based manufacturer that achieved considerable attention with its debut machine, The Big Lebowski (2018), based on the Coen Brothers' cult film. The company pursued crowdfunding to bring the project to life, tapping directly into the passionate fan communities that surround both pinball and the film's devoted following.\n\nThe development of The Big Lebowski was a lengthy and turbulent journey, drawing scrutiny over production timelines and communication with backers. When the machines finally arrived, they were received as ambitious and immersive, featuring detailed playfield art, multiball, and the wry wit of the source material. Dutch Pinball remains a symbol of both the possibilities and the challenges of independent pinball production in the modern era."
   },
   {
+    "name": "Exhibit",
+    "slug": "exhibit"
+  },
+  {
     "name": "Game Plan",
     "slug": "game-plan",
     "description": "Game Plan, Inc. was a small American pinball manufacturer active from the mid-1970s through the mid-1980s. Operating out of Wood Dale, Illinois, the company produced a modest catalog of solid-state machines during a period of great technological transition in the industry.\n\nGame Plan's machines occupied a budget tier of the market and were generally simpler in design than contemporary offerings from Bally or Williams. Titles like Sharpshooter (1979) and Lady Sharpshooter (1980) found modest success in locations where operators sought affordable alternatives to more expensive cabinets. The company ceased operations around 1985 as the market consolidated around its larger competitors. Their machines are relatively uncommon today and hold interest among collectors pursuing a complete survey of the American solid-state era."
+  },
+  {
+    "name": "Geiger",
+    "slug": "geiger"
+  },
+  {
+    "name": "Genco",
+    "slug": "genco"
   },
   {
     "name": "Gottlieb",
@@ -50,9 +102,17 @@
     "description": "D. Gottlieb & Company holds a singular place in pinball history: it is the oldest pinball manufacturer, and its first machine helped create an entire industry. Founded by David Gottlieb in Chicago in 1927, the company struck gold in 1931 with Baffle Ball, a simple but addictive game that sold thousands of units and transformed a novelty into a nationwide craze. Baffle Ball didn't just launch Gottlieb — it launched the modern amusement business.\n\nGottlieb remained at the forefront of innovation for decades. The company introduced Humpty Dumpty in 1947, the first pinball machine to feature flippers — a breakthrough that reframed the game from pure chance to skill, fundamentally altering its character and its relationship with anti-gambling legislation. In 1950, Gottlieb pioneered electronic scoring with Knock Out, replacing the clacking score reels that had defined the electromechanical era. Under chief designers including Ed Krynski and Gordon Hasse, Gottlieb built a reputation for clean, elegant gameplay and distinctive pastel-toned artwork.\n\nThe company was sold to Columbia Pictures Industries in 1977, beginning a series of ownership transitions that would ultimately prove fatal. Acquired by Premier Technology in 1984, then by Gottlieb's former workforce in a management buyout, the brand struggled through the 1990s as the market contracted. Production ceased in 1996, ending a run of nearly seven decades. The Gottlieb archive — spanning thousands of titles from Baffle Ball to Barb Wire — represents the most historically complete record of pinball's entire arc."
   },
   {
+    "name": "Grand Products",
+    "slug": "grand-products"
+  },
+  {
     "name": "Haggis Pinball",
     "slug": "haggis",
     "description": "Haggis Pinball is an independent manufacturer based in Australia, producing small-batch pinball machines for the global collector and enthusiast market. The company emerged from the groundswell of boutique manufacturing that arose internationally in the 2010s, as accessible electronics and a passionate community of players created space for alternatives to the established major manufacturers.\n\nHaggis's machines are built with attention to detail and designed for the discerning collector, combining original themes with modern features. Their debut title Celts reflects a commitment to distinctive, non-licensed intellectual property and the craftsmanship associated with boutique production."
+  },
+  {
+    "name": "Hankin",
+    "slug": "hankin"
   },
   {
     "name": "Homepin",
@@ -60,9 +120,21 @@
     "description": "Homepin is a pinball manufacturer based in New Zealand that drew international attention with Thunderbirds (2018), a machine based on the classic British science fiction television series. The project was brought to life through a crowdfunding campaign, and its completion marked a milestone: a commercially produced pinball machine from the southern hemisphere, a region with no prior history of pinball manufacturing at any meaningful scale.\n\nThunderbirds combined traditional solid-state gameplay with affectionate reverence for the 1960s puppet show that inspired it, appealing both to franchise fans and to collectors interested in unusual provenance. Homepin's achievement — producing a finished, playable machine from a small island nation through sheer determination — earned admiration well beyond the machine's commercial footprint."
   },
   {
+    "name": "Interflip",
+    "slug": "interflip"
+  },
+  {
     "name": "Jersey Jack Pinball",
     "slug": "jersey-jack",
     "description": "Jersey Jack Pinball was founded in 2011 by Jack Guarnieri, a veteran of the coin-op industry, with an explicit mission to reinvigorate pinball by pushing production quality, playfield innovation, and visual presentation far beyond the prevailing standard. The company's debut machine, The Wizard of Oz (2013), announced its ambitions unmistakably: a large LCD display beneath the playfield glass, intricate multi-level construction, and production values that felt genuinely cinematic.\n\nJersey Jack's machines occupy the premium end of the market, reflecting the company's investment in licensed properties, elaborate physical mechanisms, and high-quality component sourcing. Titles like The Hobbit (2016), Dialed In! (2017), and Pirates of the Caribbean (2018) have been celebrated for their ambition, even as their complexity has drawn debate. The company has played a significant role in establishing that modern pinball can aspire to the level of craft associated with fine amusements — and that a devoted collector base will pay accordingly."
+  },
+  {
+    "name": "Joctronic",
+    "slug": "joctronic"
+  },
+  {
+    "name": "Keeney",
+    "slug": "keeney"
   },
   {
     "name": "MAC S.A.",
@@ -70,9 +142,25 @@
     "description": "MAC S.A. was a Spanish pinball manufacturer active during the late electromechanical and early solid-state eras. Operating at a time when European manufacturers occupied a distinct market from their American counterparts, MAC produced machines that circulated primarily through Spanish and broader European distribution networks. Their catalog reflects the transitional period of the late 1970s and early 1980s, when the industry was grappling with the shift from relay-driven to microprocessor-based technology, and offers a window into the parallel development of pinball culture on the Iberian Peninsula."
   },
   {
+    "name": "Mambelli",
+    "slug": "mambelli"
+  },
+  {
     "name": "ManilaMatic",
     "slug": "manilamatic",
     "description": "ManilaMatic is a Philippine pinball manufacturer and one of the very few producers of commercial pinball machines to emerge from Southeast Asia. The game's appeal has historically been concentrated in North America and Western Europe, making any manufacturer from outside those regions a genuine rarity in the collector landscape.\n\nManilaMatic's machines are genuinely scarce, geographically distinctive, and representative of a pinball culture that developed largely independent of the dominant American tradition. For collectors pursuing a truly global survey of the medium, ManilaMatic represents an essential and elusive piece of the picture."
+  },
+  {
+    "name": "Maresa",
+    "slug": "maresa"
+  },
+  {
+    "name": "Marvel",
+    "slug": "marvel"
+  },
+  {
+    "name": "Midway",
+    "slug": "midway"
   },
   {
     "name": "Mr. Game",
@@ -100,6 +188,14 @@
     "description": "Quetzal Pinball is a contemporary Spanish pinball manufacturer producing original machines for the collector and enthusiast market. The company is part of a modest but notable Spanish tradition in pinball manufacturing — Spain produced more pinball machines per capita during the 1970s and 1980s than almost any other European nation — and Quetzal carries that heritage into the modern era with small-batch production and original intellectual property."
   },
   {
+    "name": "R.M.G.",
+    "slug": "rmg"
+  },
+  {
+    "name": "Rally",
+    "slug": "rally"
+  },
+  {
     "name": "Recel",
     "slug": "recel",
     "description": "Recel was a Spanish pinball manufacturer active during the late electromechanical and early solid-state transition period. Like several of its contemporaries in Spain — a country with a surprisingly robust domestic pinball industry — Recel produced machines that circulated primarily through European distribution channels, often unknown to collectors outside the continent.\n\nRecel's catalog reflects the aesthetic and technical sensibility of European manufacturers of the era: bold graphics, direct gameplay, and a development trajectory that tracked the American solid-state transition while maintaining a distinctly regional character."
@@ -112,12 +208,11 @@
   {
     "name": "Sega",
     "slug": "sega",
-    "description": "Sega's pinball chapter is brief but significant. In 1994, the company's American operations acquired the pinball manufacturing assets of Data East, which had been a key player in the US market since 1987. With that acquisition, Sega entered the pinball business fully formed, inheriting factory space, tooling, and design talent rather than building from scratch.\n\nSega pinball's five-year run produced a catalog of licensed machines reflecting the company's brand relationships: GoldenEye (1996), Batman Forever (1995), Lost in Space (1998), and Harley-Davidson (1999) were among the titles that carried the Sega name. The division struggled as the overall pinball market contracted sharply in the late 1990s. In 1999, Sega exited the pinball business, selling its assets to Gary Stern — who used them to found what would become the dominant force in modern pinball manufacturing."
+    "description": "Sega's involvement in pinball spans two distinct chapters under different corporate entities. In the late 1970s, Sega Enterprises manufactured electromechanical and early solid-state pinball machines in Japan for both domestic and export markets, operating as a full-line amusement company across multiple game categories. These early machines are uncommon on the Western collector market and represent an independent thread of pinball history rooted in Japan's own coin-op industry.\n\nThe better-known chapter began in 1994, when Sega's American operations acquired the pinball manufacturing assets of Data East, entering the business fully formed with inherited factory space, tooling, and design talent. Sega Pinball's five-year run produced a catalog of licensed machines reflecting the company's brand relationships: GoldenEye (1996), Batman Forever (1995), Lost in Space (1998), and Harley-Davidson (1999) were among the titles. The division also had a Spanish subsidiary, Segasa, which manufactured games for the European market. The overall pinball market contracted sharply in the late 1990s, and in 1999 Sega exited the business, selling its assets to Gary Stern — who used them to found what would become the dominant force in modern pinball manufacturing."
   },
   {
-    "name": "Sega Enterprises",
-    "slug": "sega-enterprises",
-    "description": "Sega Enterprises — the Japanese parent company of the Sega brand — had a separate and earlier relationship with pinball that predates the US pinball operation of the 1990s by more than a decade. In the late 1970s, Sega Enterprises manufactured electromechanical and early solid-state pinball machines in Japan for both domestic and export markets, operating as a full-line amusement company across multiple game categories.\n\nThese early Sega machines are historically distinct from the later US pinball venture, representing an independent thread of pinball history rooted in Japan's own coin-op industry. They are uncommon on the Western collector market and offer a fascinating glimpse into the internationalization of pinball that was underway before the American industry's 1980s peak."
+    "name": "Spinball",
+    "slug": "spinball"
   },
   {
     "name": "Spooky Pinball",
@@ -126,13 +221,21 @@
   },
   {
     "name": "Stern",
-    "slug": "stern",
+    "slug": "stern-pinball",
     "description": "Stern Pinball is the sole surviving major manufacturer from the era that defined American pinball, and today it is the dominant force in the global industry. The company was effectively founded when Gary Stern acquired Sega's pinball manufacturing assets in 1999 and relaunched operations as Stern Pinball, Inc. — though Gary's family legacy in the industry stretches back to his father Sam Stern's tenure running Williams Electronics in an earlier era.\n\nStern's longevity through the industry's darkest period — the early 2000s, when pinball's commercial viability was in serious doubt — came through ruthless focus on what operators and collectors would actually pay for: well-licensed properties, reliable hardware, and progressive rule sets updated through software. Titles like The Sopranos (2005), Iron Man (2010), Game of Thrones (2015), and Stranger Things (2019) have kept Stern at the center of the new machine market. The company's Premium and Limited Edition tiers introduced a deliberate collector-market strategy that has since been widely imitated.\n\nStern's continued operation is not merely a business story but a cultural one: the company has served as the connective tissue between pinball's storied industrial past and whatever the game's future holds."
   },
   {
     "name": "Stern Electronics",
     "slug": "stern-electronics",
     "description": "Stern Electronics was a Chicago-based manufacturer active from 1977 to 1985, and it is entirely distinct from the Stern Pinball that operates today. Founded by Sam Stern — who had previously run Williams Electronics — Stern Electronics produced a catalog of solid-state machines during the early years of the microprocessor era, competing directly with Bally, Williams, and Gottlieb.\n\nThe company's machines were technically solid and commercially competitive, with titles like Seawitch (1980), Lightning (1981), and Flight 2000 (1980) earning strong operator followings. Sam's son Gary Stern worked at the company during this period. When Stern Electronics ceased operations in 1985 — unable to weather the broader amusement industry downturn — it left behind a catalog that is genuinely distinct from any subsequent Stern-branded machines, and is prized accordingly by collectors who understand the difference."
+  },
+  {
+    "name": "T.H. Bergmann",
+    "slug": "th-bergmann"
+  },
+  {
+    "name": "Taito",
+    "slug": "taito"
   },
   {
     "name": "Team Pinball",
@@ -143,6 +246,14 @@
     "name": "Tecnoplay",
     "slug": "tecnoplay",
     "description": "Tecnoplay was an Italian pinball manufacturer active in the late 1980s and early 1990s, producing solid-state machines for the European amusement market. Like other Italian manufacturers of the era — including Mr. Game and Zaccaria — Tecnoplay operated in a domestic market with distinct tastes and distribution networks, producing machines that rarely reached North American collectors during the company's active years.\n\nTecnoplay's catalog is small, reflecting the limited scale of Italian pinball manufacturing compared to the American industry of the same period. Their machines are now genuinely rare, making them attractive to specialists pursuing a comprehensive survey of European solid-state production."
+  },
+  {
+    "name": "United",
+    "slug": "united"
+  },
+  {
+    "name": "Wico",
+    "slug": "wico"
   },
   {
     "name": "Williams",

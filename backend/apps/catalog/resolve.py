@@ -19,12 +19,21 @@ from apps.provenance.models import Claim
 
 from .claims import RELATIONSHIP_NAMESPACES
 from .models import (
+    Cabinet,
+    CorporateEntity,
     DesignCredit,
+    DisplaySubtype,
+    DisplayType,
+    Franchise,
+    GameFormat,
+    GameplayFeature,
     MachineModel,
     Manufacturer,
-    ManufacturerEntity,
     Person,
     System,
+    Tag,
+    TechnologyGeneration,
+    TechnologySubgeneration,
     Theme,
     Title,
 )
@@ -37,8 +46,6 @@ DIRECT_FIELDS: dict[str, str] = {
     "name": "name",
     "year": "year",
     "month": "month",
-    "machine_type": "machine_type",
-    "display_type": "display_type",
     "player_count": "player_count",
     "production_quantity": "production_quantity",
     "flipper_count": "flipper_count",
@@ -102,56 +109,17 @@ def _resolve_title(value) -> Title | None:
     return title
 
 
-def _resolve_manufacturer(value, source_slug: str = "") -> Manufacturer | None:
-    """Resolve a manufacturer claim value to a Manufacturer instance.
-
-    The value can be:
-    - An int/string matching ipdb_manufacturer_id (on ManufacturerEntity)
-      or opdb_manufacturer_id (on Manufacturer)
-    - A manufacturer name string
-
-    ``source_slug`` disambiguates numeric IDs: "ipdb" looks up via
-    ManufacturerEntity, "opdb" via Manufacturer.opdb_manufacturer_id.
-    Without a slug, both are tried (IPDB first, then OPDB).
-    """
+def _resolve_manufacturer(value) -> Manufacturer | None:
+    """Resolve a manufacturer claim value (slug) to a Manufacturer instance."""
     if value is None or value == "":
         return None
-
-    # Try numeric ID lookups, scoped by source when known.
-    try:
-        numeric_id = int(value)
-
-        if source_slug != "opdb":
-            entity = (
-                ManufacturerEntity.objects.filter(ipdb_manufacturer_id=numeric_id)
-                .select_related("manufacturer")
-                .first()
-            )
-            if entity:
-                return entity.manufacturer
-
-        if source_slug != "ipdb":
-            mfr = Manufacturer.objects.filter(opdb_manufacturer_id=numeric_id).first()
-            if mfr:
-                return mfr
-    except ValueError, TypeError:
-        pass
-
-    # Fall back to name match (case-insensitive).
-    name = str(value).strip()
-    if not name:
+    slug = str(value).strip()
+    if not slug:
         return None
-
-    mfr = Manufacturer.objects.filter(name__iexact=name).first()
-    if mfr:
-        return mfr
-
-    mfr = Manufacturer.objects.filter(trade_name__iexact=name).first()
-    if mfr:
-        return mfr
-
-    logger.warning("Unmatched manufacturer claim value: %r", value)
-    return None
+    mfr = Manufacturer.objects.filter(slug=slug).first()
+    if not mfr:
+        logger.warning("Unmatched manufacturer claim slug: %r", value)
+    return mfr
 
 
 def resolve_model(machine_model: MachineModel) -> MachineModel:
@@ -187,6 +155,11 @@ def resolve_model(machine_model: MachineModel) -> MachineModel:
     machine_model.manufacturer = None
     machine_model.title = None
     machine_model.system = None
+    machine_model.technology_generation = None
+    machine_model.display_type = None
+    machine_model.display_subtype = None
+    machine_model.cabinet = None
+    machine_model.game_format = None
     for attr in DIRECT_FIELDS.values():
         field = machine_model._meta.get_field(attr)
         if hasattr(field, "default") and field.default is not models.NOT_PROVIDED:
@@ -197,18 +170,42 @@ def resolve_model(machine_model: MachineModel) -> MachineModel:
             setattr(machine_model, attr, "")
     extra_data: dict = {}
 
+    techgen_lookup = _build_technology_generation_lookup()
+    display_type_lookup = _build_display_type_lookup()
+    display_subtype_lookup = _build_display_subtype_lookup()
+    cabinet_lookup = _build_cabinet_lookup()
+    game_format_lookup = _build_game_format_lookup()
+
     # Apply winners to the model.
     for claim_key, claim in winners.items():
         if claim.field_name in RELATIONSHIP_NAMESPACES:
             continue  # Handled by resolve_credits()
         if claim.field_name == "manufacturer":
-            machine_model.manufacturer = _resolve_manufacturer(
-                claim.value, source_slug=claim.source.slug if claim.source else ""
-            )
+            machine_model.manufacturer = _resolve_manufacturer(claim.value)
         elif claim.field_name == "group":
             machine_model.title = _resolve_title(claim.value)
         elif claim.field_name == "system":
             machine_model.system = _resolve_system(claim.value, _build_system_lookup())
+        elif claim.field_name == "technology_generation":
+            machine_model.technology_generation = _resolve_slug_fk(
+                claim.value, techgen_lookup, "technology_generation"
+            )
+        elif claim.field_name == "display_type":
+            machine_model.display_type = _resolve_slug_fk(
+                claim.value, display_type_lookup, "display_type"
+            )
+        elif claim.field_name == "display_subtype":
+            machine_model.display_subtype = _resolve_slug_fk(
+                claim.value, display_subtype_lookup, "display_subtype"
+            )
+        elif claim.field_name == "cabinet":
+            machine_model.cabinet = _resolve_slug_fk(
+                claim.value, cabinet_lookup, "cabinet"
+            )
+        elif claim.field_name == "game_format":
+            machine_model.game_format = _resolve_slug_fk(
+                claim.value, game_format_lookup, "game_format"
+            )
         elif claim.field_name in DIRECT_FIELDS:
             attr = DIRECT_FIELDS[claim.field_name]
             setattr(machine_model, attr, _coerce(claim.field_name, claim.value))
@@ -243,6 +240,8 @@ def resolve_model(machine_model: MachineModel) -> MachineModel:
     # Resolve relationship claims after scalar save.
     resolve_credits(machine_model)
     resolve_themes(machine_model)
+    resolve_gameplay_features(machine_model)
+    resolve_tags(machine_model)
 
     return machine_model
 
@@ -252,11 +251,20 @@ def resolve_all() -> int:
 
     Pre-fetches all lookup tables and claims in ~4 queries, resolves
     in memory, then writes back with a single bulk_update().
+    Also resolves taxonomy models.
     """
-    # 1. Pre-fetch lookup tables (~3 queries).
-    mfr_lookups = _build_manufacturer_lookups()
+    # 0. Resolve taxonomy models first (they are FK targets).
+    _resolve_all_taxonomy()
+
+    # 1. Pre-fetch lookup tables.
+    mfr_lookup = _build_manufacturer_lookup()
     group_lookup = _build_title_lookup()
     system_lookup = _build_system_lookup()
+    techgen_lookup = _build_technology_generation_lookup()
+    display_type_lookup = _build_display_type_lookup()
+    display_subtype_lookup = _build_display_subtype_lookup()
+    cabinet_lookup = _build_cabinet_lookup()
+    game_format_lookup = _build_game_format_lookup()
     field_defaults = _get_field_defaults()
 
     # 2. Pre-fetch all active claims, grouped by object_id (~1 query).
@@ -269,7 +277,17 @@ def resolve_all() -> int:
     for pm in all_models:
         winners = claims_by_model.get(pm.pk, {})
         _apply_resolution(
-            pm, winners, field_defaults, mfr_lookups, group_lookup, system_lookup
+            pm,
+            winners,
+            field_defaults,
+            mfr_lookup,
+            group_lookup,
+            system_lookup,
+            techgen_lookup,
+            display_type_lookup,
+            display_subtype_lookup,
+            cabinet_lookup,
+            game_format_lookup,
         )
 
     # 5. Detect opdb_id conflicts across all resolved models.
@@ -285,6 +303,11 @@ def resolve_all() -> int:
         "manufacturer_id",
         "title_id",
         "system_id",
+        "technology_generation_id",
+        "display_type_id",
+        "display_subtype_id",
+        "cabinet_id",
+        "game_format_id",
         "extra_data",
         "updated_at",
     ]
@@ -298,6 +321,12 @@ def resolve_all() -> int:
 
     # 9. Bulk-resolve theme relationships.
     _resolve_all_themes(all_models)
+
+    # 10. Bulk-resolve gameplay feature relationships.
+    _resolve_all_gameplay_features(all_models)
+
+    # 11. Bulk-resolve tag relationships.
+    _resolve_all_tags(all_models)
 
     return len(all_models)
 
@@ -329,30 +358,9 @@ def _get_field_defaults() -> dict[str, Any]:
     return _field_defaults
 
 
-def _build_manufacturer_lookups() -> tuple[
-    dict[int, Manufacturer],
-    dict[int, Manufacturer],
-    dict[str, Manufacturer],
-    dict[str, Manufacturer],
-]:
-    """Pre-fetch all manufacturer data into four lookup dicts."""
-    ipdb_id_to_mfr: dict[int, Manufacturer] = {}
-    for entity in ManufacturerEntity.objects.select_related("manufacturer").all():
-        if entity.ipdb_manufacturer_id is not None:
-            ipdb_id_to_mfr[entity.ipdb_manufacturer_id] = entity.manufacturer
-
-    opdb_id_to_mfr: dict[int, Manufacturer] = {}
-    name_to_mfr: dict[str, Manufacturer] = {}
-    trade_name_to_mfr: dict[str, Manufacturer] = {}
-    for mfr in Manufacturer.objects.all():
-        if mfr.opdb_manufacturer_id is not None:
-            opdb_id_to_mfr[mfr.opdb_manufacturer_id] = mfr
-        if mfr.name:
-            name_to_mfr[mfr.name.lower()] = mfr
-        if mfr.trade_name:
-            trade_name_to_mfr[mfr.trade_name.lower()] = mfr
-
-    return ipdb_id_to_mfr, opdb_id_to_mfr, name_to_mfr, trade_name_to_mfr
+def _build_manufacturer_lookup() -> dict[str, Manufacturer]:
+    """Pre-fetch all manufacturers into {slug: Manufacturer}."""
+    return {m.slug: m for m in Manufacturer.objects.all()}
 
 
 def _build_title_lookup() -> dict[str, Title]:
@@ -371,6 +379,41 @@ def _resolve_system(value, system_lookup: dict[str, System]) -> System | None:
     result = system_lookup.get(str(value))
     if not result:
         logger.warning("Unmatched system claim slug: %r", value)
+    return result
+
+
+def _build_technology_generation_lookup() -> dict[str, TechnologyGeneration]:
+    """Pre-fetch all technology generations into {slug: TechnologyGeneration}."""
+    return {t.slug: t for t in TechnologyGeneration.objects.all()}
+
+
+def _build_display_type_lookup() -> dict[str, DisplayType]:
+    """Pre-fetch all display types into {slug: DisplayType}."""
+    return {d.slug: d for d in DisplayType.objects.all()}
+
+
+def _build_display_subtype_lookup() -> dict[str, DisplaySubtype]:
+    """Pre-fetch all display subtypes into {slug: DisplaySubtype}."""
+    return {d.slug: d for d in DisplaySubtype.objects.all()}
+
+
+def _build_cabinet_lookup() -> dict[str, Cabinet]:
+    """Pre-fetch all cabinets into {slug: Cabinet}."""
+    return {c.slug: c for c in Cabinet.objects.all()}
+
+
+def _build_game_format_lookup() -> dict[str, GameFormat]:
+    """Pre-fetch all game formats into {slug: GameFormat}."""
+    return {g.slug: g for g in GameFormat.objects.all()}
+
+
+def _resolve_slug_fk(value, lookup: dict[str, Any], label: str):
+    """Resolve a slug claim value to a model instance via a pre-fetched lookup."""
+    if not value:
+        return None
+    result = lookup.get(str(value))
+    if not result:
+        logger.warning("Unmatched %s claim slug: %r", label, value)
     return result
 
 
@@ -408,49 +451,15 @@ def _build_claims_by_model() -> dict[int, dict[str, Claim]]:
 
 def _resolve_manufacturer_bulk(
     value,
-    source_slug: str,
-    mfr_lookups: tuple[
-        dict[int, Manufacturer],
-        dict[int, Manufacturer],
-        dict[str, Manufacturer],
-        dict[str, Manufacturer],
-    ],
+    mfr_lookup: dict[str, Manufacturer],
 ) -> Manufacturer | None:
-    """Same logic as _resolve_manufacturer() but uses pre-fetched dicts."""
+    """Resolve a manufacturer slug to a Manufacturer using pre-fetched dict."""
     if value is None or value == "":
         return None
-
-    ipdb_id_to_mfr, opdb_id_to_mfr, name_to_mfr, trade_name_to_mfr = mfr_lookups
-
-    try:
-        numeric_id = int(value)
-
-        if source_slug != "opdb":
-            mfr = ipdb_id_to_mfr.get(numeric_id)
-            if mfr:
-                return mfr
-
-        if source_slug != "ipdb":
-            mfr = opdb_id_to_mfr.get(numeric_id)
-            if mfr:
-                return mfr
-    except ValueError, TypeError:
-        pass
-
-    name = str(value).strip()
-    if not name:
-        return None
-
-    mfr = name_to_mfr.get(name.lower())
-    if mfr:
-        return mfr
-
-    mfr = trade_name_to_mfr.get(name.lower())
-    if mfr:
-        return mfr
-
-    logger.warning("Unmatched manufacturer claim value: %r", value)
-    return None
+    result = mfr_lookup.get(str(value))
+    if not result:
+        logger.warning("Unmatched manufacturer claim slug: %r", value)
+    return result
 
 
 def _resolve_title_bulk(value, group_lookup: dict[str, Title]) -> Title | None:
@@ -467,15 +476,25 @@ def _apply_resolution(
     pm: MachineModel,
     winners: dict[str, Claim],
     field_defaults: dict[str, Any],
-    mfr_lookups: tuple,
+    mfr_lookup: dict[str, Manufacturer],
     group_lookup: dict[str, Title],
     system_lookup: dict[str, System],
+    techgen_lookup: dict[str, TechnologyGeneration] | None = None,
+    display_type_lookup: dict[str, DisplayType] | None = None,
+    display_subtype_lookup: dict[str, DisplaySubtype] | None = None,
+    cabinet_lookup: dict[str, Cabinet] | None = None,
+    game_format_lookup: dict[str, GameFormat] | None = None,
 ) -> None:
     """Apply claim winners to a MachineModel instance in memory."""
     # Reset FK fields.
     pm.manufacturer = None
     pm.title = None
     pm.system = None
+    pm.technology_generation = None
+    pm.display_type = None
+    pm.display_subtype = None
+    pm.cabinet = None
+    pm.game_format = None
 
     # Reset all DIRECT_FIELDS to defaults.
     for attr, default in field_defaults.items():
@@ -491,13 +510,35 @@ def _apply_resolution(
         if claim.field_name == "manufacturer":
             pm.manufacturer = _resolve_manufacturer_bulk(
                 claim.value,
-                source_slug=claim.source.slug if claim.source else "",
-                mfr_lookups=mfr_lookups,
+                mfr_lookup=mfr_lookup,
             )
         elif claim.field_name == "group":
             pm.title = _resolve_title_bulk(claim.value, group_lookup)
         elif claim.field_name == "system":
             pm.system = _resolve_system(claim.value, system_lookup)
+        elif claim.field_name == "technology_generation":
+            if techgen_lookup is not None:
+                pm.technology_generation = _resolve_slug_fk(
+                    claim.value, techgen_lookup, "technology_generation"
+                )
+        elif claim.field_name == "display_type":
+            if display_type_lookup is not None:
+                pm.display_type = _resolve_slug_fk(
+                    claim.value, display_type_lookup, "display_type"
+                )
+        elif claim.field_name == "display_subtype":
+            if display_subtype_lookup is not None:
+                pm.display_subtype = _resolve_slug_fk(
+                    claim.value, display_subtype_lookup, "display_subtype"
+                )
+        elif claim.field_name == "cabinet":
+            if cabinet_lookup is not None:
+                pm.cabinet = _resolve_slug_fk(claim.value, cabinet_lookup, "cabinet")
+        elif claim.field_name == "game_format":
+            if game_format_lookup is not None:
+                pm.game_format = _resolve_slug_fk(
+                    claim.value, game_format_lookup, "game_format"
+                )
         elif claim.field_name in DIRECT_FIELDS:
             attr = DIRECT_FIELDS[claim.field_name]
             setattr(pm, attr, _coerce(claim.field_name, claim.value))
@@ -641,6 +682,22 @@ def resolve_theme(theme: Theme) -> Theme:
     return theme
 
 
+CORPORATE_ENTITY_DIRECT_FIELDS: dict[str, str] = {
+    "name": "name",
+    "years_active": "years_active",
+}
+
+
+def resolve_corporate_entity(entity: CorporateEntity) -> CorporateEntity:
+    """Resolve active claims into the given CorporateEntity's fields.
+
+    Returns the saved CorporateEntity.
+    """
+    _resolve_simple(entity, CORPORATE_ENTITY_DIRECT_FIELDS)
+    entity.save()
+    return entity
+
+
 SYSTEM_DIRECT_FIELDS: dict[str, str] = {
     "name": "name",
     "description": "description",
@@ -655,6 +712,41 @@ def resolve_system(system: System) -> System:
     _resolve_simple(system, SYSTEM_DIRECT_FIELDS)
     system.save()
     return system
+
+
+# Taxonomy models: name and display_order are claim-controlled.
+TAXONOMY_DIRECT_FIELDS: dict[str, str] = {
+    "name": "name",
+    "display_order": "display_order",
+}
+
+_TAXONOMY_INT_FIELDS: frozenset[str] = frozenset({"display_order"})
+
+# Franchise has no display_order.
+FRANCHISE_DIRECT_FIELDS: dict[str, str] = {
+    "name": "name",
+}
+
+# All taxonomy models that go through claim resolution.
+TAXONOMY_MODELS: list[tuple[type, dict[str, str], frozenset[str] | None]] = [
+    (TechnologyGeneration, TAXONOMY_DIRECT_FIELDS, _TAXONOMY_INT_FIELDS),
+    (TechnologySubgeneration, TAXONOMY_DIRECT_FIELDS, _TAXONOMY_INT_FIELDS),
+    (DisplayType, TAXONOMY_DIRECT_FIELDS, _TAXONOMY_INT_FIELDS),
+    (DisplaySubtype, TAXONOMY_DIRECT_FIELDS, _TAXONOMY_INT_FIELDS),
+    (Cabinet, TAXONOMY_DIRECT_FIELDS, _TAXONOMY_INT_FIELDS),
+    (GameFormat, TAXONOMY_DIRECT_FIELDS, _TAXONOMY_INT_FIELDS),
+    (GameplayFeature, TAXONOMY_DIRECT_FIELDS, _TAXONOMY_INT_FIELDS),
+    (Tag, TAXONOMY_DIRECT_FIELDS, _TAXONOMY_INT_FIELDS),
+    (Franchise, FRANCHISE_DIRECT_FIELDS, None),
+]
+
+
+def _resolve_all_taxonomy() -> None:
+    """Resolve claims for all taxonomy models."""
+    for model_class, direct_fields, int_fields in TAXONOMY_MODELS:
+        for obj in model_class.objects.all():
+            _resolve_simple(obj, direct_fields, int_fields=int_fields)
+            obj.save()
 
 
 def _resolve_opdb_conflicts(all_models: list[MachineModel]) -> None:
@@ -786,6 +878,60 @@ def resolve_themes(machine_model: MachineModel) -> None:
     machine_model.themes.set(desired_pks)
 
 
+def resolve_gameplay_features(machine_model: MachineModel) -> None:
+    """Resolve gameplay feature claims into the M2M for a single machine.
+
+    Picks the winning claim per claim_key. Where ``value["exists"]`` is
+    True, looks up the GameplayFeature by slug and sets the M2M.
+    """
+    winners = _pick_relationship_winners(machine_model, "gameplay_feature")
+
+    desired_pks: set[int] = set()
+    for claim in winners.values():
+        val = claim.value
+        if not val.get("exists", True):
+            continue
+        feature = GameplayFeature.objects.filter(
+            slug=val["gameplay_feature_slug"]
+        ).first()
+        if not feature:
+            logger.warning(
+                "Unresolved gameplay feature slug %r in claim for %s",
+                val["gameplay_feature_slug"],
+                machine_model.name,
+            )
+            continue
+        desired_pks.add(feature.pk)
+
+    machine_model.gameplay_features.set(desired_pks)
+
+
+def resolve_tags(machine_model: MachineModel) -> None:
+    """Resolve tag claims into the M2M for a single machine.
+
+    Picks the winning claim per claim_key. Where ``value["exists"]`` is
+    True, looks up the Tag by slug and sets the M2M.
+    """
+    winners = _pick_relationship_winners(machine_model, "tag")
+
+    desired_pks: set[int] = set()
+    for claim in winners.values():
+        val = claim.value
+        if not val.get("exists", True):
+            continue
+        tag = Tag.objects.filter(slug=val["tag_slug"]).first()
+        if not tag:
+            logger.warning(
+                "Unresolved tag slug %r in tag claim for %s",
+                val["tag_slug"],
+                machine_model.name,
+            )
+            continue
+        desired_pks.add(tag.pk)
+
+    machine_model.tags.set(desired_pks)
+
+
 # ------------------------------------------------------------------
 # Bulk resolution for credits (used by resolve_all)
 # ------------------------------------------------------------------
@@ -845,9 +991,11 @@ def _resolve_all_credits(all_models: list[MachineModel]) -> None:
             desired.add((person_pk, val["role"]))
         desired_by_model[model_id] = desired
 
-    # Pre-fetch all existing DesignCredit rows.
+    # Pre-fetch existing DesignCredit rows (model-linked only, not series credits).
     existing_by_model: dict[int, set[tuple[int, str]]] = {}
-    for dc in DesignCredit.objects.values_list("model_id", "person_id", "role"):
+    for dc in DesignCredit.objects.filter(model_id__isnull=False).values_list(
+        "model_id", "person_id", "role"
+    ):
         existing_by_model.setdefault(dc[0], set()).add((dc[1], dc[2]))
 
     # Diff and apply.
@@ -962,6 +1110,188 @@ def _resolve_all_themes(all_models: list[MachineModel]) -> None:
         pk, model_id, theme_id = row
         desired = desired_by_model.get(model_id, set())
         if theme_id not in desired:
+            to_delete_pks.append(pk)
+
+    if to_delete_pks:
+        through.objects.filter(pk__in=to_delete_pks).delete()
+    if to_create:
+        through.objects.bulk_create(to_create, batch_size=2000)
+
+
+def _resolve_all_gameplay_features(all_models: list[MachineModel]) -> None:
+    """Bulk-resolve gameplay feature claims into M2M rows for all models.
+
+    Follows the same pattern as ``_resolve_all_themes()``.
+    """
+    from django.contrib.contenttypes.models import ContentType
+
+    ct = ContentType.objects.get_for_model(MachineModel)
+
+    # Pre-fetch gameplay feature slug→pk lookup.
+    feature_lookup: dict[str, int] = dict(
+        GameplayFeature.objects.values_list("slug", "pk")
+    )
+
+    # Pre-fetch all active gameplay feature claims with priority annotation.
+    feature_claims = (
+        Claim.objects.filter(
+            is_active=True, content_type=ct, field_name="gameplay_feature"
+        )
+        .select_related("source", "user__profile")
+        .annotate(
+            effective_priority=Case(
+                When(source__isnull=False, then=F("source__priority")),
+                When(user__isnull=False, then=F("user__profile__priority")),
+                default=Value(0),
+                output_field=IntegerField(),
+            )
+        )
+        .order_by("object_id", "claim_key", "-effective_priority", "-created_at")
+    )
+
+    # Pick winner per (object_id, claim_key).
+    winners_by_model: dict[int, list[Claim]] = {}
+    seen: set[tuple[int, str]] = set()
+    for claim in feature_claims:
+        key = (claim.object_id, claim.claim_key)
+        if key not in seen:
+            seen.add(key)
+            winners_by_model.setdefault(claim.object_id, []).append(claim)
+
+    # Desired features from winning claims.
+    desired_by_model: dict[int, set[int]] = {}
+    for model_id, claims_list in winners_by_model.items():
+        desired: set[int] = set()
+        for claim in claims_list:
+            val = claim.value
+            if not val.get("exists", True):
+                continue
+            feature_pk = feature_lookup.get(val["gameplay_feature_slug"])
+            if feature_pk is None:
+                logger.warning(
+                    "Unresolved gameplay feature slug %r in claim (model pk=%s)",
+                    val["gameplay_feature_slug"],
+                    model_id,
+                )
+                continue
+            desired.add(feature_pk)
+        desired_by_model[model_id] = desired
+
+    # Pre-fetch existing M2M through-table rows.
+    through = MachineModel.gameplay_features.through
+    existing_by_model: dict[int, set[int]] = {}
+    for row in through.objects.values_list("machinemodel_id", "gameplayfeature_id"):
+        existing_by_model.setdefault(row[0], set()).add(row[1])
+
+    # Diff and apply for ALL models.
+    all_model_ids = {pm.pk for pm in all_models}
+    to_create = []
+    to_delete_pks: list[int] = []
+
+    for model_id in all_model_ids:
+        desired = desired_by_model.get(model_id, set())
+        existing = existing_by_model.get(model_id, set())
+
+        for feature_pk in desired - existing:
+            to_create.append(
+                through(machinemodel_id=model_id, gameplayfeature_id=feature_pk)
+            )
+
+    # Build a lookup for deletions.
+    for row in through.objects.filter(machinemodel_id__in=all_model_ids).values_list(
+        "pk", "machinemodel_id", "gameplayfeature_id"
+    ):
+        pk, model_id, feature_id = row
+        desired = desired_by_model.get(model_id, set())
+        if feature_id not in desired:
+            to_delete_pks.append(pk)
+
+    if to_delete_pks:
+        through.objects.filter(pk__in=to_delete_pks).delete()
+    if to_create:
+        through.objects.bulk_create(to_create, batch_size=2000)
+
+
+def _resolve_all_tags(all_models: list[MachineModel]) -> None:
+    """Bulk-resolve tag claims into M2M rows for all models.
+
+    Follows the same pattern as ``_resolve_all_themes()``.
+    """
+    from django.contrib.contenttypes.models import ContentType
+
+    ct = ContentType.objects.get_for_model(MachineModel)
+
+    # Pre-fetch tag slug→pk lookup.
+    tag_lookup: dict[str, int] = dict(Tag.objects.values_list("slug", "pk"))
+
+    # Pre-fetch all active tag claims with priority annotation.
+    tag_claims = (
+        Claim.objects.filter(is_active=True, content_type=ct, field_name="tag")
+        .select_related("source", "user__profile")
+        .annotate(
+            effective_priority=Case(
+                When(source__isnull=False, then=F("source__priority")),
+                When(user__isnull=False, then=F("user__profile__priority")),
+                default=Value(0),
+                output_field=IntegerField(),
+            )
+        )
+        .order_by("object_id", "claim_key", "-effective_priority", "-created_at")
+    )
+
+    # Pick winner per (object_id, claim_key).
+    winners_by_model: dict[int, list[Claim]] = {}
+    seen: set[tuple[int, str]] = set()
+    for claim in tag_claims:
+        key = (claim.object_id, claim.claim_key)
+        if key not in seen:
+            seen.add(key)
+            winners_by_model.setdefault(claim.object_id, []).append(claim)
+
+    # Desired tags from winning claims.
+    desired_by_model: dict[int, set[int]] = {}
+    for model_id, claims_list in winners_by_model.items():
+        desired: set[int] = set()
+        for claim in claims_list:
+            val = claim.value
+            if not val.get("exists", True):
+                continue
+            tag_pk = tag_lookup.get(val["tag_slug"])
+            if tag_pk is None:
+                logger.warning(
+                    "Unresolved tag slug %r in tag claim (model pk=%s)",
+                    val["tag_slug"],
+                    model_id,
+                )
+                continue
+            desired.add(tag_pk)
+        desired_by_model[model_id] = desired
+
+    # Pre-fetch existing M2M through-table rows.
+    through = MachineModel.tags.through
+    existing_by_model: dict[int, set[int]] = {}
+    for row in through.objects.values_list("machinemodel_id", "tag_id"):
+        existing_by_model.setdefault(row[0], set()).add(row[1])
+
+    # Diff and apply for ALL models.
+    all_model_ids = {pm.pk for pm in all_models}
+    to_create = []
+    to_delete_pks: list[int] = []
+
+    for model_id in all_model_ids:
+        desired = desired_by_model.get(model_id, set())
+        existing = existing_by_model.get(model_id, set())
+
+        for tag_pk in desired - existing:
+            to_create.append(through(machinemodel_id=model_id, tag_id=tag_pk))
+
+    # Build a lookup for deletions.
+    for row in through.objects.filter(machinemodel_id__in=all_model_ids).values_list(
+        "pk", "machinemodel_id", "tag_id"
+    ):
+        pk, model_id, tag_id = row
+        desired = desired_by_model.get(model_id, set())
+        if tag_id not in desired:
             to_delete_pks.append(pk)
 
     if to_delete_pks:

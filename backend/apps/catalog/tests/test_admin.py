@@ -179,8 +179,8 @@ class TestMachineModelAdminClaims:
         )
         assert claim.value == 1997
 
-    def test_manufacturer_fk_without_opdb_id_uses_name(self, admin_request):
-        mfr = Manufacturer.objects.create(name="Williams")
+    def test_manufacturer_fk_serialized_as_slug(self, admin_request):
+        mfr = Manufacturer.objects.create(name="Williams", slug="williams")
         pm = MachineModel.objects.create(name="Medieval Madness")
         pm.manufacturer = mfr
 
@@ -196,26 +196,7 @@ class TestMachineModelAdminClaims:
             field_name="manufacturer",
             is_active=True,
         )
-        assert claim.value == "Williams"
-
-    def test_manufacturer_fk_with_opdb_id_uses_id(self, admin_request):
-        mfr = Manufacturer.objects.create(name="Williams", opdb_manufacturer_id=42)
-        pm = MachineModel.objects.create(name="Medieval Madness")
-        pm.manufacturer = mfr
-
-        mma = MachineModelAdmin(MachineModel, AdminSite())
-        form = _MockForm(
-            ["manufacturer"], {"name": "Medieval Madness", "manufacturer": mfr}
-        )
-        mma.save_model(admin_request, pm, form, change=True)
-
-        claim = Claim.objects.get(
-            content_type__model="machinemodel",
-            object_id=pm.pk,
-            field_name="manufacturer",
-            is_active=True,
-        )
-        assert claim.value == 42
+        assert claim.value == "williams"
 
     def test_manufacturer_cleared_deactivates_user_claim(self, admin_request):
         # Pre-existing user claim for manufacturer.

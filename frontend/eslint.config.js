@@ -25,6 +25,11 @@ export default ts.config(
 		}
 	},
 	{
+		rules: {
+			'svelte/no-navigation-without-resolve': 'off'
+		}
+	},
+	{
 		ignores: ['build/', '.svelte-kit/', 'dist/', 'src/lib/api/schema.d.ts']
 	}
 );

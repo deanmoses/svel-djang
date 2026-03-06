@@ -7,10 +7,6 @@
 	let { data, children } = $props();
 	let mfr = $derived(data.manufacturer);
 	let slug = $derived(page.params.slug);
-	let ipdbId = $derived(
-		mfr.entities.find((e: { ipdb_manufacturer_id?: number | null }) => e.ipdb_manufacturer_id)
-			?.ipdb_manufacturer_id
-	);
 
 	$effect(() => {
 		auth.load();
@@ -42,7 +38,7 @@
 	</header>
 
 	<nav class="tabs" aria-label="Page sections">
-		<a class="tab" class:active={isDetail} href={resolve(`/manufacturers/${slug}`)}>Detail</a>
+		<a class="tab" class:active={isDetail} href={resolve(`/manufacturers/${slug}`)}>Titles</a>
 		{#if mfr.systems.length > 0}
 			<a class="tab" class:active={isSystems} href={resolve(`/manufacturers/${slug}/systems`)}>
 				Systems
@@ -57,18 +53,6 @@
 	</nav>
 
 	{@render children()}
-
-	{#if ipdbId}
-		<footer class="external-ids">
-			<a
-				href="https://www.ipdb.org/search.pl?any=&searchtype=advanced&mfgid={ipdbId}"
-				target="_blank"
-				rel="noopener"
-			>
-				IPDB
-			</a>
-		</footer>
-	{/if}
 </article>
 
 <style>
@@ -127,13 +111,5 @@
 	.tab.active {
 		color: var(--color-accent);
 		border-bottom-color: var(--color-accent);
-	}
-
-	.external-ids {
-		display: flex;
-		gap: var(--size-4);
-		padding-top: var(--size-4);
-		border-top: 1px solid var(--color-border-soft);
-		margin-top: var(--size-4);
 	}
 </style>

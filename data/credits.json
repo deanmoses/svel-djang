@@ -1,0 +1,12 @@
+[
+  { "series_slug": "eight-ball", "person_slug": "george-christian", "role": "Design" },
+
+  { "series_slug": "black-knight", "person_slug": "steve-ritchie", "role": "Design" },
+
+  { "series_slug": "high-speed", "person_slug": "steve-ritchie", "role": "Design" },
+  { "series_slug": "high-speed", "person_slug": "mark-sprenger", "role": "Art" },
+
+  { "series_slug": "pinbot", "person_slug": "python-anghelo", "role": "Design" },
+  { "series_slug": "pinbot", "person_slug": "python-anghelo", "role": "Art" },
+  { "series_slug": "pinbot", "person_slug": "joe-joos-jr", "role": "Mechanics" }
+]

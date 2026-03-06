@@ -32,12 +32,6 @@ class Manufacturer(TimeStampedModel):
         blank=True,
         help_text='Brand name if different (e.g., "Bally" for Midway Manufacturing)',
     )
-    opdb_manufacturer_id = models.PositiveIntegerField(
-        unique=True,
-        null=True,
-        blank=True,
-        help_text="OPDB's manufacturer_id for cross-referencing",
-    )
     wikidata_id = models.CharField(
         max_length=20,
         unique=True,
@@ -69,7 +63,7 @@ class Manufacturer(TimeStampedModel):
         super().save(*args, **kwargs)
 
 
-class ManufacturerEntity(TimeStampedModel):
+class CorporateEntity(TimeStampedModel):
     """A specific corporate incarnation of a manufacturer brand.
 
     IPDB tracks corporate entities (e.g., four separate entries for Gottlieb
@@ -85,27 +79,287 @@ class ManufacturerEntity(TimeStampedModel):
         max_length=300,
         help_text='Full corporate name, e.g., "D. Gottlieb & Company"',
     )
-    ipdb_manufacturer_id = models.PositiveIntegerField(
-        unique=True,
-        null=True,
-        blank=True,
-        help_text="IPDB's ManufacturerId for cross-referencing",
-    )
     years_active = models.CharField(
         max_length=50,
         blank=True,
         help_text='Operating period, e.g., "1931-1977"',
     )
 
+    claims = GenericRelation("provenance.Claim")
+
     class Meta:
         ordering = ["manufacturer", "years_active"]
-        verbose_name = "manufacturer entity"
-        verbose_name_plural = "manufacturer entities"
+        verbose_name = "corporate entity"
+        verbose_name_plural = "corporate entities"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["manufacturer", "name"],
+                name="catalog_unique_corporate_entity_per_manufacturer",
+            ),
+        ]
 
     def __str__(self) -> str:
         if self.years_active:
             return f"{self.name} ({self.years_active})"
         return self.name
+
+
+class Address(models.Model):
+    corporate_entity = models.ForeignKey(
+        CorporateEntity, on_delete=models.CASCADE, related_name="addresses"
+    )
+    city = models.CharField(max_length=255, blank=True)
+    state = models.CharField(max_length=255, blank=True)
+    country = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        verbose_name_plural = "addresses"
+
+    def __str__(self):
+        parts = [p for p in (self.city, self.state, self.country) if p]
+        return ", ".join(parts)
+
+
+# ---------------------------------------------------------------------------
+# Taxonomy models
+# ---------------------------------------------------------------------------
+
+
+class TechnologyGeneration(TimeStampedModel):
+    """A major technological era: Pure Mechanical, Electromechanical, Solid State.
+
+    Replaces the old MachineType enum. Seeded from technology_generations.json.
+    Name and display_order are claim-controlled; description is direct editorial.
+    """
+
+    name = models.CharField(max_length=200, unique=True)
+    slug = models.SlugField(max_length=200, unique=True, blank=True)
+    display_order = models.PositiveSmallIntegerField(default=0)
+    description = models.TextField(blank=True)
+
+    claims = GenericRelation("provenance.Claim")
+
+    class Meta:
+        ordering = ["display_order"]
+
+    def __str__(self) -> str:
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = unique_slug(self, self.name, "techgen")
+        super().save(*args, **kwargs)
+
+
+class TechnologySubgeneration(TimeStampedModel):
+    """A subdivision within a TechnologyGeneration.
+
+    e.g., Solid State → Discrete Logic, Integrated (MPU), PC-Based.
+    Seeded from technology_subgenerations.json.
+    """
+
+    name = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=200, unique=True, blank=True)
+    display_order = models.PositiveSmallIntegerField(default=0)
+    description = models.TextField(blank=True)
+    technology_generation = models.ForeignKey(
+        TechnologyGeneration,
+        on_delete=models.CASCADE,
+        related_name="subgenerations",
+    )
+
+    claims = GenericRelation("provenance.Claim")
+
+    class Meta:
+        ordering = ["display_order"]
+
+    def __str__(self) -> str:
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = unique_slug(self, self.name, "techsubgen")
+        super().save(*args, **kwargs)
+
+
+class DisplayType(TimeStampedModel):
+    """A display technology category: Score Reels, DMD, LCD, etc.
+
+    Replaces the old DisplayType enum. Seeded from display_types.json.
+    """
+
+    name = models.CharField(max_length=200, unique=True)
+    slug = models.SlugField(max_length=200, unique=True, blank=True)
+    display_order = models.PositiveSmallIntegerField(default=0)
+    description = models.TextField(blank=True)
+
+    claims = GenericRelation("provenance.Claim")
+
+    class Meta:
+        ordering = ["display_order"]
+
+    def __str__(self) -> str:
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = unique_slug(self, self.name, "displaytype")
+        super().save(*args, **kwargs)
+
+
+class DisplaySubtype(TimeStampedModel):
+    """A subdivision within a DisplayType.
+
+    e.g., LCD → Standard LCD, HD LCD. Seeded from display_subtypes.json.
+    """
+
+    name = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=200, unique=True, blank=True)
+    display_order = models.PositiveSmallIntegerField(default=0)
+    description = models.TextField(blank=True)
+    display_type = models.ForeignKey(
+        DisplayType,
+        on_delete=models.CASCADE,
+        related_name="subtypes",
+    )
+
+    claims = GenericRelation("provenance.Claim")
+
+    class Meta:
+        ordering = ["display_order"]
+
+    def __str__(self) -> str:
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = unique_slug(self, self.name, "displaysubtype")
+        super().save(*args, **kwargs)
+
+
+class Cabinet(TimeStampedModel):
+    """Physical cabinet form factor: Floor, Tabletop, Countertop, Cocktail.
+
+    Seeded from cabinets.json.
+    """
+
+    name = models.CharField(max_length=200, unique=True)
+    slug = models.SlugField(max_length=200, unique=True, blank=True)
+    display_order = models.PositiveSmallIntegerField(default=0)
+    description = models.TextField(blank=True)
+
+    claims = GenericRelation("provenance.Claim")
+
+    class Meta:
+        ordering = ["display_order"]
+
+    def __str__(self) -> str:
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = unique_slug(self, self.name, "cabinet")
+        super().save(*args, **kwargs)
+
+
+class GameFormat(TimeStampedModel):
+    """Game format: Pinball, Bagatelle, Shuffle Alley, Pitch-and-Bat.
+
+    Seeded from game_formats.json.
+    """
+
+    name = models.CharField(max_length=200, unique=True)
+    slug = models.SlugField(max_length=200, unique=True, blank=True)
+    display_order = models.PositiveSmallIntegerField(default=0)
+    description = models.TextField(blank=True)
+
+    claims = GenericRelation("provenance.Claim")
+
+    class Meta:
+        ordering = ["display_order"]
+
+    def __str__(self) -> str:
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = unique_slug(self, self.name, "gameformat")
+        super().save(*args, **kwargs)
+
+
+class GameplayFeature(TimeStampedModel):
+    """A gameplay mechanism: Flippers, Pop Bumpers, Ramps, Multiball, etc.
+
+    Seeded from gameplay_features.json. Linked to MachineModel via M2M.
+    """
+
+    name = models.CharField(max_length=200, unique=True)
+    slug = models.SlugField(max_length=200, unique=True, blank=True)
+    display_order = models.PositiveSmallIntegerField(default=0)
+    description = models.TextField(blank=True)
+
+    claims = GenericRelation("provenance.Claim")
+
+    class Meta:
+        ordering = ["display_order"]
+
+    def __str__(self) -> str:
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = unique_slug(self, self.name, "feature")
+        super().save(*args, **kwargs)
+
+
+class Tag(TimeStampedModel):
+    """A classification tag: Home Use, Prototype, Widebody, Remake, etc.
+
+    Seeded from tags.json. Linked to MachineModel via M2M relationship claims.
+    """
+
+    name = models.CharField(max_length=200, unique=True)
+    slug = models.SlugField(max_length=200, unique=True, blank=True)
+    display_order = models.PositiveSmallIntegerField(default=0)
+    description = models.TextField(blank=True)
+
+    claims = GenericRelation("provenance.Claim")
+
+    class Meta:
+        ordering = ["display_order"]
+
+    def __str__(self) -> str:
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = unique_slug(self, self.name, "tag")
+        super().save(*args, **kwargs)
+
+
+class Franchise(TimeStampedModel):
+    """An IP grouping that spans manufacturers and eras.
+
+    e.g., Indiana Jones, Star Trek. Most Titles do not belong to a Franchise.
+    Seeded from franchises.json.
+    """
+
+    name = models.CharField(max_length=300, unique=True)
+    slug = models.SlugField(max_length=300, unique=True, blank=True)
+    description = models.TextField(blank=True)
+
+    claims = GenericRelation("provenance.Claim")
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self) -> str:
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = unique_slug(self, self.name, "franchise")
+        super().save(*args, **kwargs)
 
 
 # ---------------------------------------------------------------------------
@@ -126,8 +380,8 @@ class Title(TimeStampedModel):
     opdb_id = models.CharField(
         max_length=50,
         unique=True,
-        verbose_name="OPDB group ID",
-        help_text='OPDB group identifier, e.g., "G5pe4"',
+        verbose_name="group ID",
+        help_text='OPDB group ID (e.g., "G5pe4") or synthetic ID (e.g., "ipdb:1234").',
     )
     name = models.CharField(max_length=300)
     slug = models.SlugField(max_length=300, unique=True, blank=True)
@@ -135,6 +389,22 @@ class Title(TimeStampedModel):
         max_length=50,
         blank=True,
         help_text='Common abbreviation, e.g., "MM" for Medieval Madness',
+    )
+    description = models.TextField(blank=True)
+    franchise = models.ForeignKey(
+        Franchise,
+        on_delete=models.SET_NULL,
+        related_name="titles",
+        null=True,
+        blank=True,
+    )
+    needs_review = models.BooleanField(
+        default=False,
+        help_text="Title was auto-generated and may need human review.",
+    )
+    needs_review_notes = models.TextField(
+        blank=True,
+        help_text="Context for reviewers about why this title needs attention.",
     )
 
     class Meta:
@@ -266,19 +536,6 @@ class MachineModel(TimeStampedModel):
     winning claim per field (highest priority source, most recent if tied).
     """
 
-    class MachineType(models.TextChoices):
-        PM = "PM", "Pure Mechanical"
-        EM = "EM", "Electromechanical"
-        SS = "SS", "Solid State"
-
-    class DisplayType(models.TextChoices):
-        REELS = "reels", "Score Reels"
-        LIGHTS = "lights", "Backglass Lights"
-        ALPHA = "alpha", "Alpha-Numeric"
-        DMD = "dmd", "Dot Matrix Display"
-        CGA = "cga", "CGA (Color Graphics)"
-        LCD = "lcd", "LCD Screen"
-
     # Identity
     name = models.CharField(max_length=300)
     slug = models.SlugField(max_length=300, unique=True, blank=True)
@@ -322,11 +579,45 @@ class MachineModel(TimeStampedModel):
     )
     year = models.PositiveSmallIntegerField(null=True, blank=True)
     month = models.PositiveSmallIntegerField(null=True, blank=True)
-    machine_type = models.CharField(
-        max_length=2, choices=MachineType.choices, blank=True
+    technology_generation = models.ForeignKey(
+        TechnologyGeneration,
+        on_delete=models.SET_NULL,
+        related_name="machine_models",
+        null=True,
+        blank=True,
+        help_text="Technology generation (resolved from claims).",
     )
-    display_type = models.CharField(
-        max_length=10, choices=DisplayType.choices, blank=True
+    display_type = models.ForeignKey(
+        DisplayType,
+        on_delete=models.SET_NULL,
+        related_name="machine_models",
+        null=True,
+        blank=True,
+        help_text="Display type (resolved from claims).",
+    )
+    display_subtype = models.ForeignKey(
+        DisplaySubtype,
+        on_delete=models.SET_NULL,
+        related_name="machine_models",
+        null=True,
+        blank=True,
+        help_text="Display subtype (resolved from claims).",
+    )
+    cabinet = models.ForeignKey(
+        Cabinet,
+        on_delete=models.SET_NULL,
+        related_name="machine_models",
+        null=True,
+        blank=True,
+        help_text="Cabinet form factor (resolved from claims).",
+    )
+    game_format = models.ForeignKey(
+        GameFormat,
+        on_delete=models.SET_NULL,
+        related_name="machine_models",
+        null=True,
+        blank=True,
+        help_text="Game format (resolved from claims).",
     )
     player_count = models.PositiveSmallIntegerField(null=True, blank=True)
     themes = models.ManyToManyField(
@@ -334,6 +625,18 @@ class MachineModel(TimeStampedModel):
         blank=True,
         related_name="machine_models",
         help_text="Resolved theme tags (materialized from relationship claims).",
+    )
+    gameplay_features = models.ManyToManyField(
+        "GameplayFeature",
+        blank=True,
+        related_name="machine_models",
+        help_text="Gameplay features (materialized from relationship claims).",
+    )
+    tags = models.ManyToManyField(
+        "Tag",
+        blank=True,
+        related_name="machine_models",
+        help_text="Classification tags (materialized from relationship claims).",
     )
     production_quantity = models.CharField(max_length=100, blank=True)
     system = models.ForeignKey(
@@ -368,7 +671,7 @@ class MachineModel(TimeStampedModel):
         ordering = ["name"]
         indexes = [
             models.Index(fields=["manufacturer", "year"]),
-            models.Index(fields=["machine_type", "year"]),
+            models.Index(fields=["technology_generation", "year"]),
             models.Index(fields=["display_type"]),
         ]
 
@@ -441,72 +744,8 @@ class Person(TimeStampedModel):
         super().save(*args, **kwargs)
 
 
-# ---------------------------------------------------------------------------
-# MachineTypeProfile
-# ---------------------------------------------------------------------------
-
-
-class MachineTypeProfile(models.Model):
-    """Editorial description of a pinball machine era.
-
-    One record per MachineType (PM, EM, SS). Editable directly in admin.
-    Not claim-controlled — single-source museum content.
-    """
-
-    machine_type = models.CharField(
-        max_length=2, choices=MachineModel.MachineType.choices, unique=True
-    )
-    slug = models.SlugField(unique=True)
-    title = models.CharField(max_length=100)
-    display_order = models.PositiveSmallIntegerField(default=0)
-    description = models.TextField(blank=True)
-
-    class Meta:
-        ordering = ["display_order"]
-
-    def __str__(self) -> str:
-        return self.get_machine_type_display()
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = unique_slug(self, self.get_machine_type_display(), "type")
-        super().save(*args, **kwargs)
-
-
-# ---------------------------------------------------------------------------
-# DisplayTypeProfile
-# ---------------------------------------------------------------------------
-
-
-class DisplayTypeProfile(models.Model):
-    """Editorial description of a pinball display technology.
-
-    One record per DisplayType (reels, lights, alpha, dmd, cga, lcd). Editable
-    directly in admin. Not claim-controlled — single-source museum content.
-    """
-
-    display_type = models.CharField(
-        max_length=10, choices=MachineModel.DisplayType.choices, unique=True
-    )
-    slug = models.SlugField(unique=True)
-    title = models.CharField(max_length=100)
-    display_order = models.PositiveSmallIntegerField(default=0)
-    description = models.TextField(blank=True)
-
-    class Meta:
-        ordering = ["display_order"]
-
-    def __str__(self) -> str:
-        return self.get_display_type_display()
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = unique_slug(self, self.get_display_type_display(), "type")
-        super().save(*args, **kwargs)
-
-
 class DesignCredit(TimeStampedModel):
-    """Links a person to a machine model with a specific role."""
+    """Links a person to a machine model or series with a specific role."""
 
     class Role(models.TextChoices):
         CONCEPT = "concept", "Concept"
@@ -524,6 +763,15 @@ class DesignCredit(TimeStampedModel):
         MachineModel,
         on_delete=models.CASCADE,
         related_name="credits",
+        null=True,
+        blank=True,
+    )
+    series = models.ForeignKey(
+        Series,
+        on_delete=models.CASCADE,
+        related_name="credits",
+        null=True,
+        blank=True,
     )
     person = models.ForeignKey(
         Person,
@@ -538,8 +786,22 @@ class DesignCredit(TimeStampedModel):
             models.UniqueConstraint(
                 fields=["model", "person", "role"],
                 name="catalog_unique_credit_per_model_person_role",
+                condition=models.Q(model__isnull=False),
+            ),
+            models.UniqueConstraint(
+                fields=["series", "person", "role"],
+                name="catalog_unique_credit_per_series_person_role",
+                condition=models.Q(series__isnull=False),
+            ),
+            models.CheckConstraint(
+                condition=(
+                    models.Q(model__isnull=False, series__isnull=True)
+                    | models.Q(model__isnull=True, series__isnull=False)
+                ),
+                name="catalog_credit_model_xor_series",
             ),
         ]
 
     def __str__(self) -> str:
-        return f"{self.person.name} — {self.get_role_display()} on {self.model.name}"
+        target = self.model.name if self.model else self.series.name
+        return f"{self.person.name} — {self.get_role_display()} on {target}"

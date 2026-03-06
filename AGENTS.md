@@ -75,6 +75,24 @@ docs/             Documentation source files
 - CSRF: Django sets `csrftoken` cookie; the frontend `client.ts` reads it and sends `X-CSRFToken` on mutating requests
 - Vite dev server proxies `/api/` and `/admin/` to Django at `127.0.0.1:8000`
 
+### Frontend URLs and `resolve()`
+
+SvelteKit's `resolve()` from `$app/paths` is strongly typed and only accepts known route patterns. For dynamic URLs (e.g. from API data), use the `resolveHref()` wrapper from `$lib/utils` instead:
+
+```svelte
+<script lang="ts">
+  import { resolveHref } from '$lib/utils';
+</script>
+
+<!-- Internal dynamic URL -->
+<a href={resolveHref(someUrl)}>Link</a>
+
+<!-- External URL — don't use resolve at all -->
+<a href={externalUrl} target="_blank" rel="noopener">Link</a>
+```
+
+The `svelte/no-navigation-without-resolve` ESLint rule is disabled project-wide because it doesn't recognize the wrapper.
+
 ## Environment Setup (Codex Cloud)
 
 The Makefile works without a venv — it detects the environment automatically.

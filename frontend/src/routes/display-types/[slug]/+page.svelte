@@ -1,28 +1,28 @@
 <script lang="ts">
 	import client from '$lib/api/client';
 	import { createAsyncLoader } from '$lib/async-loader.svelte';
-	import CardGrid from '$lib/components/CardGrid.svelte';
-	import MachineCard from '$lib/components/MachineCard.svelte';
+	import CardGrid from '$lib/components/grid/CardGrid.svelte';
+	import TitleCard from '$lib/components/cards/TitleCard.svelte';
 	import { pageTitle } from '$lib/constants';
 
 	let { data } = $props();
 	let profile = $derived(data.profile);
 
-	const machines = createAsyncLoader(async () => {
-		const { data: result } = await client.GET('/api/models/', {
-			params: { query: { display: profile.display_type, ordering: 'year', page_size: 500 } }
+	const titles = createAsyncLoader(async () => {
+		const { data: result } = await client.GET('/api/titles/', {
+			params: { query: { display: profile.slug, page_size: 500 } }
 		});
 		return result?.items ?? [];
 	}, []);
 </script>
 
 <svelte:head>
-	<title>{pageTitle(profile.title)}</title>
+	<title>{pageTitle(profile.name)}</title>
 </svelte:head>
 
 <article>
 	<header>
-		<h1>{profile.title}</h1>
+		<h1>{profile.name}</h1>
 		{#if profile.description}
 			<div class="description">
 				{#each profile.description.split('\n\n') as paragraph, i (i)}
@@ -32,24 +32,23 @@
 		{/if}
 	</header>
 
-	{#if machines.loading}
-		<p class="empty">Loading machines…</p>
-	{:else if machines.error}
-		<p class="empty">Failed to load machines.</p>
-	{:else if machines.data.length === 0}
-		<p class="empty">No machines with this display type.</p>
+	{#if titles.loading}
+		<p class="empty">Loading titles…</p>
+	{:else if titles.error}
+		<p class="empty">Failed to load titles.</p>
+	{:else if titles.data.length === 0}
+		<p class="empty">No titles with this display type.</p>
 	{:else}
 		<section>
-			<h2>Machines ({machines.data.length})</h2>
+			<h2>Titles ({titles.data.length})</h2>
 			<CardGrid>
-				{#each machines.data as machine (machine.slug)}
-					<MachineCard
-						slug={machine.slug}
-						name={machine.name}
-						thumbnailUrl={machine.thumbnail_url}
-						manufacturerName={machine.manufacturer_name}
-						year={machine.year}
-						machineType={machine.machine_type}
+				{#each titles.data as title (title.slug)}
+					<TitleCard
+						slug={title.slug}
+						name={title.name}
+						thumbnailUrl={title.thumbnail_url}
+						manufacturerName={title.manufacturer_name}
+						year={title.year}
 					/>
 				{/each}
 			</CardGrid>

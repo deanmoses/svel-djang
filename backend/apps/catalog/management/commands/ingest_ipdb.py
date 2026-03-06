@@ -22,10 +22,19 @@ from apps.catalog.ingestion.ipdb_title_fixes import TITLE_FIXES
 from apps.catalog.ingestion.parsers import (
     parse_credit_string,
     parse_ipdb_date,
+    parse_ipdb_location,
     parse_ipdb_machine_type,
+    parse_ipdb_manufacturer_string,
 )
 from apps.catalog.claims import build_relationship_claim, make_authoritative_scope
-from apps.catalog.models import MachineModel, Person, Theme
+from apps.catalog.models import (
+    Address,
+    CorporateEntity,
+    MachineModel,
+    Manufacturer,
+    Person,
+    Theme,
+)
 from apps.catalog.resolve import resolve_credits, resolve_themes
 from apps.provenance.models import Claim, Source
 
@@ -35,7 +44,6 @@ logger = logging.getLogger(__name__)
 CLAIM_FIELDS = {
     "Title": "name",
     "IpdbId": "ipdb_id",
-    "ManufacturerId": "manufacturer",
     "Players": "player_count",
     "ProductionNumber": "production_quantity",
     "AverageFunRating": "ipdb_rating",
@@ -150,6 +158,23 @@ class Command(BaseCommand):
             },
         )
 
+        # Build manufacturer resolution lookups.
+        entity_name_to_slug: dict[str, str] = {
+            ce.name.lower(): ce.manufacturer.slug
+            for ce in CorporateEntity.objects.select_related("manufacturer").all()
+        }
+        mfr_name_to_slug: dict[str, str] = {}
+        existing_mfr_slugs: set[str] = set()
+        for m in Manufacturer.objects.all():
+            mfr_name_to_slug[m.name.lower()] = m.slug
+            if m.trade_name:
+                mfr_name_to_slug[m.trade_name.lower()] = m.slug
+            existing_mfr_slugs.add(m.slug)
+        # Cache CE→CorporateEntity for address creation.
+        ce_by_name: dict[str, CorporateEntity] = {
+            ce.name.lower(): ce for ce in CorporateEntity.objects.all()
+        }
+
         with open(ipdb_path) as f:
             data = json.load(f)
 
@@ -218,6 +243,10 @@ class Command(BaseCommand):
                     theme_queue,
                     mpu_to_slug,
                     unknown_mpu_strings,
+                    entity_name_to_slug,
+                    mfr_name_to_slug,
+                    existing_mfr_slugs,
+                    ce_by_name,
                 )
             except Exception:
                 ipdb_id = rec.get("IpdbId", "?")
@@ -232,7 +261,7 @@ class Command(BaseCommand):
             lines = "\n".join(f"  {s}" for s in sorted(unknown_mpu_strings))
             raise CommandError(
                 f"Unknown MPU strings not in data/systems.json:\n{lines}\n"
-                "Add entries to data/systems.json and run ingest_systems before re-ingesting."
+                "Add entries to data/systems.json and run ingest_pinbase_systems before re-ingesting."
             )
 
         # --- Bulk-assert all collected claims ---
@@ -266,6 +295,10 @@ class Command(BaseCommand):
         theme_queue: list[tuple[int, list[str]]],
         mpu_to_slug: dict[str, str],
         unknown_mpu_strings: set[str],
+        entity_name_to_slug: dict[str, str],
+        mfr_name_to_slug: dict[str, str],
+        existing_mfr_slugs: set[str],
+        ce_by_name: dict[str, CorporateEntity],
     ) -> None:
         """Collect claims, credits, and theme slugs for a single IPDB record."""
         ipdb_id = rec.get("IpdbId")
@@ -274,9 +307,6 @@ class Command(BaseCommand):
         for ipdb_field, claim_field in CLAIM_FIELDS.items():
             value = rec.get(ipdb_field)
             if value is None or value == "":
-                continue
-            # Skip placeholder manufacturer IDs (0 = unassigned, 328 = "Unknown").
-            if ipdb_field == "ManufacturerId" and value in IPDB_SKIP_MANUFACTURER_IDS:
                 continue
             # Use corrected title for name claims.
             if ipdb_field == "Title" and ipdb_id in TITLE_FIXES:
@@ -295,6 +325,57 @@ class Command(BaseCommand):
                     value=value,
                 )
             )
+
+        # Manufacturer: resolve at ingest time to a slug claim.
+        mfr_id = rec.get("ManufacturerId")
+        raw_mfr = rec.get("Manufacturer", "")
+        if mfr_id and mfr_id not in IPDB_SKIP_MANUFACTURER_IDS and raw_mfr:
+            parsed = parse_ipdb_manufacturer_string(raw_mfr)
+            company = parsed["company_name"]
+            trade = parsed["trade_name"]
+            location = parsed["location"]
+
+            # 3-priority resolution cascade (matches DuckDB view).
+            slug = (
+                entity_name_to_slug.get(company.lower())
+                or (trade and mfr_name_to_slug.get(trade.lower()))
+                or mfr_name_to_slug.get(company.lower())
+            )
+
+            if not slug:
+                # Auto-create manufacturer from parsed name.
+                display_name = trade or company
+                slug = generate_unique_slug(display_name, existing_mfr_slugs)
+                Manufacturer.objects.create(
+                    name=display_name,
+                    slug=slug,
+                    trade_name=trade,
+                )
+                mfr_name_to_slug[display_name.lower()] = slug
+                if trade:
+                    mfr_name_to_slug[trade.lower()] = slug
+
+            pending_claims.append(
+                Claim(
+                    content_type_id=ct_id,
+                    object_id=pm.pk,
+                    field_name="manufacturer",
+                    value=slug,
+                )
+            )
+
+            # Create address on matched CE when location is available.
+            if location:
+                ce = ce_by_name.get(company.lower())
+                if ce:
+                    addr = parse_ipdb_location(location)
+                    if addr["city"] or addr["state"] or addr["country"]:
+                        Address.objects.get_or_create(
+                            corporate_entity=ce,
+                            city=addr["city"],
+                            state=addr["state"],
+                            country=addr["country"],
+                        )
 
         # MPU: emit 'system' slug claim if known, else collect for deferred error.
         # Normalize U+FFFD (replacement char from IPDB encoding issues) before lookup.
@@ -338,17 +419,17 @@ class Command(BaseCommand):
                     )
                 )
 
-        # Machine type.
+        # Technology generation (slug-based, resolved to FK).
         type_short = rec.get("TypeShortName")
         type_full = rec.get("Type")
-        machine_type = parse_ipdb_machine_type(type_short, type_full)
-        if machine_type:
+        technology_generation = parse_ipdb_machine_type(type_short, type_full)
+        if technology_generation:
             pending_claims.append(
                 Claim(
                     content_type_id=ct_id,
                     object_id=pm.pk,
-                    field_name="machine_type",
-                    value=machine_type,
+                    field_name="technology_generation",
+                    value=technology_generation,
                 )
             )
 

@@ -55,7 +55,7 @@ class TestPatchManufacturerClaimsValidation:
         client.force_login(user)
         resp = client.patch(
             f"/api/manufacturers/{mfr.slug}/claims/",
-            data='{"fields": {"opdb_manufacturer_id": 99}}',
+            data='{"fields": {"slug": "bad"}}',
             content_type="application/json",
         )
         assert resp.status_code == 422

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import CardGrid from '$lib/components/CardGrid.svelte';
-	import MachineCard from '$lib/components/MachineCard.svelte';
+	import CardGrid from '$lib/components/grid/CardGrid.svelte';
+	import TitleCard from '$lib/components/cards/TitleCard.svelte';
 	import { pageTitle } from '$lib/constants';
 
 	let { data } = $props();
@@ -27,20 +27,19 @@
 		{/if}
 	</header>
 
-	{#if system.machines.length === 0}
-		<p class="empty">No machines on this system.</p>
+	{#if system.titles.length === 0}
+		<p class="empty">No titles on this system.</p>
 	{:else}
 		<section>
-			<h2>Machines ({system.machines.length})</h2>
+			<h2>Titles ({system.titles.length})</h2>
 			<CardGrid>
-				{#each system.machines as machine (machine.slug)}
-					<MachineCard
-						slug={machine.slug}
-						name={machine.name}
-						thumbnailUrl={machine.thumbnail_url}
-						manufacturerName={machine.manufacturer_name}
-						year={machine.year}
-						machineType={machine.machine_type}
+				{#each system.titles as title (title.slug)}
+					<TitleCard
+						slug={title.slug}
+						name={title.name}
+						thumbnailUrl={title.thumbnail_url}
+						manufacturerName={title.manufacturer_name}
+						year={title.year}
 					/>
 				{/each}
 			</CardGrid>

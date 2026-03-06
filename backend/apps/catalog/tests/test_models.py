@@ -2,9 +2,9 @@ import pytest
 from django.db import IntegrityError
 
 from apps.catalog.models import (
+    CorporateEntity,
     DesignCredit,
     Manufacturer,
-    ManufacturerEntity,
     Person,
     MachineModel,
 )
@@ -79,22 +79,20 @@ class TestManufacturer:
         assert mfr2.slug == "williams-2"
 
 
-# --- ManufacturerEntity ---
+# --- CorporateEntity ---
 
 
-class TestManufacturerEntity:
+class TestCorporateEntity:
     def test_create(self, manufacturer):
-        entity = ManufacturerEntity.objects.create(
+        entity = CorporateEntity.objects.create(
             manufacturer=manufacturer,
             name="Williams Manufacturing Company",
-            ipdb_manufacturer_id=352,
             years_active="1943-1985",
         )
         assert entity.manufacturer == manufacturer
-        assert entity.ipdb_manufacturer_id == 352
 
     def test_str_with_years(self, manufacturer):
-        entity = ManufacturerEntity.objects.create(
+        entity = CorporateEntity.objects.create(
             manufacturer=manufacturer,
             name="Williams Manufacturing Company",
             years_active="1943-1985",
@@ -103,36 +101,21 @@ class TestManufacturerEntity:
         assert "1943-1985" in str(entity)
 
     def test_str_without_years(self, manufacturer):
-        entity = ManufacturerEntity.objects.create(
+        entity = CorporateEntity.objects.create(
             manufacturer=manufacturer,
             name="Williams Manufacturing Company",
         )
         assert str(entity) == "Williams Manufacturing Company"
 
-    def test_unique_ipdb_id(self, manufacturer):
-        ManufacturerEntity.objects.create(
-            manufacturer=manufacturer,
-            name="Williams Mfg",
-            ipdb_manufacturer_id=352,
-        )
-        with pytest.raises(IntegrityError):
-            ManufacturerEntity.objects.create(
-                manufacturer=manufacturer,
-                name="Williams Electronics",
-                ipdb_manufacturer_id=352,
-            )
-
     def test_multiple_entities_per_brand(self, manufacturer):
-        ManufacturerEntity.objects.create(
+        CorporateEntity.objects.create(
             manufacturer=manufacturer,
             name="Williams Manufacturing Company",
-            ipdb_manufacturer_id=352,
             years_active="1943-1985",
         )
-        ManufacturerEntity.objects.create(
+        CorporateEntity.objects.create(
             manufacturer=manufacturer,
             name="Williams Electronics",
-            ipdb_manufacturer_id=351,
             years_active="1985-1999",
         )
         assert manufacturer.entities.count() == 2

@@ -21,7 +21,7 @@ from apps.catalog.ingestion.parsers import (
     parse_opdb_date,
     parse_opdb_group_id,
 )
-from apps.catalog.models import MachineModel, Title
+from apps.catalog.models import MachineModel, Manufacturer, Title
 from apps.provenance.models import Claim, Source
 
 logger = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
             "--opdb",
-            default="../data/dump2/opdb_export_machines.json",
+            default="../data/dump1/opdb_export_machines.json",
             help="Path to OPDB JSON dump.",
         )
         parser.add_argument(
@@ -65,6 +65,15 @@ class Command(BaseCommand):
                 "url": "https://opdb.org",
             },
         )
+
+        # Build manufacturer name→slug lookup for ingest-time resolution.
+        mfr_name_to_slug: dict[str, str] = {}
+        existing_mfr_slugs: set[str] = set()
+        for m in Manufacturer.objects.all():
+            mfr_name_to_slug[m.name.lower()] = m.slug
+            if m.trade_name:
+                mfr_name_to_slug[m.trade_name.lower()] = m.slug
+            existing_mfr_slugs.add(m.slug)
 
         # --- Changelog pre-processing ---
         if changelog_path:
@@ -255,7 +264,15 @@ class Command(BaseCommand):
 
         for pm, rec in machine_models:
             try:
-                self._collect_claims(pm, rec, ct_id, groups_by_id, pending_claims)
+                self._collect_claims(
+                    pm,
+                    rec,
+                    ct_id,
+                    groups_by_id,
+                    pending_claims,
+                    mfr_name_to_slug,
+                    existing_mfr_slugs,
+                )
             except Exception:
                 opdb_id = rec.get("opdb_id", "?")
                 logger.exception("Failed to collect claims for OPDB record %s", opdb_id)
@@ -264,7 +281,15 @@ class Command(BaseCommand):
 
         for pm, rec in alias_models:
             try:
-                self._collect_claims(pm, rec, ct_id, groups_by_id, pending_claims)
+                self._collect_claims(
+                    pm,
+                    rec,
+                    ct_id,
+                    groups_by_id,
+                    pending_claims,
+                    mfr_name_to_slug,
+                    existing_mfr_slugs,
+                )
             except Exception:
                 opdb_id = rec.get("opdb_id", "?")
                 logger.exception("Failed to collect claims for OPDB alias %s", opdb_id)
@@ -408,6 +433,8 @@ class Command(BaseCommand):
         ct_id: int,
         groups_by_id: dict[str, dict],
         pending_claims: list[Claim],
+        mfr_name_to_slug: dict[str, str],
+        existing_mfr_slugs: set[str],
     ) -> None:
         """Collect claim objects for a machine or alias record."""
         opdb_id = rec.get("opdb_id")
@@ -428,10 +455,22 @@ class Command(BaseCommand):
         if opdb_id:
             _add("opdb_id", opdb_id)
 
-        # Manufacturer (claimed as OPDB manufacturer_id).
+        # Manufacturer: resolve OPDB name to slug at ingest time.
         mfr = rec.get("manufacturer")
-        if mfr and mfr.get("manufacturer_id"):
-            _add("manufacturer", mfr["manufacturer_id"])
+        if mfr:
+            opdb_mfr_name = mfr.get("name", "")
+            if opdb_mfr_name:
+                slug = mfr_name_to_slug.get(opdb_mfr_name.lower())
+                if not slug:
+                    # Auto-create manufacturer from OPDB name.
+                    slug = generate_unique_slug(opdb_mfr_name, existing_mfr_slugs)
+                    Manufacturer.objects.create(
+                        name=opdb_mfr_name,
+                        slug=slug,
+                        trade_name=opdb_mfr_name,
+                    )
+                    mfr_name_to_slug[opdb_mfr_name.lower()] = slug
+                _add("manufacturer", slug)
 
         # Date.
         date_str = rec.get("manufacture_date")
@@ -447,12 +486,12 @@ class Command(BaseCommand):
         if player_count is not None:
             _add("player_count", player_count)
 
-        # Machine type.
-        machine_type = map_opdb_type(rec.get("type"))
-        if machine_type:
-            _add("machine_type", machine_type)
+        # Technology generation (slug-based, resolved to FK).
+        technology_generation = map_opdb_type(rec.get("type"))
+        if technology_generation:
+            _add("technology_generation", technology_generation)
 
-        # Display type.
+        # Display type (slug-based, resolved to FK).
         display_type = map_opdb_display(rec.get("display"))
         if display_type:
             _add("display_type", display_type)

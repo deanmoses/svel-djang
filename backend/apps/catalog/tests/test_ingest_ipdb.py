@@ -42,7 +42,7 @@ class TestIngestIpdb:
         assert "name" in claim_fields
         assert "year" in claim_fields
         assert "manufacturer" in claim_fields
-        assert "machine_type" in claim_fields
+        assert "technology_generation" in claim_fields
         assert "ipdb_rating" in claim_fields
 
     def test_date_parsing(self):
@@ -84,9 +84,9 @@ class TestIngestIpdb:
         pm = MachineModel.objects.get(ipdb_id=100)
         source = Source.objects.get(slug="ipdb")
         type_claim = pm.claims.get(
-            source=source, field_name="machine_type", is_active=True
+            source=source, field_name="technology_generation", is_active=True
         )
-        assert type_claim.value == "PM"
+        assert type_claim.value == "pure-mechanical"
 
     def test_idempotent(self):
         call_command("ingest_ipdb", ipdb=f"{FIXTURES}/ipdb_sample.json")

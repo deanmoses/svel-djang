@@ -12,8 +12,6 @@
 			name: m.name,
 			year: m.year ?? '',
 			month: m.month ?? '',
-			machine_type: m.machine_type,
-			display_type: m.display_type,
 			player_count: m.player_count ?? '',
 			flipper_count: m.flipper_count ?? '',
 			production_quantity: m.production_quantity,
@@ -91,28 +89,6 @@
 				<div class="field-group">
 					<label for="ef-month">Month</label>
 					<input id="ef-month" type="number" min="1" max="12" bind:value={editFields.month} />
-				</div>
-			</div>
-
-			<div class="form-row">
-				<div class="field-group">
-					<label for="ef-machine-type">Machine type</label>
-					<select id="ef-machine-type" bind:value={editFields.machine_type}>
-						<option value="PM">PM — Pure Mechanical</option>
-						<option value="EM">EM — Electromechanical</option>
-						<option value="SS">SS — Solid State</option>
-					</select>
-				</div>
-				<div class="field-group">
-					<label for="ef-display-type">Display type</label>
-					<select id="ef-display-type" bind:value={editFields.display_type}>
-						<option value="reels">Reels</option>
-						<option value="lights">Lights</option>
-						<option value="alpha">Alphanumeric</option>
-						<option value="dmd">DMD</option>
-						<option value="cga">CGA</option>
-						<option value="lcd">LCD</option>
-					</select>
 				</div>
 			</div>
 
