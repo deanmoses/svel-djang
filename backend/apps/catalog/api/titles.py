@@ -76,6 +76,7 @@ class TitleDetailSchema(Schema):
     name: str
     slug: str
     short_name: str
+    description: str = ""
     needs_review: bool = False
     needs_review_notes: str = ""
     review_links: list[ReviewLinkSchema] = []
@@ -361,6 +362,7 @@ def _serialize_title_detail(title) -> dict:
         "name": title.name,
         "slug": title.slug,
         "short_name": title.short_name,
+        "description": title.description,
         "needs_review": title.needs_review,
         "needs_review_notes": title.needs_review_notes,
         "review_links": review_links,

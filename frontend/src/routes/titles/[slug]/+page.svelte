@@ -92,6 +92,13 @@
 	{/snippet}
 
 	{#snippet main()}
+		{#if title.description}
+			<section class="prose">
+				<h2>About</h2>
+				<p>{title.description}</p>
+			</section>
+		{/if}
+
 		{#if md}
 			{#if md.educational_text}
 				<section class="prose">
