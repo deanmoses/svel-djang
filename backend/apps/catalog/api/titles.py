@@ -14,7 +14,7 @@ from ninja.pagination import PageNumberPagination, paginate
 from .constants import DEFAULT_PAGE_SIZE
 from .helpers import _extract_image_urls, _serialize_title_machine
 from .machine_models import DesignCreditSchema, MachineModelDetailSchema
-from .schemas import SeriesRefSchema, TitleMachineSchema
+from .schemas import SeriesRefSchema, ThemeSchema, TitleMachineSchema
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -54,6 +54,24 @@ class ReviewLinkSchema(Schema):
     url: str
 
 
+class AgreedSpecsSchema(Schema):
+    """Spec fields where all child models of a title agree on the value."""
+
+    technology_generation_name: Optional[str] = None
+    technology_generation_slug: Optional[str] = None
+    display_type_name: Optional[str] = None
+    display_type_slug: Optional[str] = None
+    player_count: Optional[int] = None
+    flipper_count: Optional[int] = None
+    system_name: Optional[str] = None
+    system_slug: Optional[str] = None
+    cabinet_name: Optional[str] = None
+    game_format_name: Optional[str] = None
+    display_subtype_name: Optional[str] = None
+    themes: list[ThemeSchema] = []
+    production_quantity: Optional[str] = None
+
+
 class TitleDetailSchema(Schema):
     name: str
     slug: str
@@ -61,9 +79,11 @@ class TitleDetailSchema(Schema):
     needs_review: bool = False
     needs_review_notes: str = ""
     review_links: list[ReviewLinkSchema] = []
+    hero_image_url: Optional[str] = None
     machines: list[TitleMachineSchema]
     series: list[SeriesRefSchema] = []
     credits: list[DesignCreditSchema] = []
+    agreed_specs: AgreedSpecsSchema = AgreedSpecsSchema()
     model_detail: Optional[MachineModelDetailSchema] = None
 
 
@@ -197,30 +217,137 @@ def _build_review_links(title) -> list[dict]:
     return links
 
 
+def _agreed_value(models, accessor):
+    """Return a value if *every* model agrees, else None.
+
+    *accessor* is called with each model and should return the value (or None
+    if the model has no data for this field).  The value is only returned when
+    **all** models produce the same non-None result; if any model returns None
+    or disagrees the result is None.
+    """
+    values = [accessor(m) for m in models]
+    if not values or any(v is None for v in values):
+        return None
+    first = values[0]
+    return first if all(v == first for v in values) else None
+
+
+def _compute_agreed_specs(models) -> dict:
+    """Return spec fields that all *models* agree on."""
+
+    def _fk_pair(m, attr):
+        obj = getattr(m, attr, None)
+        return (obj.name, obj.slug) if obj else None
+
+    specs: dict = {}
+
+    tg = _agreed_value(models, lambda m: _fk_pair(m, "technology_generation"))
+    if tg:
+        specs["technology_generation_name"], specs["technology_generation_slug"] = tg
+
+    dt = _agreed_value(models, lambda m: _fk_pair(m, "display_type"))
+    if dt:
+        specs["display_type_name"], specs["display_type_slug"] = dt
+
+    pc = _agreed_value(models, lambda m: m.player_count)
+    if pc is not None:
+        specs["player_count"] = pc
+
+    fc = _agreed_value(models, lambda m: m.flipper_count)
+    if fc is not None:
+        specs["flipper_count"] = fc
+
+    sys = _agreed_value(models, lambda m: _fk_pair(m, "system"))
+    if sys:
+        specs["system_name"], specs["system_slug"] = sys
+
+    cab = _agreed_value(
+        models,
+        lambda m: getattr(m.cabinet, "name", None) if hasattr(m, "cabinet") else None,
+    )
+    if cab:
+        specs["cabinet_name"] = cab
+
+    gf = _agreed_value(
+        models,
+        lambda m: (
+            getattr(m.game_format, "name", None) if hasattr(m, "game_format") else None
+        ),
+    )
+    if gf:
+        specs["game_format_name"] = gf
+
+    dst = _agreed_value(
+        models,
+        lambda m: (
+            getattr(m.display_subtype, "name", None)
+            if hasattr(m, "display_subtype")
+            else None
+        ),
+    )
+    if dst:
+        specs["display_subtype_name"] = dst
+
+    pq = _agreed_value(models, lambda m: m.production_quantity or None)
+    if pq:
+        specs["production_quantity"] = pq
+
+    # Themes: only roll up when every model has the same set.
+    theme_sets = [frozenset((t.slug, t.name) for t in m.themes.all()) for m in models]
+    if (
+        theme_sets
+        and all(ts for ts in theme_sets)
+        and all(ts == theme_sets[0] for ts in theme_sets)
+    ):
+        specs["themes"] = [{"name": n, "slug": s} for s, n in sorted(theme_sets[0])]
+
+    return specs
+
+
 def _serialize_title_detail(title) -> dict:
-    machines = [_serialize_title_machine(pm) for pm in title.machine_models.all()]
+    model_objs = list(title.machine_models.all())
+    machines = [_serialize_title_machine(pm) for pm in model_objs]
     series = [
         {"name": s.name, "slug": s.slug}
         for s in getattr(title, "series_list", None) or title.series.all()
     ]
     review_links = _build_review_links(title) if title.needs_review else []
 
-    # Aggregate credits from all models, deduplicating by (person, role)
-    seen: set[tuple[str, str]] = set()
-    credits: list[dict] = []
-    for pm in title.machine_models.all():
+    # Hero image from the earliest model.
+    hero_image_url = None
+    if model_objs:
+        _, hero_image_url = _extract_image_urls(model_objs[0].extra_data or {})
+
+    # Credits that appear on every model (intersection, not union).
+    credit_sets = []
+    credit_data: dict[tuple[str, str], dict] = {}
+    for pm in model_objs:
+        model_keys: set[tuple[str, str]] = set()
         for c in pm.credits.all():
             key = (c.person.slug, c.role)
-            if key not in seen:
-                seen.add(key)
-                credits.append(
-                    {
-                        "person_name": c.person.name,
-                        "person_slug": c.person.slug,
-                        "role": c.role,
-                        "role_display": c.get_role_display(),
-                    }
-                )
+            model_keys.add(key)
+            credit_data.setdefault(
+                key,
+                {
+                    "person_name": c.person.name,
+                    "person_slug": c.person.slug,
+                    "role": c.role,
+                    "role_display": c.get_role_display(),
+                },
+            )
+        credit_sets.append(model_keys)
+
+    if credit_sets:
+        common_keys = credit_sets[0]
+        for s in credit_sets[1:]:
+            common_keys &= s
+        # Preserve insertion order from credit_data (first model's ordering).
+        credits = [v for k, v in credit_data.items() if k in common_keys]
+    else:
+        credits = []
+
+    # Agreed specs across all models.
+    agreed_specs = _compute_agreed_specs(model_objs) if model_objs else {}
 
     # For single-model titles, include full model detail inline.
     model_detail = None
@@ -237,9 +364,11 @@ def _serialize_title_detail(title) -> dict:
         "needs_review": title.needs_review,
         "needs_review_notes": title.needs_review_notes,
         "review_links": review_links,
+        "hero_image_url": hero_image_url,
         "machines": machines,
         "series": series,
         "credits": credits,
+        "agreed_specs": agreed_specs,
         "model_detail": model_detail,
     }
 
@@ -251,7 +380,13 @@ def _title_models_prefetch():
         "machine_models",
         queryset=MachineModel.objects.filter(alias_of__isnull=True)
         .select_related(
-            "manufacturer", "technology_generation", "display_type", "system"
+            "manufacturer",
+            "technology_generation",
+            "display_type",
+            "display_subtype",
+            "system",
+            "cabinet",
+            "game_format",
         )
         .prefetch_related("themes", "credits__person")
         .order_by("year", "name"),

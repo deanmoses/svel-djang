@@ -3,6 +3,7 @@
 	import { resolve } from '$app/paths';
 	import { pageTitle } from '$lib/constants';
 	import { auth } from '$lib/auth.svelte';
+	import TwoColumnLayout from '$lib/components/TwoColumnLayout.svelte';
 
 	let { data, children } = $props();
 	let model = $derived(data.model);
@@ -19,356 +20,237 @@
 	let isActivity = $derived(page.url.pathname.endsWith('/activity'));
 </script>
 
-{#snippet headerContent()}
-	<h1>{model.name}</h1>
-	<div class="meta">
-		{#if model.manufacturer_name}
-			<span>
-				<a href={resolve(`/manufacturers/${model.manufacturer_slug}`)}>
-					{model.manufacturer_name}
-				</a>
-			</span>
-		{/if}
-		{#if model.year}
-			<span
-				>{#if model.month}{new Date(model.year, model.month - 1).toLocaleString('en', {
-						month: 'long'
-					}) + ' '}{/if}{model.year}</span
-			>
-		{/if}
-		{#if model.franchise}
-			<span>{model.franchise.name}</span>
-		{/if}
-	</div>
-	{#if model.variant_features.length > 0}
-		<div class="features">
-			{#each model.variant_features as feature (feature)}
-				<span class="chip">{feature}</span>
-			{/each}
-		</div>
-	{/if}
-{/snippet}
-
 <svelte:head>
 	<title>{pageTitle(model.name)}</title>
 </svelte:head>
 
-<article>
-	{#if model.hero_image_url}
-		<div class="hero-banner">
-			<img class="hero-bg" src={model.hero_image_url} alt="{model.name} backglass" />
-			<div class="hero-scrim"></div>
-			<header class="hero-header">
-				{@render headerContent()}
-			</header>
+<TwoColumnLayout heroImageUrl={model.hero_image_url} heroImageAlt="{model.name} backglass">
+	{#snippet header()}
+		<h1>{model.name}</h1>
+		<div class="meta">
+			{#if model.manufacturer_name}
+				<span>
+					<a href={resolve(`/manufacturers/${model.manufacturer_slug}`)}>
+						{model.manufacturer_name}
+					</a>
+				</span>
+			{/if}
+			{#if model.year}
+				<span
+					>{#if model.month}{new Date(model.year, model.month - 1).toLocaleString('en', {
+							month: 'long'
+						}) + ' '}{/if}{model.year}</span
+				>
+			{/if}
+			{#if model.franchise}
+				<span>{model.franchise.name}</span>
+			{/if}
 		</div>
-	{:else}
-		<header>
-			{@render headerContent()}
-		</header>
-	{/if}
-
-	<div class="two-col">
-		<div class="main-col">
-			{#if model.educational_text}
-				<section class="prose">
-					<h2>About</h2>
-					<p>{model.educational_text}</p>
-				</section>
-			{/if}
-
-			{#if model.extra_data.notes}
-				<section class="prose">
-					<h2>Notes</h2>
-					<p>{model.extra_data.notes}</p>
-				</section>
-			{/if}
-
-			{#if model.extra_data.Notes}
-				<section class="prose">
-					<h2>Notes</h2>
-					<p>{model.extra_data.Notes}</p>
-				</section>
-			{/if}
-
-			<nav class="tabs" aria-label="Page sections">
-				<a class="tab" class:active={isDetail} href={resolve(`/models/${slug}`)}>People</a>
-				{#if auth.isAuthenticated}
-					<a class="tab" class:active={isEdit} href={resolve(`/models/${slug}/edit`)}>Edit</a>
-				{/if}
-				<a class="tab" class:active={isActivity} href={resolve(`/models/${slug}/activity`)}>
-					Activity
-				</a>
-			</nav>
-
-			{@render children()}
-		</div>
-
-		<aside class="sidebar">
-			<section class="sidebar-section">
-				<h3>Specifications</h3>
-				<dl>
-					{#if model.technology_generation_slug}
-						<dt>Generation</dt>
-						<dd>
-							<a href={resolve(`/technology-generations/${model.technology_generation_slug}`)}
-								>{model.technology_generation_name}</a
-							>
-						</dd>
-					{/if}
-					{#if model.display_type_slug}
-						<dt>Display Type</dt>
-						<dd>
-							<a href={resolve(`/display-types/${model.display_type_slug}`)}
-								>{model.display_type_name}</a
-							>
-						</dd>
-					{/if}
-					{#if model.player_count}
-						<dt>Players</dt>
-						<dd>{model.player_count}</dd>
-					{/if}
-					{#if model.flipper_count}
-						<dt>Flippers</dt>
-						<dd>{model.flipper_count}</dd>
-					{/if}
-					{#if model.production_quantity}
-						<dt>Units Made</dt>
-						<dd>{model.production_quantity}</dd>
-					{/if}
-					{#if model.system_slug}
-						<dt>System</dt>
-						<dd>
-							<a href={resolve(`/systems/${model.system_slug}`)}>{model.system_name}</a>
-						</dd>
-					{/if}
-					{#if model.themes.length > 0}
-						<dt>Themes</dt>
-						<dd>
-							{#each model.themes as theme, i (theme.slug)}
-								{#if i > 0},{/if}
-								<a href={resolve(`/themes/${theme.slug}`)}>{theme.name}</a>
-							{/each}
-						</dd>
-					{/if}
-					{#if model.cabinet_name}
-						<dt>Cabinet</dt>
-						<dd>{model.cabinet_name}</dd>
-					{/if}
-					{#if model.game_format_name}
-						<dt>Format</dt>
-						<dd>{model.game_format_name}</dd>
-					{/if}
-					{#if model.display_subtype_name}
-						<dt>Display</dt>
-						<dd>{model.display_subtype_name}</dd>
-					{/if}
-					{#if model.gameplay_features.length > 0}
-						<dt>Features</dt>
-						<dd>
-							{#each model.gameplay_features as feature, i (feature.slug)}
-								{#if i > 0},{/if}
-								{feature.name}
-							{/each}
-						</dd>
-					{/if}
-					{#if model.series.length > 0}
-						<dt>Series</dt>
-						<dd>
-							{#each model.series as s, i (s.slug)}
-								{#if i > 0},{/if}
-								<a href={resolve(`/series/${s.slug}`)}>{s.name}</a>
-							{/each}
-						</dd>
-					{/if}
-				</dl>
-			</section>
-
-			{#if model.ipdb_rating || model.pinside_rating}
-				<section class="sidebar-section">
-					<h3>Ratings</h3>
-					<div class="rating-row">
-						{#if model.ipdb_rating}
-							<div class="rating-badge">
-								<span class="rating-value">{model.ipdb_rating.toFixed(1)}</span>
-								<span class="rating-label">IPDB</span>
-							</div>
-						{/if}
-						{#if model.pinside_rating}
-							<div class="rating-badge">
-								<span class="rating-value">{model.pinside_rating.toFixed(1)}</span>
-								<span class="rating-label">Pinside</span>
-							</div>
-						{/if}
-					</div>
-				</section>
-			{/if}
-
-			{#if model.aliases.length > 0}
-				<section class="sidebar-section">
-					<h3>Variants</h3>
-					<ul class="sidebar-list">
-						{#each model.aliases as alias (alias.slug)}
-							<li>
-								<a href={resolve(`/models/${alias.slug}`)}>{alias.name}</a>
-								{#if alias.variant_features.length > 0}
-									<span class="muted">{alias.variant_features.join(', ')}</span>
-								{/if}
-							</li>
-						{/each}
-					</ul>
-				</section>
-			{/if}
-
-			{#if model.title_models && model.title_models.length > 0}
-				<section class="sidebar-section">
-					<h3>Other Models</h3>
-					<ul class="sidebar-list">
-						{#each model.title_models as sibling (sibling.slug)}
-							<li>
-								<a href={resolve(`/models/${sibling.slug}`)}>{sibling.name}</a>
-								{#if sibling.year}
-									<span class="muted">{sibling.year}</span>
-								{/if}
-							</li>
-						{/each}
-					</ul>
-				</section>
-			{/if}
-
-			<div class="external-ids">
-				{#if model.ipdb_id}
-					<a
-						href="https://www.ipdb.org/machine.cgi?id={model.ipdb_id}"
-						target="_blank"
-						rel="noopener"
-					>
-						IPDB #{model.ipdb_id}
-					</a>
-				{/if}
-				{#if model.opdb_id}
-					<a href="https://opdb.org/machines/{model.opdb_id}" target="_blank" rel="noopener">
-						OPDB
-					</a>
-				{/if}
-				{#if model.pinside_id}
-					<a
-						href="https://pinside.com/pinball/machine/{model.pinside_id}"
-						target="_blank"
-						rel="noopener"
-					>
-						Pinside
-					</a>
-				{/if}
+		{#if model.variant_features.length > 0}
+			<div class="features">
+				{#each model.variant_features as feature (feature)}
+					<span class="chip">{feature}</span>
+				{/each}
 			</div>
-		</aside>
-	</div>
-</article>
+		{/if}
+	{/snippet}
+
+	{#snippet main()}
+		{#if model.educational_text}
+			<section class="prose">
+				<h2>About</h2>
+				<p>{model.educational_text}</p>
+			</section>
+		{/if}
+
+		{#if model.extra_data.notes}
+			<section class="prose">
+				<h2>Notes</h2>
+				<p>{model.extra_data.notes}</p>
+			</section>
+		{/if}
+
+		{#if model.extra_data.Notes}
+			<section class="prose">
+				<h2>Notes</h2>
+				<p>{model.extra_data.Notes}</p>
+			</section>
+		{/if}
+
+		<nav class="tabs" aria-label="Page sections">
+			<a class="tab" class:active={isDetail} href={resolve(`/models/${slug}`)}>People</a>
+			{#if auth.isAuthenticated}
+				<a class="tab" class:active={isEdit} href={resolve(`/models/${slug}/edit`)}>Edit</a>
+			{/if}
+			<a class="tab" class:active={isActivity} href={resolve(`/models/${slug}/activity`)}>
+				Activity
+			</a>
+		</nav>
+
+		{@render children()}
+	{/snippet}
+
+	{#snippet sidebar()}
+		<section class="sidebar-section">
+			<h3>Specifications</h3>
+			<dl>
+				{#if model.technology_generation_slug}
+					<dt>Generation</dt>
+					<dd>
+						<a href={resolve(`/technology-generations/${model.technology_generation_slug}`)}
+							>{model.technology_generation_name}</a
+						>
+					</dd>
+				{/if}
+				{#if model.display_type_slug}
+					<dt>Display Type</dt>
+					<dd>
+						<a href={resolve(`/display-types/${model.display_type_slug}`)}
+							>{model.display_type_name}</a
+						>
+					</dd>
+				{/if}
+				{#if model.player_count}
+					<dt>Players</dt>
+					<dd>{model.player_count}</dd>
+				{/if}
+				{#if model.flipper_count}
+					<dt>Flippers</dt>
+					<dd>{model.flipper_count}</dd>
+				{/if}
+				{#if model.production_quantity}
+					<dt>Units Made</dt>
+					<dd>{model.production_quantity}</dd>
+				{/if}
+				{#if model.system_slug}
+					<dt>System</dt>
+					<dd>
+						<a href={resolve(`/systems/${model.system_slug}`)}>{model.system_name}</a>
+					</dd>
+				{/if}
+				{#if model.themes.length > 0}
+					<dt>Themes</dt>
+					<dd>
+						{#each model.themes as theme, i (theme.slug)}
+							{#if i > 0},{/if}
+							<a href={resolve(`/themes/${theme.slug}`)}>{theme.name}</a>
+						{/each}
+					</dd>
+				{/if}
+				{#if model.cabinet_name}
+					<dt>Cabinet</dt>
+					<dd>{model.cabinet_name}</dd>
+				{/if}
+				{#if model.game_format_name}
+					<dt>Format</dt>
+					<dd>{model.game_format_name}</dd>
+				{/if}
+				{#if model.display_subtype_name}
+					<dt>Display</dt>
+					<dd>{model.display_subtype_name}</dd>
+				{/if}
+				{#if model.gameplay_features.length > 0}
+					<dt>Features</dt>
+					<dd>
+						{#each model.gameplay_features as feature, i (feature.slug)}
+							{#if i > 0},{/if}
+							{feature.name}
+						{/each}
+					</dd>
+				{/if}
+				{#if model.series.length > 0}
+					<dt>Series</dt>
+					<dd>
+						{#each model.series as s, i (s.slug)}
+							{#if i > 0},{/if}
+							<a href={resolve(`/series/${s.slug}`)}>{s.name}</a>
+						{/each}
+					</dd>
+				{/if}
+			</dl>
+		</section>
+
+		{#if model.ipdb_rating || model.pinside_rating}
+			<section class="sidebar-section">
+				<h3>Ratings</h3>
+				<div class="rating-row">
+					{#if model.ipdb_rating}
+						<div class="rating-badge">
+							<span class="rating-value">{model.ipdb_rating.toFixed(1)}</span>
+							<span class="rating-label">IPDB</span>
+						</div>
+					{/if}
+					{#if model.pinside_rating}
+						<div class="rating-badge">
+							<span class="rating-value">{model.pinside_rating.toFixed(1)}</span>
+							<span class="rating-label">Pinside</span>
+						</div>
+					{/if}
+				</div>
+			</section>
+		{/if}
+
+		{#if model.aliases.length > 0}
+			<section class="sidebar-section">
+				<h3>Variants</h3>
+				<ul class="sidebar-list">
+					{#each model.aliases as alias (alias.slug)}
+						<li>
+							<a href={resolve(`/models/${alias.slug}`)}>{alias.name}</a>
+							{#if alias.variant_features.length > 0}
+								<span class="muted">{alias.variant_features.join(', ')}</span>
+							{/if}
+						</li>
+					{/each}
+				</ul>
+			</section>
+		{/if}
+
+		{#if model.title_models && model.title_models.length > 0}
+			<section class="sidebar-section">
+				<h3>Other Models</h3>
+				<ul class="sidebar-list">
+					{#each model.title_models as sibling (sibling.slug)}
+						<li>
+							<a href={resolve(`/models/${sibling.slug}`)}>{sibling.name}</a>
+							{#if sibling.year}
+								<span class="muted">{sibling.year}</span>
+							{/if}
+						</li>
+					{/each}
+				</ul>
+			</section>
+		{/if}
+
+		<div class="external-ids">
+			{#if model.ipdb_id}
+				<a
+					href="https://www.ipdb.org/machine.cgi?id={model.ipdb_id}"
+					target="_blank"
+					rel="noopener"
+				>
+					IPDB #{model.ipdb_id}
+				</a>
+			{/if}
+			{#if model.opdb_id}
+				<a href="https://opdb.org/machines/{model.opdb_id}" target="_blank" rel="noopener">
+					OPDB
+				</a>
+			{/if}
+			{#if model.pinside_id}
+				<a
+					href="https://pinside.com/pinball/machine/{model.pinside_id}"
+					target="_blank"
+					rel="noopener"
+				>
+					Pinside
+				</a>
+			{/if}
+		</div>
+	{/snippet}
+</TwoColumnLayout>
 
 <style>
-	/* Hero banner with overlaid text */
-	.hero-banner {
-		position: relative;
-		overflow: hidden;
-		border-radius: var(--radius-3);
-		min-height: 14rem;
-		max-height: 22rem;
-		margin-bottom: var(--size-5);
-		display: flex;
-		align-items: flex-end;
-		background-color: var(--color-surface);
-	}
-
-	.hero-bg {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		object-position: center 20%;
-		z-index: 0;
-	}
-
-	.hero-scrim {
-		position: absolute;
-		inset: 0;
-		z-index: 1;
-		background: linear-gradient(
-			to top,
-			rgba(0, 0, 0, 0.85) 0%,
-			rgba(0, 0, 0, 0.5) 40%,
-			rgba(0, 0, 0, 0.1) 70%,
-			transparent 100%
-		);
-		pointer-events: none;
-	}
-
-	.hero-header {
-		position: relative;
-		z-index: 2;
-		padding: var(--size-5) var(--size-5) var(--size-4);
-		width: 100%;
-		margin-bottom: 0;
-	}
-
-	.hero-header h1 {
-		color: #ffffff;
-		text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
-	}
-
-	.hero-header .meta {
-		color: rgba(255, 255, 255, 0.85);
-	}
-
-	.hero-header .meta a {
-		color: rgba(255, 255, 255, 0.9);
-		text-decoration: underline;
-		text-decoration-color: rgba(255, 255, 255, 0.4);
-	}
-
-	.hero-header .meta a:hover {
-		color: #ffffff;
-		text-decoration-color: #ffffff;
-	}
-
-	.hero-header .meta span:not(:last-child)::after {
-		color: rgba(255, 255, 255, 0.5);
-	}
-
-	.hero-header .chip {
-		background-color: rgba(255, 255, 255, 0.15);
-		border-color: rgba(255, 255, 255, 0.25);
-		color: rgba(255, 255, 255, 0.9);
-		backdrop-filter: blur(4px);
-	}
-
-	@media (max-width: 40rem) {
-		.hero-banner {
-			min-height: 10rem;
-			max-height: 16rem;
-			border-radius: 0;
-			margin-left: calc(-1 * var(--size-5));
-			margin-right: calc(-1 * var(--size-5));
-		}
-
-		.hero-header {
-			padding: var(--size-3) var(--size-4) var(--size-3);
-		}
-
-		.hero-header h1 {
-			font-size: var(--font-size-5);
-		}
-
-		.hero-header .meta {
-			font-size: var(--font-size-0);
-		}
-	}
-
-	/* Plain header (no image) */
-	header {
-		margin-bottom: var(--size-5);
-	}
-
 	h1 {
 		font-size: var(--font-size-7);
 		font-weight: 700;
@@ -404,19 +286,6 @@
 		border: 1px solid var(--color-border-soft);
 		border-radius: var(--radius-round);
 		color: var(--color-text-muted);
-	}
-
-	/* Two-column layout */
-	.two-col {
-		display: grid;
-		grid-template-columns: 1fr;
-		gap: var(--size-6);
-	}
-
-	@media (min-width: 52rem) {
-		.two-col {
-			grid-template-columns: 1fr 18rem;
-		}
 	}
 
 	/* Main column */
@@ -467,12 +336,6 @@
 	}
 
 	/* Sidebar */
-	.sidebar {
-		display: flex;
-		flex-direction: column;
-		gap: var(--size-3);
-	}
-
 	.sidebar-section {
 		padding-bottom: var(--size-3);
 		border-bottom: 1px solid var(--color-border-soft);
@@ -487,26 +350,26 @@
 		letter-spacing: 0.04em;
 	}
 
-	.sidebar dl {
+	.sidebar-section dl {
 		display: grid;
 		grid-template-columns: auto 1fr;
 		gap: 0 var(--size-3);
 		align-items: baseline;
 	}
 
-	.sidebar dt,
-	.sidebar dd {
+	.sidebar-section dt,
+	.sidebar-section dd {
 		font-size: var(--font-size-0);
 		margin: 0;
 		padding: 2px 0;
 	}
 
-	.sidebar dt {
+	.sidebar-section dt {
 		color: var(--color-text-muted);
 		font-weight: 500;
 	}
 
-	.sidebar dd {
+	.sidebar-section dd {
 		color: var(--color-text-primary);
 	}
 
