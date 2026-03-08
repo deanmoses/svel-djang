@@ -18,6 +18,7 @@ def connect():
         MachineModel,
         Manufacturer,
         Person,
+        Title,
     )
 
     for model in (
@@ -25,6 +26,7 @@ def connect():
         Manufacturer,
         Person,
         DesignCredit,
+        Title,
     ):
         uid = f"invalidate_cache_{model.__name__}"
         post_save.connect(_invalidate_cache, sender=model, dispatch_uid=f"{uid}_save")

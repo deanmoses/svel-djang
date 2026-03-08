@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { SvelteSet } from 'svelte/reactivity';
 	import client from '$lib/api/client';
 	import { createAsyncLoader } from '$lib/async-loader.svelte';
 	import CardGrid from '$lib/components/grid/CardGrid.svelte';
@@ -24,6 +25,11 @@
 		return data ?? [];
 	}, []);
 
+	const models = createAsyncLoader(async () => {
+		const { data } = await client.GET('/api/models/all/');
+		return data ?? [];
+	}, []);
+
 	const people = createAsyncLoader(async () => {
 		const { data } = await client.GET('/api/people/all/');
 		return data ?? [];
@@ -42,9 +48,29 @@
 		return fields.some((f) => f != null && normalizeText(String(f)).includes(q));
 	}
 
+	let matchedModels = $derived.by(() => {
+		if (!isSearching) return [];
+		return models.data.filter(
+			(m) =>
+				textMatches(normalizedQuery, m.name, m.shortname) ||
+				(m.search_text && normalizeText(m.search_text).includes(normalizedQuery))
+		);
+	});
+
+	// Title slugs from matched models for roll-up
+	let rollupTitleSlugs = $derived.by(() => {
+		const slugs = new SvelteSet<string>();
+		for (const m of matchedModels) {
+			if (m.title_slug) slugs.add(m.title_slug);
+		}
+		return slugs;
+	});
+
 	let matchedTitles = $derived.by(() => {
 		if (!isSearching) return [];
-		return titles.data.filter((t) => textMatches(normalizedQuery, t.name, t.short_name));
+		return titles.data.filter(
+			(t) => textMatches(normalizedQuery, t.name, t.short_name) || rollupTitleSlugs.has(t.slug)
+		);
 	});
 
 	let matchedManufacturers = $derived.by(() => {
@@ -65,7 +91,9 @@
 		matchedTitles.length + matchedManufacturers.length + matchedPeople.length
 	);
 
-	let anyLoading = $derived(titles.loading || manufacturers.loading || people.loading);
+	let anyLoading = $derived(
+		titles.loading || models.loading || manufacturers.loading || people.loading
+	);
 
 	function toggleGroup(group: string) {
 		expanded[group] = !expanded[group];

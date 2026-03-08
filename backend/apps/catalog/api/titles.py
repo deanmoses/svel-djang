@@ -15,6 +15,7 @@ from .constants import DEFAULT_PAGE_SIZE
 from .helpers import _extract_image_urls, _serialize_title_machine
 from .machine_models import DesignCreditSchema, MachineModelDetailSchema
 from .schemas import SeriesRefSchema, ThemeSchema, TitleMachineSchema
+from ..cache import TITLES_ALL_KEY
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -426,7 +427,13 @@ def list_titles(request, display: str = ""):
 @decorate_view(cache_control(public=True, max_age=300))
 def list_all_titles(request):
     """Return every title with minimal fields (no pagination)."""
+    from django.core.cache import cache
+
     from ..models import Title
+
+    result = cache.get(TITLES_ALL_KEY)
+    if result is not None:
+        return result
 
     qs = (
         Title.objects.annotate(
@@ -442,7 +449,9 @@ def list_all_titles(request):
         .prefetch_related(_title_models_prefetch(), "series")
         .order_by(F("latest_year").desc(nulls_last=True), "name")
     )
-    return [_serialize_title_list(t) for t in qs]
+    result = [_serialize_title_list(t) for t in qs]
+    cache.set(TITLES_ALL_KEY, result, timeout=None)
+    return result
 
 
 @titles_router.get("/{slug}", response=TitleDetailSchema)
