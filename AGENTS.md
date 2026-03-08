@@ -11,6 +11,17 @@ This file provides guidance to AI programming agents when working with code in t
 `except ExcType1, ExcType2:` is **valid Python 3** and is ruff-format's preferred style.
 Do NOT add parentheses. `except (ExcType1, ExcType2):` will be reverted by ruff-format every time. Stop trying to fix it.
 
+## Svelte 5 — Non-Negotiable
+
+The frontend uses **Svelte 5 runes mode** (`runes: true` in compiler options). Do NOT use legacy Svelte 4 patterns:
+
+- `export let` → use `let { } = $props()`
+- `$:` reactive declarations → use `$derived` / `$derived.by()` / `$effect()`
+- `on:click` directive syntax → use `onclick` attribute
+- `createEventDispatcher` → use callback props
+- `<slot>` → use `{@render children()}` snippets
+- `$$props` / `$$restProps` → use `$props()` with rest syntax
+
 ## Project Overview
 
 Django + SvelteKit monorepo. Django owns the data model, APIs (Django Ninja), and admin UI. SvelteKit handles the user-facing frontend with static adapter (CSR for authenticated pages, prerendered for public pages).
@@ -111,6 +122,18 @@ make lint         # Lint and format check
 - Internet is disabled during task execution — all dependencies must be installed during setup
 - Tests use SQLite in-memory by default
 - Use the `gh` CLI for GitHub operations
+
+## Data Ingestion
+
+The catalog app has management commands for importing from external data sources (IPDB, OPDB, Fandom wiki, etc.). Run `make ingest` or `uv run python manage.py ingest_all` with data files in `data/dump1/`. See [docs/Ingest.md](Ingest.md) for sources, file formats, and production ingestion steps.
+
+## Pre-commit Hooks
+
+Pre-commit hooks auto-regenerate `CLAUDE.md` and `AGENTS.md` when `docs/AGENTS.src.md` changes, and block direct edits to those generated files. Hooks also run ruff, ESLint, type checks, and the full test suite. Do not edit `CLAUDE.md` or `AGENTS.md` directly — edit `docs/AGENTS.src.md` instead.
+
+## Deployment
+
+Single Railway service: Django/Gunicorn serves both the API and the static SvelteKit frontend (no Node.js at runtime). Multi-stage Dockerfile builds the frontend with Node/pnpm, then copies output into the Python image. WhiteNoise serves static assets; a Django catch-all view serves prerendered pages or falls back to `index.html` for SPA routing. See [docs/Hosting.md](Hosting.md) for setup and troubleshooting.
 
 ## Rules
 
