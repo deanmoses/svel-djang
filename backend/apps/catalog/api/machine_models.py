@@ -433,19 +433,30 @@ def _build_search_text(pm) -> str:
 @models_router.get("/all/", response=list[MachineModelGridSchema])
 @decorate_view(cache_control(public=True, max_age=300))
 def list_all_models(request):
-    """Return every non-alias model with minimal fields (no pagination)."""
+    """Return every model (including aliases) with minimal fields (no pagination)."""
     from django.core.cache import cache
 
-    from ..models import DesignCredit
+    from ..models import DesignCredit, MachineModel
 
     result = cache.get(MODELS_ALL_KEY)
     if result is not None:
         return result
     qs = (
-        _build_model_list_qs()
+        MachineModel.objects.select_related(
+            "manufacturer",
+            "technology_generation",
+            "display_type",
+            "title",
+            "system",
+            "display_subtype",
+            "cabinet",
+            "game_format",
+        )
         .prefetch_related(
+            "themes",
             "tags",
             "gameplay_features",
+            "aliases",
             "manufacturer__entities__addresses",
             Prefetch(
                 "credits",
@@ -454,12 +465,7 @@ def list_all_models(request):
                 ).select_related("person"),
             ),
         )
-        .select_related(
-            "system",
-            "display_subtype",
-            "cabinet",
-            "game_format",
-        )
+        .order_by("name")
     )
     result = []
     for pm in qs:

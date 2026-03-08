@@ -77,6 +77,16 @@ class TestModelsAPI:
         assert data["count"] == 1
         assert data["items"][0]["name"] == "Medieval Madness"
 
+    def test_all_models_includes_aliases(self, client, machine_model):
+        MachineModel.objects.create(
+            name="Medieval Madness (LE)",
+            alias_of=machine_model,
+        )
+        resp = client.get("/api/models/all/")
+        names = [m["name"] for m in resp.json()]
+        assert "Medieval Madness" in names
+        assert "Medieval Madness (LE)" in names
+
     def test_list_models_thumbnail(self, client, manufacturer, db):
         MachineModel.objects.create(
             name="With Image",
