@@ -43,9 +43,10 @@ class Command(BaseCommand):
         franchises_by_slug = {f.slug: f for f in Franchise.objects.all()}
         series_by_slug = {s.slug: s for s in Series.objects.all()}
 
-        franchise_set = membership_set = name_set = skipped = 0
+        franchise_set = membership_set = name_set = slug_set = skipped = 0
         franchise_changed: list[Title] = []
         name_changed: list[Title] = []
+        pending_slugs: dict[int, str] = {}  # title.pk → desired slug
         series_memberships: dict[Series, list[Title]] = defaultdict(list)
 
         for entry in entries:
@@ -58,6 +59,11 @@ class Command(BaseCommand):
                 )
                 skipped += 1
                 continue
+
+            # Override slug if provided.
+            slug = entry.get("slug")
+            if slug and title.slug != slug:
+                pending_slugs[title.pk] = slug
 
             # Override name if provided.
             name = entry.get("name")
@@ -97,6 +103,36 @@ class Command(BaseCommand):
                 t.updated_at = now
             Title.objects.bulk_update(franchise_changed, ["franchise", "updated_at"])
 
+        # Update slugs in two passes to handle swaps (e.g. A→B and B→C).
+        # Filter out slugs that would conflict with titles not being renamed.
+        if pending_slugs:
+            pks_being_renamed = set(pending_slugs.keys())
+            desired_slugs = set(pending_slugs.values())
+            conflicting = set(
+                Title.objects.filter(slug__in=desired_slugs)
+                .exclude(pk__in=pks_being_renamed)
+                .values_list("slug", flat=True)
+            )
+            safe_slugs = {
+                pk: slug
+                for pk, slug in pending_slugs.items()
+                if slug not in conflicting
+            }
+            for slug in conflicting:
+                logger.warning("Slug %r already taken — skipping rename", slug)
+
+            if safe_slugs:
+                now = timezone.now()
+                # Pass 1: move to temporary slugs.
+                for pk, slug in safe_slugs.items():
+                    Title.objects.filter(pk=pk).update(
+                        slug=f"_tmp_{pk}", updated_at=now
+                    )
+                # Pass 2: move to final slugs.
+                for pk, slug in safe_slugs.items():
+                    Title.objects.filter(pk=pk).update(slug=slug)
+                slug_set = len(safe_slugs)
+
         # Bulk update name changes.
         if name_changed:
             now = timezone.now()
@@ -111,6 +147,7 @@ class Command(BaseCommand):
         self.stdout.write(
             f"  Titles: {franchise_set} franchise links, "
             f"{membership_set} series memberships, "
-            f"{name_set} name overrides, {skipped} skipped"
+            f"{name_set} name overrides, {slug_set} slug overrides, "
+            f"{skipped} skipped"
         )
         self.stdout.write(self.style.SUCCESS("Titles seed ingestion complete."))

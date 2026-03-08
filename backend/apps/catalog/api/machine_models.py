@@ -334,8 +334,6 @@ def _serialize_model_detail(pm) -> dict:
             _serialize_title_machine(sibling)
             for sibling in (pm.title.machine_models.all() if pm.title else [])
             if sibling.alias_of_id is None
-            and sibling.pk != pm.pk
-            and sibling.pk != pm.alias_of_id
         ],
     }
 
@@ -365,6 +363,7 @@ def _model_detail_qs():
             "title__machine_models",
             queryset=MachineModel.objects.filter(alias_of__isnull=True)
             .select_related("manufacturer", "technology_generation")
+            .prefetch_related("aliases")
             .order_by("year", "name"),
         ),
         Prefetch(

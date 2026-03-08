@@ -27,6 +27,15 @@ class ThemeSchema(Schema):
     slug: str
 
 
+class TitleMachineVariantSchema(Schema):
+    """A variant (alias) of a machine model, shown nested under its parent."""
+
+    name: str
+    slug: str
+    year: Optional[int] = None
+    thumbnail_url: Optional[str] = None
+
+
 class TitleMachineSchema(Schema):
     """A machine model shown in a list context (title detail, theme detail, etc.)."""
 
@@ -37,6 +46,7 @@ class TitleMachineSchema(Schema):
     manufacturer_slug: Optional[str] = None
     technology_generation_name: Optional[str] = None
     thumbnail_url: Optional[str] = None
+    variants: list[TitleMachineVariantSchema] = []
 
 
 class RelatedTitleSchema(Schema):

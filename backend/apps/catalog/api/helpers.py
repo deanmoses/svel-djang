@@ -98,6 +98,23 @@ def _extract_variant_features(extra_data: dict) -> list[str]:
 def _serialize_title_machine(pm) -> dict:
     """Serialize a MachineModel for use in title/theme/system machine lists."""
     thumbnail_url, _ = _extract_image_urls(pm.extra_data or {})
+
+    # Include variants (aliases) only when prefetched to avoid N+1 queries.
+    aliases = (
+        pm.aliases.all()
+        if "aliases" in getattr(pm, "_prefetched_objects_cache", {})
+        else []
+    )
+    variants = [
+        {
+            "name": a.name,
+            "slug": a.slug,
+            "year": a.year,
+            "thumbnail_url": _extract_image_urls(a.extra_data or {})[0],
+        }
+        for a in aliases
+    ]
+
     return {
         "name": pm.name,
         "slug": pm.slug,
@@ -108,4 +125,5 @@ def _serialize_title_machine(pm) -> dict:
             pm.technology_generation.name if pm.technology_generation else None
         ),
         "thumbnail_url": thumbnail_url,
+        "variants": variants,
     }

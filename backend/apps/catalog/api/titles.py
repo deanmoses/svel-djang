@@ -351,9 +351,9 @@ def _serialize_title_detail(title) -> dict:
     # Agreed specs across all models.
     agreed_specs = _compute_agreed_specs(model_objs) if model_objs else {}
 
-    # For single-model titles, include full model detail inline.
+    # For single-model titles with no variants, include full model detail inline.
     model_detail = None
-    if len(machines) == 1:
+    if len(machines) == 1 and not machines[0].get("variants"):
         from .machine_models import _model_detail_qs, _serialize_model_detail
 
         pm = _model_detail_qs().get(slug=machines[0]["slug"])
@@ -391,7 +391,7 @@ def _title_models_prefetch():
             "cabinet",
             "game_format",
         )
-        .prefetch_related("themes", "credits__person")
+        .prefetch_related("themes", "credits__person", "aliases")
         .order_by("year", "name"),
     )
 

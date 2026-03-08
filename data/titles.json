@@ -420,8 +420,8 @@
     "franchise_slug": "james-bond"
   },
   {
-    "slug": "james-bond-007-60th-anniversary-le",
-    "name": "James Bond 007 60th Anniversary (Limited Edition)",
+    "slug": "james-bond-007-60th-anniversary",
+    "name": "James Bond 007 60th Anniversary",
     "opdb_group_id": "Ge1Dy",
     "franchise_slug": "james-bond"
   },
@@ -1079,18 +1079,18 @@
     "franchise_slug": "x-men"
   },
   {
-    "slug": "evil-dead-ce",
-    "name": "Evil Dead (Collector's Edition)",
+    "slug": "evil-dead",
+    "name": "Evil Dead",
     "opdb_group_id": "GYWvw"
   },
   {
-    "slug": "the-texas-chainsaw-massacre-se",
-    "name": "The Texas Chainsaw Massacre (Standard Edition)",
+    "slug": "the-texas-chainsaw-massacre",
+    "name": "The Texas Chainsaw Massacre",
     "opdb_group_id": "G0lkp"
   },
   {
-    "slug": "ultraman-kaiju-rumble-se",
-    "name": "Ultraman: Kaiju Rumble (Standard Edition)",
+    "slug": "ultraman-kaiju-rumble",
+    "name": "Ultraman: Kaiju Rumble",
     "opdb_group_id": "GBLLd"
   }
 ]

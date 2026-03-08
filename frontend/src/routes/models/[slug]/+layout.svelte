@@ -3,6 +3,7 @@
 	import { resolve } from '$app/paths';
 	import { pageTitle } from '$lib/constants';
 	import { auth } from '$lib/auth.svelte';
+	import ModelHierarchy from '$lib/components/ModelHierarchy.svelte';
 	import TwoColumnLayout from '$lib/components/TwoColumnLayout.svelte';
 
 	let { data, children } = $props();
@@ -214,7 +215,6 @@
 		{#if model.alias_of_slug}
 			<section class="sidebar-section">
 				<h3>Parent Game</h3>
-				<p class="sidebar-note">This machine is a variant of:</p>
 				<ul class="sidebar-list">
 					<li>
 						<a href={resolve(`/models/${model.alias_of_slug}`)}>{model.alias_of_name}</a>
@@ -239,21 +239,11 @@
 			</section>
 		{/if}
 
-		{#if model.title_models && model.title_models.length > 0}
-			<section class="sidebar-section">
-				<h3>Other Models</h3>
-				<ul class="sidebar-list">
-					{#each model.title_models as sibling (sibling.slug)}
-						<li>
-							<a href={resolve(`/models/${sibling.slug}`)}>{sibling.name}</a>
-							{#if sibling.year}
-								<span class="muted">{sibling.year}</span>
-							{/if}
-						</li>
-					{/each}
-				</ul>
-			</section>
-		{/if}
+		<ModelHierarchy
+			models={model.title_models}
+			heading="Other Models"
+			excludeSlug={model.alias_of_slug ?? model.slug}
+		/>
 
 		<div class="external-ids">
 			{#if model.ipdb_id}
@@ -439,12 +429,6 @@
 	.rating-label {
 		font-size: var(--font-size-0);
 		color: var(--color-text-muted);
-	}
-
-	.sidebar-note {
-		font-size: var(--font-size-0);
-		color: var(--color-text-muted);
-		margin: 0 0 var(--size-1) 0;
 	}
 
 	.sidebar-list {

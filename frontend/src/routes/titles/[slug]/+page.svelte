@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import CardGrid from '$lib/components/grid/CardGrid.svelte';
 	import MachineCard from '$lib/components/cards/MachineCard.svelte';
 	import ModelDetailBody from '$lib/components/ModelDetailBody.svelte';
+	import ModelHierarchy from '$lib/components/ModelHierarchy.svelte';
 	import CreditsList from '$lib/components/CreditsList.svelte';
 	import TwoColumnLayout from '$lib/components/TwoColumnLayout.svelte';
 	import { pageTitle } from '$lib/constants';
@@ -152,8 +152,8 @@
 				{#if title.machines.length === 0}
 					<p class="empty">No machines in this title.</p>
 				{:else}
-					<CardGrid>
-						{#each title.machines as machine (machine.slug)}
+					{#each title.machines as machine (machine.slug)}
+						<div class="model-group">
 							<MachineCard
 								slug={machine.slug}
 								name={machine.name}
@@ -161,8 +161,17 @@
 								manufacturerName={machine.manufacturer_name}
 								year={machine.year}
 							/>
-						{/each}
-					</CardGrid>
+							{#if machine.variants.length > 0}
+								<ul class="variant-list">
+									{#each machine.variants as variant (variant.slug)}
+										<li>
+											<a href={resolve(`/models/${variant.slug}`)}>{variant.name}</a>
+										</li>
+									{/each}
+								</ul>
+							{/if}
+						</div>
+					{/each}
 				{/if}
 			{:else if activeTab === 'people'}
 				<CreditsList credits={title.credits} />
@@ -374,20 +383,8 @@
 				</section>
 			{/if}
 
-			{#if title.machines.length > 1}
-				<section class="sidebar-section">
-					<h3>Models</h3>
-					<ul class="sidebar-list">
-						{#each title.machines as machine (machine.slug)}
-							<li>
-								<a href={resolve(`/models/${machine.slug}`)}>{machine.name}</a>
-								{#if machine.year}
-									<span class="muted">{machine.year}</span>
-								{/if}
-							</li>
-						{/each}
-					</ul>
-				</section>
+			{#if title.machines.length > 0}
+				<ModelHierarchy models={title.machines} />
 			{/if}
 		{/if}
 	{/snippet}
@@ -517,6 +514,28 @@
 		text-align: center;
 	}
 
+	.model-group {
+		margin-bottom: var(--size-4);
+	}
+
+	.variant-list {
+		list-style: none;
+		padding: 0 0 0 var(--size-6);
+		margin: var(--size-2) 0 0 0;
+	}
+
+	.variant-list li {
+		padding: var(--size-1) 0;
+		font-size: var(--font-size-1);
+		color: var(--color-text-muted);
+	}
+
+	.variant-list li::before {
+		content: '└';
+		margin-right: var(--size-2);
+		color: var(--color-text-muted);
+	}
+
 	/* Sidebar */
 	.sidebar-section {
 		padding-bottom: var(--size-3);
@@ -593,11 +612,6 @@
 
 	.sidebar-list li:not(:last-child) {
 		border-bottom: 1px solid var(--color-border-soft);
-	}
-
-	.muted {
-		color: var(--color-text-muted);
-		font-size: var(--font-size-0);
 	}
 
 	.external-ids {
