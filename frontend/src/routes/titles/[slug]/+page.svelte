@@ -38,7 +38,7 @@
 					{#if link.url.startsWith('/')}
 						<a href={resolveHref(link.url)}>{link.label}</a>
 					{:else}
-						<a href={link.url} target="_blank" rel="noopener">{link.label}</a>
+						<a href={link.url}>{link.label}</a>
 					{/if}
 				{/each}
 			</p>
@@ -137,7 +137,8 @@
 					class:active={activeTab === 'machines'}
 					onclick={() => (activeTab = 'machines')}
 				>
-					Machines ({title.machines.length})
+					Models ({title.machines.length +
+						title.machines.reduce((n, m) => n + (m.variants?.length ?? 0), 0)})
 				</button>
 				<button
 					class="tab"
@@ -150,7 +151,7 @@
 
 			{#if activeTab === 'machines'}
 				{#if title.machines.length === 0}
-					<p class="empty">No machines in this title.</p>
+					<p class="empty">No models in this title.</p>
 				{:else}
 					{#each title.machines as machine (machine.slug)}
 						<div class="model-group">
@@ -288,21 +289,15 @@
 
 			<div class="external-ids">
 				{#if md.ipdb_id}
-					<a href="https://www.ipdb.org/machine.cgi?id={md.ipdb_id}" target="_blank" rel="noopener">
+					<a href="https://www.ipdb.org/machine.cgi?id={md.ipdb_id}">
 						IPDB #{md.ipdb_id}
 					</a>
 				{/if}
 				{#if md.opdb_id}
-					<a href="https://opdb.org/machines/{md.opdb_id}" target="_blank" rel="noopener"> OPDB </a>
+					<a href="https://opdb.org/machines/{md.opdb_id}"> OPDB </a>
 				{/if}
 				{#if md.pinside_id}
-					<a
-						href="https://pinside.com/pinball/machine/{md.pinside_id}"
-						target="_blank"
-						rel="noopener"
-					>
-						Pinside
-					</a>
+					<a href="https://pinside.com/pinball/machine/{md.pinside_id}"> Pinside </a>
 				{/if}
 			</div>
 		{:else}

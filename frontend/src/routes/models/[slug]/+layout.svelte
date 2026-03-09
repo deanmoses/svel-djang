@@ -247,27 +247,15 @@
 
 		<div class="external-ids">
 			{#if model.ipdb_id}
-				<a
-					href="https://www.ipdb.org/machine.cgi?id={model.ipdb_id}"
-					target="_blank"
-					rel="noopener"
-				>
+				<a href="https://www.ipdb.org/machine.cgi?id={model.ipdb_id}">
 					IPDB #{model.ipdb_id}
 				</a>
 			{/if}
 			{#if model.opdb_id}
-				<a href="https://opdb.org/machines/{model.opdb_id}" target="_blank" rel="noopener">
-					OPDB
-				</a>
+				<a href="https://opdb.org/machines/{model.opdb_id}"> OPDB </a>
 			{/if}
 			{#if model.pinside_id}
-				<a
-					href="https://pinside.com/pinball/machine/{model.pinside_id}"
-					target="_blank"
-					rel="noopener"
-				>
-					Pinside
-				</a>
+				<a href="https://pinside.com/pinball/machine/{model.pinside_id}"> Pinside </a>
 			{/if}
 		</div>
 	{/snippet}

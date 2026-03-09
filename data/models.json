@@ -707,12 +707,14 @@
     "slug": "toy-story-4-collectors-edition",
     "name": "Toy Story 4 (Collector's Edition)",
     "opdb_id": "GJ2o0-MrRye-AO62p",
+    "ipdb_id": 6951,
     "variant_of": "toy-story-4-limited-edition"
   },
   {
     "slug": "toy-story-4-limited-edition",
     "name": "Toy Story 4 (Limited Edition)",
-    "opdb_id": "GJ2o0-MrRye-ARNwE"
+    "opdb_id": "GJ2o0-MrRye-ARNwE",
+    "ipdb_id": 6950
   },
   {
     "slug": "transformers-limited-edition",

@@ -77,11 +77,17 @@ class Command(BaseCommand):
             default="",
             help="Path to OPDB changelog JSON dump.",
         )
+        parser.add_argument(
+            "--models",
+            default="",
+            help="Path to models.json (supplements ipdb_id cross-references).",
+        )
 
     def handle(self, *args, **options):
         opdb_path = options["opdb"]
         groups_path = options["groups"]
         changelog_path = options["changelog"]
+        models_path = options["models"]
 
         from django.contrib.contenttypes.models import ContentType
 
@@ -114,6 +120,16 @@ class Command(BaseCommand):
         groups_by_id: dict[str, dict] = {}
         if groups_path:
             groups_by_id = self._load_titles(groups_path)
+
+        # --- Supplemental ipdb_id cross-references from models.json ---
+        ipdb_id_supplement: dict[str, int] = {}
+        if models_path:
+            with open(models_path) as f:
+                for entry in json.load(f):
+                    opdb_id = entry.get("opdb_id")
+                    ipdb_id = entry.get("ipdb_id")
+                    if opdb_id and ipdb_id:
+                        ipdb_id_supplement[opdb_id] = ipdb_id
 
         # --- Load machine data ---
         with open(opdb_path) as f:
@@ -158,7 +174,7 @@ class Command(BaseCommand):
                 skipped += 1
                 continue
 
-            ipdb_id = rec.get("ipdb_id")
+            ipdb_id = rec.get("ipdb_id") or ipdb_id_supplement.get(opdb_id)
             name = rec.get("name", "Unknown")
 
             pm = None
@@ -243,7 +259,7 @@ class Command(BaseCommand):
                 normal_aliases.extend(group_aliases)
                 continue
 
-            ipdb_id = default_rec.get("ipdb_id")
+            ipdb_id = default_rec.get("ipdb_id") or ipdb_id_supplement.get(opdb_id)
             name = default_rec.get("name", "Unknown")
 
             # Match-or-create like Phase 1a, but as a standalone machine.
@@ -307,7 +323,7 @@ class Command(BaseCommand):
                 alias_skipped += 1
                 continue
 
-            ipdb_id = rec.get("ipdb_id")
+            ipdb_id = rec.get("ipdb_id") or ipdb_id_supplement.get(opdb_id)
             name = rec.get("name", "Unknown")
 
             # Find the parent machine in memory.
