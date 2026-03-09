@@ -73,7 +73,11 @@ class Command(BaseCommand):
 
             mm = by_opdb_id.get(opdb_id)
             if mm is None:
-                logger.warning("No MachineModel for opdb_id %r — skipping", opdb_id)
+                logger.warning(
+                    "No MachineModel for opdb_id %r (%s) — skipping",
+                    opdb_id,
+                    entry.get("name", "unknown"),
+                )
                 skipped += 1
                 continue
 
