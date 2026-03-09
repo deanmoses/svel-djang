@@ -47,7 +47,7 @@
 			<div class="bio-meta-row">
 				<dt>Website</dt>
 				<dd>
-					<a href={mfr.website} target="_blank" rel="noopener external">{mfr.website}</a>
+					<a href={mfr.website}>{mfr.website}</a>
 				</dd>
 			</div>
 		{/if}

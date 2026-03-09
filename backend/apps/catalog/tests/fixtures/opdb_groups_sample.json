@@ -16,5 +16,14 @@
     "description": null,
     "created_at": "2023-01-15",
     "updated_at": "2023-01-15"
+  },
+  {
+    "opdb_id": "G3333",
+    "is_machine_group": true,
+    "name": "Combo Game",
+    "shortname": null,
+    "description": null,
+    "created_at": "2024-01-01",
+    "updated_at": "2024-01-01"
   }
 ]

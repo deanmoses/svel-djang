@@ -104,4 +104,67 @@ class Command(BaseCommand):
             f"{claim_stats['duplicates_removed']} duplicates removed"
         )
 
+        # --- variant_of: set alias_of FK based on slug references ---
+        # Build slug→MachineModel lookup from entries that have both slug and opdb_id.
+        slug_to_mm: dict[str, MachineModel] = {}
+        for entry in entries:
+            slug = entry.get("slug")
+            opdb_id = entry.get("opdb_id")
+            if slug and opdb_id:
+                mm = by_opdb_id.get(opdb_id)
+                if mm:
+                    slug_to_mm[slug] = mm
+
+        # Collect parent slugs — entries that are referenced as variant_of targets.
+        parent_slugs: set[str] = {
+            entry["variant_of"] for entry in entries if entry.get("variant_of")
+        }
+
+        variant_updated: list[MachineModel] = []
+        variant_set = 0
+
+        # First pass: clear alias_of on parent models (fixes circular references
+        # when models.json overrides an ingest_opdb heuristic).
+        for slug in parent_slugs:
+            parent = slug_to_mm.get(slug)
+            if parent and parent.alias_of_id is not None:
+                parent.alias_of = None
+                variant_updated.append(parent)
+
+        # Second pass: set alias_of on variant models.
+        for entry in entries:
+            variant_of_slug = entry.get("variant_of")
+            if not variant_of_slug:
+                continue
+
+            opdb_id = entry.get("opdb_id")
+            if not opdb_id:
+                continue
+
+            mm = by_opdb_id.get(opdb_id)
+            parent = slug_to_mm.get(variant_of_slug)
+            if not mm or not parent:
+                if not parent:
+                    logger.warning(
+                        "variant_of slug %r not found for %s",
+                        variant_of_slug,
+                        entry.get("name", opdb_id),
+                    )
+                continue
+
+            if mm.alias_of_id != parent.pk:
+                mm.alias_of = parent
+                if mm not in variant_updated:
+                    variant_updated.append(mm)
+            variant_set += 1
+
+        if variant_updated:
+            MachineModel.objects.bulk_update(variant_updated, ["alias_of_id"])
+
+        if variant_set:
+            self.stdout.write(
+                f"  Variants: {variant_set} relationships, "
+                f"{len(variant_updated)} updated"
+            )
+
         self.stdout.write(self.style.SUCCESS("Models seed ingestion complete."))

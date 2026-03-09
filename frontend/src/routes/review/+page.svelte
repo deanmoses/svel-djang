@@ -53,7 +53,7 @@
 								{#if link.url.startsWith('/')}
 									<a href={resolveHref(link.url)}>{link.label}</a>
 								{:else}
-									<a href={link.url} target="_blank" rel="noopener">{link.label}</a>
+									<a href={link.url}>{link.label}</a>
 								{/if}
 							{/each}
 						</p>

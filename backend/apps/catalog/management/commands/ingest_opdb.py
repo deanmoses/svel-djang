@@ -26,6 +26,37 @@ from apps.provenance.models import Claim, Source
 
 logger = logging.getLogger(__name__)
 
+# Feature labels that indicate a "default" (canonical) variant, in priority order.
+# Collector's Edition is always a variant, never promoted.
+_DEFAULT_FEATURES = [
+    "Premium edition",
+    "Pro edition",
+    "Limited edition",
+    "Platinum edition",
+]
+_VARIANT_FEATURES = ["Collector's edition"]
+
+
+def _pick_default_alias(aliases: list[dict]) -> dict:
+    """Pick the alias that should be promoted to canonical model.
+
+    Heuristic priority:
+    1. Alias with Premium/Pro/Limited/Platinum edition feature (first match wins)
+    2. First alias that is NOT a Collector's Edition
+    3. First in the list (arbitrary — models.json corrects ambiguous cases)
+    """
+    for label in _DEFAULT_FEATURES:
+        for rec in aliases:
+            features = rec.get("features") or []
+            if label in features:
+                return rec
+    # Avoid promoting Collector's Edition if there's any alternative.
+    for rec in aliases:
+        features = rec.get("features") or []
+        if not any(f in features for f in _VARIANT_FEATURES):
+            return rec
+    return aliases[0]
+
 
 class Command(BaseCommand):
     help = "Ingest pinball machines from an OPDB JSON dump."
@@ -46,11 +77,17 @@ class Command(BaseCommand):
             default="",
             help="Path to OPDB changelog JSON dump.",
         )
+        parser.add_argument(
+            "--models",
+            default="",
+            help="Path to models.json (supplements ipdb_id cross-references).",
+        )
 
     def handle(self, *args, **options):
         opdb_path = options["opdb"]
         groups_path = options["groups"]
         changelog_path = options["changelog"]
+        models_path = options["models"]
 
         from django.contrib.contenttypes.models import ContentType
 
@@ -84,14 +121,32 @@ class Command(BaseCommand):
         if groups_path:
             groups_by_id = self._load_titles(groups_path)
 
+        # --- Supplemental ipdb_id cross-references from models.json ---
+        ipdb_id_supplement: dict[str, int] = {}
+        if models_path:
+            with open(models_path) as f:
+                for entry in json.load(f):
+                    opdb_id = entry.get("opdb_id")
+                    ipdb_id = entry.get("ipdb_id")
+                    if opdb_id and ipdb_id:
+                        ipdb_id_supplement[opdb_id] = ipdb_id
+
         # --- Load machine data ---
         with open(opdb_path) as f:
             data = json.load(f)
 
-        machines = [r for r in data if r.get("is_machine") is True]
+        all_machines = [r for r in data if r.get("is_machine") is True]
+        machines = [r for r in all_machines if r.get("physical_machine") != 0]
+        non_physical_ids = {
+            r["opdb_id"]
+            for r in all_machines
+            if r.get("physical_machine") == 0 and r.get("opdb_id")
+        }
         aliases = [r for r in data if r.get("is_alias") is True]
         self.stdout.write(
-            f"Processing {len(machines)} OPDB machines + {len(aliases)} aliases..."
+            f"Processing {len(machines)} OPDB machines "
+            f"({len(non_physical_ids)} non-physical skipped) "
+            f"+ {len(aliases)} aliases..."
         )
 
         # --- Pre-fetch all MachineModels into lookup dicts ---
@@ -119,7 +174,7 @@ class Command(BaseCommand):
                 skipped += 1
                 continue
 
-            ipdb_id = rec.get("ipdb_id")
+            ipdb_id = rec.get("ipdb_id") or ipdb_id_supplement.get(opdb_id)
             name = rec.get("name", "Unknown")
 
             pm = None
@@ -176,7 +231,85 @@ class Command(BaseCommand):
                 f"    New: {format_names([pm.name for pm in new_models])}"
             )
 
-        # --- Phase 1b: Match/create aliases ---
+        # --- Phase 1b: Separate aliases into normal vs non-physical groups ---
+        normal_aliases: list[dict] = []
+        non_phys_groups: dict[str, list[dict]] = {}
+
+        for rec in aliases:
+            opdb_id = rec.get("opdb_id")
+            if not opdb_id:
+                continue
+            parent_opdb_id = "-".join(opdb_id.split("-")[:2])
+            if parent_opdb_id in non_physical_ids:
+                non_phys_groups.setdefault(parent_opdb_id, []).append(rec)
+            else:
+                normal_aliases.append(rec)
+
+        # --- Phase 1c: Promote default alias from each non-physical group ---
+        promoted_new: list[MachineModel] = []
+        promoted_update: list[MachineModel] = []
+        promoted_count = 0
+
+        for parent_id, group_aliases in non_phys_groups.items():
+            default_rec = _pick_default_alias(group_aliases)
+            rest = [r for r in group_aliases if r is not default_rec]
+
+            opdb_id = default_rec.get("opdb_id")
+            if not opdb_id:
+                normal_aliases.extend(group_aliases)
+                continue
+
+            ipdb_id = default_rec.get("ipdb_id") or ipdb_id_supplement.get(opdb_id)
+            name = default_rec.get("name", "Unknown")
+
+            # Match-or-create like Phase 1a, but as a standalone machine.
+            pm = None
+            if ipdb_id:
+                pm = by_ipdb_id.get(ipdb_id)
+            if not pm:
+                pm = by_opdb_id.get(opdb_id)
+
+            if pm:
+                if pm.opdb_id is None and opdb_id and opdb_id not in by_opdb_id:
+                    pm.opdb_id = opdb_id
+                    by_opdb_id[opdb_id] = pm
+                    promoted_update.append(pm)
+                # Clear alias_of if it was previously set (e.g. from a prior run).
+                if pm.alias_of_id is not None:
+                    pm.alias_of = None
+                    if pm not in promoted_update:
+                        promoted_update.append(pm)
+            else:
+                slug = generate_unique_slug(name, existing_slugs)
+                pm = MachineModel(name=name, opdb_id=opdb_id, slug=slug)
+                promoted_new.append(pm)
+                by_opdb_id[opdb_id] = pm
+                if ipdb_id:
+                    by_ipdb_id[ipdb_id] = pm
+
+            machine_models.append((pm, default_rec))
+            # Register under the non-physical parent's opdb_id too,
+            # so remaining aliases can find their parent.
+            by_opdb_id[parent_id] = pm
+            promoted_count += 1
+
+            # Put remaining aliases back into normal processing.
+            normal_aliases.extend(rest)
+
+        if promoted_new:
+            MachineModel.objects.bulk_create(promoted_new)
+        if promoted_update:
+            MachineModel.objects.bulk_update(
+                promoted_update, ["opdb_id", "alias_of_id"]
+            )
+
+        if promoted_count:
+            self.stdout.write(
+                f"  Promoted {promoted_count} aliases from "
+                f"{len(non_phys_groups)} non-physical groups"
+            )
+
+        # --- Phase 1d: Match/create normal aliases ---
         new_alias_models: list[MachineModel] = []
         alias_models_needing_update: list[MachineModel] = []
         alias_models: list[tuple[MachineModel, dict]] = []
@@ -184,13 +317,13 @@ class Command(BaseCommand):
         alias_created = 0
         alias_skipped = 0
 
-        for rec in aliases:
+        for rec in normal_aliases:
             opdb_id = rec.get("opdb_id")
             if not opdb_id:
                 alias_skipped += 1
                 continue
 
-            ipdb_id = rec.get("ipdb_id")
+            ipdb_id = rec.get("ipdb_id") or ipdb_id_supplement.get(opdb_id)
             name = rec.get("name", "Unknown")
 
             # Find the parent machine in memory.

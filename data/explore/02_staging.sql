@@ -39,15 +39,7 @@ SELECT
   manufacture_date,
   ipdb_id,
   images,
-  (
-    (regexp_matches("name", '\([^)]+/[^)]+\)') OR ("name" ~~ '% / %'))
-    AND EXISTS(
-      SELECT 1 FROM opdb_machines AS a
-      WHERE a.group_id = opdb_machines.group_id
-        AND a.machine_id = opdb_machines.machine_id
-        AND a.is_alias = 't'
-    )
-  ) AS is_combo_label,
+  (physical_machine = 0) AS is_combo_label,
   technology_generation_slug,
   display_type_slug,
   system_slug

@@ -154,3 +154,79 @@ class TestIngestPinbaseModels:
         source = Source.objects.get(slug="pinbase")
         claim = mm.claims.get(source=source, field_name="display_type", is_active=True)
         assert claim.value == "alphanumeric"
+
+    def test_variant_of_sets_alias_of(self, db):
+        """variant_of correctly sets alias_of FK."""
+        parent = MachineModel.objects.create(
+            name="Parent Model", opdb_id="Gtest-Mparent"
+        )
+        child = MachineModel.objects.create(name="Child Model", opdb_id="Gtest-Mchild")
+        path = _write_models_json(
+            [
+                {"slug": "parent-model", "opdb_id": "Gtest-Mparent"},
+                {
+                    "slug": "child-model",
+                    "opdb_id": "Gtest-Mchild",
+                    "variant_of": "parent-model",
+                },
+            ]
+        )
+
+        call_command("ingest_pinbase_models", path=path)
+
+        child.refresh_from_db()
+        assert child.alias_of == parent
+
+    def test_variant_of_overrides_ingest(self, db):
+        """variant_of from pinbase overrides a wrong alias_of from ingest_opdb."""
+        wrong_parent = MachineModel.objects.create(
+            name="Wrong Parent", opdb_id="Gtest-Mwrong"
+        )
+        right_parent = MachineModel.objects.create(
+            name="Right Parent", opdb_id="Gtest-Mright"
+        )
+        child = MachineModel.objects.create(
+            name="Child", opdb_id="Gtest-Mchild", alias_of=wrong_parent
+        )
+        path = _write_models_json(
+            [
+                {"slug": "right-parent", "opdb_id": "Gtest-Mright"},
+                {
+                    "slug": "child-model",
+                    "opdb_id": "Gtest-Mchild",
+                    "variant_of": "right-parent",
+                },
+            ]
+        )
+
+        call_command("ingest_pinbase_models", path=path)
+
+        child.refresh_from_db()
+        assert child.alias_of == right_parent
+
+    def test_variant_of_clears_circular_reference(self, db):
+        """When models.json flips the parent/child, alias_of is cleared on new parent."""
+        # ingest_opdb heuristic wrongly made model_a the parent, model_b the child.
+        model_a = MachineModel.objects.create(name="Model A (CE)", opdb_id="Gtest-Ma")
+        model_b = MachineModel.objects.create(
+            name="Model B (LE)", opdb_id="Gtest-Mb", alias_of=model_a
+        )
+        # models.json says B is the real parent, A is the variant.
+        path = _write_models_json(
+            [
+                {"slug": "model-b-le", "opdb_id": "Gtest-Mb"},
+                {
+                    "slug": "model-a-ce",
+                    "opdb_id": "Gtest-Ma",
+                    "variant_of": "model-b-le",
+                },
+            ]
+        )
+
+        call_command("ingest_pinbase_models", path=path)
+
+        model_a.refresh_from_db()
+        model_b.refresh_from_db()
+        # B is the parent (alias_of cleared), A points to B.
+        assert model_b.alias_of is None
+        assert model_a.alias_of == model_b

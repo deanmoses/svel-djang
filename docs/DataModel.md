@@ -4,14 +4,14 @@ This document describes the catalog data model.
 
 ## The Hierarchy
 
-There's a hierarchy: `Title` → `Production` → `Tier` → `Model`
+There's a hierarchy: `Title` → `Production` → `Model` → `Variant`
 
 - `Title`: the same conceptual game, like the original Medieval Madness _and_ its remakes
   - `Production`: a group of machines within a Title that were all produced by one manufacturer using a shared hardware platform. Medieval Madness has three Productions: the Williams original (1997), the Chicago Gaming remake on a DMD platform (2015–2016), and the Chicago Gaming Merlin Edition on an XL HD color display platform (2025). Same manufacturer doesn't mean same Production — a substantial hardware rework is a new Production.
-    - `Tier`: a group of machines within the Production that play identically and is considered equivalent at tournaments. For example, Godzilla Pro and Godzilla Premium are separate Tiers, each with multiple models underneath them.
-      - `Model`: the actual buyable SKU. Every Tier has at least one Model, with one marked as the default. All Models within a Tier share the same gameplay and differ only in cosmetics. For example, the Godzilla Premium Tier contains the models Godzilla Premium, Godzilla LE, and Godzilla 70th Anniversary. Godzilla LE, for example, has its own cabinet art, a numbered plaque, colored plastics, and an exclusive topper - but nothing that changes gameplay.
+    - `Model`: a distinct, buyable machine within a Production, with its own SKU. Models within the same Production may differ in gameplay, features, and hardware. For example, Godzilla Pro and Godzilla Premium are separate Models within the same Stern Godzilla Production.
+      - `Variant`: a `Model` that only has cosmetic changes from a different parent `Model`. Variants share the same gameplay as their parent `Model`, differing only in cosmetics (cabinet art, numbered plaques, toppers, colored plastics). For example, Godzilla LE and Godzilla 70th Anniversary are variants of Godzilla Premium — same gameplay, different dress.
 
-A standalone game that has never been remade -- like Buckaroo (1965) by Gottlieb -- will have 1 Title, 1 Production, 1 Tier and 1 Model.
+A standalone game that has never been remade -- like Buckaroo (1965) by Gottlieb -- will have 1 Title, 1 Production, and 1 Model.
 
 ## Optional Entities
 
@@ -89,29 +89,19 @@ A specific manufacturer's hardware platform for a parent `Title`. Examples: _Wil
 - Credits mapping to People (such as Art credit to Pat Lawlor)
 - `features`: text (for now) containing just the features that distinguish this Production from its parent `Title`
 
-### Tier
-
-A gameplay tier within a `Production`. Pro vs Premium are different Tiers because they have different rules, shots, and features. Every `Production` has at least one `Tier`.
-
-This is NOT a distinct production run. When we get around to modeling it in the future, Tier will have 0..n ProductionRun records.
-
-#### Tier Fields
-
-- `description`: the story of this specific tier — e.g., what was notable about _Eight Ball Deluxe (LE)_ as a release.
-
 ### Model
 
-The actual buyable SKU — the concrete thing a collector owns. Every `Tier` has at least one `Model`, with one marked as the **default**. All Models within a Tier share the same gameplay and differ only in cosmetics (cabinet art, numbered plaques, toppers, colored plastics). The default Model represents the standard offering of that Tier.
+A distinct machine within a `Production` — the actual buyable SKU. Models within the same Production may differ in gameplay, features, and hardware. For example, Godzilla Pro and Godzilla Premium are separate Models.
 
-For example, the Godzilla Premium Tier has three Models: Godzilla Premium _(default)_, Godzilla LE, and Godzilla 70th Anniversary.
+A Model can have **variants**: cosmetic-only editions linked via `variant_of`. Variants share the same gameplay as their parent and differ only in cosmetics (cabinet art, numbered plaques, toppers, colored plastics). For example, Godzilla LE and Godzilla 70th Anniversary are variants of Godzilla Premium.
 
 #### Model Fields
 
 - `description`: describes history or circumstances of the model
-- `default`: boolean flag — true for the canonical model of the Tier
+- `variant_of`: self-referential FK to the parent Model (null for canonical models)
 - `sku`: the SKU of this model
 - `year` and `month` first produced
-- `features`: text (for now) containing just the cosmetic features that distinguish it from the default Model
+- `features`: text (for now) containing just the features that distinguish this model from its parent or from other models in the Production
 
 ## Fields common to all entities
 
@@ -123,36 +113,27 @@ For example, the Godzilla Premium Tier has three Models: Godzilla Premium _(defa
 
 ## Use Cases
 
-Tournaments care about what, Tier?
+Tournaments care about what, Model?
 
 ## Mapping from OPDB
 
-OPDB has no `Franchise`, `Series`, `Production`, or `Tier` concept. Franchise and Series data is hand-curated in `data/series.json`. `Production` and `Tier` are derived at ingest time using the logic below.
+OPDB has no `Franchise`, `Series`, or `Production` concept. Franchise and Series data is hand-curated in `data/series.json`. `Production` is derived at ingest time using the logic below.
 
-| OPDB record type                 | `physical_machine` | Maps to               |
-| -------------------------------- | ------------------ | --------------------- |
-| Group ID (e.g. `G5pe4`)          | n/a                | `Title`               |
-| Non-alias record                 | `0`                | `Production` + `Tier` |
-| Non-alias record                 | `1`                | `Tier`                |
-| Alias record (`is_alias` is set) | n/a                | `Model`               |
+| OPDB record type                 | `physical_machine` | Maps to              |
+| -------------------------------- | ------------------ | -------------------- |
+| Group ID (e.g. `G5pe4`)          | n/a                | `Title`              |
+| Non-alias record                 | `1`                | `Model`              |
+| Non-alias record                 | `0`                | Skipped              |
+| Alias record (`is_alias` is set) | n/a                | `Model` or `Variant` |
+
+### Non-physical machines (`physical_machine=0`)
+
+OPDB uses `physical_machine=0` records as grouping containers (e.g. "Godzilla (Premium/LE)") — these are not real buyable machines. During ingest, these records are skipped entirely. Their alias records are promoted: one alias becomes a canonical Model (chosen by heuristic — Premium > Pro > LE > PE; Collector's Edition is never promoted), and the remaining aliases become variants of it. Curated overrides in `data/models.json` correct any heuristic mistakes.
 
 ### Deriving Production at ingest
 
-By default, each distinct `(opdb_group_id, manufacturer, technology_generation)` triple among non-alias rows becomes one `Production`. This automatically splits EM and SS versions from the same manufacturer (e.g., Bally's electromechanical and solid-state Black Jack become separate Productions). For cases where this triple is still insufficient — e.g., Chicago Gaming's DMD-based Medieval Madness remake (2015–2016) and the XL HD color display Merlin Edition (2025) share the same technology generation but have substantially different hardware — manual overrides in `data/productions.json` and `data/tiers.json` split them into separate Productions.
-
-When a `physical_machine=0` row exists for a Production, it defines the Production (the shared hardware). Its fields (year, system, display_type, etc.) populate the `Production` record.
-
-If no `physical_machine=0` row exists, derive the `Production` from the earliest `manufacture_date` among the `physical_machine=1` rows, then lowest `opdb_id` for stability.
-
-### Deriving Tier at ingest
-
-Every non-alias OPDB row produces one `Tier` under its `Production`:
-
-- A `physical_machine=0` row (e.g. "Godzilla (Premium/LE)") produces both the `Production` and a `Tier` representing that gameplay tier.
-- Each `physical_machine=1` row (e.g. "Godzilla (Pro)") produces an additional `Tier` under the same `Production`.
-
-For simple games with a single OPDB row and no aliases, that row produces a `Production` with one `Tier` and one default `Model`.
+By default, each distinct `(opdb_group_id, manufacturer, technology_generation)` triple among non-alias rows becomes one `Production`. This automatically splits EM and SS versions from the same manufacturer (e.g., Bally's electromechanical and solid-state Black Jack become separate Productions). For cases where this triple is still insufficient — e.g., Chicago Gaming's DMD-based Medieval Madness remake (2015–2016) and the XL HD color display Merlin Edition (2025) share the same technology generation but have substantially different hardware — manual overrides in `data/productions.json` split them into separate Productions.
 
 ### Mapping alias records at ingest
 
-All OPDB alias records (`is_alias` is set) become `Models`. They are assigned to the `Tier` created by their parent record (the non-alias row whose `opdb_id` is the prefix of the alias ID). The first alias processed for a `Tier` is marked as the default `Model`.
+OPDB alias records (`is_alias` is set) become Variants. They are linked to the Model created by their parent record (the non-alias row whose `opdb_id` is the prefix of the alias ID) via `variant_of`.

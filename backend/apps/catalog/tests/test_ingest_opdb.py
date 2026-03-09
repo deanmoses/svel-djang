@@ -124,7 +124,7 @@ class TestIngestOpdbNewFields:
 @pytest.mark.usefixtures("_run_opdb")
 class TestIngestOpdbGroups:
     def test_creates_titles(self):
-        assert Title.objects.count() == 2
+        assert Title.objects.count() == 3
         mm = Title.objects.get(opdb_id="G1111")
         assert mm.name == "Medieval Madness"
         assert mm.short_name == "MM"
@@ -172,7 +172,133 @@ class TestIngestOpdbAliases:
         assert "Gold trim" in claim.value
 
     def test_total_model_count(self):
-        assert MachineModel.objects.count() == 6
+        # 4 from IPDB + 1 new OPDB machine (G2222) + 1 alias (G1111-AAlias)
+        # + 2 from non-physical group (1 promoted + 1 variant) = 8
+        assert MachineModel.objects.count() == 8
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("_run_opdb")
+class TestIngestOpdbNonPhysical:
+    def test_non_physical_machine_not_created(self):
+        """The non-physical combo label should NOT become a MachineModel."""
+        assert not MachineModel.objects.filter(opdb_id="G3333-MCombo").exists()
+
+    def test_premium_alias_promoted(self):
+        """The alias with 'Premium edition' feature should be a standalone model."""
+        pm = MachineModel.objects.get(opdb_id="G3333-MCombo-APrem")
+        assert pm.alias_of is None
+
+    def test_le_alias_points_to_promoted(self):
+        """The remaining alias should point to the promoted model."""
+        promoted = MachineModel.objects.get(opdb_id="G3333-MCombo-APrem")
+        variant = MachineModel.objects.get(opdb_id="G3333-MCombo-ALE")
+        assert variant.alias_of == promoted
+
+    def test_non_physical_idempotent(self):
+        """Re-running ingest should not change the result."""
+        initial_count = MachineModel.objects.count()
+        call_command(
+            "ingest_opdb",
+            opdb=f"{FIXTURES}/opdb_sample.json",
+            groups=f"{FIXTURES}/opdb_groups_sample.json",
+        )
+        assert MachineModel.objects.count() == initial_count
+        # Verify relationships preserved.
+        promoted = MachineModel.objects.get(opdb_id="G3333-MCombo-APrem")
+        variant = MachineModel.objects.get(opdb_id="G3333-MCombo-ALE")
+        assert promoted.alias_of is None
+        assert variant.alias_of == promoted
+
+
+@pytest.mark.django_db
+class TestOpdbNonPhysicalHeuristics:
+    def test_le_preferred_over_ce(self):
+        """Limited Edition is promoted over Collector's Edition."""
+        path = _opdb_dump(
+            machines=[
+                {
+                    "opdb_id": "GTEST-MNP",
+                    "name": "Test (LE/CE)",
+                    "physical_machine": 0,
+                }
+            ],
+            aliases=[
+                {
+                    "opdb_id": "GTEST-MNP-ACE",
+                    "name": "Test (CE)",
+                    "features": ["Collector's edition"],
+                },
+                {
+                    "opdb_id": "GTEST-MNP-ALE",
+                    "name": "Test (LE)",
+                    "features": ["Limited edition"],
+                },
+            ],
+        )
+        call_command("ingest_opdb", opdb=path)
+        le = MachineModel.objects.get(opdb_id="GTEST-MNP-ALE")
+        ce = MachineModel.objects.get(opdb_id="GTEST-MNP-ACE")
+        assert le.alias_of is None
+        assert ce.alias_of == le
+
+    def test_pe_preferred_over_ce(self):
+        """Platinum Edition is promoted over Collector's Edition."""
+        path = _opdb_dump(
+            machines=[
+                {
+                    "opdb_id": "GTEST-MNP2",
+                    "name": "Test (PE/CE)",
+                    "physical_machine": 0,
+                }
+            ],
+            aliases=[
+                {
+                    "opdb_id": "GTEST-MNP2-ACE",
+                    "name": "Test (CE)",
+                    "features": ["Collector's edition"],
+                },
+                {
+                    "opdb_id": "GTEST-MNP2-APE",
+                    "name": "Test (PE)",
+                    "features": ["Platinum edition"],
+                },
+            ],
+        )
+        call_command("ingest_opdb", opdb=path)
+        pe = MachineModel.objects.get(opdb_id="GTEST-MNP2-APE")
+        ce = MachineModel.objects.get(opdb_id="GTEST-MNP2-ACE")
+        assert pe.alias_of is None
+        assert ce.alias_of == pe
+
+    def test_ce_never_promoted_when_alternative_exists(self):
+        """Collector's Edition is always a variant, even without known features."""
+        path = _opdb_dump(
+            machines=[
+                {
+                    "opdb_id": "GTEST-MNP3",
+                    "name": "Test (Standard/CE)",
+                    "physical_machine": 0,
+                }
+            ],
+            aliases=[
+                {
+                    "opdb_id": "GTEST-MNP3-ACE",
+                    "name": "Test (CE)",
+                    "features": ["Collector's edition"],
+                },
+                {
+                    "opdb_id": "GTEST-MNP3-AStd",
+                    "name": "Test (Standard)",
+                    "features": [],
+                },
+            ],
+        )
+        call_command("ingest_opdb", opdb=path)
+        std = MachineModel.objects.get(opdb_id="GTEST-MNP3-AStd")
+        ce = MachineModel.objects.get(opdb_id="GTEST-MNP3-ACE")
+        assert std.alias_of is None
+        assert ce.alias_of == std
 
 
 @pytest.mark.django_db
@@ -212,6 +338,7 @@ def _opdb_dump(machines=None, aliases=None):
     data = []
     for m in machines or []:
         m.setdefault("is_machine", True)
+        m.setdefault("physical_machine", 1)
         data.append(m)
     for a in aliases or []:
         a.setdefault("is_alias", True)
