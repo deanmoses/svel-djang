@@ -22,7 +22,9 @@ This file provides guidance to AI programming agents when working with code in t
 `except ExcType1, ExcType2:` is **valid Python 3** and is ruff-format's preferred style.
 Do NOT add parentheses. `except (ExcType1, ExcType2):` will be reverted by ruff-format every time. Stop trying to fix it.
 
-## Svelte 5 — Non-Negotiable
+## Svelte, HTML, CSSS
+
+### You MUST use Svelte 5 — Non-Negotiable
 
 The frontend uses **Svelte 5 runes mode** (`runes: true` in compiler options). Do NOT use legacy Svelte 4 patterns:
 
@@ -32,6 +34,10 @@ The frontend uses **Svelte 5 runes mode** (`runes: true` in compiler options). D
 - `createEventDispatcher` → use callback props
 - `<slot>` → use `{@render children()}` snippets
 - `$$props` / `$$restProps` → use `$props()` with rest syntax
+
+### CSS — Non-Negotiable
+
+NEVER use `:global` in Svelte component styles without explicit approval from the user. Scoped styles are the default and preferred approach. We rearchitect components rather than use `:global`.
 
 ## Project Overview
 
