@@ -251,6 +251,39 @@
 				</SidebarSection>
 			{/if}
 
+			{#if model.converted_from_slug}
+				<SidebarSection heading="Converted From" note="This game was rebuilt from the hardware of:">
+					<SidebarList>
+						<SidebarListItem>
+							<a href={resolve(`/models/${model.converted_from_slug}`)}
+								>{model.converted_from_name}</a
+							>
+							{#if model.converted_from_year}
+								<span class="muted">{model.converted_from_year}</span>
+							{/if}
+						</SidebarListItem>
+					</SidebarList>
+				</SidebarSection>
+			{/if}
+
+			{#if model.conversions && model.conversions.length > 0}
+				<SidebarSection
+					heading="Conversions"
+					note="Different games rebuilt from this machine's hardware:"
+				>
+					<SidebarList>
+						{#each model.conversions as conversion (conversion.slug)}
+							<SidebarListItem>
+								<a href={resolve(`/models/${conversion.slug}`)}>{conversion.name}</a>
+								{#if conversion.year}
+									<span class="muted">{conversion.year}</span>
+								{/if}
+							</SidebarListItem>
+						{/each}
+					</SidebarList>
+				</SidebarSection>
+			{/if}
+
 			<ModelHierarchy
 				models={model.title_models}
 				heading="Other Models In Title"

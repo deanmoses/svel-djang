@@ -175,6 +175,58 @@ class TestModelsAPI:
         assert data["title_name"] is None
         assert data["title_slug"] is None
 
+    def test_detail_includes_conversion_fields(self, client, db):
+        """Detail response includes conversion fields."""
+        source = MachineModel.objects.create(
+            name="Star Trek", slug="star-trek", year=1991
+        )
+        conv = MachineModel.objects.create(
+            name="Dark Rider",
+            slug="dark-rider",
+            is_conversion=True,
+            converted_from=source,
+        )
+        resp = client.get(f"/api/models/{conv.slug}")
+        data = resp.json()
+        assert data["is_conversion"] is True
+        assert data["converted_from_name"] == "Star Trek"
+        assert data["converted_from_slug"] == "star-trek"
+        assert data["converted_from_year"] == 1991
+
+    def test_detail_includes_conversions_list(self, client, db):
+        """Source machine's detail includes conversions list."""
+        source = MachineModel.objects.create(
+            name="Star Trek", slug="star-trek", year=1991
+        )
+        MachineModel.objects.create(
+            name="Dark Rider",
+            slug="dark-rider",
+            is_conversion=True,
+            converted_from=source,
+        )
+        resp = client.get(f"/api/models/{source.slug}")
+        data = resp.json()
+        assert len(data["conversions"]) == 1
+        assert data["conversions"][0]["name"] == "Dark Rider"
+        assert data["conversions"][0]["slug"] == "dark-rider"
+
+    def test_conversions_appear_in_list(self, client, db):
+        """Conversions are NOT filtered from the list endpoint (unlike variants)."""
+        source = MachineModel.objects.create(
+            name="Star Trek", slug="star-trek", year=1991
+        )
+        MachineModel.objects.create(
+            name="Dark Rider",
+            slug="dark-rider",
+            is_conversion=True,
+            converted_from=source,
+        )
+        resp = client.get("/api/models/")
+        data = resp.json()
+        names = [m["name"] for m in data["items"]]
+        assert "Dark Rider" in names
+        assert "Star Trek" in names
+
     def test_get_model_404(self, client, db):
         resp = client.get("/api/models/nonexistent")
         assert resp.status_code == 404

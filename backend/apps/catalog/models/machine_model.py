@@ -49,6 +49,18 @@ class MachineModel(TimeStampedModel):
         blank=True,
         help_text="Parent machine model if this is a cosmetic/LE variant.",
     )
+    converted_from = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        related_name="conversions",
+        null=True,
+        blank=True,
+        help_text="Source machine if this is a conversion/retheme (resolved from claims).",
+    )
+    is_conversion = models.BooleanField(
+        default=False,
+        help_text="True if this machine is a conversion/retheme (resolved from claims).",
+    )
 
     # Core filterable fields
     manufacturer = models.ForeignKey(

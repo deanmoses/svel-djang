@@ -28,6 +28,8 @@ CLAIM_FIELDS = {
     "name": "name",
     "display_type": "display_type_slug",
     "description": "description",
+    "is_conversion": "is_conversion",
+    "converted_from": "converted_from",
 }
 
 

@@ -462,14 +462,16 @@ GROUP BY "name";
 
 CREATE OR REPLACE VIEW catalog_conversions AS
 SELECT
-  pc.converted_opdb_id,
-  pc.converted_name,
+  pm.opdb_id AS converted_opdb_id,
+  pm."name" AS converted_name,
   cm_conv.manufacturer AS converted_manufacturer,
   cm_conv.manufacture_date AS converted_date,
-  pc.source_opdb_id,
-  pc.source_name,
+  pm_src.opdb_id AS source_opdb_id,
+  pm_src."name" AS source_name,
   cm_src.manufacturer AS source_manufacturer,
   cm_src.manufacture_date AS source_date
-FROM pinbase_conversions AS pc
-LEFT JOIN catalog_models AS cm_conv ON pc.converted_opdb_id = cm_conv.opdb_id
-LEFT JOIN catalog_models AS cm_src ON pc.source_opdb_id = cm_src.opdb_id;
+FROM pinbase_models AS pm
+LEFT JOIN catalog_models AS cm_conv ON pm.opdb_id = cm_conv.opdb_id
+LEFT JOIN pinbase_models AS pm_src ON pm.converted_from = pm_src.slug
+LEFT JOIN catalog_models AS cm_src ON pm_src.opdb_id = cm_src.opdb_id
+WHERE pm.is_conversion = true;

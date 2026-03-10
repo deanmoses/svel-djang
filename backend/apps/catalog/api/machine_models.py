@@ -81,6 +81,12 @@ class VariantSchema(Schema):
     variant_features: list[str] = []
 
 
+class ConversionSchema(Schema):
+    name: str
+    slug: str
+    year: Optional[int] = None
+
+
 class MachineModelDetailSchema(Schema):
     name: str
     slug: str
@@ -127,6 +133,11 @@ class MachineModelDetailSchema(Schema):
     variant_of_slug: Optional[str] = None
     variant_of_year: Optional[int] = None
     variant_siblings: list[VariantSchema] = []
+    is_conversion: bool = False
+    converted_from_name: Optional[str] = None
+    converted_from_slug: Optional[str] = None
+    converted_from_year: Optional[int] = None
+    conversions: list[ConversionSchema] = []
     title_models: list[TitleMachineSchema] = []
 
 
@@ -313,6 +324,14 @@ def _serialize_model_detail(pm) -> dict:
         "variant_of_slug": pm.variant_of.slug if pm.variant_of else None,
         "variant_of_year": pm.variant_of.year if pm.variant_of else None,
         "variant_siblings": variant_siblings,
+        "is_conversion": pm.is_conversion,
+        "converted_from_name": pm.converted_from.name if pm.converted_from else None,
+        "converted_from_slug": pm.converted_from.slug if pm.converted_from else None,
+        "converted_from_year": pm.converted_from.year if pm.converted_from else None,
+        "conversions": [
+            {"name": c.name, "slug": c.slug, "year": c.year}
+            for c in pm.conversions.all()
+        ],
         "title_name": pm.title.name if pm.title else None,
         "title_slug": pm.title.slug if pm.title else None,
         "cabinet_name": pm.cabinet.name if pm.cabinet else None,
@@ -360,9 +379,11 @@ def _model_detail_qs():
         "cabinet",
         "game_format",
         "variant_of",
+        "converted_from",
     ).prefetch_related(
         "variants",
         "variant_of__variants",
+        "conversions",
         "themes",
         "gameplay_features",
         "abbreviations",

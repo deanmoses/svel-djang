@@ -38,6 +38,7 @@ DIRECT_FIELDS: dict[str, str] = {
     "ipdb_id": "ipdb_id",
     "opdb_id": "opdb_id",
     "pinside_id": "pinside_id",
+    "is_conversion": "is_conversion",
 }
 
 # Fields that should be coerced to int (nullable).
@@ -52,6 +53,9 @@ _INT_FIELDS = {
 
 # Fields that should be coerced to Decimal (nullable).
 _DECIMAL_FIELDS = {"ipdb_rating", "pinside_rating"}
+
+# Fields that should be coerced to bool.
+_BOOL_FIELDS = {"is_conversion"}
 
 
 def _coerce(field_name: str, value):
@@ -74,6 +78,13 @@ def _coerce(field_name: str, value):
                 "Cannot coerce %r to Decimal for field %s", value, field_name
             )
             return None
+
+    if field_name in _BOOL_FIELDS:
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            return value.lower() in ("true", "1", "yes")
+        return bool(value)
 
     return value
 
@@ -156,6 +167,11 @@ def _build_cabinet_lookup() -> dict[str, Cabinet]:
 def _build_game_format_lookup() -> dict[str, GameFormat]:
     """Pre-fetch all game formats into {slug: GameFormat}."""
     return {g.slug: g for g in GameFormat.objects.all()}
+
+
+def _build_converted_from_lookup() -> dict[str, MachineModel]:
+    """Pre-fetch all machine models into {slug: MachineModel}."""
+    return {m.slug: m for m in MachineModel.objects.all()}
 
 
 def _resolve_slug_fk(value, lookup: dict[str, Any], label: str):

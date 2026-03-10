@@ -230,3 +230,103 @@ class TestIngestPinbaseModels:
         # B is the parent (variant_of cleared), A points to B.
         assert model_b.variant_of is None
         assert model_a.variant_of == model_b
+
+    def test_is_conversion_claim(self, model_with_opdb_name_simple):
+        """is_conversion: true asserts a claim."""
+        mm = model_with_opdb_name_simple
+        path = _write_models_json(
+            [{"opdb_id": "Gtest-Mtest", "name": "Dark Rider", "is_conversion": True}]
+        )
+
+        call_command("ingest_pinbase_models", path=path)
+
+        source = Source.objects.get(slug="pinbase")
+        claim = mm.claims.get(source=source, field_name="is_conversion", is_active=True)
+        assert claim.value is True
+
+    def test_converted_from_claim(self, db):
+        """converted_from asserts a claim with the slug value."""
+        MachineModel.objects.create(
+            name="Star Trek", opdb_id="Gtest-Msrc", slug="star-trek"
+        )
+        conv_mm = MachineModel.objects.create(
+            name="Dark Rider", opdb_id="Gtest-Mconv", slug="dark-rider"
+        )
+        path = _write_models_json(
+            [
+                {"slug": "star-trek", "opdb_id": "Gtest-Msrc", "name": "Star Trek"},
+                {
+                    "slug": "dark-rider",
+                    "opdb_id": "Gtest-Mconv",
+                    "name": "Dark Rider",
+                    "is_conversion": True,
+                    "converted_from": "star-trek",
+                },
+            ]
+        )
+
+        call_command("ingest_pinbase_models", path=path)
+
+        source = Source.objects.get(slug="pinbase")
+        claim = conv_mm.claims.get(
+            source=source, field_name="converted_from", is_active=True
+        )
+        assert claim.value == "star-trek"
+
+    def test_is_conversion_resolves(self, model_with_opdb_name_simple):
+        """is_conversion claim resolves to boolean on model."""
+        mm = model_with_opdb_name_simple
+        path = _write_models_json(
+            [{"opdb_id": "Gtest-Mtest", "name": "Dark Rider", "is_conversion": True}]
+        )
+
+        call_command("ingest_pinbase_models", path=path)
+        resolve_model(mm)
+        mm.refresh_from_db()
+
+        assert mm.is_conversion is True
+
+    def test_converted_from_resolves(self, db):
+        """converted_from slug claim resolves to FK on model."""
+        source_mm = MachineModel.objects.create(
+            name="Star Trek", opdb_id="Gtest-Msrc", slug="star-trek"
+        )
+        conv_mm = MachineModel.objects.create(
+            name="Dark Rider", opdb_id="Gtest-Mconv", slug="dark-rider"
+        )
+        path = _write_models_json(
+            [
+                {"slug": "star-trek", "opdb_id": "Gtest-Msrc", "name": "Star Trek"},
+                {
+                    "slug": "dark-rider",
+                    "opdb_id": "Gtest-Mconv",
+                    "name": "Dark Rider",
+                    "is_conversion": True,
+                    "converted_from": "star-trek",
+                },
+            ]
+        )
+
+        call_command("ingest_pinbase_models", path=path)
+        resolve_model(conv_mm)
+        conv_mm.refresh_from_db()
+
+        assert conv_mm.converted_from == source_mm
+        assert conv_mm.is_conversion is True
+
+    def test_is_conversion_without_source(self, model_with_opdb_name_simple):
+        """is_conversion without converted_from only asserts is_conversion claim."""
+        mm = model_with_opdb_name_simple
+        path = _write_models_json(
+            [{"opdb_id": "Gtest-Mtest", "name": "Mystery Conv", "is_conversion": True}]
+        )
+
+        call_command("ingest_pinbase_models", path=path)
+
+        source = Source.objects.get(slug="pinbase")
+        assert mm.claims.filter(
+            source=source, field_name="is_conversion", is_active=True
+        ).exists()
+        assert not mm.claims.filter(
+            source=source, field_name="converted_from", is_active=True
+        ).exists()

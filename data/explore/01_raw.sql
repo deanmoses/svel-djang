@@ -100,9 +100,6 @@ FROM (
 CREATE OR REPLACE VIEW pinbase_cabinets AS
 SELECT * FROM read_json_auto('data/cabinets.json');
 
-CREATE OR REPLACE VIEW pinbase_conversions AS
-SELECT * FROM read_json_auto('data/conversions.json');
-
 CREATE OR REPLACE VIEW pinbase_corporate_entities AS
 SELECT * FROM read_json_auto('data/corporate_entities.json');
 

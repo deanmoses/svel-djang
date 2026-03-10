@@ -39,6 +39,16 @@ The frontend uses **Svelte 5 runes mode** (`runes: true` in compiler options). D
 
 NEVER use `:global` in Svelte component styles without explicit approval from the user. Scoped styles are the default and preferred approach. We rearchitect components rather than use `:global`.
 
+## All Catalog Fields Are Claims-Based — Non-Negotiable
+
+**EVERY field on catalog models must go through the claims/provenance system.** Scalars, foreign keys, and relationships — all of them. No exceptions without express approval from the user.
+
+The provenance system tracks **attribution**, not just disputes. Every piece of catalog data may come from a different source or user. "It only comes from one source today" is not a valid reason to bypass claims.
+
+The only exempt fields are internal infrastructure: `id`/`uuid`, `created_at`/`updated_at`, and `slug`.
+
+If you think a field needs an exception, **stop and ask the user first.** See [docs/Provenance.md](Provenance.md) for architecture details.
+
 ## Project Overview
 
 Django + SvelteKit monorepo. Django owns the data model, APIs (Django Ninja), and admin UI. SvelteKit handles the user-facing frontend with static adapter (CSR for authenticated pages, prerendered for public pages).

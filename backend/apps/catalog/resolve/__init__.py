@@ -30,6 +30,7 @@ from ..models import (
 from ._helpers import (
     DIRECT_FIELDS,
     _build_cabinet_lookup,
+    _build_converted_from_lookup,
     _build_display_subtype_lookup,
     _build_display_type_lookup,
     _build_game_format_lookup,
@@ -120,6 +121,7 @@ def resolve_model(machine_model: MachineModel) -> MachineModel:
     # This ensures deactivated claims don't leave stale values.
     machine_model.manufacturer = None
     machine_model.title = None
+    machine_model.converted_from = None
     machine_model.system = None
     machine_model.technology_generation = None
     machine_model.display_type = None
@@ -172,6 +174,10 @@ def resolve_model(machine_model: MachineModel) -> MachineModel:
             machine_model.game_format = _resolve_slug_fk(
                 claim.value, game_format_lookup, "game_format"
             )
+        elif claim.field_name == "converted_from":
+            machine_model.converted_from = _resolve_slug_fk(
+                claim.value, _build_converted_from_lookup(), "converted_from"
+            )
         elif claim.field_name in DIRECT_FIELDS:
             attr = DIRECT_FIELDS[claim.field_name]
             setattr(machine_model, attr, _coerce(claim.field_name, claim.value))
@@ -180,6 +186,10 @@ def resolve_model(machine_model: MachineModel) -> MachineModel:
             extra_data[claim.field_name] = claim.value
 
     machine_model.extra_data = extra_data
+
+    # Conversions are not variants.
+    if machine_model.is_conversion and machine_model.variant_of_id is not None:
+        machine_model.variant_of = None
 
     # Guard against UNIQUE constraint on opdb_id: if another model already
     # owns this opdb_id, clear it rather than crashing.
@@ -243,6 +253,7 @@ def resolve_all() -> int:
     display_subtype_lookup = _build_display_subtype_lookup()
     cabinet_lookup = _build_cabinet_lookup()
     game_format_lookup = _build_game_format_lookup()
+    converted_from_lookup = _build_converted_from_lookup()
     field_defaults = _get_field_defaults()
 
     # 2. Pre-fetch all active claims, grouped by object_id (~1 query).
@@ -266,26 +277,34 @@ def resolve_all() -> int:
             display_subtype_lookup,
             cabinet_lookup,
             game_format_lookup,
+            converted_from_lookup,
         )
 
-    # 5. Detect opdb_id conflicts across all resolved models.
+    # 5. Conversions are not variants: clear variant_of on conversion models.
+    for pm in all_models:
+        if pm.is_conversion and pm.variant_of_id is not None:
+            pm.variant_of = None
+
+    # 6. Detect opdb_id conflicts across all resolved models.
     _resolve_opdb_conflicts(all_models)
 
-    # 6. Set updated_at (auto_now not triggered by bulk_update).
+    # 7. Set updated_at (auto_now not triggered by bulk_update).
     now = timezone.now()
     for pm in all_models:
         pm.updated_at = now
 
-    # 7. Bulk write (~1 query, batched).
+    # 8. Bulk write (~1 query, batched).
     update_fields = list(DIRECT_FIELDS.values()) + [
         "manufacturer_id",
         "title_id",
+        "variant_of_id",
         "system_id",
         "technology_generation_id",
         "display_type_id",
         "display_subtype_id",
         "cabinet_id",
         "game_format_id",
+        "converted_from_id",
         "extra_data",
         "updated_at",
     ]
@@ -294,19 +313,19 @@ def resolve_all() -> int:
     # VALUES syntax and handles larger batches fine.
     MachineModel.objects.bulk_update(all_models, update_fields, batch_size=100)
 
-    # 8. Bulk-resolve credit relationships.
+    # 9. Bulk-resolve credit relationships.
     resolve_all_credits(all_models)
 
-    # 9. Bulk-resolve theme relationships.
+    # 10. Bulk-resolve theme relationships.
     resolve_all_themes(all_models)
 
-    # 10. Bulk-resolve gameplay feature relationships.
+    # 11. Bulk-resolve gameplay feature relationships.
     _resolve_all_gameplay_features(all_models)
 
-    # 11. Bulk-resolve tag relationships.
+    # 12. Bulk-resolve tag relationships.
     _resolve_all_tags(all_models)
 
-    # 12. Bulk-resolve model abbreviations.
+    # 13. Bulk-resolve model abbreviations.
     resolve_all_model_abbreviations(all_models)
 
     return len(all_models)
@@ -361,11 +380,13 @@ def _apply_resolution(
     display_subtype_lookup: dict[str, DisplaySubtype] | None = None,
     cabinet_lookup: dict[str, Cabinet] | None = None,
     game_format_lookup: dict[str, GameFormat] | None = None,
+    converted_from_lookup: dict[str, MachineModel] | None = None,
 ) -> None:
     """Apply claim winners to a MachineModel instance in memory."""
     # Reset FK fields.
     pm.manufacturer = None
     pm.title = None
+    pm.converted_from = None
     pm.system = None
     pm.technology_generation = None
     pm.display_type = None
@@ -415,6 +436,11 @@ def _apply_resolution(
             if game_format_lookup is not None:
                 pm.game_format = _resolve_slug_fk(
                     claim.value, game_format_lookup, "game_format"
+                )
+        elif claim.field_name == "converted_from":
+            if converted_from_lookup is not None:
+                pm.converted_from = _resolve_slug_fk(
+                    claim.value, converted_from_lookup, "converted_from"
                 )
         elif claim.field_name in DIRECT_FIELDS:
             attr = DIRECT_FIELDS[claim.field_name]
