@@ -74,17 +74,10 @@ SELECT
 FROM pinbase_manufacturers AS p
 LEFT JOIN fandom_manufacturers AS f ON p."name" = f.title;
 
+-- catalog_titles: pinbase-primary, OPDB-enriched.
+-- Mirrors Django's Title model after claims resolution.
 CREATE OR REPLACE VIEW catalog_titles AS
-SELECT
-  g.opdb_id AS opdb_group_id,
-  g."name",
-  g.shortname,
-  g.description,
-  t.slug AS title_slug,
-  t.franchise_slug,
-  t.series_slug
-FROM opdb_groups AS g
-LEFT JOIN pinbase_titles AS t ON g.opdb_id = t.opdb_group_id;
+SELECT * FROM merged_titles;
 
 ------------------------------------------------------------
 -- Tag-related views
@@ -110,147 +103,13 @@ GROUP BY t.slug, t."name", t.display_order, t.description
 ORDER BY t.display_order;
 
 ------------------------------------------------------------
--- Platform view (OPDB-only, picks representative machine per group)
+-- Core catalog views (from merged staging layer)
 ------------------------------------------------------------
 
-CREATE OR REPLACE VIEW catalog_platforms AS
-WITH
-  non_alias AS (
-    SELECT
-      *,
-      manufacturer."name" AS mfr_name,
-      manufacturer.full_name AS mfr_full_name
-    FROM opdb_machines
-    WHERE is_machine = CAST('t' AS BOOLEAN)
-  ),
-  ranked AS (
-    SELECT
-      *,
-      row_number() OVER (
-        PARTITION BY group_id, mfr_name
-        ORDER BY physical_machine ASC, manufacture_date ASC, opdb_id ASC
-      ) AS rn
-    FROM non_alias
-  )
-SELECT
-  group_id AS opdb_group_id,
-  mfr_name AS manufacturer,
-  mfr_full_name AS manufacturer_full_name,
-  (group_id || '-' || machine_id) AS platform_opdb_id,
-  "name",
-  manufacture_date,
-  "type",
-  display,
-  player_count,
-  description
-FROM ranked
-WHERE rn = 1;
-
-------------------------------------------------------------
--- Production views (override + auto-generated)
-------------------------------------------------------------
-
-CREATE OR REPLACE VIEW catalog_productions AS
-WITH
-  overridden_tiers AS (
-    SELECT
-      pt.opdb_id AS tier_opdb_id,
-      pt.production_slug,
-      pp.title_slug,
-      pp.slug AS production_slug,
-      pp."name" AS production_name,
-      pp.description AS production_description
-    FROM pinbase_tiers AS pt
-    INNER JOIN pinbase_productions AS pp ON pt.production_slug = pp.slug
-    WHERE pt.production_slug IS NOT NULL
-  ),
-  override_productions AS (
-    SELECT
-      ot.production_slug AS slug,
-      ot.production_name AS "name",
-      ot.production_description AS description,
-      oe.opdb_group_id,
-      oe.manufacturer,
-      oe.technology_generation_slug,
-      oe.manufacture_date,
-      oe.opdb_id AS representative_opdb_id,
-      CAST('t' AS BOOLEAN) AS is_override
-    FROM overridden_tiers AS ot
-    INNER JOIN opdb_tiers AS oe ON ot.tier_opdb_id = oe.opdb_id
-  ),
-  adjusted_base AS (
-    SELECT
-      t.opdb_group_id,
-      t.manufacturer,
-      t.technology_generation_slug,
-      min(t.manufacture_date) AS manufacture_date,
-      min(t.opdb_id) AS representative_opdb_id
-    FROM opdb_tiers AS t
-    LEFT JOIN overridden_tiers AS ot ON t.opdb_id = ot.tier_opdb_id
-    WHERE ot.tier_opdb_id IS NULL
-    GROUP BY t.opdb_group_id, t.manufacturer, t.technology_generation_slug
-  ),
-  auto_productions AS (
-    SELECT
-      CAST(NULL AS VARCHAR) AS slug,
-      CAST(NULL AS VARCHAR) AS "name",
-      CAST(NULL AS VARCHAR) AS description,
-      ab.opdb_group_id,
-      ab.manufacturer,
-      ab.technology_generation_slug,
-      ab.manufacture_date,
-      ab.representative_opdb_id,
-      CAST('f' AS BOOLEAN) AS is_override
-    FROM adjusted_base AS ab
-  )
-(SELECT * FROM auto_productions)
-UNION ALL
-(SELECT * FROM override_productions);
-
-CREATE OR REPLACE VIEW catalog_tier_productions AS
-WITH
-  overridden_tiers AS (
-    SELECT pt.opdb_id AS tier_opdb_id, pt.production_slug
-    FROM pinbase_tiers AS pt
-    WHERE pt.production_slug IS NOT NULL
-  )
-(SELECT
-  t.opdb_id AS tier_opdb_id,
-  p.slug AS production_slug,
-  p.opdb_group_id,
-  p.manufacturer,
-  p.technology_generation_slug,
-  p.is_override
-FROM opdb_tiers AS t
-INNER JOIN overridden_tiers AS ot ON t.opdb_id = ot.tier_opdb_id
-INNER JOIN catalog_productions AS p
-  ON ot.production_slug = p.slug AND p.is_override = CAST('t' AS BOOLEAN))
-UNION ALL
-(SELECT
-  t.opdb_id AS tier_opdb_id,
-  p.slug AS production_slug,
-  p.opdb_group_id,
-  p.manufacturer,
-  p.technology_generation_slug,
-  p.is_override
-FROM opdb_tiers AS t
-LEFT JOIN overridden_tiers AS ot ON t.opdb_id = ot.tier_opdb_id
-INNER JOIN catalog_productions AS p
-  ON t.opdb_group_id = p.opdb_group_id
-  AND t.manufacturer = p.manufacturer
-  AND t.technology_generation_slug IS NOT DISTINCT FROM p.technology_generation_slug
-  AND p.is_override = CAST('f' AS BOOLEAN)
-WHERE ot.tier_opdb_id IS NULL);
-
-------------------------------------------------------------
--- Thin wrappers on unified merge views
-------------------------------------------------------------
-
+-- catalog_models: the resolved machine model view.
+-- Mirrors Django's MachineModel after claims resolution.
 CREATE OR REPLACE VIEW catalog_models AS
-SELECT * FROM unified_models;
-
-CREATE OR REPLACE VIEW catalog_tiers AS
-SELECT * FROM unified_tiers;
+SELECT * FROM merged_models;
 
 ------------------------------------------------------------
 -- IPDB cross-reference
@@ -400,7 +259,7 @@ SELECT
   ps.slug,
   ps."name",
   ps.manufacturer_slug,
-  count(DISTINCT model_key(cm.opdb_id, cm.ipdb_id)) AS model_count
+  count(DISTINCT cm.model_key) AS model_count
 FROM pinbase_systems AS ps
 LEFT JOIN catalog_models AS cm ON ps.slug = cm.system_slug
 GROUP BY ps.slug, ps."name", ps.manufacturer_slug
@@ -412,7 +271,7 @@ SELECT
   tg.title AS "name",
   tg.display_order,
   tg.description,
-  count(DISTINCT model_key(cm.opdb_id, cm.ipdb_id)) AS model_count
+  count(DISTINCT cm.model_key) AS model_count
 FROM pinbase_technology_generations AS tg
 LEFT JOIN catalog_models AS cm ON tg.slug = cm.technology_generation_slug
 GROUP BY tg.slug, tg.title, tg.display_order, tg.description
@@ -424,7 +283,7 @@ SELECT
   dt.title AS "name",
   dt.display_order,
   dt.description,
-  count(DISTINCT model_key(cm.opdb_id, cm.ipdb_id)) AS model_count
+  count(DISTINCT cm.model_key) AS model_count
 FROM pinbase_display_types AS dt
 LEFT JOIN catalog_models AS cm ON dt.slug = cm.display_type_slug
 GROUP BY dt.slug, dt.title, dt.display_order, dt.description
@@ -457,21 +316,39 @@ FROM all_themes
 GROUP BY "name";
 
 ------------------------------------------------------------
--- Conversions
+-- Conversions (from pinbase editorial claims)
 ------------------------------------------------------------
 
 CREATE OR REPLACE VIEW catalog_conversions AS
 SELECT
-  pm.opdb_id AS converted_opdb_id,
-  pm."name" AS converted_name,
+  cm_conv.opdb_id AS converted_opdb_id,
+  cm_conv."name" AS converted_name,
   cm_conv.manufacturer AS converted_manufacturer,
   cm_conv.manufacture_date AS converted_date,
-  pm_src.opdb_id AS source_opdb_id,
-  pm_src."name" AS source_name,
+  cm_conv.converted_from AS source_slug,
+  cm_src.opdb_id AS source_opdb_id,
+  cm_src."name" AS source_name,
   cm_src.manufacturer AS source_manufacturer,
   cm_src.manufacture_date AS source_date
-FROM pinbase_models AS pm
-LEFT JOIN catalog_models AS cm_conv ON pm.opdb_id = cm_conv.opdb_id
-LEFT JOIN pinbase_models AS pm_src ON pm.converted_from = pm_src.slug
+FROM catalog_models AS cm_conv
+LEFT JOIN pinbase_models AS pm_src ON cm_conv.converted_from = pm_src.slug
 LEFT JOIN catalog_models AS cm_src ON pm_src.opdb_id = cm_src.opdb_id
-WHERE pm.is_conversion = true;
+WHERE cm_conv.is_conversion;
+
+------------------------------------------------------------
+-- Variant relationships (from pinbase editorial claims)
+------------------------------------------------------------
+
+CREATE OR REPLACE VIEW catalog_variants AS
+SELECT
+  cm.opdb_id AS variant_opdb_id,
+  cm."name" AS variant_name,
+  cm.manufacturer AS variant_manufacturer,
+  cm.variant_of AS production_slug,
+  pm_prod.opdb_id AS production_opdb_id,
+  cm_prod."name" AS production_name,
+  cm_prod.manufacturer AS production_manufacturer
+FROM catalog_models AS cm
+INNER JOIN pinbase_models AS pm_prod ON cm.variant_of = pm_prod.slug
+LEFT JOIN catalog_models AS cm_prod ON pm_prod.opdb_id = cm_prod.opdb_id
+WHERE cm.variant_of IS NOT NULL;

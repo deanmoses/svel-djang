@@ -130,9 +130,6 @@ SELECT * FROM read_json_auto('data/models.json', (union_by_name = CAST('t' AS BO
 CREATE OR REPLACE VIEW pinbase_people AS
 SELECT * FROM read_json_auto('data/people.json', (union_by_name = CAST('t' AS BOOLEAN)));
 
-CREATE OR REPLACE VIEW pinbase_productions AS
-SELECT * FROM read_json_auto('data/productions.json', (union_by_name = CAST('t' AS BOOLEAN)));
-
 CREATE OR REPLACE VIEW pinbase_series AS
 SELECT * FROM read_json_auto('data/series.json');
 
@@ -147,9 +144,6 @@ SELECT * FROM read_json_auto('data/technology_generations.json');
 
 CREATE OR REPLACE VIEW pinbase_technology_subgenerations AS
 SELECT * FROM read_json_auto('data/technology_subgenerations.json');
-
-CREATE OR REPLACE VIEW pinbase_tiers AS
-SELECT * FROM read_json_auto('data/tiers.json', (union_by_name = CAST('t' AS BOOLEAN)));
 
 CREATE OR REPLACE VIEW pinbase_titles AS
 SELECT * FROM read_json_auto('data/titles.json', (union_by_name = CAST('t' AS BOOLEAN)));

@@ -166,24 +166,19 @@
     "slug": "cactus-canyon-lyman-upgrade",
     "name": "Cactus Canyon (Lyman Upgrade)",
     "opdb_id": "G4835-M2YPK-ARkb7",
-    "variant_of": "cactus-canyon-remake-special",
+    "variant_of": "cactus-canyon-remake-special-edition",
     "is_conversion": true,
-    "converted_from": "cactus-canyon-remake"
-  },
-  {
-    "slug": "cactus-canyon-remake",
-    "name": "Cactus Canyon (Remake)",
-    "opdb_id": "G4835-M2YPK"
+    "converted_from": "cactus-canyon-remake-special-edition"
   },
   {
     "slug": "cactus-canyon-remake-limited-edition",
     "name": "Cactus Canyon (Remake Limited Edition)",
     "opdb_id": "G4835-M2YPK-A9ylv",
-    "variant_of": "cactus-canyon-remake-special"
+    "variant_of": "cactus-canyon-remake-special-edition"
   },
   {
-    "slug": "cactus-canyon-remake-special",
-    "name": "Cactus Canyon (Remake Special)",
+    "slug": "cactus-canyon-remake-special-edition",
+    "name": "Cactus Canyon (Remake Special Edition)",
     "opdb_id": "G4835-M2YPK-AR5ln"
   },
   {

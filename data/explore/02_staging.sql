@@ -26,117 +26,6 @@ FROM opdb_machines
 WHERE manufacturer IS NOT NULL
 ORDER BY "name";
 
--- opdb_tiers: one row per OPDB machine (non-alias), with combo-label detection
-CREATE OR REPLACE VIEW opdb_tiers AS
-SELECT
-  opdb_id,
-  group_id AS opdb_group_id,
-  machine_id,
-  (manufacturer ->> 'name') AS manufacturer,
-  "name",
-  common_name,
-  shortname,
-  manufacture_date,
-  ipdb_id,
-  images,
-  (physical_machine = 0) AS is_combo_label,
-  technology_generation_slug,
-  display_type_slug,
-  system_slug
-FROM opdb_machines
-WHERE is_machine = 't';
-
--- opdb_models: alias models + tier defaults + synthetic (no-alias) models
-CREATE OR REPLACE VIEW opdb_models AS
-WITH
-  combo_labels AS (
-    SELECT opdb_group_id, machine_id
-    FROM opdb_tiers
-    WHERE is_combo_label
-  ),
-  alias_models AS (
-    SELECT
-      a.opdb_id,
-      a.group_id AS opdb_group_id,
-      a.machine_id,
-      a.alias_id,
-      (a.group_id || '-' || a.machine_id) AS tier_opdb_id,
-      (a.manufacturer ->> 'name') AS manufacturer,
-      a."name",
-      a.common_name,
-      a.shortname,
-      a.manufacture_date,
-      a.ipdb_id,
-      a.images,
-      CASE
-        WHEN cl.machine_id IS NOT NULL
-        THEN (row_number() OVER (PARTITION BY a.group_id, a.machine_id ORDER BY a.opdb_id) = 1)
-        ELSE CAST('f' AS BOOLEAN)
-      END AS is_default,
-      CAST('f' AS BOOLEAN) AS is_synthetic
-    FROM opdb_machines AS a
-    LEFT JOIN combo_labels AS cl
-      ON cl.opdb_group_id = a.group_id AND cl.machine_id = a.machine_id
-    WHERE a.is_alias = 't'
-  ),
-  tier_default_models AS (
-    SELECT
-      opdb_id,
-      group_id AS opdb_group_id,
-      machine_id,
-      CAST(NULL AS VARCHAR) AS alias_id,
-      opdb_id AS tier_opdb_id,
-      (manufacturer ->> 'name') AS manufacturer,
-      "name",
-      common_name,
-      shortname,
-      manufacture_date,
-      ipdb_id,
-      images,
-      CAST('t' AS BOOLEAN) AS is_default,
-      CAST('f' AS BOOLEAN) AS is_synthetic
-    FROM opdb_machines AS m
-    WHERE m.is_machine = 't'
-      AND NOT EXISTS(
-        SELECT 1 FROM combo_labels AS cl
-        WHERE cl.opdb_group_id = m.group_id AND cl.machine_id = m.machine_id
-      )
-      AND EXISTS(
-        SELECT 1 FROM opdb_machines AS a
-        WHERE a.group_id = m.group_id
-          AND a.machine_id = m.machine_id
-          AND a.is_alias = 't'
-      )
-  ),
-  synthetic_models AS (
-    SELECT
-      opdb_id,
-      group_id AS opdb_group_id,
-      machine_id,
-      CAST(NULL AS VARCHAR) AS alias_id,
-      opdb_id AS tier_opdb_id,
-      (manufacturer ->> 'name') AS manufacturer,
-      "name",
-      common_name,
-      shortname,
-      manufacture_date,
-      ipdb_id,
-      images,
-      CAST('t' AS BOOLEAN) AS is_default,
-      CAST('t' AS BOOLEAN) AS is_synthetic
-    FROM opdb_machines AS m
-    WHERE m.is_machine = 't'
-      AND NOT EXISTS(
-        SELECT 1 FROM opdb_machines AS a
-        WHERE a.group_id = m.group_id
-          AND a.machine_id = m.machine_id
-          AND a.is_alias = 't'
-      )
-  )
-(SELECT * FROM alias_models)
-UNION ALL (SELECT * FROM tier_default_models)
-UNION ALL (SELECT * FROM synthetic_models);
-
 -- opdb_keywords: unnested keyword list per machine
 CREATE OR REPLACE VIEW opdb_keywords AS
 SELECT opdb_id, "name", unnest(keywords) AS keyword
@@ -358,34 +247,52 @@ SELECT
 FROM resolved AS r;
 
 ------------------------------------------------------------
--- Cross-source merge views
+-- Cross-source merge: models
+-- Mirrors Django's MachineModel after claims resolution.
+-- Priority: pinbase (300) > OPDB (200) > IPDB (100)
 ------------------------------------------------------------
 
--- unified_models: OPDB models + IPDB-only fallback, with taxonomy resolution
-CREATE OR REPLACE VIEW unified_models AS
+CREATE OR REPLACE VIEW merged_models AS
 WITH
-  opdb AS (
+  -- Every OPDB record (machine or alias) is a candidate model.
+  -- Excludes combo_labels (physical_machine=0): synthetic groupings, not real
+  -- machines. Django's ingest_opdb also skips these.
+  opdb_base AS (
     SELECT
-      opdb_id, opdb_group_id, machine_id, alias_id, tier_opdb_id,
-      manufacturer, "name", common_name, shortname,
-      manufacture_date, ipdb_id, images, is_default, is_synthetic,
-      'opdb' AS "source"
-    FROM opdb_models
+      om.opdb_id,
+      om.group_id AS opdb_group_id,
+      om.ipdb_id,
+      (om.manufacturer ->> 'name') AS opdb_manufacturer,
+      om."name" AS opdb_name,
+      om.common_name,
+      om.shortname,
+      om.manufacture_date,
+      om.player_count,
+      om.description AS opdb_description,
+      om.features,
+      om.images,
+      om.technology_generation_slug AS opdb_tech_gen_slug,
+      om.display_type_slug AS opdb_display_type_slug,
+      om.system_slug AS opdb_system_slug,
+      om.is_machine,
+      om.is_alias
+    FROM opdb_machines AS om
+    WHERE om.is_alias = 't'
+       OR (om.is_machine = 't' AND om.physical_machine != 0)
   ),
+  -- IPDB machines not cross-referenced from any OPDB record.
   ipdb_only AS (
     SELECT
       CAST(NULL AS VARCHAR) AS opdb_id,
       CAST(NULL AS VARCHAR) AS opdb_group_id,
-      CAST(NULL AS VARCHAR) AS machine_id,
-      CAST(NULL AS VARCHAR) AS alias_id,
-      CAST(NULL AS VARCHAR) AS tier_opdb_id,
+      im.IpdbId AS ipdb_id,
       COALESCE(
         imr_mfr."name",
         NULLIF(imr.trade_name, ''),
         imr.company_name,
         im.ManufacturerShortName
-      ) AS manufacturer,
-      im.Title AS "name",
+      ) AS opdb_manufacturer,
+      im.Title AS opdb_name,
       CAST(NULL AS VARCHAR) AS common_name,
       CAST(NULL AS VARCHAR) AS shortname,
       CASE
@@ -393,7 +300,9 @@ WITH
         THEN TRY_CAST(CAST(im.DateOfManufacture AS VARCHAR) AS DATE)
         ELSE NULL
       END AS manufacture_date,
-      im.IpdbId AS ipdb_id,
+      im.Players AS player_count,
+      CAST(NULL AS VARCHAR) AS opdb_description,
+      CAST([] AS VARCHAR[]) AS features,
       CAST(main.list_value() AS STRUCT(
         title VARCHAR,
         "primary" BOOLEAN,
@@ -405,83 +314,96 @@ WITH
           small STRUCT(width BIGINT, height BIGINT)
         )
       )[]) AS images,
-      CAST('t' AS BOOLEAN) AS is_default,
-      CAST('f' AS BOOLEAN) AS is_synthetic,
-      'ipdb' AS "source"
+      im.technology_generation_slug AS opdb_tech_gen_slug,
+      im.display_type_slug AS opdb_display_type_slug,
+      im.system_slug AS opdb_system_slug,
+      CAST('t' AS BOOLEAN) AS is_machine,
+      CAST('f' AS BOOLEAN) AS is_alias
     FROM ipdb_machines AS im
     LEFT JOIN opdb_machines AS om ON im.IpdbId = om.ipdb_id
     LEFT JOIN ipdb_manufacturer_resolution AS imr ON im.Manufacturer = imr.raw_manufacturer
     LEFT JOIN pinbase_manufacturers AS imr_mfr ON imr.manufacturer_slug = imr_mfr.slug
     WHERE om.opdb_id IS NULL
   ),
-  all_models AS (
-    (SELECT * FROM opdb)
+  all_sources AS (
+    (SELECT * FROM opdb_base)
     UNION ALL
     (SELECT * FROM ipdb_only)
   )
+-- Apply pinbase editorial claims (priority 300 wins over OPDB 200 / IPDB 100).
 SELECT
-  m.*,
-  COALESCE(om.technology_generation_slug, im.technology_generation_slug) AS technology_generation_slug,
-  COALESCE(pm.display_type_slug, om.display_type_slug, im.display_type_slug) AS display_type_slug,
-  COALESCE(om.system_slug, im.system_slug) AS system_slug
-FROM all_models AS m
+  model_key(m.opdb_id, m.ipdb_id) AS model_key,
+  m.opdb_id,
+  m.opdb_group_id,
+  COALESCE(m.ipdb_id, im.IpdbId) AS ipdb_id,
+  -- Name: pinbase > OPDB/IPDB
+  COALESCE(pm."name", m.opdb_name) AS "name",
+  m.common_name,
+  m.shortname,
+  m.opdb_manufacturer AS manufacturer,
+  m.manufacture_date,
+  m.player_count,
+  -- Taxonomy: pinbase > OPDB > IPDB
+  m.opdb_tech_gen_slug AS technology_generation_slug,
+  COALESCE(pm.display_type_slug, m.opdb_display_type_slug) AS display_type_slug,
+  m.opdb_system_slug AS system_slug,
+  -- Pinbase editorial claims
+  COALESCE(pm.is_conversion, false) AS is_conversion,
+  pm.converted_from,
+  pm.variant_of,
+  pm.description AS pinbase_description,
+  -- OPDB metadata
+  m.opdb_description,
+  m.features,
+  m.images,
+  m.is_machine,
+  m.is_alias,
+  -- Source tracking
+  CASE WHEN m.opdb_id IS NOT NULL THEN 'opdb' ELSE 'ipdb' END AS primary_source,
+  (pm.slug IS NOT NULL) AS has_pinbase_claims
+FROM all_sources AS m
 LEFT JOIN pinbase_models AS pm ON m.opdb_id = pm.opdb_id
-LEFT JOIN opdb_machines AS om ON m.opdb_id = om.opdb_id
 LEFT JOIN ipdb_machines AS im ON m.ipdb_id = im.IpdbId;
 
--- unified_tiers: OPDB tiers + IPDB-only fallback, with taxonomy resolution
-CREATE OR REPLACE VIEW unified_tiers AS
+------------------------------------------------------------
+-- Cross-source merge: titles
+-- Mirrors Django's Title after claims resolution.
+-- Pinbase titles are primary; OPDB groups enrich.
+------------------------------------------------------------
+
+CREATE OR REPLACE VIEW merged_titles AS
 WITH
-  opdb AS (
+  -- Start from OPDB groups as the universe of titles.
+  opdb_base AS (
     SELECT
-      opdb_id, opdb_group_id, machine_id,
-      "name", common_name, shortname,
-      manufacture_date, ipdb_id, images, is_combo_label,
-      'opdb' AS "source"
-    FROM opdb_tiers
+      g.opdb_id AS opdb_group_id,
+      g."name" AS opdb_name,
+      g.shortname,
+      g.description AS opdb_description
+    FROM opdb_groups AS g
   ),
-  ipdb_only AS (
+  -- Pinbase titles (may reference OPDB groups, or be standalone).
+  pinbase AS (
     SELECT
-      CAST(NULL AS VARCHAR) AS opdb_id,
-      CAST(NULL AS VARCHAR) AS opdb_group_id,
-      CAST(NULL AS VARCHAR) AS machine_id,
-      im.Title AS "name",
-      CAST(NULL AS VARCHAR) AS common_name,
-      CAST(NULL AS VARCHAR) AS shortname,
-      CASE
-        WHEN im.DateOfManufacture IS NOT NULL
-        THEN TRY_CAST(CAST(im.DateOfManufacture AS VARCHAR) AS DATE)
-        ELSE NULL
-      END AS manufacture_date,
-      im.IpdbId AS ipdb_id,
-      CAST(list_value() AS STRUCT(
-        title VARCHAR,
-        "primary" BOOLEAN,
-        "type" VARCHAR,
-        urls STRUCT(medium VARCHAR, "large" VARCHAR, small VARCHAR),
-        sizes STRUCT(
-          medium STRUCT(width BIGINT, height BIGINT),
-          "large" STRUCT(width BIGINT, height BIGINT),
-          small STRUCT(width BIGINT, height BIGINT)
-        )
-      )[]) AS images,
-      CAST('f' AS BOOLEAN) AS is_combo_label,
-      'ipdb' AS "source"
-    FROM ipdb_machines AS im
-    LEFT JOIN opdb_machines AS om ON im.IpdbId = om.ipdb_id
-    WHERE om.opdb_id IS NULL
-  ),
-  all_tiers AS (
-    (SELECT * FROM opdb)
-    UNION ALL
-    (SELECT * FROM ipdb_only)
+      t.opdb_group_id,
+      t.slug,
+      t."name" AS pinbase_name,
+      t.franchise_slug,
+      t.series_slug,
+      t.abbreviations
+    FROM pinbase_titles AS t
   )
+-- Full outer join: every OPDB group + every pinbase title.
 SELECT
-  e.*,
-  COALESCE(oe.technology_generation_slug, im.technology_generation_slug) AS technology_generation_slug,
-  COALESCE(pm.display_type_slug, oe.display_type_slug, im.display_type_slug) AS display_type_slug,
-  COALESCE(oe.system_slug, im.system_slug) AS system_slug
-FROM all_tiers AS e
-LEFT JOIN pinbase_models AS pm ON e.opdb_id = pm.opdb_id
-LEFT JOIN opdb_tiers AS oe ON e.opdb_id = oe.opdb_id
-LEFT JOIN ipdb_machines AS im ON e.ipdb_id = im.IpdbId;
+  COALESCE(o.opdb_group_id, p.opdb_group_id) AS opdb_group_id,
+  p.slug AS title_slug,
+  -- Name: pinbase > OPDB
+  COALESCE(p.pinbase_name, o.opdb_name) AS "name",
+  o.shortname,
+  o.opdb_description AS description,
+  p.franchise_slug,
+  p.series_slug,
+  p.abbreviations,
+  (p.slug IS NOT NULL) AS has_pinbase_claims
+FROM opdb_base AS o
+FULL OUTER JOIN pinbase AS p ON o.opdb_group_id = p.opdb_group_id;
