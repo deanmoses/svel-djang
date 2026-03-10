@@ -45,9 +45,7 @@ class TestAllEndpointCache:
         assert resp2.json() == resp1.json()
 
     def test_title_save_invalidates_cache(self, client, db):
-        title = Title.objects.create(
-            name="Cactus Canyon", opdb_id="CC1", short_name="CC"
-        )
+        title = Title.objects.create(name="Cactus Canyon", opdb_id="CC1")
         client.get("/api/titles/all/")
         assert cache.get(TITLES_ALL_KEY) is not None
 
@@ -59,6 +57,6 @@ class TestAllEndpointCache:
         resp1 = client.get("/api/titles/all/")
         count_before = len(resp1.json())
 
-        Title.objects.create(name="Godzilla", opdb_id="GZ1", short_name="GZ")
+        Title.objects.create(name="Godzilla", opdb_id="GZ1")
         resp2 = client.get("/api/titles/all/")
         assert len(resp2.json()) == count_before + 1

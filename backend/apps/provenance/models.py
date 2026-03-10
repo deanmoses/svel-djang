@@ -18,13 +18,19 @@ from apps.core.models import TimeStampedModel, unique_slug
 _RESERVED = frozenset("|:")
 
 
+def _escape_claim_value(s: str) -> str:
+    """Percent-escape reserved delimiters in claim key identity values."""
+    return s.replace("%", "%25").replace("|", "%7C").replace(":", "%3A")
+
+
 def make_claim_key(field_name: str, **identity_parts: object) -> str:
     """Build a canonical claim_key from field_name and sorted identity parts.
 
     For scalar claims, call with just field_name (returns field_name unchanged).
     For relationship claims, pass identity parts as keyword arguments.
 
-    Raises ValueError if any identity value contains reserved delimiters (| or :).
+    Reserved characters (``|`` and ``:``) in identity values are
+    percent-escaped so the key remains unambiguous.
     """
     if not identity_parts:
         return field_name
@@ -32,9 +38,7 @@ def make_claim_key(field_name: str, **identity_parts: object) -> str:
     for k in sorted(identity_parts):
         v = identity_parts[k]
         s = "null" if v is None else str(v)
-        if _RESERVED & set(s):
-            raise ValueError(f"Identity value {s!r} for {k!r} contains reserved chars")
-        parts.append(f"{k}:{s}")
+        parts.append(f"{k}:{_escape_claim_value(s)}")
     return "|".join(parts)
 
 

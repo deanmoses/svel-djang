@@ -161,9 +161,7 @@ class TestModelsAPI:
         assert data["aliases"][0]["variant_features"] == ["Gold trim"]
 
     def test_get_model_detail_title(self, client, machine_model, db):
-        title = Title.objects.create(
-            name="Medieval Madness", opdb_id="G5pe4", short_name="MM"
-        )
+        title = Title.objects.create(name="Medieval Madness", opdb_id="G5pe4")
         machine_model.title = title
         machine_model.save()
         resp = client.get(f"/api/models/{machine_model.slug}")

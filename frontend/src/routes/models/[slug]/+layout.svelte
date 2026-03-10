@@ -144,6 +144,10 @@
 						{/each}
 					</dd>
 				{/if}
+				{#if model.abbreviations.length > 0}
+					<dt>Abbrs</dt>
+					<dd>{model.abbreviations.join(', ')}</dd>
+				{/if}
 				{#if model.cabinet_name}
 					<dt>Cabinet</dt>
 					<dd>{model.cabinet_name}</dd>

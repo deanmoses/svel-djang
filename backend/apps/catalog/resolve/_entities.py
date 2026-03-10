@@ -83,7 +83,6 @@ _PERSON_INT_FIELDS: frozenset[str] = frozenset(
 
 TITLE_DIRECT_FIELDS: dict[str, str] = {
     "name": "name",
-    "short_name": "short_name",
     "description": "description",
 }
 
@@ -423,6 +422,11 @@ def resolve_title(title: Title) -> Title:
     else:
         title.franchise = None
     title.save()
+
+    # Resolve relationship claims after scalar save.
+    from ._relationships import resolve_title_abbreviations
+
+    resolve_title_abbreviations(title)
     return title
 
 

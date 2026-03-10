@@ -23,12 +23,8 @@ class TestSystemsAPI:
 
     @pytest.fixture
     def system_with_machines(self, system, manufacturer):
-        t1 = Title.objects.create(
-            name="Medieval Madness", opdb_id="G5pe4-s", short_name="MM"
-        )
-        t2 = Title.objects.create(
-            name="No Good Gofers", opdb_id="T-ngg", short_name="NGG"
-        )
+        t1 = Title.objects.create(name="Medieval Madness", opdb_id="G5pe4-s")
+        t2 = Title.objects.create(name="No Good Gofers", opdb_id="T-ngg")
         MachineModel.objects.create(
             name="Medieval Madness",
             manufacturer=manufacturer,

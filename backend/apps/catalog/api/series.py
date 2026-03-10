@@ -21,7 +21,7 @@ from .machine_models import CreditSchema
 class TitleRefSchema(Schema):
     name: str
     slug: str
-    short_name: str
+    abbreviations: list[str] = []
     machine_count: int = 0
     manufacturer_name: Optional[str] = None
     year: Optional[int] = None
@@ -63,7 +63,7 @@ def _serialize_title_list(title) -> dict:
     return {
         "name": title.name,
         "slug": title.slug,
-        "short_name": title.short_name,
+        "abbreviations": [a.value for a in title.abbreviations.all()],
         "machine_count": title.machine_count,
         "manufacturer_name": manufacturer_name,
         "year": year,
@@ -127,12 +127,13 @@ def get_series(request, slug: str):
             filter=Q(machine_models__alias_of__isnull=True),
         )
     ).prefetch_related(
+        "abbreviations",
         Prefetch(
             "machine_models",
             queryset=MachineModel.objects.filter(alias_of__isnull=True)
             .select_related("manufacturer")
             .order_by("year", "name"),
-        )
+        ),
     )
     credits_qs = Credit.objects.filter(
         series__isnull=False,

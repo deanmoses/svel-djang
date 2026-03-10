@@ -20,9 +20,7 @@ from .conftest import SAMPLE_IMAGES
 class TestTitlesAPI:
     @pytest.fixture
     def title(self, db):
-        return Title.objects.create(
-            name="Medieval Madness", opdb_id="G5pe4", short_name="MM"
-        )
+        return Title.objects.create(name="Medieval Madness", opdb_id="G5pe4")
 
     @pytest.fixture
     def title_with_machines(self, title, manufacturer):
@@ -48,7 +46,7 @@ class TestTitlesAPI:
         assert data["count"] == 1
         item = data["items"][0]
         assert item["name"] == "Medieval Madness"
-        assert item["short_name"] == "MM"
+        assert item["abbreviations"] == []
         assert item["machine_count"] == 2
 
     def test_list_titles_thumbnail(self, client, title_with_machines):
@@ -109,9 +107,7 @@ class TestTitlesAllFacets:
 
     @pytest.fixture
     def faceted_title(self, db, manufacturer, solid_state, credit_roles):
-        title = Title.objects.create(
-            name="Medieval Madness", opdb_id="G5pe4", short_name="MM"
-        )
+        title = Title.objects.create(name="Medieval Madness", opdb_id="G5pe4")
         franchise = Franchise.objects.create(name="Castle Games")
         title.franchise = franchise
         title.save()
@@ -221,7 +217,7 @@ class TestTitlesAllFacets:
 
     def test_all_titles_empty_title(self, client, db):
         """Title with no models returns empty facet arrays."""
-        Title.objects.create(name="Empty", opdb_id="EMPTY", short_name="E")
+        Title.objects.create(name="Empty", opdb_id="EMPTY")
         resp = client.get("/api/titles/all/")
         data = resp.json()
         item = data[0]

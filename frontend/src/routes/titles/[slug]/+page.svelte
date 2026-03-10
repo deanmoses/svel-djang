@@ -220,6 +220,10 @@
 							{/each}
 						</dd>
 					{/if}
+					{#if md.abbreviations.length > 0}
+						<dt>Abbrs</dt>
+						<dd>{md.abbreviations.join(', ')}</dd>
+					{/if}
 					{#if md.cabinet_name}
 						<dt>Cabinet</dt>
 						<dd>{md.cabinet_name}</dd>
@@ -341,6 +345,10 @@
 									<a href={resolve(`/themes/${theme.slug}`)}>{theme.name}</a>
 								{/each}
 							</dd>
+						{/if}
+						{#if title.abbreviations.length > 0}
+							<dt>Abbrs</dt>
+							<dd>{title.abbreviations.join(', ')}</dd>
 						{/if}
 						{#if specs.cabinet_name}
 							<dt>Cabinet</dt>

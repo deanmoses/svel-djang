@@ -66,11 +66,20 @@ class TestResolveModel:
 
     def test_extra_data_catchall(self, pm, ipdb):
         Claim.objects.assert_claim(pm, "model_number", "20021", source=ipdb)
-        Claim.objects.assert_claim(pm, "abbreviation", "MM", source=ipdb)
 
         resolved = resolve_model(pm)
         assert resolved.extra_data["model_number"] == "20021"
-        assert resolved.extra_data["abbreviation"] == "MM"
+
+    def test_abbreviation_relationship_claim(self, pm, ipdb):
+        from apps.catalog.claims import build_relationship_claim
+
+        claim_key, value = build_relationship_claim("abbreviation", {"value": "MM"})
+        Claim.objects.assert_claim(
+            pm, "abbreviation", value, source=ipdb, claim_key=claim_key
+        )
+
+        resolved = resolve_model(pm)
+        assert list(resolved.abbreviations.values_list("value", flat=True)) == ["MM"]
 
     def test_manufacturer_resolution_by_slug(self, pm, ipdb):
         mfr = Manufacturer.objects.create(name="Williams", slug="williams")
@@ -113,11 +122,9 @@ class TestResolveModel:
     def test_stale_values_cleared_on_re_resolve(self, pm, ipdb):
         Claim.objects.assert_claim(pm, "year", 1997, source=ipdb)
         Claim.objects.assert_claim(pm, "player_count", 4, source=ipdb)
-        Claim.objects.assert_claim(pm, "abbreviation", "MM", source=ipdb)
         resolve_model(pm)
         assert pm.year == 1997
         assert pm.player_count == 4
-        assert pm.extra_data["abbreviation"] == "MM"
 
         pm.claims.filter(is_active=True).update(is_active=False)
         resolve_model(pm)
@@ -189,12 +196,18 @@ class TestResolveAll:
         pm_bulk = MachineModel.objects.create(name="P1", slug="p1")
         pm_single = MachineModel.objects.create(name="P2", slug="p2")
 
+        from apps.catalog.claims import build_relationship_claim
+
+        abbr_key, abbr_val = build_relationship_claim("abbreviation", {"value": "MM"})
+
         for pm in (pm_bulk, pm_single):
             Claim.objects.assert_claim(pm, "name", "Medieval Madness", source=ipdb)
             Claim.objects.assert_claim(pm, "year", 1997, source=opdb)
             Claim.objects.assert_claim(pm, "manufacturer", "williams", source=ipdb)
             Claim.objects.assert_claim(pm, "group", "G1111", source=opdb)
-            Claim.objects.assert_claim(pm, "abbreviation", "MM", source=ipdb)
+            Claim.objects.assert_claim(
+                pm, "abbreviation", abbr_val, source=ipdb, claim_key=abbr_key
+            )
             Claim.objects.assert_claim(
                 pm, "technology_generation", "solid-state", source=ipdb
             )
@@ -237,12 +250,10 @@ class TestResolveAll:
 
         Claim.objects.assert_claim(pm, "year", 1997, source=ipdb)
         Claim.objects.assert_claim(pm, "player_count", 4, source=ipdb)
-        Claim.objects.assert_claim(pm, "abbreviation", "MM", source=ipdb)
         resolve_all()
         pm.refresh_from_db()
         assert pm.year == 1997
         assert pm.player_count == 4
-        assert pm.extra_data["abbreviation"] == "MM"
 
         pm.claims.filter(is_active=True).update(is_active=False)
         resolve_all()
@@ -260,7 +271,7 @@ class TestResolveAll:
             Claim.objects.assert_claim(pm, "name", f"Resolved {i}", source=ipdb)
             Claim.objects.assert_claim(pm, "year", 2000 + i, source=ipdb)
 
-        with django_assert_max_num_queries(50):
+        with django_assert_max_num_queries(55):
             resolve_all()
 
 
