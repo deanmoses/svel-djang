@@ -49,9 +49,6 @@
 						}) + ' '}{/if}{model.year}</span
 				>
 			{/if}
-			{#if model.franchise}
-				<span>{model.franchise.name}</span>
-			{/if}
 		</div>
 		{#if model.variant_features.length > 0}
 			<div class="features">
@@ -133,6 +130,12 @@
 					<dt>System</dt>
 					<dd>
 						<a href={resolve(`/systems/${model.system_slug}`)}>{model.system_name}</a>
+					</dd>
+				{/if}
+				{#if model.franchise}
+					<dt>Franchise</dt>
+					<dd>
+						<a href={resolve(`/franchises/${model.franchise.slug}`)}>{model.franchise.name}</a>
 					</dd>
 				{/if}
 				{#if model.themes.length > 0}
