@@ -19,6 +19,7 @@ from .models import (
     GameplayFeature,
     MachineModel,
     Manufacturer,
+    ModelAbbreviation,
     Person,
     Series,
     System,
@@ -27,6 +28,7 @@ from .models import (
     TechnologySubgeneration,
     Theme,
     Title,
+    TitleAbbreviation,
 )
 from .resolve import (
     DIRECT_FIELDS,
@@ -270,11 +272,36 @@ class ManufacturerAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
         return obj.entities.count()
 
 
+class TitleAbbreviationInline(admin.TabularInline):
+    """Read-only inline — abbreviations are materialized from relationship claims."""
+
+    model = TitleAbbreviation
+    extra = 0
+    readonly_fields = ("value",)
+    can_delete = False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+class ModelAbbreviationInline(admin.TabularInline):
+    """Read-only inline — abbreviations are materialized from relationship claims."""
+
+    model = ModelAbbreviation
+    extra = 0
+    readonly_fields = ("value",)
+    can_delete = False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(Title)
 class TitleAdmin(admin.ModelAdmin):
-    list_display = ("name", "short_name", "opdb_id", "machine_model_count")
-    search_fields = ("name", "short_name", "opdb_id")
+    list_display = ("name", "opdb_id", "machine_model_count")
+    search_fields = ("name", "opdb_id")
     prepopulated_fields = {"slug": ("name",)}
+    inlines = (TitleAbbreviationInline,)
 
     @admin.display(description="Machine Models")
     def machine_model_count(self, obj):
@@ -402,7 +429,13 @@ class MachineModelAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
         "cabinet",
         "game_format",
     )
-    inlines = (CreditInline, ThemeInline, GameplayFeatureInline, ClaimInline)
+    inlines = (
+        CreditInline,
+        ThemeInline,
+        GameplayFeatureInline,
+        ModelAbbreviationInline,
+        ClaimInline,
+    )
 
     fieldsets = (
         (

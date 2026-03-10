@@ -21,7 +21,7 @@ function makeTitle(overrides: Partial<FacetedTitle> = {}): FacetedTitle {
 	return {
 		name: 'Test Title',
 		slug: 'test-title',
-		short_name: 'TT',
+		abbreviations: ['TT'],
 		machine_count: 1,
 		tech_generations: [],
 		display_types: [],
@@ -37,7 +37,7 @@ function makeTitle(overrides: Partial<FacetedTitle> = {}): FacetedTitle {
 const medievalMadness = makeTitle({
 	name: 'Medieval Madness',
 	slug: 'medieval-madness',
-	short_name: 'MM',
+	abbreviations: ['MM'],
 	manufacturer_name: 'Williams',
 	manufacturer_slug: 'williams',
 	year: 1997,
@@ -56,7 +56,7 @@ const medievalMadness = makeTitle({
 const mandalorian = makeTitle({
 	name: 'The Mandalorian',
 	slug: 'the-mandalorian',
-	short_name: 'Mando',
+	abbreviations: ['Mando'],
 	manufacturer_name: 'Stern',
 	manufacturer_slug: 'stern',
 	year: 2021,
@@ -76,7 +76,7 @@ const mandalorian = makeTitle({
 const eightBall = makeTitle({
 	name: 'Eight Ball Deluxe',
 	slug: 'eight-ball-deluxe',
-	short_name: 'EBD',
+	abbreviations: ['EBD'],
 	manufacturer_name: 'Bally',
 	manufacturer_slug: 'bally',
 	year: 1981,

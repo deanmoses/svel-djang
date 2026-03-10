@@ -397,8 +397,9 @@ class Title(TimeStampedModel):
 
     OPDB calls this a "group" (e.g., "Medieval Madness" spans the 1997 original,
     the 2015 remake, and LE/SE variants). We use "Title" as it is the natural
-    pinball-world term. Title fields (name, short_name, description, franchise)
-    are resolved from claims, just like MachineModel and Manufacturer.
+    pinball-world term. Title fields (name, description, franchise) and
+    abbreviations are resolved from claims, just like MachineModel and
+    Manufacturer.
     """
 
     opdb_id = models.CharField(
@@ -409,11 +410,6 @@ class Title(TimeStampedModel):
     )
     name = models.CharField(max_length=300)
     slug = models.SlugField(max_length=300, unique=True, blank=True)
-    short_name = models.CharField(
-        max_length=50,
-        blank=True,
-        help_text='Common abbreviation, e.g., "MM" for Medieval Madness',
-    )
     description = models.TextField(blank=True)
     franchise = models.ForeignKey(
         Franchise,
@@ -438,14 +434,37 @@ class Title(TimeStampedModel):
         ordering = ["name"]
 
     def __str__(self) -> str:
-        if self.short_name:
-            return f"{self.name} ({self.short_name})"
         return self.name
 
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = unique_slug(self, self.name, "title")
         super().save(*args, **kwargs)
+
+
+# ---------------------------------------------------------------------------
+# TitleAbbreviation
+# ---------------------------------------------------------------------------
+
+
+class TitleAbbreviation(TimeStampedModel):
+    """A common abbreviation for a Title, e.g. "MM" for Medieval Madness.
+
+    Materialized from provenance claims; each abbreviation is individually
+    tracked with source attribution.
+    """
+
+    title = models.ForeignKey(
+        Title, on_delete=models.CASCADE, related_name="abbreviations"
+    )
+    value = models.CharField(max_length=50)
+
+    class Meta:
+        ordering = ["value"]
+        unique_together = [("title", "value")]
+
+    def __str__(self) -> str:
+        return self.value
 
 
 # ---------------------------------------------------------------------------
@@ -715,6 +734,31 @@ class MachineModel(TimeStampedModel):
                 parts.append(str(self.year))
             self.slug = unique_slug(self, " ".join(parts), "model")
         super().save(*args, **kwargs)
+
+
+# ---------------------------------------------------------------------------
+# ModelAbbreviation
+# ---------------------------------------------------------------------------
+
+
+class ModelAbbreviation(TimeStampedModel):
+    """A common abbreviation for a MachineModel, e.g. "TS4LE" for Toy Story 4 LE.
+
+    Materialized from provenance claims; each abbreviation is individually
+    tracked with source attribution.
+    """
+
+    machine_model = models.ForeignKey(
+        MachineModel, on_delete=models.CASCADE, related_name="abbreviations"
+    )
+    value = models.CharField(max_length=50)
+
+    class Meta:
+        ordering = ["value"]
+        unique_together = [("machine_model", "value")]
+
+    def __str__(self) -> str:
+        return self.value
 
 
 # ---------------------------------------------------------------------------

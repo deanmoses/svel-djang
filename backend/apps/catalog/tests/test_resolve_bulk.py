@@ -34,7 +34,6 @@ class TestResolveBulkTitle:
         t2 = Title.objects.create(opdb_id="G2", name="", slug="t2")
 
         Claim.objects.assert_claim(t1, "name", "Godzilla", source=opdb)
-        Claim.objects.assert_claim(t1, "short_name", "GZ", source=opdb)
         Claim.objects.assert_claim(t2, "name", "Blackout", source=opdb)
 
         _resolve_bulk(Title, TITLE_DIRECT_FIELDS)
@@ -42,9 +41,7 @@ class TestResolveBulkTitle:
         t1.refresh_from_db()
         t2.refresh_from_db()
         assert t1.name == "Godzilla"
-        assert t1.short_name == "GZ"
         assert t2.name == "Blackout"
-        assert t2.short_name == ""
 
     def test_winner_by_priority(self, opdb, editorial):
         t = Title.objects.create(opdb_id="G1", name="", slug="t1")

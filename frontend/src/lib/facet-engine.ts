@@ -17,7 +17,7 @@ export interface FacetRef {
 export interface FacetedTitle {
 	name: string;
 	slug: string;
-	short_name: string;
+	abbreviations: string[];
 	machine_count: number;
 	manufacturer_name?: string | null;
 	manufacturer_slug?: string | null;
@@ -157,7 +157,7 @@ function matchesQuery(t: FacetedTitle, q: string): boolean {
 	if (!q) return true;
 	return (
 		normalizeText(t.name).includes(q) ||
-		normalizeText(t.short_name).includes(q) ||
+		t.abbreviations.some((a) => normalizeText(a).includes(q)) ||
 		(t.manufacturer_name != null && normalizeText(t.manufacturer_name).includes(q))
 	);
 }

@@ -50,9 +50,12 @@ from ._relationships import (
     _resolve_all_gameplay_features,
     _resolve_all_tags,
     resolve_all_credits,
+    resolve_all_model_abbreviations,
     resolve_all_themes,
+    resolve_all_title_abbreviations,
     resolve_credits,
     resolve_gameplay_features,
+    resolve_model_abbreviations,
     resolve_tags,
     resolve_themes,
 )
@@ -205,6 +208,7 @@ def resolve_model(machine_model: MachineModel) -> MachineModel:
     resolve_themes(machine_model)
     resolve_gameplay_features(machine_model)
     resolve_tags(machine_model)
+    resolve_model_abbreviations(machine_model)
 
     return machine_model
 
@@ -226,6 +230,9 @@ def resolve_all() -> int:
         TITLE_DIRECT_FIELDS,
         fk_handlers={"franchise": ("franchise", franchise_lookup)},
     )
+
+    # 0c. Resolve title abbreviations.
+    resolve_all_title_abbreviations(list(Title.objects.all()))
 
     # 1. Pre-fetch lookup tables.
     mfr_lookup = _build_manufacturer_lookup()
@@ -298,6 +305,9 @@ def resolve_all() -> int:
 
     # 11. Bulk-resolve tag relationships.
     _resolve_all_tags(all_models)
+
+    # 12. Bulk-resolve model abbreviations.
+    resolve_all_model_abbreviations(all_models)
 
     return len(all_models)
 

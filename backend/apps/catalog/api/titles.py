@@ -30,7 +30,7 @@ class FacetRef(Schema):
 class TitleListSchema(Schema):
     name: str
     slug: str
-    short_name: str
+    abbreviations: list[str] = []
     machine_count: int = 0
     manufacturer_name: Optional[str] = None
     manufacturer_slug: Optional[str] = None
@@ -76,7 +76,7 @@ class AgreedSpecsSchema(Schema):
 class TitleDetailSchema(Schema):
     name: str
     slug: str
-    short_name: str
+    abbreviations: list[str] = []
     description: str = ""
     needs_review: bool = False
     needs_review_notes: str = ""
@@ -161,7 +161,7 @@ def _serialize_title_list(title) -> dict:
     return {
         "name": title.name,
         "slug": title.slug,
-        "short_name": title.short_name,
+        "abbreviations": [a.value for a in title.abbreviations.all()],
         "machine_count": title.machine_count,
         "manufacturer_name": manufacturer_name,
         "manufacturer_slug": manufacturer_slug,
@@ -363,7 +363,7 @@ def _serialize_title_detail(title) -> dict:
     return {
         "name": title.name,
         "slug": title.slug,
-        "short_name": title.short_name,
+        "abbreviations": [a.value for a in title.abbreviations.all()],
         "description": title.description,
         "needs_review": title.needs_review,
         "needs_review_notes": title.needs_review_notes,
@@ -418,7 +418,7 @@ def list_titles(request, display: str = ""):
         qs = qs.filter(machine_models__display_type__slug=display).distinct()
     qs = (
         qs.select_related("franchise")
-        .prefetch_related(_title_models_prefetch(), "series")
+        .prefetch_related(_title_models_prefetch(), "series", "abbreviations")
         .order_by("name")
     )
     return [_serialize_title_list(t) for t in qs]
@@ -447,7 +447,7 @@ def list_all_titles(request):
             ),
         )
         .select_related("franchise")
-        .prefetch_related(_title_models_prefetch(), "series")
+        .prefetch_related(_title_models_prefetch(), "series", "abbreviations")
         .order_by(F("latest_year").desc(nulls_last=True), "name")
     )
     result = [_serialize_title_list(t) for t in qs]
@@ -461,7 +461,9 @@ def get_title(request, slug: str):
     from ..models import Title
 
     title = get_object_or_404(
-        Title.objects.prefetch_related(_title_models_prefetch(), "series"),
+        Title.objects.prefetch_related(
+            _title_models_prefetch(), "series", "abbreviations"
+        ),
         slug=slug,
     )
     return _serialize_title_detail(title)

@@ -21,6 +21,7 @@ from apps.catalog.ingestion.parsers import (
     parse_opdb_date,
     parse_opdb_group_id,
 )
+from apps.catalog.claims import build_relationship_claim
 from apps.catalog.models import MachineModel, Manufacturer, Title
 from apps.provenance.models import Claim, Source
 
@@ -524,7 +525,6 @@ class Command(BaseCommand):
 
         for opdb_id, rec in groups_by_id.items():
             name = rec.get("name", "")
-            short_name = rec.get("shortname") or ""
 
             existing = existing_titles.get(opdb_id)
             if existing:
@@ -536,7 +536,6 @@ class Command(BaseCommand):
                         opdb_id=opdb_id,
                         name=name,
                         slug=slug,
-                        short_name=short_name,
                     )
                 )
 
@@ -547,7 +546,7 @@ class Command(BaseCommand):
         # Re-fetch all titles so we have PKs for claim assertions.
         all_titles: dict[str, Title] = {t.opdb_id: t for t in Title.objects.all()}
 
-        # Collect name and short_name claims for all titles from this source.
+        # Collect name and abbreviation claims for all titles from this source.
         pending_claims: list[Claim] = []
         touched_ids: set[int] = set()
 
@@ -570,12 +569,16 @@ class Command(BaseCommand):
                     )
                 )
             if short_name:
+                claim_key, value = build_relationship_claim(
+                    "abbreviation", {"value": short_name}
+                )
                 pending_claims.append(
                     Claim(
                         content_type_id=ct_id,
                         object_id=title.pk,
-                        field_name="short_name",
-                        value=short_name,
+                        field_name="abbreviation",
+                        claim_key=claim_key,
+                        value=value,
                     )
                 )
 
@@ -584,12 +587,17 @@ class Command(BaseCommand):
         # Resolve touched titles so fields reflect winning claims.
         from apps.catalog.models import Franchise
 
+        from apps.catalog.resolve import resolve_all_title_abbreviations
+
         franchise_lookup = {f.slug: f for f in Franchise.objects.all()}
         _resolve_bulk(
             Title,
             TITLE_DIRECT_FIELDS,
             fk_handlers={"franchise": ("franchise", franchise_lookup)},
             object_ids=touched_ids,
+        )
+        resolve_all_title_abbreviations(
+            list(Title.objects.all()), title_ids=touched_ids
         )
 
         self.stdout.write(f"  Titles: {titles_created} created, {unchanged} unchanged")
@@ -680,10 +688,26 @@ class Command(BaseCommand):
         if opdb_features:
             _add("variant_features", opdb_features)
 
-        for field in ("keywords", "description", "common_name", "shortname", "images"):
+        for field in ("keywords", "description", "common_name", "images"):
             value = rec.get(field)
             if value:
                 _add(field, value)
+
+        # Shortname becomes a relationship claim for abbreviations.
+        shortname = rec.get("shortname")
+        if shortname:
+            claim_key, abbr_value = build_relationship_claim(
+                "abbreviation", {"value": shortname}
+            )
+            pending_claims.append(
+                Claim(
+                    content_type_id=ct_id,
+                    object_id=pm.pk,
+                    field_name="abbreviation",
+                    claim_key=claim_key,
+                    value=abbr_value,
+                )
+            )
 
         # Group claim (derived from opdb_id prefix).
         if opdb_id and groups_by_id:

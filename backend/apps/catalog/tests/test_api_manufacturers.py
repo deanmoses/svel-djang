@@ -17,9 +17,7 @@ class TestManufacturersAPI:
         assert data["items"][0]["model_count"] == 1
 
     def test_get_manufacturer_detail(self, client, manufacturer, machine_model):
-        title = Title.objects.create(
-            name="Medieval Madness", opdb_id="G5pe4", short_name="MM"
-        )
+        title = Title.objects.create(name="Medieval Madness", opdb_id="G5pe4")
         machine_model.title = title
         machine_model.save()
         CorporateEntity.objects.create(
@@ -91,12 +89,8 @@ class TestManufacturersAPI:
         assert data[0]["thumbnail_url"] == "https://img.opdb.org/year-md.jpg"
 
     def test_get_manufacturer_detail_nulls_last(self, client, manufacturer, db):
-        t1 = Title.objects.create(
-            name="No Year Title", opdb_id="T-noyear", short_name="NYT"
-        )
-        t2 = Title.objects.create(
-            name="Has Year Title", opdb_id="T-hasyear", short_name="HYT"
-        )
+        t1 = Title.objects.create(name="No Year Title", opdb_id="T-noyear")
+        t2 = Title.objects.create(name="Has Year Title", opdb_id="T-hasyear")
         MachineModel.objects.create(
             name="No Year Game",
             manufacturer=manufacturer,

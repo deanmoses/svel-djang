@@ -32,13 +32,17 @@ class TestMakeClaimKey:
         key = make_claim_key("recipient", person="pat-lawlor", year=None)
         assert key == "recipient|person:pat-lawlor|year:null"
 
-    def test_pipe_in_value_raises(self):
-        with pytest.raises(ValueError, match="reserved"):
-            make_claim_key("credit", person="bad|value")
+    def test_pipe_in_value_escaped(self):
+        key = make_claim_key("credit", person="bad|value")
+        assert key == "credit|person:bad%7Cvalue"
 
-    def test_colon_in_value_raises(self):
-        with pytest.raises(ValueError, match="reserved"):
-            make_claim_key("credit", person="bad:value")
+    def test_colon_in_value_escaped(self):
+        key = make_claim_key("credit", person="bad:value")
+        assert key == "credit|person:bad%3Avalue"
+
+    def test_percent_in_value_escaped(self):
+        key = make_claim_key("credit", person="100%")
+        assert key == "credit|person:100%25"
 
 
 # ---------------------------------------------------------------------------

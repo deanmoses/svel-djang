@@ -101,8 +101,8 @@ class TestIngestOpdbNewFields:
     def test_claims_shortname(self):
         pm = MachineModel.objects.get(opdb_id="G2222-MTest2")
         source = Source.objects.get(slug="opdb")
-        claim = pm.claims.get(source=source, field_name="shortname", is_active=True)
-        assert claim.value == "SEG"
+        claim = pm.claims.get(source=source, field_name="abbreviation", is_active=True)
+        assert claim.value == {"value": "SEG", "exists": True}
 
     def test_claims_images(self):
         pm = MachineModel.objects.get(opdb_id="G1111-MTest1")
@@ -127,7 +127,7 @@ class TestIngestOpdbGroups:
         assert Title.objects.count() == 3
         mm = Title.objects.get(opdb_id="G1111")
         assert mm.name == "Medieval Madness"
-        assert mm.short_name == "MM"
+        assert list(mm.abbreviations.values_list("value", flat=True)) == ["MM"]
 
     def test_group_claim_on_machine(self):
         pm = MachineModel.objects.get(opdb_id="G1111-MTest1")

@@ -768,14 +768,6 @@ class Migration(migrations.Migration):
                 ),
                 ("name", models.CharField(max_length=300)),
                 ("slug", models.SlugField(blank=True, max_length=300, unique=True)),
-                (
-                    "short_name",
-                    models.CharField(
-                        blank=True,
-                        help_text='Common abbreviation, e.g., "MM" for Medieval Madness',
-                        max_length=50,
-                    ),
-                ),
                 ("description", models.TextField(blank=True)),
                 (
                     "needs_review",
@@ -877,5 +869,63 @@ class Migration(migrations.Migration):
             index=models.Index(
                 fields=["display_type"], name="catalog_mac_display_2a6560_idx"
             ),
+        ),
+        migrations.CreateModel(
+            name="TitleAbbreviation",
+            fields=[
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("value", models.CharField(max_length=50)),
+                (
+                    "title",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="abbreviations",
+                        to="catalog.title",
+                    ),
+                ),
+            ],
+            options={
+                "ordering": ["value"],
+                "unique_together": {("title", "value")},
+            },
+        ),
+        migrations.CreateModel(
+            name="ModelAbbreviation",
+            fields=[
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("value", models.CharField(max_length=50)),
+                (
+                    "machine_model",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="abbreviations",
+                        to="catalog.machinemodel",
+                    ),
+                ),
+            ],
+            options={
+                "ordering": ["value"],
+                "unique_together": {("machine_model", "value")},
+            },
         ),
     ]

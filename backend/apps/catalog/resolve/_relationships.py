@@ -1,4 +1,5 @@
-"""Resolution logic for relationship claims (credits, themes, gameplay features, tags).
+"""Resolution logic for relationship claims (credits, themes, gameplay features, tags,
+abbreviations).
 
 Includes both single-object and bulk variants for each relationship type.
 """
@@ -16,9 +17,12 @@ from ..models import (
     CreditRole,
     GameplayFeature,
     MachineModel,
+    ModelAbbreviation,
     Person,
     Tag,
     Theme,
+    Title,
+    TitleAbbreviation,
 )
 from ._helpers import _pick_relationship_winners
 
@@ -568,3 +572,221 @@ def _resolve_all_tags(all_models: list[MachineModel]) -> None:
         through.objects.filter(pk__in=to_delete_pks).delete()
     if to_create:
         through.objects.bulk_create(to_create, batch_size=2000)
+
+
+# ------------------------------------------------------------------
+# Single-object abbreviation resolvers
+# ------------------------------------------------------------------
+
+
+def resolve_title_abbreviations(title: Title) -> None:
+    """Resolve abbreviation claims into TitleAbbreviation rows for a single Title."""
+    winners = _pick_relationship_winners(title, "abbreviation")
+
+    desired: set[str] = set()
+    for claim in winners.values():
+        val = claim.value
+        if not val.get("exists", True):
+            continue
+        desired.add(val["value"])
+
+    existing = set(title.abbreviations.values_list("value", flat=True))
+
+    # Create new abbreviations.
+    for value in desired - existing:
+        TitleAbbreviation.objects.create(title=title, value=value)
+
+    # Remove stale abbreviations.
+    if stale := existing - desired:
+        title.abbreviations.filter(value__in=stale).delete()
+
+
+def resolve_model_abbreviations(machine_model: MachineModel) -> None:
+    """Resolve abbreviation claims into ModelAbbreviation rows for a single MachineModel."""
+    winners = _pick_relationship_winners(machine_model, "abbreviation")
+
+    desired: set[str] = set()
+    for claim in winners.values():
+        val = claim.value
+        if not val.get("exists", True):
+            continue
+        desired.add(val["value"])
+
+    existing = set(machine_model.abbreviations.values_list("value", flat=True))
+
+    for value in desired - existing:
+        ModelAbbreviation.objects.create(machine_model=machine_model, value=value)
+
+    if stale := existing - desired:
+        machine_model.abbreviations.filter(value__in=stale).delete()
+
+
+# ------------------------------------------------------------------
+# Bulk abbreviation resolvers
+# ------------------------------------------------------------------
+
+
+def resolve_all_title_abbreviations(
+    all_titles: list[Title],
+    *,
+    title_ids: set[int] | None = None,
+) -> None:
+    """Bulk-resolve abbreviation claims into TitleAbbreviation rows."""
+    from django.contrib.contenttypes.models import ContentType
+
+    ct = ContentType.objects.get_for_model(Title)
+
+    # Pre-fetch active abbreviation claims with priority annotation.
+    abbr_qs = Claim.objects.filter(
+        is_active=True, content_type=ct, field_name="abbreviation"
+    )
+    if title_ids is not None:
+        abbr_qs = abbr_qs.filter(object_id__in=title_ids)
+    abbr_claims = (
+        abbr_qs.select_related("source", "user__profile")
+        .annotate(
+            effective_priority=Case(
+                When(source__isnull=False, then=F("source__priority")),
+                When(user__isnull=False, then=F("user__profile__priority")),
+                default=Value(0),
+                output_field=IntegerField(),
+            )
+        )
+        .order_by("object_id", "claim_key", "-effective_priority", "-created_at")
+    )
+
+    # Pick winner per (object_id, claim_key).
+    winners_by_title: dict[int, list[Claim]] = {}
+    seen: set[tuple[int, str]] = set()
+    for claim in abbr_claims:
+        key = (claim.object_id, claim.claim_key)
+        if key not in seen:
+            seen.add(key)
+            winners_by_title.setdefault(claim.object_id, []).append(claim)
+
+    # Desired abbreviation values from winning claims.
+    desired_by_title: dict[int, set[str]] = {}
+    for title_id, claims_list in winners_by_title.items():
+        desired: set[str] = set()
+        for claim in claims_list:
+            val = claim.value
+            if not val.get("exists", True):
+                continue
+            desired.add(val["value"])
+        desired_by_title[title_id] = desired
+
+    # Pre-fetch existing TitleAbbreviation rows.
+    all_title_ids = title_ids if title_ids is not None else {t.pk for t in all_titles}
+    existing_by_title: dict[int, set[str]] = {}
+    for row in TitleAbbreviation.objects.filter(title_id__in=all_title_ids).values_list(
+        "title_id", "value"
+    ):
+        existing_by_title.setdefault(row[0], set()).add(row[1])
+
+    # Diff and apply.
+    to_create = []
+    to_delete_pks: list[int] = []
+
+    for title_id in all_title_ids:
+        desired = desired_by_title.get(title_id, set())
+        existing = existing_by_title.get(title_id, set())
+
+        for value in desired - existing:
+            to_create.append(TitleAbbreviation(title_id=title_id, value=value))
+
+    # Build a lookup for deletions.
+    for row in TitleAbbreviation.objects.filter(title_id__in=all_title_ids).values_list(
+        "pk", "title_id", "value"
+    ):
+        pk, title_id, value = row
+        desired = desired_by_title.get(title_id, set())
+        if value not in desired:
+            to_delete_pks.append(pk)
+
+    if to_delete_pks:
+        TitleAbbreviation.objects.filter(pk__in=to_delete_pks).delete()
+    if to_create:
+        TitleAbbreviation.objects.bulk_create(to_create, batch_size=2000)
+
+
+def resolve_all_model_abbreviations(
+    all_models: list[MachineModel],
+    *,
+    model_ids: set[int] | None = None,
+) -> None:
+    """Bulk-resolve abbreviation claims into ModelAbbreviation rows."""
+    from django.contrib.contenttypes.models import ContentType
+
+    ct = ContentType.objects.get_for_model(MachineModel)
+
+    # Pre-fetch active abbreviation claims with priority annotation.
+    abbr_qs = Claim.objects.filter(
+        is_active=True, content_type=ct, field_name="abbreviation"
+    )
+    if model_ids is not None:
+        abbr_qs = abbr_qs.filter(object_id__in=model_ids)
+    abbr_claims = (
+        abbr_qs.select_related("source", "user__profile")
+        .annotate(
+            effective_priority=Case(
+                When(source__isnull=False, then=F("source__priority")),
+                When(user__isnull=False, then=F("user__profile__priority")),
+                default=Value(0),
+                output_field=IntegerField(),
+            )
+        )
+        .order_by("object_id", "claim_key", "-effective_priority", "-created_at")
+    )
+
+    # Pick winner per (object_id, claim_key).
+    winners_by_model: dict[int, list[Claim]] = {}
+    seen: set[tuple[int, str]] = set()
+    for claim in abbr_claims:
+        key = (claim.object_id, claim.claim_key)
+        if key not in seen:
+            seen.add(key)
+            winners_by_model.setdefault(claim.object_id, []).append(claim)
+
+    # Desired abbreviation values from winning claims.
+    desired_by_model: dict[int, set[str]] = {}
+    for model_id, claims_list in winners_by_model.items():
+        desired: set[str] = set()
+        for claim in claims_list:
+            val = claim.value
+            if not val.get("exists", True):
+                continue
+            desired.add(val["value"])
+        desired_by_model[model_id] = desired
+
+    # Pre-fetch existing ModelAbbreviation rows.
+    all_model_ids = model_ids if model_ids is not None else {pm.pk for pm in all_models}
+    existing_by_model: dict[int, set[str]] = {}
+    for row in ModelAbbreviation.objects.filter(
+        machine_model_id__in=all_model_ids
+    ).values_list("machine_model_id", "value"):
+        existing_by_model.setdefault(row[0], set()).add(row[1])
+
+    # Diff and apply.
+    to_create = []
+    to_delete_pks: list[int] = []
+
+    for model_id in all_model_ids:
+        desired = desired_by_model.get(model_id, set())
+        existing = existing_by_model.get(model_id, set())
+
+        for value in desired - existing:
+            to_create.append(ModelAbbreviation(machine_model_id=model_id, value=value))
+
+    # Build a lookup for deletions.
+    for row in ModelAbbreviation.objects.filter(
+        machine_model_id__in=all_model_ids
+    ).values_list("pk", "machine_model_id", "value"):
+        pk, model_id, value = row
+        desired = desired_by_model.get(model_id, set())
+        if value not in desired:
+            to_delete_pks.append(pk)
+
+    if to_delete_pks:
+        ModelAbbreviation.objects.filter(pk__in=to_delete_pks).delete()
+    if to_create:
+        ModelAbbreviation.objects.bulk_create(to_create, batch_size=2000)

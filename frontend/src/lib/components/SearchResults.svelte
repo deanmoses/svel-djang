@@ -52,7 +52,7 @@
 		if (!isSearching) return [];
 		return models.data.filter(
 			(m) =>
-				textMatches(normalizedQuery, m.name, m.shortname) ||
+				textMatches(normalizedQuery, m.name, ...(m.abbreviations ?? [])) ||
 				(m.search_text && normalizeText(m.search_text).includes(normalizedQuery))
 		);
 	});
@@ -69,7 +69,9 @@
 	let matchedTitles = $derived.by(() => {
 		if (!isSearching) return [];
 		return titles.data.filter(
-			(t) => textMatches(normalizedQuery, t.name, t.short_name) || rollupTitleSlugs.has(t.slug)
+			(t) =>
+				textMatches(normalizedQuery, t.name, ...(t.abbreviations ?? [])) ||
+				rollupTitleSlugs.has(t.slug)
 		);
 	});
 

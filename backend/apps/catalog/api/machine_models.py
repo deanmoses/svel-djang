@@ -44,7 +44,7 @@ class MachineModelGridSchema(Schema):
     manufacturer_name: Optional[str] = None
     technology_generation_name: Optional[str] = None
     thumbnail_url: Optional[str] = None
-    shortname: Optional[str] = None
+    abbreviations: list[str] = []
     search_text: Optional[str] = None
     title_slug: Optional[str] = None
 
@@ -103,6 +103,7 @@ class MachineModelDetailSchema(Schema):
     ipdb_rating: Optional[float] = None
     pinside_rating: Optional[float] = None
     title_description: str = ""
+    abbreviations: list[str] = []
     extra_data: dict
     credits: list[CreditSchema]
     activity: list[ClaimSchema]
@@ -296,6 +297,7 @@ def _serialize_model_detail(pm) -> dict:
         if pm.pinside_rating is not None
         else None,
         "title_description": pm.title.description if pm.title else "",
+        "abbreviations": [a.value for a in pm.abbreviations.all()],
         "extra_data": pm.extra_data or {},
         "credits": credits,
         "activity": activity,
@@ -358,6 +360,7 @@ def _model_detail_qs():
         "alias_of__aliases",
         "themes",
         "gameplay_features",
+        "abbreviations",
         "title__series",
         Prefetch(
             "title__machine_models",
@@ -446,9 +449,8 @@ def _build_search_text(pm) -> str:
         parts.append(gf.name)
     for credit in pm.credits.all():
         parts.append(credit.person.name)
-    shortname = (pm.extra_data or {}).get("shortname")
-    if shortname:
-        parts.append(shortname)
+    for abbr in pm.abbreviations.all():
+        parts.append(abbr.value)
     return " | ".join(parts)
 
 
@@ -479,6 +481,7 @@ def list_all_models(request):
             "tags",
             "gameplay_features",
             "aliases",
+            "abbreviations",
             "manufacturer__entities__addresses",
             Prefetch(
                 "credits",
@@ -504,7 +507,7 @@ def list_all_models(request):
                     pm.technology_generation.name if pm.technology_generation else None
                 ),
                 "thumbnail_url": thumbnail_url,
-                "shortname": pm.extra_data.get("shortname") or None,
+                "abbreviations": [a.value for a in pm.abbreviations.all()],
                 "search_text": _build_search_text(pm),
                 "title_slug": pm.title.slug if pm.title else None,
             }

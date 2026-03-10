@@ -52,7 +52,6 @@ CLAIM_FIELDS = {
     "Notes": "notes",
     "Toys": "toys",
     "MarketingSlogans": "marketing_slogans",
-    "CommonAbbreviations": "abbreviation",
     "ModelNumber": "model_number",
 }
 
@@ -325,6 +324,25 @@ class Command(BaseCommand):
                     value=value,
                 )
             )
+
+        # Common abbreviations: each abbreviation becomes its own relationship claim.
+        raw_abbrevs = rec.get("CommonAbbreviations")
+        if raw_abbrevs:
+            for abbrev in str(raw_abbrevs).split(","):
+                abbrev = unescape(abbrev.strip())
+                if abbrev:
+                    claim_key, value = build_relationship_claim(
+                        "abbreviation", {"value": abbrev}
+                    )
+                    pending_claims.append(
+                        Claim(
+                            content_type_id=ct_id,
+                            object_id=pm.pk,
+                            field_name="abbreviation",
+                            claim_key=claim_key,
+                            value=value,
+                        )
+                    )
 
         # Manufacturer: resolve at ingest time to a slug claim.
         mfr_id = rec.get("ManufacturerId")

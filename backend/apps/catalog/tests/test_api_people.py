@@ -18,9 +18,7 @@ class TestPeopleAPI:
         assert data["items"][0]["credit_count"] == 1
 
     def test_get_person_detail(self, client, person, machine_model, credit_roles):
-        title = Title.objects.create(
-            name="Medieval Madness", opdb_id="G5pe4-p", short_name="MM"
-        )
+        title = Title.objects.create(name="Medieval Madness", opdb_id="G5pe4-p")
         machine_model.title = title
         machine_model.save()
         role = CreditRole.objects.get(slug="design")
