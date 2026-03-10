@@ -46,10 +46,6 @@ Resolution picks a winner per field/claim-key and materializes the result:
 
 If you think a field needs an exception, ask the user first.
 
-## Known Exceptions Pending Migration
-
-- `variant_of` on MachineModel — currently a direct FK, should be migrated to claims
-
 ## Key Code
 
 - `backend/apps/provenance/models.py` — Source, Claim, ClaimManager

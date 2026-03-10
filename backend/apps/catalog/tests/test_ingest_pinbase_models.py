@@ -155,12 +155,14 @@ class TestIngestPinbaseModels:
         claim = mm.claims.get(source=source, field_name="display_type", is_active=True)
         assert claim.value == "alphanumeric"
 
-    def test_variant_of_sets_variant_of(self, db):
-        """variant_of correctly sets variant_of FK."""
-        parent = MachineModel.objects.create(
-            name="Parent Model", opdb_id="Gtest-Mparent"
+    def test_variant_of_claim(self, db):
+        """variant_of asserts a claim with the slug value."""
+        MachineModel.objects.create(
+            name="Parent Model", opdb_id="Gtest-Mparent", slug="parent-model"
         )
-        child = MachineModel.objects.create(name="Child Model", opdb_id="Gtest-Mchild")
+        child = MachineModel.objects.create(
+            name="Child Model", opdb_id="Gtest-Mchild", slug="child-model"
+        )
         path = _write_models_json(
             [
                 {"slug": "parent-model", "opdb_id": "Gtest-Mparent"},
@@ -174,19 +176,46 @@ class TestIngestPinbaseModels:
 
         call_command("ingest_pinbase_models", path=path)
 
+        source = Source.objects.get(slug="pinbase")
+        claim = child.claims.get(source=source, field_name="variant_of", is_active=True)
+        assert claim.value == "parent-model"
+
+    def test_variant_of_resolves(self, db):
+        """variant_of slug claim resolves to FK on model."""
+        parent = MachineModel.objects.create(
+            name="Parent Model", opdb_id="Gtest-Mparent", slug="parent-model"
+        )
+        child = MachineModel.objects.create(
+            name="Child Model", opdb_id="Gtest-Mchild", slug="child-model"
+        )
+        path = _write_models_json(
+            [
+                {"slug": "parent-model", "opdb_id": "Gtest-Mparent"},
+                {
+                    "slug": "child-model",
+                    "opdb_id": "Gtest-Mchild",
+                    "variant_of": "parent-model",
+                },
+            ]
+        )
+
+        call_command("ingest_pinbase_models", path=path)
+        resolve_model(child)
         child.refresh_from_db()
+
         assert child.variant_of == parent
 
     def test_variant_of_overrides_ingest(self, db):
         """variant_of from pinbase overrides a wrong variant_of from ingest_opdb."""
-        wrong_parent = MachineModel.objects.create(
-            name="Wrong Parent", opdb_id="Gtest-Mwrong"
-        )
+        MachineModel.objects.create(name="Wrong Parent", opdb_id="Gtest-Mwrong")
         right_parent = MachineModel.objects.create(
-            name="Right Parent", opdb_id="Gtest-Mright"
+            name="Right Parent", opdb_id="Gtest-Mright", slug="right-parent"
         )
         child = MachineModel.objects.create(
-            name="Child", opdb_id="Gtest-Mchild", variant_of=wrong_parent
+            name="Child",
+            opdb_id="Gtest-Mchild",
+            slug="child-model",
+            variant_of=MachineModel.objects.get(opdb_id="Gtest-Mwrong"),
         )
         path = _write_models_json(
             [
@@ -200,16 +229,22 @@ class TestIngestPinbaseModels:
         )
 
         call_command("ingest_pinbase_models", path=path)
-
+        resolve_model(child)
         child.refresh_from_db()
+
         assert child.variant_of == right_parent
 
     def test_variant_of_clears_circular_reference(self, db):
         """When models.json flips the parent/child, variant_of is cleared on new parent."""
         # ingest_opdb heuristic wrongly made model_a the parent, model_b the child.
-        model_a = MachineModel.objects.create(name="Model A (CE)", opdb_id="Gtest-Ma")
+        model_a = MachineModel.objects.create(
+            name="Model A (CE)", opdb_id="Gtest-Ma", slug="model-a-ce"
+        )
         model_b = MachineModel.objects.create(
-            name="Model B (LE)", opdb_id="Gtest-Mb", variant_of=model_a
+            name="Model B (LE)",
+            opdb_id="Gtest-Mb",
+            slug="model-b-le",
+            variant_of=model_a,
         )
         # models.json says B is the real parent, A is the variant.
         path = _write_models_json(
@@ -224,10 +259,13 @@ class TestIngestPinbaseModels:
         )
 
         call_command("ingest_pinbase_models", path=path)
-
+        # Resolution resets all FKs to None, then applies winners.
+        # model_b has no variant_of claim, so it stays None.
+        resolve_model(model_a)
+        resolve_model(model_b)
         model_a.refresh_from_db()
         model_b.refresh_from_db()
-        # B is the parent (variant_of cleared), A points to B.
+
         assert model_b.variant_of is None
         assert model_a.variant_of == model_b
 

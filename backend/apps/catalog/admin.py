@@ -378,6 +378,8 @@ class MachineModelAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
     CLAIM_FIELDS = frozenset(DIRECT_FIELDS) | {
         "manufacturer",
         "title",
+        "variant_of",
+        "converted_from",
         "system",
         "technology_generation",
         "display_type",
@@ -402,6 +404,10 @@ class MachineModelAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
         if field_name == "cabinet" and value is not None:
             return value.slug
         if field_name == "game_format" and value is not None:
+            return value.slug
+        if field_name == "variant_of" and value is not None:
+            return value.slug
+        if field_name == "converted_from" and value is not None:
             return value.slug
         return super()._to_claim_value(field_name, value)
 

@@ -236,10 +236,9 @@ class TestMachineModelAdminClaims:
         )
         assert claim.value == "G5pe4"
 
-    def test_non_claim_field_variant_of_creates_no_claim(self, admin_request):
+    def test_claim_field_variant_of_creates_claim(self, admin_request):
         parent = MachineModel.objects.create(name="Medieval Madness")
         pm = MachineModel.objects.create(name="Medieval Madness LE")
-        pm.variant_of = parent
 
         mma = MachineModelAdmin(MachineModel, AdminSite())
         form = _MockForm(
@@ -247,9 +246,13 @@ class TestMachineModelAdminClaims:
         )
         mma.save_model(admin_request, pm, form, change=True)
 
-        assert not Claim.objects.filter(
-            object_id=pm.pk, user=admin_request.user
-        ).exists()
+        claim = Claim.objects.get(
+            object_id=pm.pk,
+            user=admin_request.user,
+            field_name="variant_of",
+            is_active=True,
+        )
+        assert claim.value == parent.slug
 
     def test_new_object_asserts_claims_for_filled_fields(self, admin_request):
         pm = MachineModel.objects.create(name="Firepower")

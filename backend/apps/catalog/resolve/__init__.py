@@ -121,6 +121,7 @@ def resolve_model(machine_model: MachineModel) -> MachineModel:
     # This ensures deactivated claims don't leave stale values.
     machine_model.manufacturer = None
     machine_model.title = None
+    machine_model.variant_of = None
     machine_model.converted_from = None
     machine_model.system = None
     machine_model.technology_generation = None
@@ -143,6 +144,7 @@ def resolve_model(machine_model: MachineModel) -> MachineModel:
     display_subtype_lookup = _build_display_subtype_lookup()
     cabinet_lookup = _build_cabinet_lookup()
     game_format_lookup = _build_game_format_lookup()
+    self_lookup = _build_converted_from_lookup()  # {slug: MachineModel} for self-FKs
 
     # Apply winners to the model.
     for claim_key, claim in winners.items():
@@ -174,9 +176,13 @@ def resolve_model(machine_model: MachineModel) -> MachineModel:
             machine_model.game_format = _resolve_slug_fk(
                 claim.value, game_format_lookup, "game_format"
             )
+        elif claim.field_name == "variant_of":
+            machine_model.variant_of = _resolve_slug_fk(
+                claim.value, self_lookup, "variant_of"
+            )
         elif claim.field_name == "converted_from":
             machine_model.converted_from = _resolve_slug_fk(
-                claim.value, _build_converted_from_lookup(), "converted_from"
+                claim.value, self_lookup, "converted_from"
             )
         elif claim.field_name in DIRECT_FIELDS:
             attr = DIRECT_FIELDS[claim.field_name]
@@ -278,6 +284,7 @@ def resolve_all() -> int:
             cabinet_lookup,
             game_format_lookup,
             converted_from_lookup,
+            variant_of_lookup=converted_from_lookup,
         )
 
     # 5. Conversions are not variants: clear variant_of on conversion models.
@@ -381,11 +388,13 @@ def _apply_resolution(
     cabinet_lookup: dict[str, Cabinet] | None = None,
     game_format_lookup: dict[str, GameFormat] | None = None,
     converted_from_lookup: dict[str, MachineModel] | None = None,
+    variant_of_lookup: dict[str, MachineModel] | None = None,
 ) -> None:
     """Apply claim winners to a MachineModel instance in memory."""
     # Reset FK fields.
     pm.manufacturer = None
     pm.title = None
+    pm.variant_of = None
     pm.converted_from = None
     pm.system = None
     pm.technology_generation = None
@@ -436,6 +445,11 @@ def _apply_resolution(
             if game_format_lookup is not None:
                 pm.game_format = _resolve_slug_fk(
                     claim.value, game_format_lookup, "game_format"
+                )
+        elif claim.field_name == "variant_of":
+            if variant_of_lookup is not None:
+                pm.variant_of = _resolve_slug_fk(
+                    claim.value, variant_of_lookup, "variant_of"
                 )
         elif claim.field_name == "converted_from":
             if converted_from_lookup is not None:

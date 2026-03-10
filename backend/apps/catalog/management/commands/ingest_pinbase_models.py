@@ -2,8 +2,7 @@
 
 Creates MachineModel records that don't yet exist (with opdb_id, ipdb_id,
 name, slug), then asserts editorial claims with the pinbase source
-(priority 300) which outranks OPDB.  Also sets variant_of FK relationships
-based on slug references.
+(priority 300) which outranks OPDB.
 """
 
 from __future__ import annotations
@@ -30,6 +29,7 @@ CLAIM_FIELDS = {
     "description": "description",
     "is_conversion": "is_conversion",
     "converted_from": "converted_from",
+    "variant_of": "variant_of",
 }
 
 
@@ -110,7 +110,7 @@ class Command(BaseCommand):
                 for mm in MachineModel.objects.filter(opdb_id__isnull=False)
             }
 
-        # Pass 2: assert claims and set variant relationships.
+        # Pass 2: assert claims.
         pending_claims: list[Claim] = []
         matched = 0
         skipped = 0
@@ -157,68 +157,5 @@ class Command(BaseCommand):
             f"{claim_stats['superseded']} superseded, "
             f"{claim_stats['duplicates_removed']} duplicates removed"
         )
-
-        # --- variant_of: set variant_of FK based on slug references ---
-        # Build slug→MachineModel lookup from entries that have both slug and opdb_id.
-        slug_to_mm: dict[str, MachineModel] = {}
-        for entry in entries:
-            slug = entry.get("slug")
-            opdb_id = entry.get("opdb_id")
-            if slug and opdb_id:
-                mm = by_opdb_id.get(opdb_id)
-                if mm:
-                    slug_to_mm[slug] = mm
-
-        # Collect parent slugs — entries that are referenced as variant_of targets.
-        parent_slugs: set[str] = {
-            entry["variant_of"] for entry in entries if entry.get("variant_of")
-        }
-
-        variant_updated: list[MachineModel] = []
-        variant_set = 0
-
-        # First pass: clear variant_of on parent models (fixes circular references
-        # when models.json overrides an ingest_opdb heuristic).
-        for slug in parent_slugs:
-            parent = slug_to_mm.get(slug)
-            if parent and parent.variant_of_id is not None:
-                parent.variant_of = None
-                variant_updated.append(parent)
-
-        # Second pass: set variant_of on variant models.
-        for entry in entries:
-            variant_of_slug = entry.get("variant_of")
-            if not variant_of_slug:
-                continue
-
-            opdb_id = entry.get("opdb_id")
-            if not opdb_id:
-                continue
-
-            mm = by_opdb_id.get(opdb_id)
-            parent = slug_to_mm.get(variant_of_slug)
-            if not mm or not parent:
-                if not parent:
-                    logger.warning(
-                        "variant_of slug %r not found for %s",
-                        variant_of_slug,
-                        entry.get("name", opdb_id),
-                    )
-                continue
-
-            if mm.variant_of_id != parent.pk:
-                mm.variant_of = parent
-                if mm not in variant_updated:
-                    variant_updated.append(mm)
-            variant_set += 1
-
-        if variant_updated:
-            MachineModel.objects.bulk_update(variant_updated, ["variant_of_id"])
-
-        if variant_set:
-            self.stdout.write(
-                f"  Variants: {variant_set} relationships, "
-                f"{len(variant_updated)} updated"
-            )
 
         self.stdout.write(self.style.SUCCESS("Models seed ingestion complete."))
