@@ -570,6 +570,11 @@
     "description": "Pinball machines based on The X-Files television series."
   },
   {
+    "slug": "toy-story",
+    "name": "Toy Story",
+    "description": "Pinball machines based on the Pixar Toy Story film series."
+  },
+  {
     "slug": "transformers",
     "name": "Transformers",
     "description": "Pinball machines based on the Transformers franchise."
