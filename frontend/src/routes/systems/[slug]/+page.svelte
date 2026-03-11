@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
 	import CardGrid from '$lib/components/grid/CardGrid.svelte';
 	import SidebarList from '$lib/components/SidebarList.svelte';
 	import SidebarListItem from '$lib/components/SidebarListItem.svelte';
@@ -18,6 +19,7 @@
 
 <article>
 	<header>
+		<Breadcrumb crumbs={[{ label: 'Systems', href: '/systems' }]} current={system.name} />
 		<h1>{system.name}</h1>
 	</header>
 
