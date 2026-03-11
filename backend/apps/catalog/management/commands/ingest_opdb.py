@@ -83,12 +83,18 @@ class Command(BaseCommand):
             default="",
             help="Path to models.json (supplements ipdb_id cross-references).",
         )
+        parser.add_argument(
+            "--titles",
+            default="",
+            help="Path to titles.json (split_from_opdb_group entries skip group creation).",
+        )
 
     def handle(self, *args, **options):
         opdb_path = options["opdb"]
         groups_path = options["groups"]
         changelog_path = options["changelog"]
         models_path = options["models"]
+        titles_path = options["titles"]
 
         from django.contrib.contenttypes.models import ContentType
 
@@ -117,10 +123,19 @@ class Command(BaseCommand):
         if changelog_path:
             self._process_changelog(changelog_path)
 
+        # --- Build skip set from titles.json split_from_opdb_group entries ---
+        split_group_ids: set[str] = set()
+        if titles_path:
+            with open(titles_path) as f:
+                for entry in json.load(f):
+                    gid = entry.get("split_from_opdb_group")
+                    if gid:
+                        split_group_ids.add(gid)
+
         # --- Titles pre-loading ---
         groups_by_id: dict[str, dict] = {}
         if groups_path:
-            groups_by_id = self._load_titles(groups_path, source)
+            groups_by_id = self._load_titles(groups_path, source, split_group_ids)
 
         # --- Supplemental ipdb_id cross-references from models.json ---
         ipdb_id_supplement: dict[str, int] = {}
@@ -499,8 +514,16 @@ class Command(BaseCommand):
     # Groups
     # ------------------------------------------------------------------
 
-    def _load_titles(self, path: str, source: Source) -> dict[str, dict]:
+    def _load_titles(
+        self,
+        path: str,
+        source: Source,
+        split_group_ids: set[str] | None = None,
+    ) -> dict[str, dict]:
         """Load groups JSON, create Title records, and assert name/short_name claims.
+
+        Groups in *split_group_ids* are skipped — they have been split into
+        separate titles in titles.json.
 
         Returns a dict mapping group opdb_id → group record for later lookup.
         """
@@ -513,12 +536,18 @@ class Command(BaseCommand):
 
         ct_id = ContentType.objects.get_for_model(Title).pk
 
-        # Build lookup of raw group data.
+        # Build lookup of raw group data, skipping split groups.
+        _skip = split_group_ids or set()
         groups_by_id: dict[str, dict] = {}
+        skipped_splits = 0
         for rec in data:
             opdb_id = rec.get("opdb_id")
-            if opdb_id:
-                groups_by_id[opdb_id] = rec
+            if not opdb_id:
+                continue
+            if opdb_id in _skip:
+                skipped_splits += 1
+                continue
+            groups_by_id[opdb_id] = rec
 
         # Pre-fetch existing titles.
         existing_titles: dict[str, Title] = {t.opdb_id: t for t in Title.objects.all()}
@@ -607,7 +636,10 @@ class Command(BaseCommand):
             list(Title.objects.all()), title_ids=touched_ids
         )
 
-        self.stdout.write(f"  Titles: {titles_created} created, {unchanged} unchanged")
+        self.stdout.write(
+            f"  Titles: {titles_created} created, {unchanged} unchanged"
+            + (f", {skipped_splits} split groups skipped" if skipped_splits else "")
+        )
         self.stdout.write(
             f"  Title claims: {claim_stats['created']} created, "
             f"{claim_stats['unchanged']} unchanged"

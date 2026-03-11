@@ -21,6 +21,10 @@
         "type": "string",
         "description": "References a slug in series.json"
       },
+      "split_from_opdb_group": {
+        "type": "string",
+        "description": "OPDB group ID that this title was split from; prevents the OPDB ingester from creating the combined group title"
+      },
       "abbreviations": {
         "type": "array",
         "items": { "type": "string", "minLength": 1 },

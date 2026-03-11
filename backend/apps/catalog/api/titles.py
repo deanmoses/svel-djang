@@ -82,6 +82,7 @@ class TitleDetailSchema(Schema):
     needs_review_notes: str = ""
     review_links: list[ReviewLinkSchema] = []
     hero_image_url: Optional[str] = None
+    franchise: Optional[FacetRef] = None
     machines: list[TitleMachineSchema]
     series: list[SeriesRefSchema] = []
     credits: list[CreditSchema] = []
@@ -369,6 +370,11 @@ def _serialize_title_detail(title) -> dict:
         "needs_review_notes": title.needs_review_notes,
         "review_links": review_links,
         "hero_image_url": hero_image_url,
+        "franchise": (
+            {"slug": title.franchise.slug, "name": title.franchise.name}
+            if title.franchise
+            else None
+        ),
         "machines": machines,
         "series": series,
         "credits": credits,

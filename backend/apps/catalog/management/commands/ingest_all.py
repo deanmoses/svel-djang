@@ -88,6 +88,7 @@ class Command(BaseCommand):
                         "groups": opdb_groups,
                         "changelog": opdb_changelog,
                         "models": "../data/models.json",
+                        "titles": "../data/titles.json",
                     }
                 elif step == "ingest_pinbase_signs":
                     kwargs = {"csv": csv_path}

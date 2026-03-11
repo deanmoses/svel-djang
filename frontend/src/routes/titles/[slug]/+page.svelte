@@ -43,9 +43,6 @@
 				: `${md.year}`;
 			items.push({ text: yearText });
 		}
-		if (md.franchise) {
-			items.push({ text: md.franchise.name });
-		}
 		return items;
 	});
 </script>
@@ -187,6 +184,12 @@
 								{/each}
 							</dd>
 						{/if}
+						{#if md.franchise}
+							<dt>Franchise</dt>
+							<dd>
+								<a href={resolve(`/franchises/${md.franchise.slug}`)}>{md.franchise.name}</a>
+							</dd>
+						{/if}
 						{#if md.abbreviations.length > 0}
 							<dt>Abbrs</dt>
 							<dd>{md.abbreviations.join(', ')}</dd>
@@ -297,6 +300,13 @@
 										{#if i > 0},{/if}
 										<a href={resolve(`/themes/${theme.slug}`)}>{theme.name}</a>
 									{/each}
+								</dd>
+							{/if}
+							{#if title.franchise}
+								<dt>Franchise</dt>
+								<dd>
+									<a href={resolve(`/franchises/${title.franchise.slug}`)}>{title.franchise.name}</a
+									>
 								</dd>
 							{/if}
 							{#if title.abbreviations.length > 0}

@@ -137,12 +137,6 @@
 							<a href={resolve(`/systems/${model.system_slug}`)}>{model.system_name}</a>
 						</dd>
 					{/if}
-					{#if model.franchise}
-						<dt>Franchise</dt>
-						<dd>
-							<a href={resolve(`/franchises/${model.franchise.slug}`)}>{model.franchise.name}</a>
-						</dd>
-					{/if}
 					{#if model.themes.length > 0}
 						<dt>Themes</dt>
 						<dd>
@@ -150,6 +144,12 @@
 								{#if i > 0},{/if}
 								<a href={resolve(`/themes/${theme.slug}`)}>{theme.name}</a>
 							{/each}
+						</dd>
+					{/if}
+					{#if model.franchise}
+						<dt>Franchise</dt>
+						<dd>
+							<a href={resolve(`/franchises/${model.franchise.slug}`)}>{model.franchise.name}</a>
 						</dd>
 					{/if}
 					{#if model.abbreviations.length > 0}
