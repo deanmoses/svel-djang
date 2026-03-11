@@ -144,7 +144,7 @@ class TestIngestPinbaseModels:
                 {
                     "opdb_id": "Gtest-Mtest",
                     "name": "Foo (Limited Edition)",
-                    "display_type_slug": "alphanumeric",
+                    "display_type": "alphanumeric",
                 }
             ]
         )

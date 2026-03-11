@@ -2,8 +2,8 @@
   {
     "slug": "301bullseye",
     "name": "301/Bullseye",
-    "opdb_id": "G4kE2-MBRzN",
     "is_conversion": true,
+    "opdb_id": "G4kE2-MBRzN",
     "ipdb_id": 403
   },
   {
@@ -14,21 +14,21 @@
   {
     "slug": "abba-limited-edition",
     "name": "ABBA (Limited Edition)",
-    "opdb_id": "Ge1py-MkPj1-A1XDN",
-    "variant_of": "abba-collectors-edition"
+    "variant_of": "abba-collectors-edition",
+    "opdb_id": "Ge1py-MkPj1-A1XDN"
   },
   {
     "slug": "ac-dc-limited-edition",
-    "opdb_id": "G43W4-MrRpw",
     "name": "AC/DC (Limited Edition)",
+    "opdb_id": "G43W4-MrRpw",
     "ipdb_id": 5777
   },
   {
     "slug": "aerosmith-limited-edition",
-    "opdb_id": "Gr16e-M5Rbv",
     "name": "Aerosmith (Limited Edition)",
-    "ipdb_id": 6372,
-    "variant_of": "aerosmith-premium"
+    "variant_of": "aerosmith-premium",
+    "opdb_id": "Gr16e-M5Rbv",
+    "ipdb_id": 6372
   },
   {
     "slug": "aerosmith-premium",
@@ -43,22 +43,22 @@
   },
   {
     "slug": "alien-limited-edition",
-    "opdb_id": "G4PBO-MYep0",
-    "name": "Alien (Limited Edition)"
+    "name": "Alien (Limited Edition)",
+    "opdb_id": "G4PBO-MYep0"
   },
   {
     "slug": "amazon-hunt-iii",
     "name": "Amazon Hunt III",
-    "opdb_id": "G5Lk0-MDeVZ",
     "is_conversion": true,
     "converted_from": "bone-busters-inc",
+    "opdb_id": "G5Lk0-MDeVZ",
     "ipdb_id": 4432
   },
   {
     "slug": "avatar-the-battle-for-pandora-collectors-edition",
     "name": "Avatar: The Battle for Pandora (Collector's Edition)",
-    "opdb_id": "GbPxB-MkPol-A9j2b",
-    "variant_of": "avatar-the-battle-for-pandora-limited-edition"
+    "variant_of": "avatar-the-battle-for-pandora-limited-edition",
+    "opdb_id": "GbPxB-MkPol-A9j2b"
   },
   {
     "slug": "avatar-the-battle-for-pandora-limited-edition",
@@ -68,9 +68,9 @@
   {
     "slug": "avengers-infinity-quest-limited-edition",
     "name": "Avengers: Infinity Quest (Limited Edition)",
+    "variant_of": "avengers-infinity-quest-premium",
     "opdb_id": "Gj66P-MXr0E-ARkqN",
-    "ipdb_id": 6756,
-    "variant_of": "avengers-infinity-quest-premium"
+    "ipdb_id": 6756
   },
   {
     "slug": "avengers-infinity-quest-premium",
@@ -86,46 +86,46 @@
   {
     "slug": "barry-os-barbecue-challenge-limited-edition",
     "name": "Barry O's Barbecue Challenge (Limited Edition)",
-    "opdb_id": "GK1Kv-ME0E0-AO7ZV",
-    "variant_of": "barry-os-barbecue-challenge-collectors-edition"
+    "variant_of": "barry-os-barbecue-challenge-collectors-edition",
+    "opdb_id": "GK1Kv-ME0E0-AO7ZV"
   },
   {
     "slug": "batman-66-limited-edition",
-    "opdb_id": "GRoz4-MrRPw",
     "name": "Batman 66 (Limited Edition)",
+    "opdb_id": "GRoz4-MrRPw",
     "ipdb_id": 6355
   },
   {
     "slug": "big-dryvers",
     "name": "Big Dryvers",
-    "opdb_id": "G43WO-MJYYV",
     "is_conversion": true,
     "converted_from": "space-orbit",
+    "opdb_id": "G43WO-MJYYV",
     "ipdb_id": 4110
   },
   {
     "slug": "bird-watcher",
     "name": "Bird Watcher",
-    "opdb_id": "GX2zO-M5Rr4",
-    "is_conversion": true
+    "is_conversion": true,
+    "opdb_id": "GX2zO-M5Rr4"
   },
   {
     "slug": "black-knight-limited-edition",
-    "opdb_id": "GrO7w-MDR9W",
     "name": "Black Knight (Limited Edition)",
+    "opdb_id": "GrO7w-MDR9W",
     "ipdb_id": 3799
   },
   {
     "slug": "black-knight-sword-of-rage-limited-edition",
-    "opdb_id": "GD7Ld-MBRP4-A1e4P",
     "name": "Black Knight: Sword of Rage (Limited Edition)",
+    "opdb_id": "GD7Ld-MBRP4-A1e4P",
     "ipdb_id": 6569
   },
   {
     "slug": "blood-bank-billiards",
     "name": "Blood Bank Billiards",
-    "opdb_id": "GPBzy-Mo1KX",
-    "is_conversion": true
+    "is_conversion": true,
+    "opdb_id": "GPBzy-Mo1KX"
   },
   {
     "slug": "bobby-orrs-power-play",
@@ -148,17 +148,17 @@
   {
     "slug": "bride-of-pinbot-20",
     "name": "Bride of Pinbot 2.0",
-    "opdb_id": "GRpee-MJkyr",
     "is_conversion": true,
     "converted_from": "bride-of-pinbot",
+    "opdb_id": "GRpee-MJkyr",
     "ipdb_id": 6319
   },
   {
     "slug": "buck-rogers",
     "name": "Buck Rogers",
-    "opdb_id": "GRw8o-MDxjq",
     "is_conversion": true,
     "converted_from": "tiger",
+    "opdb_id": "GRw8o-MDxjq",
     "ipdb_id": 4999
   },
   {
@@ -170,23 +170,23 @@
   {
     "slug": "cactus-canyon-continued",
     "name": "Cactus Canyon Continued",
-    "opdb_id": "G4835-M2YEn",
     "is_conversion": true,
-    "converted_from": "cactus-canyon"
+    "converted_from": "cactus-canyon",
+    "opdb_id": "G4835-M2YEn"
   },
   {
     "slug": "cactus-canyon-lyman-upgrade",
     "name": "Cactus Canyon (Lyman Upgrade)",
-    "opdb_id": "G4835-M2YPK-ARkb7",
     "variant_of": "cactus-canyon-remake-special-edition",
     "is_conversion": true,
-    "converted_from": "cactus-canyon-remake-special-edition"
+    "converted_from": "cactus-canyon-remake-special-edition",
+    "opdb_id": "G4835-M2YPK-ARkb7"
   },
   {
     "slug": "cactus-canyon-remake-limited-edition",
     "name": "Cactus Canyon (Remake Limited Edition)",
-    "opdb_id": "G4835-M2YPK-A9ylv",
-    "variant_of": "cactus-canyon-remake-special-edition"
+    "variant_of": "cactus-canyon-remake-special-edition",
+    "opdb_id": "G4835-M2YPK-A9ylv"
   },
   {
     "slug": "cactus-canyon-remake-special-edition",
@@ -208,72 +208,72 @@
   {
     "slug": "challenger",
     "name": "Challenger",
-    "opdb_id": "GrN7J-MDlYZ",
     "is_conversion": true,
     "converted_from": "eight-ball",
+    "opdb_id": "GrN7J-MDlYZ",
     "ipdb_id": 3922
   },
   {
     "slug": "challenger-ii",
     "name": "Challenger II",
-    "opdb_id": "G59wx-MLnZ3-A1lJd",
     "is_conversion": true,
     "converted_from": "evel-knievel",
+    "opdb_id": "G59wx-MLnZ3-A1lJd",
     "ipdb_id": 4987
   },
   {
     "slug": "challenger-iii",
     "name": "Challenger III",
-    "opdb_id": "G4en0-MJ5vB-ARevr",
     "is_conversion": true,
     "converted_from": "bobby-orrs-power-play",
+    "opdb_id": "G4en0-MJ5vB-ARevr",
     "ipdb_id": 4986
   },
   {
     "slug": "challenger-iv",
     "name": "Challenger IV",
-    "opdb_id": "GrleW-MYeod-AO3dY",
     "is_conversion": true,
     "converted_from": "strikes-and-spares",
+    "opdb_id": "GrleW-MYeod-AO3dY",
     "ipdb_id": 4985
   },
   {
     "slug": "challenger-v",
     "name": "Challenger V",
-    "opdb_id": "GRVnd-MQZzx-AOjJv",
     "is_conversion": true,
     "converted_from": "star-trek",
+    "opdb_id": "GRVnd-MQZzx-AOjJv",
     "ipdb_id": 4984
   },
   {
     "slug": "city-ship",
     "name": "City Ship",
-    "opdb_id": "G4qzZ-MQpoP-A9pdL",
     "is_conversion": true,
     "converted_from": "super-spin",
+    "opdb_id": "G4qzZ-MQpoP-A9pdL",
     "ipdb_id": 5130
   },
   {
     "slug": "cleopatra",
     "name": "Cleopatra",
-    "opdb_id": "G5n1Q-MQPRP",
     "is_conversion": true,
     "converted_from": "play-pool",
+    "opdb_id": "G5n1Q-MQPRP",
     "ipdb_id": 4111
   },
   {
     "slug": "coney-island",
     "name": "Coney Island",
-    "opdb_id": "GRVL2-MLl9Y-A1Zx2",
     "is_conversion": true,
     "converted_from": "lady-robin-hood",
+    "opdb_id": "GRVL2-MLl9Y-A1Zx2",
     "ipdb_id": 3880
   },
   {
     "slug": "cosmodrome",
     "name": "Cosmodrome",
-    "opdb_id": "G509D-MnKVN",
     "is_conversion": true,
+    "opdb_id": "G509D-MnKVN",
     "ipdb_id": 3696
   },
   {
@@ -285,15 +285,15 @@
   {
     "slug": "dark-rider",
     "name": "Dark Rider",
-    "opdb_id": "GRVnd-MLbOx",
     "is_conversion": true,
     "converted_from": "star-trek",
+    "opdb_id": "GRVnd-MLbOx",
     "ipdb_id": 3968
   },
   {
     "slug": "deadpool-limited-edition",
-    "opdb_id": "G6lnq-M6153",
     "name": "Deadpool (Limited Edition)",
+    "opdb_id": "G6lnq-M6153",
     "ipdb_id": 6560
   },
   {
@@ -305,20 +305,20 @@
   {
     "slug": "demolition-man-on-steroids",
     "name": "Demolition Man on Steroids",
-    "opdb_id": "G5bv3-MePXV",
     "is_conversion": true,
-    "converted_from": "demolition-man"
+    "converted_from": "demolition-man",
+    "opdb_id": "G5bv3-MePXV"
   },
   {
     "slug": "dialed-in-collectors-edition",
-    "opdb_id": "G4X2l-MYepl-ARXxn",
     "name": "Dialed In! (Collector's Edition)",
+    "opdb_id": "G4X2l-MYepl-ARXxn",
     "ipdb_id": 6352
   },
   {
     "slug": "dialed-in-limited-edition",
-    "opdb_id": "G4X2l-MYepl-A1WXy",
     "name": "Dialed In! (Limited Edition)",
+    "opdb_id": "G4X2l-MYepl-A1WXy",
     "ipdb_id": 6351
   },
   {
@@ -329,33 +329,33 @@
   },
   {
     "slug": "disney-tron-legacy-limited-edition",
-    "opdb_id": "GrkL5-MJoNN",
     "name": "Disney TRON: Legacy (Limited Edition)",
+    "opdb_id": "GrkL5-MJoNN",
     "ipdb_id": 5707
   },
   {
     "slug": "drained",
     "name": "Drained",
-    "opdb_id": "GyVb1-MYeq1",
-    "is_conversion": true
+    "is_conversion": true,
+    "opdb_id": "GyVb1-MYeq1"
   },
   {
     "slug": "drained-bite-sized",
     "name": "Drained Bite-Sized",
-    "opdb_id": "GbPv6-MVKq8",
-    "is_conversion": true
+    "is_conversion": true,
+    "opdb_id": "GbPv6-MVKq8"
   },
   {
     "slug": "dungeon-door-defender",
     "name": "Dungeon Door Defender",
-    "opdb_id": "G7Zyb-MvB5k",
-    "is_conversion": true
+    "is_conversion": true,
+    "opdb_id": "G7Zyb-MvB5k"
   },
   {
     "slug": "dungeons-and-dragons-the-tyrants-eye-limited-edition",
     "name": "Dungeons & Dragons: The Tyrant's Eye (Limited Edition)",
-    "opdb_id": "GK1Ej-MePok-A1zKx",
-    "variant_of": "dungeons-and-dragons-the-tyrants-eye-premium"
+    "variant_of": "dungeons-and-dragons-the-tyrants-eye-premium",
+    "opdb_id": "GK1Ej-MePok-A1zKx"
   },
   {
     "slug": "dungeons-and-dragons-the-tyrants-eye-premium",
@@ -376,15 +376,15 @@
   },
   {
     "slug": "eight-ball-deluxe-limited-edition",
-    "opdb_id": "G5KXk-MLqNz",
     "name": "Eight Ball Deluxe (Limited Edition)",
+    "opdb_id": "G5KXk-MLqNz",
     "ipdb_id": 763
   },
   {
     "slug": "elton-john-collectors-edition",
     "name": "Elton John (Collector's Edition)",
-    "opdb_id": "G2LWd-M4o3Y-AOwoL",
-    "variant_of": "elton-john-platinum-edition"
+    "variant_of": "elton-john-platinum-edition",
+    "opdb_id": "G2LWd-M4o3Y-AOwoL"
   },
   {
     "slug": "elton-john-platinum-edition",
@@ -394,21 +394,21 @@
   {
     "slug": "elviras-house-of-horrors-40th-anniversary",
     "name": "Elvira's House of Horrors (40th Anniversary)",
-    "opdb_id": "GZVOd-MwNxZ-A1lvp",
-    "variant_of": "elviras-house-of-horrors-premium"
+    "variant_of": "elviras-house-of-horrors-premium",
+    "opdb_id": "GZVOd-MwNxZ-A1lvp"
   },
   {
     "slug": "elviras-house-of-horrors-blood-red-kiss",
     "name": "Elvira's House of Horrors (Blood Red Kiss)",
-    "opdb_id": "GZVOd-MwNxZ-AO25N",
-    "variant_of": "elviras-house-of-horrors-premium"
+    "variant_of": "elviras-house-of-horrors-premium",
+    "opdb_id": "GZVOd-MwNxZ-AO25N"
   },
   {
     "slug": "elviras-house-of-horrors-limited-edition",
     "name": "Elvira's House of Horrors (Limited Edition)",
+    "variant_of": "elviras-house-of-horrors-premium",
     "opdb_id": "GZVOd-MwNxZ-AR8vV",
-    "ipdb_id": 6597,
-    "variant_of": "elviras-house-of-horrors-premium"
+    "ipdb_id": 6597
   },
   {
     "slug": "elviras-house-of-horrors-premium",
@@ -419,15 +419,15 @@
   {
     "slug": "elviras-house-of-horrors-signature-edition",
     "name": "Elvira's House of Horrors (Signature Edition)",
+    "variant_of": "elviras-house-of-horrors-premium",
     "opdb_id": "GZVOd-MwNxZ-ARove",
-    "ipdb_id": 6598,
-    "variant_of": "elviras-house-of-horrors-premium"
+    "ipdb_id": 6598
   },
   {
     "slug": "escape-from-the-megaverse",
     "name": "Escape From The Megaverse",
-    "opdb_id": "G0lop-M4oEY",
-    "is_conversion": true
+    "is_conversion": true,
+    "opdb_id": "G0lop-M4oEY"
   },
   {
     "slug": "evel-knievel",
@@ -443,44 +443,44 @@
   },
   {
     "slug": "evil-dead-collectors-edition",
-    "opdb_id": "GYWvw-MKNP4",
-    "name": "Evil Dead (Collector's Edition)"
+    "name": "Evil Dead (Collector's Edition)",
+    "opdb_id": "GYWvw-MKNP4"
   },
   {
     "slug": "fantasy",
     "name": "Fantasy",
-    "opdb_id": "GrX7q-MJop6",
     "is_conversion": true,
     "converted_from": "centaur",
+    "opdb_id": "GrX7q-MJop6",
     "ipdb_id": 3091
   },
   {
     "slug": "flesh-and-blood",
     "name": "Flesh and Blood",
-    "opdb_id": "GrPdq-MnKwO",
     "is_conversion": true,
     "converted_from": "pinball-champ-82",
+    "opdb_id": "GrPdq-MnKwO",
     "ipdb_id": 5157
   },
   {
     "slug": "flipper-foxtrot-rhythm-explosion",
     "name": "Flipper Foxtrot Rhythm Explosion",
-    "opdb_id": "G9z10-M2Y1K",
-    "is_conversion": true
+    "is_conversion": true,
+    "opdb_id": "G9z10-M2Y1K"
   },
   {
     "slug": "fly-high",
     "name": "Fly High",
-    "opdb_id": "GRLXd-MDbdq",
     "is_conversion": true,
     "converted_from": "star-ship",
+    "opdb_id": "GRLXd-MDbdq",
     "ipdb_id": 3974
   },
   {
     "slug": "foo-fighters-limited-edition",
     "name": "Foo Fighters (Limited Edition)",
-    "opdb_id": "GpeoL-MkPz1-A944p",
-    "variant_of": "foo-fighters-premium"
+    "variant_of": "foo-fighters-premium",
+    "opdb_id": "GpeoL-MkPz1-A944p"
   },
   {
     "slug": "foo-fighters-premium",
@@ -496,9 +496,9 @@
   {
     "slug": "funhouse-20-rudys-nightmare",
     "name": "Funhouse 2.0 (Rudy's Nightmare)",
-    "opdb_id": "G5Dz7-Mz2e1",
     "is_conversion": true,
-    "converted_from": "funhouse"
+    "converted_from": "funhouse",
+    "opdb_id": "G5Dz7-Mz2e1"
   },
   {
     "slug": "funhouse-remake-collectors-edition",
@@ -508,13 +508,13 @@
   {
     "slug": "funhouse-remake-limited-edition",
     "name": "Funhouse (Remake Limited Edition)",
-    "opdb_id": "G5Dz7-MdEod-AR8Nb",
-    "variant_of": "funhouse-remake-collectors-edition"
+    "variant_of": "funhouse-remake-collectors-edition",
+    "opdb_id": "G5Dz7-MdEod-AR8Nb"
   },
   {
     "slug": "galactic-tank-force-limited-edition",
-    "opdb_id": "Gj6PZ-Mb5z6-A9Lbd",
-    "name": "Galactic Tank Force (Limited Edition)"
+    "name": "Galactic Tank Force (Limited Edition)",
+    "opdb_id": "Gj6PZ-Mb5z6-A9Lbd"
   },
   {
     "slug": "gamatron",
@@ -525,15 +525,15 @@
   {
     "slug": "gamatron-2",
     "name": "Gamatron",
-    "opdb_id": "GRo6e-MQPov",
     "is_conversion": true,
     "converted_from": "gamatron",
+    "opdb_id": "GRo6e-MQPov",
     "ipdb_id": 984
   },
   {
     "slug": "game-of-thrones-limited-edition",
-    "opdb_id": "G41d5-M9REd",
     "name": "Game of Thrones (Limited Edition)",
+    "opdb_id": "G41d5-M9REd",
     "ipdb_id": 6309
   },
   {
@@ -544,22 +544,22 @@
   },
   {
     "slug": "ghostbusters-limited-edition",
-    "opdb_id": "GR9Nr-MVKol",
     "name": "Ghostbusters (Limited Edition)",
+    "opdb_id": "GR9Nr-MVKol",
     "ipdb_id": 6334
   },
   {
     "slug": "godzilla-70th-anniversary",
     "name": "Godzilla (70th Anniversary)",
-    "opdb_id": "GweeP-Ml9pZ-AOvNL",
-    "variant_of": "godzilla-premium"
+    "variant_of": "godzilla-premium",
+    "opdb_id": "GweeP-Ml9pZ-AOvNL"
   },
   {
     "slug": "godzilla-limited-edition",
     "name": "Godzilla (Limited Edition)",
+    "variant_of": "godzilla-premium",
     "opdb_id": "GweeP-Ml9pZ-A9vXB",
-    "ipdb_id": 6843,
-    "variant_of": "godzilla-premium"
+    "ipdb_id": 6843
   },
   {
     "slug": "godzilla-premium",
@@ -576,13 +576,13 @@
   {
     "slug": "grand-slam-rally",
     "name": "Grand Slam Rally",
-    "opdb_id": "GoEEx-MjB52",
-    "is_conversion": true
+    "is_conversion": true,
+    "opdb_id": "GoEEx-MjB52"
   },
   {
     "slug": "guardians-of-the-galaxy-limited-edition",
-    "opdb_id": "GRWvz-MP37P",
     "name": "Guardians of the Galaxy (Limited Edition)",
+    "opdb_id": "GRWvz-MP37P",
     "ipdb_id": 6476
   },
   {
@@ -593,14 +593,14 @@
   },
   {
     "slug": "guns-n-roses-collectors-edition",
-    "opdb_id": "GqZZ1-MZeoE",
     "name": "Guns N' Roses (Collector's Edition)",
+    "opdb_id": "GqZZ1-MZeoE",
     "ipdb_id": 6766
   },
   {
     "slug": "guns-n-roses-limited-edition",
-    "opdb_id": "GqZZ1-M85y9",
     "name": "Guns N' Roses (Limited Edition)",
+    "opdb_id": "GqZZ1-M85y9",
     "ipdb_id": 6765
   },
   {
@@ -611,13 +611,13 @@
   },
   {
     "slug": "halloween-collectors-edition",
-    "opdb_id": "Gj66Z-Mp4BN-A9Y6n",
-    "name": "Halloween (Collector's Edition)"
+    "name": "Halloween (Collector's Edition)",
+    "opdb_id": "Gj66Z-Mp4BN-A9Y6n"
   },
   {
     "slug": "halloween-standard-edition",
-    "opdb_id": "Gj66Z-Mp4BN",
-    "name": "Halloween (Standard Edition)"
+    "name": "Halloween (Standard Edition)",
+    "opdb_id": "Gj66Z-Mp4BN"
   },
   {
     "slug": "harlem-globetrotters-on-tour",
@@ -628,14 +628,14 @@
   {
     "slug": "harry-potter-arcade-edition",
     "name": "Harry Potter (Arcade Edition)",
-    "opdb_id": "GWyBj-MdEbK-A9dEy",
-    "variant_of": "harry-potter-wizard-edition"
+    "variant_of": "harry-potter-wizard-edition",
+    "opdb_id": "GWyBj-MdEbK-A9dEy"
   },
   {
     "slug": "harry-potter-collectors-edition",
     "name": "Harry Potter (Collector's Edition)",
-    "opdb_id": "GWyBj-MdEbK-AOPdq",
-    "variant_of": "harry-potter-wizard-edition"
+    "variant_of": "harry-potter-wizard-edition",
+    "opdb_id": "GWyBj-MdEbK-AOPdq"
   },
   {
     "slug": "harry-potter-wizard-edition",
@@ -656,15 +656,15 @@
   {
     "slug": "hoopin-it-up",
     "name": "Hoopin' It Up",
-    "opdb_id": "G188W-MnK95",
-    "is_conversion": true
+    "is_conversion": true,
+    "opdb_id": "G188W-MnK95"
   },
   {
     "slug": "horror",
     "name": "Horror",
-    "opdb_id": "G4jyz-M5REB",
     "is_conversion": true,
     "converted_from": "space-shuttle",
+    "opdb_id": "G4jyz-M5REB",
     "ipdb_id": 5118
   },
   {
@@ -676,15 +676,15 @@
   {
     "slug": "ice-mania",
     "name": "Ice Mania",
-    "opdb_id": "G43DV-MBREl",
     "is_conversion": true,
     "converted_from": "ice-fever",
+    "opdb_id": "G43DV-MBREl",
     "ipdb_id": 3911
   },
   {
     "slug": "iron-maiden-legacy-of-the-beast-limited-edition",
-    "opdb_id": "G4dOQ-MW970",
     "name": "Iron Maiden: Legacy of the Beast (Limited Edition)",
+    "opdb_id": "G4dOQ-MW970",
     "ipdb_id": 6557
   },
   {
@@ -696,9 +696,9 @@
   {
     "slug": "james-bond-007-limited-edition",
     "name": "James Bond 007 (Limited Edition)",
+    "variant_of": "james-bond-007-premium",
     "opdb_id": "GQKyP-MP3OK-A1KoX",
-    "ipdb_id": 6898,
-    "variant_of": "james-bond-007-premium"
+    "ipdb_id": 6898
   },
   {
     "slug": "james-bond-007-premium",
@@ -708,21 +708,21 @@
   },
   {
     "slug": "james-camerons-avatar-limited-edition",
-    "opdb_id": "GrZBr-MyNZz",
     "name": "James Cameron's Avatar (Limited Edition)",
+    "opdb_id": "GrZBr-MyNZz",
     "ipdb_id": 5653
   },
   {
     "slug": "jaws-50th-anniversary",
     "name": "JAWS (50th Anniversary)",
-    "opdb_id": "GLWll-M1r8O-A1KkX",
-    "variant_of": "jaws-premium"
+    "variant_of": "jaws-premium",
+    "opdb_id": "GLWll-M1r8O-A1KkX"
   },
   {
     "slug": "jaws-limited-edition",
     "name": "JAWS (Limited Edition)",
-    "opdb_id": "GLWll-M1r8O-A1kx7",
-    "variant_of": "jaws-premium"
+    "variant_of": "jaws-premium",
+    "opdb_id": "GLWll-M1r8O-A1kx7"
   },
   {
     "slug": "jaws-premium",
@@ -732,8 +732,8 @@
   {
     "slug": "john-wick-limited-edition",
     "name": "John Wick (Limited Edition)",
-    "opdb_id": "GQK1P-Ml95Z-A9bjw",
-    "variant_of": "john-wick-premium"
+    "variant_of": "john-wick-premium",
+    "opdb_id": "GQK1P-Ml95Z-A9bjw"
   },
   {
     "slug": "john-wick-premium",
@@ -743,15 +743,15 @@
   {
     "slug": "jurassic-park-30th-anniversary",
     "name": "Jurassic Park (30th Anniversary)",
-    "opdb_id": "GK17D-MKNKd-AOxoz",
-    "variant_of": "jurassic-park-premium"
+    "variant_of": "jurassic-park-premium",
+    "opdb_id": "GK17D-MKNKd-AOxoz"
   },
   {
     "slug": "jurassic-park-limited-edition",
     "name": "Jurassic Park (Limited Edition)",
+    "variant_of": "jurassic-park-premium",
     "opdb_id": "GK17D-MKNKd-AOyKv",
-    "ipdb_id": 6575,
-    "variant_of": "jurassic-park-premium"
+    "ipdb_id": 6575
   },
   {
     "slug": "jurassic-park-premium",
@@ -762,15 +762,15 @@
   {
     "slug": "king",
     "name": "King",
-    "opdb_id": "G4XjW-MLXXy",
     "is_conversion": true,
+    "opdb_id": "G4XjW-MLXXy",
     "ipdb_id": 3625
   },
   {
     "slug": "king-kong-myth-of-terror-island-limited-edition",
     "name": "King Kong: Myth of Terror Island (Limited Edition)",
-    "opdb_id": "GEL0V-MyN8E-ARq7n",
-    "variant_of": "king-kong-myth-of-terror-island-premium"
+    "variant_of": "king-kong-myth-of-terror-island-premium",
+    "opdb_id": "GEL0V-MyN8E-ARq7n"
   },
   {
     "slug": "king-kong-myth-of-terror-island-premium",
@@ -785,24 +785,24 @@
   },
   {
     "slug": "kiss-limited-edition",
-    "opdb_id": "G4qX5-Ml9jb",
     "name": "KISS (Limited Edition)",
+    "opdb_id": "G4qX5-Ml9jb",
     "ipdb_id": 6267
   },
   {
     "slug": "la-retata",
     "name": "La Retata",
-    "opdb_id": "GRvzd-MD0r9",
     "is_conversion": true,
     "converted_from": "high-speed",
+    "opdb_id": "GRvzd-MD0r9",
     "ipdb_id": 4440
   },
   {
     "slug": "lady-death",
     "name": "Lady Death",
-    "opdb_id": "G417e-MJkoe",
     "is_conversion": true,
     "converted_from": "mata-hari-em",
+    "opdb_id": "G417e-MJkoe",
     "ipdb_id": 3972
   },
   {
@@ -820,17 +820,17 @@
   {
     "slug": "le-grande-8",
     "name": "Le Grande 8",
-    "opdb_id": "G5bQq-MkPW7",
     "is_conversion": true,
     "converted_from": "panthera",
+    "opdb_id": "G5bQq-MkPW7",
     "ipdb_id": 3916
   },
   {
     "slug": "led-zeppelin-limited-edition",
     "name": "Led Zeppelin (Limited Edition)",
+    "variant_of": "led-zeppelin-premium",
     "opdb_id": "Gweel-ME0pP-AR0N5",
-    "ipdb_id": 6762,
-    "variant_of": "led-zeppelin-premium"
+    "ipdb_id": 6762
   },
   {
     "slug": "led-zeppelin-premium",
@@ -846,14 +846,14 @@
   {
     "slug": "legends-of-valhalla-deluxe",
     "name": "Legends of Valhalla (Deluxe)",
-    "opdb_id": "GWyyq-MwNK5-AO3QJ",
-    "variant_of": "legends-of-valhalla-classic"
+    "variant_of": "legends-of-valhalla-classic",
+    "opdb_id": "GWyyq-MwNK5-AO3QJ"
   },
   {
     "slug": "legends-of-valhalla-deluxe-limited-edition",
     "name": "Legends of Valhalla (Deluxe Limited Edition)",
-    "opdb_id": "GWyyq-MwNK5-AObnw",
-    "variant_of": "legends-of-valhalla-classic"
+    "variant_of": "legends-of-valhalla-classic",
+    "opdb_id": "GWyyq-MwNK5-AObnw"
   },
   {
     "slug": "legends-of-wrestlemania-limited-edition",
@@ -864,48 +864,48 @@
   {
     "slug": "lexy-lightspeed-secret-agent-showdown",
     "name": "Lexy Lightspeed - Secret Agent Showdown",
-    "opdb_id": "GpeeL-MYez0",
     "is_conversion": true,
+    "opdb_id": "GpeeL-MYez0",
     "ipdb_id": 6453
   },
   {
     "slug": "lhexagone",
     "name": "L'Hexagone",
-    "opdb_id": "GRBKZ-MyNN8",
     "is_conversion": true,
     "converted_from": "genie",
+    "opdb_id": "GRBKZ-MyNN8",
     "ipdb_id": 3903
   },
   {
     "slug": "looney-tunes-collectors-edition",
-    "opdb_id": "GJ2K0-M85re-A1qdn",
-    "name": "Looney Tunes (Collector's Edition)"
+    "name": "Looney Tunes (Collector's Edition)",
+    "opdb_id": "GJ2K0-M85re-A1qdn"
   },
   {
     "slug": "looney-tunes-standard-edition",
-    "opdb_id": "GJ2K0-M85re",
-    "name": "Looney Tunes (Standard Edition)"
+    "name": "Looney Tunes (Standard Edition)",
+    "opdb_id": "GJ2K0-M85re"
   },
   {
     "slug": "lord-of-the-rings-limited-edition",
-    "opdb_id": "GrqZX-MDEPd",
     "name": "Lord of the Rings (Limited Edition)",
+    "opdb_id": "GrqZX-MDEPd",
     "ipdb_id": 5558
   },
   {
     "slug": "lovers",
     "name": "Lovers",
-    "opdb_id": "G4xlK-MJp6z",
     "is_conversion": true,
     "converted_from": "sky-dive",
+    "opdb_id": "G4xlK-MJp6z",
     "ipdb_id": 4112
   },
   {
     "slug": "mac-jungle",
     "name": "Mac Jungle",
-    "opdb_id": "G4Z6n-MDq43",
     "is_conversion": true,
     "converted_from": "macs-galaxy",
+    "opdb_id": "G4Z6n-MDq43",
     "ipdb_id": 3187
   },
   {
@@ -917,9 +917,9 @@
   {
     "slug": "magic-picture-pin",
     "name": "Magic Picture Pin",
-    "opdb_id": "GRD2P-MQknK",
     "is_conversion": true,
     "converted_from": "silverball-mania",
+    "opdb_id": "GRD2P-MQknK",
     "ipdb_id": 3450
   },
   {
@@ -930,15 +930,15 @@
   },
   {
     "slug": "metallica-master-of-puppets-limited-edition",
-    "opdb_id": "GRBE4-MOE4l",
     "name": "Metallica Master of Puppets (Limited Edition)",
+    "opdb_id": "GRBE4-MOE4l",
     "ipdb_id": 6031
   },
   {
     "slug": "metallica-remastered-limited-edition",
     "name": "Metallica Remastered (Limited Edition)",
-    "opdb_id": "GO0q3-MOEy8-ARrPz",
-    "variant_of": "metallica-remastered-premium"
+    "variant_of": "metallica-remastered-premium",
+    "opdb_id": "GO0q3-MOEy8-ARrPz"
   },
   {
     "slug": "metallica-remastered-premium",
@@ -948,22 +948,22 @@
   {
     "slug": "metallica-retheme",
     "name": "Metallica (Retheme)",
-    "opdb_id": "GRw0r-Mo1V7",
     "is_conversion": true,
     "converted_from": "earthshaker",
+    "opdb_id": "GRw0r-Mo1V7",
     "ipdb_id": 5478
   },
   {
     "slug": "mustang-limited-edition",
-    "opdb_id": "GrPOR-MLq5x",
     "name": "Mustang (Limited Edition)",
+    "opdb_id": "GrPOR-MLq5x",
     "ipdb_id": 6100
   },
   {
     "slug": "new-wave",
     "name": "New Wave",
-    "opdb_id": "GRB8Z-MQKXV",
     "is_conversion": true,
+    "opdb_id": "GRB8Z-MQKXV",
     "ipdb_id": 3482
   },
   {
@@ -974,8 +974,8 @@
   {
     "slug": "ninja-eclipse-first-edition",
     "name": "Ninja Eclipse (First Edition)",
-    "opdb_id": "GZVXY-MyNOq-ARWE8",
-    "variant_of": "ninja-eclipse-arcade-edition"
+    "variant_of": "ninja-eclipse-arcade-edition",
+    "opdb_id": "GZVXY-MyNOq-ARWE8"
   },
   {
     "slug": "panthera",
@@ -986,29 +986,29 @@
   {
     "slug": "peter-brock-king-of-the-mountain-torana",
     "name": "Peter Brock: King Of The Mountain (Torana)",
-    "opdb_id": "Ge1O1-MYeEB-A9xwz",
-    "variant_of": "holden-heritage"
+    "variant_of": "holden-heritage",
+    "opdb_id": "Ge1O1-MYeEB-A9xwz"
   },
   {
     "slug": "peter-brock-king-of-the-mountain-vk-commodore",
     "name": "Peter Brock: King Of The Mountain (VK Commodore)",
-    "opdb_id": "Ge1O1-MYeEB-A9wWL",
-    "variant_of": "holden-heritage"
+    "variant_of": "holden-heritage",
+    "opdb_id": "Ge1O1-MYeEB-A9wWL"
   },
   {
     "slug": "pin-ball-pool",
     "name": "Pin Ball Pool",
-    "opdb_id": "G5KXk-MJpvO",
     "is_conversion": true,
     "converted_from": "sure-shot",
+    "opdb_id": "G5KXk-MJpvO",
     "ipdb_id": 3310
   },
   {
     "slug": "pinball",
     "name": "Pinball",
-    "opdb_id": "GrPdq-MLONx",
     "is_conversion": true,
     "converted_from": "pinball-champ-82",
+    "opdb_id": "GrPdq-MLONx",
     "ipdb_id": 3306
   },
   {
@@ -1019,14 +1019,14 @@
   },
   {
     "slug": "pirates-of-the-caribbean-collectors-edition",
-    "opdb_id": "GRbPY-MBR24",
     "name": "Pirates of the Caribbean (Collector's Edition)",
+    "opdb_id": "GRbPY-MBR24",
     "ipdb_id": 6494
   },
   {
     "slug": "pirates-of-the-caribbean-limited-edition",
-    "opdb_id": "GRbPY-MePOP-A9pVl",
     "name": "Pirates of the Caribbean (Limited Edition)",
+    "opdb_id": "GRbPY-MePOP-A9pVl",
     "ipdb_id": 6493
   },
   {
@@ -1050,8 +1050,8 @@
   {
     "slug": "pokemon-limited-edition",
     "name": "Pokémon (Limited Edition)",
-    "opdb_id": "GV8wB-MRjKd-ARz2r",
-    "variant_of": "pokemon-premium"
+    "variant_of": "pokemon-premium",
+    "opdb_id": "GV8wB-MRjKd-ARz2r"
   },
   {
     "slug": "pokemon-premium",
@@ -1061,8 +1061,8 @@
   {
     "slug": "pulp-fiction-limited-edition",
     "name": "Pulp Fiction (Limited Edition)",
-    "opdb_id": "GoEkx-MdEzN-AR50E",
-    "variant_of": "pulp-fiction-special-edition"
+    "variant_of": "pulp-fiction-special-edition",
+    "opdb_id": "GoEkx-MdEzN-AR50E"
   },
   {
     "slug": "pulp-fiction-special-edition",
@@ -1077,41 +1077,41 @@
   {
     "slug": "queen-limited-edition",
     "name": "Queen (Limited Edition)",
-    "opdb_id": "GELkO-Ml9zZ-AOjEb",
-    "variant_of": "queen-collectors-edition"
+    "variant_of": "queen-collectors-edition",
+    "opdb_id": "GELkO-Ml9zZ-AOjEb"
   },
   {
     "slug": "race-stars",
     "name": "Race Stars",
-    "opdb_id": "G59wx-MXrdl",
     "is_conversion": true,
     "converted_from": "evel-knievel-em",
+    "opdb_id": "G59wx-MXrdl",
     "ipdb_id": 4015
   },
   {
     "slug": "ranger-in-the-ruins",
     "name": "Ranger in the Ruins",
-    "opdb_id": "GLWWV-Mb5Xx",
-    "is_conversion": true
+    "is_conversion": true,
+    "opdb_id": "GLWWV-Mb5Xx"
   },
   {
     "slug": "rick-and-morty-standard-edition",
-    "opdb_id": "GQKb2-MYek0",
     "name": "Rick and Morty (Standard Edition)",
+    "opdb_id": "GQKb2-MYek0",
     "ipdb_id": 6640
   },
   {
     "slug": "road-racer",
     "name": "Road Racer",
-    "opdb_id": "G59wx-MJ92p",
     "is_conversion": true,
     "converted_from": "evel-knievel-em",
+    "opdb_id": "G59wx-MJ92p",
     "ipdb_id": 3971
   },
   {
     "slug": "rob-zombies-spookshow-international-limited-edition",
-    "opdb_id": "G5pp2-MBRK4",
     "name": "Rob Zombie's Spookshow International (Limited Edition)",
+    "opdb_id": "G5pp2-MBRK4",
     "ipdb_id": 6417
   },
   {
@@ -1129,17 +1129,17 @@
   {
     "slug": "rocky-girl",
     "name": "Rocky Girl",
-    "opdb_id": "GRbD8-M9Rqz",
     "is_conversion": true,
     "converted_from": "rock-star",
+    "opdb_id": "GRbD8-M9Rqz",
     "ipdb_id": 4084
   },
   {
     "slug": "rush-limited-edition",
     "name": "Rush (Limited Edition)",
+    "variant_of": "rush-premium",
     "opdb_id": "G2Lkd-M0ope-A97xV",
-    "ipdb_id": 6846,
-    "variant_of": "rush-premium"
+    "ipdb_id": 6846
   },
   {
     "slug": "rush-premium",
@@ -1150,58 +1150,58 @@
   {
     "slug": "sahara-love",
     "name": "Sahara Love",
-    "opdb_id": "G4xqN-MDvw2",
     "is_conversion": true,
     "converted_from": "sinbad",
+    "opdb_id": "G4xqN-MDvw2",
     "ipdb_id": 3587
   },
   {
     "slug": "saturn-2",
     "name": "Saturn 2",
-    "opdb_id": "GRwl7-MDBRl",
     "is_conversion": true,
     "converted_from": "spy-hunter",
+    "opdb_id": "GRwl7-MDBRl",
     "ipdb_id": 3542
   },
   {
     "slug": "scooby-doo-collectors-edition",
-    "opdb_id": "GllPz-MBRrV-A9vWL",
-    "name": "Scooby-Doo (Collector's Edition)"
+    "name": "Scooby-Doo (Collector's Edition)",
+    "opdb_id": "GllPz-MBRrV-A9vWL"
   },
   {
     "slug": "scooby-doo-standard-edition",
-    "opdb_id": "GllPz-MBRrV",
-    "name": "Scooby-Doo (Standard Edition)"
+    "name": "Scooby-Doo (Standard Edition)",
+    "opdb_id": "GllPz-MBRrV"
   },
   {
     "slug": "screech",
     "name": "Screech",
-    "opdb_id": "GPBBv-ME0x0",
-    "display_type_slug": "alphanumeric",
     "description": "OPDB incorrectly lists display as DMD; Screech is a 1976 Inder EM with a digital score display fitted over factory-installed reels — the player-visible display is what matters for classification",
+    "display_type": "alphanumeric",
+    "opdb_id": "GPBBv-ME0x0",
     "ipdb_id": 3939
   },
   {
     "slug": "sexy-girl",
     "name": "Sexy Girl",
-    "opdb_id": "GrkOB-MD00x",
     "is_conversion": true,
     "converted_from": "playboy",
+    "opdb_id": "GrkOB-MD00x",
     "ipdb_id": 2106
   },
   {
     "slug": "sexy-girl-delux",
     "name": "Sexy Girl (Delux)",
-    "opdb_id": "GRD2P-Mx03K",
     "is_conversion": true,
     "converted_from": "silverball-mania",
+    "opdb_id": "GRD2P-Mx03K",
     "ipdb_id": 4423
   },
   {
     "slug": "silver-falls",
     "name": "Silver Falls",
-    "opdb_id": "GWyyZ-Mq1yv",
-    "is_conversion": true
+    "is_conversion": true,
+    "opdb_id": "GWyyZ-Mq1yv"
   },
   {
     "slug": "silverball-mania",
@@ -1218,9 +1218,9 @@
   {
     "slug": "sisters",
     "name": "Sisters",
-    "opdb_id": "G5WPp-MLyZJ",
     "is_conversion": true,
     "converted_from": "golden-arrow",
+    "opdb_id": "G5WPp-MLyZJ",
     "ipdb_id": 4108
   },
   {
@@ -1232,22 +1232,22 @@
   {
     "slug": "sky-warrior",
     "name": "Sky Warrior",
-    "opdb_id": "Gr3VN-MJ5qB",
     "is_conversion": true,
+    "opdb_id": "Gr3VN-MJ5qB",
     "ipdb_id": 3905
   },
   {
     "slug": "sorcerers-apprentice",
     "name": "Sorcerer's Apprentice",
-    "opdb_id": "G8llL-MyNwq",
-    "is_conversion": true
+    "is_conversion": true,
+    "opdb_id": "G8llL-MyNwq"
   },
   {
     "slug": "space-hawks",
     "name": "Space Hawks",
-    "opdb_id": "GR69j-MdEEB",
     "is_conversion": true,
     "converted_from": "cybernaut",
+    "opdb_id": "GR69j-MdEEB",
     "ipdb_id": 3621
   },
   {
@@ -1259,9 +1259,9 @@
   {
     "slug": "space-rider",
     "name": "Space Rider",
-    "opdb_id": "GRnwQ-MLyWb",
     "is_conversion": true,
     "converted_from": "harlem-globetrotters-on-tour",
+    "opdb_id": "GRnwQ-MLyWb",
     "ipdb_id": 4018
   },
   {
@@ -1273,17 +1273,17 @@
   {
     "slug": "space-wars",
     "name": "Space Wars",
-    "opdb_id": "GrN7J-MQjXy",
     "is_conversion": true,
     "converted_from": "eight-ball",
+    "opdb_id": "GrN7J-MQjXy",
     "ipdb_id": 3973
   },
   {
     "slug": "spider",
     "name": "Spider",
-    "opdb_id": "GRpYQ-MkPd9",
     "is_conversion": true,
     "converted_from": "central-park",
+    "opdb_id": "GRpYQ-MkPd9",
     "ipdb_id": 4404
   },
   {
@@ -1306,15 +1306,15 @@
   },
   {
     "slug": "star-trek-limited-edition",
-    "opdb_id": "Gryw4-MNEKn",
     "name": "Star Trek (Limited Edition)",
+    "opdb_id": "Gryw4-MNEKn",
     "ipdb_id": 6046
   },
   {
     "slug": "star-wars-fall-of-the-empire-limited-edition",
     "name": "Star Wars: Fall of the Empire (Limited Edition)",
-    "opdb_id": "Gxv81-Mo1rp-A9Qew",
-    "variant_of": "star-wars-fall-of-the-empire-premium"
+    "variant_of": "star-wars-fall-of-the-empire-premium",
+    "opdb_id": "Gxv81-Mo1rp-A9Qew"
   },
   {
     "slug": "star-wars-fall-of-the-empire-premium",
@@ -1323,24 +1323,24 @@
   },
   {
     "slug": "star-wars-limited-edition",
-    "opdb_id": "G5vLR-MZebq",
     "name": "Star Wars (Limited Edition)",
+    "opdb_id": "G5vLR-MZebq",
     "ipdb_id": 6430
   },
   {
     "slug": "stellar-airship",
     "name": "Stellar Airship",
-    "opdb_id": "GrN7J-MQj62",
     "is_conversion": true,
     "converted_from": "eight-ball",
+    "opdb_id": "GrN7J-MQj62",
     "ipdb_id": 4016
   },
   {
     "slug": "stranger-things-limited-edition",
     "name": "Stranger Things (Limited Edition)",
+    "variant_of": "stranger-things-premium",
     "opdb_id": "Gzy89-M0oPy-A9xXV",
-    "ipdb_id": 6644,
-    "variant_of": "stranger-things-premium"
+    "ipdb_id": 6644
   },
   {
     "slug": "stranger-things-premium",
@@ -1357,9 +1357,9 @@
   {
     "slug": "super-bowl",
     "name": "Super Bowl",
-    "opdb_id": "GRpWD-MQork",
     "is_conversion": true,
     "converted_from": "xs-os",
+    "opdb_id": "GRpWD-MQork",
     "ipdb_id": 3399
   },
   {
@@ -1383,25 +1383,25 @@
   {
     "slug": "tag-team-pinball-2",
     "name": "Tag-Team Pinball",
-    "opdb_id": "G5Yyo-MQdNz",
     "is_conversion": true,
     "converted_from": "tag-team-pinball",
+    "opdb_id": "G5Yyo-MQdNz",
     "ipdb_id": 4119
   },
   {
     "slug": "take-a-card",
     "name": "Take A Card",
-    "opdb_id": "GrEXx-MJ5Yv",
     "is_conversion": true,
     "converted_from": "lawman",
+    "opdb_id": "GrEXx-MJ5Yv",
     "ipdb_id": 4109
   },
   {
     "slug": "teenage-mutant-ninja-turtles-limited-edition",
     "name": "Teenage Mutant Ninja Turtles (Limited Edition)",
+    "variant_of": "teenage-mutant-ninja-turtles-premium",
     "opdb_id": "Gd2Xb-MRjpZ-A92v0",
-    "ipdb_id": 6732,
-    "variant_of": "teenage-mutant-ninja-turtles-premium"
+    "ipdb_id": 6732
   },
   {
     "slug": "teenage-mutant-ninja-turtles-premium",
@@ -1411,14 +1411,14 @@
   },
   {
     "slug": "the-avengers-hulk-limited-edition",
-    "opdb_id": "GRzNR-MyNq8-A1oeR",
     "name": "The Avengers Hulk (Limited Edition)",
+    "opdb_id": "GRzNR-MyNq8-A1oeR",
     "ipdb_id": 5941
   },
   {
     "slug": "the-avengers-limited-edition",
-    "opdb_id": "GRzNR-MyNq8",
     "name": "The Avengers (Limited Edition)",
+    "opdb_id": "GRzNR-MyNq8",
     "ipdb_id": 5940
   },
   {
@@ -1430,8 +1430,8 @@
   {
     "slug": "the-godfather-collectors-edition",
     "name": "The Godfather (Collector's Edition)",
-    "opdb_id": "Gd2ox-MW9qj-A1loo",
-    "variant_of": "the-godfather-limited-edition"
+    "variant_of": "the-godfather-limited-edition",
+    "opdb_id": "Gd2ox-MW9qj-A1loo"
   },
   {
     "slug": "the-godfather-limited-edition",
@@ -1440,8 +1440,8 @@
   },
   {
     "slug": "the-hobbit-limited-edition",
-    "opdb_id": "G5bYr-MLezO-A9dNe",
-    "name": "The Hobbit (Limited Edition)"
+    "name": "The Hobbit (Limited Edition)",
+    "opdb_id": "G5bYr-MLezO-A9dNe"
   },
   {
     "slug": "the-hobbit-standard-edition",
@@ -1452,16 +1452,16 @@
   {
     "slug": "the-hunter",
     "name": "The Hunter",
-    "opdb_id": "G4Od9-MDlpK",
     "is_conversion": true,
+    "opdb_id": "G4Od9-MDlpK",
     "ipdb_id": 3733
   },
   {
     "slug": "the-mandalorian-limited-edition",
     "name": "The Mandalorian (Limited Edition)",
+    "variant_of": "the-mandalorian-premium",
     "opdb_id": "GBLLP-MW900-A1KoQ",
-    "ipdb_id": 6830,
-    "variant_of": "the-mandalorian-premium"
+    "ipdb_id": 6830
   },
   {
     "slug": "the-mandalorian-premium",
@@ -1472,9 +1472,9 @@
   {
     "slug": "the-munsters-limited-edition",
     "name": "The Munsters (Limited Edition)",
+    "variant_of": "the-munsters-premium",
     "opdb_id": "GbPde-Mp43l-AO4Do",
-    "ipdb_id": 6566,
-    "variant_of": "the-munsters-premium"
+    "ipdb_id": 6566
   },
   {
     "slug": "the-munsters-premium",
@@ -1484,35 +1484,35 @@
   },
   {
     "slug": "the-princess-bride-collectors-edition",
-    "opdb_id": "GkBnQ-MBRxV-A96qp",
-    "name": "The Princess Bride (Collector's Edition)"
+    "name": "The Princess Bride (Collector's Edition)",
+    "opdb_id": "GkBnQ-MBRxV-A96qp"
   },
   {
     "slug": "the-princess-bride-limited-edition",
-    "opdb_id": "GkBnQ-MBRxV-ARB7b",
-    "name": "The Princess Bride (Limited Edition)"
+    "name": "The Princess Bride (Limited Edition)",
+    "opdb_id": "GkBnQ-MBRxV-ARB7b"
   },
   {
     "slug": "the-rolling-stones-limited-edition",
-    "opdb_id": "GredR-Mb5jN",
     "name": "The Rolling Stones (Limited Edition)",
+    "opdb_id": "GredR-Mb5jN",
     "ipdb_id": 5708
   },
   {
     "slug": "the-texas-chainsaw-massacre-collectors-edition",
-    "opdb_id": "G0lkp-MZeqp-AOdky",
-    "name": "The Texas Chainsaw Massacre (Collector's Edition)"
+    "name": "The Texas Chainsaw Massacre (Collector's Edition)",
+    "opdb_id": "G0lkp-MZeqp-AOdky"
   },
   {
     "slug": "the-texas-chainsaw-massacre-standard-edition",
-    "opdb_id": "G0lkp-MZeqp",
-    "name": "The Texas Chainsaw Massacre (Standard Edition)"
+    "name": "The Texas Chainsaw Massacre (Standard Edition)",
+    "opdb_id": "G0lkp-MZeqp"
   },
   {
     "slug": "the-uncanny-x-men-limited-edition",
     "name": "The Uncanny X-Men (Limited Edition)",
-    "opdb_id": "G7ZEz-MyN3K-ARl3o",
-    "variant_of": "the-uncanny-x-men-premium"
+    "variant_of": "the-uncanny-x-men-premium",
+    "opdb_id": "G7ZEz-MyN3K-ARl3o"
   },
   {
     "slug": "the-uncanny-x-men-premium",
@@ -1521,15 +1521,15 @@
   },
   {
     "slug": "the-walking-dead-limited-edition",
-    "opdb_id": "G5nz5-MP3r1",
     "name": "The Walking Dead (Limited Edition)",
+    "opdb_id": "G5nz5-MP3r1",
     "ipdb_id": 6156
   },
   {
     "slug": "the-walking-dead-remastered-limited-edition",
     "name": "The Walking Dead Remastered (Limited Edition)",
-    "opdb_id": "Gj6DE-MePEz-AR5Pz",
-    "variant_of": "the-walking-dead-remastered-premium"
+    "variant_of": "the-walking-dead-remastered-premium",
+    "opdb_id": "Gj6DE-MePEz-AR5Pz"
   },
   {
     "slug": "the-walking-dead-remastered-premium",
@@ -1538,8 +1538,8 @@
   },
   {
     "slug": "the-wizard-of-oz-limited-edition",
-    "opdb_id": "G4xyR-MJ2v0-AOPQQ",
-    "name": "The Wizard of Oz (Limited Edition)"
+    "name": "The Wizard of Oz (Limited Edition)",
+    "opdb_id": "G4xyR-MJ2v0-AOPQQ"
   },
   {
     "slug": "the-wizard-of-oz-standard-edition",
@@ -1556,29 +1556,29 @@
   {
     "slug": "tiger-rag",
     "name": "Tiger Rag",
-    "opdb_id": "GR67j-MLqwr",
     "is_conversion": true,
     "converted_from": "kings-of-steel",
+    "opdb_id": "GR67j-MLqwr",
     "ipdb_id": 3501
   },
   {
     "slug": "tiger-woman",
     "name": "Tiger Woman",
-    "opdb_id": "G4eEJ-M61q0",
     "is_conversion": true,
+    "opdb_id": "G4eEJ-M61q0",
     "ipdb_id": 3904
   },
   {
     "slug": "total-nuclear-annihilation-collectors-edition",
-    "opdb_id": "GRD79-M0odk-AObBw",
-    "name": "Total Nuclear Annihilation (Collector's Edition)"
+    "name": "Total Nuclear Annihilation (Collector's Edition)",
+    "opdb_id": "GRD79-M0odk-AObBw"
   },
   {
     "slug": "toy-story-4-collectors-edition",
     "name": "Toy Story 4 (Collector's Edition)",
+    "variant_of": "toy-story-4-limited-edition",
     "opdb_id": "GJ2o0-MrRye-AO62p",
-    "ipdb_id": 6951,
-    "variant_of": "toy-story-4-limited-edition"
+    "ipdb_id": 6951
   },
   {
     "slug": "toy-story-4-limited-edition",
@@ -1588,20 +1588,20 @@
   },
   {
     "slug": "transformers-autobot-crimson-limited-edition",
-    "opdb_id": "GRnPz-Mx0XO-AOxV9",
     "name": "Transformers Autobot Crimson (Limited Edition)",
+    "opdb_id": "GRnPz-Mx0XO-AOxV9",
     "ipdb_id": 5754
   },
   {
     "slug": "transformers-decepticon-violet-limited-edition",
-    "opdb_id": "GRnPz-Mx0XO-ARzL1",
     "name": "Transformers Decepticon Violet (Limited Edition)",
+    "opdb_id": "GRnPz-Mx0XO-ARzL1",
     "ipdb_id": 5755
   },
   {
     "slug": "transformers-limited-edition",
-    "opdb_id": "GRnPz-Mx0XO",
     "name": "Transformers (Limited Edition)",
+    "opdb_id": "GRnPz-Mx0XO",
     "ipdb_id": 5753
   },
   {
@@ -1612,20 +1612,20 @@
   },
   {
     "slug": "ultraman-kaiju-rumble-collectors-edition",
-    "opdb_id": "GBLLd-MdEON-A9QJL",
-    "name": "Ultraman: Kaiju Rumble (Collector's Edition)"
+    "name": "Ultraman: Kaiju Rumble (Collector's Edition)",
+    "opdb_id": "GBLLd-MdEON-A9QJL"
   },
   {
     "slug": "ultraman-kaiju-rumble-standard-edition",
-    "opdb_id": "GBLLd-MdEON",
-    "name": "Ultraman: Kaiju Rumble (Standard Edition)"
+    "name": "Ultraman: Kaiju Rumble (Standard Edition)",
+    "opdb_id": "GBLLd-MdEON"
   },
   {
     "slug": "venom-limited-edition",
     "name": "Venom (Limited Edition)",
+    "variant_of": "venom-premium",
     "opdb_id": "G3EBl-MRj6e-ARzbx",
-    "ipdb_id": 7066,
-    "variant_of": "venom-premium"
+    "ipdb_id": 7066
   },
   {
     "slug": "venom-premium",
@@ -1635,8 +1635,8 @@
   },
   {
     "slug": "weird-als-museum-of-natural-hilarity-limited-edition",
-    "opdb_id": "GN6WW-MnKPq-AOPQq",
-    "name": "Weird Al's Museum of Natural Hilarity (Limited Edition)"
+    "name": "Weird Al's Museum of Natural Hilarity (Limited Edition)",
+    "opdb_id": "GN6WW-MnKPq-AOPQq"
   },
   {
     "slug": "whirlwind",
@@ -1647,15 +1647,15 @@
   {
     "slug": "whirlwind-20",
     "name": "Whirlwind 2.0",
-    "opdb_id": "GrE7e-MnKzq",
     "is_conversion": true,
-    "converted_from": "whirlwind"
+    "converted_from": "whirlwind",
+    "opdb_id": "GrE7e-MnKzq"
   },
   {
     "slug": "white-shark",
     "name": "White Shark",
-    "opdb_id": "G509D-M9RzK",
     "is_conversion": true,
+    "opdb_id": "G509D-M9RzK",
     "ipdb_id": 3555
   },
   {
@@ -1667,29 +1667,29 @@
   {
     "slug": "whoa-nellie-big-juicy-melons-2",
     "name": "Whoa Nellie! Big Juicy Melons",
-    "opdb_id": "GRYX4-MLRe3",
     "is_conversion": true,
     "converted_from": "whoa-nellie-big-juicy-melons",
+    "opdb_id": "GRYX4-MLRe3",
     "ipdb_id": 5863
   },
   {
     "slug": "wild-schutz",
     "name": "Wild Schutz",
-    "opdb_id": "GrleW-ME0op",
     "is_conversion": true,
     "converted_from": "strikes-and-spares",
+    "opdb_id": "GrleW-ME0op",
     "ipdb_id": 4017
   },
   {
     "slug": "willy-wonka-and-the-chocolate-factory-collectors-edition",
-    "opdb_id": "GYWBZ-MW9B0-A9jqd",
     "name": "Willy Wonka & The Chocolate Factory (Collector's Edition)",
+    "opdb_id": "GYWBZ-MW9B0-A9jqd",
     "ipdb_id": 6649
   },
   {
     "slug": "willy-wonka-and-the-chocolate-factory-limited-edition",
-    "opdb_id": "GYWBZ-MW9B0",
     "name": "Willy Wonka & The Chocolate Factory (Limited Edition)",
+    "opdb_id": "GYWBZ-MW9B0",
     "ipdb_id": 6648
   },
   {
@@ -1701,8 +1701,8 @@
   {
     "slug": "world-defender",
     "name": "World Defender",
-    "opdb_id": "GR9NQ-MRjop",
     "is_conversion": true,
+    "opdb_id": "GR9NQ-MRjop",
     "ipdb_id": 3519
   },
   {
@@ -1713,13 +1713,13 @@
   },
   {
     "slug": "x-men-limited-edition",
-    "opdb_id": "Grj6X-MJNV1",
-    "name": "X-Men (Limited Edition)"
+    "name": "X-Men (Limited Edition)",
+    "opdb_id": "Grj6X-MJNV1"
   },
   {
     "slug": "x-men-magneto-limited-edition",
-    "opdb_id": "Grj6X-MJNV1-AOwN1",
     "name": "X-Men Magneto (Limited Edition)",
+    "opdb_id": "Grj6X-MJNV1-AOwN1",
     "ipdb_id": 5823
   },
   {
@@ -1730,8 +1730,8 @@
   },
   {
     "slug": "x-men-wolverine-limited-edition",
-    "opdb_id": "Grj6X-MJNV1-AO209",
     "name": "X-Men Wolverine (Limited Edition)",
+    "opdb_id": "Grj6X-MJNV1-AO209",
     "ipdb_id": 5824
   },
   {

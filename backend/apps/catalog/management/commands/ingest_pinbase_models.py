@@ -25,7 +25,7 @@ DEFAULT_PATH = Path(__file__).parents[5] / "data" / "models.json"
 # Fields stored as claim values (claim field_name → JSON key).
 CLAIM_FIELDS = {
     "name": "name",
-    "display_type": "display_type_slug",
+    "display_type": "display_type",
     "description": "description",
     "is_conversion": "is_conversion",
     "converted_from": "converted_from",
