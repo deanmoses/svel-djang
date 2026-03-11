@@ -1,8 +1,8 @@
 """Create Title records for IPDB-only MachineModels that lack a title.
 
-For each IPDB-only model (ipdb_id set, opdb_id NULL) without an active "group"
+For each IPDB-only model (ipdb_id set, opdb_id NULL) without an active "title"
 claim, creates a Title with synthetic opdb_id ``ipdb:{ipdb_id}`` and asserts a
-"group" claim linking the model to it, plus a "name" claim on the Title.
+"title" claim linking the model to it, plus a "name" claim on the Title.
 
 Models whose names match existing OPDB-backed Titles are flagged with
 ``needs_review=True`` and contextual notes for human curation.
@@ -50,17 +50,17 @@ class Command(BaseCommand):
             ipdb_id__isnull=False, opdb_id__isnull=True
         )
 
-        # Find which of those already have an active "group" claim.
-        has_group_claim = set(
+        # Find which of those already have an active "title" claim.
+        has_title_claim = set(
             Claim.objects.filter(
                 content_type_id=model_ct_id,
-                field_name="group",
+                field_name="title",
                 is_active=True,
                 source=source,
             ).values_list("object_id", flat=True)
         )
 
-        candidates = [m for m in ipdb_only if m.pk not in has_group_claim]
+        candidates = [m for m in ipdb_only if m.pk not in has_title_claim]
 
         if not candidates:
             self.stdout.write("  No IPDB-only models need titles.")
@@ -83,7 +83,7 @@ class Command(BaseCommand):
         )
 
         new_titles: list[Title] = []
-        # Group claims on MachineModel linking to the synthetic title.
+        # Title claims on MachineModel linking to the synthetic title.
         model_claims: list[Claim] = []
         # Name claims on the Title itself.
         title_name_map: list[tuple[str, str]] = []  # (synthetic_id, name)
@@ -161,8 +161,8 @@ class Command(BaseCommand):
                 Claim(
                     content_type_id=model_ct_id,
                     object_id=model.pk,
-                    field_name="group",
-                    claim_key="group",
+                    field_name="title",
+                    claim_key="title",
                     value=synthetic_id,
                     needs_review=needs_review,
                     needs_review_notes=needs_review_notes,
@@ -197,7 +197,7 @@ class Command(BaseCommand):
                         )
                     )
 
-        # Assert model-level group claims.
+        # Assert model-level title claims.
         if model_claims:
             claim_stats = Claim.objects.bulk_assert_claims(source, model_claims)
             self.stdout.write(

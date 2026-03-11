@@ -20,7 +20,6 @@ from django.core.management.base import BaseCommand
 from apps.catalog.models import Manufacturer
 from apps.catalog.resolve import (
     MANUFACTURER_DIRECT_FIELDS,
-    _MANUFACTURER_INT_FIELDS,
     _resolve_bulk,
 )
 from apps.provenance.models import Claim, Source
@@ -106,7 +105,6 @@ class Command(BaseCommand):
             _resolve_bulk(
                 Manufacturer,
                 MANUFACTURER_DIRECT_FIELDS,
-                int_fields=_MANUFACTURER_INT_FIELDS,
                 object_ids=touched_ids,
             )
 

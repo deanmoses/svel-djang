@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
@@ -41,45 +42,104 @@ DIRECT_FIELDS: dict[str, str] = {
     "is_conversion": "is_conversion",
 }
 
-# Fields that should be coerced to int (nullable).
-_INT_FIELDS = {
-    "year",
-    "month",
-    "player_count",
-    "flipper_count",
-    "ipdb_id",
-    "pinside_id",
+
+# ------------------------------------------------------------------
+# FK field registry
+# ------------------------------------------------------------------
+
+
+@dataclass(frozen=True, slots=True)
+class FKFieldSpec:
+    """Descriptor for a foreign-key field resolved from claims."""
+
+    model_attr: str  # e.g. "title", "manufacturer"
+    target_model: type  # e.g. Title, Manufacturer
+    lookup_key: str  # field on target model used for lookup, e.g. "slug" or "opdb_id"
+
+
+FK_FIELDS: dict[str, FKFieldSpec] = {
+    "title": FKFieldSpec("title", Title, "opdb_id"),
+    "manufacturer": FKFieldSpec("manufacturer", Manufacturer, "slug"),
+    "system": FKFieldSpec("system", System, "slug"),
+    "technology_generation": FKFieldSpec(
+        "technology_generation", TechnologyGeneration, "slug"
+    ),
+    "display_type": FKFieldSpec("display_type", DisplayType, "slug"),
+    "display_subtype": FKFieldSpec("display_subtype", DisplaySubtype, "slug"),
+    "cabinet": FKFieldSpec("cabinet", Cabinet, "slug"),
+    "game_format": FKFieldSpec("game_format", GameFormat, "slug"),
+    "variant_of": FKFieldSpec("variant_of", MachineModel, "slug"),
+    "converted_from": FKFieldSpec("converted_from", MachineModel, "slug"),
 }
 
-# Fields that should be coerced to Decimal (nullable).
-_DECIMAL_FIELDS = {"ipdb_rating", "pinside_rating"}
 
-# Fields that should be coerced to bool.
-_BOOL_FIELDS = {"is_conversion"}
+def build_fk_lookups() -> dict[str, dict[str, Any]]:
+    """Pre-fetch all FK lookup tables. Returns {claim_field_name: {key: instance}}."""
+    lookups: dict[str, dict[str, Any]] = {}
+    for field_name, spec in FK_FIELDS.items():
+        lookups[field_name] = {
+            getattr(obj, spec.lookup_key): obj
+            for obj in spec.target_model.objects.all()
+        }
+    return lookups
 
 
-def _coerce(field_name: str, value):
+def _resolve_fk(
+    field_name: str,
+    value,
+    lookup: dict[str, Any] | None = None,
+) -> Any | None:
+    """Resolve a claim value to an FK instance, optionally using a pre-fetched lookup."""
+    if not value:
+        return None
+    spec = FK_FIELDS[field_name]
+    key = str(value).strip()
+    if not key:
+        return None
+    if lookup is not None:
+        result = lookup.get(key)
+    else:
+        result = spec.target_model.objects.filter(**{spec.lookup_key: key}).first()
+    if not result:
+        logger.warning("Unmatched %s claim value: %r", field_name, value)
+    return result
+
+
+# ------------------------------------------------------------------
+# Type coercion (auto-detected from Django model field)
+# ------------------------------------------------------------------
+
+
+def _coerce(model_class: type[models.Model], attr: str, value):
     """Coerce a JSON claim value to the type expected by the model field."""
     if value is None or value == "":
-        return None
+        field = model_class._meta.get_field(attr)
+        return None if field.null else ""
 
-    if field_name in _INT_FIELDS:
+    field = model_class._meta.get_field(attr)
+
+    if isinstance(
+        field,
+        models.IntegerField
+        | models.SmallIntegerField
+        | models.PositiveIntegerField
+        | models.PositiveSmallIntegerField
+        | models.BigIntegerField,
+    ):
         try:
             return int(value)
         except ValueError, TypeError:
-            logger.warning("Cannot coerce %r to int for field %s", value, field_name)
-            return None
+            logger.warning("Cannot coerce %r to int for field %s", value, attr)
+            return None if field.null else 0
 
-    if field_name in _DECIMAL_FIELDS:
+    if isinstance(field, models.DecimalField):
         try:
             return Decimal(str(value))
         except InvalidOperation, ValueError, TypeError:
-            logger.warning(
-                "Cannot coerce %r to Decimal for field %s", value, field_name
-            )
-            return None
+            logger.warning("Cannot coerce %r to Decimal for field %s", value, attr)
+            return None if field.null else Decimal(0)
 
-    if field_name in _BOOL_FIELDS:
+    if isinstance(field, models.BooleanField):
         if isinstance(value, bool):
             return value
         if isinstance(value, str):
@@ -89,139 +149,19 @@ def _coerce(field_name: str, value):
     return value
 
 
-def _resolve_title_fk(value) -> Title | None:
-    """Resolve a group claim value to a Title instance.
-
-    The value is expected to be an OPDB group ID string (e.g., "G5pe4").
-    """
-    if value is None or value == "":
-        return None
-    title = Title.objects.filter(opdb_id=str(value)).first()
-    if not title:
-        logger.warning("Unmatched group claim value: %r", value)
-    return title
-
-
-def _resolve_manufacturer(value) -> Manufacturer | None:
-    """Resolve a manufacturer claim value (slug) to a Manufacturer instance."""
-    if value is None or value == "":
-        return None
-    slug = str(value).strip()
-    if not slug:
-        return None
-    mfr = Manufacturer.objects.filter(slug=slug).first()
-    if not mfr:
-        logger.warning("Unmatched manufacturer claim slug: %r", value)
-    return mfr
-
-
 # ------------------------------------------------------------------
-# Lookup builders (used by bulk resolution)
+# Field defaults
 # ------------------------------------------------------------------
 
 
-def _build_manufacturer_lookup() -> dict[str, Manufacturer]:
-    """Pre-fetch all manufacturers into {slug: Manufacturer}."""
-    return {m.slug: m for m in Manufacturer.objects.all()}
-
-
-def _build_title_lookup() -> dict[str, Title]:
-    """Pre-fetch all titles into {opdb_id: Title}."""
-    return {t.opdb_id: t for t in Title.objects.all()}
-
-
-def _build_system_lookup() -> dict[str, System]:
-    """Pre-fetch all systems into {slug: System}."""
-    return {s.slug: s for s in System.objects.all()}
-
-
-def _resolve_system(value, system_lookup: dict[str, System]) -> System | None:
-    if not value:
-        return None
-    result = system_lookup.get(str(value))
-    if not result:
-        logger.warning("Unmatched system claim slug: %r", value)
-    return result
-
-
-def _build_technology_generation_lookup() -> dict[str, TechnologyGeneration]:
-    """Pre-fetch all technology generations into {slug: TechnologyGeneration}."""
-    return {t.slug: t for t in TechnologyGeneration.objects.all()}
-
-
-def _build_display_type_lookup() -> dict[str, DisplayType]:
-    """Pre-fetch all display types into {slug: DisplayType}."""
-    return {d.slug: d for d in DisplayType.objects.all()}
-
-
-def _build_display_subtype_lookup() -> dict[str, DisplaySubtype]:
-    """Pre-fetch all display subtypes into {slug: DisplaySubtype}."""
-    return {d.slug: d for d in DisplaySubtype.objects.all()}
-
-
-def _build_cabinet_lookup() -> dict[str, Cabinet]:
-    """Pre-fetch all cabinets into {slug: Cabinet}."""
-    return {c.slug: c for c in Cabinet.objects.all()}
-
-
-def _build_game_format_lookup() -> dict[str, GameFormat]:
-    """Pre-fetch all game formats into {slug: GameFormat}."""
-    return {g.slug: g for g in GameFormat.objects.all()}
-
-
-def _build_converted_from_lookup() -> dict[str, MachineModel]:
-    """Pre-fetch all machine models into {slug: MachineModel}."""
-    return {m.slug: m for m in MachineModel.objects.all()}
-
-
-def _resolve_slug_fk(value, lookup: dict[str, Any], label: str):
-    """Resolve a slug claim value to a model instance via a pre-fetched lookup."""
-    if not value:
-        return None
-    result = lookup.get(str(value))
-    if not result:
-        logger.warning("Unmatched %s claim slug: %r", label, value)
-    return result
-
-
-def _resolve_manufacturer_bulk(
-    value,
-    mfr_lookup: dict[str, Manufacturer],
-) -> Manufacturer | None:
-    """Resolve a manufacturer slug to a Manufacturer using pre-fetched dict."""
-    if value is None or value == "":
-        return None
-    result = mfr_lookup.get(str(value))
-    if not result:
-        logger.warning("Unmatched manufacturer claim slug: %r", value)
-    return result
-
-
-def _resolve_title_fk_bulk(value, group_lookup: dict[str, Title]) -> Title | None:
-    """Same logic as _resolve_title_fk() but uses pre-fetched dict."""
-    if value is None or value == "":
-        return None
-    title = group_lookup.get(str(value))
-    if not title:
-        logger.warning("Unmatched group claim value: %r", value)
-    return title
-
-
-# ------------------------------------------------------------------
-# Field defaults cache (used by bulk resolution)
-# ------------------------------------------------------------------
-
-_field_defaults: dict[str, Any] | None = None
-
-
-def _get_field_defaults() -> dict[str, Any]:
-    """Compute reset values for all DIRECT_FIELDS (cached after first call)."""
-    global _field_defaults
-    if _field_defaults is not None:
-        return _field_defaults
+def get_field_defaults(
+    model_class: type[models.Model],
+    direct_fields: dict[str, str],
+) -> dict[str, Any]:
+    """Compute reset values for direct fields by inspecting Django model metadata."""
     defaults: dict[str, Any] = {}
-    for attr in DIRECT_FIELDS.values():
-        field = MachineModel._meta.get_field(attr)
+    for attr in direct_fields.values():
+        field = model_class._meta.get_field(attr)
         if hasattr(field, "default") and field.default is not models.NOT_PROVIDED:
             defaults[attr] = (
                 field.default() if callable(field.default) else field.default
@@ -230,8 +170,7 @@ def _get_field_defaults() -> dict[str, Any]:
             defaults[attr] = None
         else:
             defaults[attr] = ""
-    _field_defaults = defaults
-    return _field_defaults
+    return defaults
 
 
 # ------------------------------------------------------------------

@@ -119,7 +119,7 @@ def list_review_claims(request):
         subject = claim.subject
         subject_name = str(subject) if subject else "Unknown"
         subject_slug = getattr(subject, "slug", None)
-        if claim.field_name == "group":
+        if claim.field_name == "title":
             review_links, title_slug = _build_claim_review_context(claim)
         else:
             review_links, title_slug = [], None

@@ -48,8 +48,6 @@ from apps.catalog.models import MachineModel, Manufacturer, Person
 from apps.catalog.resolve import (
     MANUFACTURER_DIRECT_FIELDS,
     PERSON_DIRECT_FIELDS,
-    _MANUFACTURER_INT_FIELDS,
-    _PERSON_INT_FIELDS,
     _resolve_bulk,
     resolve_all_credits,
 )
@@ -371,7 +369,6 @@ class Command(BaseCommand):
         _resolve_bulk(
             Person,
             PERSON_DIRECT_FIELDS,
-            int_fields=_PERSON_INT_FIELDS,
             object_ids=resolved_person_ids,
         )
 
@@ -412,7 +409,6 @@ class Command(BaseCommand):
         _resolve_bulk(
             Manufacturer,
             MANUFACTURER_DIRECT_FIELDS,
-            int_fields=_MANUFACTURER_INT_FIELDS,
             object_ids=matched_mfr_ids,
         )
 

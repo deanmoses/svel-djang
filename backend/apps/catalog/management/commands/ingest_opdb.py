@@ -709,8 +709,8 @@ class Command(BaseCommand):
                 )
             )
 
-        # Group claim (derived from opdb_id prefix).
+        # Title claim (derived from opdb_id prefix).
         if opdb_id and groups_by_id:
             group_opdb_id = parse_opdb_group_id(opdb_id)
             if group_opdb_id and group_opdb_id in groups_by_id:
-                _add("group", group_opdb_id)
+                _add("title", group_opdb_id)

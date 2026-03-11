@@ -86,7 +86,7 @@ class TestGenerateIpdbTitles:
 
         source = Source.objects.get(slug="ipdb")
         claim = ipdb_only_model.claims.get(
-            source=source, field_name="group", is_active=True
+            source=source, field_name="title", is_active=True
         )
         assert claim.value == "ipdb:20"
         assert claim.needs_review is False
@@ -96,8 +96,8 @@ class TestGenerateIpdbTitles:
 
         assert not Title.objects.filter(opdb_id__startswith="ipdb:").exists()
 
-    def test_skips_model_with_existing_group_claim(self, ipdb_only_model, ipdb_source):
-        """Models that already have an active group claim should be skipped."""
+    def test_skips_model_with_existing_title_claim(self, ipdb_only_model, ipdb_source):
+        """Models that already have an active title claim should be skipped."""
         from django.contrib.contenttypes.models import ContentType
 
         ct = ContentType.objects.get_for_model(MachineModel)
@@ -105,8 +105,8 @@ class TestGenerateIpdbTitles:
             content_type=ct,
             object_id=ipdb_only_model.pk,
             source=ipdb_source,
-            field_name="group",
-            claim_key="group",
+            field_name="title",
+            claim_key="title",
             value="G9999",
         )
 
@@ -135,7 +135,7 @@ class TestGenerateIpdbTitles:
 
         source = Source.objects.get(slug="ipdb")
         claim = ipdb_model_matching_opdb.claims.get(
-            source=source, field_name="group", is_active=True
+            source=source, field_name="title", is_active=True
         )
         assert claim.needs_review is True
         assert "G1234" in claim.needs_review_notes

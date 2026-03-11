@@ -9,9 +9,7 @@ Also handles taxonomy model resolution.
 from __future__ import annotations
 
 import logging
-from typing import Any
 
-from django.db import models
 from django.db.models import Case, F, IntegerField, Value, When
 from django.utils import timezone
 
@@ -34,6 +32,7 @@ from ..models import (
     Theme,
     Title,
 )
+from ._helpers import _coerce, get_field_defaults
 
 logger = logging.getLogger(__name__)
 
@@ -54,8 +53,6 @@ MANUFACTURER_DIRECT_FIELDS: dict[str, str] = {
     "website": "website",
 }
 
-_MANUFACTURER_INT_FIELDS: frozenset[str] = frozenset({"founded_year", "dissolved_year"})
-
 PERSON_DIRECT_FIELDS: dict[str, str] = {
     "name": "name",
     "bio": "bio",
@@ -69,17 +66,6 @@ PERSON_DIRECT_FIELDS: dict[str, str] = {
     "nationality": "nationality",
     "photo_url": "photo_url",
 }
-
-_PERSON_INT_FIELDS: frozenset[str] = frozenset(
-    {
-        "birth_year",
-        "birth_month",
-        "birth_day",
-        "death_year",
-        "death_month",
-        "death_day",
-    }
-)
 
 TITLE_DIRECT_FIELDS: dict[str, str] = {
     "name": "name",
@@ -107,24 +93,22 @@ TAXONOMY_DIRECT_FIELDS: dict[str, str] = {
     "display_order": "display_order",
 }
 
-_TAXONOMY_INT_FIELDS: frozenset[str] = frozenset({"display_order"})
-
 # Franchise has no display_order.
 FRANCHISE_DIRECT_FIELDS: dict[str, str] = {
     "name": "name",
 }
 
 # All taxonomy models that go through claim resolution.
-TAXONOMY_MODELS: list[tuple[type, dict[str, str], frozenset[str] | None]] = [
-    (TechnologyGeneration, TAXONOMY_DIRECT_FIELDS, _TAXONOMY_INT_FIELDS),
-    (TechnologySubgeneration, TAXONOMY_DIRECT_FIELDS, _TAXONOMY_INT_FIELDS),
-    (DisplayType, TAXONOMY_DIRECT_FIELDS, _TAXONOMY_INT_FIELDS),
-    (DisplaySubtype, TAXONOMY_DIRECT_FIELDS, _TAXONOMY_INT_FIELDS),
-    (Cabinet, TAXONOMY_DIRECT_FIELDS, _TAXONOMY_INT_FIELDS),
-    (GameFormat, TAXONOMY_DIRECT_FIELDS, _TAXONOMY_INT_FIELDS),
-    (GameplayFeature, TAXONOMY_DIRECT_FIELDS, _TAXONOMY_INT_FIELDS),
-    (Tag, TAXONOMY_DIRECT_FIELDS, _TAXONOMY_INT_FIELDS),
-    (Franchise, FRANCHISE_DIRECT_FIELDS, None),
+TAXONOMY_MODELS: list[tuple[type, dict[str, str]]] = [
+    (TechnologyGeneration, TAXONOMY_DIRECT_FIELDS),
+    (TechnologySubgeneration, TAXONOMY_DIRECT_FIELDS),
+    (DisplayType, TAXONOMY_DIRECT_FIELDS),
+    (DisplaySubtype, TAXONOMY_DIRECT_FIELDS),
+    (Cabinet, TAXONOMY_DIRECT_FIELDS),
+    (GameFormat, TAXONOMY_DIRECT_FIELDS),
+    (GameplayFeature, TAXONOMY_DIRECT_FIELDS),
+    (Tag, TAXONOMY_DIRECT_FIELDS),
+    (Franchise, FRANCHISE_DIRECT_FIELDS),
 ]
 
 
@@ -136,7 +120,6 @@ TAXONOMY_MODELS: list[tuple[type, dict[str, str], frozenset[str] | None]] = [
 def _resolve_single(
     obj,
     direct_fields: dict[str, str],
-    int_fields: frozenset[str] | None = None,
 ) -> None:
     """Resolve active claims onto a single object with only direct fields.
 
@@ -148,7 +131,6 @@ def _resolve_single(
     resolution regardless of what was previously stored.
 
     Mutates *obj* in memory; the caller is responsible for saving.
-    Pass *int_fields* to coerce matching claim values to ``int``.
     """
     claims = (
         obj.claims.filter(is_active=True)
@@ -170,25 +152,15 @@ def _resolve_single(
             winners[claim.field_name] = claim
 
     # Reset resolvable fields to defaults.
-    for attr in direct_fields.values():
-        field = obj._meta.get_field(attr)
-        if hasattr(field, "default") and field.default is not models.NOT_PROVIDED:
-            default = field.default() if callable(field.default) else field.default
-            setattr(obj, attr, default)
-        elif field.null:
-            setattr(obj, attr, None)
-        else:
-            setattr(obj, attr, "")
+    field_defaults = get_field_defaults(type(obj), direct_fields)
+    for attr, default in field_defaults.items():
+        setattr(obj, attr, default)
 
     # Apply winners.
     for field_name, claim in winners.items():
         if field_name in direct_fields:
             attr = direct_fields[field_name]
-            value = claim.value
-            if int_fields and field_name in int_fields:
-                setattr(obj, attr, None if value is None else int(value))
-            else:
-                setattr(obj, attr, "" if value is None else value)
+            setattr(obj, attr, _coerce(type(obj), attr, claim.value))
 
 
 # ------------------------------------------------------------------
@@ -199,7 +171,6 @@ def _resolve_single(
 def _resolve_bulk(
     model_class,
     direct_fields: dict[str, str],
-    int_fields: frozenset[str] | None = None,
     fk_handlers: dict[str, tuple[str, dict]] | None = None,
     object_ids: set[int] | None = None,
 ) -> int:
@@ -212,7 +183,6 @@ def _resolve_bulk(
     Parameters:
         model_class: The Django model class to resolve.
         direct_fields: Maps claim field_name to model attribute name.
-        int_fields: Claim field names whose values should be coerced to int.
         fk_handlers: Maps claim field_name to (fk_field_name, slug_lookup_dict).
             For each matching claim, resolves value via the lookup dict and
             sets the FK attribute. The lookup dict maps slug to model instance.
@@ -259,17 +229,7 @@ def _resolve_bulk(
         return 0
 
     # 3. Compute field defaults once.
-    field_defaults: dict[str, Any] = {}
-    for attr in direct_fields.values():
-        field = model_class._meta.get_field(attr)
-        if hasattr(field, "default") and field.default is not models.NOT_PROVIDED:
-            field_defaults[attr] = (
-                field.default() if callable(field.default) else field.default
-            )
-        elif field.null:
-            field_defaults[attr] = None
-        else:
-            field_defaults[attr] = ""
+    field_defaults = get_field_defaults(model_class, direct_fields)
 
     # Collect FK attribute names for bulk_update.
     fk_update_fields: list[str] = []
@@ -295,22 +255,7 @@ def _resolve_bulk(
         for field_name, claim in winners.items():
             if field_name in direct_fields:
                 attr = direct_fields[field_name]
-                value = claim.value
-                if int_fields and field_name in int_fields:
-                    if value is None:
-                        setattr(obj, attr, None)
-                    else:
-                        try:
-                            setattr(obj, attr, int(value))
-                        except ValueError, TypeError:
-                            logger.warning(
-                                "Cannot coerce %r to int for %s.%s",
-                                value,
-                                model_class.__name__,
-                                field_name,
-                            )
-                else:
-                    setattr(obj, attr, "" if value is None else value)
+                setattr(obj, attr, _coerce(model_class, attr, claim.value))
             elif fk_handlers and field_name in fk_handlers:
                 fk_field, lookup = fk_handlers[field_name]
                 slug = str(claim.value).strip() if claim.value else ""
@@ -342,62 +287,42 @@ def _resolve_bulk(
 
 
 def resolve_manufacturer(mfr: Manufacturer) -> Manufacturer:
-    """Resolve active claims into the given Manufacturer's fields.
-
-    Returns the saved Manufacturer.
-    """
-    _resolve_single(
-        mfr, MANUFACTURER_DIRECT_FIELDS, int_fields=_MANUFACTURER_INT_FIELDS
-    )
+    """Resolve active claims into the given Manufacturer's fields."""
+    _resolve_single(mfr, MANUFACTURER_DIRECT_FIELDS)
     mfr.save()
     return mfr
 
 
 def resolve_person(person: Person) -> Person:
-    """Resolve active claims into the given Person's fields.
-
-    Returns the saved Person.
-    """
-    _resolve_single(person, PERSON_DIRECT_FIELDS, int_fields=_PERSON_INT_FIELDS)
+    """Resolve active claims into the given Person's fields."""
+    _resolve_single(person, PERSON_DIRECT_FIELDS)
     person.save()
     return person
 
 
 def resolve_theme(theme: Theme) -> Theme:
-    """Resolve active claims into the given Theme's fields.
-
-    Returns the saved Theme.
-    """
+    """Resolve active claims into the given Theme's fields."""
     _resolve_single(theme, THEME_DIRECT_FIELDS)
     theme.save()
     return theme
 
 
 def resolve_corporate_entity(entity: CorporateEntity) -> CorporateEntity:
-    """Resolve active claims into the given CorporateEntity's fields.
-
-    Returns the saved CorporateEntity.
-    """
+    """Resolve active claims into the given CorporateEntity's fields."""
     _resolve_single(entity, CORPORATE_ENTITY_DIRECT_FIELDS)
     entity.save()
     return entity
 
 
 def resolve_system(system: System) -> System:
-    """Resolve active claims into the given System's fields.
-
-    Returns the saved System.
-    """
+    """Resolve active claims into the given System's fields."""
     _resolve_single(system, SYSTEM_DIRECT_FIELDS)
     system.save()
     return system
 
 
 def resolve_title(title: Title) -> Title:
-    """Resolve active claims into the given Title's fields.
-
-    Returns the saved Title.
-    """
+    """Resolve active claims into the given Title's fields."""
     _resolve_single(title, TITLE_DIRECT_FIELDS)
     # Handle franchise FK.
     franchise_claim = (
@@ -437,5 +362,5 @@ def resolve_title(title: Title) -> Title:
 
 def _resolve_all_taxonomy() -> None:
     """Resolve claims for all taxonomy models."""
-    for model_class, direct_fields, int_fields in TAXONOMY_MODELS:
-        _resolve_bulk(model_class, direct_fields, int_fields=int_fields)
+    for model_class, direct_fields in TAXONOMY_MODELS:
+        _resolve_bulk(model_class, direct_fields)

@@ -7,6 +7,7 @@ Includes both single-object and bulk variants for each relationship type.
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 
 from django.db.models import Case, F, IntegerField, Value, When
 
@@ -30,16 +31,209 @@ logger = logging.getLogger(__name__)
 
 
 # ------------------------------------------------------------------
-# Single-object relationship resolvers
+# M2M relationship registry
+# ------------------------------------------------------------------
+
+
+@dataclass(frozen=True, slots=True)
+class M2MFieldSpec:
+    """Descriptor for a simple M2M relationship resolved from claims."""
+
+    field_name: str  # claim field_name: "theme", "tag", "gameplay_feature"
+    slug_key: str  # key in claim value dict: "theme_slug", "tag_slug", etc.
+    m2m_attr: str  # model attribute: "themes", "tags", "gameplay_features"
+    target_model: type  # Theme, Tag, GameplayFeature
+
+
+M2M_FIELDS: dict[str, M2MFieldSpec] = {
+    "theme": M2MFieldSpec("theme", "theme_slug", "themes", Theme),
+    "gameplay_feature": M2MFieldSpec(
+        "gameplay_feature",
+        "gameplay_feature_slug",
+        "gameplay_features",
+        GameplayFeature,
+    ),
+    "tag": M2MFieldSpec("tag", "tag_slug", "tags", Tag),
+}
+
+
+# ------------------------------------------------------------------
+# Generic M2M resolvers
+# ------------------------------------------------------------------
+
+
+def _resolve_m2m_single(obj, spec: M2MFieldSpec) -> None:
+    """Resolve M2M claims for a single object using the given spec."""
+    winners = _pick_relationship_winners(obj, spec.field_name)
+
+    desired_pks: set[int] = set()
+    for claim in winners.values():
+        val = claim.value
+        if not val.get("exists", True):
+            continue
+        target = spec.target_model.objects.filter(slug=val[spec.slug_key]).first()
+        if not target:
+            logger.warning(
+                "Unresolved %s slug %r in %s claim for %s",
+                spec.field_name,
+                val[spec.slug_key],
+                spec.field_name,
+                obj,
+            )
+            continue
+        desired_pks.add(target.pk)
+
+    getattr(obj, spec.m2m_attr).set(desired_pks)
+
+
+def _resolve_all_m2m(
+    spec: M2MFieldSpec,
+    all_models: list[MachineModel],
+    *,
+    model_ids: set[int] | None = None,
+) -> None:
+    """Bulk-resolve M2M claims into through-table rows for the given spec."""
+    from django.contrib.contenttypes.models import ContentType
+
+    ct = ContentType.objects.get_for_model(MachineModel)
+
+    # Pre-fetch slug→pk lookup.
+    slug_lookup: dict[str, int] = dict(
+        spec.target_model.objects.values_list("slug", "pk")
+    )
+
+    # Pre-fetch active claims with priority annotation.
+    claims_qs = Claim.objects.filter(
+        is_active=True, content_type=ct, field_name=spec.field_name
+    )
+    if model_ids is not None:
+        claims_qs = claims_qs.filter(object_id__in=model_ids)
+    claims = (
+        claims_qs.select_related("source", "user__profile")
+        .annotate(
+            effective_priority=Case(
+                When(source__isnull=False, then=F("source__priority")),
+                When(user__isnull=False, then=F("user__profile__priority")),
+                default=Value(0),
+                output_field=IntegerField(),
+            )
+        )
+        .order_by("object_id", "claim_key", "-effective_priority", "-created_at")
+    )
+
+    # Pick winner per (object_id, claim_key).
+    winners_by_model: dict[int, list[Claim]] = {}
+    seen: set[tuple[int, str]] = set()
+    for claim in claims:
+        key = (claim.object_id, claim.claim_key)
+        if key not in seen:
+            seen.add(key)
+            winners_by_model.setdefault(claim.object_id, []).append(claim)
+
+    # Desired PKs from winning claims.
+    desired_by_model: dict[int, set[int]] = {}
+    for model_id, claims_list in winners_by_model.items():
+        desired: set[int] = set()
+        for claim in claims_list:
+            val = claim.value
+            if not val.get("exists", True):
+                continue
+            target_pk = slug_lookup.get(val[spec.slug_key])
+            if target_pk is None:
+                logger.warning(
+                    "Unresolved %s slug %r in claim (model pk=%s)",
+                    spec.field_name,
+                    val[spec.slug_key],
+                    model_id,
+                )
+                continue
+            desired.add(target_pk)
+        desired_by_model[model_id] = desired
+
+    # Pre-fetch existing M2M through-table rows.
+    all_model_ids = model_ids if model_ids is not None else {pm.pk for pm in all_models}
+    through = getattr(MachineModel, spec.m2m_attr).through
+    target_col = spec.target_model._meta.model_name + "_id"
+
+    existing_by_model: dict[int, set[int]] = {}
+    for row in through.objects.filter(machinemodel_id__in=all_model_ids).values_list(
+        "machinemodel_id", target_col
+    ):
+        existing_by_model.setdefault(row[0], set()).add(row[1])
+
+    # Diff and apply.
+    to_create = []
+    to_delete_pks: list[int] = []
+
+    for model_id in all_model_ids:
+        desired = desired_by_model.get(model_id, set())
+        existing = existing_by_model.get(model_id, set())
+
+        for target_pk in desired - existing:
+            to_create.append(
+                through(machinemodel_id=model_id, **{target_col: target_pk})
+            )
+
+    # Build a lookup for deletions.
+    for row in through.objects.filter(machinemodel_id__in=all_model_ids).values_list(
+        "pk", "machinemodel_id", target_col
+    ):
+        pk, model_id, fk_id = row
+        desired = desired_by_model.get(model_id, set())
+        if fk_id not in desired:
+            to_delete_pks.append(pk)
+
+    if to_delete_pks:
+        through.objects.filter(pk__in=to_delete_pks).delete()
+    if to_create:
+        through.objects.bulk_create(to_create, batch_size=2000)
+
+
+# ------------------------------------------------------------------
+# Public M2M wrappers (single-object)
+# ------------------------------------------------------------------
+
+
+def resolve_themes(machine_model: MachineModel) -> None:
+    _resolve_m2m_single(machine_model, M2M_FIELDS["theme"])
+
+
+def resolve_gameplay_features(machine_model: MachineModel) -> None:
+    _resolve_m2m_single(machine_model, M2M_FIELDS["gameplay_feature"])
+
+
+def resolve_tags(machine_model: MachineModel) -> None:
+    _resolve_m2m_single(machine_model, M2M_FIELDS["tag"])
+
+
+# ------------------------------------------------------------------
+# Public M2M wrappers (bulk)
+# ------------------------------------------------------------------
+
+
+def resolve_all_themes(
+    all_models: list[MachineModel],
+    *,
+    model_ids: set[int] | None = None,
+) -> None:
+    _resolve_all_m2m(M2M_FIELDS["theme"], all_models, model_ids=model_ids)
+
+
+def _resolve_all_gameplay_features(all_models: list[MachineModel]) -> None:
+    _resolve_all_m2m(M2M_FIELDS["gameplay_feature"], all_models)
+
+
+def _resolve_all_tags(all_models: list[MachineModel]) -> None:
+    _resolve_all_m2m(M2M_FIELDS["tag"], all_models)
+
+
+# ------------------------------------------------------------------
+# Credits (compound identity — not amenable to generic M2M)
 # ------------------------------------------------------------------
 
 
 def resolve_credits(machine_model: MachineModel) -> None:
-    """Resolve credit claims into Credit rows for a single machine.
-
-    Picks the winning claim per claim_key. Where ``value["exists"]`` is
-    True, looks up the Person by slug and materializes a Credit.
-    """
+    """Resolve credit claims into Credit rows for a single machine."""
     winners = _pick_relationship_winners(machine_model, "credit")
 
     role_lookup: dict[str, int] = dict(CreditRole.objects.values_list("slug", "pk"))
@@ -52,8 +246,7 @@ def resolve_credits(machine_model: MachineModel) -> None:
             )
         return
 
-    # Desired credits from winning claims.
-    desired: set[tuple[int, int]] = set()  # (person_id, role_id)
+    desired: set[tuple[int, int]] = set()
     for claim in winners.values():
         val = claim.value
         if not val.get("exists", True):
@@ -76,10 +269,8 @@ def resolve_credits(machine_model: MachineModel) -> None:
             continue
         desired.add((person.pk, role_id))
 
-    # Existing credits.
     existing = set(machine_model.credits.values_list("person_id", "role_id"))
 
-    # Diff and apply.
     to_create = desired - existing
     to_delete = existing - desired
 
@@ -96,106 +287,16 @@ def resolve_credits(machine_model: MachineModel) -> None:
         )
 
 
-def resolve_themes(machine_model: MachineModel) -> None:
-    """Resolve theme claims into the M2M for a single machine.
-
-    Picks the winning claim per claim_key. Where ``value["exists"]`` is
-    True, looks up the Theme by slug and sets the M2M.
-    """
-    winners = _pick_relationship_winners(machine_model, "theme")
-
-    desired_pks: set[int] = set()
-    for claim in winners.values():
-        val = claim.value
-        if not val.get("exists", True):
-            continue
-        theme = Theme.objects.filter(slug=val["theme_slug"]).first()
-        if not theme:
-            logger.warning(
-                "Unresolved theme slug %r in theme claim for %s",
-                val["theme_slug"],
-                machine_model.name,
-            )
-            continue
-        desired_pks.add(theme.pk)
-
-    machine_model.themes.set(desired_pks)
-
-
-def resolve_gameplay_features(machine_model: MachineModel) -> None:
-    """Resolve gameplay feature claims into the M2M for a single machine.
-
-    Picks the winning claim per claim_key. Where ``value["exists"]`` is
-    True, looks up the GameplayFeature by slug and sets the M2M.
-    """
-    winners = _pick_relationship_winners(machine_model, "gameplay_feature")
-
-    desired_pks: set[int] = set()
-    for claim in winners.values():
-        val = claim.value
-        if not val.get("exists", True):
-            continue
-        feature = GameplayFeature.objects.filter(
-            slug=val["gameplay_feature_slug"]
-        ).first()
-        if not feature:
-            logger.warning(
-                "Unresolved gameplay feature slug %r in claim for %s",
-                val["gameplay_feature_slug"],
-                machine_model.name,
-            )
-            continue
-        desired_pks.add(feature.pk)
-
-    machine_model.gameplay_features.set(desired_pks)
-
-
-def resolve_tags(machine_model: MachineModel) -> None:
-    """Resolve tag claims into the M2M for a single machine.
-
-    Picks the winning claim per claim_key. Where ``value["exists"]`` is
-    True, looks up the Tag by slug and sets the M2M.
-    """
-    winners = _pick_relationship_winners(machine_model, "tag")
-
-    desired_pks: set[int] = set()
-    for claim in winners.values():
-        val = claim.value
-        if not val.get("exists", True):
-            continue
-        tag = Tag.objects.filter(slug=val["tag_slug"]).first()
-        if not tag:
-            logger.warning(
-                "Unresolved tag slug %r in tag claim for %s",
-                val["tag_slug"],
-                machine_model.name,
-            )
-            continue
-        desired_pks.add(tag.pk)
-
-    machine_model.tags.set(desired_pks)
-
-
-# ------------------------------------------------------------------
-# Bulk relationship resolvers
-# ------------------------------------------------------------------
-
-
 def resolve_all_credits(
     all_models: list[MachineModel],
     *,
     model_ids: set[int] | None = None,
 ) -> None:
-    """Bulk-resolve credit claims into Credit rows.
-
-    If *model_ids* is given, only claims and rows for those models are
-    queried.  Otherwise all models in *all_models* are processed.
-    """
+    """Bulk-resolve credit claims into Credit rows."""
     from django.contrib.contenttypes.models import ContentType
 
     ct = ContentType.objects.get_for_model(MachineModel)
 
-    # Pre-fetch person slug→pk and role slug→pk lookups.
     person_lookup: dict[str, int] = dict(Person.objects.values_list("slug", "pk"))
     role_lookup: dict[str, int] = dict(CreditRole.objects.values_list("slug", "pk"))
     if not role_lookup:
@@ -205,7 +306,6 @@ def resolve_all_credits(
         )
         return
 
-    # Pre-fetch active credit claims with priority annotation.
     credit_qs = Claim.objects.filter(
         is_active=True, content_type=ct, field_name="credit"
     )
@@ -224,7 +324,6 @@ def resolve_all_credits(
         .order_by("object_id", "claim_key", "-effective_priority", "-created_at")
     )
 
-    # Pick winner per (object_id, claim_key).
     winners_by_model: dict[int, list[Claim]] = {}
     seen: set[tuple[int, str]] = set()
     for claim in credit_claims:
@@ -233,7 +332,6 @@ def resolve_all_credits(
             seen.add(key)
             winners_by_model.setdefault(claim.object_id, []).append(claim)
 
-    # Desired credits from winning claims.
     desired_by_model: dict[int, set[tuple[int, int]]] = {}
     for model_id, claims_list in winners_by_model.items():
         desired: set[tuple[int, int]] = set()
@@ -260,14 +358,12 @@ def resolve_all_credits(
             desired.add((person_pk, role_pk))
         desired_by_model[model_id] = desired
 
-    # Pre-fetch existing Credit rows (model-linked only, not series credits).
     all_model_ids = model_ids if model_ids is not None else {pm.pk for pm in all_models}
     existing_by_model: dict[int, set[tuple[int, int]]] = {}
     dc_qs = Credit.objects.filter(model_id__in=all_model_ids)
     for dc in dc_qs.values_list("model_id", "person_id", "role_id"):
         existing_by_model.setdefault(dc[0], set()).add((dc[1], dc[2]))
 
-    # Diff and apply.
     to_create: list[Credit] = []
     to_delete_pks: list[int] = []
 
@@ -280,7 +376,6 @@ def resolve_all_credits(
                 Credit(model_id=model_id, person_id=person_id, role_id=role_id)
             )
 
-    # Build a lookup for deletions.
     for dc in Credit.objects.filter(model_id__in=all_model_ids).values_list(
         "pk", "model_id", "person_id", "role_id"
     ):
@@ -295,287 +390,8 @@ def resolve_all_credits(
         Credit.objects.bulk_create(to_create, batch_size=2000)
 
 
-def resolve_all_themes(
-    all_models: list[MachineModel],
-    *,
-    model_ids: set[int] | None = None,
-) -> None:
-    """Bulk-resolve theme claims into M2M rows.
-
-    If *model_ids* is given, only claims and rows for those models are
-    queried.  Otherwise all models in *all_models* are processed.
-    """
-    from django.contrib.contenttypes.models import ContentType
-
-    ct = ContentType.objects.get_for_model(MachineModel)
-
-    # Pre-fetch theme slug→pk lookup.
-    theme_lookup: dict[str, int] = dict(Theme.objects.values_list("slug", "pk"))
-
-    # Pre-fetch active theme claims with priority annotation.
-    theme_qs = Claim.objects.filter(is_active=True, content_type=ct, field_name="theme")
-    if model_ids is not None:
-        theme_qs = theme_qs.filter(object_id__in=model_ids)
-    theme_claims = (
-        theme_qs.select_related("source", "user__profile")
-        .annotate(
-            effective_priority=Case(
-                When(source__isnull=False, then=F("source__priority")),
-                When(user__isnull=False, then=F("user__profile__priority")),
-                default=Value(0),
-                output_field=IntegerField(),
-            )
-        )
-        .order_by("object_id", "claim_key", "-effective_priority", "-created_at")
-    )
-
-    # Pick winner per (object_id, claim_key).
-    winners_by_model: dict[int, list[Claim]] = {}
-    seen: set[tuple[int, str]] = set()
-    for claim in theme_claims:
-        key = (claim.object_id, claim.claim_key)
-        if key not in seen:
-            seen.add(key)
-            winners_by_model.setdefault(claim.object_id, []).append(claim)
-
-    # Desired themes from winning claims.
-    desired_by_model: dict[int, set[int]] = {}
-    for model_id, claims_list in winners_by_model.items():
-        desired: set[int] = set()
-        for claim in claims_list:
-            val = claim.value
-            if not val.get("exists", True):
-                continue
-            theme_pk = theme_lookup.get(val["theme_slug"])
-            if theme_pk is None:
-                logger.warning(
-                    "Unresolved theme slug %r in theme claim (model pk=%s)",
-                    val["theme_slug"],
-                    model_id,
-                )
-                continue
-            desired.add(theme_pk)
-        desired_by_model[model_id] = desired
-
-    # Pre-fetch existing M2M through-table rows.
-    all_model_ids = model_ids if model_ids is not None else {pm.pk for pm in all_models}
-    through = MachineModel.themes.through
-    existing_by_model: dict[int, set[int]] = {}
-    for row in through.objects.filter(machinemodel_id__in=all_model_ids).values_list(
-        "machinemodel_id", "theme_id"
-    ):
-        existing_by_model.setdefault(row[0], set()).add(row[1])
-
-    # Diff and apply.
-    to_create = []
-    to_delete_pks: list[int] = []
-
-    for model_id in all_model_ids:
-        desired = desired_by_model.get(model_id, set())
-        existing = existing_by_model.get(model_id, set())
-
-        for theme_pk in desired - existing:
-            to_create.append(through(machinemodel_id=model_id, theme_id=theme_pk))
-
-    # Build a lookup for deletions.
-    for row in through.objects.filter(machinemodel_id__in=all_model_ids).values_list(
-        "pk", "machinemodel_id", "theme_id"
-    ):
-        pk, model_id, theme_id = row
-        desired = desired_by_model.get(model_id, set())
-        if theme_id not in desired:
-            to_delete_pks.append(pk)
-
-    if to_delete_pks:
-        through.objects.filter(pk__in=to_delete_pks).delete()
-    if to_create:
-        through.objects.bulk_create(to_create, batch_size=2000)
-
-
-def _resolve_all_gameplay_features(all_models: list[MachineModel]) -> None:
-    """Bulk-resolve gameplay feature claims into M2M rows for all models.
-
-    Follows the same pattern as ``resolve_all_themes()``.
-    """
-    from django.contrib.contenttypes.models import ContentType
-
-    ct = ContentType.objects.get_for_model(MachineModel)
-
-    # Pre-fetch gameplay feature slug→pk lookup.
-    feature_lookup: dict[str, int] = dict(
-        GameplayFeature.objects.values_list("slug", "pk")
-    )
-
-    # Pre-fetch all active gameplay feature claims with priority annotation.
-    feature_claims = (
-        Claim.objects.filter(
-            is_active=True, content_type=ct, field_name="gameplay_feature"
-        )
-        .select_related("source", "user__profile")
-        .annotate(
-            effective_priority=Case(
-                When(source__isnull=False, then=F("source__priority")),
-                When(user__isnull=False, then=F("user__profile__priority")),
-                default=Value(0),
-                output_field=IntegerField(),
-            )
-        )
-        .order_by("object_id", "claim_key", "-effective_priority", "-created_at")
-    )
-
-    # Pick winner per (object_id, claim_key).
-    winners_by_model: dict[int, list[Claim]] = {}
-    seen: set[tuple[int, str]] = set()
-    for claim in feature_claims:
-        key = (claim.object_id, claim.claim_key)
-        if key not in seen:
-            seen.add(key)
-            winners_by_model.setdefault(claim.object_id, []).append(claim)
-
-    # Desired features from winning claims.
-    desired_by_model: dict[int, set[int]] = {}
-    for model_id, claims_list in winners_by_model.items():
-        desired: set[int] = set()
-        for claim in claims_list:
-            val = claim.value
-            if not val.get("exists", True):
-                continue
-            feature_pk = feature_lookup.get(val["gameplay_feature_slug"])
-            if feature_pk is None:
-                logger.warning(
-                    "Unresolved gameplay feature slug %r in claim (model pk=%s)",
-                    val["gameplay_feature_slug"],
-                    model_id,
-                )
-                continue
-            desired.add(feature_pk)
-        desired_by_model[model_id] = desired
-
-    # Pre-fetch existing M2M through-table rows.
-    through = MachineModel.gameplay_features.through
-    existing_by_model: dict[int, set[int]] = {}
-    for row in through.objects.values_list("machinemodel_id", "gameplayfeature_id"):
-        existing_by_model.setdefault(row[0], set()).add(row[1])
-
-    # Diff and apply for ALL models.
-    all_model_ids = {pm.pk for pm in all_models}
-    to_create = []
-    to_delete_pks: list[int] = []
-
-    for model_id in all_model_ids:
-        desired = desired_by_model.get(model_id, set())
-        existing = existing_by_model.get(model_id, set())
-
-        for feature_pk in desired - existing:
-            to_create.append(
-                through(machinemodel_id=model_id, gameplayfeature_id=feature_pk)
-            )
-
-    # Build a lookup for deletions.
-    for row in through.objects.filter(machinemodel_id__in=all_model_ids).values_list(
-        "pk", "machinemodel_id", "gameplayfeature_id"
-    ):
-        pk, model_id, feature_id = row
-        desired = desired_by_model.get(model_id, set())
-        if feature_id not in desired:
-            to_delete_pks.append(pk)
-
-    if to_delete_pks:
-        through.objects.filter(pk__in=to_delete_pks).delete()
-    if to_create:
-        through.objects.bulk_create(to_create, batch_size=2000)
-
-
-def _resolve_all_tags(all_models: list[MachineModel]) -> None:
-    """Bulk-resolve tag claims into M2M rows for all models.
-
-    Follows the same pattern as ``resolve_all_themes()``.
-    """
-    from django.contrib.contenttypes.models import ContentType
-
-    ct = ContentType.objects.get_for_model(MachineModel)
-
-    # Pre-fetch tag slug→pk lookup.
-    tag_lookup: dict[str, int] = dict(Tag.objects.values_list("slug", "pk"))
-
-    # Pre-fetch all active tag claims with priority annotation.
-    tag_claims = (
-        Claim.objects.filter(is_active=True, content_type=ct, field_name="tag")
-        .select_related("source", "user__profile")
-        .annotate(
-            effective_priority=Case(
-                When(source__isnull=False, then=F("source__priority")),
-                When(user__isnull=False, then=F("user__profile__priority")),
-                default=Value(0),
-                output_field=IntegerField(),
-            )
-        )
-        .order_by("object_id", "claim_key", "-effective_priority", "-created_at")
-    )
-
-    # Pick winner per (object_id, claim_key).
-    winners_by_model: dict[int, list[Claim]] = {}
-    seen: set[tuple[int, str]] = set()
-    for claim in tag_claims:
-        key = (claim.object_id, claim.claim_key)
-        if key not in seen:
-            seen.add(key)
-            winners_by_model.setdefault(claim.object_id, []).append(claim)
-
-    # Desired tags from winning claims.
-    desired_by_model: dict[int, set[int]] = {}
-    for model_id, claims_list in winners_by_model.items():
-        desired: set[int] = set()
-        for claim in claims_list:
-            val = claim.value
-            if not val.get("exists", True):
-                continue
-            tag_pk = tag_lookup.get(val["tag_slug"])
-            if tag_pk is None:
-                logger.warning(
-                    "Unresolved tag slug %r in tag claim (model pk=%s)",
-                    val["tag_slug"],
-                    model_id,
-                )
-                continue
-            desired.add(tag_pk)
-        desired_by_model[model_id] = desired
-
-    # Pre-fetch existing M2M through-table rows.
-    through = MachineModel.tags.through
-    existing_by_model: dict[int, set[int]] = {}
-    for row in through.objects.values_list("machinemodel_id", "tag_id"):
-        existing_by_model.setdefault(row[0], set()).add(row[1])
-
-    # Diff and apply for ALL models.
-    all_model_ids = {pm.pk for pm in all_models}
-    to_create = []
-    to_delete_pks: list[int] = []
-
-    for model_id in all_model_ids:
-        desired = desired_by_model.get(model_id, set())
-        existing = existing_by_model.get(model_id, set())
-
-        for tag_pk in desired - existing:
-            to_create.append(through(machinemodel_id=model_id, tag_id=tag_pk))
-
-    # Build a lookup for deletions.
-    for row in through.objects.filter(machinemodel_id__in=all_model_ids).values_list(
-        "pk", "machinemodel_id", "tag_id"
-    ):
-        pk, model_id, tag_id = row
-        desired = desired_by_model.get(model_id, set())
-        if tag_id not in desired:
-            to_delete_pks.append(pk)
-
-    if to_delete_pks:
-        through.objects.filter(pk__in=to_delete_pks).delete()
-    if to_create:
-        through.objects.bulk_create(to_create, batch_size=2000)
-
-
 # ------------------------------------------------------------------
-# Single-object abbreviation resolvers
+# Abbreviation resolvers (string values, dedup logic — not generic M2M)
 # ------------------------------------------------------------------
 
 
@@ -592,11 +408,9 @@ def resolve_title_abbreviations(title: Title) -> None:
 
     existing = set(title.abbreviations.values_list("value", flat=True))
 
-    # Create new abbreviations.
     for value in desired - existing:
         TitleAbbreviation.objects.create(title=title, value=value)
 
-    # Remove stale abbreviations.
     if stale := existing - desired:
         title.abbreviations.filter(value__in=stale).delete()
 
@@ -630,11 +444,6 @@ def resolve_model_abbreviations(machine_model: MachineModel) -> None:
         machine_model.abbreviations.filter(value__in=stale).delete()
 
 
-# ------------------------------------------------------------------
-# Bulk abbreviation resolvers
-# ------------------------------------------------------------------
-
-
 def resolve_all_title_abbreviations(
     all_titles: list[Title],
     *,
@@ -645,7 +454,6 @@ def resolve_all_title_abbreviations(
 
     ct = ContentType.objects.get_for_model(Title)
 
-    # Pre-fetch active abbreviation claims with priority annotation.
     abbr_qs = Claim.objects.filter(
         is_active=True, content_type=ct, field_name="abbreviation"
     )
@@ -664,7 +472,6 @@ def resolve_all_title_abbreviations(
         .order_by("object_id", "claim_key", "-effective_priority", "-created_at")
     )
 
-    # Pick winner per (object_id, claim_key).
     winners_by_title: dict[int, list[Claim]] = {}
     seen: set[tuple[int, str]] = set()
     for claim in abbr_claims:
@@ -673,7 +480,6 @@ def resolve_all_title_abbreviations(
             seen.add(key)
             winners_by_title.setdefault(claim.object_id, []).append(claim)
 
-    # Desired abbreviation values from winning claims.
     desired_by_title: dict[int, set[str]] = {}
     for title_id, claims_list in winners_by_title.items():
         desired: set[str] = set()
@@ -684,7 +490,6 @@ def resolve_all_title_abbreviations(
             desired.add(val["value"])
         desired_by_title[title_id] = desired
 
-    # Pre-fetch existing TitleAbbreviation rows.
     all_title_ids = title_ids if title_ids is not None else {t.pk for t in all_titles}
     existing_by_title: dict[int, set[str]] = {}
     for row in TitleAbbreviation.objects.filter(title_id__in=all_title_ids).values_list(
@@ -692,7 +497,6 @@ def resolve_all_title_abbreviations(
     ):
         existing_by_title.setdefault(row[0], set()).add(row[1])
 
-    # Diff and apply.
     to_create = []
     to_delete_pks: list[int] = []
 
@@ -703,7 +507,6 @@ def resolve_all_title_abbreviations(
         for value in desired - existing:
             to_create.append(TitleAbbreviation(title_id=title_id, value=value))
 
-    # Build a lookup for deletions.
     for row in TitleAbbreviation.objects.filter(title_id__in=all_title_ids).values_list(
         "pk", "title_id", "value"
     ):
@@ -722,7 +525,6 @@ def _get_title_abbrs_for_models(
     model_ids: set[int],
 ) -> dict[int, set[str]]:
     """Return {model_id: set(abbreviation_values)} from each model's title."""
-    # Get model_id -> title_id mapping.
     model_title_map = dict(
         MachineModel.objects.filter(pk__in=model_ids, title__isnull=False).values_list(
             "pk", "title_id"
@@ -731,7 +533,6 @@ def _get_title_abbrs_for_models(
     if not model_title_map:
         return {}
 
-    # Get title_id -> set of abbreviation values.
     title_ids = set(model_title_map.values())
     title_abbrs: dict[int, set[str]] = {}
     for title_id, value in TitleAbbreviation.objects.filter(
@@ -739,7 +540,6 @@ def _get_title_abbrs_for_models(
     ).values_list("title_id", "value"):
         title_abbrs.setdefault(title_id, set()).add(value)
 
-    # Map back to model_id.
     result: dict[int, set[str]] = {}
     for model_id, title_id in model_title_map.items():
         abbrs = title_abbrs.get(title_id)
@@ -758,7 +558,6 @@ def resolve_all_model_abbreviations(
 
     ct = ContentType.objects.get_for_model(MachineModel)
 
-    # Pre-fetch active abbreviation claims with priority annotation.
     abbr_qs = Claim.objects.filter(
         is_active=True, content_type=ct, field_name="abbreviation"
     )
@@ -777,7 +576,6 @@ def resolve_all_model_abbreviations(
         .order_by("object_id", "claim_key", "-effective_priority", "-created_at")
     )
 
-    # Pick winner per (object_id, claim_key).
     winners_by_model: dict[int, list[Claim]] = {}
     seen: set[tuple[int, str]] = set()
     for claim in abbr_claims:
@@ -786,7 +584,6 @@ def resolve_all_model_abbreviations(
             seen.add(key)
             winners_by_model.setdefault(claim.object_id, []).append(claim)
 
-    # Desired abbreviation values from winning claims.
     desired_by_model: dict[int, set[str]] = {}
     for model_id, claims_list in winners_by_model.items():
         desired: set[str] = set()
@@ -797,7 +594,6 @@ def resolve_all_model_abbreviations(
             desired.add(val["value"])
         desired_by_model[model_id] = desired
 
-    # Deduplicate: remove model abbreviations that already exist on the title.
     all_model_ids = model_ids if model_ids is not None else {pm.pk for pm in all_models}
     title_abbrs_by_model = _get_title_abbrs_for_models(all_model_ids)
     for model_id in list(desired_by_model):
@@ -805,14 +601,12 @@ def resolve_all_model_abbreviations(
         if title_abbrs:
             desired_by_model[model_id] -= title_abbrs
 
-    # Pre-fetch existing ModelAbbreviation rows.
     existing_by_model: dict[int, set[str]] = {}
     for row in ModelAbbreviation.objects.filter(
         machine_model_id__in=all_model_ids
     ).values_list("machine_model_id", "value"):
         existing_by_model.setdefault(row[0], set()).add(row[1])
 
-    # Diff and apply.
     to_create = []
     to_delete_pks: list[int] = []
 
@@ -823,7 +617,6 @@ def resolve_all_model_abbreviations(
         for value in desired - existing:
             to_create.append(ModelAbbreviation(machine_model_id=model_id, value=value))
 
-    # Build a lookup for deletions.
     for row in ModelAbbreviation.objects.filter(
         machine_model_id__in=all_model_ids
     ).values_list("pk", "machine_model_id", "value"):

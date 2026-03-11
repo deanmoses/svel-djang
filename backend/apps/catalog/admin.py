@@ -32,6 +32,7 @@ from .models import (
 )
 from .resolve import (
     DIRECT_FIELDS,
+    FK_FIELDS,
     MANUFACTURER_DIRECT_FIELDS,
     PERSON_DIRECT_FIELDS,
     SYSTEM_DIRECT_FIELDS,
@@ -375,40 +376,11 @@ class PersonAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
 
 @admin.register(MachineModel)
 class MachineModelAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
-    CLAIM_FIELDS = frozenset(DIRECT_FIELDS) | {
-        "manufacturer",
-        "title",
-        "variant_of",
-        "converted_from",
-        "system",
-        "technology_generation",
-        "display_type",
-        "display_subtype",
-        "cabinet",
-        "game_format",
-    }
+    CLAIM_FIELDS = frozenset(DIRECT_FIELDS) | frozenset(FK_FIELDS)
 
     def _to_claim_value(self, field_name: str, value):
-        if field_name == "manufacturer" and value is not None:
-            return value.slug
-        if field_name == "title" and value is not None:
-            return value.opdb_id
-        if field_name == "system" and value is not None:
-            return value.slug
-        if field_name == "technology_generation" and value is not None:
-            return value.slug
-        if field_name == "display_type" and value is not None:
-            return value.slug
-        if field_name == "display_subtype" and value is not None:
-            return value.slug
-        if field_name == "cabinet" and value is not None:
-            return value.slug
-        if field_name == "game_format" and value is not None:
-            return value.slug
-        if field_name == "variant_of" and value is not None:
-            return value.slug
-        if field_name == "converted_from" and value is not None:
-            return value.slug
+        if value is not None and field_name in FK_FIELDS:
+            return getattr(value, FK_FIELDS[field_name].lookup_key)
         return super()._to_claim_value(field_name, value)
 
     def _resolve(self, obj):

@@ -10,7 +10,6 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from django.db import models
 from django.db.models import Case, F, IntegerField, Value, When
 from django.utils import timezone
 
@@ -18,34 +17,17 @@ from apps.provenance.models import Claim
 
 from ..claims import RELATIONSHIP_NAMESPACES
 from ..models import (
-    Cabinet,
-    DisplaySubtype,
-    DisplayType,
     Franchise,
-    GameFormat,
     MachineModel,
-    TechnologyGeneration,
     Title,
 )
 from ._helpers import (
     DIRECT_FIELDS,
-    _build_cabinet_lookup,
-    _build_converted_from_lookup,
-    _build_display_subtype_lookup,
-    _build_display_type_lookup,
-    _build_game_format_lookup,
-    _build_manufacturer_lookup,
-    _build_system_lookup,
-    _build_technology_generation_lookup,
-    _build_title_lookup,
+    FK_FIELDS,
     _coerce,
-    _get_field_defaults,
-    _resolve_manufacturer,
-    _resolve_manufacturer_bulk,
-    _resolve_slug_fk,
-    _resolve_system,
-    _resolve_title_fk,
-    _resolve_title_fk_bulk,
+    _resolve_fk,
+    build_fk_lookups,
+    get_field_defaults,
 )
 from ._relationships import (
     _resolve_all_gameplay_features,
@@ -72,9 +54,6 @@ from ._entities import (  # noqa: F401
     TAXONOMY_MODELS as TAXONOMY_MODELS,
     THEME_DIRECT_FIELDS as THEME_DIRECT_FIELDS,
     TITLE_DIRECT_FIELDS as TITLE_DIRECT_FIELDS,
-    _MANUFACTURER_INT_FIELDS as _MANUFACTURER_INT_FIELDS,
-    _PERSON_INT_FIELDS as _PERSON_INT_FIELDS,
-    _TAXONOMY_INT_FIELDS as _TAXONOMY_INT_FIELDS,
     _resolve_all_taxonomy,
     _resolve_bulk as _resolve_bulk,
     _resolve_single as _resolve_single,
@@ -118,77 +97,32 @@ def resolve_model(machine_model: MachineModel) -> MachineModel:
             winners[claim.claim_key] = claim
 
     # Reset all resolvable fields to defaults before applying winners.
-    # This ensures deactivated claims don't leave stale values.
-    machine_model.manufacturer = None
-    machine_model.title = None
-    machine_model.variant_of = None
-    machine_model.converted_from = None
-    machine_model.system = None
-    machine_model.technology_generation = None
-    machine_model.display_type = None
-    machine_model.display_subtype = None
-    machine_model.cabinet = None
-    machine_model.game_format = None
-    for attr in DIRECT_FIELDS.values():
-        field = machine_model._meta.get_field(attr)
-        if hasattr(field, "default") and field.default is not models.NOT_PROVIDED:
-            setattr(machine_model, attr, field.default)
-        elif field.null:
-            setattr(machine_model, attr, None)
-        else:
-            setattr(machine_model, attr, "")
-    extra_data: dict = {}
+    for spec in FK_FIELDS.values():
+        setattr(machine_model, spec.model_attr, None)
+    field_defaults = get_field_defaults(MachineModel, DIRECT_FIELDS)
+    for attr, default in field_defaults.items():
+        setattr(machine_model, attr, default)
 
-    techgen_lookup = _build_technology_generation_lookup()
-    display_type_lookup = _build_display_type_lookup()
-    display_subtype_lookup = _build_display_subtype_lookup()
-    cabinet_lookup = _build_cabinet_lookup()
-    game_format_lookup = _build_game_format_lookup()
-    self_lookup = _build_converted_from_lookup()  # {slug: MachineModel} for self-FKs
+    fk_lookups = build_fk_lookups()
+    extra_data: dict = {}
 
     # Apply winners to the model.
     for claim_key, claim in winners.items():
         if claim.field_name in RELATIONSHIP_NAMESPACES:
-            continue  # Handled by resolve_credits()
-        if claim.field_name == "manufacturer":
-            machine_model.manufacturer = _resolve_manufacturer(claim.value)
-        elif claim.field_name == "group":
-            machine_model.title = _resolve_title_fk(claim.value)
-        elif claim.field_name == "system":
-            machine_model.system = _resolve_system(claim.value, _build_system_lookup())
-        elif claim.field_name == "technology_generation":
-            machine_model.technology_generation = _resolve_slug_fk(
-                claim.value, techgen_lookup, "technology_generation"
-            )
-        elif claim.field_name == "display_type":
-            machine_model.display_type = _resolve_slug_fk(
-                claim.value, display_type_lookup, "display_type"
-            )
-        elif claim.field_name == "display_subtype":
-            machine_model.display_subtype = _resolve_slug_fk(
-                claim.value, display_subtype_lookup, "display_subtype"
-            )
-        elif claim.field_name == "cabinet":
-            machine_model.cabinet = _resolve_slug_fk(
-                claim.value, cabinet_lookup, "cabinet"
-            )
-        elif claim.field_name == "game_format":
-            machine_model.game_format = _resolve_slug_fk(
-                claim.value, game_format_lookup, "game_format"
-            )
-        elif claim.field_name == "variant_of":
-            machine_model.variant_of = _resolve_slug_fk(
-                claim.value, self_lookup, "variant_of"
-            )
-        elif claim.field_name == "converted_from":
-            machine_model.converted_from = _resolve_slug_fk(
-                claim.value, self_lookup, "converted_from"
+            continue
+        if claim.field_name in FK_FIELDS:
+            spec = FK_FIELDS[claim.field_name]
+            setattr(
+                machine_model,
+                spec.model_attr,
+                _resolve_fk(
+                    claim.field_name, claim.value, fk_lookups[claim.field_name]
+                ),
             )
         elif claim.field_name in DIRECT_FIELDS:
             attr = DIRECT_FIELDS[claim.field_name]
-            setattr(machine_model, attr, _coerce(claim.field_name, claim.value))
+            setattr(machine_model, attr, _coerce(MachineModel, attr, claim.value))
         else:
-            # Goes into extra_data catch-all.
             extra_data[claim.field_name] = claim.value
 
     machine_model.extra_data = extra_data
@@ -251,16 +185,8 @@ def resolve_all() -> int:
     resolve_all_title_abbreviations(list(Title.objects.all()))
 
     # 1. Pre-fetch lookup tables.
-    mfr_lookup = _build_manufacturer_lookup()
-    group_lookup = _build_title_lookup()
-    system_lookup = _build_system_lookup()
-    techgen_lookup = _build_technology_generation_lookup()
-    display_type_lookup = _build_display_type_lookup()
-    display_subtype_lookup = _build_display_subtype_lookup()
-    cabinet_lookup = _build_cabinet_lookup()
-    game_format_lookup = _build_game_format_lookup()
-    converted_from_lookup = _build_converted_from_lookup()
-    field_defaults = _get_field_defaults()
+    fk_lookups = build_fk_lookups()
+    field_defaults = get_field_defaults(MachineModel, DIRECT_FIELDS)
 
     # 2. Pre-fetch all active claims, grouped by object_id (~1 query).
     claims_by_model = _build_claims_by_model()
@@ -271,21 +197,7 @@ def resolve_all() -> int:
     # 4. Resolve each model in memory.
     for pm in all_models:
         winners = claims_by_model.get(pm.pk, {})
-        _apply_resolution(
-            pm,
-            winners,
-            field_defaults,
-            mfr_lookup,
-            group_lookup,
-            system_lookup,
-            techgen_lookup,
-            display_type_lookup,
-            display_subtype_lookup,
-            cabinet_lookup,
-            game_format_lookup,
-            converted_from_lookup,
-            variant_of_lookup=converted_from_lookup,
-        )
+        _apply_resolution(pm, winners, field_defaults, fk_lookups)
 
     # 5. Conversions are not variants: clear variant_of on conversion models.
     for pm in all_models:
@@ -301,20 +213,11 @@ def resolve_all() -> int:
         pm.updated_at = now
 
     # 8. Bulk write (~1 query, batched).
-    update_fields = list(DIRECT_FIELDS.values()) + [
-        "manufacturer_id",
-        "title_id",
-        "variant_of_id",
-        "system_id",
-        "technology_generation_id",
-        "display_type_id",
-        "display_subtype_id",
-        "cabinet_id",
-        "game_format_id",
-        "converted_from_id",
-        "extra_data",
-        "updated_at",
-    ]
+    update_fields = (
+        list(DIRECT_FIELDS.values())
+        + [f"{spec.model_attr}_id" for spec in FK_FIELDS.values()]
+        + ["extra_data", "updated_at"]
+    )
     # batch_size=100 is optimal for SQLite (CASE WHEN overhead grows with
     # batch size × field count). PostgreSQL uses a more efficient UPDATE FROM
     # VALUES syntax and handles larger batches fine.
@@ -379,29 +282,12 @@ def _apply_resolution(
     pm: MachineModel,
     winners: dict[str, Claim],
     field_defaults: dict[str, Any],
-    mfr_lookup: dict,
-    group_lookup: dict,
-    system_lookup: dict,
-    techgen_lookup: dict[str, TechnologyGeneration] | None = None,
-    display_type_lookup: dict[str, DisplayType] | None = None,
-    display_subtype_lookup: dict[str, DisplaySubtype] | None = None,
-    cabinet_lookup: dict[str, Cabinet] | None = None,
-    game_format_lookup: dict[str, GameFormat] | None = None,
-    converted_from_lookup: dict[str, MachineModel] | None = None,
-    variant_of_lookup: dict[str, MachineModel] | None = None,
+    fk_lookups: dict[str, dict[str, Any]],
 ) -> None:
     """Apply claim winners to a MachineModel instance in memory."""
     # Reset FK fields.
-    pm.manufacturer = None
-    pm.title = None
-    pm.variant_of = None
-    pm.converted_from = None
-    pm.system = None
-    pm.technology_generation = None
-    pm.display_type = None
-    pm.display_subtype = None
-    pm.cabinet = None
-    pm.game_format = None
+    for spec in FK_FIELDS.values():
+        setattr(pm, spec.model_attr, None)
 
     # Reset all DIRECT_FIELDS to defaults.
     for attr, default in field_defaults.items():
@@ -413,52 +299,19 @@ def _apply_resolution(
     # Apply winners.
     for claim_key, claim in winners.items():
         if claim.field_name in RELATIONSHIP_NAMESPACES:
-            continue  # Handled by bulk credit/recipient resolution
-        if claim.field_name == "manufacturer":
-            pm.manufacturer = _resolve_manufacturer_bulk(
-                claim.value,
-                mfr_lookup=mfr_lookup,
+            continue
+        if claim.field_name in FK_FIELDS:
+            spec = FK_FIELDS[claim.field_name]
+            setattr(
+                pm,
+                spec.model_attr,
+                _resolve_fk(
+                    claim.field_name, claim.value, fk_lookups.get(claim.field_name)
+                ),
             )
-        elif claim.field_name == "group":
-            pm.title = _resolve_title_fk_bulk(claim.value, group_lookup)
-        elif claim.field_name == "system":
-            pm.system = _resolve_system(claim.value, system_lookup)
-        elif claim.field_name == "technology_generation":
-            if techgen_lookup is not None:
-                pm.technology_generation = _resolve_slug_fk(
-                    claim.value, techgen_lookup, "technology_generation"
-                )
-        elif claim.field_name == "display_type":
-            if display_type_lookup is not None:
-                pm.display_type = _resolve_slug_fk(
-                    claim.value, display_type_lookup, "display_type"
-                )
-        elif claim.field_name == "display_subtype":
-            if display_subtype_lookup is not None:
-                pm.display_subtype = _resolve_slug_fk(
-                    claim.value, display_subtype_lookup, "display_subtype"
-                )
-        elif claim.field_name == "cabinet":
-            if cabinet_lookup is not None:
-                pm.cabinet = _resolve_slug_fk(claim.value, cabinet_lookup, "cabinet")
-        elif claim.field_name == "game_format":
-            if game_format_lookup is not None:
-                pm.game_format = _resolve_slug_fk(
-                    claim.value, game_format_lookup, "game_format"
-                )
-        elif claim.field_name == "variant_of":
-            if variant_of_lookup is not None:
-                pm.variant_of = _resolve_slug_fk(
-                    claim.value, variant_of_lookup, "variant_of"
-                )
-        elif claim.field_name == "converted_from":
-            if converted_from_lookup is not None:
-                pm.converted_from = _resolve_slug_fk(
-                    claim.value, converted_from_lookup, "converted_from"
-                )
         elif claim.field_name in DIRECT_FIELDS:
             attr = DIRECT_FIELDS[claim.field_name]
-            setattr(pm, attr, _coerce(claim.field_name, claim.value))
+            setattr(pm, attr, _coerce(MachineModel, attr, claim.value))
         else:
             extra_data[claim.field_name] = claim.value
 

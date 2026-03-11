@@ -204,7 +204,7 @@ class TestResolveAll:
             Claim.objects.assert_claim(pm, "name", "Medieval Madness", source=ipdb)
             Claim.objects.assert_claim(pm, "year", 1997, source=opdb)
             Claim.objects.assert_claim(pm, "manufacturer", "williams", source=ipdb)
-            Claim.objects.assert_claim(pm, "group", "G1111", source=opdb)
+            Claim.objects.assert_claim(pm, "title", "G1111", source=opdb)
             Claim.objects.assert_claim(
                 pm, "abbreviation", abbr_val, source=ipdb, claim_key=abbr_key
             )

@@ -129,16 +129,16 @@ class TestIngestOpdbGroups:
         assert mm.name == "Medieval Madness"
         assert list(mm.abbreviations.values_list("value", flat=True)) == ["MM"]
 
-    def test_group_claim_on_machine(self):
+    def test_title_claim_on_machine(self):
         pm = MachineModel.objects.get(opdb_id="G1111-MTest1")
         source = Source.objects.get(slug="opdb")
-        claim = pm.claims.get(source=source, field_name="group", is_active=True)
+        claim = pm.claims.get(source=source, field_name="title", is_active=True)
         assert claim.value == "G1111"
 
-    def test_group_claim_on_unmatched_machine(self):
+    def test_title_claim_on_unmatched_machine(self):
         pm = MachineModel.objects.get(opdb_id="G2222-MTest2")
         source = Source.objects.get(slug="opdb")
-        claim = pm.claims.get(source=source, field_name="group", is_active=True)
+        claim = pm.claims.get(source=source, field_name="title", is_active=True)
         assert claim.value == "G2222"
 
 
@@ -161,7 +161,7 @@ class TestIngestOpdbAliases:
         field_names = set(claims.values_list("field_name", flat=True))
         assert "name" in field_names
         assert "variant_features" in field_names
-        assert "group" in field_names
+        assert "title" in field_names
 
     def test_alias_features_claim(self):
         variant = MachineModel.objects.get(opdb_id="G1111-MTest1-AAlias")

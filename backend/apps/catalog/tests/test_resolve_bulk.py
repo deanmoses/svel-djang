@@ -2,11 +2,11 @@
 
 import pytest
 
-from apps.catalog.models import Franchise, Manufacturer, Title
+from apps.catalog.models import Franchise, Manufacturer, Tag, Title
 from apps.catalog.resolve import (
     MANUFACTURER_DIRECT_FIELDS,
+    TAXONOMY_DIRECT_FIELDS,
     TITLE_DIRECT_FIELDS,
-    _MANUFACTURER_INT_FIELDS,
     _resolve_bulk,
     resolve_title,
 )
@@ -131,13 +131,28 @@ class TestResolveBulkManufacturer:
         _resolve_bulk(
             Manufacturer,
             MANUFACTURER_DIRECT_FIELDS,
-            int_fields=_MANUFACTURER_INT_FIELDS,
         )
 
         m.refresh_from_db()
         assert m.name == "Stern Pinball"
         assert m.founded_year == 1999
         assert m.country == "US"
+
+
+@pytest.mark.django_db
+class TestResolveBulkTaxonomy:
+    def test_malformed_int_claim_uses_default(self, opdb):
+        """Non-parseable integer on a non-null field should fall back to 0, not None."""
+        tag = Tag.objects.create(name="", slug="test-tag")
+
+        Claim.objects.assert_claim(tag, "name", "Test Tag", source=opdb)
+        Claim.objects.assert_claim(tag, "display_order", "abc", source=opdb)
+
+        _resolve_bulk(Tag, TAXONOMY_DIRECT_FIELDS, object_ids={tag.pk})
+
+        tag.refresh_from_db()
+        assert tag.name == "Test Tag"
+        assert tag.display_order == 0  # default, not None
 
 
 @pytest.mark.django_db

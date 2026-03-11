@@ -115,7 +115,7 @@ class Command(BaseCommand):
         model_title: dict[int, Title] = {}
         group_claims = Claim.objects.filter(
             content_type_id=model_ct_id,
-            field_name="group",
+            field_name="title",
             is_active=True,
         ).values_list("object_id", "value")
         for obj_id, group_value in group_claims:

@@ -32,7 +32,6 @@ from apps.catalog.claims import build_relationship_claim, make_authoritative_sco
 from apps.catalog.models import MachineModel, Person
 from apps.catalog.resolve import (
     PERSON_DIRECT_FIELDS,
-    _PERSON_INT_FIELDS,
     _resolve_bulk,
     resolve_all_credits,
 )
@@ -149,7 +148,6 @@ class Command(BaseCommand):
         _resolve_bulk(
             Person,
             PERSON_DIRECT_FIELDS,
-            int_fields=_PERSON_INT_FIELDS,
             object_ids=matched_person_ids,
         )
 

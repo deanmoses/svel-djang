@@ -13,9 +13,9 @@ __all__ = ["Title", "TitleAbbreviation"]
 class Title(TimeStampedModel):
     """The canonical identity of a pinball game, independent of edition or variant.
 
-    OPDB calls this a "group" (e.g., "Medieval Madness" spans the 1997 original,
-    the 2015 remake, and LE/SE variants). We use "Title" as it is the natural
-    pinball-world term. Title fields (name, description, franchise) and
+    OPDB calls this a "group" in its JSON, but we use "Title" as it is the
+    natural pinball-world term (e.g., "Medieval Madness" spans the 1997
+    original, the 2015 remake, and LE/SE variants). Title fields (name, description, franchise) and
     abbreviations are resolved from claims, just like MachineModel and
     Manufacturer.
     """
