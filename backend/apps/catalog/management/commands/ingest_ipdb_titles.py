@@ -163,7 +163,7 @@ class Command(BaseCommand):
                     object_id=model.pk,
                     field_name="title",
                     claim_key="title",
-                    value=synthetic_id,
+                    value=slug,
                     needs_review=needs_review,
                     needs_review_notes=needs_review_notes,
                 )

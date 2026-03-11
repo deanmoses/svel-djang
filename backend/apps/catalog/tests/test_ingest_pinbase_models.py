@@ -6,7 +6,7 @@ import tempfile
 import pytest
 from django.core.management import call_command
 
-from apps.catalog.models import MachineModel
+from apps.catalog.models import MachineModel, Title
 from apps.catalog.resolve import resolve_model
 from apps.provenance.models import Claim, Source
 
@@ -368,3 +368,49 @@ class TestIngestPinbaseModels:
         assert not mm.claims.filter(
             source=source, field_name="converted_from", is_active=True
         ).exists()
+
+    def test_title_claim(self, db):
+        """title asserts a claim with the slug value."""
+        Title.objects.create(name="Test Title", slug="test-title", opdb_id="Gtest")
+        mm = MachineModel.objects.create(
+            name="Test Model", opdb_id="Gtest-Mtest", slug="test-model"
+        )
+        path = _write_models_json(
+            [
+                {
+                    "slug": "test-model",
+                    "opdb_id": "Gtest-Mtest",
+                    "title": "test-title",
+                },
+            ]
+        )
+
+        call_command("ingest_pinbase_models", path=path)
+
+        source = Source.objects.get(slug="pinbase")
+        claim = mm.claims.get(source=source, field_name="title", is_active=True)
+        assert claim.value == "test-title"
+
+    def test_title_resolves(self, db):
+        """title slug claim resolves to FK on model."""
+        title = Title.objects.create(
+            name="Test Title", slug="test-title", opdb_id="Gtest"
+        )
+        mm = MachineModel.objects.create(
+            name="Test Model", opdb_id="Gtest-Mtest", slug="test-model"
+        )
+        path = _write_models_json(
+            [
+                {
+                    "slug": "test-model",
+                    "opdb_id": "Gtest-Mtest",
+                    "title": "test-title",
+                },
+            ]
+        )
+
+        call_command("ingest_pinbase_models", path=path)
+        resolve_model(mm)
+        mm.refresh_from_db()
+
+        assert mm.title == title

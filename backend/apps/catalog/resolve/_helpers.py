@@ -58,7 +58,7 @@ class FKFieldSpec:
 
 
 FK_FIELDS: dict[str, FKFieldSpec] = {
-    "title": FKFieldSpec("title", Title, "opdb_id"),
+    "title": FKFieldSpec("title", Title, "slug"),
     "manufacturer": FKFieldSpec("manufacturer", Manufacturer, "slug"),
     "system": FKFieldSpec("system", System, "slug"),
     "technology_generation": FKFieldSpec(

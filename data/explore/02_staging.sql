@@ -345,7 +345,7 @@ SELECT
   m.player_count,
   -- Taxonomy: pinbase > OPDB > IPDB
   m.opdb_tech_gen_slug AS technology_generation_slug,
-  COALESCE(pm.display_type_slug, m.opdb_display_type_slug) AS display_type_slug,
+  COALESCE(pm.display_type, m.opdb_display_type_slug) AS display_type_slug,
   m.opdb_system_slug AS system_slug,
   -- Pinbase editorial claims
   COALESCE(pm.is_conversion, false) AS is_conversion,

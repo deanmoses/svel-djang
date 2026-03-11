@@ -27,7 +27,7 @@
         "uniqueItems": true
       }
     },
-    "required": ["opdb_group_id"],
+    "required": ["slug", "name"],
     "additionalProperties": false
   }
 }

@@ -559,6 +559,9 @@ class Command(BaseCommand):
             if not title:
                 continue
 
+            # Inject title slug for _collect_claims to emit slug-based claims.
+            rec["_title_slug"] = title.slug
+
             name = rec.get("name", "")
             short_name = rec.get("shortname") or ""
             touched_ids.add(title.pk)
@@ -718,8 +721,11 @@ class Command(BaseCommand):
                 )
             )
 
-        # Title claim (derived from opdb_id prefix).
+        # Title claim (derived from opdb_id prefix, emitted as slug).
         if opdb_id and groups_by_id:
             group_opdb_id = parse_opdb_group_id(opdb_id)
-            if group_opdb_id and group_opdb_id in groups_by_id:
-                _add("title", group_opdb_id)
+            group = groups_by_id.get(group_opdb_id) if group_opdb_id else None
+            if group:
+                title_slug = group.get("_title_slug")
+                if title_slug:
+                    _add("title", title_slug)

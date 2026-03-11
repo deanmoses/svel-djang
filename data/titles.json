@@ -11,6 +11,11 @@
     "opdb_group_id": "G4kE2"
   },
   {
+    "slug": "abba",
+    "name": "ABBA",
+    "opdb_group_id": "Ge1py"
+  },
+  {
     "slug": "ac-dc",
     "name": "AC/DC",
     "opdb_group_id": "G43W4",
@@ -68,6 +73,11 @@
     "franchise_slug": "avatar"
   },
   {
+    "slug": "avatar-the-battle-for-pandora",
+    "name": "Avatar: The Battle for Pandora",
+    "opdb_group_id": "GbPxB"
+  },
+  {
     "slug": "avengers-infinity-quest",
     "name": "Avengers: Infinity Quest",
     "opdb_group_id": "Gj66P",
@@ -93,6 +103,11 @@
     "abbreviations": [
       "BW"
     ]
+  },
+  {
+    "slug": "barry-os-barbeque-challenge",
+    "name": "Barry O's Barbeque Challenge",
+    "opdb_group_id": "GK1Kv"
   },
   {
     "slug": "batman",
@@ -234,6 +249,15 @@
     "franchise_slug": "camel"
   },
   {
+    "slug": "captain-fantastic-and-the-brown-dirt-cowboy",
+    "name": "Captain Fantastic and the Brown Dirt Cowboy",
+    "opdb_group_id": "GRveZ",
+    "franchise_slug": "elton-john",
+    "abbreviations": [
+      "CF"
+    ]
+  },
+  {
     "slug": "centaur",
     "name": "Centaur",
     "opdb_group_id": "GrX7q"
@@ -317,6 +341,11 @@
     ]
   },
   {
+    "slug": "dialed-in",
+    "name": "Dialed In!",
+    "opdb_group_id": "G4X2l"
+  },
+  {
     "slug": "dirty-harry",
     "name": "Dirty Harry",
     "opdb_group_id": "GrJ2Z",
@@ -380,6 +409,11 @@
     "opdb_group_id": "G7Zyb"
   },
   {
+    "slug": "dungeons-dragons-the-tyrants-eye",
+    "name": "Dungeons & Dragons: The Tyrant's Eye",
+    "opdb_group_id": "GK1Ej"
+  },
+  {
     "slug": "earthshaker",
     "name": "Earthshaker",
     "opdb_group_id": "GRw0r"
@@ -413,12 +447,8 @@
   },
   {
     "slug": "elton-john",
-    "name": "Captain Fantastic and the Brown Dirt Cowboy",
-    "opdb_group_id": "GRveZ",
-    "franchise_slug": "elton-john",
-    "abbreviations": [
-      "CF"
-    ]
+    "name": "Elton John",
+    "opdb_group_id": "G2LWd"
   },
   {
     "slug": "elvira-and-the-party-monsters",
@@ -468,9 +498,13 @@
   },
   {
     "slug": "family-guy",
-    "name": "Family Guy / Shrek",
-    "opdb_group_id": "G5LW9",
+    "name": "Family Guy",
     "franchise_slug": "family-guy"
+  },
+  {
+    "slug": "shrek",
+    "name": "Shrek",
+    "franchise_slug": "shrek"
   },
   {
     "slug": "flash-gordon",
@@ -487,6 +521,11 @@
     "opdb_group_id": "G9z10"
   },
   {
+    "slug": "foo-fighters",
+    "name": "Foo Fighters",
+    "opdb_group_id": "GpeoL"
+  },
+  {
     "slug": "frankenstein",
     "name": "Mary Shelley's Frankenstein",
     "opdb_group_id": "GRB7E",
@@ -499,6 +538,11 @@
     "slug": "funhouse",
     "name": "Funhouse",
     "opdb_group_id": "G5Dz7"
+  },
+  {
+    "slug": "galactic-tank-force",
+    "name": "Galactic Tank Force",
+    "opdb_group_id": "Gj6PZ"
   },
   {
     "slug": "gamatron",
@@ -596,6 +640,11 @@
     ]
   },
   {
+    "slug": "halloween",
+    "name": "Halloween",
+    "opdb_group_id": "Gj66Z"
+  },
+  {
     "slug": "harlem-globetrotters",
     "name": "Harlem Globetrotters On Tour",
     "opdb_group_id": "GRnwQ",
@@ -618,6 +667,11 @@
     "abbreviations": [
       "HD"
     ]
+  },
+  {
+    "slug": "harry-potter",
+    "name": "Harry Potter",
+    "opdb_group_id": "GWyBj"
   },
   {
     "slug": "heavy-metal",
@@ -735,6 +789,16 @@
     ]
   },
   {
+    "slug": "jaws",
+    "name": "JAWS",
+    "opdb_group_id": "GLWll"
+  },
+  {
+    "slug": "john-wick",
+    "name": "John Wick",
+    "opdb_group_id": "GQK1P"
+  },
+  {
     "slug": "johnny-mnemonic",
     "name": "Johnny Mnemonic",
     "opdb_group_id": "GR6W8",
@@ -785,6 +849,11 @@
     "opdb_group_id": "G4XjW"
   },
   {
+    "slug": "king-kong-myth-of-terror-island",
+    "name": "King Kong: Myth of Terror Island",
+    "opdb_group_id": "GEL0V"
+  },
+  {
     "slug": "kings-of-steel",
     "name": "Kings of Steel",
     "opdb_group_id": "GR67j"
@@ -830,6 +899,11 @@
     ]
   },
   {
+    "slug": "legends-of-valhalla",
+    "name": "Legends of Valhalla",
+    "opdb_group_id": "GWyyq"
+  },
+  {
     "slug": "lethal-weapon",
     "name": "Lethal Weapon 3",
     "opdb_group_id": "GRokL",
@@ -842,6 +916,11 @@
     "slug": "lexy-lightspeed-secret-agent-showdown",
     "name": "Lexy Lightspeed - Secret Agent Showdown",
     "opdb_group_id": "GpeeL"
+  },
+  {
+    "slug": "looney-tunes",
+    "name": "Looney Tunes",
+    "opdb_group_id": "GJ2K0"
   },
   {
     "slug": "lord-of-the-rings",
@@ -896,6 +975,11 @@
     "abbreviations": [
       "MET"
     ]
+  },
+  {
+    "slug": "metallica-remastered",
+    "name": "Metallica Remastered",
+    "opdb_group_id": "GO0q3"
   },
   {
     "slug": "monopoly",
@@ -963,6 +1047,11 @@
     ]
   },
   {
+    "slug": "ninja-eclipse",
+    "name": "Ninja Eclipse",
+    "opdb_group_id": "GZVXY"
+  },
+  {
     "slug": "no-fear",
     "name": "No Fear: Dangerous Sports",
     "opdb_group_id": "Gr2Y2",
@@ -981,6 +1070,11 @@
     "slug": "panthera",
     "name": "Panthera",
     "opdb_group_id": "G5bQq"
+  },
+  {
+    "slug": "peter-brock-holden",
+    "name": "Peter Brock / Holden",
+    "opdb_group_id": "Ge1O1"
   },
   {
     "slug": "pinball-champ-82",
@@ -1047,6 +1141,11 @@
     ]
   },
   {
+    "slug": "pokemon",
+    "name": "Pokémon",
+    "opdb_group_id": "GV8wB"
+  },
+  {
     "slug": "popeye",
     "name": "Popeye Saves the Earth",
     "opdb_group_id": "GR0lW",
@@ -1054,6 +1153,16 @@
     "abbreviations": [
       "PSTE"
     ]
+  },
+  {
+    "slug": "pulp-fiction",
+    "name": "Pulp Fiction",
+    "opdb_group_id": "GoEkx"
+  },
+  {
+    "slug": "queen",
+    "name": "Queen",
+    "opdb_group_id": "GELkO"
   },
   {
     "slug": "ranger-in-the-ruins",
@@ -1160,6 +1269,16 @@
     "abbreviations": [
       "SS"
     ]
+  },
+  {
+    "slug": "scooby-doo",
+    "name": "Scooby Doo",
+    "opdb_group_id": "GllPz"
+  },
+  {
+    "slug": "screech",
+    "name": "Screech",
+    "opdb_group_id": "GPBBv"
   },
   {
     "slug": "shaq",
@@ -1515,6 +1634,11 @@
     ]
   },
   {
+    "slug": "the-godfather",
+    "name": "The Godfather",
+    "opdb_group_id": "Gd2ox"
+  },
+  {
     "slug": "the-hobbit",
     "name": "The Hobbit",
     "opdb_group_id": "G5bYr",
@@ -1565,6 +1689,11 @@
     "franchise_slug": "the-munsters"
   },
   {
+    "slug": "the-princess-bride",
+    "name": "The Princess Bride",
+    "opdb_group_id": "GkBnQ"
+  },
+  {
     "slug": "the-rolling-stones",
     "name": "The Rolling Stones",
     "opdb_group_id": "GredR",
@@ -1612,6 +1741,11 @@
     ]
   },
   {
+    "slug": "the-uncanny-x-men",
+    "name": "The Uncanny X-Men",
+    "opdb_group_id": "G7ZEz"
+  },
+  {
     "slug": "the-walking-dead",
     "name": "The Walking Dead",
     "opdb_group_id": "G5nz5",
@@ -1619,6 +1753,11 @@
     "abbreviations": [
       "TWD"
     ]
+  },
+  {
+    "slug": "the-walking-dead-remastered",
+    "name": "The Walking Dead Remastered",
+    "opdb_group_id": "Gj6DE"
   },
   {
     "slug": "the-whos-tommy-pinball-wizard",
@@ -1656,6 +1795,16 @@
     "slug": "tiger-woman",
     "name": "Tiger Woman",
     "opdb_group_id": "G4eEJ"
+  },
+  {
+    "slug": "total-nuclear-annihilation",
+    "name": "Total Nuclear Annihilation",
+    "opdb_group_id": "GRD79"
+  },
+  {
+    "slug": "toy-story-4",
+    "name": "Toy Story 4",
+    "opdb_group_id": "GJ2o0"
   },
   {
     "slug": "transformers",
@@ -1717,6 +1866,11 @@
     ]
   },
   {
+    "slug": "weird-als-museum-of-natural-hilarity",
+    "name": "Weird Al's Museum of Natural Hilarity",
+    "opdb_group_id": "GN6WW"
+  },
+  {
     "slug": "wheel-of-fortune",
     "name": "Wheel of Fortune",
     "opdb_group_id": "G417d",
@@ -1758,6 +1912,11 @@
     "abbreviations": [
       "WPT"
     ]
+  },
+  {
+    "slug": "wrestlemania",
+    "name": "WrestleMania",
+    "opdb_group_id": "GR6Or"
   },
   {
     "slug": "wwf",

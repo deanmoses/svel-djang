@@ -47,7 +47,7 @@ INSERT INTO _violations
 SELECT 'orphan_pinbase_title', pt.opdb_group_id
 FROM pinbase_titles AS pt
 LEFT JOIN opdb_groups AS og ON pt.opdb_group_id = og.opdb_id
-WHERE og.opdb_id IS NULL;
+WHERE pt.opdb_group_id IS NOT NULL AND og.opdb_id IS NULL;
 
 -- Pinbase title franchise_slug references nonexistent franchise
 INSERT INTO _violations
@@ -91,6 +91,28 @@ SELECT 'chained_variant_of', a.slug || ' -> ' || a.variant_of || ' -> ' || b.var
 FROM pinbase_models AS a
 JOIN pinbase_models AS b ON a.variant_of = b.slug
 WHERE b.variant_of IS NOT NULL;
+
+-- Pinbase model title references nonexistent title slug
+INSERT INTO _violations
+SELECT 'orphan_model_title', pm.slug || ' -> ' || pm.title
+FROM pinbase_models AS pm
+WHERE pm.title IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM pinbase_titles AS pt WHERE pt.slug = pm.title
+  );
+
+-- Duplicate slugs in pinbase_titles
+INSERT INTO _violations
+SELECT 'duplicate_title_slug', slug
+FROM pinbase_titles
+GROUP BY slug HAVING count(*) > 1;
+
+-- Duplicate opdb_group_ids in pinbase_titles
+INSERT INTO _violations
+SELECT 'duplicate_title_opdb_group_id', opdb_group_id
+FROM pinbase_titles
+WHERE opdb_group_id IS NOT NULL
+GROUP BY opdb_group_id HAVING count(*) > 1;
 
 -- Pinbase model references a combo_label (physical_machine=0)
 INSERT INTO _violations

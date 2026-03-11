@@ -9,6 +9,11 @@
     "properties": {
       "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
       "name": { "type": "string", "minLength": 1 },
+      "title": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+        "description": "Slug of the title this model belongs to (references titles.json)"
+      },
       "description": { "type": "string" },
       "display_type": {
         "type": "string",
@@ -37,7 +42,7 @@
         "description": "Internet Pinball Database identifier"
       }
     },
-    "required": ["opdb_id"],
+    "required": ["slug", "name", "title", "opdb_id"],
     "additionalProperties": false
   }
 }

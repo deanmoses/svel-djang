@@ -88,7 +88,7 @@ class TestGenerateIpdbTitles:
         claim = ipdb_only_model.claims.get(
             source=source, field_name="title", is_active=True
         )
-        assert claim.value == "ipdb:20"
+        assert claim.value == "alien-poker"
         assert claim.needs_review is False
 
     def test_skips_opdb_models(self, opdb_model, ipdb_source):

@@ -219,8 +219,10 @@ class TestMachineModelAdminClaims:
             object_id=pm.pk, field_name="manufacturer", is_active=True
         ).exists()
 
-    def test_title_fk_serialized_as_opdb_id(self, admin_request):
-        title = Title.objects.create(opdb_id="G5pe4", name="Medieval Madness")
+    def test_title_fk_serialized_as_slug(self, admin_request):
+        title = Title.objects.create(
+            opdb_id="G5pe4", name="Medieval Madness", slug="medieval-madness"
+        )
         pm = MachineModel.objects.create(name="Medieval Madness")
         pm.title = title
 
@@ -234,7 +236,7 @@ class TestMachineModelAdminClaims:
             field_name="title",
             is_active=True,
         )
-        assert claim.value == "G5pe4"
+        assert claim.value == "medieval-madness"
 
     def test_claim_field_variant_of_creates_claim(self, admin_request):
         parent = MachineModel.objects.create(name="Medieval Madness")

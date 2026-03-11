@@ -134,13 +134,13 @@ class TestIngestOpdbGroups:
         pm = MachineModel.objects.get(opdb_id="G1111-MTest1")
         source = Source.objects.get(slug="opdb")
         claim = pm.claims.get(source=source, field_name="title", is_active=True)
-        assert claim.value == "G1111"
+        assert claim.value == "medieval-madness"
 
     def test_title_claim_on_unmatched_machine(self):
         pm = MachineModel.objects.get(opdb_id="G2222-MTest2")
         source = Source.objects.get(slug="opdb")
         claim = pm.claims.get(source=source, field_name="title", is_active=True)
-        assert claim.value == "G2222"
+        assert claim.value == "stern-exclusive-game"
 
 
 @pytest.mark.django_db

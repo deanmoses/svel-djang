@@ -61,6 +61,7 @@ class Command(BaseCommand):
 
         # Build lookups.
         titles_by_opdb_id = {t.opdb_id: t for t in Title.objects.all()}
+        titles_by_slug = {t.slug: t for t in Title.objects.all()}
         existing_slugs: set[str] = set(Title.objects.values_list("slug", flat=True))
         franchises_by_slug = {f.slug: f for f in Franchise.objects.all()}
         series_by_slug = {s.slug: s for s in Series.objects.all()}
@@ -68,15 +69,21 @@ class Command(BaseCommand):
         # Pass 1: create Titles that don't exist yet.
         new_titles: list[Title] = []
         for entry in entries:
-            opdb_group_id = entry["opdb_group_id"]
-            if opdb_group_id in titles_by_opdb_id:
+            opdb_group_id = entry.get("opdb_group_id")
+            slug = entry.get("slug")
+
+            # Match by opdb_group_id first, then by slug.
+            if opdb_group_id and opdb_group_id in titles_by_opdb_id:
                 continue
-            slug = entry.get("slug") or generate_unique_slug(
-                entry.get("name", ""), existing_slugs
-            )
+            if slug and slug in titles_by_slug:
+                continue
+
+            slug = slug or generate_unique_slug(entry.get("name", ""), existing_slugs)
+            # Use opdb_group_id if provided, otherwise a synthetic ID.
+            opdb_id = opdb_group_id or f"pinbase:{slug}"
             new_titles.append(
                 Title(
-                    opdb_id=opdb_group_id,
+                    opdb_id=opdb_id,
                     name=entry.get("name", ""),
                     slug=slug,
                 )
@@ -86,7 +93,10 @@ class Command(BaseCommand):
         titles_created = len(new_titles)
         if new_titles:
             Title.objects.bulk_create(new_titles)
-            titles_by_opdb_id = {t.opdb_id: t for t in Title.objects.all()}
+
+        # Re-fetch lookups after potential creation.
+        titles_by_opdb_id = {t.opdb_id: t for t in Title.objects.all()}
+        titles_by_slug = {t.slug: t for t in Title.objects.all()}
 
         membership_set = slug_set = skipped = 0
         pending_claims: list[Claim] = []
@@ -95,12 +105,19 @@ class Command(BaseCommand):
         touched_ids: set[int] = set()
 
         for entry in entries:
-            opdb_group_id = entry["opdb_group_id"]
+            opdb_group_id = entry.get("opdb_group_id")
+            slug = entry.get("slug")
 
-            title = titles_by_opdb_id.get(opdb_group_id)
+            # Look up by opdb_group_id first, then by slug.
+            title = None
+            if opdb_group_id:
+                title = titles_by_opdb_id.get(opdb_group_id)
+            if title is None and slug:
+                title = titles_by_slug.get(slug)
             if title is None:
                 logger.warning(
-                    "Title with opdb_id %r not found — skipping", opdb_group_id
+                    "Title %r not found — skipping",
+                    opdb_group_id or slug,
                 )
                 skipped += 1
                 continue

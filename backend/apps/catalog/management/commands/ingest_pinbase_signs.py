@@ -108,10 +108,10 @@ class Command(BaseCommand):
             pm.ipdb_id: pm for pm in MachineModel.objects.filter(ipdb_id__isnull=False)
         }
 
-        # Build model PK → Title lookup from active group claims.
+        # Build model PK → Title lookup from active title claims.
         # The title FK may not be populated yet (resolve_claims runs later),
-        # so we resolve the mapping from group claim values → Title opdb_ids.
-        titles_by_opdb_id = {t.opdb_id: t for t in Title.objects.all()}
+        # so we resolve the mapping from title claim values (slugs) → Titles.
+        titles_by_slug = {t.slug: t for t in Title.objects.all()}
         model_title: dict[int, Title] = {}
         group_claims = Claim.objects.filter(
             content_type_id=model_ct_id,
@@ -120,7 +120,7 @@ class Command(BaseCommand):
         ).values_list("object_id", "value")
         for obj_id, group_value in group_claims:
             if group_value:
-                title = titles_by_opdb_id.get(str(group_value))
+                title = titles_by_slug.get(str(group_value))
                 if title:
                     model_title[obj_id] = title
 
