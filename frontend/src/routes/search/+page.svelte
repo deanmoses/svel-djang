@@ -43,7 +43,6 @@
 </svelte:head>
 
 <div class="search-page">
-	<h1 class="page-title">Search</h1>
 	<SearchBox
 		bind:value={searchQuery}
 		placeholder="Search titles, manufacturers, people..."
@@ -55,12 +54,5 @@
 <style>
 	.search-page {
 		padding: var(--size-5) 0;
-	}
-
-	.page-title {
-		font-size: var(--font-size-6);
-		font-weight: 700;
-		color: var(--color-text-primary);
-		margin-bottom: var(--size-4);
 	}
 </style>

@@ -480,6 +480,51 @@ def _build_search_text(pm) -> str:
     return " | ".join(parts)
 
 
+class ModelRecentSchema(Schema):
+    name: str
+    slug: str
+    manufacturer_name: Optional[str] = None
+    year: Optional[int] = None
+    thumbnail_url: Optional[str] = None
+
+
+@models_router.get("/recent/", response=list[ModelRecentSchema])
+@decorate_view(cache_control(public=True, max_age=300))
+def list_recent_models(request):
+    """Return the 3 newest non-variant models, one per title."""
+    from ..models import MachineModel
+
+    qs = (
+        MachineModel.objects.filter(variant_of__isnull=True)
+        .select_related("manufacturer")
+        .order_by(
+            F("year").desc(nulls_last=True),
+            F("month").desc(nulls_last=True),
+            "-updated_at",
+        )
+    )
+    results = []
+    seen_titles: set[int | None] = set()
+    for m in qs:
+        title_id = m.title_id
+        if title_id in seen_titles:
+            continue
+        seen_titles.add(title_id)
+        thumbnail_url, _ = _extract_image_urls(m.extra_data or {})
+        results.append(
+            {
+                "name": m.name,
+                "slug": m.slug,
+                "manufacturer_name": m.manufacturer.name if m.manufacturer else None,
+                "year": m.year,
+                "thumbnail_url": thumbnail_url,
+            }
+        )
+        if len(results) == 3:
+            break
+    return results
+
+
 @models_router.get("/all/", response=list[MachineModelGridSchema])
 @decorate_view(cache_control(public=True, max_age=300))
 def list_all_models(request):
