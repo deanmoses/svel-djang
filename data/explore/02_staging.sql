@@ -257,6 +257,8 @@ WITH
   -- Every OPDB record (machine or alias) is a candidate model.
   -- Excludes combo_labels (physical_machine=0): synthetic groupings, not real
   -- machines. Django's ingest_opdb also skips these.
+  -- For aliases, also looks up the parent machine's opdb_id and manufacturer
+  -- to derive variant_of / clone_of relationships.
   opdb_base AS (
     SELECT
       om.opdb_id,
@@ -275,8 +277,20 @@ WITH
       om.display_type_slug AS opdb_display_type_slug,
       om.system_slug AS opdb_system_slug,
       om.is_machine,
-      om.is_alias
+      om.is_alias,
+      -- Parent machine for aliases (derived from opdb_id structure).
+      CASE WHEN om.is_alias = 't'
+        THEN om.group_id || '-' || om.machine_id
+        ELSE NULL
+      END AS alias_parent_opdb_id,
+      CASE WHEN om.is_alias = 't'
+        THEN (parent.manufacturer ->> 'name')
+        ELSE NULL
+      END AS alias_parent_manufacturer
     FROM opdb_machines AS om
+    LEFT JOIN opdb_machines_raw AS parent
+      ON om.is_alias = 't'
+      AND (om.group_id || '-' || om.machine_id) = parent.opdb_id
     WHERE om.is_alias = 't'
        OR (om.is_machine = 't' AND om.physical_machine != 0)
   ),
@@ -318,7 +332,9 @@ WITH
       im.display_type_slug AS opdb_display_type_slug,
       im.system_slug AS opdb_system_slug,
       CAST('t' AS BOOLEAN) AS is_machine,
-      CAST('f' AS BOOLEAN) AS is_alias
+      CAST('f' AS BOOLEAN) AS is_alias,
+      CAST(NULL AS VARCHAR) AS alias_parent_opdb_id,
+      CAST(NULL AS VARCHAR) AS alias_parent_manufacturer
     FROM ipdb_machines AS im
     LEFT JOIN opdb_machines AS om ON im.IpdbId = om.ipdb_id
     LEFT JOIN ipdb_manufacturer_resolution AS imr ON im.Manufacturer = imr.raw_manufacturer
@@ -331,6 +347,8 @@ WITH
     (SELECT * FROM ipdb_only)
   )
 -- Apply pinbase editorial claims (priority 300 wins over OPDB 200 / IPDB 100).
+-- For OPDB aliases, derive variant_of from the parent machine (unless the alias
+-- is a clone or conversion, which get their own fields instead).
 SELECT
   model_key(m.opdb_id, m.ipdb_id) AS model_key,
   m.opdb_id,
@@ -350,7 +368,39 @@ SELECT
   -- Pinbase editorial claims
   COALESCE(pm.is_conversion, false) AS is_conversion,
   pm.converted_from,
-  pm.variant_of,
+  -- is_remake: pinbase remake_of (300) > OPDB feature tag (200).
+  (pm.remake_of IS NOT NULL OR list_contains(m.features, 'Remake')) AS is_remake,
+  pm.remake_of,
+  -- variant_of: pinbase (300) > OPDB alias (200).
+  -- OPDB alias variant_of is suppressed for clones (different manufacturer)
+  -- and conversions (pinbase is_conversion).
+  -- Chains are collapsed: if the target itself has a variant_of, follow it
+  -- to the root (one hop is sufficient since pinbase forbids chains).
+  COALESCE(
+    COALESCE(pm_variant_root.variant_of, pm.variant_of),
+    CASE
+      WHEN m.is_alias = 't'
+        AND NOT COALESCE(pm.is_conversion, false)
+        AND m.opdb_manufacturer = m.alias_parent_manufacturer
+        THEN COALESCE(pm_parent.variant_of, pm_parent.slug)
+      ELSE NULL
+    END
+  ) AS variant_of,
+  -- Clone: OPDB alias with a different manufacturer than the parent.
+  -- These are licensed reproductions / regional clones, not variants.
+  (m.is_alias = 't'
+    AND NOT COALESCE(pm.is_conversion, false)
+    AND m.alias_parent_manufacturer IS NOT NULL
+    AND m.opdb_manufacturer <> m.alias_parent_manufacturer
+  ) AS is_clone,
+  CASE
+    WHEN m.is_alias = 't'
+      AND NOT COALESCE(pm.is_conversion, false)
+      AND m.alias_parent_manufacturer IS NOT NULL
+      AND m.opdb_manufacturer <> m.alias_parent_manufacturer
+      THEN pm_parent.slug
+    ELSE NULL
+  END AS clone_of,
   pm.description AS pinbase_description,
   -- OPDB metadata
   m.opdb_description,
@@ -363,6 +413,8 @@ SELECT
   (pm.slug IS NOT NULL) AS has_pinbase_claims
 FROM all_sources AS m
 LEFT JOIN pinbase_models AS pm ON m.opdb_id = pm.opdb_id
+LEFT JOIN pinbase_models AS pm_variant_root ON pm.variant_of = pm_variant_root.slug
+LEFT JOIN pinbase_models AS pm_parent ON m.alias_parent_opdb_id = pm_parent.opdb_id
 LEFT JOIN ipdb_machines AS im ON m.ipdb_id = im.IpdbId;
 
 ------------------------------------------------------------

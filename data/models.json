@@ -241,12 +241,14 @@
     "name": "Cactus Canyon (Remake Limited Edition)",
     "title": "cactus-canyon-remake",
     "variant_of": "cactus-canyon-remake-special-edition",
+    "remake_of": "cactus-canyon",
     "opdb_id": "G4835-M2YPK-A9ylv"
   },
   {
     "slug": "cactus-canyon-remake-special-edition",
     "name": "Cactus Canyon (Remake Special Edition)",
     "title": "cactus-canyon-remake",
+    "remake_of": "cactus-canyon",
     "opdb_id": "G4835-M2YPK-AR5ln"
   },
   {

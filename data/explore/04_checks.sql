@@ -121,6 +121,36 @@ FROM pinbase_models AS pm
 JOIN opdb_machines AS om ON pm.opdb_id = om.opdb_id
 WHERE om.is_machine = 't' AND om.physical_machine = 0;
 
+-- Self-referential variant_of in resolved catalog
+-- (variant_of is a slug; resolve it to opdb_id to compare with model_key)
+INSERT INTO _violations
+SELECT 'catalog_self_variant_of', a.model_key
+FROM catalog_models AS a
+JOIN pinbase_models AS pm ON a.variant_of = pm.slug
+JOIN catalog_models AS b ON pm.opdb_id = b.opdb_id
+WHERE a.model_key = b.model_key;
+
+-- Circular variant_of in resolved catalog (A→B and B→A)
+INSERT INTO _violations
+SELECT 'catalog_circular_variant_of', a.model_key || ' <-> ' || b.model_key
+FROM catalog_models AS a
+JOIN pinbase_models AS pm_a ON a.variant_of = pm_a.slug
+JOIN catalog_models AS b ON pm_a.opdb_id = b.opdb_id
+JOIN pinbase_models AS pm_b ON b.variant_of = pm_b.slug
+JOIN catalog_models AS a2 ON pm_b.opdb_id = a2.opdb_id
+WHERE a.model_key = a2.model_key
+  AND a.model_key < b.model_key;
+
+-- Chained variant_of in resolved catalog (A→B→C)
+INSERT INTO _violations
+SELECT 'catalog_chained_variant_of',
+  a.model_key || ' -> ' || a.variant_of || ' -> ' || b.variant_of
+FROM catalog_models AS a
+JOIN pinbase_models AS pm_a ON a.variant_of = pm_a.slug
+JOIN catalog_models AS b ON pm_a.opdb_id = b.opdb_id
+WHERE b.variant_of IS NOT NULL
+  AND b.variant_of <> a.variant_of;
+
 ------------------------------------------------------------
 -- Soft warnings (data quality, not regressions)
 ------------------------------------------------------------

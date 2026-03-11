@@ -33,6 +33,11 @@
         "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
         "description": "Slug of the model this was converted from"
       },
+      "remake_of": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+        "description": "Slug of the original model this is a remake of"
+      },
       "opdb_id": {
         "type": "string",
         "description": "Open Pinball Database identifier"
