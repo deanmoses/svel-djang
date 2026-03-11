@@ -137,8 +137,10 @@ class Command(BaseCommand):
         if groups_path:
             groups_by_id = self._load_titles(groups_path, source, split_group_ids)
 
-        # --- Supplemental ipdb_id cross-references from models.json ---
+        # --- Supplemental cross-references from models.json ---
         ipdb_id_supplement: dict[str, int] = {}
+        pinbase_variant_of: dict[str, str] = {}  # opdb_id → variant_of slug
+        pinbase_is_conversion: set[str] = set()  # opdb_ids marked is_conversion
         if models_path:
             with open(models_path) as f:
                 for entry in json.load(f):
@@ -146,6 +148,10 @@ class Command(BaseCommand):
                     ipdb_id = entry.get("ipdb_id")
                     if opdb_id and ipdb_id:
                         ipdb_id_supplement[opdb_id] = ipdb_id
+                    if opdb_id and entry.get("variant_of"):
+                        pinbase_variant_of[opdb_id] = entry["variant_of"]
+                    if opdb_id and entry.get("is_conversion"):
+                        pinbase_is_conversion.add(opdb_id)
 
         # --- Load machine data ---
         with open(opdb_path) as f:
@@ -153,6 +159,14 @@ class Command(BaseCommand):
 
         all_machines = [r for r in data if r.get("is_machine") is True]
         machines = [r for r in all_machines if r.get("physical_machine") != 0]
+
+        # Build opdb_id→manufacturer-name lookup for clone detection.
+        opdb_mfr_by_id: dict[str, str] = {}
+        for r in data:
+            oid = r.get("opdb_id")
+            mfr = r.get("manufacturer")
+            if oid and mfr:
+                opdb_mfr_by_id[oid] = mfr.get("name", "")
         non_physical_ids = {
             r["opdb_id"]
             for r in all_machines
@@ -358,8 +372,29 @@ class Command(BaseCommand):
             if not pm:
                 pm = by_opdb_id.get(opdb_id)
 
-            # Inject parent slug so _collect_claims can emit a variant_of claim.
-            rec["_variant_of_slug"] = parent.slug
+            # Determine variant_of target, applying the same guards as DuckDB:
+            # 1. Skip if alias is a conversion (pinbase is_conversion).
+            # 2. Skip if alias manufacturer differs from parent (clone).
+            # 3. Collapse chains: if parent has variant_of, follow to root.
+            alias_mfr = (rec.get("manufacturer") or {}).get("name", "")
+            parent_mfr = opdb_mfr_by_id.get(parent_opdb_id, "")
+            is_conversion = opdb_id in pinbase_is_conversion
+
+            if is_conversion:
+                pass  # Conversions don't get variant_of from OPDB alias
+            elif alias_mfr and parent_mfr and alias_mfr != parent_mfr:
+                pass  # Clone: different manufacturer, not a variant
+            else:
+                # Chain collapse: if parent has a variant_of in pinbase,
+                # point at the root instead.
+                root_slug = pinbase_variant_of.get(parent.opdb_id)
+                target_slug = root_slug or parent.slug
+                # 4. Skip self-referential: promoted non-physical parent may
+                #    chain-collapse back to the alias itself.
+                if pm and target_slug == pm.slug:
+                    pass
+                else:
+                    rec["_variant_of_slug"] = target_slug
 
             if pm:
                 alias_linked += 1
