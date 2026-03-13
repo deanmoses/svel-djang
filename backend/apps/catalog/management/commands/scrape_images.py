@@ -46,13 +46,16 @@ REQUEST_DELAY = 1.5
 # Hand-picked image URLs for machines that scrapers can't find. Keyed by opdb_id.
 MANUAL_IMAGES: dict[str, list[str]] = {
     "GV8wB-Mq12N": [  # Pokémon (Pro)
-        "https://scontent-sjc6-1.xx.fbcdn.net/v/t39.30808-6/635610770_1323098703181952_4251437457470395789_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=107&ccb=1-7&_nc_sid=7b2446&_nc_ohc=3ktPut9lrCcQ7kNvwFY0hBU&_nc_oc=Adn38G1p2Sc0iczV8POYOI55e2jFFUFvgL0HKF5JI2Cg0EhKPVjZaQuTzkJyV7eaV-k&_nc_zt=23&_nc_ht=scontent-sjc6-1.xx&_nc_gid=Fj6p4Hief3yQdoxOcCW5kw&oh=00_AfuFs3vRocrxVq9YIBjrM6M75viyrasY2yKTujoSMOAuQQ&oe=699D84F1",
+        "https://content.abt.com/image.php/stern-pinball-machine-POKEMONPRO-art.jpg?image=/images/products/BDP_Images/stern-pinball-machine-POKEMONPRO-art.jpg&canvas=1&width=750&height=550",
     ],
     "GV8wB-MRjKd": [  # Pokémon (Premium/LE)
         "https://image-cdn.hypb.st/https%3A%2F%2Fhypebeast.com%2Fimage%2F2026%2F02%2F16%2Fstern-pinball-pokemon-pinball-machine-debut-collaboration-release-info-001.jpg?w=1440&cbr=1&q=90&fit=max",
     ],
     "GV8wB-MRjKd-AOVy7": [  # Pokémon (Premium)
         "https://image-cdn.hypb.st/https%3A%2F%2Fhypebeast.com%2Fimage%2F2026%2F02%2F16%2Fstern-pinball-pokemon-pinball-machine-debut-collaboration-release-info-001.jpg?w=1440&cbr=1&q=90&fit=max",
+    ],
+    "GqZVo-Mb5xK": [  # Beetlejuice
+        "https://www.pinballnews.com/site/wp-content/uploads/games/beetlejuice/006-beetlejuice.jpg",
     ],
 }
 
