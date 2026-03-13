@@ -33,6 +33,7 @@ import logging
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
+from apps.catalog.ingestion.bulk_utils import ManufacturerResolver
 from apps.catalog.ingestion.person_lookup import build_person_lookup
 from apps.catalog.ingestion.fandom_wiki import (
     FandomManufacturer,
@@ -375,14 +376,7 @@ class Command(BaseCommand):
         # ------------------------------------------------------------------
         # 9. Ingest manufacturers.
         # ------------------------------------------------------------------
-        all_mfrs = list(Manufacturer.objects.all())
-        existing_mfrs_by_name: dict[str, Manufacturer] = {
-            m.name.lower(): m for m in all_mfrs
-        }
-        existing_mfrs_by_trade: dict[str, Manufacturer] = {
-            m.trade_name.lower(): m for m in all_mfrs if m.trade_name
-        }
-
+        resolver = ManufacturerResolver()
         mfr_ct_id = ContentType.objects.get_for_model(Manufacturer).pk
 
         mfrs_matched = 0
@@ -391,9 +385,9 @@ class Command(BaseCommand):
         matched_mfr_objects: list[Manufacturer] = []
 
         for fm in fandom_mfrs:
-            mfr = existing_mfrs_by_name.get(
-                fm.title.lower()
-            ) or existing_mfrs_by_trade.get(fm.title.lower())
+            mfr = resolver.resolve_object(fm.title)
+            if mfr is None:
+                mfr = resolver.resolve_normalized_object(fm.title)
             if mfr is None:
                 unmatched_mfrs.append(fm.title)
                 continue

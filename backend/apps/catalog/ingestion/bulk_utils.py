@@ -2,7 +2,13 @@
 
 from __future__ import annotations
 
+import re
+from typing import TYPE_CHECKING
+
 from django.utils.text import slugify
+
+if TYPE_CHECKING:
+    from apps.catalog.models import Manufacturer
 
 MAX_NAMES_SHOWN = 10
 
@@ -31,12 +37,45 @@ def generate_unique_slug(base_name: str, existing_slugs: set[str]) -> str:
     return slug
 
 
+# Common business suffixes stripped during normalized name matching.
+# Order matters: longer suffixes first to avoid partial matches.
+_BUSINESS_SUFFIXES = re.compile(
+    r",?\s+(?:Manufacturing|Electronics|Industries|Enterprises"
+    r"|Games|Pinball|Technologies|Company|Corporation"
+    r"|Inc\.?|Ltd\.?|Co\.?|LLC|GmbH|S\.?A\.?|s\.?p\.?a\.?)"
+    r"$",
+    re.IGNORECASE,
+)
+
+
+def normalize_manufacturer_name(name: str) -> str:
+    """Strip common business suffixes for fuzzy matching.
+
+    >>> normalize_manufacturer_name("Bally Manufacturing")
+    'bally'
+    >>> normalize_manufacturer_name("WMS Industries")
+    'wms'
+    >>> normalize_manufacturer_name("Sega Enterprises, Ltd.")
+    'sega'
+    """
+    stripped = _BUSINESS_SUFFIXES.sub("", name).strip()
+    # Apply repeatedly for compound suffixes like "Sega Enterprises, Ltd."
+    prev = None
+    while stripped != prev:
+        prev = stripped
+        stripped = _BUSINESS_SUFFIXES.sub("", stripped).strip()
+    return stripped.lower()
+
+
 class ManufacturerResolver:
     """Resolve manufacturer names to slugs, auto-creating on miss.
 
     Caches name→slug and trade_name→slug lookups from the database at
     construction time.  Also loads CorporateEntity name→manufacturer slug
     for IPDB's 3-priority resolution cascade.
+
+    Includes a normalized-name fallback that strips common business
+    suffixes ("Manufacturing", "Inc.", etc.) and matches when unambiguous.
 
     All lookups are case-insensitive.
     """
@@ -45,21 +84,51 @@ class ManufacturerResolver:
         from apps.catalog.models import CorporateEntity, Manufacturer
 
         self._name_to_slug: dict[str, str] = {}
+        self._slug_to_mfr: dict[str, Manufacturer] = {}
         self._slugs: set[str] = set()
         for m in Manufacturer.objects.all():
             self._name_to_slug[m.name.lower()] = m.slug
             if m.trade_name:
                 self._name_to_slug[m.trade_name.lower()] = m.slug
             self._slugs.add(m.slug)
+            self._slug_to_mfr[m.slug] = m
 
         self._entity_to_slug: dict[str, str] = {
             ce.name.lower(): ce.manufacturer.slug
             for ce in CorporateEntity.objects.select_related("manufacturer").all()
         }
 
+        # Normalized-name fallback: strip business suffixes.
+        # Only usable when the normalized form maps to exactly one record.
+        self._normalized_to_slug: dict[str, str | None] = {}
+        for m in Manufacturer.objects.all():
+            key = normalize_manufacturer_name(m.name)
+            if key in self._normalized_to_slug:
+                self._normalized_to_slug[key] = None  # ambiguous — disable
+            else:
+                self._normalized_to_slug[key] = m.slug
+
     def resolve(self, name: str) -> str | None:
         """Look up a manufacturer by name or trade name. Returns slug or None."""
         return self._name_to_slug.get(name.lower())
+
+    def resolve_normalized(self, name: str) -> str | None:
+        """Fuzzy lookup: strip business suffixes and match if unambiguous.
+
+        Returns slug or None.  Returns None for ambiguous normalized forms.
+        """
+        key = normalize_manufacturer_name(name)
+        return self._normalized_to_slug.get(key)
+
+    def resolve_object(self, name: str) -> Manufacturer | None:
+        """Look up by name or trade name. Returns Manufacturer instance or None."""
+        slug = self.resolve(name)
+        return self._slug_to_mfr.get(slug) if slug else None
+
+    def resolve_normalized_object(self, name: str) -> Manufacturer | None:
+        """Fuzzy lookup returning the Manufacturer instance or None."""
+        slug = self.resolve_normalized(name)
+        return self._slug_to_mfr.get(slug) if slug else None
 
     def resolve_entity(self, name: str) -> str | None:
         """Look up a manufacturer via CorporateEntity name. Returns slug or None."""
@@ -78,7 +147,7 @@ class ManufacturerResolver:
             return slug
 
         slug = generate_unique_slug(name, self._slugs)
-        Manufacturer.objects.create(
+        mfr = Manufacturer.objects.create(
             name=name,
             slug=slug,
             trade_name=trade_name,
@@ -86,4 +155,5 @@ class ManufacturerResolver:
         self._name_to_slug[name.lower()] = slug
         if trade_name:
             self._name_to_slug[trade_name.lower()] = slug
+        self._slug_to_mfr[slug] = mfr
         return slug

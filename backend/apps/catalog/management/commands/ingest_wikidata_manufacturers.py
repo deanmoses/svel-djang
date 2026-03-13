@@ -18,11 +18,11 @@ from __future__ import annotations
 
 import json
 import logging
-import re
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
+from apps.catalog.ingestion.bulk_utils import ManufacturerResolver
 from apps.catalog.ingestion.wikidata_sparql import (
     WikidataManufacturer,
     fetch_manufacturer_sparql,
@@ -36,33 +36,6 @@ from apps.catalog.resolve import (
 from apps.provenance.models import Claim, Source
 
 logger = logging.getLogger(__name__)
-
-# Common business suffixes stripped during fallback name matching.
-# Order matters: longer suffixes first to avoid partial matches.
-_BUSINESS_SUFFIXES = re.compile(
-    r",?\s+(?:Manufacturing|Electronics|Industries|Enterprises"
-    r"|Games|Pinball|Technologies|Company|Corporation"
-    r"|Inc\.?|Ltd\.?|Co\.?|LLC|GmbH|S\.?A\.?|s\.?p\.?a\.?)"
-    r"$",
-    re.IGNORECASE,
-)
-
-
-def _normalize_name(name: str) -> str:
-    """Strip common business suffixes for fuzzy matching.
-
-    >>> _normalize_name("Bally Manufacturing")
-    'bally'
-    >>> _normalize_name("WMS Industries")
-    'wms'
-    """
-    stripped = _BUSINESS_SUFFIXES.sub("", name).strip()
-    # Apply repeatedly for compound suffixes like "Sega Enterprises, Ltd."
-    prev = None
-    while stripped != prev:
-        prev = stripped
-        stripped = _BUSINESS_SUFFIXES.sub("", stripped).strip()
-    return stripped.lower()
 
 
 class Command(BaseCommand):
@@ -130,22 +103,8 @@ class Command(BaseCommand):
             },
         )
 
-        # 5. Load existing Manufacturer records into lookup dicts.
-        all_mfrs = list(Manufacturer.objects.all())
-        by_name: dict[str, Manufacturer] = {m.name.lower(): m for m in all_mfrs}
-        by_trade_name: dict[str, Manufacturer] = {
-            m.trade_name.lower(): m for m in all_mfrs if m.trade_name
-        }
-        # Fallback: normalized names (business suffixes stripped).
-        # Only usable when the normalized form maps to exactly one record.
-        by_normalized: dict[str, Manufacturer | None] = {}
-        for m in all_mfrs:
-            key = _normalize_name(m.name)
-            if key in by_normalized:
-                by_normalized[key] = None  # ambiguous — disable
-            else:
-                by_normalized[key] = m
-
+        # 5. Set up manufacturer resolver and content type.
+        resolver = ManufacturerResolver()
         ct_id = ContentType.objects.get_for_model(Manufacturer).pk
 
         # 6. Match, report, collect claims.
@@ -156,12 +115,10 @@ class Command(BaseCommand):
         unmatched_count = 0
 
         for wm in wikidata_manufacturers:
-            mfr = by_name.get(wm.name.lower()) or by_trade_name.get(wm.name.lower())
+            mfr = resolver.resolve_object(wm.name)
             match_type = "exact"
             if mfr is None:
-                # Fallback: strip business suffixes and try again.
-                normalized = _normalize_name(wm.name)
-                mfr = by_normalized.get(normalized)
+                mfr = resolver.resolve_normalized_object(wm.name)
                 match_type = "normalized"
             if mfr is None:
                 unmatched_count += 1
