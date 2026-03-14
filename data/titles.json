@@ -49,6 +49,11 @@
     "franchise_slug": "alien"
   },
   {
+    "slug": "americas-most-haunted",
+    "name": "America's Most Haunted",
+    "opdb_group_id": "G4ELZ"
+  },
+  {
     "slug": "apollo-13",
     "name": "Apollo 13",
     "opdb_group_id": "G411e",
@@ -56,6 +61,11 @@
     "abbreviations": [
       "A13"
     ]
+  },
+  {
+    "slug": "attack-from-mars",
+    "name": "Attack from Mars",
+    "opdb_group_id": "G4do5"
   },
   {
     "slug": "austin-powers",
@@ -94,6 +104,10 @@
     "abbreviations": [
       "BTTF"
     ]
+  },
+  {
+    "slug": "baffle-ball",
+    "name": "Baffle Ball"
   },
   {
     "slug": "barb-wire",
@@ -153,6 +167,11 @@
     "abbreviations": [
       "BW"
     ]
+  },
+  {
+    "slug": "big-bang-bar",
+    "name": "Big Bang Bar",
+    "opdb_group_id": "G56vo"
   },
   {
     "slug": "big-buck-hunter",
@@ -256,6 +275,11 @@
     "abbreviations": [
       "CF"
     ]
+  },
+  {
+    "slug": "celts",
+    "name": "Celts",
+    "opdb_group_id": "G9zzB"
   },
   {
     "slug": "centaur",
@@ -503,10 +527,9 @@
     "split_from_opdb_group": "G5LW9"
   },
   {
-    "slug": "shrek",
-    "name": "Shrek",
-    "franchise_slug": "shrek",
-    "split_from_opdb_group": "G5LW9"
+    "slug": "firepower",
+    "name": "Firepower",
+    "opdb_group_id": "G5VDd"
   },
   {
     "slug": "flash-gordon",
@@ -516,6 +539,11 @@
     "abbreviations": [
       "FG"
     ]
+  },
+  {
+    "slug": "flight-2000",
+    "name": "Flight 2000",
+    "opdb_group_id": "G48kY"
   },
   {
     "slug": "flipper-foxtrot-rhythm-explosion",
@@ -535,6 +563,11 @@
     "abbreviations": [
       "MSF"
     ]
+  },
+  {
+    "slug": "freedom",
+    "name": "Freedom",
+    "opdb_group_id": "GR9qY"
   },
   {
     "slug": "funhouse",
@@ -685,6 +718,11 @@
     ]
   },
   {
+    "slug": "hercules",
+    "name": "Hercules",
+    "opdb_group_id": "G4NOx"
+  },
+  {
     "slug": "high-speed",
     "name": "High Speed",
     "opdb_group_id": "GRvzd",
@@ -712,6 +750,16 @@
     "abbreviations": [
       "HW"
     ]
+  },
+  {
+    "slug": "houdini",
+    "name": "Houdini: Master of Mystery",
+    "opdb_group_id": "GvBQX"
+  },
+  {
+    "slug": "humpty-dumpty",
+    "name": "Humpty Dumpty",
+    "opdb_group_id": "GyVVQ"
   },
   {
     "slug": "ice-fever",
@@ -873,9 +921,19 @@
     "franchise_slug": "kiss"
   },
   {
+    "slug": "knock-out",
+    "name": "Knock Out",
+    "opdb_group_id": "GR6Zq"
+  },
+  {
     "slug": "lady-robin-hood",
     "name": "Lady Robin Hood",
     "opdb_group_id": "GRVL2"
+  },
+  {
+    "slug": "lady-sharpshooter",
+    "name": "Lady Sharpshooter",
+    "opdb_group_id": "G48NN"
   },
   {
     "slug": "last-action-hero",
@@ -918,6 +976,11 @@
     "slug": "lexy-lightspeed-secret-agent-showdown",
     "name": "Lexy Lightspeed - Secret Agent Showdown",
     "opdb_group_id": "GpeeL"
+  },
+  {
+    "slug": "lightning-stern-electronics",
+    "name": "Lightning",
+    "opdb_group_id": "G5pQ8"
   },
   {
     "slug": "looney-tunes",
@@ -1063,6 +1126,11 @@
     ]
   },
   {
+    "slug": "oktoberfest",
+    "name": "Oktoberfest",
+    "opdb_group_id": "GLWBV"
+  },
+  {
     "slug": "pabst-blue-ribbon",
     "name": "Whoa Nellie / PBR",
     "opdb_group_id": "GRYX4",
@@ -1082,6 +1150,11 @@
     "slug": "pinball-champ-82",
     "name": "Pinball Champ '82",
     "opdb_group_id": "GrPdq"
+  },
+  {
+    "slug": "pinball-magic",
+    "name": "Pinball Magic",
+    "opdb_group_id": "GrZnn"
   },
   {
     "slug": "pinbot",
@@ -1283,10 +1356,26 @@
     "opdb_group_id": "GPBBv"
   },
   {
+    "slug": "seawitch",
+    "name": "Seawitch",
+    "opdb_group_id": "GR6kB"
+  },
+  {
     "slug": "shaq",
     "name": "Shaq Attaq",
     "opdb_group_id": "G4PoV",
     "franchise_slug": "shaq"
+  },
+  {
+    "slug": "sharpshooter",
+    "name": "Sharpshooter",
+    "opdb_group_id": "Gr37O"
+  },
+  {
+    "slug": "shrek",
+    "name": "Shrek",
+    "franchise_slug": "shrek",
+    "split_from_opdb_group": "G5LW9"
   },
   {
     "slug": "silver-falls",
@@ -1787,6 +1876,11 @@
     "abbreviations": [
       "XF"
     ]
+  },
+  {
+    "slug": "thunderbirds",
+    "name": "Thunderbirds",
+    "opdb_group_id": "GN6Lq"
   },
   {
     "slug": "tiger",

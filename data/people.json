@@ -1,7 +1,31 @@
 [
   {
+    "slug": "charlie-emery",
+    "name": "Charlie Emery"
+  },
+  {
+    "slug": "david-gottlieb",
+    "name": "David Gottlieb"
+  },
+  {
+    "slug": "ed-krynski",
+    "name": "Ed Krynski"
+  },
+  {
+    "slug": "gary-stern",
+    "name": "Gary Stern"
+  },
+  {
     "slug": "george-christian",
     "name": "George Christian"
+  },
+  {
+    "slug": "gerry-stellenberg",
+    "name": "Gerry Stellenberg"
+  },
+  {
+    "slug": "harry-williams",
+    "name": "Harry Williams"
   },
   {
     "slug": "joe-joos-jr",
@@ -27,13 +51,25 @@
     "name": "Mark Sprenger"
   },
   {
+    "slug": "pat-lawlor",
+    "name": "Pat Lawlor"
+  },
+  {
     "slug": "python-anghelo",
     "name": "Python Anghelo"
+  },
+  {
+    "slug": "raymond-t-moloney",
+    "name": "Raymond T. Moloney"
   },
   {
     "slug": "robert-quinn",
     "name": "Robert Quinn",
     "aliases": ["Rob Quinn"]
+  },
+  {
+    "slug": "sam-stern",
+    "name": "Sam Stern"
   },
   {
     "slug": "steve-ritchie",

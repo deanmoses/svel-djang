@@ -3,7 +3,7 @@
     "slug": "atari-system-1",
     "name": "Atari System 1",
     "manufacturer": "atari",
-    "description": "Atari's first solid-state pinball platform, used from 1976 to 1978, built around a custom discrete-logic MPU without a traditional microprocessor. It debuted with The Atarians (1976) and was used on early titles like Time 2000 and Airborne Avenger. The system used a unique design that differed significantly from the Motorola 6800-based platforms favored by competitors.",
+    "description": "[[manufacturer:atari]]'s first solid-state pinball platform, used from 1976 to 1978, built around a custom discrete-logic MPU without a traditional microprocessor. It debuted with The Atarians (1976) and was used on early titles like Time 2000 and Airborne Avenger. The system used a unique design that differed significantly from the Motorola 6800-based platforms favored by competitors.",
     "mpu_strings": [
       "Atari Generation/System 1"
     ]
@@ -12,7 +12,7 @@
     "slug": "atari-system-2",
     "name": "Atari System 2",
     "manufacturer": "atari",
-    "description": "Atari's second-generation pinball platform, used from approximately 1977 to 1979, featuring a Motorola 6800 CPU. Games on this platform include Superman (1979) and Hercules (1979), the latter being the largest pinball machine ever mass-produced. The system introduced speech capability on some later titles.",
+    "description": "[[manufacturer:atari]]'s second-generation pinball platform, used from approximately 1977 to 1979, featuring a Motorola 6800 CPU. Games on this platform include [[title:superman]] (1979) and [[title:hercules]] (1979), the latter being the largest pinball machine ever mass-produced. The system introduced speech capability on some later titles.",
     "mpu_strings": [
       "Atari Generation/System 2"
     ]
@@ -21,7 +21,7 @@
     "slug": "atari-system-3",
     "name": "Atari System 3",
     "manufacturer": "atari",
-    "description": "Atari's third and final pinball hardware generation, used from approximately 1979 to 1985, built around a 6502-family CPU. Notable titles include Road Runner (1979) and Space Invaders (1980). Atari exited the pinball business in 1985 after declining sales.",
+    "description": "[[manufacturer:atari]]'s third and final pinball hardware generation, used from approximately 1979 to 1985, built around a 6502-family CPU. Notable titles include [[title:road-runner]] (1979) and Space Invaders (1980). [[manufacturer:atari]] exited the pinball business in 1985 after declining sales.",
     "mpu_strings": [
       "Atari Generation/System 3"
     ]
@@ -30,7 +30,7 @@
     "slug": "bally-as2518-17",
     "name": "Bally AS-2518-17",
     "manufacturer": "bally",
-    "description": "Bally's first solid-state pinball MPU, introduced in 1977, based on the Motorola 6800 CPU. Used on early Bally solid-state games such as Freedom (1977) and Night Rider (1977). This board established Bally's entry into the solid-state era, replacing their earlier electromechanical designs.",
+    "description": "[[manufacturer:bally]]'s first solid-state pinball MPU, introduced in 1977, based on the Motorola 6800 CPU. Used on early [[manufacturer:bally]] solid-state games such as [[title:freedom]] (1977) and Night Rider (1977). This board established [[manufacturer:bally]]'s entry into the solid-state era, replacing their earlier electromechanical designs.",
     "mpu_strings": [
       "Bally MPU AS-2518-17"
     ]
@@ -39,7 +39,7 @@
     "slug": "bally-as2518-35",
     "name": "Bally AS-2518-35",
     "manufacturer": "bally",
-    "description": "An updated version of Bally's 6800-based MPU, used from approximately 1979 to 1981. This board added support for more complex game rules and additional hardware features over the -17 board. Notable games include Xenon (1980), one of the first pinball machines with synthesized speech, and Eight Ball Deluxe (1981).",
+    "description": "An updated version of [[manufacturer:bally]]'s 6800-based MPU, used from approximately 1979 to 1981. This board added support for more complex game rules and additional hardware features over the -17 board. Notable games include Xenon (1980), one of the first pinball machines with synthesized speech, and [[title:eight-ball-deluxe]] (1981).",
     "mpu_strings": [
       "Bally MPU AS-2518-35"
     ]
@@ -48,7 +48,7 @@
     "slug": "bally-as2518-133",
     "name": "Bally AS-2518-133",
     "manufacturer": "bally",
-    "description": "A further revision of Bally's solid-state MPU line, used in the early 1980s, still based on the Motorola 6800 architecture. This board refined the earlier -35 design with cost reductions and reliability improvements.",
+    "description": "A further revision of [[manufacturer:bally]]'s solid-state MPU line, used in the early 1980s, still based on the Motorola 6800 architecture. This board refined the earlier -35 design with cost reductions and reliability improvements.",
     "mpu_strings": [
       "Bally MPU AS-2518-133"
     ]
@@ -57,7 +57,7 @@
     "slug": "bally-6802",
     "name": "Bally 6802",
     "manufacturer": "bally",
-    "description": "A Bally/Midway pinball platform from the early-to-mid 1980s using the Motorola 6802 processor, an evolution of the 6800 with onboard RAM. This transitional platform bridged the gap between Bally's original solid-state boards and the later 6803 system.",
+    "description": "A [[manufacturer:bally]]/Midway pinball platform from the early-to-mid 1980s using the Motorola 6802 processor, an evolution of the 6800 with onboard RAM. This transitional platform bridged the gap between [[manufacturer:bally]]'s original solid-state boards and the later 6803 system.",
     "mpu_strings": [
       "Bally MPU A080-91638-D000 (6802)"
     ]
@@ -66,7 +66,7 @@
     "slug": "bally-6803",
     "name": "Bally 6803",
     "manufacturer": "bally",
-    "description": "Bally/Midway's mid-1980s pinball platform, based on the Motorola 6803 CPU, used from approximately 1985 to 1989. Notable titles include Cybernaut (1985), Escape from the Lost World (1987), and Blackwater 100 (1988). This was the last Bally-designed system before Williams acquired Bally/Midway.",
+    "description": "[[manufacturer:bally]]/Midway's mid-1980s pinball platform, based on the Motorola 6803 CPU, used from approximately 1985 to 1989. Notable titles include [[title:cybernaut]] (1985), Escape from the Lost World (1987), and Blackwater 100 (1988). This was the last [[manufacturer:bally]]-designed system before [[manufacturer:williams]] acquired [[manufacturer:bally]]/Midway.",
     "mpu_strings": [
       "Bally MPU A084-91786-AH06 (6803)"
     ]
@@ -75,7 +75,7 @@
     "slug": "capcom-a0015405",
     "name": "Capcom A0015405",
     "manufacturer": "capcom",
-    "description": "Capcom's pinball MPU, used during their brief entry into pinball manufacturing from 1995 to 1996. Based on a Motorola 68000 CPU, it featured a dot-matrix display and stereo sound. Notable games include Pinball Magic (1995) and Big Bang Bar (1996). Capcom exited pinball after producing only a handful of titles.",
+    "description": "[[manufacturer:capcom]]'s pinball MPU, used during their brief entry into pinball manufacturing from 1995 to 1996. Based on a Motorola 68000 CPU, it featured a dot-matrix display and stereo sound. Notable games include [[title:pinball-magic]] (1995) and [[title:big-bang-bar]] (1996). [[manufacturer:capcom]] exited pinball after producing only a handful of titles.",
     "mpu_strings": [
       "Capcom A0015405"
     ]
@@ -84,7 +84,7 @@
     "slug": "cgc-pinball-controller-os",
     "name": "CGC Pinball Controller/OS",
     "manufacturer": "chicago-gaming",
-    "description": "The proprietary hardware and operating system developed by Chicago Gaming Company for their recreation and remake pinball machines, including Medieval Madness Remake (2014), Attack from Mars Remake (2017), and Cactus Canyon Continued (2019). The system uses modern embedded processors to faithfully reproduce classic Williams WPC-era gameplay while adding new features and improved reliability.",
+    "description": "The proprietary hardware and operating system developed by [[manufacturer:chicago-gaming]] Company for their recreation and remake pinball machines, including [[title:medieval-madness]] Remake (2014), [[title:attack-from-mars]] Remake (2017), and Cactus Canyon Continued (2019). The system uses modern embedded processors to faithfully reproduce classic [[manufacturer:williams]] WPC-era gameplay while adding new features and improved reliability.",
     "mpu_strings": [
       "CGC Pinball Controller/OS"
     ]
@@ -93,7 +93,7 @@
     "slug": "data-east-v1",
     "name": "Data East/Sega Version 1",
     "manufacturer": "data-east",
-    "description": "Data East's first pinball hardware platform, introduced in 1987, based on the Motorola 6808 CPU. It featured an alphanumeric segmented display. Early titles include Laser War (1987), Data East's first pinball machine, and Secret Service (1988).",
+    "description": "[[manufacturer:data-east]]'s first pinball hardware platform, introduced in 1987, based on the Motorola 6808 CPU. It featured an alphanumeric segmented display. Early titles include Laser War (1987), [[manufacturer:data-east]]'s first pinball machine, and Secret Service (1988).",
     "mpu_strings": [
       "DataEast/Sega Version 1"
     ]
@@ -102,7 +102,7 @@
     "slug": "data-east-v2",
     "name": "Data East/Sega Version 2",
     "manufacturer": "data-east",
-    "description": "Data East's second-generation platform, introduced around 1989, transitioning to a more capable processor and adding support for 128x16 dot-matrix displays. Notable games include Checkpoint (1991), one of the earliest DMD pinball machines, and Star Wars (1992).",
+    "description": "[[manufacturer:data-east]]'s second-generation platform, introduced around 1989, transitioning to a more capable processor and adding support for 128x16 dot-matrix displays. Notable games include Checkpoint (1991), one of the earliest DMD pinball machines, and [[title:star-wars-data-east]] (1992).",
     "mpu_strings": [
       "DataEast/Sega Version 2"
     ]
@@ -111,7 +111,7 @@
     "slug": "data-east-v3",
     "name": "Data East/Sega Version 3",
     "manufacturer": "data-east",
-    "description": "The third revision of the Data East pinball hardware, used in the early-to-mid 1990s, with an upgraded processor and enhanced sound capabilities. This platform was used on popular titles like Jurassic Park (1993), Last Action Hero (1993), and Tales from the Crypt (1993). It featured a 128x32 DMD.",
+    "description": "The third revision of the [[manufacturer:data-east]] pinball hardware, used in the early-to-mid 1990s, with an upgraded processor and enhanced sound capabilities. This platform was used on popular titles like [[title:jurassic-park]] (1993), [[title:last-action-hero]] (1993), and [[title:tales-from-the-crypt]] (1993). It featured a 128x32 DMD.",
     "mpu_strings": [
       "DataEast/Sega Version 3"
     ]
@@ -120,7 +120,7 @@
     "slug": "data-east-v3b",
     "name": "Data East/Sega Version 3b",
     "manufacturer": "data-east",
-    "description": "A minor revision of the Data East Version 3 hardware, used in the mid-1990s as the brand transitioned to Sega Pinball following Sega's acquisition of Data East's pinball division in 1994. Games on this platform include Maverick (1994) and Batman Forever (1995).",
+    "description": "A minor revision of the [[manufacturer:data-east]] Version 3 hardware, used in the mid-1990s as the brand transitioned to [[manufacturer:sega]] Pinball following [[manufacturer:sega]]'s acquisition of [[manufacturer:data-east]]'s pinball division in 1994. Games on this platform include [[title:maverick]] (1994) and [[title:batman-forever]] (1995).",
     "mpu_strings": [
       "DataEast/Sega Version 3b"
     ]
@@ -129,7 +129,7 @@
     "slug": "day-one-d1psb",
     "name": "Day One D1PSB",
     "manufacturer": "day-one",
-    "description": "A modern boutique pinball hardware platform produced by Day One Pinball, representing one of several small-batch pinball control systems that emerged during the 2010s indie pinball movement.",
+    "description": "A modern boutique pinball hardware platform produced by [[manufacturer:day-one]], representing one of several small-batch pinball control systems that emerged during the 2010s indie pinball movement.",
     "mpu_strings": [
       "Day One D1PSB"
     ]
@@ -138,7 +138,7 @@
     "slug": "game-plan-mpu-1",
     "name": "Game Plan MPU-1",
     "manufacturer": "game-plan",
-    "description": "Game Plan's first solid-state pinball MPU, used from approximately 1978 to 1980, based on the Motorola 6800 CPU. Game Plan was founded by former Genco/Chicago Coin personnel. Early titles include Sharpshooter (1979) and Old Coney Island! (1979).",
+    "description": "[[manufacturer:game-plan]]'s first solid-state pinball MPU, used from approximately 1978 to 1980, based on the Motorola 6800 CPU. [[manufacturer:game-plan]] was founded by former [[manufacturer:genco]]/[[manufacturer:chicago-coin]] personnel. Early titles include [[title:sharpshooter]] (1979) and Old Coney Island! (1979).",
     "mpu_strings": [
       "Game Plan MPU-1"
     ]
@@ -147,7 +147,7 @@
     "slug": "game-plan-mpu-2",
     "name": "Game Plan MPU-2",
     "manufacturer": "game-plan",
-    "description": "Game Plan's second-generation MPU, used from approximately 1981 to 1985. It offered expanded capabilities over the MPU-1 while retaining the 6800-family architecture. Notable games include Attila the Hun (1984) and Cyclopes (1985). Game Plan exited the pinball industry in the mid-1980s.",
+    "description": "[[manufacturer:game-plan]]'s second-generation MPU, used from approximately 1981 to 1985. It offered expanded capabilities over the MPU-1 while retaining the 6800-family architecture. Notable games include Attila the Hun (1984) and Cyclopes (1985). [[manufacturer:game-plan]] exited the pinball industry in the mid-1980s.",
     "mpu_strings": [
       "Game Plan MPU-2"
     ]
@@ -156,7 +156,7 @@
     "slug": "gottlieb-system-1",
     "name": "Gottlieb System 1",
     "manufacturer": "gottlieb",
-    "description": "Gottlieb's first solid-state pinball system, introduced in 1977, based on the Rockwell PPS-4, a 4-bit microprocessor. It debuted with Cleopatra (1977) and was used on titles like Close Encounters of the Third Kind (1978) and Sinbad (1978). The unusual choice of a 4-bit CPU made these boards distinctive among competitors who favored 8-bit Motorola processors.",
+    "description": "[[manufacturer:gottlieb]]'s first solid-state pinball system, introduced in 1977, based on the Rockwell PPS-4, a 4-bit microprocessor. It debuted with Cleopatra (1977) and was used on titles like [[title:close-encounters]] (1978) and [[title:sinbad]] (1978). The unusual choice of a 4-bit CPU made these boards distinctive among competitors who favored 8-bit Motorola processors.",
     "mpu_strings": [
       "Gottlieb System 1"
     ]
@@ -165,7 +165,7 @@
     "slug": "gottlieb-system-80",
     "name": "Gottlieb System 80",
     "manufacturer": "gottlieb",
-    "description": "Gottlieb's second major solid-state platform, introduced around 1980, switching to a Rockwell 6502 CPU. Games include Haunted House (1982), notable as the first three-level playfield pinball, and Black Hole (1981), the first multi-level pinball. The system used 6- and 7-digit numeric displays.",
+    "description": "[[manufacturer:gottlieb]]'s second major solid-state platform, introduced around 1980, switching to a Rockwell 6502 CPU. Games include Haunted House (1982), notable as the first three-level playfield pinball, and Black Hole (1981), the first multi-level pinball. The system used 6- and 7-digit numeric displays.",
     "mpu_strings": [
       "Gottlieb System 80"
     ]
@@ -174,7 +174,7 @@
     "slug": "gottlieb-system-80a",
     "name": "Gottlieb System 80A",
     "manufacturer": "gottlieb",
-    "description": "An incremental update to Gottlieb's System 80, introduced around 1983, retaining the 6502 CPU but adding alphanumeric displays for more expressive scoring and messaging. Games include Rack 'Em Up (1983) and other mid-1980s Gottlieb/Mylstar titles.",
+    "description": "An incremental update to [[manufacturer:gottlieb]]'s System 80, introduced around 1983, retaining the 6502 CPU but adding alphanumeric displays for more expressive scoring and messaging. Games include Rack 'Em Up (1983) and other mid-1980s [[manufacturer:gottlieb]]/Mylstar titles.",
     "mpu_strings": [
       "Gottlieb System 80A"
     ]
@@ -192,7 +192,7 @@
     "slug": "gottlieb-system-3",
     "name": "Gottlieb System 3",
     "manufacturer": "gottlieb",
-    "description": "Gottlieb's final pinball hardware platform, used from 1989 to 1996, featuring a 65C02 CPU and a 128x32 dot-matrix display. Notable games include Surf 'n Safari (1991), Cue Ball Wizard (1992), and Stargate (1995). Premier Technology (Gottlieb's parent) exited pinball in 1996.",
+    "description": "[[manufacturer:gottlieb]]'s final pinball hardware platform, used from 1989 to 1996, featuring a 65C02 CPU and a 128x32 dot-matrix display. Notable games include Surf 'n Safari (1991), Cue Ball Wizard (1992), and [[title:stargate]] (1995). Premier Technology ([[manufacturer:gottlieb]]'s parent) exited pinball in 1996.",
     "mpu_strings": [
       "Gottlieb System 3"
     ]
@@ -201,7 +201,7 @@
     "slug": "homepin-h-0012",
     "name": "Homepin H-0012",
     "manufacturer": "homepin",
-    "description": "A modern pinball control system designed by Homepin, an Australian boutique pinball manufacturer. It is used in their original title Thunderbirds and is based on modern embedded computing hardware.",
+    "description": "A modern pinball control system designed by [[manufacturer:homepin]], an Australian boutique pinball manufacturer. It is used in their original title [[title:thunderbirds]] and is based on modern embedded computing hardware.",
     "mpu_strings": [
       "Homepin H-0012"
     ]
@@ -210,7 +210,7 @@
     "slug": "jersey-jack",
     "name": "Jersey Jack",
     "manufacturer": "jersey-jack",
-    "description": "Jersey Jack Pinball's hardware platform, debuting with The Wizard of Oz (2013), built around an Intel Celeron PC-class processor running Linux. It features a full-color high-definition LCD display in the backbox, RGB LED lighting throughout, and sophisticated audio. Subsequent titles include The Hobbit (2016), Dialed In! (2017), Pirates of the Caribbean (2018), and Guns N' Roses (2020).",
+    "description": "[[manufacturer:jersey-jack]]'s hardware platform, debuting with [[title:the-wizard-of-oz]] (2013), built around an Intel Celeron PC-class processor running Linux. It features a full-color high-definition LCD display in the backbox, RGB LED lighting throughout, and sophisticated audio. Subsequent titles include [[title:the-hobbit]] (2016), Dialed In! (2017), [[title:pirates-of-the-caribbean-jersey-jack-pinball]] (2018), and [[title:guns-n-roses-jersey-jack-pinball]] (2020).",
     "mpu_strings": [
       "Intel Celeron"
     ]
@@ -228,7 +228,7 @@
     "slug": "manilamatic-system-80a",
     "name": "ManilaMatic System 80A",
     "manufacturer": "manilamatic",
-    "description": "A pinball hardware system from ManilaMatic, a Philippine pinball manufacturer. It appears to share design lineage or naming conventions with Gottlieb's System 80A architecture.",
+    "description": "A pinball hardware system from [[manufacturer:manilamatic]], a Philippine pinball manufacturer. It appears to share design lineage or naming conventions with [[manufacturer:gottlieb]]'s System 80A architecture.",
     "mpu_strings": [
       "ManilaMatic System 80A Combi"
     ]
@@ -237,7 +237,7 @@
     "slug": "manilamatic-system-80b",
     "name": "ManilaMatic System 80B",
     "manufacturer": "manilamatic",
-    "description": "A pinball hardware system from ManilaMatic, a Philippine pinball manufacturer, sharing naming conventions with Gottlieb's System 80B.",
+    "description": "A pinball hardware system from [[manufacturer:manilamatic]], a Philippine pinball manufacturer, sharing naming conventions with [[manufacturer:gottlieb]]'s System 80B.",
     "mpu_strings": [
       "ManilaMatic System 80B Combi"
     ]
@@ -246,7 +246,7 @@
     "slug": "mr-game-1b11188-0",
     "name": "Mr. Game 1B11188/0",
     "manufacturer": "mr-game",
-    "description": "The MPU used by Mr. Game, an Italian pinball manufacturer active in the late 1980s and early 1990s. The platform was used on a small number of titles including Dakar (1988) and Motor Show (1988).",
+    "description": "The MPU used by [[manufacturer:mr-game]], an Italian pinball manufacturer active in the late 1980s and early 1990s. The platform was used on a small number of titles including Dakar (1988) and Motor Show (1988).",
     "mpu_strings": [
       "Mr. Game 1B11188/0"
     ]
@@ -255,7 +255,7 @@
     "slug": "multimorphic-p-roc",
     "name": "Multimorphic P-ROC",
     "manufacturer": "multimorphic",
-    "description": "The Programmable Read-Only Controller (P-ROC), designed by Multimorphic and introduced around 2010, is an FPGA-based pinball control board that can interface with and replace the MPU in many classic pinball platforms including Williams WPC, Stern Whitestar, and Data East. It enables custom software development via the pyprocgame and Mission Pinball Framework libraries, and has been used in homebrew, custom, and rethemed pinball machines.",
+    "description": "The Programmable Read-Only Controller (P-ROC), designed by [[manufacturer:multimorphic]] and introduced around 2010, is an FPGA-based pinball control board that can interface with and replace the MPU in many classic pinball platforms including [[manufacturer:williams]] WPC, [[system:stern-whitestar]], and [[manufacturer:data-east]]. It enables custom software development via the pyprocgame and Mission Pinball Framework libraries, and has been used in homebrew, custom, and rethemed pinball machines.",
     "mpu_strings": [
       "Multimorphic P-ROC"
     ]
@@ -264,7 +264,7 @@
     "slug": "multimorphic-p3-roc",
     "name": "Multimorphic P3-ROC",
     "manufacturer": "multimorphic",
-    "description": "Multimorphic's next-generation pinball control platform, designed specifically for their P3 modular pinball platform rather than retrofitting existing machines. It uses an FPGA-based architecture paired with a host computer running Linux and features an integrated LCD playfield display capability. The P3 platform debuted with Lexy Lightspeed: Escape from Earth and supports swappable game modules.",
+    "description": "[[manufacturer:multimorphic]]'s next-generation pinball control platform, designed specifically for their P3 modular pinball platform rather than retrofitting existing machines. It uses an FPGA-based architecture paired with a host computer running Linux and features an integrated LCD playfield display capability. The P3 platform debuted with Lexy Lightspeed: Escape from Earth and supports swappable game modules.",
     "mpu_strings": [
       "Multimorphic P3-ROC"
     ]
@@ -282,7 +282,7 @@
     "slug": "playmatic-mpu-1",
     "name": "Playmatic MPU-1",
     "manufacturer": "playmatic",
-    "description": "Playmatic's first solid-state pinball MPU, used by the Spanish manufacturer Playmatic (Automáticos Montecarlo) beginning in the late 1970s. Based on a CDP 1802 COSMAC processor, an unusual choice that set Playmatic apart from American manufacturers. Early titles include Space Gambler (1978).",
+    "description": "[[manufacturer:playmatic]]'s first solid-state pinball MPU, used by the Spanish manufacturer [[manufacturer:playmatic]] (Automáticos Montecarlo) beginning in the late 1970s. Based on a CDP 1802 COSMAC processor, an unusual choice that set [[manufacturer:playmatic]] apart from American manufacturers. Early titles include Space Gambler (1978).",
     "mpu_strings": [
       "Playmatic MPU 1"
     ]
@@ -291,7 +291,7 @@
     "slug": "playmatic-mpu-3",
     "name": "Playmatic MPU-3",
     "manufacturer": "playmatic",
-    "description": "An updated Playmatic pinball platform, continuing to use the CDP 1802 COSMAC processor. Used on games from the early 1980s including Meg-Aon (1981). The platform evolved the earlier MPU-1 design with added features while retaining the distinctive COSMAC architecture.",
+    "description": "An updated [[manufacturer:playmatic]] pinball platform, continuing to use the CDP 1802 COSMAC processor. Used on games from the early 1980s including Meg-Aon (1981). The platform evolved the earlier MPU-1 design with added features while retaining the distinctive COSMAC architecture.",
     "mpu_strings": [
       "Playmatic MPU 3"
     ]
@@ -300,7 +300,7 @@
     "slug": "playmatic-mpu-4",
     "name": "Playmatic MPU-4",
     "manufacturer": "playmatic",
-    "description": "A further evolution of Playmatic's CDP 1802-based hardware, used in the mid-1980s. This revision added enhancements for sound and display capabilities. Playmatic continued to serve primarily the Spanish and broader European pinball markets.",
+    "description": "A further evolution of [[manufacturer:playmatic]]'s CDP 1802-based hardware, used in the mid-1980s. This revision added enhancements for sound and display capabilities. [[manufacturer:playmatic]] continued to serve primarily the Spanish and broader European pinball markets.",
     "mpu_strings": [
       "Playmatic MPU 4"
     ]
@@ -309,7 +309,7 @@
     "slug": "playmatic-mpu-5",
     "name": "Playmatic MPU-5",
     "manufacturer": "playmatic",
-    "description": "One of Playmatic's later hardware revisions, used in the mid-to-late 1980s. It continued the CDP 1802 lineage that defined all Playmatic solid-state platforms. Playmatic eventually ceased pinball production in the late 1980s as the European pinball market contracted.",
+    "description": "One of [[manufacturer:playmatic]]'s later hardware revisions, used in the mid-to-late 1980s. It continued the CDP 1802 lineage that defined all [[manufacturer:playmatic]] solid-state platforms. [[manufacturer:playmatic]] eventually ceased pinball production in the late 1980s as the European pinball market contracted.",
     "mpu_strings": [
       "Playmatic MPU 5"
     ]
@@ -318,7 +318,7 @@
     "slug": "playmatic-mpu-c",
     "name": "Playmatic MPU-C",
     "manufacturer": "playmatic",
-    "description": "A later Playmatic hardware variant that reportedly transitioned to a different processor architecture from the CDP 1802 used in earlier Playmatic boards.",
+    "description": "A later [[manufacturer:playmatic]] hardware variant that reportedly transitioned to a different processor architecture from the CDP 1802 used in earlier [[manufacturer:playmatic]] boards.",
     "mpu_strings": [
       "Playmatic MPU-C"
     ]
@@ -327,7 +327,7 @@
     "slug": "quetzal-qpc",
     "name": "Quetzal QPC",
     "manufacturer": "quetzal",
-    "description": "A modern pinball control platform produced by Quetzal Pinball, used in boutique and indie pinball machines. It is part of the broader wave of custom pinball hardware that emerged in the 2010s.",
+    "description": "A modern pinball control platform produced by [[manufacturer:quetzal]], used in boutique and indie pinball machines. It is part of the broader wave of custom pinball hardware that emerged in the 2010s.",
     "mpu_strings": [
       "QPC System",
       "QPC Mini System"
@@ -337,7 +337,7 @@
     "slug": "recel-system-iii",
     "name": "Recel System III",
     "manufacturer": "recel",
-    "description": "A solid-state pinball system from Recel (Recreativos Electrónicos), a Spanish pinball manufacturer. Recel was related to and eventually merged with other Spanish pinball operations.",
+    "description": "A solid-state pinball system from [[manufacturer:recel]] (Recreativos Electrónicos), a Spanish pinball manufacturer. [[manufacturer:recel]] was related to and eventually merged with other Spanish pinball operations.",
     "mpu_strings": [
       "Recel System III"
     ]
@@ -346,7 +346,7 @@
     "slug": "sega-95534",
     "name": "Sega 95534",
     "manufacturer": "sega",
-    "description": "An early Sega Pinball hardware revision following Sega's 1994 acquisition of Data East's pinball division. This transitional board was used in the mid-1990s as Sega rebranded the Data East pinball line.",
+    "description": "An early [[manufacturer:sega]] Pinball hardware revision following [[manufacturer:sega]]'s 1994 acquisition of [[manufacturer:data-east]]'s pinball division. This transitional board was used in the mid-1990s as [[manufacturer:sega]] rebranded the [[manufacturer:data-east]] pinball line.",
     "mpu_strings": [
       "Sega 95534"
     ]
@@ -355,7 +355,7 @@
     "slug": "sega-95680",
     "name": "Sega 95680",
     "manufacturer": "sega",
-    "description": "A Sega Pinball hardware board from the mid-1990s, part of the evolutionary line from Data East's Version 3 platform. It featured a 128x32 DMD and enhanced sound capabilities. Titles on this or adjacent revisions include Apollo 13 (1995) and GoldenEye (1996).",
+    "description": "A [[manufacturer:sega]] Pinball hardware board from the mid-1990s, part of the evolutionary line from [[manufacturer:data-east]]'s Version 3 platform. It featured a 128x32 DMD and enhanced sound capabilities. Titles on this or adjacent revisions include [[title:apollo-13]] (1995) and GoldenEye (1996).",
     "mpu_strings": [
       "Sega 95680"
     ]
@@ -364,7 +364,7 @@
     "slug": "sega-96054",
     "name": "Sega 96054",
     "manufacturer": "sega",
-    "description": "A later Sega Pinball hardware revision from the mid-to-late 1990s, part of Sega's incremental hardware improvements leading toward the Whitestar platform.",
+    "description": "A later [[manufacturer:sega]] Pinball hardware revision from the mid-to-late 1990s, part of [[manufacturer:sega]]'s incremental hardware improvements leading toward the Whitestar platform.",
     "mpu_strings": [
       "Sega 96054"
     ]
@@ -373,7 +373,7 @@
     "slug": "sega-whitestar",
     "name": "Sega Whitestar",
     "manufacturer": "sega",
-    "description": "Sega Pinball's most advanced and final hardware platform, introduced in 1995, based on a Motorola 6809 CPU with a 128x32 DMD and BSMT2000 sound chip. The platform continued under Stern Pinball after their 1999 acquisition of Sega's pinball division. Notable Sega-era titles include Star Wars Trilogy (1997) and Starship Troopers (1997).",
+    "description": "[[manufacturer:sega]] Pinball's most advanced and final hardware platform, introduced in 1995, based on a Motorola 6809 CPU with a 128x32 DMD and BSMT2000 sound chip. The platform continued under [[manufacturer:stern-pinball]] after their 1999 acquisition of [[manufacturer:sega]]'s pinball division. Notable [[manufacturer:sega]]-era titles include [[title:star-wars-trilogy]] (1997) and [[title:starship-troopers]] (1997).",
     "mpu_strings": [
       "Sega/Stern Whitestar"
     ]
@@ -382,7 +382,7 @@
     "slug": "spooky-pinheck",
     "name": "Spooky PinHeck",
     "manufacturer": "spooky",
-    "description": "The proprietary control system used by Spooky Pinball, a boutique American pinball manufacturer founded in 2011. The PinHeck board powers titles including America's Most Haunted (2014), Rob Zombie's Spookshow International (2016), Alice Cooper's Nightmare Castle (2019), and Rick and Morty (2020). The system uses modern embedded hardware designed for cost-effective small-run production.",
+    "description": "The proprietary control system used by [[manufacturer:spooky]], a boutique American pinball manufacturer founded in 2011. The PinHeck board powers titles including [[title:americas-most-haunted]] (2014), [[title:rob-zombie]] (2016), [[title:alice-cooper]] (2019), and [[title:rick-and-morty]] (2020). The system uses modern embedded hardware designed for cost-effective small-run production.",
     "mpu_strings": [
       "PinHeck System"
     ]
@@ -391,7 +391,7 @@
     "slug": "stern-mpu-100",
     "name": "Stern MPU-100",
     "manufacturer": "stern-electronics",
-    "description": "Stern Electronics' first solid-state pinball MPU, introduced in 1977, based on the Motorola 6800 CPU. It was used on early Stern solid-state titles including Pinball (1977), Stars (1978), and Memory Lane (1978). The MPU-100 established Stern's entry into the solid-state era.",
+    "description": "[[manufacturer:stern-electronics]]' first solid-state pinball MPU, introduced in 1977, based on the Motorola 6800 CPU. It was used on early [[manufacturer:stern-electronics]] solid-state titles including Pinball (1977), Stars (1978), and Memory Lane (1978). The MPU-100 established [[manufacturer:stern-electronics]]'s entry into the solid-state era.",
     "mpu_strings": [
       "Stern M-100 MPU"
     ]
@@ -400,7 +400,7 @@
     "slug": "stern-mpu-200",
     "name": "Stern MPU-200",
     "manufacturer": "stern-electronics",
-    "description": "Stern Electronics' updated solid-state platform, introduced around 1979, still based on the Motorola 6800 architecture with additional capabilities over the MPU-100. Notable games include Meteor (1979), Galaxy (1980), and Flight 2000 (1980). Stern Electronics closed in 1985, unrelated to the later Stern Pinball founded by Gary Stern in 1999.",
+    "description": "[[manufacturer:stern-electronics]]' updated solid-state platform, introduced around 1979, still based on the Motorola 6800 architecture with additional capabilities over the MPU-100. Notable games include Meteor (1979), Galaxy (1980), and [[title:flight-2000]] (1980). [[manufacturer:stern-electronics]] closed in 1985, unrelated to the later [[manufacturer:stern-pinball]] founded by [[person:gary-stern]] in 1999.",
     "mpu_strings": [
       "Stern M-200 MPU"
     ]
@@ -409,7 +409,7 @@
     "slug": "stern-whitestar",
     "name": "Stern Whitestar",
     "manufacturer": "stern-pinball",
-    "description": "A modified version of the Sega Whitestar platform, continued by Stern Pinball after acquiring Sega's pinball division in 1999. Stern made incremental improvements to the Whitestar design over its production run, which lasted until approximately 2005. Notable Stern Whitestar games include The Simpsons Pinball Party (2003), The Lord of the Rings (2003), and The Sopranos (2005).",
+    "description": "A modified version of the [[manufacturer:sega]] Whitestar platform, continued by [[manufacturer:stern-pinball]] after acquiring [[manufacturer:sega]]'s pinball division in 1999. [[manufacturer:stern-pinball]] made incremental improvements to the Whitestar design over its production run, which lasted until approximately 2005. Notable Stern Whitestar games include [[title:the-simpsons-pinball-party]] (2003), [[title:lord-of-the-rings]] (2003), and [[title:the-sopranos]] (2005).",
     "mpu_strings": [
       "Stern Whitestar (modified)"
     ]
@@ -418,7 +418,7 @@
     "slug": "stern-sam",
     "name": "Stern SAM",
     "manufacturer": "stern-pinball",
-    "description": "Stern's S.A.M. (Stern Army Manufacturing) Board System, introduced in 2006 as the successor to Whitestar, based on an Atmel AT91SAM9 ARM processor. It featured a 128x32 DMD and improved processing power. Used on popular titles including Spider-Man (2007), Batman: The Dark Knight (2008), Iron Man (2010), Tron: Legacy (2011), The Avengers (2012), and Metallica (2013).",
+    "description": "[[manufacturer:stern-pinball]]'s S.A.M. (Stern Army Manufacturing) Board System, introduced in 2006 as the successor to [[system:stern-whitestar]], based on an Atmel AT91SAM9 ARM processor. It featured a 128x32 DMD and improved processing power. Used on popular titles including [[title:spider-man]] (2007), Batman: The Dark Knight (2008), [[title:iron-man]] (2010), Tron: Legacy (2011), [[title:the-avengers]] (2012), and [[title:metallica]] (2013).",
     "mpu_strings": [
       "Stern S.A.M. Board System"
     ]
@@ -427,7 +427,7 @@
     "slug": "stern-spike-1",
     "name": "Stern SPIKE",
     "manufacturer": "stern-pinball",
-    "description": "Stern's SPIKE hardware platform, introduced in 2014 with WWE Wrestlemania, replacing the SAM system. It uses a distributed node-based architecture where small processor boards throughout the cabinet and playfield connect via a serial bus to a central Linux-based CPU board. Early SPIKE games used a 128x32 DMD; titles include Game of Thrones (2015) and Ghostbusters (2016).",
+    "description": "[[manufacturer:stern-pinball]]'s SPIKE hardware platform, introduced in 2014 with WWE Wrestlemania, replacing the SAM system. It uses a distributed node-based architecture where small processor boards throughout the cabinet and playfield connect via a serial bus to a central Linux-based CPU board. Early SPIKE games used a 128x32 DMD; titles include [[title:game-of-thrones]] (2015) and [[title:ghostbusters]] (2016).",
     "mpu_strings": [
       "Stern SPIKE System",
       "Stern SPIKE� System"
@@ -437,7 +437,7 @@
     "slug": "stern-spike-2",
     "name": "Stern SPIKE 2",
     "manufacturer": "stern-pinball",
-    "description": "An evolution of Stern's SPIKE platform, introduced around 2017, adding support for a full-color LCD display in the backbox replacing the traditional DMD. The distributed node-bus architecture is retained from SPIKE. Titles include Star Wars (2017), Jurassic Park (2019), Led Zeppelin (2020), Godzilla (2021), and James Bond 007 (2022).",
+    "description": "An evolution of [[manufacturer:stern-pinball]]'s SPIKE platform, introduced around 2017, adding support for a full-color LCD display in the backbox replacing the traditional DMD. The distributed node-bus architecture is retained from SPIKE. Titles include [[title:star-wars-stern]] (2017), [[title:jurassic-park-stern]] (2019), [[title:led-zeppelin]] (2020), [[title:godzilla-stern]] (2021), and [[title:james-bond-007-60th-anniversary]] (2022).",
     "mpu_strings": [
       "Stern SPIKE 2 System",
       "Stern SPIKE� 2 System"
@@ -447,7 +447,7 @@
     "slug": "team-pinball-rboard-v2",
     "name": "Team Pinball Rboard v2",
     "manufacturer": "team-pinball",
-    "description": "A pinball control board designed by Team Pinball, a small American pinball manufacturer. The Rboard v2 was used in their title The Mafia.",
+    "description": "A pinball control board designed by [[manufacturer:team-pinball]], a small American pinball manufacturer. The Rboard v2 was used in their title The Mafia.",
     "mpu_strings": [
       "Team Pinball Rboard v2"
     ]
@@ -456,7 +456,7 @@
     "slug": "tecnoplay-2-2c-8008-ls-68000-cpu",
     "name": "Tecnoplay \"2-2C 8008 LS\" (68000 CPU)",
     "manufacturer": "tecnoplay",
-    "description": "A pinball hardware system from Tecnoplay, an Italian manufacturer active in the late 1980s, featuring a Motorola 68000 CPU. Tecnoplay produced a small number of titles including Scramble (1987) and Xforce (1987). The 68000 was a notably powerful processor choice for pinball at the time.",
+    "description": "A pinball hardware system from [[manufacturer:tecnoplay]], an Italian manufacturer active in the late 1980s, featuring a Motorola 68000 CPU. [[manufacturer:tecnoplay]] produced a small number of titles including Scramble (1987) and Xforce (1987). The 68000 was a notably powerful processor choice for pinball at the time.",
     "mpu_strings": [
       "Technoplay \"2-2C 8008 LS\" (68000 CPU)"
     ]
@@ -465,7 +465,7 @@
     "slug": "williams-system-3",
     "name": "Williams System 3",
     "manufacturer": "williams",
-    "description": "Williams' first solid-state pinball platform, introduced in 1977, based on the Motorola 6800-family architecture. It debuted with Hot Tip (1977) and Lucky Seven (1977). The system used 6-digit numeric displays and established Williams' solid-state design philosophy.",
+    "description": "[[manufacturer:williams]]' first solid-state pinball platform, introduced in 1977, based on the Motorola 6800-family architecture. It debuted with Hot Tip (1977) and Lucky Seven (1977). The system used 6-digit numeric displays and established [[manufacturer:williams]]' solid-state design philosophy.",
     "mpu_strings": [
       "Williams System 3"
     ]
@@ -474,7 +474,7 @@
     "slug": "williams-system-4",
     "name": "Williams System 4",
     "manufacturer": "williams",
-    "description": "An incremental update to Williams System 3, introduced in 1978, retaining the 6800-family CPU. Games include Phoenix (1978) and Pokerino (1978). The update primarily addressed minor hardware revisions and manufacturing improvements.",
+    "description": "An incremental update to [[manufacturer:williams]] System 3, introduced in 1978, retaining the 6800-family CPU. Games include Phoenix (1978) and Pokerino (1978). The update primarily addressed minor hardware revisions and manufacturing improvements.",
     "mpu_strings": [
       "Williams System 4"
     ]
@@ -483,7 +483,7 @@
     "slug": "williams-system-6",
     "name": "Williams System 6",
     "manufacturer": "williams",
-    "description": "Introduced around 1979, Williams System 6 used the Motorola 6808 CPU and added support for background sound effects and more complex game rules. Notable games include Firepower (1980), one of the first multi-ball pinball machines with lane-change features, and Black Knight (1980), featuring a two-level playfield with Magna-Save.",
+    "description": "Introduced around 1979, [[manufacturer:williams]] System 6 used the Motorola 6808 CPU and added support for background sound effects and more complex game rules. Notable games include [[title:firepower]] (1980), one of the first multi-ball pinball machines with lane-change features, and [[title:black-knight]] (1980), featuring a two-level playfield with Magna-Save.",
     "mpu_strings": [
       "Williams System 6"
     ]
@@ -492,7 +492,7 @@
     "slug": "williams-system-6a",
     "name": "Williams System 6A",
     "manufacturer": "williams",
-    "description": "A minor revision of Williams System 6, used on a small number of titles in the early 1980s. The 6A designation indicates incremental hardware refinements, bridging the gap between System 6 and the later System 7.",
+    "description": "A minor revision of [[manufacturer:williams]] System 6, used on a small number of titles in the early 1980s. The 6A designation indicates incremental hardware refinements, bridging the gap between System 6 and the later System 7.",
     "mpu_strings": [
       "Williams System 6A"
     ]
@@ -510,7 +510,7 @@
     "slug": "williams-system-8",
     "name": "Williams System 8",
     "manufacturer": "williams",
-    "description": "Williams System 8 was designed but never officially released as a production platform. Williams skipped from System 7 directly to System 9, likely because the System 8 design was superseded during development. No commercial pinball machines were released under this designation.",
+    "description": "[[manufacturer:williams]] System 8 was designed but never officially released as a production platform. [[manufacturer:williams]] skipped from System 7 directly to System 9, likely because the System 8 design was superseded during development. No commercial pinball machines were released under this designation.",
     "mpu_strings": [
       "Williams System 8"
     ]
@@ -519,7 +519,7 @@
     "slug": "williams-system-9",
     "name": "Williams System 9",
     "manufacturer": "williams",
-    "description": "Introduced in 1985, Williams System 9 used the Motorola 6802 CPU and was a short-lived transitional platform between System 7 and System 11. Only a small number of games were produced, including Space Shuttle (1984) and Comet (1985). It featured improved sound capabilities.",
+    "description": "Introduced in 1985, [[manufacturer:williams]] System 9 used the Motorola 6802 CPU and was a short-lived transitional platform between System 7 and System 11. Only a small number of games were produced, including [[title:space-shuttle]] (1984) and Comet (1985). It featured improved sound capabilities.",
     "mpu_strings": [
       "Williams System 9"
     ]
@@ -528,7 +528,7 @@
     "slug": "williams-system-10",
     "name": "Williams System 10",
     "manufacturer": "williams",
-    "description": "A brief transitional platform used by Williams between System 9 and System 11. Very few titles were produced on this specific revision, as Williams quickly moved to the more capable System 11 platform.",
+    "description": "A brief transitional platform used by [[manufacturer:williams]] between System 9 and System 11. Very few titles were produced on this specific revision, as [[manufacturer:williams]] quickly moved to the more capable System 11 platform.",
     "mpu_strings": [
       "Williams System 10"
     ]
@@ -537,7 +537,7 @@
     "slug": "williams-system-11",
     "name": "Williams System 11",
     "manufacturer": "williams",
-    "description": "Introduced in 1986, Williams System 11 used a Motorola 6802 CPU and was the first Williams platform to feature alphanumeric segmented displays with full text capability. It introduced background music and advanced sound via a separate sound board. The first System 11 game was High Speed (1986), designed by Steve Ritchie. Other notable titles include Pinbot (1986) and F-14 Tomcat (1987).",
+    "description": "Introduced in 1986, [[manufacturer:williams]] System 11 used a Motorola 6802 CPU and was the first [[manufacturer:williams]] platform to feature alphanumeric segmented displays with full text capability. It introduced background music and advanced sound via a separate sound board. The first System 11 game was [[title:high-speed]] (1986), designed by Steve Ritchie. Other notable titles include [[title:pinbot]] (1986) and F-14 Tomcat (1987).",
     "mpu_strings": [
       "Williams System 11"
     ]
@@ -546,7 +546,7 @@
     "slug": "williams-system-11a",
     "name": "Williams System 11A",
     "manufacturer": "williams",
-    "description": "A revision of Williams System 11, introduced in 1987, with updated sound hardware. Notable games include Millionaire (1987) and F-14 Tomcat (1987). The A revision primarily improved the audio subsystem.",
+    "description": "A revision of [[manufacturer:williams]] System 11, introduced in 1987, with updated sound hardware. Notable games include Millionaire (1987) and F-14 Tomcat (1987). The A revision primarily improved the audio subsystem.",
     "mpu_strings": [
       "Williams System 11A"
     ]
@@ -564,7 +564,7 @@
     "slug": "williams-system-11c",
     "name": "Williams System 11C",
     "manufacturer": "williams",
-    "description": "The final revision of the System 11 line, used from approximately 1989 to 1990, bridging the gap to the WPC era. Notable games include Riverboat Gambler (1990) and Rollergames (1990). By this point Williams was developing the WPC platform that would define the 1990s.",
+    "description": "The final revision of the System 11 line, used from approximately 1989 to 1990, bridging the gap to the WPC era. Notable games include Riverboat Gambler (1990) and [[title:rollergames]] (1990). By this point [[manufacturer:williams]] was developing the WPC platform that would define the 1990s.",
     "mpu_strings": [
       "Williams System 11C"
     ]
@@ -573,7 +573,7 @@
     "slug": "williams-wpc-alphanumeric",
     "name": "Williams WPC Alphanumeric",
     "manufacturer": "williams",
-    "description": "The first generation of Williams' WPC (Williams Pinball Controller) platform, introduced in 1990, using a Motorola 6809 CPU. This initial version retained alphanumeric segmented displays. Funhouse (1990) and Harley-Davidson (1991) are notable titles. It established the WPC architecture that would dominate the 1990s.",
+    "description": "The first generation of [[manufacturer:williams]]' WPC ([[manufacturer:williams]] Pinball Controller) platform, introduced in 1990, using a Motorola 6809 CPU. This initial version retained alphanumeric segmented displays. [[title:funhouse]] (1990) and Harley-Davidson (1991) are notable titles. It established the WPC architecture that would dominate the 1990s.",
     "mpu_strings": [
       "Williams WPC (Alpha Numeric)"
     ]
@@ -582,7 +582,7 @@
     "slug": "williams-wpc-dot-matrix",
     "name": "Williams WPC Dot Matrix",
     "manufacturer": "williams",
-    "description": "The second WPC generation, adding a 128x32 dot-matrix display for animations and advanced scoring displays. Introduced in 1991, notable early DMD games include Terminator 2: Judgment Day (1991) and The Addams Family (1992), the best-selling pinball machine of all time with over 20,000 units produced.",
+    "description": "The second WPC generation, adding a 128x32 dot-matrix display for animations and advanced scoring displays. Introduced in 1991, notable early DMD games include [[title:terminator-2-judgment-day]] (1991) and [[title:the-addams-family]] (1992), the best-selling pinball machine of all time with over 20,000 units produced.",
     "mpu_strings": [
       "Williams WPC (Dot Matrix)"
     ]
@@ -591,7 +591,7 @@
     "slug": "williams-wpc-fliptronics",
     "name": "Williams WPC Fliptronics",
     "manufacturer": "williams",
-    "description": "A WPC revision that added the Fliptronics board, which put flipper control under software rather than purely electromechanical circuits. This enabled features like timed flipper holds and software-controlled flipper strength. Games include late-run Addams Family units and Twilight Zone (1993).",
+    "description": "A WPC revision that added the Fliptronics board, which put flipper control under software rather than purely electromechanical circuits. This enabled features like timed flipper holds and software-controlled flipper strength. Games include late-run Addams Family units and [[title:twilight-zone]] (1993).",
     "mpu_strings": [
       "Williams WPC (Fliptronics 1)"
     ]
@@ -600,7 +600,7 @@
     "slug": "williams-wpc-fliptronics-2",
     "name": "Williams WPC Fliptronics II",
     "manufacturer": "williams",
-    "description": "An update to the Fliptronics system with the Fliptronics II board, offering improved flipper control circuitry. Used on mid-1990s titles including Indiana Jones: The Pinball Adventure (1993), Judge Dredd (1993), and Star Trek: The Next Generation (1993).",
+    "description": "An update to the Fliptronics system with the Fliptronics II board, offering improved flipper control circuitry. Used on mid-1990s titles including [[title:indiana-jones-the-pinball-adventure]] (1993), [[title:judge-dredd]] (1993), and [[title:star-trek-the-next-generation]] (1993).",
     "mpu_strings": [
       "Williams WPC (Fliptronics 2)"
     ]
@@ -609,7 +609,7 @@
     "slug": "williams-wpc-dcs",
     "name": "Williams WPC-DCS",
     "manufacturer": "williams",
-    "description": "A WPC revision introducing the DCS (Digital Compression System) sound board, which provided CD-quality audio via ADPCM compression. Introduced in 1993, notable games include Indiana Jones: The Pinball Adventure (1993), Demolition Man (1994), and The Shadow (1994). The DCS audio was a significant leap in pinball sound quality.",
+    "description": "A WPC revision introducing the DCS (Digital Compression System) sound board, which provided CD-quality audio via ADPCM compression. Introduced in 1993, notable games include [[title:indiana-jones-the-pinball-adventure]] (1993), [[title:demolition-man]] (1994), and [[title:the-shadow]] (1994). The DCS audio was a significant leap in pinball sound quality.",
     "mpu_strings": [
       "Williams WPC (DCS)"
     ]
@@ -618,7 +618,7 @@
     "slug": "williams-wpc-s",
     "name": "Williams WPC-S",
     "manufacturer": "williams",
-    "description": "WPC-Security, introduced in 1994, added an ASIC security chip to combat ROM piracy and bootleg copies. It retained the DCS sound system. Notable games include The Flintstones (1994), Johnny Mnemonic (1995), Jack*Bot (1995), and No Fear: Dangerous Sports (1995).",
+    "description": "WPC-Security, introduced in 1994, added an ASIC security chip to combat ROM piracy and bootleg copies. It retained the DCS sound system. Notable games include [[title:the-flintstones]] (1994), [[title:johnny-mnemonic]] (1995), Jack*Bot (1995), and [[title:no-fear]] (1995).",
     "mpu_strings": [
       "Williams WPC Security (WPC-S)"
     ]
@@ -627,7 +627,7 @@
     "slug": "wpc-95",
     "name": "Williams WPC-95",
     "manufacturer": "williams",
-    "description": "The final major WPC revision, introduced in 1995, featuring a redesigned and consolidated main board that reduced component count and manufacturing cost. Notable games include Congo (1995), Attack from Mars (1995), Medieval Madness (1997), Cirqus Voltaire (1997), and Monster Bash (1998) — several of which are among the most sought-after pinball machines ever made.",
+    "description": "The final major WPC revision, introduced in 1995, featuring a redesigned and consolidated main board that reduced component count and manufacturing cost. Notable games include [[title:congo]] (1995), [[title:attack-from-mars]] (1995), [[title:medieval-madness]] (1997), Cirqus Voltaire (1997), and [[title:monster-bash]] (1998) — several of which are among the most sought-after pinball machines ever made.",
     "mpu_strings": [
       "Williams WPC-95"
     ]
@@ -636,7 +636,7 @@
     "slug": "williams-pinball-2000",
     "name": "Williams Pinball 2000",
     "manufacturer": "williams",
-    "description": "Williams' final pinball platform, introduced in 1999, which projected video game-style graphics onto the playfield glass using a monitor and half-mirror (Pepper's ghost effect), blending video imagery with the physical playfield. Based on a PC-class Intel Pentium processor. Only two games were produced — Revenge from Mars (1999) and Star Wars Episode I (1999) — before Williams/Bally/Midway exited the pinball business entirely in October 1999.",
+    "description": "[[manufacturer:williams]]' final pinball platform, introduced in 1999, which projected video game-style graphics onto the playfield glass using a monitor and half-mirror (Pepper's ghost effect), blending video imagery with the physical playfield. Based on a PC-class Intel Pentium processor. Only two games were produced — Revenge from Mars (1999) and [[title:star-wars-episode-i]] (1999) — before [[manufacturer:williams]]/[[manufacturer:bally]]/Midway exited the pinball business entirely in October 1999.",
     "mpu_strings": [
       "Williams Pinball 2000"
     ]
@@ -645,7 +645,7 @@
     "slug": "zaccaria-gen-1",
     "name": "Zaccaria Generation 1",
     "manufacturer": "zaccaria",
-    "description": "Zaccaria's first solid-state pinball platform, introduced in the late 1970s by the Italian manufacturer, based on the Signetics 2650 processor — a unique choice among pinball manufacturers. Games include Winter Sports (1978) and House of Diamonds (1978). Zaccaria was one of the most prolific European pinball manufacturers of the era.",
+    "description": "[[manufacturer:zaccaria]]'s first solid-state pinball platform, introduced in the late 1970s by the Italian manufacturer, based on the Signetics 2650 processor — a unique choice among pinball manufacturers. Games include Winter Sports (1978) and House of Diamonds (1978). [[manufacturer:zaccaria]] was one of the most prolific European pinball manufacturers of the era.",
     "mpu_strings": [
       "Zaccaria Generation 1"
     ]
@@ -654,7 +654,7 @@
     "slug": "zaccaria-gen-2",
     "name": "Zaccaria Generation 2",
     "manufacturer": "zaccaria",
-    "description": "Zaccaria's second-generation solid-state platform, used from the early 1980s onward, transitioning to a Motorola 6802 CPU. This brought Zaccaria's hardware more in line with American manufacturers' architectures. Notable games include Pinball Champ (1982), Time Machine (1983), and Farfalla (1983). Zaccaria ceased pinball production in the late 1980s.",
+    "description": "[[manufacturer:zaccaria]]'s second-generation solid-state platform, used from the early 1980s onward, transitioning to a Motorola 6802 CPU. This brought [[manufacturer:zaccaria]]'s hardware more in line with American manufacturers' architectures. Notable games include Pinball Champ (1982), Time Machine (1983), and Farfalla (1983). [[manufacturer:zaccaria]] ceased pinball production in the late 1980s.",
     "mpu_strings": [
       "Zaccaria Generation 2"
     ]

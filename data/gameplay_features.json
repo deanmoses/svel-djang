@@ -3,7 +3,7 @@
     "slug": "flippers",
     "name": "Flippers",
     "display_order": 1,
-    "description": "Player-controlled paddles mounted near the bottom of the playfield, operated by buttons on the sides of the cabinet. Harry Mabs designed the first flipper mechanism for Gottlieb's *Humpty Dumpty* in 1947, and the invention transformed pinball from a game of aim into a game of reflexes and timing. Early machines used six flippers scattered across the playfield; by the early 1950s, the layout had consolidated to two flippers at the bottom — the configuration that became universal. Three-flipper and four-flipper layouts appear periodically when designers want additional shot options from the upper playfield."
+    "description": "Player-controlled paddles mounted near the bottom of the playfield, operated by buttons on the sides of the cabinet. Harry Mabs designed the first flipper mechanism for [[manufacturer:gottlieb]]'s *[[title:humpty-dumpty]]* in 1947, and the invention transformed pinball from a game of aim into a game of reflexes and timing. Early machines used six flippers scattered across the playfield; by the early 1950s, the layout had consolidated to two flippers at the bottom — the configuration that became universal. Three-flipper and four-flipper layouts appear periodically when designers want additional shot options from the upper playfield."
   },
   {
     "slug": "pop-bumpers",
@@ -15,19 +15,19 @@
     "slug": "slingshots",
     "name": "Slingshots",
     "display_order": 3,
-    "description": "Triangular kicker assemblies typically mounted just above the flippers on both sides of the playfield. When the ball strikes the rubberized face of the slingshot, a solenoid fires and kicks it back with force. Slingshots add speed and unpredictability to the lower playfield, often deflecting the ball into the outlanes or across to the opposite flipper. They became a standard feature of virtually every flipper game and are so universal that their absence on a machine is more notable than their presence."
+    "description": "Triangular kicker assemblies typically mounted just above the flippers on both sides of the playfield. When the ball strikes the rubberized face of the slingshot, a solenoid fires and kicks it back with force. Slingshots add speed and unpredictability to the lower playfield, often deflecting the ball into the outlanes or across to the opposite [[gameplayfeature:flippers]]. They became a standard feature of virtually every flipper game and are so universal that their absence on a machine is more notable than their presence."
   },
   {
     "slug": "drop-targets",
     "name": "Drop Targets",
     "display_order": 4,
-    "description": "Flat rectangular targets mounted on spring-loaded mechanisms that retract below the playfield surface when struck by the ball. Typically arranged in banks of three, four, or five, they present the player with a completion challenge: knock down the entire bank to score a bonus or advance a game objective, then watch them reset for another round. Gottlieb pioneered drop targets in the early 1960s, and they became one of the most versatile and widely used playfield mechanisms in pinball design, appearing in electromechanical and solid-state machines alike."
+    "description": "Flat rectangular targets mounted on spring-loaded mechanisms that retract below the playfield surface when struck by the ball. Typically arranged in banks of three, four, or five, they present the player with a completion challenge: knock down the entire bank to score a bonus or advance a game objective, then watch them reset for another round. [[manufacturer:gottlieb]] pioneered drop targets in the early 1960s, and they became one of the most versatile and widely used playfield mechanisms in pinball design, appearing in [[technologygeneration:electromechanical]] and [[technologygeneration:solid-state]] machines alike."
   },
   {
     "slug": "standup-targets",
     "name": "Standup Targets",
     "display_order": 5,
-    "description": "Fixed vertical targets that register a hit when struck by the ball but remain in place — they don't drop, retract, or move. The simplest form of scoring target on the playfield, standup targets are typically flat plastic or metal plates mounted on leaf switches, arranged individually or in groups to spell words, complete sequences, or guard high-value areas. They require less mechanism than drop targets and can be placed almost anywhere on the playfield, making them the workhorse target of pinball design."
+    "description": "Fixed vertical targets that register a hit when struck by the ball but remain in place — they don't drop, retract, or move. The simplest form of scoring target on the playfield, standup targets are typically flat plastic or metal plates mounted on leaf switches, arranged individually or in groups to spell words, complete sequences, or guard high-value areas. They require less mechanism than [[gameplayfeature:drop-targets]] and can be placed almost anywhere on the playfield, making them the workhorse target of pinball design."
   },
   {
     "slug": "spinners",
@@ -45,7 +45,7 @@
     "slug": "multiball",
     "name": "Multiball",
     "display_order": 8,
-    "description": "A game state in which two or more balls are in play simultaneously, typically triggered by locking balls in designated features and then releasing them all at once. Multiball is the climactic event in most modern pinball designs — the moment when scoring multipliers peak, the music intensifies, and the player's ability to track and control multiple balls determines whether the round produces a massive score or a rapid drain. Williams' *Firepower* (1980) is credited as the first machine to feature multiball as a designed gameplay objective, and the mechanic has been central to pinball game design ever since."
+    "description": "A game state in which two or more balls are in play simultaneously, typically triggered by locking balls in designated features and then releasing them all at once. Multiball is the climactic event in most modern pinball designs — the moment when scoring multipliers peak, the music intensifies, and the player's ability to track and control multiple balls determines whether the round produces a massive score or a rapid drain. [[manufacturer:williams]]' *[[title:firepower]]* (1980) is credited as the first machine to feature multiball as a designed gameplay objective, and the mechanic has been central to pinball game design ever since."
   },
   {
     "slug": "captive-ball",
@@ -63,7 +63,7 @@
     "slug": "gobble-holes",
     "name": "Gobble Holes",
     "display_order": 11,
-    "description": "Holes in the playfield that swallow the ball and end it — no eject, no return. The ball drops through and is gone, awarding its score but costing the player that ball of play. Gobble holes were a defining feature of pre-flipper and early flipper-era machines, where the entire playfield was a landscape of risk: every hole was a potential ending. As flippers gave players more control and game designs shifted toward keeping the ball in play longer, gobble holes largely disappeared from mainstream pinball, surviving primarily in novelty games and as historical curiosities."
+    "description": "Holes in the playfield that swallow the ball and end it — no eject, no return. The ball drops through and is gone, awarding its score but costing the player that ball of play. Gobble holes were a defining feature of pre-[[gameplayfeature:flippers]] and early flipper-era machines, where the entire playfield was a landscape of risk: every hole was a potential ending. As [[gameplayfeature:flippers]] gave players more control and game designs shifted toward keeping the ball in play longer, gobble holes largely disappeared from mainstream pinball, surviving primarily in novelty games and as historical curiosities."
   },
   {
     "slug": "kickback",
@@ -75,13 +75,13 @@
     "slug": "magna-save",
     "name": "Magna-Save",
     "display_order": 13,
-    "description": "A patented Williams mechanism that uses an electromagnet beneath the playfield to grab and hold a steel ball as it rolls toward the outlane. The player activates the magnet by pressing a dedicated button — separate from the flipper buttons — at precisely the right moment. If the timing is correct, the ball sticks to the playfield surface long enough for gravity to pull it back toward the flippers. Magna-Save was introduced on *Black Knight* in 1980 and appeared on a handful of subsequent Williams titles. It remains one of pinball's most dramatic save mechanics: a physical intervention that feels like cheating the laws of physics."
+    "description": "A patented [[manufacturer:williams]] mechanism that uses an electromagnet beneath the playfield to grab and hold a steel ball as it rolls toward the outlane. The player activates the magnet by pressing a dedicated button — separate from the [[gameplayfeature:flippers]] buttons — at precisely the right moment. If the timing is correct, the ball sticks to the playfield surface long enough for gravity to pull it back toward the flippers. Magna-Save was introduced on *[[title:black-knight]]* in 1980 and appeared on a handful of subsequent [[manufacturer:williams]] titles. It remains one of pinball's most dramatic save mechanics: a physical intervention that feels like cheating the laws of physics."
   },
   {
     "slug": "ball-save",
     "name": "Ball Save",
     "display_order": 14,
-    "description": "A timed grace period at the beginning of each ball — or after certain events — during which a drained ball is automatically returned to the plunger lane for another try. Ball save is the modern, software-controlled descendant of the mechanical kickback: invisible, automatic, and temporary. It protects players against the frustration of a drain on the first shot and ensures that every ball gets a fair chance to reach the flippers. The feature became standard on WPC-era machines in the early 1990s and is now virtually universal on new titles."
+    "description": "A timed grace period at the beginning of each ball — or after certain events — during which a drained ball is automatically returned to the plunger lane for another try. Ball save is the modern, software-controlled descendant of the mechanical [[gameplayfeature:kickback]]: invisible, automatic, and temporary. It protects players against the frustration of a drain on the first shot and ensures that every ball gets a fair chance to reach the [[gameplayfeature:flippers]]. The feature became standard on WPC-era machines in the early 1990s and is now virtually universal on new titles."
   },
   {
     "slug": "skill-shot",
@@ -93,30 +93,30 @@
     "slug": "multi-level-playfield",
     "name": "Multi-Level Playfield",
     "display_order": 16,
-    "description": "A playfield design incorporating two or more distinct playing levels stacked vertically, each with its own features, targets, and sometimes its own set of flippers. Williams' *Black Knight* (1980) introduced the concept with an upper playfield accessible via a ramp, and the design became a hallmark of ambitious games that wanted to pack more features into a standard-width cabinet. Multi-level playfields add physical depth and shot variety, creating distinct zones of play that the ball transitions between — though they also increase manufacturing complexity and can make the lower playfield feel cramped."
+    "description": "A playfield design incorporating two or more distinct playing levels stacked vertically, each with its own features, targets, and sometimes its own set of [[gameplayfeature:flippers]]. [[manufacturer:williams]]' *[[title:black-knight]]* (1980) introduced the concept with an upper playfield accessible via a ramp, and the design became a hallmark of ambitious games that wanted to pack more features into a standard-width cabinet. Multi-level playfields add physical depth and shot variety, creating distinct zones of play that the ball transitions between — though they also increase manufacturing complexity and can make the lower playfield feel cramped."
   },
   {
     "slug": "magnets",
     "name": "Magnets",
     "display_order": 17,
-    "description": "Electromagnets mounted beneath the playfield surface that can grab, slow, deflect, or redirect the ball during play. Unlike Magna-Save, which is player-activated, playfield magnets are typically software-controlled — the game decides when to energize them, creating unpredictable ball movement that no amount of player skill can fully anticipate. Williams' *Twilight Zone* (1993) used magnets to spectacular effect, and the mechanism has since become a standard tool in the designer's kit for creating moments of surprise, challenge, and controlled chaos."
+    "description": "Electromagnets mounted beneath the playfield surface that can grab, slow, deflect, or redirect the ball during play. Unlike [[gameplayfeature:magna-save]], which is player-activated, playfield magnets are typically software-controlled — the game decides when to energize them, creating unpredictable ball movement that no amount of player skill can fully anticipate. [[manufacturer:williams]]' *[[title:twilight-zone]]* (1993) used magnets to spectacular effect, and the mechanism has since become a standard tool in the designer's kit for creating moments of surprise, challenge, and controlled chaos."
   },
   {
     "slug": "replay",
     "name": "Replay",
     "display_order": 18,
-    "description": "A free game awarded to the player for exceeding a score threshold, completing a specific in-game objective, or winning a match at the end of the game. The replay is the coin-operated amusement industry's fundamental reward: play well enough and you earn another game without inserting another coin. Replay thresholds could be set by the operator to control how frequently free games were awarded, balancing player satisfaction against revenue. In jurisdictions where replays were legally classified as gambling, manufacturers offered add-a-ball as an alternative reward system."
+    "description": "A free game awarded to the player for exceeding a score threshold, completing a specific in-game objective, or winning a match at the end of the game. The replay is the coin-operated amusement industry's fundamental reward: play well enough and you earn another game without inserting another coin. Replay thresholds could be set by the operator to control how frequently free games were awarded, balancing player satisfaction against revenue. In jurisdictions where replays were legally classified as gambling, manufacturers offered [[gameplayfeature:add-a-ball]] as an alternative reward system."
   },
   {
     "slug": "add-a-ball",
     "name": "Add-a-Ball",
     "display_order": 19,
-    "description": "An alternative reward system in which the player earns an additional ball of play rather than a free game. Add-a-ball emerged as a response to local regulations that classified replay awards as gambling: if the machine never awarded a free game, it could not be considered a gambling device. The distinction was legally significant — it determined whether a machine could be placed on location in a given jurisdiction. Machines configured for add-a-ball play typically displayed different artwork and messaging to make the distinction clear to both players and regulators."
+    "description": "An alternative reward system in which the player earns an additional ball of play rather than a free game. Add-a-ball emerged as a response to local regulations that classified [[gameplayfeature:replay]] awards as gambling: if the machine never awarded a free game, it could not be considered a gambling device. The distinction was legally significant — it determined whether a machine could be placed on location in a given jurisdiction. Machines configured for add-a-ball play typically displayed different artwork and messaging to make the distinction clear to both players and regulators."
   },
   {
     "slug": "head-to-head",
     "name": "Head-to-Head",
     "display_order": 20,
-    "description": "A game configuration in which two players compete simultaneously on the same machine, each controlling their own set of flippers on opposite ends of the playfield. Head-to-head machines are rare — the standard pinball format is turn-based, with players alternating balls on a single playfield. True simultaneous head-to-head play requires a symmetrical or dual playfield design and a scoring system that can track two players in real time. The format has appeared periodically as a novelty, most notably in machines designed specifically for competitive or tournament play."
+    "description": "A game configuration in which two players compete simultaneously on the same machine, each controlling their own set of [[gameplayfeature:flippers]] on opposite ends of the playfield. Head-to-head machines are rare — the standard pinball format is turn-based, with players alternating balls on a single playfield. True simultaneous head-to-head play requires a symmetrical or dual playfield design and a scoring system that can track two players in real time. The format has appeared periodically as a novelty, most notably in machines designed specifically for competitive or tournament play."
   }
 ]
