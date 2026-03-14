@@ -134,6 +134,7 @@ TAXONOMY_MODELS: list[tuple[type, dict[str, str]]] = [
     (CreditRole, TAXONOMY_DIRECT_FIELDS),
     (Franchise, FRANCHISE_DIRECT_FIELDS),
     (Series, SERIES_DIRECT_FIELDS),
+    (System, SYSTEM_DIRECT_FIELDS),
 ]
 
 

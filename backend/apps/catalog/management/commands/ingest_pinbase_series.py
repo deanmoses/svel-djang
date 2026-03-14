@@ -13,9 +13,11 @@ import json
 import logging
 from pathlib import Path
 
+from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand, CommandError
 
 from apps.catalog.models import Credit, CreditRole, Person, Series
+from apps.provenance.models import Claim, Source
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +75,39 @@ class Command(BaseCommand):
         self.stdout.write(
             f"  Series: {series_created} created, {series_updated} updated"
         )
+
+        # Assert claims for name and description.
+        source, _ = Source.objects.get_or_create(
+            slug="pinbase",
+            defaults={
+                "name": "Pinbase",
+                "source_type": Source.SourceType.EDITORIAL,
+                "priority": 300,
+                "description": "Pinbase curated data.",
+            },
+        )
+        ct_id = ContentType.objects.get_for_model(Series).pk
+
+        pending_claims: list[Claim] = []
+        for obj, entry in zip(objs, series_entries):
+            for field in ("name", "description"):
+                value = entry.get(field, "")
+                if value:
+                    pending_claims.append(
+                        Claim(
+                            content_type_id=ct_id,
+                            object_id=obj.pk,
+                            field_name=field,
+                            value=value,
+                        )
+                    )
+
+        if pending_claims:
+            claim_stats = Claim.objects.bulk_assert_claims(source, pending_claims)
+            self.stdout.write(
+                f"  Claims: {claim_stats['created']} created, "
+                f"{claim_stats['unchanged']} unchanged"
+            )
 
         # Seed series-level design credits.
         with open(credits_path) as f:

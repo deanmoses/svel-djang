@@ -1,7 +1,7 @@
 """Seed all taxonomy models from data/*.json files.
 
-Creates records and asserts claims for claim-controlled fields (name, display_order)
-via the "pinbase" source. Description is set directly as editorial content.
+Creates records and asserts claims for claim-controlled fields (name, display_order,
+description) via the "pinbase" source.
 
 Replaces the old ingest_machine_types_seed and ingest_display_types_seed commands.
 """
@@ -115,8 +115,9 @@ class Command(BaseCommand):
             _, parent_model, _ = parent_config
             parent_lookup = {p.slug: p for p in parent_model.objects.all()}
 
-        # Build model instances from JSON.
+        # Build model instances from JSON, tracking entries that survive filtering.
         objs = []
+        entries_used = []
         for entry in data:
             slug = entry["slug"]
             name_value = entry[name_key]
@@ -146,6 +147,7 @@ class Command(BaseCommand):
                 kwargs[fk_field] = parent_obj
 
             objs.append(model_class(**kwargs))
+            entries_used.append(entry)
 
         # Bulk upsert: single INSERT ... ON CONFLICT DO UPDATE.
         update_fields = ["name", "description"]
@@ -164,7 +166,7 @@ class Command(BaseCommand):
 
         # Assert claims for claim-controlled fields.
         pending_claims: list[Claim] = []
-        for obj in objs:
+        for obj, entry in zip(objs, entries_used):
             pending_claims.append(
                 Claim(
                     content_type_id=ct.pk,
@@ -183,6 +185,18 @@ class Command(BaseCommand):
                         field_name="display_order",
                         claim_key="display_order",
                         value=obj.display_order,
+                        citation="",
+                    )
+                )
+            description = entry.get("description", "")
+            if description:
+                pending_claims.append(
+                    Claim(
+                        content_type_id=ct.pk,
+                        object_id=obj.pk,
+                        field_name="description",
+                        claim_key="description",
+                        value=description,
                         citation="",
                     )
                 )
