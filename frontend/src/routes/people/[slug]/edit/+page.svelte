@@ -10,7 +10,7 @@
 	function personToFormFields(p: typeof person) {
 		return {
 			name: p.name,
-			bio: p.bio,
+			description: p.description,
 			nationality: p.nationality ?? '',
 			birth_year: p.birth_year ?? '',
 			birth_month: p.birth_month ?? '',
@@ -175,8 +175,8 @@
 			</div>
 
 			<div class="field-group">
-				<label for="ef-bio">Bio</label>
-				<textarea id="ef-bio" rows="8" bind:value={editFields.bio}></textarea>
+				<label for="ef-description">Bio</label>
+				<textarea id="ef-description" rows="8" bind:value={editFields.description}></textarea>
 			</div>
 
 			<div class="form-actions">

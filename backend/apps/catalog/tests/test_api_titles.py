@@ -29,7 +29,7 @@ class TestTitlesAPI:
             manufacturer=manufacturer,
             year=1997,
             title=title,
-            extra_data={"images": SAMPLE_IMAGES},
+            extra_data={"opdb.images": SAMPLE_IMAGES},
         )
         MachineModel.objects.create(
             name="Medieval Madness (Remake)",

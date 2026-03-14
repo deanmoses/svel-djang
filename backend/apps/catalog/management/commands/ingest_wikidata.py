@@ -248,7 +248,7 @@ def _collect_person_claims(
     add("name", wp.name)
 
     if wp.description:
-        add("bio", wp.description)
+        add("wikidata.description", wp.description)
 
     birth_year, birth_month, birth_day = parse_wikidata_date(
         wp.birth_date, wp.birth_precision

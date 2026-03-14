@@ -186,7 +186,7 @@ def _collect_manufacturer_claims(
             )
 
     if wm.description:
-        add("description", wm.description)
+        add("wikidata.description", wm.description)
     add("founded_year", wm.founded_year)
     add("dissolved_year", wm.dissolved_year)
     add("country", wm.country)

@@ -95,7 +95,7 @@ class TestModelsAPI:
         MachineModel.objects.create(
             name="With Image",
             manufacturer=manufacturer,
-            extra_data={"images": SAMPLE_IMAGES},
+            extra_data={"opdb.images": SAMPLE_IMAGES},
         )
         resp = client.get("/api/models/")
         data = resp.json()
@@ -125,7 +125,7 @@ class TestModelsAPI:
         pm = MachineModel.objects.create(
             name="With Image",
             manufacturer=manufacturer,
-            extra_data={"images": SAMPLE_IMAGES},
+            extra_data={"opdb.images": SAMPLE_IMAGES},
         )
         resp = client.get(f"/api/models/{pm.slug}")
         data = resp.json()
@@ -142,7 +142,7 @@ class TestModelsAPI:
         pm = MachineModel.objects.create(
             name="With Features",
             manufacturer=manufacturer,
-            extra_data={"variant_features": ["Castle attack", "Gold trim"]},
+            extra_data={"opdb.variant_features": ["Castle attack", "Gold trim"]},
         )
         resp = client.get(f"/api/models/{pm.slug}")
         data = resp.json()
@@ -152,7 +152,7 @@ class TestModelsAPI:
         MachineModel.objects.create(
             name="Medieval Madness (LE)",
             variant_of=machine_model,
-            extra_data={"variant_features": ["Gold trim"]},
+            extra_data={"opdb.variant_features": ["Gold trim"]},
         )
         resp = client.get(f"/api/models/{machine_model.slug}")
         data = resp.json()

@@ -42,6 +42,9 @@ class Manufacturer(Linkable, TimeStampedModel):
     logo_url = models.URLField(null=True, blank=True)
     website = models.URLField(blank=True)
 
+    # Catch-all for fields without dedicated columns (e.g. fandom.description)
+    extra_data = models.JSONField(default=dict, blank=True)
+
     claims = GenericRelation("provenance.Claim")
 
     class Meta:
@@ -70,6 +73,7 @@ class CorporateEntity(TimeStampedModel):
         on_delete=models.CASCADE,
         related_name="entities",
     )
+    description = MarkdownField(blank=True)
     name = models.CharField(
         max_length=300,
         help_text='Full corporate name, e.g., "D. Gottlieb & Company"',

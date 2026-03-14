@@ -168,7 +168,7 @@ class TestPatchPersonClaimsAuth:
     def test_anonymous_gets_401(self, client, person):
         resp = client.patch(
             f"/api/people/{person.slug}/claims/",
-            data='{"fields": {"bio": "A great designer."}}',
+            data='{"fields": {"description": "A great designer."}}',
             content_type="application/json",
         )
         assert resp.status_code in (401, 403)
@@ -177,7 +177,7 @@ class TestPatchPersonClaimsAuth:
         client.force_login(user)
         resp = client.patch(
             f"/api/people/{person.slug}/claims/",
-            data='{"fields": {"bio": "A great designer."}}',
+            data='{"fields": {"description": "A great designer."}}',
             content_type="application/json",
         )
         assert resp.status_code == 200
@@ -198,7 +198,7 @@ class TestPatchPersonClaimsValidation:
         client.force_login(user)
         resp = client.patch(
             "/api/people/does-not-exist/claims/",
-            data='{"fields": {"bio": "x"}}',
+            data='{"fields": {"description": "x"}}',
             content_type="application/json",
         )
         assert resp.status_code == 404
@@ -207,7 +207,7 @@ class TestPatchPersonClaimsValidation:
         client.force_login(user)
         resp = client.patch(
             f"/api/people/{person.slug}/claims/",
-            data='{"fields": {"bio": "Worked on [[system:nope]]."}}',
+            data='{"fields": {"description": "Worked on [[system:nope]]."}}',
             content_type="application/json",
         )
         assert resp.status_code == 422
@@ -220,34 +220,35 @@ class TestPatchPersonClaimsPersistence:
         client.force_login(user)
         client.patch(
             f"/api/people/{person.slug}/claims/",
-            data='{"fields": {"bio": "A great designer."}}',
+            data='{"fields": {"description": "A great designer."}}',
             content_type="application/json",
         )
-        claim = person.claims.get(user=user, field_name="bio", is_active=True)
+        claim = person.claims.get(user=user, field_name="description", is_active=True)
         assert claim.value == "A great designer."
 
     def test_model_resolved_and_returned(self, client, user, person):
         client.force_login(user)
         resp = client.patch(
             f"/api/people/{person.slug}/claims/",
-            data='{"fields": {"bio": "A great designer.", "name": "Pat Lawlor"}}',
+            data='{"fields": {"description": "A great designer.", "name": "Pat Lawlor"}}',
             content_type="application/json",
         )
         data = resp.json()
-        assert data["bio"] == "A great designer."
+        assert data["description"] == "A great designer."
         assert data["name"] == "Pat Lawlor"
         person.refresh_from_db()
-        assert person.bio == "A great designer."
+        assert person.description == "A great designer."
 
     def test_response_includes_activity(self, client, user, person):
         client.force_login(user)
         resp = client.patch(
             f"/api/people/{person.slug}/claims/",
-            data='{"fields": {"bio": "Short bio."}}',
+            data='{"fields": {"description": "Short bio."}}',
             content_type="application/json",
         )
         data = resp.json()
         assert "activity" in data
         assert any(
-            c["field_name"] == "bio" and c["is_winner"] for c in data["activity"]
+            c["field_name"] == "description" and c["is_winner"]
+            for c in data["activity"]
         )

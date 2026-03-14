@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 # Maps field_name (as stored in Claim.field_name) → model attribute name.
 DIRECT_FIELDS: dict[str, str] = {
     "name": "name",
+    "description": "description",
     "year": "year",
     "month": "month",
     "player_count": "player_count",

@@ -61,7 +61,7 @@ def _extract_image_urls(extra_data: dict) -> tuple[str | None, str | None]:
     to IPDB flat URL list (same URL used for both thumbnail and hero).
     """
     # Try OPDB structured images first (have size variants).
-    images = extra_data.get("images")
+    images = extra_data.get("opdb.images")
     if images and isinstance(images, list):
         img = None
         for candidate in images:
@@ -78,7 +78,7 @@ def _extract_image_urls(extra_data: dict) -> tuple[str | None, str | None]:
                 return thumbnail, hero
 
     # Fall back to IPDB flat URL list.
-    image_urls = extra_data.get("image_urls")
+    image_urls = extra_data.get("ipdb.image_urls")
     if image_urls and isinstance(image_urls, list):
         first = image_urls[0]
         if isinstance(first, str) and first:
@@ -89,7 +89,7 @@ def _extract_image_urls(extra_data: dict) -> tuple[str | None, str | None]:
 
 def _extract_variant_features(extra_data: dict) -> list[str]:
     """Return variant feature list from extra_data variant_features claim."""
-    features = extra_data.get("variant_features")
+    features = extra_data.get("opdb.variant_features")
     if not features or not isinstance(features, list):
         return []
     return [str(f) for f in features]

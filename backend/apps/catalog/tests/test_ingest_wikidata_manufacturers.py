@@ -70,7 +70,7 @@ class TestIngestWikidataManufacturers:
         active = mfr.claims.filter(source=source, is_active=True)
         field_names = set(active.values_list("field_name", flat=True))
         assert field_names >= {
-            "description",
+            "wikidata.description",
             "founded_year",
             "dissolved_year",
             "country",
@@ -79,11 +79,11 @@ class TestIngestWikidataManufacturers:
             "website",
         }
 
-    def test_resolved_description(self):
+    def test_resolved_description_in_extra_data(self):
         mfr = Manufacturer.objects.get(name="Williams")
         mfr.refresh_from_db()
         assert (
-            mfr.description
+            mfr.extra_data.get("wikidata.description")
             == "American manufacturer of pinball machines and arcade games"
         )
 
@@ -125,7 +125,7 @@ class TestIngestWikidataManufacturers:
         source = Source.objects.get(slug="wikidata")
         mfr = Manufacturer.objects.get(name="Williams")
         desc_claims = mfr.claims.filter(
-            source=source, field_name="description", is_active=True
+            source=source, field_name="wikidata.description", is_active=True
         )
         assert desc_claims.count() == 1
 

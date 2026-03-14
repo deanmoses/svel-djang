@@ -68,7 +68,9 @@ class TestIngestWikidata:
     def test_bio_claim_asserted(self):
         person = Person.objects.get(name="Steve Ritchie")
         source = Source.objects.get(slug="wikidata")
-        claim = person.claims.get(source=source, field_name="bio", is_active=True)
+        claim = person.claims.get(
+            source=source, field_name="wikidata.description", is_active=True
+        )
         assert claim.value == "American pinball machine designer"
         assert claim.citation == "https://www.wikidata.org/wiki/Q312897"
 
@@ -135,7 +137,10 @@ class TestIngestWikidata:
         """resolve_person() should have applied claims to model fields."""
         person = Person.objects.get(name="Steve Ritchie")
         person.refresh_from_db()
-        assert person.bio == "American pinball machine designer"
+        assert (
+            person.extra_data.get("wikidata.description")
+            == "American pinball machine designer"
+        )
         assert person.birth_year == 1951
         assert person.birth_month == 10
         assert person.birth_day == 15
@@ -149,7 +154,7 @@ class TestIngestWikidata:
         source = Source.objects.get(slug="wikidata")
         steve = Person.objects.get(name="Steve Ritchie")
         bio_claims = steve.claims.filter(
-            source=source, field_name="bio", is_active=True
+            source=source, field_name="wikidata.description", is_active=True
         )
         assert bio_claims.count() == 1
 

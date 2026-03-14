@@ -18,7 +18,7 @@ class Person(Linkable, TimeStampedModel):
 
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
-    bio = MarkdownField(blank=True)
+    description = MarkdownField(blank=True)
 
     # Wikidata cross-reference — direct field, not a claim
     wikidata_id = models.CharField(
@@ -42,6 +42,9 @@ class Person(Linkable, TimeStampedModel):
     birth_place = models.CharField(max_length=200, null=True, blank=True)
     nationality = models.CharField(max_length=200, null=True, blank=True)
     photo_url = models.URLField(null=True, blank=True)
+
+    # Catch-all for fields without dedicated columns (e.g. fandom.bio)
+    extra_data = models.JSONField(default=dict, blank=True)
 
     claims = GenericRelation("provenance.Claim")
 

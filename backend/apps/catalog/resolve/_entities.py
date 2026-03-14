@@ -70,7 +70,7 @@ MANUFACTURER_DIRECT_FIELDS: dict[str, str] = {
 
 PERSON_DIRECT_FIELDS: dict[str, str] = {
     "name": "name",
-    "bio": "bio",
+    "description": "description",
     "birth_year": "birth_year",
     "birth_month": "birth_month",
     "birth_day": "birth_day",
@@ -94,6 +94,7 @@ THEME_DIRECT_FIELDS: dict[str, str] = {
 
 CORPORATE_ENTITY_DIRECT_FIELDS: dict[str, str] = {
     "name": "name",
+    "description": "description",
     "years_active": "years_active",
 }
 
@@ -181,10 +182,16 @@ def _resolve_single(
         setattr(obj, attr, default)
 
     # Apply winners.
+    has_extra_data = hasattr(obj, "extra_data")
+    extra_data: dict = {} if has_extra_data else None
     for field_name, claim in winners.items():
         if field_name in direct_fields:
             attr = direct_fields[field_name]
             setattr(obj, attr, _coerce(type(obj), attr, claim.value))
+        elif has_extra_data:
+            extra_data[field_name] = claim.value
+    if has_extra_data:
+        obj.extra_data = extra_data
 
 
 # ------------------------------------------------------------------
@@ -261,6 +268,9 @@ def _resolve_bulk(
         for fk_field, _lookup in fk_handlers.values():
             fk_update_fields.append(f"{fk_field}_id")
 
+    # Check if model has extra_data field for unmatched claims.
+    has_extra_data = hasattr(model_class, "extra_data")
+
     # 4. Resolve each object in memory.
     now = timezone.now()
     for obj in all_objs:
@@ -276,6 +286,7 @@ def _resolve_bulk(
                 setattr(obj, fk_field, None)
 
         # Apply winners.
+        extra_data: dict = {} if has_extra_data else None
         for field_name, claim in winners.items():
             if field_name in direct_fields:
                 attr = direct_fields[field_name]
@@ -293,6 +304,10 @@ def _resolve_bulk(
                             field_name,
                             claim.value,
                         )
+            elif has_extra_data:
+                extra_data[field_name] = claim.value
+        if has_extra_data:
+            obj.extra_data = extra_data
 
         obj.updated_at = now
 
@@ -300,6 +315,8 @@ def _resolve_bulk(
     update_fields = (
         list(set(direct_fields.values())) + fk_update_fields + ["updated_at"]
     )
+    if has_extra_data:
+        update_fields.append("extra_data")
     model_class.objects.bulk_update(all_objs, update_fields, batch_size=100)
 
     # Sync markdown backlinks (RecordReference) for bulk-resolved objects.

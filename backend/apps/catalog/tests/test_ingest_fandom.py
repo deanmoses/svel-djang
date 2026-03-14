@@ -335,10 +335,10 @@ class TestIngestFandomPersons:
             from_dump_manufacturers=MANUFACTURERS_SAMPLE,
         )
         pat = Person.objects.get(name="Pat Lawlor")
-        assert Claim.objects.filter(object_id=pat.pk, field_name="bio").exists()
+        assert Claim.objects.filter(object_id=pat.pk, field_name="fandom.bio").exists()
 
-    def test_bio_resolved_into_person_field(self, _seed_persons_db):
-        """resolve_person() should populate Person.bio from the Fandom claim."""
+    def test_bio_resolved_into_extra_data(self, _seed_persons_db):
+        """resolve_person() should populate Person.extra_data from the Fandom claim."""
         call_command(
             "ingest_fandom",
             from_dump=SAMPLE,
@@ -346,7 +346,7 @@ class TestIngestFandomPersons:
             from_dump_manufacturers=MANUFACTURERS_SAMPLE,
         )
         pat = Person.objects.get(name="Pat Lawlor")
-        assert pat.bio != ""
+        assert pat.extra_data.get("fandom.bio", "") != ""
 
     def test_idempotent_persons(self, _seed_persons_db):
         """Running twice must not duplicate persons or claims."""

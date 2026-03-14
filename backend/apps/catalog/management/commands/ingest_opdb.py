@@ -718,16 +718,21 @@ class Command(BaseCommand):
         # OPDB 'features' are variant labels (LE, SE, shaker motor etc.) — stored
         # as 'variant_features' to avoid future confusion with gameplay features.
         if rec.features:
-            _add("variant_features", rec.features)
+            _add("opdb.variant_features", rec.features)
 
         # variant_of: determined by Phase 1d classification, passed explicitly.
         if variant_of_slug:
             _add("variant_of", variant_of_slug)
 
-        for field_name in ("keywords", "description", "common_name", "images"):
-            value = getattr(rec, field_name)
+        for attr, claim_field in (
+            ("keywords", "opdb.keywords"),
+            ("description", "opdb.description"),
+            ("common_name", "opdb.common_name"),
+            ("images", "opdb.images"),
+        ):
+            value = getattr(rec, attr)
             if value:
-                _add(field_name, value)
+                _add(claim_field, value)
 
         # Shortname becomes a relationship claim for abbreviations.
         if rec.shortname:

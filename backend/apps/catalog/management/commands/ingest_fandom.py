@@ -356,7 +356,7 @@ class Command(BaseCommand):
                     Claim(
                         content_type_id=person_ct_id,
                         object_id=person.pk,
-                        field_name="bio",
+                        field_name="fandom.bio",
                         value=fp.bio,
                         citation=fp.citation_url,
                     )
@@ -517,7 +517,7 @@ def _collect_manufacturer_claims(
     # Include name so that resolve_manufacturer() does not reset the name field
     # (it resets all resolvable fields before applying winning claims).
     add("name", fm.title)
-    add("description", fm.description)
+    add("fandom.description", fm.description)
     add("founded_year", fm.founded_year)
     add("dissolved_year", fm.dissolved_year)
     add("headquarters", fm.headquarters)

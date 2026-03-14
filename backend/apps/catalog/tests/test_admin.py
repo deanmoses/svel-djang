@@ -128,7 +128,7 @@ class TestPersonAdminClaims:
         person.name = "Steve Ritchie Jr."
 
         pa = PersonAdmin(Person, AdminSite())
-        form = _MockForm(["name"], {"name": "Steve Ritchie Jr.", "bio": ""})
+        form = _MockForm(["name"], {"name": "Steve Ritchie Jr.", "description": ""})
         pa.save_model(admin_request, person, form, change=True)
 
         claim = Claim.objects.get(
@@ -141,16 +141,18 @@ class TestPersonAdminClaims:
 
     def test_changed_bio_asserts_claim(self, admin_request):
         person = Person.objects.create(name="Pat Lawlor")
-        person.bio = "Prolific designer."
+        person.description = "Prolific designer."
 
         pa = PersonAdmin(Person, AdminSite())
-        form = _MockForm(["bio"], {"name": "Pat Lawlor", "bio": "Prolific designer."})
+        form = _MockForm(
+            ["description"], {"name": "Pat Lawlor", "description": "Prolific designer."}
+        )
         pa.save_model(admin_request, person, form, change=True)
 
         claim = Claim.objects.get(
             content_type__model="person",
             object_id=person.pk,
-            field_name="bio",
+            field_name="description",
             is_active=True,
         )
         assert claim.value == "Prolific designer."

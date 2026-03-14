@@ -84,26 +84,30 @@ class TestResolveManufacturer:
 class TestResolvePerson:
     def test_basic_resolution(self, person, ipdb):
         Claim.objects.assert_claim(person, "name", "Pat Lawlor", source=ipdb)
-        Claim.objects.assert_claim(person, "bio", "Designer of TAF.", source=ipdb)
+        Claim.objects.assert_claim(
+            person, "description", "Designer of TAF.", source=ipdb
+        )
 
         resolved = resolve_person(person)
         assert resolved.name == "Pat Lawlor"
-        assert resolved.bio == "Designer of TAF."
+        assert resolved.description == "Designer of TAF."
 
     def test_higher_priority_wins(self, person, ipdb, editorial):
-        Claim.objects.assert_claim(person, "bio", "Short bio.", source=ipdb)
-        Claim.objects.assert_claim(person, "bio", "Better bio.", source=editorial)
+        Claim.objects.assert_claim(person, "description", "Short bio.", source=ipdb)
+        Claim.objects.assert_claim(
+            person, "description", "Better bio.", source=editorial
+        )
 
         resolved = resolve_person(person)
-        assert resolved.bio == "Better bio."
+        assert resolved.description == "Better bio."
 
     def test_no_claims_resets_to_defaults(self, person):
         """Claims are the sole source of truth: a field with no active claim is blanked."""
-        person.bio = "Something"
+        person.description = "Something"
         person.save()
 
         resolved = resolve_person(person)
-        assert resolved.bio == ""
+        assert resolved.description == ""
 
     def test_saves_to_db(self, person, ipdb):
         Claim.objects.assert_claim(person, "name", "Steve Ritchie", source=ipdb)

@@ -5,7 +5,7 @@ from __future__ import annotations
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
-from apps.core.models import Linkable, TimeStampedModel, unique_slug
+from apps.core.models import Linkable, MarkdownField, TimeStampedModel, unique_slug
 
 __all__ = ["MachineModel", "ModelAbbreviation"]
 
@@ -63,6 +63,8 @@ class MachineModel(Linkable, TimeStampedModel):
         default=False,
         help_text="True if this machine is a conversion/retheme (resolved from claims).",
     )
+
+    description = MarkdownField(blank=True)
 
     # Core filterable fields
     manufacturer = models.ForeignKey(

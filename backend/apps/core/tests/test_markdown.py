@@ -94,17 +94,17 @@ class TestRenderMarkdownFields:
         result = render_markdown_fields(mfr)
         assert result["description_html"] == ""
 
-    def test_bio_field(self):
+    def test_person_description_field(self):
         from apps.catalog.models import Person
 
-        person = Person(name="Pat", slug="pat", bio="*italic*")
+        person = Person(name="Pat", slug="pat", description="*italic*")
         result = render_markdown_fields(person)
-        assert "bio_html" in result
-        assert "<em>italic</em>" in result["bio_html"]
+        assert "description_html" in result
+        assert "<em>italic</em>" in result["description_html"]
 
     def test_no_markdown_fields(self):
-        from apps.catalog.models import CorporateEntity
+        from apps.catalog.models import Address
 
-        entity = CorporateEntity(name="Test")
-        result = render_markdown_fields(entity)
+        addr = Address(city="Chicago")
+        result = render_markdown_fields(addr)
         assert result == {}

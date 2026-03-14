@@ -13,6 +13,8 @@ from ninja.errors import HttpError
 from ninja.pagination import PageNumberPagination, paginate
 from ninja.security import django_auth
 
+from apps.core.markdown import render_markdown_fields
+
 from ..cache import MODELS_ALL_KEY, invalidate_all
 from .constants import DEFAULT_PAGE_SIZE
 from .helpers import (
@@ -109,6 +111,8 @@ class MachineModelDetailSchema(Schema):
     pinside_id: Optional[int] = None
     ipdb_rating: Optional[float] = None
     pinside_rating: Optional[float] = None
+    description: str = ""
+    description_html: str = ""
     title_description: str = ""
     abbreviations: list[str] = []
     extra_data: dict
@@ -286,6 +290,8 @@ def _serialize_model_detail(pm) -> dict:
     return {
         "name": pm.name,
         "slug": pm.slug,
+        "description": pm.description,
+        **render_markdown_fields(pm),
         "manufacturer_name": pm.manufacturer.name if pm.manufacturer else None,
         "manufacturer_slug": pm.manufacturer.slug if pm.manufacturer else None,
         "year": pm.year,

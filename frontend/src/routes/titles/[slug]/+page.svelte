@@ -74,20 +74,6 @@
 			{/if}
 
 			{#if md}
-				{#if md.extra_data.notes}
-					<section class="prose">
-						<h2>Notes</h2>
-						<p>{md.extra_data.notes}</p>
-					</section>
-				{/if}
-
-				{#if md.extra_data.Notes}
-					<section class="prose">
-						<h2>Notes</h2>
-						<p>{md.extra_data.Notes}</p>
-					</section>
-				{/if}
-
 				<TabNav>
 					<Tab active>People</Tab>
 					{#if auth.isAuthenticated}

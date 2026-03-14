@@ -80,16 +80,17 @@ class Command(BaseCommand):
             person = persons_by_slug.get(entry["slug"])
             if not person:
                 continue
-            name = entry.get("name")
-            if name:
-                pending_claims.append(
-                    Claim(
-                        content_type_id=ct_id,
-                        object_id=person.pk,
-                        field_name="name",
-                        value=name,
+            for field in ("name", "description"):
+                value = entry.get(field, "")
+                if value:
+                    pending_claims.append(
+                        Claim(
+                            content_type_id=ct_id,
+                            object_id=person.pk,
+                            field_name=field,
+                            value=value,
+                        )
                     )
-                )
 
         if pending_claims:
             claim_stats = Claim.objects.bulk_assert_claims(source, pending_claims)

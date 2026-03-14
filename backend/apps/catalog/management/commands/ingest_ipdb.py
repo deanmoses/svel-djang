@@ -52,12 +52,12 @@ CLAIM_FIELDS = {
     "players": "player_count",
     "production_number": "production_quantity",
     "average_fun_rating": "ipdb_rating",
-    # Extra data (no dedicated column)
-    "notable_features": "notable_features",
-    "notes": "notes",
-    "toys": "toys",
-    "marketing_slogans": "marketing_slogans",
-    "model_number": "model_number",
+    # Extra data (no dedicated column) — namespaced by source
+    "notable_features": "ipdb.notable_features",
+    "notes": "ipdb.notes",
+    "toys": "ipdb.toys",
+    "marketing_slogans": "ipdb.marketing_slogans",
+    "model_number": "ipdb.model_number",
 }
 
 # IpdbRecord attribute → Credit role.
@@ -444,7 +444,7 @@ class Command(BaseCommand):
                     Claim(
                         content_type_id=ct_id,
                         object_id=pm.pk,
-                        field_name="image_urls",
+                        field_name="ipdb.image_urls",
                         value=urls,
                     )
                 )

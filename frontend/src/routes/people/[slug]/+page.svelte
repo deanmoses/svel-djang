@@ -61,9 +61,9 @@
 	</dl>
 {/if}
 
-{#if person.bio_html}
+{#if person.description_html}
 	<section class="bio">
-		<Markdown html={person.bio_html} />
+		<Markdown html={person.description_html} />
 	</section>
 {/if}
 

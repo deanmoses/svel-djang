@@ -75,20 +75,6 @@
 				</section>
 			{/if}
 
-			{#if model.extra_data.notes}
-				<section class="prose">
-					<h2>Notes</h2>
-					<p>{model.extra_data.notes}</p>
-				</section>
-			{/if}
-
-			{#if model.extra_data.Notes}
-				<section class="prose">
-					<h2>Notes</h2>
-					<p>{model.extra_data.Notes}</p>
-				</section>
-			{/if}
-
 			<TabNav>
 				<Tab active={isDetail} href={resolve(`/models/${slug}`)}>People</Tab>
 				{#if auth.isAuthenticated}

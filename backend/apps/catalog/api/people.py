@@ -47,8 +47,8 @@ class PersonTitleSchema(RelatedTitleSchema):
 class PersonDetailSchema(Schema):
     name: str
     slug: str
-    bio: str
-    bio_html: str = ""
+    description: str
+    description_html: str = ""
     birth_year: int | None = None
     birth_month: int | None = None
     birth_day: int | None = None
@@ -102,7 +102,7 @@ def _serialize_person_detail(person) -> dict:
     return {
         "name": person.name,
         "slug": person.slug,
-        "bio": person.bio,
+        "description": person.description,
         **render_markdown_fields(person),
         "birth_year": person.birth_year,
         "birth_month": person.birth_month,

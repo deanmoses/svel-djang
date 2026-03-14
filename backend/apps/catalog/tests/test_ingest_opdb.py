@@ -90,14 +90,16 @@ class TestIngestOpdbNewFields:
     def test_claims_common_name(self):
         pm = MachineModel.objects.get(opdb_id="G2222-MTest2")
         source = Source.objects.get(slug="opdb")
-        claim = pm.claims.get(source=source, field_name="common_name", is_active=True)
+        claim = pm.claims.get(
+            source=source, field_name="opdb.common_name", is_active=True
+        )
         assert claim.value == "SEG"
 
     def test_no_common_name_when_null(self):
         pm = MachineModel.objects.get(opdb_id="G1111-MTest1")
         source = Source.objects.get(slug="opdb")
         assert not pm.claims.filter(
-            source=source, field_name="common_name", is_active=True
+            source=source, field_name="opdb.common_name", is_active=True
         ).exists()
 
     def test_claims_shortname(self):
@@ -109,7 +111,7 @@ class TestIngestOpdbNewFields:
     def test_claims_images(self):
         pm = MachineModel.objects.get(opdb_id="G1111-MTest1")
         source = Source.objects.get(slug="opdb")
-        claim = pm.claims.get(source=source, field_name="images", is_active=True)
+        claim = pm.claims.get(source=source, field_name="opdb.images", is_active=True)
         assert len(claim.value) == 1
         assert claim.value[0]["type"] == "backglass"
         assert "large" in claim.value[0]["urls"]
@@ -118,7 +120,7 @@ class TestIngestOpdbNewFields:
         pm = MachineModel.objects.get(opdb_id="G2222-MTest2")
         source = Source.objects.get(slug="opdb")
         assert not pm.claims.filter(
-            source=source, field_name="images", is_active=True
+            source=source, field_name="opdb.images", is_active=True
         ).exists()
 
 
@@ -164,14 +166,14 @@ class TestIngestOpdbAliases:
         claims = variant.claims.filter(source=source, is_active=True)
         field_names = set(claims.values_list("field_name", flat=True))
         assert "name" in field_names
-        assert "variant_features" in field_names
+        assert "opdb.variant_features" in field_names
         assert "title" in field_names
 
     def test_alias_features_claim(self):
         variant = MachineModel.objects.get(opdb_id="G1111-MTest1-AAlias")
         source = Source.objects.get(slug="opdb")
         claim = variant.claims.get(
-            source=source, field_name="variant_features", is_active=True
+            source=source, field_name="opdb.variant_features", is_active=True
         )
         assert "Gold trim" in claim.value
 

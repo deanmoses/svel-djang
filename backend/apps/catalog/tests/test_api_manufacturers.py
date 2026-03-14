@@ -64,14 +64,14 @@ class TestManufacturersAPI:
         MachineModel.objects.create(
             name="No Year Game",
             manufacturer=manufacturer,
-            extra_data={"images": SAMPLE_IMAGES},
+            extra_data={"opdb.images": SAMPLE_IMAGES},
         )
         MachineModel.objects.create(
             name="Has Year Game",
             manufacturer=manufacturer,
             year=2020,
             extra_data={
-                "images": [
+                "opdb.images": [
                     {
                         "primary": True,
                         "type": "backglass",
