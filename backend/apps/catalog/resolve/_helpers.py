@@ -20,6 +20,7 @@ from ..models import (
     Manufacturer,
     System,
     TechnologyGeneration,
+    TechnologySubgeneration,
     Title,
 )
 
@@ -64,6 +65,9 @@ FK_FIELDS: dict[str, FKFieldSpec] = {
     "system": FKFieldSpec("system", System, "slug"),
     "technology_generation": FKFieldSpec(
         "technology_generation", TechnologyGeneration, "slug"
+    ),
+    "technology_subgeneration": FKFieldSpec(
+        "technology_subgeneration", TechnologySubgeneration, "slug"
     ),
     "display_type": FKFieldSpec("display_type", DisplayType, "slug"),
     "display_subtype": FKFieldSpec("display_subtype", DisplaySubtype, "slug"),

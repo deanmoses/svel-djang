@@ -458,6 +458,7 @@ class MachineModelAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
         "converted_from",
         "system",
         "technology_generation",
+        "technology_subgeneration",
         "display_type",
         "display_subtype",
         "cabinet",
@@ -493,6 +494,7 @@ class MachineModelAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
             {
                 "fields": (
                     "technology_generation",
+                    "technology_subgeneration",
                     "display_type",
                     "display_subtype",
                     "cabinet",

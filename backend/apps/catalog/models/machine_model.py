@@ -84,6 +84,14 @@ class MachineModel(Linkable, TimeStampedModel):
         blank=True,
         help_text="Technology generation (resolved from claims).",
     )
+    technology_subgeneration = models.ForeignKey(
+        "TechnologySubgeneration",
+        on_delete=models.SET_NULL,
+        related_name="machine_models",
+        null=True,
+        blank=True,
+        help_text="Technology subgeneration (resolved from claims).",
+    )
     display_type = models.ForeignKey(
         "DisplayType",
         on_delete=models.SET_NULL,

@@ -98,6 +98,8 @@ class MachineModelDetailSchema(Schema):
     month: Optional[int] = None
     technology_generation_name: Optional[str] = None
     technology_generation_slug: Optional[str] = None
+    technology_subgeneration_name: Optional[str] = None
+    technology_subgeneration_slug: Optional[str] = None
     display_type_name: Optional[str] = None
     display_type_slug: Optional[str] = None
     player_count: Optional[int] = None
@@ -153,9 +155,13 @@ class MachineModelDetailSchema(Schema):
 def _build_model_list_qs(
     manufacturer: str = "",
     type: str = "",
+    subgeneration: str = "",
     display: str = "",
+    display_subtype: str = "",
     feature: str = "",
     game_format: str = "",
+    cabinet: str = "",
+    tag: str = "",
     year_min: int | None = None,
     year_max: int | None = None,
     person: str = "",
@@ -175,12 +181,20 @@ def _build_model_list_qs(
         qs = qs.filter(manufacturer__slug=manufacturer)
     if type:
         qs = qs.filter(technology_generation__slug=type)
+    if subgeneration:
+        qs = qs.filter(technology_subgeneration__slug=subgeneration)
     if display:
         qs = qs.filter(display_type__slug=display)
+    if display_subtype:
+        qs = qs.filter(display_subtype__slug=display_subtype)
     if feature:
         qs = qs.filter(gameplay_features__slug=feature)
     if game_format:
         qs = qs.filter(game_format__slug=game_format)
+    if cabinet:
+        qs = qs.filter(cabinet__slug=cabinet)
+    if tag:
+        qs = qs.filter(tags__slug=tag)
     if year_min is not None:
         qs = qs.filter(year__gte=year_min)
     if year_max is not None:
@@ -221,6 +235,7 @@ def _serialize_model_list(pm) -> dict:
         "display_type_name": pm.display_type.name if pm.display_type else None,
         "display_type_slug": pm.display_type.slug if pm.display_type else None,
         "ipdb_id": pm.ipdb_id,
+        # Note: technology_subgeneration not included in list view
         "ipdb_rating": float(pm.ipdb_rating) if pm.ipdb_rating is not None else None,
         "pinside_rating": float(pm.pinside_rating)
         if pm.pinside_rating is not None
@@ -308,6 +323,12 @@ def _serialize_model_detail(pm) -> dict:
         "technology_generation_slug": (
             pm.technology_generation.slug if pm.technology_generation else None
         ),
+        "technology_subgeneration_name": (
+            pm.technology_subgeneration.name if pm.technology_subgeneration else None
+        ),
+        "technology_subgeneration_slug": (
+            pm.technology_subgeneration.slug if pm.technology_subgeneration else None
+        ),
         "display_type_name": pm.display_type.name if pm.display_type else None,
         "display_type_slug": pm.display_type.slug if pm.display_type else None,
         "player_count": pm.player_count,
@@ -386,6 +407,7 @@ def _model_detail_qs():
         "title__franchise",
         "system",
         "technology_generation",
+        "technology_subgeneration",
         "display_type",
         "display_subtype",
         "cabinet",
@@ -430,9 +452,13 @@ def list_models(
     request,
     manufacturer: str = "",
     type: str = "",
+    subgeneration: str = "",
     display: str = "",
+    display_subtype: str = "",
     feature: str = "",
     game_format: str = "",
+    cabinet: str = "",
+    tag: str = "",
     year_min: int | None = None,
     year_max: int | None = None,
     person: str = "",
@@ -441,9 +467,13 @@ def list_models(
     qs = _build_model_list_qs(
         manufacturer=manufacturer,
         type=type,
+        subgeneration=subgeneration,
         display=display,
+        display_subtype=display_subtype,
         feature=feature,
         game_format=game_format,
+        cabinet=cabinet,
+        tag=tag,
         year_min=year_min,
         year_max=year_max,
         person=person,
@@ -556,6 +586,7 @@ def list_all_models(request):
         MachineModel.objects.select_related(
             "manufacturer",
             "technology_generation",
+            "technology_subgeneration",
             "display_type",
             "title",
             "system",
