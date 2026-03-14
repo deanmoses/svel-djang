@@ -5,18 +5,20 @@ from __future__ import annotations
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
-from apps.core.models import TimeStampedModel, unique_slug
+from apps.core.models import Linkable, MarkdownField, TimeStampedModel, unique_slug
 
 __all__ = ["Manufacturer", "CorporateEntity", "Address"]
 
 
-class Manufacturer(TimeStampedModel):
+class Manufacturer(Linkable, TimeStampedModel):
     """A pinball machine brand (user-facing grouping).
 
     Corporate incarnations are tracked separately in ManufacturerEntity.
     For example, "Gottlieb" is one Manufacturer with four ManufacturerEntity
     records spanning different ownership eras.
     """
+
+    link_url_pattern = "/manufacturers/{slug}"
 
     name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
@@ -32,7 +34,7 @@ class Manufacturer(TimeStampedModel):
         blank=True,
         help_text="Wikidata QID, e.g. Q180268",
     )
-    description = models.TextField(blank=True)
+    description = MarkdownField(blank=True)
     founded_year = models.IntegerField(null=True, blank=True)
     dissolved_year = models.IntegerField(null=True, blank=True)
     country = models.CharField(max_length=200, null=True, blank=True)

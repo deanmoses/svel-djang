@@ -146,9 +146,15 @@ Pre-commit hooks auto-regenerate `CLAUDE.md` and `AGENTS.md` when `docs/AGENTS.s
 
 Single Railway service: Django/Gunicorn serves both the API and the static SvelteKit frontend (no Node.js at runtime). Multi-stage Dockerfile builds the frontend with Node/pnpm, then copies output into the Python image. WhiteNoise serves static assets; a Django catch-all view serves prerendered pages or falls back to `index.html` for SPA routing. See [docs/Hosting.md](Hosting.md) for setup and troubleshooting.
 
+## Testing
+
+- For any change, identify and run the smallest meaningful test set.
+- **TDD**
+  - When fixing a bug, write a failing test first that reproduces the bug, then fix the code to make it pass.
+  - For new behavior, include tests. Consider writing the test first, though sometimes that's more trouble than it's worth.
+
 ## Rules
 
 - Don't silence linter warnings — fix the underlying issue
 - Never hardcode secrets — use environment variables via `.env`
-- Write tests for new behavior
 - Describe your approach before implementing non-trivial changes

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Markdown from '$lib/components/Markdown.svelte';
 	import SearchableGrid from '$lib/components/grid/SearchableGrid.svelte';
 	import TitleCard from '$lib/components/cards/TitleCard.svelte';
 
@@ -60,9 +61,9 @@
 	</dl>
 {/if}
 
-{#if person.bio}
+{#if person.bio_html}
 	<section class="bio">
-		<p>{person.bio}</p>
+		<Markdown html={person.bio_html} />
 	</section>
 {/if}
 
@@ -125,10 +126,7 @@
 		margin: 0;
 	}
 
-	.bio p {
-		font-size: var(--font-size-2);
-		color: var(--color-text-primary);
-		line-height: var(--font-lineheight-3);
+	.bio {
 		margin-bottom: var(--size-6);
 	}
 

@@ -69,6 +69,16 @@ class TestPatchManufacturerClaimsValidation:
         )
         assert resp.status_code == 404
 
+    def test_invalid_markdown_link_returns_422(self, client, user, mfr):
+        client.force_login(user)
+        resp = client.patch(
+            f"/api/manufacturers/{mfr.slug}/claims/",
+            data='{"fields": {"description": "Links to [[system:nope]]."}}',
+            content_type="application/json",
+        )
+        assert resp.status_code == 422
+        assert "nope" in resp.json()["detail"].lower()
+
 
 @pytest.mark.django_db
 class TestPatchManufacturerClaimsPersistence:
@@ -192,6 +202,16 @@ class TestPatchPersonClaimsValidation:
             content_type="application/json",
         )
         assert resp.status_code == 404
+
+    def test_invalid_markdown_link_returns_422(self, client, user, person):
+        client.force_login(user)
+        resp = client.patch(
+            f"/api/people/{person.slug}/claims/",
+            data='{"fields": {"bio": "Worked on [[system:nope]]."}}',
+            content_type="application/json",
+        )
+        assert resp.status_code == 422
+        assert "nope" in resp.json()["detail"].lower()
 
 
 @pytest.mark.django_db

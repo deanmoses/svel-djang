@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Optional
 
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.db.models import Count, F, Prefetch, Q
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
@@ -62,6 +63,7 @@ class ManufacturerDetailSchema(Schema):
     slug: str
     trade_name: str
     description: str = ""
+    description_html: str = ""
     founded_year: int | None = None
     dissolved_year: int | None = None
     country: str | None = None
@@ -112,11 +114,14 @@ def _serialize_manufacturer_detail(mfr) -> dict:
     Expects *mfr* to have been fetched with prefetch_related for entities,
     non_variant_models, and claims (to_attr="active_claims").
     """
+    from apps.core.markdown import render_markdown_fields
+
     return {
         "name": mfr.name,
         "slug": mfr.slug,
         "trade_name": mfr.trade_name,
         "description": mfr.description,
+        **render_markdown_fields(mfr),
         "founded_year": mfr.founded_year,
         "dissolved_year": mfr.dissolved_year,
         "country": mfr.country,
@@ -263,6 +268,7 @@ def get_manufacturer(request, slug: str):
 )
 def patch_manufacturer_claims(request, slug: str, data: ClaimPatchSchema):
     """Assert per-field claims from the authenticated user, then re-resolve."""
+    from apps.core.markdown_links import prepare_markdown_claim_value
     from apps.provenance.models import Claim
 
     from ..models import Manufacturer
@@ -276,6 +282,10 @@ def patch_manufacturer_claims(request, slug: str, data: ClaimPatchSchema):
     mfr = get_object_or_404(Manufacturer, slug=slug)
 
     for field_name, value in data.fields.items():
+        try:
+            value = prepare_markdown_claim_value(field_name, value, Manufacturer)
+        except ValidationError as exc:
+            raise HttpError(422, "; ".join(exc.messages)) from exc
         Claim.objects.assert_claim(mfr, field_name, value, user=request.user)
 
     resolve_manufacturer(mfr)

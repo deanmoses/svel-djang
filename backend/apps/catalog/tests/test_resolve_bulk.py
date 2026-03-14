@@ -1,8 +1,9 @@
 """Tests for _resolve_bulk and resolve_title."""
 
 import pytest
+from django.contrib.contenttypes.models import ContentType
 
-from apps.catalog.models import Franchise, Manufacturer, Tag, Title
+from apps.catalog.models import Franchise, Manufacturer, System, Tag, Title
 from apps.catalog.resolve import (
     MANUFACTURER_DIRECT_FIELDS,
     TAXONOMY_DIRECT_FIELDS,
@@ -10,6 +11,7 @@ from apps.catalog.resolve import (
     _resolve_bulk,
     resolve_title,
 )
+from apps.core.models import RecordReference
 from apps.provenance.models import Claim, Source
 
 
@@ -137,6 +139,62 @@ class TestResolveBulkManufacturer:
         assert m.name == "Stern Pinball"
         assert m.founded_year == 1999
         assert m.country == "US"
+
+
+@pytest.mark.django_db
+class TestResolveBulkMarkdownReferences:
+    def test_bulk_resolve_syncs_record_references(self, opdb):
+        """_resolve_bulk populates RecordReference for markdown link fields."""
+        mfr = Manufacturer.objects.create(name="", slug="williams")
+        system = System.objects.create(name="WPC-95", slug="wpc-95", manufacturer=mfr)
+
+        Claim.objects.assert_claim(mfr, "name", "Williams", source=opdb)
+        Claim.objects.assert_claim(
+            mfr,
+            "description",
+            f"Uses [[system:id:{system.pk}]].",
+            source=opdb,
+        )
+
+        _resolve_bulk(Manufacturer, MANUFACTURER_DIRECT_FIELDS)
+
+        mfr_ct = ContentType.objects.get_for_model(Manufacturer)
+        refs = RecordReference.objects.filter(source_type=mfr_ct, source_id=mfr.pk)
+        assert refs.count() == 1
+        system_ct = ContentType.objects.get_for_model(System)
+        assert refs.first().target_type == system_ct
+        assert refs.first().target_id == system.pk
+
+    def test_bulk_resolve_cleans_stale_references(self, opdb):
+        """_resolve_bulk removes RecordReference when markdown links are removed."""
+        mfr = Manufacturer.objects.create(name="", slug="williams")
+        system = System.objects.create(name="WPC-95", slug="wpc-95", manufacturer=mfr)
+
+        # First resolve with a link
+        Claim.objects.assert_claim(
+            mfr,
+            "description",
+            f"Uses [[system:id:{system.pk}]].",
+            source=opdb,
+        )
+        _resolve_bulk(Manufacturer, MANUFACTURER_DIRECT_FIELDS)
+
+        mfr_ct = ContentType.objects.get_for_model(Manufacturer)
+        assert (
+            RecordReference.objects.filter(source_type=mfr_ct, source_id=mfr.pk).count()
+            == 1
+        )
+
+        # Deactivate the claim so description resolves to blank
+        Claim.objects.filter(
+            content_type=mfr_ct, object_id=mfr.pk, field_name="description"
+        ).update(is_active=False)
+        _resolve_bulk(Manufacturer, MANUFACTURER_DIRECT_FIELDS)
+
+        assert (
+            RecordReference.objects.filter(source_type=mfr_ct, source_id=mfr.pk).count()
+            == 0
+        )
 
 
 @pytest.mark.django_db

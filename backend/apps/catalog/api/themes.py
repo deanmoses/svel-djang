@@ -8,6 +8,8 @@ from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
 
+from apps.core.markdown import render_markdown_fields
+
 from .helpers import _serialize_title_machine
 from .schemas import TitleMachineSchema
 
@@ -20,6 +22,7 @@ class ThemeDetailSchema(Schema):
     name: str
     slug: str
     description: str = ""
+    description_html: str = ""
     machines: list[TitleMachineSchema]
 
 
@@ -50,5 +53,6 @@ def get_theme(request, slug: str):
         "name": theme.name,
         "slug": theme.slug,
         "description": theme.description,
+        **render_markdown_fields(theme),
         "machines": [_serialize_title_machine(pm) for pm in theme.machine_models.all()],
     }

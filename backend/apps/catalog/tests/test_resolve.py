@@ -271,7 +271,7 @@ class TestResolveAll:
             Claim.objects.assert_claim(pm, "name", f"Resolved {i}", source=ipdb)
             Claim.objects.assert_claim(pm, "year", 2000 + i, source=ipdb)
 
-        with django_assert_max_num_queries(55):
+        with django_assert_max_num_queries(60):
             resolve_all()
 
 

@@ -10,6 +10,8 @@ from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
 
+from apps.core.markdown import render_markdown_fields
+
 from .helpers import _extract_image_urls
 from .machine_models import CreditSchema
 
@@ -32,6 +34,7 @@ class SeriesListSchema(Schema):
     name: str
     slug: str
     description: str = ""
+    description_html: str = ""
     title_count: int = 0
     thumbnail_url: Optional[str] = None
 
@@ -40,6 +43,7 @@ class SeriesDetailSchema(Schema):
     name: str
     slug: str
     description: str = ""
+    description_html: str = ""
     titles: list[TitleRefSchema]
     credits: list[CreditSchema] = []
 
@@ -109,6 +113,7 @@ def list_series(request):
                 "name": s.name,
                 "slug": s.slug,
                 "description": s.description,
+                **render_markdown_fields(s),
                 "title_count": s.title_count,
                 "thumbnail_url": thumb,
             }
@@ -149,6 +154,7 @@ def get_series(request, slug: str):
         "name": series.name,
         "slug": series.slug,
         "description": series.description,
+        **render_markdown_fields(series),
         "titles": [_serialize_title_list(t) for t in series.titles.all()],
         "credits": [
             {

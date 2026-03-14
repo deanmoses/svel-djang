@@ -5,21 +5,23 @@ from __future__ import annotations
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
-from apps.core.models import TimeStampedModel, unique_slug
+from apps.core.models import Linkable, MarkdownField, TimeStampedModel, unique_slug
 
 __all__ = ["Franchise", "Series"]
 
 
-class Franchise(TimeStampedModel):
+class Franchise(Linkable, TimeStampedModel):
     """An IP grouping that spans manufacturers and eras.
 
     e.g., Indiana Jones, Star Trek. Most Titles do not belong to a Franchise.
     Seeded from franchises.json.
     """
 
+    link_url_pattern = "/franchises/{slug}"
+
     name = models.CharField(max_length=300, unique=True)
     slug = models.SlugField(max_length=300, unique=True, blank=True)
-    description = models.TextField(blank=True)
+    description = MarkdownField(blank=True)
 
     claims = GenericRelation("provenance.Claim")
 
@@ -35,7 +37,7 @@ class Franchise(TimeStampedModel):
         super().save(*args, **kwargs)
 
 
-class Series(TimeStampedModel):
+class Series(Linkable, TimeStampedModel):
     """A manually-curated grouping of related Titles sharing a thematic lineage.
 
     e.g., the "Eight Ball" series spans Eight Ball, Eight Ball Deluxe, and
@@ -44,14 +46,18 @@ class Series(TimeStampedModel):
     maintained by curators via the admin or seed data.
     """
 
+    link_url_pattern = "/series/{slug}"
+
     name = models.CharField(max_length=300)
     slug = models.SlugField(max_length=300, unique=True, blank=True)
-    description = models.TextField(blank=True)
+    description = MarkdownField(blank=True)
     titles = models.ManyToManyField(
         "Title",
         blank=True,
         related_name="series",
     )
+
+    claims = GenericRelation("provenance.Claim")
 
     class Meta:
         ordering = ["name"]

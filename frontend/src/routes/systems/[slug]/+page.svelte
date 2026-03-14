@@ -2,6 +2,7 @@
 	import { resolve } from '$app/paths';
 	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
 	import CardGrid from '$lib/components/grid/CardGrid.svelte';
+	import Markdown from '$lib/components/Markdown.svelte';
 	import SidebarList from '$lib/components/SidebarList.svelte';
 	import SidebarListItem from '$lib/components/SidebarListItem.svelte';
 	import SidebarSection from '$lib/components/SidebarSection.svelte';
@@ -25,8 +26,8 @@
 
 	<TwoColumnLayout>
 		{#snippet main()}
-			{#if system.description}
-				<p class="description">{system.description}</p>
+			{#if system.description_html}
+				<Markdown html={system.description_html} />
 			{/if}
 
 			{#if system.titles.length === 0}
@@ -83,13 +84,6 @@
 		font-weight: 700;
 		color: var(--color-text-primary);
 		margin-bottom: var(--size-2);
-	}
-
-	.description {
-		font-size: var(--font-size-2);
-		color: var(--color-text-muted);
-		line-height: var(--font-lineheight-3);
-		margin-bottom: var(--size-4);
 	}
 
 	h2 {

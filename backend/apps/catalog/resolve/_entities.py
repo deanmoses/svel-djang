@@ -18,6 +18,7 @@ from apps.provenance.models import Claim
 from ..models import (
     Cabinet,
     CorporateEntity,
+    CreditRole,
     DisplaySubtype,
     DisplayType,
     Franchise,
@@ -25,6 +26,7 @@ from ..models import (
     GameplayFeature,
     Manufacturer,
     Person,
+    Series,
     System,
     Tag,
     TechnologyGeneration,
@@ -35,6 +37,19 @@ from ..models import (
 from ._helpers import _coerce, get_field_defaults
 
 logger = logging.getLogger(__name__)
+
+
+def _sync_markdown_references(obj) -> None:
+    """Sync RecordReference table for all markdown fields on the object.
+
+    Always calls sync_references, even for empty fields, so that stale
+    references are cleaned up when a field is blanked.
+    """
+    from apps.core.markdown_links import sync_references
+    from apps.core.models import get_markdown_fields
+
+    for field_name in get_markdown_fields(type(obj)):
+        sync_references(obj, getattr(obj, field_name, "") or "")
 
 
 # ------------------------------------------------------------------
@@ -87,15 +102,22 @@ SYSTEM_DIRECT_FIELDS: dict[str, str] = {
     "description": "description",
 }
 
-# Taxonomy models: name and display_order are claim-controlled.
+# Taxonomy models: name, display_order, and description are claim-controlled.
 TAXONOMY_DIRECT_FIELDS: dict[str, str] = {
     "name": "name",
     "display_order": "display_order",
+    "description": "description",
 }
 
 # Franchise has no display_order.
 FRANCHISE_DIRECT_FIELDS: dict[str, str] = {
     "name": "name",
+    "description": "description",
+}
+
+SERIES_DIRECT_FIELDS: dict[str, str] = {
+    "name": "name",
+    "description": "description",
 }
 
 # All taxonomy models that go through claim resolution.
@@ -108,7 +130,9 @@ TAXONOMY_MODELS: list[tuple[type, dict[str, str]]] = [
     (GameFormat, TAXONOMY_DIRECT_FIELDS),
     (GameplayFeature, TAXONOMY_DIRECT_FIELDS),
     (Tag, TAXONOMY_DIRECT_FIELDS),
+    (CreditRole, TAXONOMY_DIRECT_FIELDS),
     (Franchise, FRANCHISE_DIRECT_FIELDS),
+    (Series, SERIES_DIRECT_FIELDS),
 ]
 
 
@@ -278,6 +302,13 @@ def _resolve_bulk(
     )
     model_class.objects.bulk_update(all_objs, update_fields, batch_size=100)
 
+    # Sync markdown backlinks (RecordReference) for bulk-resolved objects.
+    from apps.core.models import get_markdown_fields
+
+    if get_markdown_fields(model_class):
+        for obj in all_objs:
+            _sync_markdown_references(obj)
+
     return len(all_objs)
 
 
@@ -290,6 +321,7 @@ def resolve_manufacturer(mfr: Manufacturer) -> Manufacturer:
     """Resolve active claims into the given Manufacturer's fields."""
     _resolve_single(mfr, MANUFACTURER_DIRECT_FIELDS)
     mfr.save()
+    _sync_markdown_references(mfr)
     return mfr
 
 
@@ -297,6 +329,7 @@ def resolve_person(person: Person) -> Person:
     """Resolve active claims into the given Person's fields."""
     _resolve_single(person, PERSON_DIRECT_FIELDS)
     person.save()
+    _sync_markdown_references(person)
     return person
 
 
@@ -304,6 +337,7 @@ def resolve_theme(theme: Theme) -> Theme:
     """Resolve active claims into the given Theme's fields."""
     _resolve_single(theme, THEME_DIRECT_FIELDS)
     theme.save()
+    _sync_markdown_references(theme)
     return theme
 
 
@@ -318,6 +352,7 @@ def resolve_system(system: System) -> System:
     """Resolve active claims into the given System's fields."""
     _resolve_single(system, SYSTEM_DIRECT_FIELDS)
     system.save()
+    _sync_markdown_references(system)
     return system
 
 
@@ -347,6 +382,7 @@ def resolve_title(title: Title) -> Title:
     else:
         title.franchise = None
     title.save()
+    _sync_markdown_references(title)
 
     # Resolve relationship claims after scalar save.
     from ._relationships import resolve_title_abbreviations
@@ -358,6 +394,30 @@ def resolve_title(title: Title) -> Title:
 # ------------------------------------------------------------------
 # Taxonomy resolution
 # ------------------------------------------------------------------
+
+
+def resolve_taxonomy(obj):
+    """Resolve active claims into a single taxonomy model instance."""
+    _resolve_single(obj, TAXONOMY_DIRECT_FIELDS)
+    obj.save()
+    _sync_markdown_references(obj)
+    return obj
+
+
+def resolve_franchise(franchise: Franchise) -> Franchise:
+    """Resolve active claims into the given Franchise's fields."""
+    _resolve_single(franchise, FRANCHISE_DIRECT_FIELDS)
+    franchise.save()
+    _sync_markdown_references(franchise)
+    return franchise
+
+
+def resolve_series(series: Series) -> Series:
+    """Resolve active claims into the given Series's fields."""
+    _resolve_single(series, SERIES_DIRECT_FIELDS)
+    series.save()
+    _sync_markdown_references(series)
+    return series
 
 
 def _resolve_all_taxonomy() -> None:

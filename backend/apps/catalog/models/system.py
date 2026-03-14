@@ -5,12 +5,12 @@ from __future__ import annotations
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
-from apps.core.models import TimeStampedModel, unique_slug
+from apps.core.models import Linkable, MarkdownField, TimeStampedModel, unique_slug
 
 __all__ = ["System"]
 
 
-class System(TimeStampedModel):
+class System(Linkable, TimeStampedModel):
     """An electronic hardware generation for pinball machines.
 
     e.g. WPC-95, System 6, SAM System, SPIKE.
@@ -18,9 +18,11 @@ class System(TimeStampedModel):
     created by IPDB ingest (via mpu_strings mapping) or admin.
     """
 
+    link_url_pattern = "/systems/{slug}"
+
     name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
-    description = models.TextField(blank=True)
+    description = MarkdownField(blank=True)
     manufacturer = models.ForeignKey(
         "Manufacturer",
         on_delete=models.SET_NULL,

@@ -5,12 +5,12 @@ from __future__ import annotations
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
-from apps.core.models import TimeStampedModel, unique_slug
+from apps.core.models import Linkable, MarkdownField, TimeStampedModel, unique_slug
 
 __all__ = ["Title", "TitleAbbreviation"]
 
 
-class Title(TimeStampedModel):
+class Title(Linkable, TimeStampedModel):
     """The canonical identity of a pinball game, independent of edition or variant.
 
     OPDB calls this a "group" in its JSON, but we use "Title" as it is the
@@ -20,6 +20,8 @@ class Title(TimeStampedModel):
     Manufacturer.
     """
 
+    link_url_pattern = "/titles/{slug}"
+
     opdb_id = models.CharField(
         max_length=50,
         unique=True,
@@ -28,7 +30,7 @@ class Title(TimeStampedModel):
     )
     name = models.CharField(max_length=300)
     slug = models.SlugField(max_length=300, unique=True, blank=True)
-    description = models.TextField(blank=True)
+    description = MarkdownField(blank=True)
     franchise = models.ForeignKey(
         "Franchise",
         on_delete=models.SET_NULL,

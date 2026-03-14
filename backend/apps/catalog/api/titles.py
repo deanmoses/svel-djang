@@ -11,6 +11,8 @@ from ninja import Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
 
+from apps.core.markdown import render_markdown_fields
+
 from .constants import DEFAULT_PAGE_SIZE
 from .helpers import _extract_image_urls, _serialize_title_machine
 from .machine_models import CreditSchema, MachineModelDetailSchema
@@ -78,6 +80,7 @@ class TitleDetailSchema(Schema):
     slug: str
     abbreviations: list[str] = []
     description: str = ""
+    description_html: str = ""
     needs_review: bool = False
     needs_review_notes: str = ""
     review_links: list[ReviewLinkSchema] = []
@@ -366,6 +369,7 @@ def _serialize_title_detail(title) -> dict:
         "slug": title.slug,
         "abbreviations": [a.value for a in title.abbreviations.all()],
         "description": title.description,
+        **render_markdown_fields(title),
         "needs_review": title.needs_review,
         "needs_review_notes": title.needs_review_notes,
         "review_links": review_links,

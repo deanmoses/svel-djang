@@ -6,17 +6,19 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.db.models.functions import Lower
 
-from apps.core.models import TimeStampedModel, unique_slug
+from apps.core.models import Linkable, MarkdownField, TimeStampedModel, unique_slug
 
 __all__ = ["Person", "PersonAlias", "Credit"]
 
 
-class Person(TimeStampedModel):
+class Person(Linkable, TimeStampedModel):
     """A person involved in pinball machine design (designer, artist, etc.)."""
+
+    link_url_pattern = "/people/{slug}"
 
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
-    bio = models.TextField(blank=True)
+    bio = MarkdownField(blank=True)
 
     # Wikidata cross-reference — direct field, not a claim
     wikidata_id = models.CharField(

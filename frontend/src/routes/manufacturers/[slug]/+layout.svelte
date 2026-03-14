@@ -3,6 +3,7 @@
 	import { resolve } from '$app/paths';
 	import { pageTitle } from '$lib/constants';
 	import { auth } from '$lib/auth.svelte';
+	import Markdown from '$lib/components/Markdown.svelte';
 	import TabNav from '$lib/components/TabNav.svelte';
 	import Tab from '$lib/components/Tab.svelte';
 
@@ -34,8 +35,8 @@
 		{#if mfr.trade_name && mfr.trade_name !== mfr.name}
 			<p class="trade-name">Trade name: {mfr.trade_name}</p>
 		{/if}
-		{#if mfr.description}
-			<p class="description">{mfr.description}</p>
+		{#if mfr.description_html}
+			<Markdown html={mfr.description_html} />
 		{/if}
 	</header>
 
@@ -73,12 +74,5 @@
 		font-size: var(--font-size-2);
 		color: var(--color-text-muted);
 		margin-top: var(--size-2);
-	}
-
-	.description {
-		font-size: var(--font-size-2);
-		color: var(--color-text-secondary);
-		margin-top: var(--size-2);
-		line-height: var(--font-lineheight-3);
 	}
 </style>

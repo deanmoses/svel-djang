@@ -1,8 +1,9 @@
 from decimal import Decimal
 
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 
 from apps.provenance.models import Claim
 
@@ -33,15 +34,23 @@ from .models import (
 from .resolve import (
     DIRECT_FIELDS,
     FK_FIELDS,
+    FRANCHISE_DIRECT_FIELDS,
     MANUFACTURER_DIRECT_FIELDS,
     PERSON_DIRECT_FIELDS,
+    SERIES_DIRECT_FIELDS,
     SYSTEM_DIRECT_FIELDS,
+    TAXONOMY_DIRECT_FIELDS,
     THEME_DIRECT_FIELDS,
+    TITLE_DIRECT_FIELDS,
+    resolve_franchise,
     resolve_manufacturer,
     resolve_model,
     resolve_person,
+    resolve_series,
     resolve_system,
+    resolve_taxonomy,
     resolve_theme,
+    resolve_title,
 )
 
 
@@ -61,6 +70,9 @@ class ProvenanceSaveMixin:
     CLAIM_FIELDS: frozenset = frozenset()
 
     def _to_claim_value(self, field_name: str, value):
+        from apps.core.markdown_links import prepare_markdown_claim_value
+
+        value = prepare_markdown_claim_value(field_name, value, self.model)
         if isinstance(value, Decimal):
             return str(value)
         return value
@@ -77,9 +89,17 @@ class ProvenanceSaveMixin:
             return
 
         for field_name in changed:
-            claim_value = self._to_claim_value(
-                field_name, form.cleaned_data.get(field_name)
-            )
+            try:
+                claim_value = self._to_claim_value(
+                    field_name, form.cleaned_data.get(field_name)
+                )
+            except ValidationError as exc:
+                self.message_user(
+                    request,
+                    f"{field_name}: {'; '.join(exc.messages)}",
+                    messages.ERROR,
+                )
+                continue
             if claim_value is None:
                 # Field cleared: withdraw the user's claim rather than storing a
                 # NULL value (Claim.value does not allow NULL).
@@ -175,76 +195,100 @@ class CorporateEntityInline(admin.TabularInline):
 # ---------------------------------------------------------------------------
 
 
+class TaxonomyAdminMixin(ProvenanceSaveMixin):
+    """Shared ProvenanceSaveMixin for taxonomy models."""
+
+    CLAIM_FIELDS = frozenset(TAXONOMY_DIRECT_FIELDS)
+
+    def _resolve(self, obj):
+        resolve_taxonomy(obj)
+
+
 @admin.register(TechnologyGeneration)
-class TechnologyGenerationAdmin(admin.ModelAdmin):
+class TechnologyGenerationAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
     list_display = ("display_order", "name", "slug")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
+    inlines = (ClaimInline,)
 
 
 @admin.register(TechnologySubgeneration)
-class TechnologySubgenerationAdmin(admin.ModelAdmin):
+class TechnologySubgenerationAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
     list_display = ("display_order", "name", "technology_generation", "slug")
     list_filter = ("technology_generation",)
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
+    inlines = (ClaimInline,)
 
 
 @admin.register(DisplayType)
-class DisplayTypeAdmin(admin.ModelAdmin):
+class DisplayTypeAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
     list_display = ("display_order", "name", "slug")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
+    inlines = (ClaimInline,)
 
 
 @admin.register(DisplaySubtype)
-class DisplaySubtypeAdmin(admin.ModelAdmin):
+class DisplaySubtypeAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
     list_display = ("display_order", "name", "display_type", "slug")
     list_filter = ("display_type",)
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
+    inlines = (ClaimInline,)
 
 
 @admin.register(Cabinet)
-class CabinetAdmin(admin.ModelAdmin):
+class CabinetAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
     list_display = ("display_order", "name", "slug")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
+    inlines = (ClaimInline,)
 
 
 @admin.register(GameFormat)
-class GameFormatAdmin(admin.ModelAdmin):
+class GameFormatAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
     list_display = ("display_order", "name", "slug")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
+    inlines = (ClaimInline,)
 
 
 @admin.register(GameplayFeature)
-class GameplayFeatureAdmin(admin.ModelAdmin):
+class GameplayFeatureAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
     list_display = ("display_order", "name", "slug")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
+    inlines = (ClaimInline,)
 
 
 @admin.register(Tag)
-class TagAdmin(admin.ModelAdmin):
+class TagAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
     list_display = ("display_order", "name", "slug")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
+    inlines = (ClaimInline,)
 
 
 @admin.register(CreditRole)
-class CreditRoleAdmin(admin.ModelAdmin):
+class CreditRoleAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
     list_display = ("display_order", "name", "slug")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
+    inlines = (ClaimInline,)
 
 
 @admin.register(Franchise)
-class FranchiseAdmin(admin.ModelAdmin):
+class FranchiseAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
+    CLAIM_FIELDS = frozenset(FRANCHISE_DIRECT_FIELDS)
+
+    def _resolve(self, obj):
+        resolve_franchise(obj)
+
     list_display = ("name", "slug")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
+    inlines = (ClaimInline,)
 
 
 # ---------------------------------------------------------------------------
@@ -298,11 +342,16 @@ class ModelAbbreviationInline(admin.TabularInline):
 
 
 @admin.register(Title)
-class TitleAdmin(admin.ModelAdmin):
+class TitleAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
+    CLAIM_FIELDS = frozenset(TITLE_DIRECT_FIELDS)
+
+    def _resolve(self, obj):
+        resolve_title(obj)
+
     list_display = ("name", "opdb_id", "machine_model_count")
     search_fields = ("name", "opdb_id")
     prepopulated_fields = {"slug": ("name",)}
-    inlines = (TitleAbbreviationInline,)
+    inlines = (TitleAbbreviationInline, ClaimInline)
 
     @admin.display(description="Machine Models")
     def machine_model_count(self, obj):
@@ -310,11 +359,17 @@ class TitleAdmin(admin.ModelAdmin):
 
 
 @admin.register(Series)
-class SeriesAdmin(admin.ModelAdmin):
+class SeriesAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
+    CLAIM_FIELDS = frozenset(SERIES_DIRECT_FIELDS)
+
+    def _resolve(self, obj):
+        resolve_series(obj)
+
     list_display = ("name", "slug", "title_count")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
     filter_horizontal = ("titles",)
+    inlines = (ClaimInline,)
 
     @admin.display(description="Titles")
     def title_count(self, obj):

@@ -3,16 +3,23 @@ from ninja import NinjaAPI, Schema
 
 from apps.accounts.api import auth_router
 from apps.catalog.api import (
+    cabinets_router,
+    credit_roles_router,
+    display_subtypes_router,
     display_types_router,
     franchises_router,
-    titles_router,
+    game_formats_router,
+    gameplay_features_router,
     manufacturers_router,
     models_router,
     people_router,
     series_router,
     systems_router,
+    tags_router,
     technology_generations_router,
+    technology_subgenerations_router,
     themes_router,
+    titles_router,
 )
 from apps.provenance.api import review_router, sources_router
 
@@ -69,5 +76,12 @@ api.add_router("/themes/", themes_router)
 api.add_router("/systems/", systems_router)
 api.add_router("/series/", series_router)
 api.add_router("/franchises/", franchises_router)
+api.add_router("/cabinets/", cabinets_router)
+api.add_router("/credit-roles/", credit_roles_router)
+api.add_router("/display-subtypes/", display_subtypes_router)
+api.add_router("/game-formats/", game_formats_router)
+api.add_router("/gameplay-features/", gameplay_features_router)
+api.add_router("/tags/", tags_router)
+api.add_router("/technology-subgenerations/", technology_subgenerations_router)
 api.add_router("/sources/", sources_router)
 api.add_router("/review/", review_router)

@@ -5,6 +5,7 @@
 	import ModelHierarchy from '$lib/components/ModelHierarchy.svelte';
 	import CreditsList from '$lib/components/CreditsList.svelte';
 	import ExternalLinksSidebarSection from '$lib/components/ExternalLinksSidebarSection.svelte';
+	import Markdown from '$lib/components/Markdown.svelte';
 	import HeroHeader from '$lib/components/HeroHeader.svelte';
 	import RatingsSidebarSection from '$lib/components/RatingsSidebarSection.svelte';
 	import SidebarList from '$lib/components/SidebarList.svelte';
@@ -65,10 +66,10 @@
 
 	<TwoColumnLayout>
 		{#snippet main()}
-			{#if title.description}
+			{#if title.description_html}
 				<section class="prose">
 					<h2>About</h2>
-					<p>{title.description}</p>
+					<Markdown html={title.description_html} />
 				</section>
 			{/if}
 

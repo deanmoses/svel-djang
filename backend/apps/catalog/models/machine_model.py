@@ -5,17 +5,19 @@ from __future__ import annotations
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
-from apps.core.models import TimeStampedModel, unique_slug
+from apps.core.models import Linkable, TimeStampedModel, unique_slug
 
 __all__ = ["MachineModel", "ModelAbbreviation"]
 
 
-class MachineModel(TimeStampedModel):
+class MachineModel(Linkable, TimeStampedModel):
     """A pinball machine title/design — the resolved/materialized view.
 
     Fields are derived from resolving claims. The resolution logic picks the
     winning claim per field (highest priority source, most recent if tied).
     """
+
+    link_url_pattern = "/machines/{slug}"
 
     # Identity
     name = models.CharField(max_length=300)

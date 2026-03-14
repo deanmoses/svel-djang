@@ -3,6 +3,7 @@
 	import { createAsyncLoader } from '$lib/async-loader.svelte';
 	import CardGrid from '$lib/components/grid/CardGrid.svelte';
 	import MachineCard from '$lib/components/cards/MachineCard.svelte';
+	import Markdown from '$lib/components/Markdown.svelte';
 	import { pageTitle } from '$lib/constants';
 
 	let { data } = $props();
@@ -23,12 +24,8 @@
 <article>
 	<header>
 		<h1>{profile.name}</h1>
-		{#if profile.description}
-			<div class="description">
-				{#each profile.description.split('\n\n') as paragraph, i (i)}
-					<p>{paragraph}</p>
-				{/each}
-			</div>
+		{#if profile.description_html}
+			<Markdown html={profile.description_html} />
 		{/if}
 	</header>
 
@@ -70,13 +67,6 @@
 		font-weight: 700;
 		color: var(--color-text-primary);
 		margin-bottom: var(--size-4);
-	}
-
-	.description p {
-		font-size: var(--font-size-2);
-		color: var(--color-text-muted);
-		line-height: var(--font-lineheight-3);
-		margin-bottom: var(--size-3);
 	}
 
 	h2 {

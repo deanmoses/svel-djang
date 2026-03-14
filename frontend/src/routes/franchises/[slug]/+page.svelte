@@ -1,5 +1,6 @@
 <script lang="ts">
 	import CardGrid from '$lib/components/grid/CardGrid.svelte';
+	import Markdown from '$lib/components/Markdown.svelte';
 	import TitleCard from '$lib/components/cards/TitleCard.svelte';
 	import { pageTitle } from '$lib/constants';
 
@@ -14,8 +15,8 @@
 <article>
 	<header>
 		<h1>{franchise.name}</h1>
-		{#if franchise.description}
-			<p class="description">{franchise.description}</p>
+		{#if franchise.description_html}
+			<Markdown html={franchise.description_html} />
 		{/if}
 	</header>
 
@@ -53,12 +54,6 @@
 		font-weight: 700;
 		color: var(--color-text-primary);
 		margin-bottom: var(--size-2);
-	}
-
-	.description {
-		font-size: var(--font-size-2);
-		color: var(--color-text-muted);
-		line-height: var(--font-lineheight-3);
 	}
 
 	h2 {

@@ -35,6 +35,7 @@ class SystemDetailSchema(Schema):
     name: str
     slug: str
     description: str = ""
+    description_html: str = ""
     manufacturer_name: Optional[str] = None
     manufacturer_slug: Optional[str] = None
     titles: list[RelatedTitleSchema]
@@ -119,10 +120,13 @@ def get_system(request, slug: str):
             .values("name", "slug")
         )
 
+    from apps.core.markdown import render_markdown_fields
+
     return {
         "name": system.name,
         "slug": system.slug,
         "description": system.description,
+        **render_markdown_fields(system),
         "manufacturer_name": system.manufacturer.name if system.manufacturer else None,
         "manufacturer_slug": system.manufacturer.slug if system.manufacturer else None,
         "titles": list(titles.values()),
