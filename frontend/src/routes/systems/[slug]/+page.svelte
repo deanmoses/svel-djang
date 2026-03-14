@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
-	import CardGrid from '$lib/components/grid/CardGrid.svelte';
+	import ClientFilteredGrid from '$lib/components/grid/ClientFilteredGrid.svelte';
 	import Markdown from '$lib/components/Markdown.svelte';
 	import SidebarList from '$lib/components/SidebarList.svelte';
 	import SidebarListItem from '$lib/components/SidebarListItem.svelte';
@@ -35,8 +35,8 @@
 			{:else}
 				<section>
 					<h2>Titles ({system.titles.length})</h2>
-					<CardGrid>
-						{#each system.titles as title (title.slug)}
+					<ClientFilteredGrid items={system.titles} showCount={false}>
+						{#snippet children(title)}
 							<TitleCard
 								slug={title.slug}
 								name={title.name}
@@ -44,8 +44,8 @@
 								manufacturerName={title.manufacturer_name}
 								year={title.year}
 							/>
-						{/each}
-					</CardGrid>
+						{/snippet}
+					</ClientFilteredGrid>
 				</section>
 			{/if}
 		{/snippet}

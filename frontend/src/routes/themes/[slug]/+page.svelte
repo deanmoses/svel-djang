@@ -1,34 +1,24 @@
 <script lang="ts">
-	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
-	import CardGrid from '$lib/components/grid/CardGrid.svelte';
+	import EntityDetailLayout from '$lib/components/EntityDetailLayout.svelte';
+	import ClientFilteredGrid from '$lib/components/grid/ClientFilteredGrid.svelte';
 	import MachineCard from '$lib/components/cards/MachineCard.svelte';
-	import Markdown from '$lib/components/Markdown.svelte';
-	import { pageTitle } from '$lib/constants';
 
 	let { data } = $props();
 	let theme = $derived(data.theme);
 </script>
 
-<svelte:head>
-	<title>{pageTitle(theme.name)}</title>
-</svelte:head>
-
-<article>
-	<header>
-		<Breadcrumb crumbs={[{ label: 'Themes', href: '/themes' }]} current={theme.name} />
-		<h1>{theme.name}</h1>
-		{#if theme.description_html}
-			<Markdown html={theme.description_html} />
-		{/if}
-	</header>
-
+<EntityDetailLayout
+	name={theme.name}
+	descriptionHtml={theme.description_html}
+	breadcrumbs={[{ label: 'Themes', href: '/themes' }]}
+>
 	{#if theme.machines.length === 0}
 		<p class="empty">No machines with this theme.</p>
 	{:else}
 		<section>
 			<h2>Machines ({theme.machines.length})</h2>
-			<CardGrid>
-				{#each theme.machines as machine (machine.slug)}
+			<ClientFilteredGrid items={theme.machines} showCount={false}>
+				{#snippet children(machine)}
 					<MachineCard
 						slug={machine.slug}
 						name={machine.name}
@@ -36,28 +26,13 @@
 						manufacturerName={machine.manufacturer_name}
 						year={machine.year}
 					/>
-				{/each}
-			</CardGrid>
+				{/snippet}
+			</ClientFilteredGrid>
 		</section>
 	{/if}
-</article>
+</EntityDetailLayout>
 
 <style>
-	article {
-		max-width: 64rem;
-	}
-
-	header {
-		margin-bottom: var(--size-6);
-	}
-
-	h1 {
-		font-size: var(--font-size-7);
-		font-weight: 700;
-		color: var(--color-text-primary);
-		margin-bottom: var(--size-2);
-	}
-
 	h2 {
 		font-size: var(--font-size-3);
 		font-weight: 600;

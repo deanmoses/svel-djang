@@ -6,7 +6,7 @@
 	import ActiveFilterChips from '$lib/components/ActiveFilterChips.svelte';
 	import CardGrid from '$lib/components/grid/CardGrid.svelte';
 	import FilterDrawer from '$lib/components/FilterDrawer.svelte';
-	import InfiniteGrid from '$lib/components/grid/InfiniteGrid.svelte';
+	import ClientFilteredGrid from '$lib/components/grid/ClientFilteredGrid.svelte';
 	import SearchBox from '$lib/components/SearchBox.svelte';
 	import SkeletonCard from '$lib/components/cards/SkeletonCard.svelte';
 	import TitleCard from '$lib/components/cards/TitleCard.svelte';
@@ -72,7 +72,7 @@
 
 			<main class="results">
 				<ActiveFilterChips bind:filters allTitles={titles.data} />
-				<InfiniteGrid items={filteredTitles} entityName="title">
+				<ClientFilteredGrid items={filteredTitles} entityName="title">
 					{#snippet children(title)}
 						<TitleCard
 							slug={title.slug}
@@ -82,7 +82,7 @@
 							year={title.year}
 						/>
 					{/snippet}
-				</InfiniteGrid>
+				</ClientFilteredGrid>
 			</main>
 		</div>
 	{/if}

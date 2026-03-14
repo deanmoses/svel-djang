@@ -1,34 +1,24 @@
 <script lang="ts">
-	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
-	import CardGrid from '$lib/components/grid/CardGrid.svelte';
-	import Markdown from '$lib/components/Markdown.svelte';
+	import EntityDetailLayout from '$lib/components/EntityDetailLayout.svelte';
+	import ClientFilteredGrid from '$lib/components/grid/ClientFilteredGrid.svelte';
 	import TitleCard from '$lib/components/cards/TitleCard.svelte';
-	import { pageTitle } from '$lib/constants';
 
 	let { data } = $props();
 	let franchise = $derived(data.franchise);
 </script>
 
-<svelte:head>
-	<title>{pageTitle(franchise.name)}</title>
-</svelte:head>
-
-<article>
-	<header>
-		<Breadcrumb crumbs={[{ label: 'Franchises', href: '/franchises' }]} current={franchise.name} />
-		<h1>{franchise.name}</h1>
-		{#if franchise.description_html}
-			<Markdown html={franchise.description_html} />
-		{/if}
-	</header>
-
+<EntityDetailLayout
+	name={franchise.name}
+	descriptionHtml={franchise.description_html}
+	breadcrumbs={[{ label: 'Franchises', href: '/franchises' }]}
+>
 	{#if franchise.titles.length === 0}
 		<p class="empty">No titles in this franchise.</p>
 	{:else}
 		<section>
 			<h2>Titles ({franchise.titles.length})</h2>
-			<CardGrid>
-				{#each franchise.titles as title (title.slug)}
+			<ClientFilteredGrid items={franchise.titles} showCount={false}>
+				{#snippet children(title)}
 					<TitleCard
 						slug={title.slug}
 						name={title.name}
@@ -36,28 +26,13 @@
 						manufacturerName={title.manufacturer_name}
 						year={title.year}
 					/>
-				{/each}
-			</CardGrid>
+				{/snippet}
+			</ClientFilteredGrid>
 		</section>
 	{/if}
-</article>
+</EntityDetailLayout>
 
 <style>
-	article {
-		max-width: 64rem;
-	}
-
-	header {
-		margin-bottom: var(--size-6);
-	}
-
-	h1 {
-		font-size: var(--font-size-7);
-		font-weight: 700;
-		color: var(--color-text-primary);
-		margin-bottom: var(--size-2);
-	}
-
 	h2 {
 		font-size: var(--font-size-3);
 		font-weight: 600;

@@ -2,7 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import SearchBox from '../SearchBox.svelte';
 	import CardGrid from './CardGrid.svelte';
-	import InfiniteGrid from './InfiniteGrid.svelte';
+	import ClientFilteredGrid from './ClientFilteredGrid.svelte';
 	import SkeletonCard from '../cards/SkeletonCard.svelte';
 	import { normalizeText } from '$lib/util';
 
@@ -59,7 +59,7 @@
 			<SearchBox bind:value={searchQuery} {placeholder} />
 		{/if}
 
-		<InfiniteGrid items={filteredItems} {entityName} {entityNamePlural} {children} />
+		<ClientFilteredGrid items={filteredItems} {entityName} {entityNamePlural} {children} />
 	{/if}
 </div>
 

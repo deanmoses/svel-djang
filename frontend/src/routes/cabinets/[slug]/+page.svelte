@@ -1,85 +1,35 @@
 <script lang="ts">
 	import client from '$lib/api/client';
-	import { createAsyncLoader } from '$lib/async-loader.svelte';
-	import CardGrid from '$lib/components/grid/CardGrid.svelte';
+	import { createPaginatedLoader } from '$lib/paginated-loader.svelte';
+	import EntityDetailLayout from '$lib/components/EntityDetailLayout.svelte';
+	import PaginatedSection from '$lib/components/grid/PaginatedSection.svelte';
 	import MachineCard from '$lib/components/cards/MachineCard.svelte';
-	import Markdown from '$lib/components/Markdown.svelte';
-	import { pageTitle } from '$lib/constants';
 
 	let { data } = $props();
 	let profile = $derived(data.profile);
 
-	const machines = createAsyncLoader(async () => {
+	const machines = createPaginatedLoader(async (page) => {
 		const { data: result } = await client.GET('/api/models/', {
-			params: { query: { cabinet: profile.slug, ordering: 'year', page_size: 500 } }
+			params: { query: { cabinet: profile.slug, page } }
 		});
-		return result?.items ?? [];
-	}, []);
+		return result ?? { items: [], count: 0 };
+	});
 </script>
 
-<svelte:head>
-	<title>{pageTitle(profile.name)}</title>
-</svelte:head>
-
-<article>
-	<header>
-		<h1>{profile.name}</h1>
-		{#if profile.description_html}
-			<Markdown html={profile.description_html} />
-		{/if}
-	</header>
-
-	{#if machines.loading}
-		<p class="empty">Loading machines…</p>
-	{:else if machines.error}
-		<p class="empty">Failed to load machines.</p>
-	{:else if machines.data.length === 0}
-		<p class="empty">No machines with this cabinet type.</p>
-	{:else}
-		<section>
-			<h2>Machines ({machines.data.length})</h2>
-			<CardGrid>
-				{#each machines.data as machine (machine.slug)}
-					<MachineCard
-						slug={machine.slug}
-						name={machine.name}
-						thumbnailUrl={machine.thumbnail_url}
-						manufacturerName={machine.manufacturer_name}
-						year={machine.year}
-					/>
-				{/each}
-			</CardGrid>
-		</section>
-	{/if}
-</article>
-
-<style>
-	article {
-		max-width: 64rem;
-	}
-
-	header {
-		margin-bottom: var(--size-6);
-	}
-
-	h1 {
-		font-size: var(--font-size-7);
-		font-weight: 700;
-		color: var(--color-text-primary);
-		margin-bottom: var(--size-4);
-	}
-
-	h2 {
-		font-size: var(--font-size-3);
-		font-weight: 600;
-		color: var(--color-text-primary);
-		margin-bottom: var(--size-3);
-	}
-
-	.empty {
-		color: var(--color-text-muted);
-		font-size: var(--font-size-2);
-		padding: var(--size-8) 0;
-		text-align: center;
-	}
-</style>
+<EntityDetailLayout name={profile.name} descriptionHtml={profile.description_html}>
+	<PaginatedSection
+		loader={machines}
+		heading="Machines"
+		emptyMessage="No machines with this cabinet type."
+	>
+		{#snippet children(machine)}
+			<MachineCard
+				slug={machine.slug}
+				name={machine.name}
+				thumbnailUrl={machine.thumbnail_url}
+				manufacturerName={machine.manufacturer_name}
+				year={machine.year}
+			/>
+		{/snippet}
+	</PaginatedSection>
+</EntityDetailLayout>
