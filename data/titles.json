@@ -97,6 +97,12 @@
     ]
   },
   {
+    "slug": "baby-pac-man",
+    "name": "Baby Pac-Man",
+    "opdb_group_id": "G5Kvx",
+    "franchise_slug": "pac-man"
+  },
+  {
     "slug": "back-to-the-future",
     "name": "Back to the Future",
     "opdb_group_id": "GRpbW",
@@ -648,6 +654,11 @@
     "opdb_group_id": "GoEEx"
   },
   {
+    "slug": "granny-and-the-gators",
+    "name": "Granny and the Gators",
+    "opdb_group_id": "G4OKd"
+  },
+  {
     "slug": "guardians-of-the-galaxy",
     "name": "Guardians of the Galaxy",
     "opdb_group_id": "GRWvz",
@@ -1065,6 +1076,12 @@
     ]
   },
   {
+    "slug": "mr-mrs-pac-man",
+    "name": "Mr. & Mrs. Pac-Man",
+    "opdb_group_id": "Gr2Dk",
+    "franchise_slug": "pac-man"
+  },
+  {
     "slug": "muhammad-ali",
     "name": "Ali",
     "opdb_group_id": "G43kO",
@@ -1261,6 +1278,11 @@
     "abbreviations": [
       "RBION"
     ]
+  },
+  {
+    "slug": "revenge-from-mars",
+    "name": "Revenge from Mars",
+    "opdb_group_id": "G50Wr"
   },
   {
     "slug": "road-runner",

@@ -350,6 +350,11 @@
     "description": "Pinball machines themed around the Pabst Blue Ribbon beer brand."
   },
   {
+    "slug": "pac-man",
+    "name": "Pac-Man",
+    "description": "Pinball machines based on Namco's Pac-Man video game franchise."
+  },
+  {
     "slug": "pirates-of-the-caribbean",
     "name": "Pirates of the Caribbean",
     "description": "Pinball machines based on the Pirates of the Caribbean franchise."
