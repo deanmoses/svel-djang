@@ -51,7 +51,7 @@
         "description": "Internet Pinball Database identifier"
       }
     },
-    "required": ["slug", "name", "title", "opdb_id"],
+    "required": ["slug", "name", "title"],
     "additionalProperties": false
   }
 }

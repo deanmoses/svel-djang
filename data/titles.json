@@ -68,6 +68,11 @@
     "opdb_group_id": "G4do5"
   },
   {
+    "slug": "attila-the-hun",
+    "name": "Attila the Hun",
+    "opdb_group_id": "GrZxD"
+  },
+  {
     "slug": "austin-powers",
     "name": "Austin Powers",
     "opdb_group_id": "G43BW",
@@ -114,6 +119,11 @@
   {
     "slug": "baffle-ball",
     "name": "Baffle Ball"
+  },
+  {
+    "slug": "banzai-run",
+    "name": "Banzai Run",
+    "opdb_group_id": "GR9lZ"
   },
   {
     "slug": "barb-wire",
@@ -194,6 +204,11 @@
     "opdb_group_id": "GX2zO"
   },
   {
+    "slug": "black-hole",
+    "name": "Black Hole",
+    "opdb_group_id": "G41yq"
+  },
+  {
     "slug": "black-knight",
     "name": "Black Knight",
     "opdb_group_id": "GrO7w",
@@ -228,6 +243,11 @@
     "abbreviations": [
       "BV"
     ]
+  },
+  {
+    "slug": "blackwater-100",
+    "name": "Blackwater 100",
+    "opdb_group_id": "G5K6X"
   },
   {
     "slug": "blood-bank-billiards",
@@ -307,6 +327,21 @@
     ]
   },
   {
+    "slug": "checkpoint",
+    "name": "Checkpoint",
+    "opdb_group_id": "G4Jdp"
+  },
+  {
+    "slug": "cirqus-voltaire",
+    "name": "Cirqus Voltaire",
+    "opdb_group_id": "GRVjJ"
+  },
+  {
+    "slug": "cleopatra",
+    "name": "Cleopatra",
+    "opdb_group_id": "GrknN"
+  },
+  {
     "slug": "close-encounters",
     "name": "Close Encounters of the Third Kind",
     "opdb_group_id": "G4qvL",
@@ -316,6 +351,12 @@
     ]
   },
   {
+    "slug": "comet",
+    "name": "Comet",
+    "opdb_group_id": "Gryd3",
+    "series_slug": "comet"
+  },
+  {
     "slug": "congo",
     "name": "Congo",
     "opdb_group_id": "GrNd0",
@@ -323,6 +364,11 @@
     "abbreviations": [
       "CNG"
     ]
+  },
+  {
+    "slug": "cosmic-flash",
+    "name": "Cosmic Flash",
+    "opdb_group_id": "G5pxD"
   },
   {
     "slug": "cosmodrome",
@@ -348,9 +394,30 @@
     ]
   },
   {
+    "slug": "cue-ball-wizard",
+    "name": "Cue Ball Wizard",
+    "opdb_group_id": "G5vPd"
+  },
+  {
     "slug": "cybernaut",
     "name": "Cybernaut",
     "opdb_group_id": "GR69j"
+  },
+  {
+    "slug": "cyclone",
+    "name": "Cyclone",
+    "opdb_group_id": "G4O2b",
+    "series_slug": "comet"
+  },
+  {
+    "slug": "cyclopes",
+    "name": "Cyclopes",
+    "opdb_group_id": "GRwZ7"
+  },
+  {
+    "slug": "dakar",
+    "name": "Dakar",
+    "opdb_group_id": "GR02j"
   },
   {
     "slug": "deadpool",
@@ -360,6 +427,11 @@
     "abbreviations": [
       "DP"
     ]
+  },
+  {
+    "slug": "defender",
+    "name": "Defender",
+    "opdb_group_id": "G5p7D"
   },
   {
     "slug": "demolition-man",
@@ -505,6 +577,11 @@
     "franchise_slug": "elvis"
   },
   {
+    "slug": "escape-from-the-lost-world",
+    "name": "Escape from the Lost World",
+    "opdb_group_id": "G5oEz"
+  },
+  {
     "slug": "escape-from-the-megaverse",
     "name": "Escape From The Megaverse",
     "opdb_group_id": "G0lop"
@@ -527,10 +604,20 @@
     ]
   },
   {
+    "slug": "f-14-tomcat",
+    "name": "F-14 Tomcat",
+    "opdb_group_id": "GRY2O"
+  },
+  {
     "slug": "family-guy",
     "name": "Family Guy",
     "franchise_slug": "family-guy",
     "split_from_opdb_group": "G5LW9"
+  },
+  {
+    "slug": "farfalla",
+    "name": "Farfalla",
+    "opdb_group_id": "GRVw2"
   },
   {
     "slug": "firepower",
@@ -584,6 +671,11 @@
     "slug": "galactic-tank-force",
     "name": "Galactic Tank Force",
     "opdb_group_id": "Gj6PZ"
+  },
+  {
+    "slug": "galaxy-stern",
+    "name": "Galaxy",
+    "opdb_group_id": "GrdDB"
   },
   {
     "slug": "gamatron",
@@ -720,6 +812,11 @@
     "opdb_group_id": "GWyBj"
   },
   {
+    "slug": "haunted-house",
+    "name": "Haunted House",
+    "opdb_group_id": "G5BP6"
+  },
+  {
     "slug": "heavy-metal",
     "name": "Heavy Metal",
     "opdb_group_id": "GoEej",
@@ -754,6 +851,16 @@
     "opdb_group_id": "G188W"
   },
   {
+    "slug": "hot-fire-birds",
+    "name": "Hot Fire Birds",
+    "opdb_group_id": "G4xpN"
+  },
+  {
+    "slug": "hot-tip",
+    "name": "Hot Tip",
+    "opdb_group_id": "Grep0"
+  },
+  {
     "slug": "hot-wheels",
     "name": "Hot Wheels",
     "opdb_group_id": "GEL31",
@@ -768,9 +875,18 @@
     "opdb_group_id": "GvBQX"
   },
   {
+    "slug": "house-of-diamonds",
+    "name": "House of Diamonds",
+    "opdb_group_id": "GRVpL"
+  },
+  {
     "slug": "humpty-dumpty",
     "name": "Humpty Dumpty",
     "opdb_group_id": "GyVVQ"
+  },
+  {
+    "slug": "hyperball",
+    "name": "Hyperball"
   },
   {
     "slug": "ice-fever",
@@ -823,6 +939,11 @@
     ]
   },
   {
+    "slug": "jack-bot",
+    "name": "Jack*Bot",
+    "opdb_group_id": "GRKOX"
+  },
+  {
     "slug": "james-bond-007",
     "name": "James Bond 007",
     "opdb_group_id": "GQKyP",
@@ -867,6 +988,11 @@
     "abbreviations": [
       "JM"
     ]
+  },
+  {
+    "slug": "joust",
+    "name": "Joust",
+    "opdb_group_id": "G4den"
   },
   {
     "slug": "judge-dredd",
@@ -947,6 +1073,11 @@
     "opdb_group_id": "G48NN"
   },
   {
+    "slug": "laser-war",
+    "name": "Laser War",
+    "opdb_group_id": "G5one"
+  },
+  {
     "slug": "last-action-hero",
     "name": "Last Action Hero",
     "opdb_group_id": "GRwyq",
@@ -984,6 +1115,11 @@
     ]
   },
   {
+    "slug": "lexy-lightspeed",
+    "name": "Lexy Lightspeed",
+    "opdb_group_id": "G4doo"
+  },
+  {
     "slug": "lexy-lightspeed-secret-agent-showdown",
     "name": "Lexy Lightspeed - Secret Agent Showdown",
     "opdb_group_id": "GpeeL"
@@ -1017,6 +1153,11 @@
     ]
   },
   {
+    "slug": "lucky-seven",
+    "name": "Lucky Seven",
+    "opdb_group_id": "G5D3O"
+  },
+  {
     "slug": "macs-galaxy",
     "name": "Mac's Galaxy",
     "opdb_group_id": "G4Z6n"
@@ -1044,6 +1185,11 @@
     ]
   },
   {
+    "slug": "memory-lane",
+    "name": "Memory Lane",
+    "opdb_group_id": "Gry0Z"
+  },
+  {
     "slug": "metallica",
     "name": "Metallica",
     "opdb_group_id": "GRBE4",
@@ -1056,6 +1202,16 @@
     "slug": "metallica-remastered",
     "name": "Metallica Remastered",
     "opdb_group_id": "GO0q3"
+  },
+  {
+    "slug": "meteor",
+    "name": "Meteor",
+    "opdb_group_id": "G5b38"
+  },
+  {
+    "slug": "millionaire",
+    "name": "Millionaire",
+    "opdb_group_id": "G5n38"
   },
   {
     "slug": "monopoly",
@@ -1074,6 +1230,16 @@
     "abbreviations": [
       "MB"
     ]
+  },
+  {
+    "slug": "monte-carlo-gottlieb",
+    "name": "Monte Carlo",
+    "opdb_group_id": "G578Y"
+  },
+  {
+    "slug": "motor-show",
+    "name": "Motor Show",
+    "opdb_group_id": "GRb2y"
   },
   {
     "slug": "mr-mrs-pac-man",
@@ -1120,6 +1286,11 @@
     "opdb_group_id": "GRB8Z"
   },
   {
+    "slug": "night-rider",
+    "name": "Night Rider",
+    "opdb_group_id": "GryQj"
+  },
+  {
     "slug": "nightmare-on-elm-street",
     "name": "Freddy: A Nightmare On Elm Street",
     "opdb_group_id": "GRzB7",
@@ -1148,6 +1319,11 @@
     "opdb_group_id": "GLWBV"
   },
   {
+    "slug": "old-coney-island",
+    "name": "Old Coney Island!",
+    "opdb_group_id": "G4qjj"
+  },
+  {
     "slug": "pabst-blue-ribbon",
     "name": "Whoa Nellie / PBR",
     "opdb_group_id": "GRYX4",
@@ -1164,14 +1340,35 @@
     "opdb_group_id": "Ge1O1"
   },
   {
-    "slug": "pinball-champ-82",
-    "name": "Pinball Champ '82",
+    "slug": "phantom-of-the-opera",
+    "name": "The Phantom of the Opera",
+    "opdb_group_id": "Grq1D",
+    "franchise_slug": "phantom-of-the-opera"
+  },
+  {
+    "slug": "pharaoh",
+    "name": "Pharaoh",
+    "opdb_group_id": "G41vn"
+  },
+  {
+    "slug": "phoenix-williams",
+    "name": "Phoenix",
+    "opdb_group_id": "GRQp6"
+  },
+  {
+    "slug": "pinball-champ",
+    "name": "Pinball Champ",
     "opdb_group_id": "GrPdq"
   },
   {
     "slug": "pinball-magic",
     "name": "Pinball Magic",
     "opdb_group_id": "GrZnn"
+  },
+  {
+    "slug": "pinball-stern",
+    "name": "Pinball",
+    "opdb_group_id": "GrZXj"
   },
   {
     "slug": "pinbot",
@@ -1238,6 +1435,16 @@
     "opdb_group_id": "GV8wB"
   },
   {
+    "slug": "pokerino",
+    "name": "Pokerino",
+    "opdb_group_id": "G5pn8"
+  },
+  {
+    "slug": "police-force",
+    "name": "Police Force",
+    "opdb_group_id": "G4d8d"
+  },
+  {
     "slug": "popeye",
     "name": "Popeye Saves the Earth",
     "opdb_group_id": "GR0lW",
@@ -1257,9 +1464,19 @@
     "opdb_group_id": "GELkO"
   },
   {
+    "slug": "rack-em-up",
+    "name": "Rack 'Em Up",
+    "opdb_group_id": "G4ywq"
+  },
+  {
     "slug": "ranger-in-the-ruins",
     "name": "Ranger in the Ruins",
     "opdb_group_id": "GLWWV"
+  },
+  {
+    "slug": "revenge-from-mars",
+    "name": "Revenge from Mars",
+    "opdb_group_id": "G50Wr"
   },
   {
     "slug": "rick-and-morty",
@@ -1280,9 +1497,9 @@
     ]
   },
   {
-    "slug": "revenge-from-mars",
-    "name": "Revenge from Mars",
-    "opdb_group_id": "G50Wr"
+    "slug": "riverboat-gambler",
+    "name": "Riverboat Gambler",
+    "opdb_group_id": "G4E0z"
   },
   {
     "slug": "road-runner",
@@ -1373,6 +1590,11 @@
     "opdb_group_id": "GllPz"
   },
   {
+    "slug": "scramble",
+    "name": "Scramble",
+    "opdb_group_id": "G5p8V"
+  },
+  {
     "slug": "screech",
     "name": "Screech",
     "opdb_group_id": "GPBBv"
@@ -1381,6 +1603,11 @@
     "slug": "seawitch",
     "name": "Seawitch",
     "opdb_group_id": "GR6kB"
+  },
+  {
+    "slug": "secret-service",
+    "name": "Secret Service",
+    "opdb_group_id": "G4qqv"
   },
   {
     "slug": "shaq",
@@ -1425,6 +1652,11 @@
     "opdb_group_id": "Gr3VN"
   },
   {
+    "slug": "solar-fire",
+    "name": "Solar Fire",
+    "opdb_group_id": "GRB26"
+  },
+  {
     "slug": "sorcerers-apprentice",
     "name": "Sorcerer's Apprentice",
     "opdb_group_id": "G8llL"
@@ -1437,6 +1669,11 @@
     "abbreviations": [
       "SP"
     ]
+  },
+  {
+    "slug": "space-gambler",
+    "name": "Space Gambler",
+    "opdb_group_id": "G5bVN"
   },
   {
     "slug": "space-jam",
@@ -1594,6 +1831,11 @@
     ]
   },
   {
+    "slug": "stars",
+    "name": "Stars",
+    "opdb_group_id": "GrXEW"
+  },
+  {
     "slug": "starship-troopers",
     "name": "Starship Troopers",
     "opdb_group_id": "G5we0",
@@ -1635,6 +1877,11 @@
     "name": "Superman",
     "opdb_group_id": "GR73N",
     "franchise_slug": "superman"
+  },
+  {
+    "slug": "surf-n-safari",
+    "name": "Surf 'n Safari",
+    "opdb_group_id": "G5W0z"
   },
   {
     "slug": "tag-team-pinball",
@@ -1691,6 +1938,11 @@
     "abbreviations": [
       "TAF"
     ]
+  },
+  {
+    "slug": "the-atarians",
+    "name": "The Atarians",
+    "opdb_group_id": "Gry9N"
   },
   {
     "slug": "the-avengers",
@@ -1915,6 +2167,16 @@
     "opdb_group_id": "G4eEJ"
   },
   {
+    "slug": "time-machine-zaccaria",
+    "name": "Time Machine",
+    "opdb_group_id": "GRnoY"
+  },
+  {
+    "slug": "torpedo-alley",
+    "name": "Torpedo Alley",
+    "opdb_group_id": "G48on"
+  },
+  {
     "slug": "total-nuclear-annihilation",
     "name": "Total Nuclear Annihilation",
     "opdb_group_id": "GRD79"
@@ -2013,6 +2275,11 @@
     ]
   },
   {
+    "slug": "winter-sports",
+    "name": "Winter Sports",
+    "opdb_group_id": "GrxWp"
+  },
+  {
     "slug": "wizard",
     "name": "Wizard!",
     "opdb_group_id": "G4l8K",
@@ -2047,6 +2314,11 @@
     ]
   },
   {
+    "slug": "x-force",
+    "name": "X Force",
+    "opdb_group_id": "GRzJ1"
+  },
+  {
     "slug": "x-men",
     "name": "X-Men",
     "opdb_group_id": "Grj6X",
@@ -2054,6 +2326,11 @@
     "abbreviations": [
       "XM"
     ]
+  },
+  {
+    "slug": "xenon",
+    "name": "Xenon",
+    "opdb_group_id": "G42Pk"
   },
   {
     "slug": "xs-os",

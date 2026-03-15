@@ -355,6 +355,11 @@
     "description": "Pinball machines based on Namco's Pac-Man video game franchise."
   },
   {
+    "slug": "phantom-of-the-opera",
+    "name": "The Phantom of the Opera",
+    "description": "Pinball machines based on The Phantom of the Opera."
+  },
+  {
     "slug": "pirates-of-the-caribbean",
     "name": "Pirates of the Caribbean",
     "description": "Pinball machines based on the Pirates of the Caribbean franchise."

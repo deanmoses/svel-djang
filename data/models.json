@@ -73,6 +73,13 @@
     "ipdb_id": 4432
   },
   {
+    "slug": "attila-the-hun",
+    "name": "Attila the Hun",
+    "title": "attila-the-hun",
+    "opdb_id": "GrZxD-MLO4Y",
+    "ipdb_id": 109
+  },
+  {
     "slug": "avatar-the-battle-for-pandora-collectors-edition",
     "name": "Avatar: The Battle for Pandora (Collector's Edition)",
     "title": "avatar-the-battle-for-pandora",
@@ -99,6 +106,13 @@
     "title": "avengers-infinity-quest",
     "opdb_id": "Gj66P-MXr0E-A1nx0",
     "ipdb_id": 6755
+  },
+  {
+    "slug": "banzai-run",
+    "name": "Banzai Run",
+    "title": "banzai-run",
+    "opdb_id": "GR9lZ-MkP2j",
+    "ipdb_id": 175
   },
   {
     "slug": "barry-os-barbecue-challenge-collectors-edition",
@@ -129,6 +143,13 @@
     "ipdb_id": 6354
   },
   {
+    "slug": "batman-the-dark-knight",
+    "name": "Batman: The Dark Knight",
+    "title": "batman",
+    "opdb_id": "G4yVw-M85j8",
+    "ipdb_id": 5307
+  },
+  {
     "slug": "big-dryvers",
     "name": "Big Dryvers",
     "title": "space-orbit",
@@ -143,6 +164,13 @@
     "title": "bird-watcher",
     "is_conversion": true,
     "opdb_id": "GX2zO-M5Rr4"
+  },
+  {
+    "slug": "black-hole",
+    "name": "Black Hole",
+    "title": "black-hole",
+    "opdb_id": "G41yq-MQP65",
+    "ipdb_id": 307
   },
   {
     "slug": "black-knight-limited-edition",
@@ -165,6 +193,13 @@
     "title": "black-knight-sword-of-rage",
     "opdb_id": "GD7Ld-MBRP4",
     "ipdb_id": 6568
+  },
+  {
+    "slug": "blackwater-100",
+    "name": "Blackwater 100",
+    "title": "blackwater-100",
+    "opdb_id": "G5K6X-MQjwK",
+    "ipdb_id": 319
   },
   {
     "slug": "blood-bank-billiards",
@@ -311,6 +346,20 @@
     "ipdb_id": 4984
   },
   {
+    "slug": "checkpoint",
+    "name": "Checkpoint",
+    "title": "checkpoint",
+    "opdb_id": "G4Jdp-MJNrr",
+    "ipdb_id": 498
+  },
+  {
+    "slug": "cirqus-voltaire",
+    "name": "Cirqus Voltaire",
+    "title": "cirqus-voltaire",
+    "opdb_id": "GRVjJ-MLq7W",
+    "ipdb_id": 4059
+  },
+  {
     "slug": "city-ship",
     "name": "City Ship",
     "title": "super-spin",
@@ -322,11 +371,25 @@
   {
     "slug": "cleopatra",
     "name": "Cleopatra",
+    "title": "cleopatra",
+    "opdb_id": "GrknN-MQrdv",
+    "ipdb_id": 532
+  },
+  {
+    "slug": "cleopatra-play-pool",
+    "name": "Cleopatra",
     "title": "play-pool",
     "is_conversion": true,
     "converted_from": "play-pool",
     "opdb_id": "G5n1Q-MQPRP",
     "ipdb_id": 4111
+  },
+  {
+    "slug": "comet",
+    "name": "Comet",
+    "title": "comet",
+    "opdb_id": "Gryd3-MLqjd",
+    "ipdb_id": 548
   },
   {
     "slug": "coney-island",
@@ -338,6 +401,13 @@
     "ipdb_id": 3880
   },
   {
+    "slug": "cosmic-flash",
+    "name": "Cosmic Flash",
+    "title": "cosmic-flash",
+    "opdb_id": "G5pxD-Mp48v",
+    "ipdb_id": 3639
+  },
+  {
     "slug": "cosmodrome",
     "name": "Cosmodrome",
     "title": "cosmodrome",
@@ -346,11 +416,39 @@
     "ipdb_id": 3696
   },
   {
+    "slug": "cue-ball-wizard",
+    "name": "Cue Ball Wizard",
+    "title": "cue-ball-wizard",
+    "opdb_id": "G5vPd-MJp7z",
+    "ipdb_id": 610
+  },
+  {
     "slug": "cybernaut",
     "name": "Cybernaut",
     "title": "cybernaut",
     "opdb_id": "GR69j-MW93o",
     "ipdb_id": 614
+  },
+  {
+    "slug": "cyclone",
+    "name": "Cyclone",
+    "title": "cyclone",
+    "opdb_id": "G4O2b-MJpn4",
+    "ipdb_id": 617
+  },
+  {
+    "slug": "cyclopes",
+    "name": "Cyclopes",
+    "title": "cyclopes",
+    "opdb_id": "GRwZ7-MJ7vy",
+    "ipdb_id": 619
+  },
+  {
+    "slug": "dakar",
+    "name": "Dakar",
+    "title": "dakar",
+    "opdb_id": "GR02j-MLy1Z",
+    "ipdb_id": 3629
   },
   {
     "slug": "dark-rider",
@@ -377,6 +475,13 @@
     "ipdb_id": 6559
   },
   {
+    "slug": "defender-pinball",
+    "name": "Defender",
+    "title": "defender",
+    "opdb_id": "G5p7D-MJNVo",
+    "ipdb_id": 651
+  },
+  {
     "slug": "demolition-man",
     "name": "Demolition Man",
     "title": "demolition-man",
@@ -390,6 +495,12 @@
     "is_conversion": true,
     "converted_from": "demolition-man",
     "opdb_id": "G5bv3-MePXV"
+  },
+  {
+    "slug": "dialed-in",
+    "name": "Dialed In!",
+    "title": "dialed-in",
+    "opdb_id": "G4X2l-MDqjR"
   },
   {
     "slug": "dialed-in-collectors-edition",
@@ -534,6 +645,13 @@
     "ipdb_id": 6598
   },
   {
+    "slug": "escape-from-the-lost-world",
+    "name": "Escape from the Lost World",
+    "title": "escape-from-the-lost-world",
+    "opdb_id": "G5oEz-MQ7Zw",
+    "ipdb_id": 789
+  },
+  {
     "slug": "escape-from-the-megaverse",
     "name": "Escape From The Megaverse",
     "title": "escape-from-the-megaverse",
@@ -561,6 +679,13 @@
     "opdb_id": "GYWvw-MKNP4"
   },
   {
+    "slug": "f-14-tomcat",
+    "name": "F-14 Tomcat",
+    "title": "f-14-tomcat",
+    "opdb_id": "GRY2O-MLWdy",
+    "ipdb_id": 804
+  },
+  {
     "slug": "family-guy",
     "name": "Family Guy",
     "title": "family-guy",
@@ -577,9 +702,16 @@
     "ipdb_id": 3091
   },
   {
+    "slug": "farfalla",
+    "name": "Farfalla",
+    "title": "farfalla",
+    "opdb_id": "GRVw2-M4oWO",
+    "ipdb_id": 824
+  },
+  {
     "slug": "flesh-and-blood",
     "name": "Flesh and Blood",
-    "title": "pinball-champ-82",
+    "title": "pinball-champ",
     "is_conversion": true,
     "converted_from": "pinball-champ-82",
     "opdb_id": "GrPdq-MnKwO",
@@ -656,6 +788,13 @@
     "title": "galactic-tank-force",
     "variant_of": "galactic-tank-force-classic",
     "opdb_id": "Gj6PZ-Mb5z6-A9Lbd"
+  },
+  {
+    "slug": "galaxy-stern",
+    "name": "Galaxy",
+    "title": "galaxy-stern",
+    "opdb_id": "GrdDB-ML8xK",
+    "ipdb_id": 980
   },
   {
     "slug": "gamatron",
@@ -740,6 +879,12 @@
     "ipdb_id": 1044
   },
   {
+    "slug": "goldeneye",
+    "name": "GoldenEye",
+    "title": "goldeneye",
+    "opdb_id": "G43wE-MQV5K"
+  },
+  {
     "slug": "grand-slam-rally",
     "name": "Grand Slam Rally",
     "title": "grand-slam-rally",
@@ -810,6 +955,12 @@
     "ipdb_id": 1125
   },
   {
+    "slug": "harley-davidson-bally",
+    "name": "Harley-Davidson",
+    "title": "harley-davidson-bally",
+    "opdb_id": "Gr2L0-MLOrj"
+  },
+  {
     "slug": "harry-potter-arcade-edition",
     "name": "Harry Potter (Arcade Edition)",
     "title": "harry-potter",
@@ -828,6 +979,13 @@
     "name": "Harry Potter (Wizard Edition)",
     "title": "harry-potter",
     "opdb_id": "GWyBj-MdEbK-A973V"
+  },
+  {
+    "slug": "haunted-house",
+    "name": "Haunted House",
+    "title": "haunted-house",
+    "opdb_id": "G5BP6-MJK4Z",
+    "ipdb_id": 1133
   },
   {
     "slug": "high-speed",
@@ -857,6 +1015,33 @@
     "converted_from": "space-shuttle",
     "opdb_id": "G4jyz-M5REB",
     "ipdb_id": 5118
+  },
+  {
+    "slug": "hot-fire-birds",
+    "name": "Hot Fire Birds",
+    "title": "hot-fire-birds",
+    "opdb_id": "G4xpN-MRjPo",
+    "ipdb_id": 3633
+  },
+  {
+    "slug": "hot-tip",
+    "name": "Hot Tip",
+    "title": "hot-tip",
+    "opdb_id": "Grep0-MQYN4",
+    "ipdb_id": 3163
+  },
+  {
+    "slug": "house-of-diamonds",
+    "name": "House of Diamonds",
+    "title": "house-of-diamonds",
+    "opdb_id": "GRVpL-MJjPR",
+    "ipdb_id": 3165
+  },
+  {
+    "slug": "hyperball",
+    "name": "Hyperball",
+    "title": "hyperball",
+    "ipdb_id": 3169
   },
   {
     "slug": "ice-fever",
@@ -895,6 +1080,13 @@
     "title": "iron-maiden",
     "opdb_id": "G4dOQ-MyNbb",
     "ipdb_id": 6555
+  },
+  {
+    "slug": "jack-bot",
+    "name": "Jack*Bot",
+    "title": "jack-bot",
+    "opdb_id": "GRKOX-MLyrW",
+    "ipdb_id": 3619
   },
   {
     "slug": "james-bond-007-limited-edition",
@@ -950,6 +1142,13 @@
     "name": "John Wick (Premium)",
     "title": "john-wick",
     "opdb_id": "GQK1P-Ml95Z-AOY43"
+  },
+  {
+    "slug": "joust",
+    "name": "Joust",
+    "title": "joust",
+    "opdb_id": "G4den-MLRYK",
+    "ipdb_id": 1316
   },
   {
     "slug": "jurassic-park-30th-anniversary",
@@ -1042,6 +1241,13 @@
     "ipdb_id": 1406
   },
   {
+    "slug": "laser-war",
+    "name": "Laser War",
+    "title": "laser-war",
+    "opdb_id": "G5one-MQY5V",
+    "ipdb_id": 1415
+  },
+  {
     "slug": "lawman",
     "name": "Lawman",
     "title": "lawman",
@@ -1100,6 +1306,13 @@
     "ipdb_id": 6216
   },
   {
+    "slug": "lexy-lightspeed-escape-from-earth",
+    "name": "Lexy Lightspeed: Escape from Earth",
+    "title": "lexy-lightspeed",
+    "opdb_id": "G4doo-MLEj1",
+    "ipdb_id": 6449
+  },
+  {
     "slug": "lexy-lightspeed-secret-agent-showdown",
     "name": "Lexy Lightspeed - Secret Agent Showdown",
     "title": "lexy-lightspeed-secret-agent-showdown",
@@ -1146,6 +1359,13 @@
     "ipdb_id": 4112
   },
   {
+    "slug": "lucky-seven",
+    "name": "Lucky Seven",
+    "title": "lucky-seven",
+    "opdb_id": "G5D3O-Ml9xp",
+    "ipdb_id": 3798
+  },
+  {
     "slug": "mac-jungle",
     "name": "Mac Jungle",
     "title": "macs-galaxy",
@@ -1176,6 +1396,13 @@
     "title": "mata-hari-em",
     "opdb_id": "G417e-Ml9ZE",
     "ipdb_id": 1557
+  },
+  {
+    "slug": "memory-lane",
+    "name": "Memory Lane",
+    "title": "memory-lane",
+    "opdb_id": "Gry0Z-MP3zR",
+    "ipdb_id": 1570
   },
   {
     "slug": "metallica-master-of-puppets-limited-edition",
@@ -1217,6 +1444,34 @@
     "ipdb_id": 5478
   },
   {
+    "slug": "meteor",
+    "name": "Meteor",
+    "title": "meteor",
+    "opdb_id": "G5b38-MDqkx",
+    "ipdb_id": 1580
+  },
+  {
+    "slug": "millionaire",
+    "name": "Millionaire",
+    "title": "millionaire",
+    "opdb_id": "G5n38-M1rw3",
+    "ipdb_id": 1597
+  },
+  {
+    "slug": "monte-carlo-gottlieb",
+    "name": "Monte Carlo",
+    "title": "monte-carlo-gottlieb",
+    "opdb_id": "G578Y-MJNzE",
+    "ipdb_id": 1622
+  },
+  {
+    "slug": "motor-show",
+    "name": "Motor Show",
+    "title": "motor-show",
+    "opdb_id": "GRb2y-MZezV",
+    "ipdb_id": 3631
+  },
+  {
     "slug": "mustang-limited-edition",
     "name": "Mustang (Limited Edition)",
     "title": "mustang",
@@ -1240,6 +1495,13 @@
     "ipdb_id": 3482
   },
   {
+    "slug": "night-rider",
+    "name": "Night Rider",
+    "title": "night-rider",
+    "opdb_id": "GryQj-MLvN7",
+    "ipdb_id": 4497
+  },
+  {
     "slug": "ninja-eclipse-arcade-edition",
     "name": "Ninja Eclipse (Arcade Edition)",
     "title": "ninja-eclipse",
@@ -1251,6 +1513,13 @@
     "title": "ninja-eclipse",
     "variant_of": "ninja-eclipse-arcade-edition",
     "opdb_id": "GZVXY-MyNOq-ARWE8"
+  },
+  {
+    "slug": "old-coney-island",
+    "name": "Old Coney Island!",
+    "title": "old-coney-island",
+    "opdb_id": "G4qjj-MZeyb",
+    "ipdb_id": 553
   },
   {
     "slug": "panthera",
@@ -1274,6 +1543,27 @@
     "opdb_id": "Ge1O1-MYeEB-A9wWL"
   },
   {
+    "slug": "phantom-of-the-opera",
+    "name": "The Phantom of the Opera",
+    "title": "phantom-of-the-opera",
+    "opdb_id": "Grq1D-MQokp",
+    "ipdb_id": 1777
+  },
+  {
+    "slug": "pharaoh",
+    "name": "Pharaoh",
+    "title": "pharaoh",
+    "opdb_id": "G41vn-MD1jB",
+    "ipdb_id": 1778
+  },
+  {
+    "slug": "phoenix-williams",
+    "name": "Phoenix",
+    "title": "phoenix-williams",
+    "opdb_id": "GRQp6-MJ5Wq",
+    "ipdb_id": 1780
+  },
+  {
     "slug": "pin-ball-pool",
     "name": "Pin Ball Pool",
     "title": "eight-ball-deluxe",
@@ -1285,18 +1575,32 @@
   {
     "slug": "pinball",
     "name": "Pinball",
-    "title": "pinball-champ-82",
+    "title": "pinball-champ",
     "is_conversion": true,
     "converted_from": "pinball-champ-82",
     "opdb_id": "GrPdq-MLONx",
     "ipdb_id": 3306
   },
   {
-    "slug": "pinball-champ-82",
+    "slug": "pinball-champ",
     "name": "Pinball Champ '82",
-    "title": "pinball-champ-82",
+    "title": "pinball-champ",
     "opdb_id": "GrPdq-MQYkJ",
     "ipdb_id": 1794
+  },
+  {
+    "slug": "pinball-champ-82",
+    "name": "Pinball Champ '82",
+    "title": "pinball-champ",
+    "opdb_id": "GrPdq-MQYkJ",
+    "ipdb_id": 1794
+  },
+  {
+    "slug": "pinball-stern",
+    "name": "Pinball",
+    "title": "pinball-stern",
+    "opdb_id": "GrZXj-Mq11k",
+    "ipdb_id": 1792
   },
   {
     "slug": "pirates-of-the-caribbean-collectors-edition",
@@ -1348,6 +1652,20 @@
     "opdb_id": "GV8wB-MRjKd-AOVy7"
   },
   {
+    "slug": "pokerino",
+    "name": "Pokerino",
+    "title": "pokerino",
+    "opdb_id": "G5pn8-MJ5P4",
+    "ipdb_id": 1839
+  },
+  {
+    "slug": "police-force",
+    "name": "Police Force",
+    "title": "police-force",
+    "opdb_id": "G4d8d-MVKOR",
+    "ipdb_id": 1841
+  },
+  {
     "slug": "pulp-fiction-limited-edition",
     "name": "Pulp Fiction (Limited Edition)",
     "title": "pulp-fiction",
@@ -1383,6 +1701,13 @@
     "ipdb_id": 4015
   },
   {
+    "slug": "rack-em-up",
+    "name": "Rack 'Em Up",
+    "title": "rack-em-up",
+    "opdb_id": "G4ywq-MLqxN",
+    "ipdb_id": 1902
+  },
+  {
     "slug": "ranger-in-the-ruins",
     "name": "Ranger in the Ruins",
     "title": "ranger-in-the-ruins",
@@ -1390,11 +1715,24 @@
     "opdb_id": "GLWWV-Mb5Xx"
   },
   {
+    "slug": "revenge-from-mars",
+    "name": "Revenge from Mars",
+    "title": "revenge-from-mars",
+    "opdb_id": "G50Wr-MLeZP"
+  },
+  {
     "slug": "rick-and-morty-standard-edition",
     "name": "Rick and Morty (Standard Edition)",
     "title": "rick-and-morty",
     "opdb_id": "GQKb2-MYek0",
     "ipdb_id": 6640
+  },
+  {
+    "slug": "riverboat-gambler",
+    "name": "Riverboat Gambler",
+    "title": "riverboat-gambler",
+    "opdb_id": "G4E0z-MDvl7",
+    "ipdb_id": 1966
   },
   {
     "slug": "road-racer",
@@ -1482,6 +1820,13 @@
     "opdb_id": "GllPz-MBRrV"
   },
   {
+    "slug": "scramble",
+    "name": "Scramble",
+    "title": "scramble",
+    "opdb_id": "G5p8V-MD0op",
+    "ipdb_id": 3557
+  },
+  {
     "slug": "screech",
     "name": "Screech",
     "title": "screech",
@@ -1489,6 +1834,13 @@
     "display_type": "alphanumeric",
     "opdb_id": "GPBBv-ME0x0",
     "ipdb_id": 3939
+  },
+  {
+    "slug": "secret-service",
+    "name": "Secret Service",
+    "title": "secret-service",
+    "opdb_id": "G4qqv-MDW0P",
+    "ipdb_id": 2090
   },
   {
     "slug": "sexy-girl",
@@ -1561,11 +1913,25 @@
     "ipdb_id": 3905
   },
   {
+    "slug": "solar-fire",
+    "name": "Solar Fire",
+    "title": "solar-fire",
+    "opdb_id": "GRB26-MQPwX",
+    "ipdb_id": 2238
+  },
+  {
     "slug": "sorcerers-apprentice",
     "name": "Sorcerer's Apprentice",
     "title": "sorcerers-apprentice",
     "is_conversion": true,
     "opdb_id": "G8llL-MyNwq"
+  },
+  {
+    "slug": "space-gambler",
+    "name": "Space Gambler",
+    "title": "space-gambler",
+    "opdb_id": "G5bVN-M61nY",
+    "ipdb_id": 2250
   },
   {
     "slug": "space-hawks",
@@ -1682,6 +2048,13 @@
     "ipdb_id": 6429
   },
   {
+    "slug": "stars",
+    "name": "Stars",
+    "title": "stars",
+    "opdb_id": "GrXEW-MDEwr",
+    "ipdb_id": 2366
+  },
+  {
     "slug": "stellar-airship",
     "name": "Stellar Airship",
     "title": "eight-ball",
@@ -1737,6 +2110,13 @@
     "ipdb_id": 4574
   },
   {
+    "slug": "surf-n-safari",
+    "name": "Surf 'n Safari",
+    "title": "surf-n-safari",
+    "opdb_id": "G5W0z-MLW6N",
+    "ipdb_id": 2461
+  },
+  {
     "slug": "tag-team-pinball",
     "name": "Tag-Team Pinball",
     "title": "tag-team-pinball",
@@ -1775,6 +2155,13 @@
     "title": "teenage-mutant-ninja-turtles",
     "opdb_id": "Gd2Xb-MRjpZ-A9wqN",
     "ipdb_id": 6731
+  },
+  {
+    "slug": "the-atarians",
+    "name": "The Atarians",
+    "title": "the-atarians",
+    "opdb_id": "Gry9N-MQYVj",
+    "ipdb_id": 102
   },
   {
     "slug": "the-avengers-hulk-limited-edition",
@@ -1991,6 +2378,20 @@
     "ipdb_id": 3904
   },
   {
+    "slug": "time-machine-zaccaria",
+    "name": "Time Machine",
+    "title": "time-machine-zaccaria",
+    "opdb_id": "GRnoY-MQVwx",
+    "ipdb_id": 3494
+  },
+  {
+    "slug": "torpedo-alley",
+    "name": "Torpedo Alley",
+    "title": "torpedo-alley",
+    "opdb_id": "G48on-ML8B9",
+    "ipdb_id": 2603
+  },
+  {
     "slug": "total-nuclear-annihilation",
     "name": "Total Nuclear Annihilation",
     "title": "total-nuclear-annihilation",
@@ -2049,6 +2450,13 @@
     "title": "transformers",
     "opdb_id": "GRnPz-MLBzV",
     "ipdb_id": 5709
+  },
+  {
+    "slug": "tron-legacy",
+    "name": "Disney TRON: Legacy",
+    "title": "tron",
+    "opdb_id": "GrkL5-MJoNN",
+    "ipdb_id": 5707
   },
   {
     "slug": "ultraman-kaiju-rumble-collectors-edition",
@@ -2162,6 +2570,13 @@
     "ipdb_id": 6647
   },
   {
+    "slug": "winter-sports",
+    "name": "Winter Sports",
+    "title": "winter-sports",
+    "opdb_id": "GrxWp-MDvrD",
+    "ipdb_id": 3563
+  },
+  {
     "slug": "world-defender",
     "name": "World Defender",
     "title": "world-defender",
@@ -2175,6 +2590,13 @@
     "title": "wrestlemania",
     "opdb_id": "GR6Or-MwNex",
     "ipdb_id": 6215
+  },
+  {
+    "slug": "x-force",
+    "name": "X Force",
+    "title": "x-force",
+    "opdb_id": "GRzJ1-MkPEj",
+    "ipdb_id": 3539
   },
   {
     "slug": "x-men-limited-edition",
@@ -2204,6 +2626,13 @@
     "variant_of": "x-men-limited-edition",
     "opdb_id": "Grj6X-MJNV1-AO209",
     "ipdb_id": 5824
+  },
+  {
+    "slug": "xenon",
+    "name": "Xenon",
+    "title": "xenon",
+    "opdb_id": "G42Pk-MZe2e",
+    "ipdb_id": 2821
   },
   {
     "slug": "xs-os",
