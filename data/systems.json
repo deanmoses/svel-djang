@@ -253,7 +253,7 @@
     "slug": "manilamatic-system-80a",
     "name": "ManilaMatic System 80A",
     "manufacturer": "manilamatic",
-    "description": "A pinball hardware system from [[manufacturer:manilamatic]], a Philippine pinball manufacturer. It appears to share design lineage or naming conventions with [[manufacturer:gottlieb]]'s System 80A architecture.",
+    "description": "A pinball hardware system from [[manufacturer:manilamatic]], a Philippine pinball manufacturer. It appears to share design lineage or naming conventions with [[manufacturer:gottlieb]]'s [[system:gottlieb-system-80a]] architecture.",
     "mpu_strings": [
       "ManilaMatic System 80A Combi"
     ],
@@ -263,7 +263,7 @@
     "slug": "manilamatic-system-80b",
     "name": "ManilaMatic System 80B",
     "manufacturer": "manilamatic",
-    "description": "A pinball hardware system from [[manufacturer:manilamatic]], a Philippine pinball manufacturer, sharing naming conventions with [[manufacturer:gottlieb]]'s System 80B.",
+    "description": "A pinball hardware system from [[manufacturer:manilamatic]], a Philippine pinball manufacturer, sharing naming conventions with [[manufacturer:gottlieb]]'s [[system:gottlieb-system-80b]].",
     "mpu_strings": [
       "ManilaMatic System 80B Combi"
     ],
