@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pinbase/title.schema.json",
+  "title": "Pinbase Title",
+  "description": "Frontmatter for a Pinbase-authored title record",
+  "type": "object",
+  "properties": {
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "name": { "type": "string", "minLength": 1 },
+    "opdb_group_id": { "type": ["string", "null"] },
+    "franchise_slug": {
+      "type": ["string", "null"],
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "series_slug": {
+      "type": ["string", "null"],
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "abbreviations": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true,
+      "default": []
+    },
+    "model_slugs": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+      "uniqueItems": true,
+      "default": []
+    },
+    "split_from_opdb_group": {
+      "type": ["string", "null"],
+      "description": "OPDB group ID this title was intentionally split from"
+    }
+  },
+  "required": ["slug", "name"],
+  "additionalProperties": false
+}

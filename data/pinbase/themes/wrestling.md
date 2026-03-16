@@ -1,0 +1,4 @@
+---
+slug: wrestling
+name: Wrestling
+---

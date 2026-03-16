@@ -1,0 +1,4 @@
+---
+slug: vampire
+name: Vampire
+---

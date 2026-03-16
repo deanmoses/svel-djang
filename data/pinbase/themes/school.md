@@ -1,0 +1,4 @@
+---
+slug: school
+name: School
+---

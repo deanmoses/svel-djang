@@ -1,0 +1,11 @@
+---
+slug: jumbo-button-console-model
+name: Jumbo (button console model)
+title_slug: jumbo-button-console-model
+ipdb_id: 6982
+manufacturer_slug: bally
+year: 1959
+month: 5
+player_count: 1
+technology_generation_slug: electromechanical
+---

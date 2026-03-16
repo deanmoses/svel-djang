@@ -1,10 +1,13 @@
-"""Seed CorporateEntity + Address records from data/corporate_entities.json.
+"""Seed CorporateEntity + Address records from data/corporate_entities.json or data/pinbase/manufacturers/.
 
 Creates or updates CorporateEntity records linked to their parent
 Manufacturer, then asserts editorial claims for name and years_active.
 Also creates Address records from optional headquarters fields.
 
 Runs after ingest_pinbase_manufacturers (for Manufacturer records).
+
+In Markdown mode, corporate entities are embedded in manufacturer files
+as the corporate_entities frontmatter field.
 """
 
 from __future__ import annotations
@@ -16,6 +19,7 @@ from pathlib import Path
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
+from apps.catalog.ingestion.pinbase_loader import load_corporate_entities_as_dicts
 from apps.catalog.models import Address, CorporateEntity, Manufacturer
 from apps.catalog.resolve import resolve_corporate_entity
 from apps.provenance.models import Claim, Source
@@ -26,7 +30,7 @@ DEFAULT_PATH = Path(__file__).parents[5] / "data" / "corporate_entities.json"
 
 
 class Command(BaseCommand):
-    help = "Seed CorporateEntity records from data/corporate_entities.json."
+    help = "Seed CorporateEntity records from data/corporate_entities.json or data/pinbase/."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -34,11 +38,20 @@ class Command(BaseCommand):
             default=str(DEFAULT_PATH),
             help="Path to corporate_entities.json seed file.",
         )
+        parser.add_argument(
+            "--format",
+            choices=["json", "markdown"],
+            default="json",
+            help="Data source format: json (data/*.json) or markdown (data/pinbase/)",
+        )
 
     def handle(self, *args, **options):
-        path = options["path"]
-        with open(path) as f:
-            entries = json.load(f)
+        if options["format"] == "markdown":
+            entries = load_corporate_entities_as_dicts()
+        else:
+            path = options["path"]
+            with open(path) as f:
+                entries = json.load(f)
 
         # Pre-fetch manufacturer lookup by slug.
         mfr_by_slug: dict[str, Manufacturer] = {

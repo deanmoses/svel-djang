@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pinbase/model.schema.json",
+  "title": "Pinbase Model",
+  "description": "Frontmatter for a Pinbase-authored machine model record",
+  "type": "object",
+  "properties": {
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "name": { "type": "string", "minLength": 1 },
+    "title_slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "opdb_id": { "type": ["string", "null"] },
+    "ipdb_id": { "type": ["integer", "null"] },
+    "manufacturer_slug": {
+      "type": ["string", "null"],
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "year": { "type": ["integer", "null"], "minimum": 1700, "maximum": 2100 },
+    "month": { "type": ["integer", "null"], "minimum": 1, "maximum": 12 },
+    "player_count": { "type": ["integer", "null"], "minimum": 1 },
+    "flipper_count": { "type": ["integer", "null"], "minimum": 0 },
+    "production_quantity": { "type": ["string", "null"] },
+    "display_type_slug": {
+      "type": ["string", "null"],
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "display_subtype_slug": {
+      "type": ["string", "null"],
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "technology_generation_slug": {
+      "type": ["string", "null"],
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "technology_subgeneration_slug": {
+      "type": ["string", "null"],
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "system_slug": {
+      "type": ["string", "null"],
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "cabinet_slug": {
+      "type": ["string", "null"],
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "game_format_slug": {
+      "type": ["string", "null"],
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "variant_of": {
+      "type": ["string", "null"],
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "converted_from": {
+      "type": ["string", "null"],
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "is_conversion": { "type": "boolean", "default": false },
+    "is_remake": { "type": "boolean", "default": false },
+    "remake_of": {
+      "type": ["string", "null"],
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "tag_slugs": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+      "uniqueItems": true,
+      "default": []
+    },
+    "credit_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "person_slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "role": { "type": "string", "minLength": 1 }
+        },
+        "required": ["person_slug", "role"],
+        "additionalProperties": false
+      },
+      "default": []
+    }
+  },
+  "required": ["slug", "name", "title_slug"],
+  "additionalProperties": false
+}

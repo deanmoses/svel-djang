@@ -1,0 +1,4 @@
+---
+slug: blackjack
+name: Blackjack
+---

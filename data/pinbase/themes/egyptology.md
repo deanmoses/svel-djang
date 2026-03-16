@@ -1,0 +1,4 @@
+---
+slug: egyptology
+name: Egyptology
+---

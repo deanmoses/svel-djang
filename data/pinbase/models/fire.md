@@ -1,0 +1,30 @@
+---
+slug: fire
+name: Fire!
+title_slug: fire
+opdb_id: G41Lo-MJp3y
+ipdb_id: 859
+manufacturer_slug: williams
+year: 1987
+month: 1
+player_count: 4
+production_quantity: '7697'
+display_type_slug: alphanumeric
+technology_generation_slug: solid-state
+system_slug: williams-system-11a
+credit_refs:
+- person_slug: mark-sprenger
+  role: Art
+- person_slug: barry-oursler
+  role: Design
+- person_slug: chris-granner
+  role: Music
+- person_slug: dan-lee
+  role: Software
+- person_slug: brian-schmidt
+  role: Sound
+- person_slug: chris-granner
+  role: Sound
+- person_slug: rich-karstens
+  role: Sound
+---

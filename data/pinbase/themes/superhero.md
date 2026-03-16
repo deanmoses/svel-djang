@@ -1,0 +1,4 @@
+---
+slug: superhero
+name: Superhero
+---

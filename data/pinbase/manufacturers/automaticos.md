@@ -1,0 +1,4 @@
+---
+slug: automaticos
+name: Automaticos
+---

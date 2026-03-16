@@ -1,0 +1,4 @@
+---
+slug: celebration
+name: Celebration
+---

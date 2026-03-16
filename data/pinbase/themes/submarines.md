@@ -1,0 +1,4 @@
+---
+slug: submarines
+name: Submarines
+---

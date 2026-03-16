@@ -1,0 +1,17 @@
+---
+slug: grand-tour
+name: Grand Tour
+title_slug: grand-tour-happy-tour
+opdb_id: GrNx1-MJ6q9
+ipdb_id: 1081
+manufacturer_slug: bally
+year: 1964
+month: 6
+player_count: 1
+production_quantity: '1310'
+display_type_slug: score-reels
+technology_generation_slug: electromechanical
+credit_refs:
+- person_slug: ted-zale
+  role: Design
+---

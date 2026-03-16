@@ -1,0 +1,4 @@
+---
+slug: dice
+name: Dice
+---

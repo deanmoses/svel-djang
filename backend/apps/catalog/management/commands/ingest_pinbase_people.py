@@ -1,4 +1,4 @@
-"""Seed Person records and aliases from data/people.json.
+"""Seed Person records and aliases from data/people.json or data/pinbase/people/.
 
 Creates or updates Person records with canonical names and slugs, then
 syncs PersonAlias rows so external ingest commands can match variant
@@ -17,6 +17,7 @@ from pathlib import Path
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
+from apps.catalog.ingestion.pinbase_loader import load_people_as_dicts
 from apps.catalog.models import Person, PersonAlias
 from apps.provenance.models import Claim, Source
 
@@ -26,7 +27,7 @@ DEFAULT_PATH = Path(__file__).parents[5] / "data" / "people.json"
 
 
 class Command(BaseCommand):
-    help = "Seed Person records and aliases from data/people.json."
+    help = "Seed Person records and aliases from data/people.json or data/pinbase/."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -34,11 +35,20 @@ class Command(BaseCommand):
             default=str(DEFAULT_PATH),
             help="Path to people.json.",
         )
+        parser.add_argument(
+            "--format",
+            choices=["json", "markdown"],
+            default="json",
+            help="Data source format: json (data/*.json) or markdown (data/pinbase/)",
+        )
 
     def handle(self, *args, **options):
-        path = options["path"]
-        with open(path) as f:
-            entries = json.load(f)
+        if options["format"] == "markdown":
+            entries = load_people_as_dicts()
+        else:
+            path = options["path"]
+            with open(path) as f:
+                entries = json.load(f)
 
         # --- Create/update Person records ---
 

@@ -35,13 +35,13 @@ repos:
         entry: npx prettier@3.8.1 --check
         language: system
         types: [markdown]
-        exclude: ^(CLAUDE|AGENTS)\.md$
+        exclude: ^(CLAUDE|AGENTS)\.md$|^data/pinbase/
       - id: markdownlint-cli2
         name: markdownlint-cli2
         entry: npx markdownlint-cli2@0.21.0
         language: system
         types: [markdown]
-        exclude: ^(CLAUDE|AGENTS)\.md$
+        exclude: ^(CLAUDE|AGENTS)\.md$|^data/pinbase/
       # Python (backend) — use project's ruff via uv so pre-commit and CI
       # always run the identical binary (avoids platform formatting drift).
       # pass_filenames: false so ruff checks all backend files every time,

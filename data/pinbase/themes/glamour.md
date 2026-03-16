@@ -1,0 +1,4 @@
+---
+slug: glamour
+name: Glamour
+---

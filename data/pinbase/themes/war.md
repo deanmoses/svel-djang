@@ -1,0 +1,4 @@
+---
+slug: war
+name: War
+---

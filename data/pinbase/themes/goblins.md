@@ -1,0 +1,4 @@
+---
+slug: goblins
+name: Goblins
+---

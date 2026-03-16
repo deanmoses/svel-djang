@@ -1,4 +1,4 @@
-"""Seed System records from data/systems.json.
+"""Seed System records from data/systems.json or data/pinbase/systems/.
 
 Creates or updates System records with editorial slugs, names, and
 manufacturer FKs. Runs after ingest_pinbase_manufacturers so manufacturer
@@ -17,6 +17,7 @@ from pathlib import Path
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
+from apps.catalog.ingestion.pinbase_loader import load_systems_as_dicts
 from apps.catalog.models import Manufacturer, System, TechnologySubgeneration
 from apps.provenance.models import Claim, Source
 
@@ -26,7 +27,7 @@ DEFAULT_PATH = Path(__file__).parents[5] / "data" / "systems.json"
 
 
 class Command(BaseCommand):
-    help = "Seed System records from data/systems.json."
+    help = "Seed System records from data/systems.json or data/pinbase/."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -34,11 +35,20 @@ class Command(BaseCommand):
             default=str(DEFAULT_PATH),
             help="Path to systems.json seed file.",
         )
+        parser.add_argument(
+            "--format",
+            choices=["json", "markdown"],
+            default="json",
+            help="Data source format: json (data/*.json) or markdown (data/pinbase/)",
+        )
 
     def handle(self, *args, **options):
-        path = options["path"]
-        with open(path) as f:
-            entries = json.load(f)
+        if options["format"] == "markdown":
+            entries = load_systems_as_dicts()
+        else:
+            path = options["path"]
+            with open(path) as f:
+                entries = json.load(f)
 
         # Pre-fetch manufacturer lookup by slug.
         mfr_by_slug: dict[str, Manufacturer] = {

@@ -1,0 +1,19 @@
+---
+slug: granada
+name: Granada
+title_slug: granada
+opdb_id: GPBdK-M0o99
+ipdb_id: 1063
+manufacturer_slug: williams
+year: 1972
+month: 3
+player_count: 1
+production_quantity: '875'
+display_type_slug: score-reels
+technology_generation_slug: electromechanical
+credit_refs:
+- person_slug: john-craig
+  role: Art
+- person_slug: norm-clark
+  role: Design
+---

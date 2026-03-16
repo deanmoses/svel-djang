@@ -1,0 +1,4 @@
+---
+slug: pirates
+name: Pirates
+---

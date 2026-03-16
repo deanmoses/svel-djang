@@ -1,0 +1,4 @@
+---
+slug: taito
+name: Taito
+---

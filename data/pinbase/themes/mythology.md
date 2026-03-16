@@ -1,0 +1,4 @@
+---
+slug: mythology
+name: Mythology
+---

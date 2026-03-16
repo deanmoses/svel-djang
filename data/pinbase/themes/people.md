@@ -1,0 +1,4 @@
+---
+slug: people
+name: People
+---

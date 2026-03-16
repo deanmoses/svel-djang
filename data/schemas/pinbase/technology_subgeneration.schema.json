@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pinbase/technology_subgeneration.schema.json",
+  "title": "Pinbase Technology Subgeneration",
+  "description": "Frontmatter for a Pinbase-authored technology subgeneration record",
+  "type": "object",
+  "properties": {
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "name": { "type": "string", "minLength": 1 },
+    "display_order": { "type": "integer", "minimum": 0 },
+    "technology_generation_slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    }
+  },
+  "required": ["slug", "name", "display_order", "technology_generation_slug"],
+  "additionalProperties": false
+}

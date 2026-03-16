@@ -1,0 +1,4 @@
+---
+slug: wizardry
+name: Wizardry
+---

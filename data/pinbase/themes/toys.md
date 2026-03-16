@@ -1,0 +1,4 @@
+---
+slug: toys
+name: Toys
+---

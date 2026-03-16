@@ -1,8 +1,9 @@
-"""Seed Series records from data/series.json and design credits from data/credits.json.
+"""Seed Series records from data/series.json or data/pinbase/series/.
 
 Creates or updates Series records with names and descriptions. Person records
 must exist before credits can be created (run ingest_pinbase_people first).
-Creates Credit(series=...) records from credits.json.
+Creates Credit(series=...) records from credits.json (JSON mode) or from
+credit_refs embedded in series Markdown files (Markdown mode).
 
 Series-Title M2M memberships are handled by ingest_pinbase_titles.
 """
@@ -16,6 +17,7 @@ from pathlib import Path
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand, CommandError
 
+from apps.catalog.ingestion.pinbase_loader import load_series_as_dicts
 from apps.catalog.models import Credit, CreditRole, Person, Series
 from apps.provenance.models import Claim, Source
 
@@ -39,13 +41,22 @@ class Command(BaseCommand):
             default=str(DEFAULT_CREDITS_PATH),
             help="Path to credits.json seed file.",
         )
+        parser.add_argument(
+            "--format",
+            choices=["json", "markdown"],
+            default="json",
+            help="Data source format: json (data/*.json) or markdown (data/pinbase/)",
+        )
 
     def handle(self, *args, **options):
-        series_path = options["series"]
-        credits_path = options["credits"]
+        if options["format"] == "markdown":
+            series_entries, credit_entries = load_series_as_dicts()
+        else:
+            series_path = options["series"]
+            credits_path = options["credits"]
 
-        with open(series_path) as f:
-            series_entries = json.load(f)
+            with open(series_path) as f:
+                series_entries = json.load(f)
 
         # Pre-fetch existing slugs for counts.
         existing_slugs = set(Series.objects.values_list("slug", flat=True))
@@ -110,8 +121,9 @@ class Command(BaseCommand):
             )
 
         # Seed series-level design credits.
-        with open(credits_path) as f:
-            credit_entries = json.load(f)
+        if options["format"] != "markdown":
+            with open(credits_path) as f:
+                credit_entries = json.load(f)
 
         people_by_slug = {p.slug: p for p in Person.objects.all()}
         role_lookup = {r.slug: r for r in CreditRole.objects.all()}

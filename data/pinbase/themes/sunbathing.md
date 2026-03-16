@@ -1,0 +1,4 @@
+---
+slug: sunbathing
+name: Sunbathing
+---

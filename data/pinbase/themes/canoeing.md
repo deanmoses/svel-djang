@@ -1,0 +1,4 @@
+---
+slug: canoeing
+name: Canoeing
+---

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pinbase/corporate_entity.schema.json",
+  "title": "Pinbase Corporate Entity",
+  "description": "Frontmatter for a Pinbase-authored corporate entity record",
+  "type": "object",
+  "properties": {
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "name": { "type": "string", "minLength": 1 },
+    "manufacturer_slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "year_start": { "type": ["integer", "null"] },
+    "year_end": { "type": ["integer", "null"] },
+    "headquarters_city": { "type": ["string", "null"] },
+    "headquarters_state": { "type": ["string", "null"] },
+    "headquarters_country": { "type": ["string", "null"] }
+  },
+  "required": ["slug", "name", "manufacturer_slug"],
+  "additionalProperties": false
+}

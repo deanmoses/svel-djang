@@ -1,0 +1,4 @@
+---
+slug: futuristic
+name: Futuristic
+---

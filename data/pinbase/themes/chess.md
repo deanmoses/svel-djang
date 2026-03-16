@@ -1,0 +1,4 @@
+---
+slug: chess
+name: Chess
+---

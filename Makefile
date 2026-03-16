@@ -1,4 +1,4 @@
-.PHONY: bootstrap dev test lint quality agent-docs api-gen ingest superuser
+.PHONY: bootstrap dev test lint quality agent-docs api-gen ingest superuser explore pinbase-export
 
 bootstrap:
 	./scripts/bootstrap
@@ -28,3 +28,10 @@ ingest:
 
 superuser:
 	cd backend && DJANGO_SUPERUSER_EMAIL="" uv run python manage.py createsuperuser --noinput
+
+pinbase-export:
+	python scripts/export_pinbase_json.py
+
+explore: pinbase-export
+	rm -f data/explore/explore.duckdb
+	duckdb data/explore/explore.duckdb < data/explore/explore.sql

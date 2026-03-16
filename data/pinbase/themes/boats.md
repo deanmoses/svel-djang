@@ -1,0 +1,4 @@
+---
+slug: boats
+name: Boats
+---

@@ -1,0 +1,4 @@
+---
+slug: wizardmagic
+name: Wizardmagic
+---

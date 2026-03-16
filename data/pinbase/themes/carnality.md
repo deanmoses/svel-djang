@@ -1,0 +1,4 @@
+---
+slug: carnality
+name: Carnality
+---

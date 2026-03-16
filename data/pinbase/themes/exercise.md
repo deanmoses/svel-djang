@@ -1,0 +1,4 @@
+---
+slug: exercise
+name: Exercise
+---

@@ -1,0 +1,4 @@
+---
+slug: equitation
+name: Equitation
+---

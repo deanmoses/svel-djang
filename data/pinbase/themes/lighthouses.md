@@ -1,0 +1,4 @@
+---
+slug: lighthouses
+name: Lighthouses
+---

@@ -1,0 +1,4 @@
+---
+slug: horses
+name: Horses
+---

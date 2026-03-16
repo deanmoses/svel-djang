@@ -1,0 +1,14 @@
+---
+slug: galaxy-2
+name: Galaxy
+title_slug: galaxy-2
+ipdb_id: 3115
+manufacturer_slug: bally
+year: 1978
+month: 6
+player_count: 1
+technology_generation_slug: electromechanical
+credit_refs:
+- person_slug: don-hooker
+  role: Design
+---

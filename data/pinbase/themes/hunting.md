@@ -1,0 +1,4 @@
+---
+slug: hunting
+name: Hunting
+---

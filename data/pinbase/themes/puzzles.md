@@ -1,0 +1,4 @@
+---
+slug: puzzles
+name: Puzzles
+---

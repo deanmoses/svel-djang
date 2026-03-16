@@ -1,0 +1,4 @@
+---
+slug: monsters
+name: Monsters
+---

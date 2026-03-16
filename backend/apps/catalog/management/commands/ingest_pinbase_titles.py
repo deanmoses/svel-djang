@@ -1,4 +1,4 @@
-"""Create and enrich Title records from data/titles.json.
+"""Create and enrich Title records from data/titles.json or data/pinbase/titles/.
 
 Creates Title records that don't yet exist (with opdb_id, name, slug),
 then asserts name and franchise claims and resolves them.  Slug overrides
@@ -20,6 +20,7 @@ from django.core.management.base import BaseCommand
 
 from apps.catalog.claims import build_relationship_claim
 from apps.catalog.ingestion.bulk_utils import generate_unique_slug
+from apps.catalog.ingestion.pinbase_loader import load_titles_as_dicts
 from apps.catalog.models import Franchise, Series, Title
 from apps.provenance.models import Claim, Source
 
@@ -29,7 +30,7 @@ DEFAULT_PATH = Path(__file__).parents[5] / "data" / "titles.json"
 
 
 class Command(BaseCommand):
-    help = "Set Title franchise FK and Series memberships from data/titles.json."
+    help = "Set Title franchise FK and Series memberships from data/titles.json or data/pinbase/."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -37,15 +38,24 @@ class Command(BaseCommand):
             default=str(DEFAULT_PATH),
             help="Path to titles.json.",
         )
+        parser.add_argument(
+            "--format",
+            choices=["json", "markdown"],
+            default="json",
+            help="Data source format: json (data/*.json) or markdown (data/pinbase/)",
+        )
 
     def handle(self, *args, **options):
         from django.contrib.contenttypes.models import ContentType
 
         from apps.catalog.resolve import TITLE_DIRECT_FIELDS, _resolve_bulk
 
-        path = options["path"]
-        with open(path) as f:
-            entries = json.load(f)
+        if options["format"] == "markdown":
+            entries = load_titles_as_dicts()
+        else:
+            path = options["path"]
+            with open(path) as f:
+                entries = json.load(f)
 
         source, _ = Source.objects.update_or_create(
             slug="pinbase-titles",

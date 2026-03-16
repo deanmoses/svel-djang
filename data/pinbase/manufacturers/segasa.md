@@ -1,0 +1,4 @@
+---
+slug: segasa
+name: Segasa
+---

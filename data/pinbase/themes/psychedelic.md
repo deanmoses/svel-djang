@@ -1,0 +1,4 @@
+---
+slug: psychedelic
+name: Psychedelic
+---

@@ -1,0 +1,4 @@
+---
+slug: fishing
+name: Fishing
+---

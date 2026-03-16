@@ -1,4 +1,4 @@
-"""Seed manufacturer records from data/manufacturers.json.
+"""Seed manufacturer records from data/manufacturers.json or data/pinbase/manufacturers/.
 
 Creates or updates Manufacturer records with editorial slugs and names.
 Asserts editorial description claims at priority 300 so they win over
@@ -17,6 +17,7 @@ from pathlib import Path
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
+from apps.catalog.ingestion.pinbase_loader import load_manufacturers_as_dicts
 from apps.catalog.models import Manufacturer
 from apps.catalog.resolve import (
     MANUFACTURER_DIRECT_FIELDS,
@@ -30,7 +31,7 @@ DEFAULT_PATH = Path(__file__).parents[5] / "data" / "manufacturers.json"
 
 
 class Command(BaseCommand):
-    help = "Seed Manufacturer records from data/manufacturers.json."
+    help = "Seed Manufacturer records from data/manufacturers.json or data/pinbase/."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -38,11 +39,20 @@ class Command(BaseCommand):
             default=str(DEFAULT_PATH),
             help="Path to manufacturers.json seed file.",
         )
+        parser.add_argument(
+            "--format",
+            choices=["json", "markdown"],
+            default="json",
+            help="Data source format: json (data/*.json) or markdown (data/pinbase/)",
+        )
 
     def handle(self, *args, **options):
-        path = options["path"]
-        with open(path) as f:
-            entries = json.load(f)
+        if options["format"] == "markdown":
+            entries = load_manufacturers_as_dicts()
+        else:
+            path = options["path"]
+            with open(path) as f:
+                entries = json.load(f)
 
         source, _ = Source.objects.update_or_create(
             slug="editorial",

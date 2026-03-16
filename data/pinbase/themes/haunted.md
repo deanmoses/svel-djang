@@ -1,0 +1,4 @@
+---
+slug: haunted
+name: Haunted
+---

@@ -1,0 +1,4 @@
+---
+slug: wartime
+name: Wartime
+---

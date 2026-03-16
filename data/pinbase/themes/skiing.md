@@ -1,0 +1,4 @@
+---
+slug: skiing
+name: Skiing
+---

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pinbase/technology_generation.schema.json",
+  "title": "Pinbase Technology Generation",
+  "description": "Frontmatter for a Pinbase-authored technology generation record",
+  "type": "object",
+  "properties": {
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "name": { "type": "string", "minLength": 1 },
+    "display_order": { "type": "integer", "minimum": 0 }
+  },
+  "required": ["slug", "name", "display_order"],
+  "additionalProperties": false
+}

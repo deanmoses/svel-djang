@@ -1,4 +1,4 @@
-"""Seed all taxonomy models from data/*.json files.
+"""Seed all taxonomy models from data/*.json or data/pinbase/**/*.md files.
 
 Creates records and asserts claims for claim-controlled fields (name, display_order,
 description) via the "pinbase" source.
@@ -15,6 +15,10 @@ from pathlib import Path
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
+from apps.catalog.ingestion.pinbase_loader import (
+    load_franchises_as_dicts,
+    load_taxonomy_as_dicts,
+)
 from apps.catalog.models import (
     Cabinet,
     CreditRole,
@@ -35,21 +39,37 @@ DATA_DIR = Path(__file__).parents[5] / "data"
 
 PINBASE_PRIORITY = 300
 
-# Registry: (json_filename, model_class, json_name_key, has_display_order, parent_config)
+# Registry: (json_filename, pinbase_dir, model_class, json_name_key, has_display_order, parent_config)
+# pinbase_dir: directory name under data/pinbase/ for Markdown loading
 # parent_config: (model_fk_field, parent_model, json_fk_key) or None
 TAXONOMY_REGISTRY = [
     # Top-level (no parent FK) — order matters: parents before children.
-    ("technology_generations.json", TechnologyGeneration, "title", True, None),
-    ("display_types.json", DisplayType, "title", True, None),
-    ("cabinets.json", Cabinet, "name", True, None),
-    ("game_formats.json", GameFormat, "name", True, None),
-    ("gameplay_features.json", GameplayFeature, "name", True, None),
-    ("tags.json", Tag, "name", True, None),
-    ("credit_roles.json", CreditRole, "name", True, None),
-    ("franchises.json", Franchise, "name", False, None),
+    (
+        "technology_generations.json",
+        "technology_generations",
+        TechnologyGeneration,
+        "title",
+        True,
+        None,
+    ),
+    ("display_types.json", "display_types", DisplayType, "title", True, None),
+    ("cabinets.json", "cabinets", Cabinet, "name", True, None),
+    ("game_formats.json", "game_formats", GameFormat, "name", True, None),
+    (
+        "gameplay_features.json",
+        "gameplay_features",
+        GameplayFeature,
+        "name",
+        True,
+        None,
+    ),
+    ("tags.json", "tags", Tag, "name", True, None),
+    ("credit_roles.json", "credit_roles", CreditRole, "name", True, None),
+    ("franchises.json", "franchises", Franchise, "name", False, None),
     # Child models (parents must be seeded first).
     (
         "technology_subgenerations.json",
+        "technology_subgenerations",
         TechnologySubgeneration,
         "name",
         True,
@@ -57,6 +77,7 @@ TAXONOMY_REGISTRY = [
     ),
     (
         "display_subtypes.json",
+        "display_subtypes",
         DisplaySubtype,
         "name",
         True,
@@ -66,7 +87,15 @@ TAXONOMY_REGISTRY = [
 
 
 class Command(BaseCommand):
-    help = "Seed all taxonomy models from data/*.json via the claims system."
+    help = "Seed all taxonomy models from data/*.json or data/pinbase/ via the claims system."
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--format",
+            choices=["json", "markdown"],
+            default="json",
+            help="Data source format: json (data/*.json) or markdown (data/pinbase/)",
+        )
 
     def handle(self, *args, **options):
         source, _ = Source.objects.get_or_create(
@@ -79,20 +108,38 @@ class Command(BaseCommand):
             },
         )
 
+        fmt = options["format"]
+
         for (
             json_file,
+            pinbase_dir,
             model_class,
             name_key,
             has_display_order,
             parent_config,
         ) in TAXONOMY_REGISTRY:
-            path = DATA_DIR / json_file
-            if not path.exists():
-                self.stderr.write(f"  Skipping {json_file} (not found)")
-                continue
+            if fmt == "markdown":
+                if pinbase_dir == "franchises":
+                    data = load_franchises_as_dicts()
+                else:
+                    data = load_taxonomy_as_dicts(pinbase_dir)
+                # Markdown files always use "name" as the name field.
+                effective_name_key = "name"
+            else:
+                path = DATA_DIR / json_file
+                if not path.exists():
+                    self.stderr.write(f"  Skipping {json_file} (not found)")
+                    continue
+                data = json.loads(path.read_text())
+                effective_name_key = name_key
 
             count, stats = self._seed_model(
-                source, path, model_class, name_key, has_display_order, parent_config
+                source,
+                data,
+                model_class,
+                effective_name_key,
+                has_display_order,
+                parent_config,
             )
             label = model_class.__name__
             self.stdout.write(
@@ -104,9 +151,8 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Taxonomy seed ingestion complete."))
 
     def _seed_model(
-        self, source, path, model_class, name_key, has_display_order, parent_config
+        self, source, data, model_class, name_key, has_display_order, parent_config
     ):
-        data = json.loads(path.read_text())
         ct = ContentType.objects.get_for_model(model_class)
 
         # Resolve parent FK lookup if needed.

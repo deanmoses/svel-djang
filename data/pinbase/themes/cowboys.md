@@ -1,0 +1,4 @@
+---
+slug: cowboys
+name: Cowboys
+---

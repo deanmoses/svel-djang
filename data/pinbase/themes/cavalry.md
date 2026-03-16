@@ -1,0 +1,4 @@
+---
+slug: cavalry
+name: Cavalry
+---

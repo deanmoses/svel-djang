@@ -1,0 +1,4 @@
+---
+slug: college
+name: College
+---

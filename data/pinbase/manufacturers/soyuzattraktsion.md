@@ -1,0 +1,4 @@
+---
+slug: soyuzattraktsion
+name: Soyuzattraktsion
+---

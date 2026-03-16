@@ -1,0 +1,4 @@
+---
+slug: skating
+name: Skating
+---

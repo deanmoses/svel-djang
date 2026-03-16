@@ -1,0 +1,4 @@
+---
+slug: singing
+name: Singing
+---

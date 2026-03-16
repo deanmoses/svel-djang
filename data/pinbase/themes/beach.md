@@ -1,0 +1,4 @@
+---
+slug: beach
+name: Beach
+---

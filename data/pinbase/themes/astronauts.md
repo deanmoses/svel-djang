@@ -1,0 +1,4 @@
+---
+slug: astronauts
+name: Astronauts
+---

@@ -70,6 +70,12 @@ class Command(BaseCommand):
             help="Path to machine_sign_copy.csv for ingest_pinbase_signs.",
         )
         parser.add_argument(
+            "--format",
+            choices=["json", "markdown"],
+            default="json",
+            help="Data source format for Pinbase commands: json (data/*.json) or markdown (data/pinbase/)",
+        )
+        parser.add_argument(
             "--write",
             action="store_true",
             help="Commit changes to the database. Without this flag, the pipeline "
@@ -83,6 +89,7 @@ class Command(BaseCommand):
         opdb_groups = options["opdb_groups"]
         opdb_changelog = options["opdb_changelog"]
         csv_path = options["csv"]
+        fmt = options["format"]
 
         from apps.catalog.cache import invalidate_all
 
@@ -93,6 +100,17 @@ class Command(BaseCommand):
                 )
             )
 
+        pinbase_steps = {
+            "ingest_pinbase_taxonomy",
+            "ingest_pinbase_manufacturers",
+            "ingest_pinbase_corporate_entities",
+            "ingest_pinbase_systems",
+            "ingest_pinbase_people",
+            "ingest_pinbase_series",
+            "ingest_pinbase_titles",
+            "ingest_pinbase_models",
+        }
+
         try:
             with transaction.atomic():
                 for step in STEPS:
@@ -101,18 +119,22 @@ class Command(BaseCommand):
                         self.style.MIGRATE_HEADING(f"{prefix}Running {step}...")
                     )
                     kwargs = {}
-                    if step == "ingest_ipdb":
-                        kwargs = {"ipdb": ipdb_path}
+                    if step in pinbase_steps:
+                        kwargs["format"] = fmt
+                    elif step == "ingest_ipdb":
+                        kwargs["ipdb"] = ipdb_path
                     elif step == "ingest_opdb":
-                        kwargs = {
-                            "opdb": opdb_path,
-                            "groups": opdb_groups,
-                            "changelog": opdb_changelog,
-                            "models": "../data/models.json",
-                            "titles": "../data/titles.json",
-                        }
+                        kwargs.update(
+                            {
+                                "opdb": opdb_path,
+                                "groups": opdb_groups,
+                                "changelog": opdb_changelog,
+                                "models": "../data/models.json",
+                                "titles": "../data/titles.json",
+                            }
+                        )
                     elif step == "ingest_pinbase_signs":
-                        kwargs = {"csv": csv_path}
+                        kwargs["csv"] = csv_path
                     call_command(step, stdout=self.stdout, stderr=self.stderr, **kwargs)
 
                 if not write:

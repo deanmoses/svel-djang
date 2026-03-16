@@ -1,0 +1,4 @@
+---
+slug: fair
+name: Fair
+---

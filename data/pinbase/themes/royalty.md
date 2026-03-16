@@ -1,0 +1,4 @@
+---
+slug: royalty
+name: Royalty
+---

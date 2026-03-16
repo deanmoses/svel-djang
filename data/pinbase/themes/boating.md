@@ -1,0 +1,4 @@
+---
+slug: boating
+name: Boating
+---

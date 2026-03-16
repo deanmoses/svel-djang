@@ -1,0 +1,4 @@
+---
+slug: fantasy
+name: Fantasy
+---

@@ -1,0 +1,4 @@
+---
+slug: competition
+name: Competition
+---

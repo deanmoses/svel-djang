@@ -1,0 +1,10 @@
+---
+slug: flat-top
+name: Flat-Top
+title_slug: flat-top
+ipdb_id: 876
+manufacturer_slug: williams
+year: 1945
+player_count: 1
+technology_generation_slug: electromechanical
+---

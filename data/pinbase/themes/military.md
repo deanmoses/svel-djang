@@ -1,0 +1,4 @@
+---
+slug: military
+name: Military
+---

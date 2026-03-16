@@ -1,0 +1,4 @@
+---
+slug: outdoors
+name: Outdoors
+---

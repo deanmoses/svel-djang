@@ -1,0 +1,4 @@
+---
+slug: mattel
+name: Mattel
+---

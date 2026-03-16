@@ -1,0 +1,4 @@
+---
+slug: horoscope
+name: Horoscope
+---

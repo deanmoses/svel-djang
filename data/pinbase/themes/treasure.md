@@ -1,0 +1,4 @@
+---
+slug: treasure
+name: Treasure
+---

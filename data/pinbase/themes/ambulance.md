@@ -1,0 +1,4 @@
+---
+slug: ambulance
+name: Ambulance
+---

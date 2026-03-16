@@ -1,0 +1,4 @@
+---
+slug: magister
+name: Magister
+---

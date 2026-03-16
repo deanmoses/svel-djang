@@ -1,0 +1,4 @@
+---
+slug: humor
+name: Humor
+---

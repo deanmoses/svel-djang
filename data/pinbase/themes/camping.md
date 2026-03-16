@@ -1,0 +1,4 @@
+---
+slug: camping
+name: Camping
+---

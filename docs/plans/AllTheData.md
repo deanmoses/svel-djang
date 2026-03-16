@@ -1,0 +1,804 @@
+# All The Data: Canonical Pinbase Records Without Losing Provenance
+
+## Goal
+
+Scale Pinbase-owned content to cover the full catalog of all pinball machines in existence while preserving the following:
+
+- Pinbase-owned canonical facts and relationships
+- Independent source attribution for OPDB/IPDB-derived facts
+- Git-friendly review and rollback
+- AI-friendly record editing without giant monolithic files
+
+Target scope:
+
+- Every title and model in the catalog
+- Rich descriptions for every record of every entity: model, title, person, manufacturer, system, theme, technology generation, etc
+- Full manufacturer and corporate-entity history
+- Broad coverage of people, aliases, and bios
+
+## Summary
+
+Pinbase should stop growing the large aggregate files like `data/models.json` and `data/titles.json` as the main authoring surface.
+
+Instead, Pinbase should move to a three-layer architecture:
+
+1. `data/dump1/` remains immutable third-party evidence.
+2. `data/pinbase/` becomes the Pinbase-authored canonical layer, stored as one Markdown file per entity with YAML frontmatter.
+3. The Django SQLite database remains the operational source of truth after ingestion and claim resolution.
+
+This keeps the provenance model, but changes the authority boundaries:
+
+- Pinbase-authored files become canonical for the runtime graph and for all relationship-shaping data.
+- OPDB and IPDB remain ingested as claims only for non-relational factual fields.
+- OPDB/IPDB relationships are preserved for comparison and research, not for driving runtime resolution.
+
+## Why Change
+
+The current JSON files worked well as a small editorial overlay, but they are no longer the right shape for a catalog-scale knowledge base.
+
+Problems with the current flat-file approach:
+
+- Large aggregate files are hard to review, diff, and safely edit.
+- AIs make ID, slug, and cross-reference mistakes when too many records live in one file.
+- Narrative descriptions are awkward inside JSON string literals.
+- The current files blur "Pinbase-authored canon" and "facts imported from external datasets."
+- The current runtime ingest gives too much power to OPDB relationship structures like groups and aliases.
+- The OPDB ingest path has become too complex because it is trying to translate a third-party editorial model into Pinbase's own graph.
+
+Problems with making one big per-title JSON blob:
+
+- Models are first-class entities in the Django catalog and claims system.
+- Model-specific prose, variants, remakes, and conversions deserve their own files.
+- Editing one model should not rewrite an entire title bundle.
+
+## Proposed Data Model
+
+### Principle: one file per entity
+
+Pinbase-authored entities each get their own file:
+
+```text
+data/
+  dump1/                          # immutable third-party inputs
+  pinbase/
+    titles/
+      medieval-madness.md
+      attack-from-mars.md
+    models/
+      medieval-madness.md
+      medieval-madness-remake.md
+    people/
+      brian-eddy.md
+      steve-ritchie.md
+    manufacturers/
+      williams.md
+      bally.md
+    corporate_entities/
+      williams-manufacturing-company.md
+      williams-electronics.md
+    cabinets/
+      standard.md
+      mini.md
+    credit_roles/
+      design.md
+      art.md
+    display_types/
+      dot-matrix.md
+      lcd.md
+    display_subtypes/
+      sega-192x64.md
+    franchises/
+      star-wars.md
+    game_formats/
+      pinball-machine.md
+    gameplay_features/
+      multiball.md
+    series/
+      williams-wpc-95.md
+    systems/
+      wpc-95.md
+    tags/
+      castle.md
+    themes/
+      fantasy.md
+    technology_generations/
+      solid-state.md
+    technology_subgenerations/
+      dot-matrix-era.md
+```
+
+The format rule should be simple:
+
+- `data/pinbase/` contains authored Markdown records only
+- `data/dump1/` contains raw third-party dumps in their original formats
+- generated exports for explore/validation may use JSON, but they are build artifacts, not authored canon
+
+### Why Markdown with frontmatter
+
+Markdown-with-frontmatter is a better fit than pure JSON for authored catalog records:
+
+- Frontmatter handles IDs, slugs, dates, booleans, and relationships cleanly.
+- The body is ideal for prose descriptions, markdown links, and editorial notes.
+- Git diffs stay readable.
+- AIs usually edit a single Markdown file more safely than a large JSON array.
+- One consistent authored format keeps the repo easier to understand and tool.
+
+### Example title record
+
+```md
+---
+slug: medieval-madness
+name: Medieval Madness
+opdb_group_id: GrB14
+franchise_slug: medieval-madness
+series_slug: williams-wpc-95
+abbreviations:
+  - MM
+model_slugs:
+  - medieval-madness
+  - medieval-madness-remake
+---
+
+Medieval Madness is a fantasy-themed title centered on castle destruction,
+taunting rulers, and a highly theatrical presentation.
+```
+
+### Example model record
+
+```md
+---
+slug: medieval-madness
+name: Medieval Madness
+title_slug: medieval-madness
+opdb_id: GrB14-M0Ry6
+ipdb_id: 4032
+manufacturer_slug: williams
+year: 1997
+month: 6
+player_count: 4
+flipper_count: 2
+display_type_slug: dot-matrix
+technology_generation_slug: solid-state
+technology_subgeneration_slug: dot-matrix-era
+system_slug: wpc-95
+cabinet_slug: standard
+game_format_slug: pinball-machine
+tag_slugs:
+  - castle
+  - fantasy
+credit_refs:
+  - person_slug: brian-eddy
+    role: Design
+  - person_slug: greg-freres
+    role: Art
+---
+
+This model is widely regarded as one of the defining Williams games of the
+late WPC era, combining fast flow with a densely integrated ruleset.
+```
+
+Optional fields are simply omitted when null, empty, or false. Only fields with meaningful values appear in frontmatter.
+
+### Example person record
+
+```md
+---
+slug: brian-eddy
+name: Brian Eddy
+---
+
+Brian Eddy is a designer and programmer associated with several highly
+regarded 1990s Williams titles.
+```
+
+### Example manufacturer record
+
+```md
+---
+slug: williams
+name: Williams
+---
+
+Williams was one of the central American pinball manufacturers of the solid
+state era and the parent brand behind many canonical tables.
+```
+
+### Example corporate entity record
+
+Corporate entities are standalone files in `data/pinbase/corporate_entities/`, each pointing at its parent manufacturer via `manufacturer_slug`:
+
+```md
+---
+slug: williams-manufacturing-company
+name: Williams Manufacturing Company
+manufacturer_slug: williams
+year_start: 1943
+year_end: 1964
+headquarters_city: Chicago
+headquarters_state: Illinois
+headquarters_country: USA
+---
+```
+
+### Example taxonomy record
+
+```md
+---
+slug: solid-state
+name: Solid State
+display_order: 20
+---
+
+Solid-state games use transistorized electronics rather than electromechanical
+score reels and relay-driven control logic.
+```
+
+## Source-of-Truth Rules
+
+This part matters most.
+
+### Third-party data is evidence, not canon
+
+Files in `data/dump1/` remain raw snapshots from OPDB, IPDB, Fandom, and other external sources. They are not edited by hand.
+
+### Pinbase files are the authored canonical layer
+
+Files in `data/pinbase/` express Pinbase-authored choices:
+
+- canonical facts Pinbase wants the app to resolve to
+- editorial descriptions
+- Pinbase slugs
+- link-rich markdown prose
+- aliases
+- franchise and series relationships
+- corrections to third-party data
+- additional facts Pinbase wishes to assert directly
+- all relationship-shaping judgments such as title membership, variants, remakes, conversions, and graph structure
+
+Every authored record in `data/pinbase/` should use the same Markdown-with-frontmatter format, including smaller taxonomy entities. There should not be a split between "serious records in Markdown" and "small records in JSON."
+
+### SQLite remains the runtime truth
+
+The live Django catalog in SQLite remains the actual resolved state of the app after claims ingestion.
+
+That means:
+
+- Pinbase files are not replacing the claims system.
+- Pinbase files are the highest-authority authored input to the claims system.
+- OPDB and IPDB still ingest separately as their own `Source` records, but only for non-relational fact claims.
+
+## Non-Negotiable Provenance Rule
+
+Do not retire `ingest_opdb` or `ingest_ipdb` entirely.
+
+They should continue to assert claims from external sources, because that is how Pinbase preserves:
+
+- attribution
+- verification
+- source comparison
+- future refreshes when upstream data changes
+
+But those ingests should be narrowed aggressively.
+
+Pinbase should absorb OPDB/IPDB facts into its own authored files for canonical runtime use. At the same time, Pinbase should keep OPDB/IPDB claims as a comparison layer for straightforward facts.
+
+### External claims should remain for non-relational fields only
+
+Phase-one allowlist:
+
+- `name`
+- `manufacturer`
+- `year`
+- `month`
+- `player_count`
+- `display_type`
+- `display_subtype`
+- `technology_generation`
+- `technology_subgeneration`
+- `system`
+- `cabinet`
+- `game_format`
+- `production_quantity`
+- `flipper_count`
+- `ipdb_rating`
+- `ipdb_id`
+- `opdb_id`
+- `abbreviation`
+
+These are the fields Pinbase still ingests from OPDB/IPDB as comparison claims in phase one.
+
+Explicitly not included in this allowlist:
+
+- any relationship-shaping field
+- themes, gameplay features, tags, and credits
+- source-specific prose and note fields
+- source-specific keyword or feature buckets that are better treated as raw evidence than normalized runtime claims
+
+### Images remain a separate attributed ingest path
+
+Images are not "facts" in the same sense as year, manufacturer, or player count. They should remain externally sourced media with attribution and source metadata.
+
+That means:
+
+- OPDB/IPDB image ingest should survive
+- image provenance should remain explicit
+- image ingest should not participate in relationship resolution
+- image ingest can be simplified independently of fact/relationship ingest
+
+### External claims should stop shaping the runtime graph
+
+Do not let OPDB/IPDB ingest define or infer:
+
+- title grouping
+- alias-driven `variant_of`
+- clone relationships
+- conversion relationships
+- remake relationships
+- canonical title membership
+- franchise/series relationships
+- any other graph-shaping relationship that Pinbase intends to own editorially
+
+In practice, this means the biggest simplification target is OPDB groups/aliases and the relationship inference built around them.
+
+If Pinbase wants to "own all the facts" operationally, the right meaning is:
+
+- Pinbase keeps its own raw snapshots
+- Pinbase stores canonical authored records for runtime use
+- Pinbase can rebuild the runtime DB locally
+- Pinbase still preserves OPDB/IPDB claims for research and comparison
+
+It should not mean letting OPDB's editorial structure keep overriding or complicating Pinbase's own graph.
+
+Raw external relationship data such as OPDB groups and aliases should live only in compare-oriented DuckDB tables and related exploration artifacts. It should not be ingested into runtime catalog claims, even in suppressed form.
+
+## DuckDB's Role
+
+DuckDB is valuable, but it should remain an exploration, reconciliation, and audit tool.
+
+Use DuckDB for:
+
+- looking up correct OPDB/IPDB IDs before editing
+- finding missing coverage
+- checking relationships across sources
+- generating migration candidates
+- validating completeness and integrity
+
+Do use DuckDB merged views as a practical bootstrap input for the migration.
+
+Do not use DuckDB merged views as the sole or normative source for the migration.
+
+Why not:
+
+- `merged_titles` and `merged_models` are already resolved projections
+- they intentionally collapse distinctions between Pinbase, OPDB, and IPDB
+- seeding canon from them naively risks freezing a lossy merged interpretation
+
+Better migration seed inputs:
+
+- DuckDB merged views, used as bootstrap candidate output
+- current Pinbase flat files
+- raw OPDB/IPDB/Fandom dumps
+- the runtime SQLite database and its claims tables
+
+Recommended stance:
+
+- use `merged_titles` and `merged_models` to generate first-pass skeleton files quickly
+- treat that output as candidate canon to be normalized and corrected
+- prefer explicit Pinbase rules over merged-view output whenever relationship-shaping fields are involved
+
+## File Semantics
+
+### Titles
+
+Title files should contain title-level data only:
+
+- slug
+- name
+- OPDB/IPDB cross-reference IDs where useful
+- franchise/series linkage
+- abbreviations
+- `split_from_opdb_group` when Pinbase intentionally breaks a title away from an OPDB grouping decision
+- title-level description
+- explicit list of model slugs
+
+They should not inline all model records.
+
+### Models
+
+Model files should contain model-level data only:
+
+- slug
+- name
+- title linkage
+- OPDB/IPDB IDs
+- manufacturer/year/month/player count/flipper count/production quantity
+- variant/remake/conversion relationships
+- technology generation and subgeneration
+- display type and subtype
+- system
+- cabinet
+- game format
+- tags
+- model-level credits
+- model-level description
+
+All slug reference fields should use the `_slug` suffix consistently (e.g. `display_type_slug`, `cabinet_slug`, `technology_generation_slug`).
+
+These relationship fields are canonical Pinbase assertions, not imported behavior from OPDB aliases or groups.
+
+### People
+
+Person files should contain:
+
+- slug
+- name
+- aliases
+- birth/death data when available
+- hometown or geography when available
+- biography body
+
+### Manufacturers
+
+Manufacturer files should contain:
+
+- slug
+- name
+- aliases
+- manufacturer description body
+
+Manufacturer files do not contain corporate entities. Corporate entities are standalone files that point back at their manufacturer via `manufacturer_slug`.
+
+### Corporate entities
+
+Corporate entity files should contain:
+
+- slug (generated from slugified name)
+- name
+- manufacturer_slug (FK to manufacturer)
+- year_start / year_end
+- headquarters city/state/country when available
+- description body (for future editorial prose)
+
+### Taxonomy entities
+
+Taxonomy entities should also be individual Markdown records:
+
+- cabinets
+- credit roles
+- display types
+- display subtypes
+- franchises
+- game formats
+- gameplay features
+- series
+- systems
+- tags
+- themes
+- technology generations
+- technology subgenerations
+
+Some of these records may have only frontmatter at first. That is fine. The benefit is consistency: every authored Pinbase record has the same editing and validation model.
+
+Some taxonomy entities are hierarchical. The schema should support relationship fields such as `parent_slug` where appropriate, for example:
+
+- display subtypes belonging to display types
+- technology subgenerations belonging to technology generations
+- any future taxonomy tree Pinbase chooses to model explicitly
+
+### Golden records
+
+Golden records are validation assertions, not entity records. They do not fit the one-file-per-entity Markdown pattern because their purpose is spot-check verification across multiple entity types and fields.
+
+Golden records should remain as JSON in `data/golden_records.json`. They are consumed by DuckDB contract checks in `04_checks.sql` and are not inputs to the claims system. Moving them to Markdown would add complexity without benefit.
+
+## Credits Strategy
+
+Credits should be embedded in the authored records they belong to.
+
+That means:
+
+- model-level credits live in model files as `credit_refs`
+- series-level credits live in series files as `credit_refs`
+
+This matches the current data shape well because most models and series have only a handful of credits, and each credit is currently just a role plus a person slug.
+
+If credits later grow richer metadata or standalone prose, the format can be refactored then. For now, embedding keeps the authored layer simpler.
+
+Note: the current standalone `data/credits.json` (series-level credits) will be merged into the corresponding series Markdown files during migration. There will be no separate credits file in the new layout.
+
+## Migration Plan
+
+### Critical dependency: OPDB simplification requires Pinbase files first
+
+The plan's end-state goal is to strip relationship-shaping claims from OPDB/IPDB ingest. But this cannot happen until Pinbase-authored files supply those relationships, or the catalog will lose data.
+
+The dependency chain is:
+
+1. Pinbase Markdown files must exist and contain relationship-shaping fields.
+2. Pinbase ingestion must read those files and assert relationship claims.
+3. Only then can OPDB/IPDB ingest stop asserting relationship claims.
+
+This means OPDB simplification is the _goal_ of this project, not a prerequisite. The migration phases below are sequenced to respect this dependency.
+
+### Phase 0: Field ownership matrix ✓
+
+Produced a field-by-field ownership matrix by querying the Django claims table. Stored in `docs/plans/field-ownership-matrix.md`.
+
+Key findings:
+
+- Relationship-shaping denylist: `title`, `variant_of`, `credit`, `theme`, `gameplay_feature`
+- All taxonomy fields are already Pinbase-only
+- 14 non-relational fields remain in the OPDB/IPDB comparison allowlist
+
+### Phase 1: Schemas and loader ✓
+
+Created 14 JSON Schema files in `data/schemas/pinbase/`:
+
+- `title.schema.json`, `model.schema.json`, `person.schema.json`, `manufacturer.schema.json`
+- `corporate_entity.schema.json`, `series.schema.json`, `system.schema.json`
+- `franchise.schema.json`, `theme.schema.json`
+- `taxonomy.schema.json` (shared by cabinets, credit_roles, display_types, game_formats, gameplay_features, tags)
+- `display_subtype.schema.json`, `technology_generation.schema.json`, `technology_subgeneration.schema.json`
+
+Built a shared loader at `backend/apps/catalog/ingestion/pinbase_loader.py`:
+
+- Parses Markdown + YAML frontmatter
+- Validates against JSON schemas (using `jsonschema` library, added as dependency)
+- Exposes entity iterators (`iter_titles`, `iter_models`, etc.) and JSON-compatible adapter functions (`load_titles_as_dicts`, etc.)
+- Single read path for Django ingestion, validation, and generation
+
+Built a validation script at `scripts/validate_pinbase_records.py`:
+
+- Schema validation, slug/filename match, slug uniqueness, OPDB ID uniqueness
+- Cross-entity reference integrity (model→title, title→model, credit→person, etc.)
+- Self-referential and chained variant_of detection
+
+### Phase 2: Generate first batch ✓
+
+Generated ~1,195 Markdown records from existing `data/*.json` files using `scripts/bootstrap_pinbase_markdown.py`:
+
+- 389 models, 371 titles, 128 franchises, 90 corporate entities, 73 systems, 59 manufacturers, 19 people, 5 series (with credits merged from credits.json), plus ~160 taxonomy records
+
+Design decisions made during execution:
+
+- Corporate entities are standalone files (not embedded in manufacturer files), each with a generated slug and `manufacturer_slug` FK
+- Series-level credits from `data/credits.json` are merged into series files as `credit_refs`
+- Optional fields with null values, empty lists, empty strings, or false booleans are omitted from frontmatter
+
+### Phase 3: Generate full catalog ✓
+
+Generated the remaining catalog records from the Django SQLite runtime database using `scripts/export_full_catalog.py`:
+
+- 6,440 additional models, 5,853 titles, 715 manufacturers, 566 people, 597 themes
+- Phase 2 files were preserved; Phase 3 only created files for records not already present
+- Title `model_slugs` backfilled from model→title linkage
+
+Final totals: 15,366 Markdown files across 18 directories in `data/pinbase/`:
+
+| Entity                    | Files |
+| ------------------------- | ----- |
+| models                    | 6,829 |
+| titles                    | 6,224 |
+| manufacturers             | 774   |
+| themes                    | 597   |
+| people                    | 585   |
+| franchises                | 128   |
+| corporate_entities        | 90    |
+| systems                   | 73    |
+| gameplay_features         | 20    |
+| credit_roles              | 10    |
+| display_types             | 6     |
+| tags                      | 6     |
+| display_subtypes          | 5     |
+| series                    | 5     |
+| cabinets                  | 4     |
+| game_formats              | 4     |
+| technology_generations    | 3     |
+| technology_subgenerations | 3     |
+
+3 pre-existing OPDB ID duplicates flagged (data quality issue in Django DB, not a migration bug).
+
+### Phase 4: Update Django ingestion (dual-mode) ✓
+
+All 8 Pinbase ingestion commands now support `--format markdown` (default remains `json`):
+
+- `ingest_pinbase_taxonomy`, `ingest_pinbase_manufacturers`, `ingest_pinbase_corporate_entities`
+- `ingest_pinbase_systems`, `ingest_pinbase_people`, `ingest_pinbase_series`
+- `ingest_pinbase_titles`, `ingest_pinbase_models`
+
+`ingest_all` passes `--format` through to all Pinbase commands.
+
+JSON-compatible adapter functions in `pinbase_loader.py` translate Markdown frontmatter field names to the JSON field names the existing ingest code expects (e.g. `title_slug` → `title`). The claims pipeline is unchanged.
+
+Smoke-tested: taxonomy and systems produce zero new claims (identical data); the full catalog produces new claims for records that only existed in OPDB/IPDB before.
+
+### Phase 5: DuckDB explore layer + verification
+
+Before narrowing OPDB/IPDB ingest, add the new Pinbase Markdown data to DuckDB so it can be explored side-by-side with existing OPDB/IPDB/merged views. This is the verification step that builds confidence before stripping external claims.
+
+Steps:
+
+1. Write a Python export script that reads `data/pinbase/**/*.md` via the shared loader and emits normalized JSON files into `data/explore/pinbase_export/`.
+2. Add DuckDB views in `01_raw.sql` that read those exported JSON files as `pinbase_md_models`, `pinbase_md_titles`, etc. — alongside the existing `pinbase_models`, `pinbase_titles` views that read `data/*.json`.
+3. Write comparison queries: join Markdown-layer data against merged views and OPDB/IPDB raw views to surface discrepancies in slugs, names, relationships, and field coverage.
+4. Fix data quality issues discovered during exploration: slug naming (e.g. obscure games holding simple slugs, slugs that don't match full names), relationship correctness, missing fields.
+
+This phase is iterative — export, explore, fix, re-export — until the Markdown layer is trustworthy.
+
+### Phase 6: Narrow OPDB/IPDB ingest
+
+Only safe after Phase 5, when the Markdown layer has been verified via DuckDB comparison.
+
+Changes to `ingest_opdb.py`:
+
+- stop asserting claims for: `variant_of`, `converted_from`, `is_conversion`, `title`, `clone_of`, and any other relationship-shaping fields
+- stop running non-physical group heuristics and alias-driven relationship classification
+- keep asserting claims for the non-relational allowlist fields only
+- keep image ingest unchanged
+- keep OPDB group/alias data flowing into DuckDB exploration views for comparison
+
+Changes to `ingest_ipdb.py`:
+
+- stop asserting claims for: credits, themes, gameplay features, tags
+- keep asserting claims for the non-relational allowlist fields only
+- keep image ingest unchanged
+
+This is the biggest simplification target. The non-physical group heuristics, three-way variant/clone/conversion classification, chain-collapse logic, and models.json override plumbing in `ingest_opdb.py` can all be removed.
+
+### Phase 7: Validation and checks
+
+Extend the current validation approach with provenance-focused checks:
+
+- if a Pinbase record references an OPDB or IPDB ID, that ID should be discoverable in the raw dumps or runtime source tables
+- if Pinbase overrides a field already imported from OPDB/IPDB, the override is visible as a higher-priority editorial claim
+- if OPDB/IPDB still assert any relationship-shaping claim field, fail validation
+- if runtime relationships differ from OPDB/IPDB relationship data, expose that as an intentional divergence report rather than a catalog error
+
+Basic structural checks (slug uniqueness, cross-references, chained variants, filename/slug match, OPDB ID uniqueness) are already implemented in `scripts/validate_pinbase_records.py`.
+
+### Phase 8: Cutover and cleanup
+
+Do not delete the old authored JSON files immediately.
+
+Staged cutover:
+
+1. Switch default ingestion to Markdown (remove the dual-mode flag).
+2. Run full ingest and compare catalog output against the last JSON-based ingest.
+3. Fix any remaining discrepancies.
+4. Retire the old authored JSON files only after parity is demonstrated.
+5. Remove the legacy JSON reading code from ingestion commands.
+
+This avoids a one-shot migration that quietly changes catalog behavior.
+
+## AI Editing Workflow
+
+When an AI needs to add or update a record, it should **query DuckDB first** to look up correct IDs and relationships, rather than guessing or searching through files:
+
+```sql
+-- Find the correct OPDB ID for a machine
+SELECT opdb_id, name, manufacturer, year FROM opdb_machines
+WHERE name ILIKE '%medieval%';
+
+-- Find the OPDB group for a title
+SELECT group_id, group_name FROM opdb_groups
+WHERE group_name ILIKE '%batman%';
+
+-- Check what models already exist for a title
+SELECT * FROM merged_models WHERE group_id = 'GrB14';
+```
+
+The existing `data/explore/explore.duckdb` (rebuilt via `make explore`) already supports these queries.
+
+The full workflow:
+
+1. Query DuckDB to find correct IDs and existing relationships.
+2. Edit only the relevant entity file in `data/pinbase/`.
+3. Run schema validation and integrity checks.
+4. Ingest or dry-run ingest to confirm the resulting claims are sensible.
+
+This sharply reduces the chance of:
+
+- wrong OPDB IDs
+- wrong slugs
+- accidental duplicates
+- orphaned relationships
+
+## Suggested Commands and Tooling
+
+Add small focused tools rather than one giant migration script.
+
+Recommended commands:
+
+- `make pinbase-export`
+  - build normalized JSON from Markdown for explore/validation
+- `make pinbase-validate`
+  - validate frontmatter schemas and relationship integrity
+- `make explore`
+  - rebuild DuckDB from exported JSON + dump1 files
+- `uv run python manage.py ingest_pinbase_titles`
+- `uv run python manage.py ingest_pinbase_models`
+- `uv run python manage.py ingest_opdb`
+- `uv run python manage.py ingest_ipdb`
+
+Possible helper scripts:
+
+- `scripts/export_pinbase_records.py`
+- `scripts/validate_pinbase_records.py`
+- `scripts/bootstrap_pinbase_markdown.py`
+
+### Enrichment sources
+
+The following ingestion commands are not affected by this migration and should continue to operate as they do today:
+
+- `ingest_fandom.py` — Fandom wiki bios, manufacturer metadata
+- `ingest_wikidata.py` — Wikidata person data
+- `ingest_wikidata_manufacturers.py` — Wikidata manufacturer data
+
+These are non-relational enrichment sources that assert claims through the normal provenance pipeline. Nothing in this plan changes their behavior.
+
+Pinball Map data (`data/dump1/pinballmap_*.json`) does not have a Django ingest command, but is already imported into DuckDB as `pinballmap_machines` and `pinballmap_machine_groups` views. That should continue unchanged — DuckDB is a valid enrichment path for exploration and reconciliation data that doesn't need to flow through the claims pipeline.
+
+### `ingest_pinbase_signs` is retired
+
+The museum sign copy ingest (`ingest_pinbase_signs.py`, source `flip-signs`, priority 50) should be retired after migration.
+
+Its valuable content is the long-form educational text (MainText column), which should be absorbed into `data/pinbase/titles/*.md` body text during Phase 2/3 generation. Once those descriptions live in Pinbase-authored files, they become canonical at priority 300.
+
+The other claims it asserts (name, year, month, manufacturer, production_quantity, credits) are redundant with higher-priority sources (OPDB at 200, IPDB at 100, Pinbase at 300) and add no unique value.
+
+After migration:
+
+- absorb MainText descriptions into title Markdown files
+- remove `ingest_pinbase_signs` from `ingest_all` orchestration
+- the raw CSV (`data/dump1/machine_sign_copy.csv`) remains in dump1 as archival evidence
+
+### `ingest_all` orchestration
+
+`ingest_all` should survive, but its phase ordering needs to change to reflect the new architecture.
+
+At a high level, the new orchestration should be:
+
+1. ingest Pinbase-authored canonical records (from `data/pinbase/`)
+2. ingest OPDB/IPDB non-relational comparison claims
+3. ingest enrichment sources (Fandom, Wikidata)
+4. ingest externally sourced images with attribution
+5. resolve claims
+6. run validation and divergence checks
+
+## Sizing Estimates
+
+Actual file counts after Phase 3 generation:
+
+| Entity | Files |
+| --- | --- |
+| Models | 6,829 |
+| Titles | 6,224 |
+| Manufacturers | 774 |
+| Themes | 597 |
+| People | 585 |
+| Franchises | 128 |
+| Corporate Entities | 90 |
+| Systems | 73 |
+| Taxonomy (all types) | 78 |
+
+Total: 15,366 files across 18 directories. Each individual file fits comfortably in an AI context window. Git handles this file count trivially.
+
+## Open Questions
+
+No open architectural questions. Format, provenance, credits, golden records, corporate entities, enrichment sources, and external-relationship decisions have all been made and implemented through Phase 4.
+
+Remaining work is execution of Phases 5–8.
+
+## Recommendation
+
+Adopt the per-entity file strategy from the original plan, but refine it as follows:
+
+- one file per title, model, person, and manufacturer
+- Markdown with frontmatter for all Pinbase-authored entities
+- make Pinbase-authored files canonical for runtime facts and relationships
+- keep OPDB/IPDB ingestion as independent provenance-bearing sources for non-relational fact claims only
+- remove OPDB groups/aliases from the main runtime graph-building path
+- keep DuckDB as an audit/reconciliation tool
+- migrate gradually with parity checks before retiring legacy files
+
+This gets the AI ergonomics and Git reviewability benefits you want while also cutting out the most brittle source of ingest complexity: letting OPDB's relationship model shape Pinbase's runtime graph.

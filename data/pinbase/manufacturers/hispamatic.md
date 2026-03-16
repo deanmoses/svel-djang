@@ -1,0 +1,4 @@
+---
+slug: hispamatic
+name: Hispamatic
+---

@@ -1,0 +1,4 @@
+---
+slug: checkers
+name: Checkers
+---

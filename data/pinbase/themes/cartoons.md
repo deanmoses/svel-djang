@@ -1,0 +1,4 @@
+---
+slug: cartoons
+name: Cartoons
+---

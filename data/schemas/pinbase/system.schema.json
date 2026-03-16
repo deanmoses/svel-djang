@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pinbase/system.schema.json",
+  "title": "Pinbase System",
+  "description": "Frontmatter for a Pinbase-authored system record",
+  "type": "object",
+  "properties": {
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "name": { "type": "string", "minLength": 1 },
+    "manufacturer_slug": {
+      "type": ["string", "null"],
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "technology_subgeneration_slug": {
+      "type": ["string", "null"],
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "mpu_strings": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "default": []
+    }
+  },
+  "required": ["slug", "name"],
+  "additionalProperties": false
+}

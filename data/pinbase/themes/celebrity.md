@@ -1,0 +1,4 @@
+---
+slug: celebrity
+name: Celebrity
+---

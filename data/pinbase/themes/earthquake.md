@@ -1,0 +1,4 @@
+---
+slug: earthquake
+name: Earthquake
+---

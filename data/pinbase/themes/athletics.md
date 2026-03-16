@@ -1,0 +1,4 @@
+---
+slug: athletics
+name: Athletics
+---

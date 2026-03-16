@@ -1,0 +1,19 @@
+---
+slug: hi-deal
+name: Hi-Deal
+title_slug: hi-deal
+opdb_id: G4joK-M0o8O
+ipdb_id: 1157
+manufacturer_slug: bally
+year: 1975
+month: 10
+player_count: 1
+production_quantity: '2085'
+display_type_slug: score-reels
+technology_generation_slug: electromechanical
+credit_refs:
+- person_slug: dick-white
+  role: Art
+- person_slug: jim-patla
+  role: Design
+---

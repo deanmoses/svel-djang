@@ -1,4 +1,4 @@
-"""Create and enrich MachineModel records from data/models.json.
+"""Create and enrich MachineModel records from data/models.json or data/pinbase/models/.
 
 Creates MachineModel records that don't yet exist (with opdb_id, ipdb_id,
 name, slug), then asserts editorial claims with the pinbase source
@@ -15,6 +15,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
 from apps.catalog.ingestion.bulk_utils import generate_unique_slug
+from apps.catalog.ingestion.pinbase_loader import load_models_as_dicts
 from apps.catalog.models import MachineModel
 from apps.provenance.models import Claim, Source
 
@@ -36,7 +37,7 @@ CLAIM_FIELDS = {
 
 
 class Command(BaseCommand):
-    help = "Assert editorial claims for MachineModels from data/models.json."
+    help = "Assert editorial claims for MachineModels from data/models.json or data/pinbase/."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -44,11 +45,20 @@ class Command(BaseCommand):
             default=str(DEFAULT_PATH),
             help="Path to models.json.",
         )
+        parser.add_argument(
+            "--format",
+            choices=["json", "markdown"],
+            default="json",
+            help="Data source format: json (data/*.json) or markdown (data/pinbase/)",
+        )
 
     def handle(self, *args, **options):
-        path = options["path"]
-        with open(path) as f:
-            entries = json.load(f)
+        if options["format"] == "markdown":
+            entries = load_models_as_dicts()
+        else:
+            path = options["path"]
+            with open(path) as f:
+                entries = json.load(f)
 
         ct_id = ContentType.objects.get_for_model(MachineModel).pk
 

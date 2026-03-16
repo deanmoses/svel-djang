@@ -1,0 +1,4 @@
+---
+slug: magic
+name: Magic
+---

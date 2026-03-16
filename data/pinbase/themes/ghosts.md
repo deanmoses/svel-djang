@@ -1,0 +1,4 @@
+---
+slug: ghosts
+name: Ghosts
+---

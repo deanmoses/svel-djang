@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pinbase/person.schema.json",
+  "title": "Pinbase Person",
+  "description": "Frontmatter for a Pinbase-authored person record",
+  "type": "object",
+  "properties": {
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "name": { "type": "string", "minLength": 1 },
+    "aliases": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true,
+      "default": []
+    },
+    "born": { "type": ["string", "null"], "description": "Birth date (YYYY, YYYY-MM, or YYYY-MM-DD)" },
+    "died": { "type": ["string", "null"], "description": "Death date (YYYY, YYYY-MM, or YYYY-MM-DD)" },
+    "hometown": { "type": ["string", "null"] }
+  },
+  "required": ["slug", "name"],
+  "additionalProperties": false
+}
