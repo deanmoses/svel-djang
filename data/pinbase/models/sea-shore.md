@@ -4,7 +4,7 @@ name: Sea Shore
 title_slug: sea-shore
 opdb_id: GryDO-ML032
 ipdb_id: 2086
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1964
 month: 9
 player_count: 2

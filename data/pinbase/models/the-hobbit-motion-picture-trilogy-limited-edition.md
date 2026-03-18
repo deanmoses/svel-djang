@@ -4,7 +4,7 @@ name: The Hobbit (Motion Picture Trilogy)
 title_slug: the-hobbit
 opdb_id: G5bYr-MLezO-A97xX
 ipdb_id: 6223
-manufacturer_slug: jersey-jack
+corporate_entity_slug: jersey-jack-pinball-inc-lakewood-nj
 year: 2016
 month: 1
 player_count: 4

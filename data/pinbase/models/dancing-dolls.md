@@ -4,7 +4,7 @@ name: Dancing Dolls
 title_slug: dancing-dolls
 opdb_id: G5nDL-M2YZ5
 ipdb_id: 634
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1960
 month: 5
 player_count: 1

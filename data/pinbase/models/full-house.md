@@ -4,7 +4,7 @@ name: Full House
 title_slug: full-house-top-hand
 opdb_id: G4EeX-MDl4j
 ipdb_id: 961
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1966
 month: 3
 player_count: 1

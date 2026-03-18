@@ -3,7 +3,7 @@ slug: old-orchard
 name: Old Orchard
 title_slug: old-orchard
 ipdb_id: 1707
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1932
 month: 4
 player_count: 1

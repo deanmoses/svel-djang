@@ -4,7 +4,7 @@ name: Wild Fyre
 title_slug: wild-fyre
 opdb_id: GrOwV-Ml9kO
 ipdb_id: 2783
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1978
 month: 1
 player_count: 4

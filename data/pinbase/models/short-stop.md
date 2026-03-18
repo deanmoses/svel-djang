@@ -3,7 +3,7 @@ slug: short-stop
 name: Short Stop
 title_slug: short-stop
 ipdb_id: 2128
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1948
 month: 5
 player_count: 1

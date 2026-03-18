@@ -3,7 +3,7 @@ slug: counter-knock-out
 name: Counter Knock-Out
 title_slug: counter-knock-out
 ipdb_id: 5591
-manufacturer_slug: superior-amusement-company
+corporate_entity_slug: superior-amusement-company
 year: 1934
 month: 7
 player_count: 1

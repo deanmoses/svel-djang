@@ -4,7 +4,7 @@ name: Tic & Toc
 title_slug: tic-toc
 opdb_id: GRWwO-Mz2B6
 ipdb_id: 4079
-manufacturer_slug: europlay
+corporate_entity_slug: europlay
 year: 1974
 month: 1
 player_count: 1

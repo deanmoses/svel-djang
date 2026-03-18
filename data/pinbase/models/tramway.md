@@ -4,7 +4,7 @@ name: Tramway
 title_slug: tramway
 opdb_id: GrjVe-M3dp6
 ipdb_id: 2627
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1974
 month: 1
 player_count: 2

@@ -3,7 +3,7 @@ slug: dino-turbo
 name: Dino Turbo
 title_slug: dino-turbo
 ipdb_id: 4493
-manufacturer_slug: komplett-flipper
+corporate_entity_slug: geiger-automatenbau-gmbh
 year: 1990
 player_count: 4
 production_quantity: '150'

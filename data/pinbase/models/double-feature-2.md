@@ -4,7 +4,7 @@ name: Double-Feature
 title_slug: double-feature
 opdb_id: GRLoV-MQ4Ex
 ipdb_id: 711
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1950
 month: 12
 player_count: 1

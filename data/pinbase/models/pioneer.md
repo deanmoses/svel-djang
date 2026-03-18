@@ -4,7 +4,7 @@ name: Pioneer
 title_slug: spirit-of-76-pioneer-new-york
 opdb_id: GrlPK-MXrXw
 ipdb_id: 1802
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1976
 month: 3
 player_count: 2

@@ -4,7 +4,7 @@ name: Doodle Bug
 title_slug: dipsy-doodle-doodle-bug-love-bug
 opdb_id: Grx1z-Mx02z
 ipdb_id: 703
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1971
 month: 3
 player_count: 1

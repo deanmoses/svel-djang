@@ -4,7 +4,7 @@ name: The Lost World Jurassic Park
 title_slug: the-lost-world-jurassic-park
 opdb_id: G4kBL-MLndo
 ipdb_id: 4136
-manufacturer_slug: sega
+corporate_entity_slug: sega-pinball-incorporated
 year: 1997
 month: 6
 player_count: 4

@@ -4,7 +4,7 @@ name: Highways
 title_slug: highways
 opdb_id: G4j0D-MLeyd
 ipdb_id: 1178
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1961
 month: 3
 player_count: 1

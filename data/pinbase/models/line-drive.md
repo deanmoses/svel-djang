@@ -3,7 +3,7 @@ slug: line-drive
 name: Line Drive
 title_slug: line-drive
 ipdb_id: 1447
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1972
 month: 1
 player_count: 2

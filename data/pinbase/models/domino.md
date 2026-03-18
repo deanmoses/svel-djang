@@ -4,7 +4,7 @@ name: Domino
 title_slug: domino
 opdb_id: G4q9J-M2Y55
 ipdb_id: 700
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1952
 month: 5
 player_count: 1

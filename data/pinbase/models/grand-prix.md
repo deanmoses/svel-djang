@@ -4,7 +4,7 @@ name: Grand Prix
 title_slug: grand-prix
 opdb_id: G4O1L-MDW47
 ipdb_id: 1072
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1976
 month: 12
 player_count: 4

@@ -4,7 +4,7 @@ name: Dimension
 title_slug: 2001-dimension-galaxie
 opdb_id: G48nw-MQ5V4
 ipdb_id: 680
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1971
 month: 2
 player_count: 1

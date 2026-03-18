@@ -4,7 +4,7 @@ name: 'Black Knight: Sword of Rage (Pro)'
 title_slug: black-knight-sword-of-rage
 opdb_id: GD7Ld-ME0BP
 ipdb_id: 6567
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2019
 month: 3
 player_count: 4

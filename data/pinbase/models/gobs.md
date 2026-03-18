@@ -3,7 +3,7 @@ slug: gobs
 name: Gobs
 title_slug: gobs
 ipdb_id: 3027
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1942
 month: 3
 player_count: 1

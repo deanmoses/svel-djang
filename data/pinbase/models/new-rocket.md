@@ -3,7 +3,7 @@ slug: new-rocket
 name: New Rocket
 title_slug: new-rocket
 ipdb_id: 3575
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1938
 month: 3
 player_count: 1

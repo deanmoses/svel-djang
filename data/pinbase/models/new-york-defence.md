@@ -3,7 +3,7 @@ slug: new-york-defence
 name: New York Defence
 title_slug: new-york-defence
 ipdb_id: 3920
-manufacturer_slug: e-g-s
+corporate_entity_slug: electronic-games-systems-srl
 year: 1981
 month: 10
 player_count: 4

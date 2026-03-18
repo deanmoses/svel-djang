@@ -4,7 +4,7 @@ name: Beat the Clock
 title_slug: beat-the-clock
 opdb_id: GRY9k-MQr4w
 ipdb_id: 212
-manufacturer_slug: bally
+corporate_entity_slug: bally-midway-manufacturing-company
 year: 1985
 month: 1
 player_count: 4

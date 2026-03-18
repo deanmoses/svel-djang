@@ -4,7 +4,7 @@ name: Bronco
 title_slug: bronco-mustang
 opdb_id: GR6bk-Mz2N6
 ipdb_id: 388
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1977
 month: 4
 player_count: 4

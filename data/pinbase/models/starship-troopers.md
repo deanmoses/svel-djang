@@ -4,7 +4,7 @@ name: Starship Troopers
 title_slug: starship-troopers
 opdb_id: G5we0-MDx6b
 ipdb_id: 4341
-manufacturer_slug: sega
+corporate_entity_slug: sega-pinball-incorporated
 year: 1997
 month: 1
 player_count: 6

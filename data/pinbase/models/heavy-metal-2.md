@@ -4,7 +4,7 @@ name: Heavy Metal
 title_slug: heavy-metal
 opdb_id: GoEej-Mo1q0
 ipdb_id: 6733
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2020
 month: 6
 player_count: 4

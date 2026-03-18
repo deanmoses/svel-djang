@@ -4,7 +4,7 @@ name: Pro Pool
 title_slug: play-pool
 opdb_id: G5n1Q-MQZdq
 ipdb_id: 1866
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1973
 month: 12
 player_count: 1

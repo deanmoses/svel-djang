@@ -4,7 +4,7 @@ name: Caravelle
 title_slug: caravelle
 opdb_id: Gryq6-MDl0b
 ipdb_id: 444
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1961
 month: 2
 player_count: 4

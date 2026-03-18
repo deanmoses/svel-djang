@@ -4,7 +4,7 @@ name: Horseshoes
 title_slug: horseshoes
 opdb_id: GR6Le-MQZ8o
 ipdb_id: 1239
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1951
 month: 12
 player_count: 1

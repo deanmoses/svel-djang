@@ -4,7 +4,7 @@ name: Saloon
 title_slug: saloon
 opdb_id: GrEqX-MLbvZ
 ipdb_id: 5562
-manufacturer_slug: rally
+corporate_entity_slug: rally-aka-rally-play-company
 year: 1965
 month: 1
 player_count: 4

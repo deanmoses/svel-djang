@@ -3,7 +3,7 @@ slug: gun-smoke-2
 name: Gun Smoke
 title_slug: gun-smoke-2
 ipdb_id: 4808
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1968
 player_count: 2
 technology_generation_slug: electromechanical

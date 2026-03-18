@@ -4,7 +4,7 @@ name: New Canasta
 title_slug: new-canasta
 opdb_id: Gr18d-M5R11
 ipdb_id: 5554
-manufacturer_slug: marsaplay
+corporate_entity_slug: marsaplay
 year: 2010
 month: 4
 player_count: 4

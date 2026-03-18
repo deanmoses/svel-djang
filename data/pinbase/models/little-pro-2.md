@@ -3,7 +3,7 @@ slug: little-pro-2
 name: Little Pro
 title_slug: little-pro-2
 ipdb_id: 5312
-manufacturer_slug: bromley-inc
+corporate_entity_slug: bromley-inc
 year: 1990
 player_count: 1
 production_quantity: '250'

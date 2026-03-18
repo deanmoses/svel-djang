@@ -4,7 +4,7 @@ name: Cosmic Flash
 title_slug: cosmic-flash
 opdb_id: G5pxD-MBRWW
 ipdb_id: 3695
-manufacturer_slug: bell-games
+corporate_entity_slug: bell-games
 year: 1984
 month: 1
 player_count: 4

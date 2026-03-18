@@ -3,7 +3,7 @@ slug: flag-ship-extended-play-prototype
 name: Flag-Ship (Extended Play Prototype)
 title_slug: flag-ship-extended-play-prototype
 ipdb_id: 7033
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1957
 player_count: 2
 technology_generation_slug: electromechanical

@@ -3,7 +3,7 @@ slug: scram
 name: Scram!
 title_slug: scram-2
 ipdb_id: 2069
-manufacturer_slug: abt-manufacturing-company
+corporate_entity_slug: abt-manufacturing-company
 year: 1932
 month: 5
 player_count: 1

@@ -3,7 +3,7 @@ slug: zingy-bingy
 name: Zingy Bingy
 title_slug: zingy-bingy
 ipdb_id: 6635
-manufacturer_slug: capcom
+corporate_entity_slug: capcom-coin-op-incorporated
 player_count: 4
 technology_generation_slug: solid-state
 credit_refs:

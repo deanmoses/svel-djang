@@ -4,7 +4,7 @@ name: The Hobbit (Black Arrow)
 title_slug: the-hobbit
 opdb_id: G5bYr-MLezO-ARePO
 ipdb_id: 6456
-manufacturer_slug: jersey-jack
+corporate_entity_slug: jersey-jack-pinball-inc-lakewood-nj
 year: 2015
 month: 12
 player_count: 4

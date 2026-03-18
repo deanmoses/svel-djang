@@ -4,7 +4,7 @@ name: Pole Position
 title_slug: pole-position
 opdb_id: Grlop-MLy9n
 ipdb_id: 3322
-manufacturer_slug: segasa
+corporate_entity_slug: segasa-dba-sonic
 year: 1986
 month: 1
 player_count: 4

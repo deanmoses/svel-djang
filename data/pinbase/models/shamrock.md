@@ -4,7 +4,7 @@ name: Shamrock
 title_slug: shamrock-2
 opdb_id: G5n7L-MQplz
 ipdb_id: 2107
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1956
 month: 10
 player_count: 2

@@ -4,7 +4,7 @@ name: Ali
 title_slug: muhammad-ali
 opdb_id: G43kO-MQ50p
 ipdb_id: 43
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1980
 month: 3
 player_count: 4

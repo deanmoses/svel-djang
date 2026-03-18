@@ -4,7 +4,7 @@ name: The Wizard of Oz (75th Anniversary)
 title_slug: the-wizard-of-oz
 opdb_id: G4xyR-MJ2v0-A1BY7
 ipdb_id: 6221
-manufacturer_slug: jersey-jack
+corporate_entity_slug: jersey-jack-pinball-inc-lakewood-nj
 year: 2014
 month: 1
 player_count: 4

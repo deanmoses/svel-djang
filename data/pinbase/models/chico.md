@@ -4,7 +4,7 @@ name: Chico
 title_slug: chico
 opdb_id: GWyvZ-M0oBe
 ipdb_id: 3014
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1948
 month: 6
 player_count: 1

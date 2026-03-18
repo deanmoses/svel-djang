@@ -4,7 +4,7 @@ name: James Cameron's Avatar
 title_slug: avatar
 opdb_id: GrZBr-MDbx7
 ipdb_id: 5618
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2010
 month: 9
 player_count: 4

@@ -4,7 +4,7 @@ name: The Who's Tommy Pinball Wizard
 title_slug: the-whos-tommy-pinball-wizard
 opdb_id: GR6do-MLBq4
 ipdb_id: 2579
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1994
 month: 2
 player_count: 4

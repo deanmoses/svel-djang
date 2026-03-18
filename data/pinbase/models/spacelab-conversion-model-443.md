@@ -4,7 +4,7 @@ name: Spacelab
 title_slug: skylab-spacelab
 opdb_id: G5DOx-MP3Ey
 ipdb_id: 2264
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1974
 month: 7
 player_count: 1

@@ -3,7 +3,7 @@ slug: portal-extended
 name: Portal (Extended)
 title_slug: portal
 opdb_id: GpebN-M5RNp
-manufacturer_slug: multimorphic
+corporate_entity_slug: multimorphic-inc
 year: 2025
 month: 3
 player_count: 4

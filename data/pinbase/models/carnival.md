@@ -4,7 +4,7 @@ name: Carnival
 title_slug: carnival-4
 opdb_id: GrOXo-MJKyB
 ipdb_id: 450
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1957
 month: 8
 player_count: 2

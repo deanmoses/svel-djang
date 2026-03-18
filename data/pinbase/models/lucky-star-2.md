@@ -3,7 +3,7 @@ slug: lucky-star-2
 name: Lucky Star
 title_slug: lucky-star-2
 ipdb_id: 1493
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1947
 month: 5
 player_count: 1

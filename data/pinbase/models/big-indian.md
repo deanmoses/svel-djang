@@ -4,7 +4,7 @@ name: Big Indian
 title_slug: big-indian-big-brave
 opdb_id: GrXKb-MJ4ww
 ipdb_id: 257
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1974
 month: 2
 player_count: 4

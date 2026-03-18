@@ -4,7 +4,7 @@ name: Shoo Shoo
 title_slug: shoo-shoo
 opdb_id: GRwwl-MQNPN
 ipdb_id: 2121
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1951
 month: 2
 player_count: 1

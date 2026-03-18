@@ -3,7 +3,7 @@ slug: maisie
 name: Maisie
 title_slug: maisie
 ipdb_id: 1520
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1947
 month: 3
 player_count: 1

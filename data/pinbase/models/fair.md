@@ -3,7 +3,7 @@ slug: fair
 name: Fair
 title_slug: fair
 ipdb_id: 807
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1939
 month: 5
 player_count: 1

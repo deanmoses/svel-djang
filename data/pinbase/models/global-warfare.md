@@ -4,7 +4,7 @@ name: Global Warfare
 title_slug: global-warfare
 opdb_id: G436N-MQw3K
 ipdb_id: 1015
-manufacturer_slug: game-plan
+corporate_entity_slug: game-plan-incorporated
 year: 1981
 month: 6
 player_count: 4

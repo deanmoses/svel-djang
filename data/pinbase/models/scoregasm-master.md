@@ -3,7 +3,7 @@ slug: scoregasm-master
 name: ScoreGasm Master
 title_slug: scoregasm-master
 ipdb_id: 6259
-manufacturer_slug: day-one
+corporate_entity_slug: day-one-pinball-manufacturing-incorporated
 year: 2015
 month: 4
 player_count: 1

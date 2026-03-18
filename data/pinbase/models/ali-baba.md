@@ -4,7 +4,7 @@ name: Ali Baba
 title_slug: ali-baba
 opdb_id: G5KVw-Ml94Y
 ipdb_id: 44
-manufacturer_slug: sega
+corporate_entity_slug: sega-enterprises-ltd
 year: 1976
 month: 1
 player_count: 2

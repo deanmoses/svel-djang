@@ -4,7 +4,7 @@ name: Cosmic Pinball
 title_slug: cosmic-pinball
 opdb_id: GrE68-MJozw
 ipdb_id: 3032
-manufacturer_slug: briarwood
+corporate_entity_slug: briarwood-a-division-of-brunswick-manufacturing-company
 year: 1977
 month: 1
 player_count: 1

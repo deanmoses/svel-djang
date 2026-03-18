@@ -4,7 +4,7 @@ name: Jungle Lord
 title_slug: jungle-lord
 opdb_id: G5nkY-MDv88
 ipdb_id: 1338
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1981
 month: 2
 player_count: 4

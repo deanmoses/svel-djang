@@ -4,7 +4,7 @@ name: Times Square
 title_slug: times-square
 opdb_id: G5LP7-MDBBV
 ipdb_id: 2570
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1953
 month: 4
 player_count: 1

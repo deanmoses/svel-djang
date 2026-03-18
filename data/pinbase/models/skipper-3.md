@@ -4,7 +4,7 @@ name: Skipper
 title_slug: skipper
 opdb_id: GRvkP-MQYn1
 ipdb_id: 2189
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1969
 month: 11
 player_count: 4

@@ -4,7 +4,7 @@ name: Pro-Football
 title_slug: gridiron-pro-football
 opdb_id: G41E2-ME00b
 ipdb_id: 1865
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1973
 month: 2
 player_count: 1

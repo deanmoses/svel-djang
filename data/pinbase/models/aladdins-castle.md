@@ -4,7 +4,7 @@ name: Aladdin's Castle
 title_slug: aladdins-castle
 opdb_id: G5oXq-MD82e
 ipdb_id: 40
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1976
 month: 6
 player_count: 2

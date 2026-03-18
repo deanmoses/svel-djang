@@ -3,7 +3,7 @@ slug: excalibur-2
 name: Excalibur
 title_slug: excalibur-2
 ipdb_id: 3928
-manufacturer_slug: jeutel
+corporate_entity_slug: jeutel
 year: 1981
 month: 12
 player_count: 4

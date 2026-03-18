@@ -4,7 +4,7 @@ name: Gold Rush
 title_slug: gold-rush
 opdb_id: Gr1PE-MDz9j
 ipdb_id: 1035
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1966
 month: 4
 player_count: 1

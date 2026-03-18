@@ -3,7 +3,7 @@ slug: harley-davidson-2nd-production-run
 name: Harley-Davidson (2nd production run)
 title_slug: harley-davidson-2nd-production-run
 ipdb_id: 7047
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1991
 month: 10
 player_count: 4

@@ -3,7 +3,7 @@ slug: drum-major
 name: Drum Major
 title_slug: drum-major
 ipdb_id: 736
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1940
 month: 5
 player_count: 1

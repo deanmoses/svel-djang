@@ -4,7 +4,7 @@ name: Mustang (Pro)
 title_slug: mustang
 opdb_id: GrPOR-MJK2k
 ipdb_id: 6098
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2014
 month: 4
 player_count: 4

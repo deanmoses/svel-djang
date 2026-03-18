@@ -1,6 +1,7 @@
 ---
 slug: playmatic
 name: Playmatic
+opdb_manufacturer_id: 5
 ---
 
 Playmatic S.A. was a Spanish manufacturer and one of the most prolific pinball producers in Europe during its active years, roughly 1968 to 1989. Operating from Barcelona, Playmatic built an extensive catalog of machines covering both the [[technologygeneration:electromechanical]] and [[technologygeneration:solid-state]] eras, distributing them throughout Spain and across the broader European market.

@@ -4,7 +4,7 @@ name: Aqualand
 title_slug: aqualand
 opdb_id: GRQVw-Mx06k
 ipdb_id: 3935
-manufacturer_slug: juegos-populares
+corporate_entity_slug: juegos-populares-sa
 year: 1986
 month: 1
 player_count: 4

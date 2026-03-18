@@ -3,7 +3,7 @@ slug: champion-2
 name: Champion
 title_slug: champion-3
 ipdb_id: 488
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1939
 month: 8
 player_count: 1

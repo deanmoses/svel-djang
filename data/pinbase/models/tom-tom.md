@@ -4,7 +4,7 @@ name: Tom Tom
 title_slug: tom-tom
 opdb_id: G4EjL-MQjVR
 ipdb_id: 2578
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1963
 month: 1
 player_count: 2

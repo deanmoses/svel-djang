@@ -4,7 +4,7 @@ name: De-Icer
 title_slug: de-icer
 opdb_id: GQKqy-MKNn4
 ipdb_id: 653
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1949
 month: 11
 player_count: 1

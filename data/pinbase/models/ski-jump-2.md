@@ -4,7 +4,7 @@ name: Ski Jump
 title_slug: ski-jump
 opdb_id: GRzxO-MQP8j
 ipdb_id: 4686
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1978
 month: 1
 player_count: 1

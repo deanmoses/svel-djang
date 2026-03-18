@@ -3,7 +3,7 @@ slug: the-new-champ
 name: The New Champ
 title_slug: the-new-champ
 ipdb_id: 1668
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1941
 month: 9
 player_count: 1

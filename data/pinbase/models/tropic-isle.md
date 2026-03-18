@@ -4,7 +4,7 @@ name: Tropic Isle
 title_slug: tropic-isle
 opdb_id: G5L3N-MLl77
 ipdb_id: 2661
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1962
 month: 4
 player_count: 1

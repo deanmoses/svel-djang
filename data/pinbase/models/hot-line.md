@@ -4,7 +4,7 @@ name: Hot Line
 title_slug: hot-line-big-strike
 opdb_id: GrZex-MLe41
 ipdb_id: 1245
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1966
 month: 9
 player_count: 1

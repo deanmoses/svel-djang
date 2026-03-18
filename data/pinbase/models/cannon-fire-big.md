@@ -3,7 +3,7 @@ slug: cannon-fire-big
 name: Cannon Fire (Big)
 title_slug: cannon-fire-big
 ipdb_id: 6346
-manufacturer_slug: mills-novelty-company
+corporate_entity_slug: mills-novelty-company
 year: 1934
 month: 11
 player_count: 1

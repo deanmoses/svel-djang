@@ -4,7 +4,7 @@ name: Galaxy Ranger
 title_slug: galaxy-ranger
 opdb_id: G4ynZ-MLyZb
 ipdb_id: 981
-manufacturer_slug: midway
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1978
 month: 1
 player_count: 4

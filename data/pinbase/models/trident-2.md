@@ -3,7 +3,7 @@ slug: trident-2
 name: Trident
 title_slug: trident-2
 ipdb_id: 6443
-manufacturer_slug: lai
+corporate_entity_slug: leisure-allied-industries
 year: 1979
 month: 3
 player_count: 4

@@ -4,7 +4,7 @@ name: Playboy 35th Anniversary
 title_slug: playboy-35th-anniversary
 opdb_id: GRL60-MLW2q
 ipdb_id: 1822
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1989
 month: 5
 player_count: 4

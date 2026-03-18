@@ -4,7 +4,7 @@ name: Fandango
 title_slug: fiesta-fandango
 opdb_id: Gr1VD-MDRNP
 ipdb_id: 818
-manufacturer_slug: playmatic
+corporate_entity_slug: playmatic
 year: 1976
 month: 5
 player_count: 1

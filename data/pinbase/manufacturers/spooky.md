@@ -1,6 +1,7 @@
 ---
 slug: spooky
 name: Spooky Pinball
+opdb_manufacturer_id: 95
 ---
 
 Spooky Pinball was founded by [[person:charlie-emery]] in 2013 in Benton, Wisconsin, and quickly became one of the most beloved companies in the modern independent manufacturing scene. Operating from a small facility with a tight-knit team, Spooky built its reputation on original games with strong creative identities, genuine quirk, and a level of personality that larger manufacturers rarely risk.

@@ -3,7 +3,7 @@ slug: mike-ike
 name: Mike & Ike
 title_slug: mike-ike
 ipdb_id: 1595
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1933
 month: 2
 player_count: 2

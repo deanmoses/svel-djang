@@ -4,7 +4,7 @@ name: Cue Ball
 title_slug: cue-ball
 opdb_id: GrExQ-Mb5NB
 ipdb_id: 609
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1956
 month: 12
 player_count: 1

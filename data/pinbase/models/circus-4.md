@@ -4,7 +4,7 @@ name: Circus
 title_slug: circus-3
 opdb_id: G42bD-MQjNr
 ipdb_id: 518
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1977
 month: 4
 player_count: 4

@@ -3,7 +3,7 @@ slug: fathom-mermaid
 name: Fathom (Mermaid)
 title_slug: fathom
 opdb_id: GrPO3-M7Zkd
-manufacturer_slug: haggis
+corporate_entity_slug: haggis-pinball
 year: 2022
 month: 5
 player_count: 4

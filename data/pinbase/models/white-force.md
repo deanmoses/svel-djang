@@ -4,7 +4,7 @@ name: White Force
 title_slug: white-force
 opdb_id: GRnW8-MQ66o
 ipdb_id: 4129
-manufacturer_slug: unidesa
+corporate_entity_slug: universal-de-desarrollos-electronicos-sa
 year: 1987
 month: 1
 player_count: 4

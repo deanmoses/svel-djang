@@ -3,7 +3,7 @@ slug: sky-ride
 name: Sky Ride
 title_slug: sky-ride
 ipdb_id: 2200
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1933
 month: 7
 player_count: 1

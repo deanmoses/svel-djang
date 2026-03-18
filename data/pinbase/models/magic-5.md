@@ -3,7 +3,7 @@ slug: magic-5
 name: Magic
 title_slug: magic-5
 ipdb_id: 6434
-manufacturer_slug: lai
+corporate_entity_slug: leisure-allied-industries
 year: 1979
 player_count: 4
 production_quantity: '264'

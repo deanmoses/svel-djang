@@ -4,7 +4,7 @@ name: Disco
 title_slug: disco
 opdb_id: G43bY-MwNRn
 ipdb_id: 685
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1977
 month: 6
 player_count: 2

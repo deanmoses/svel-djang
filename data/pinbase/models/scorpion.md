@@ -4,7 +4,7 @@ name: Scorpion
 title_slug: scorpion
 opdb_id: G4qQj-MD8XD
 ipdb_id: 2067
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1980
 month: 7
 player_count: 4

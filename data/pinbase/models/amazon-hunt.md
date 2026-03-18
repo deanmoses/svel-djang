@@ -4,7 +4,7 @@ name: Amazon Hunt
 title_slug: amazon-hunt
 opdb_id: GrJkp-M1rBN
 ipdb_id: 66
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1983
 month: 1
 player_count: 4

@@ -3,7 +3,7 @@ slug: blow-me-down
 name: Blow Me Down
 title_slug: blow-me-down
 ipdb_id: 323
-manufacturer_slug: coast-coin-machine-company
+corporate_entity_slug: coast-coin-machine-company
 year: 1933
 month: 4
 player_count: 1

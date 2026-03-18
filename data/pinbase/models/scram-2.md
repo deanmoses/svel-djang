@@ -3,7 +3,7 @@ slug: scram-2
 name: Scram!
 title_slug: scram-3
 ipdb_id: 2070
-manufacturer_slug: j-p-seeburg-corporation
+corporate_entity_slug: j-p-seeburg-corporation
 year: 1932
 month: 5
 player_count: 1

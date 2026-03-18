@@ -3,7 +3,7 @@ slug: skill-roll
 name: Skill Roll
 title_slug: skill-roll
 ipdb_id: 2184
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1935
 month: 9
 player_count: 1

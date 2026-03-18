@@ -4,7 +4,7 @@ name: Grand Slam
 title_slug: grand-slam
 opdb_id: G4PL3-MLeBP
 ipdb_id: 1079
-manufacturer_slug: bally
+corporate_entity_slug: bally-midway-manufacturing-company
 year: 1983
 month: 1
 player_count: 4

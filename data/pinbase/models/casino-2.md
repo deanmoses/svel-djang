@@ -4,7 +4,7 @@ name: Casino
 title_slug: casino
 opdb_id: G4xOz-MDnlX
 ipdb_id: 466
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1972
 month: 6
 player_count: 4

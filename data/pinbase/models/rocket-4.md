@@ -4,7 +4,7 @@ name: Rocket
 title_slug: rocket
 opdb_id: G42BY-MD8ZY
 ipdb_id: 1988
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1959
 month: 11
 player_count: 1

@@ -4,7 +4,7 @@ name: Triple Strike
 title_slug: triple-strike
 opdb_id: GR9YD-MQP1j
 ipdb_id: 2652
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1975
 month: 8
 player_count: 1

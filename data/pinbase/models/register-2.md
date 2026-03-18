@@ -4,7 +4,7 @@ name: Register
 title_slug: register
 opdb_id: G5WEb-MJjBX
 ipdb_id: 1942
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1956
 month: 10
 player_count: 4

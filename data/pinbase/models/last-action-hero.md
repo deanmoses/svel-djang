@@ -4,7 +4,7 @@ name: Last Action Hero
 title_slug: last-action-hero
 opdb_id: GRwyq-MW9lN
 ipdb_id: 1416
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1993
 month: 1
 player_count: 4

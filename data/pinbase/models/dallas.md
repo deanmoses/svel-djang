@@ -4,7 +4,7 @@ name: Dallas
 title_slug: dallas
 opdb_id: Ge161-MdEpd
 ipdb_id: 633
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1949
 month: 2
 player_count: 1

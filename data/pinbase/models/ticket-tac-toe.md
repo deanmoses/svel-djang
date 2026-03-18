@@ -3,7 +3,7 @@ slug: ticket-tac-toe
 name: Ticket Tac Toe
 title_slug: ticket-tac-toe
 ipdb_id: 4334
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1996
 month: 3
 player_count: 1

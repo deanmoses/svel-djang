@@ -4,7 +4,7 @@ name: Super Mario Bros. Mushroom World
 title_slug: super-mario-bros-mushroom-world
 opdb_id: G7Zp0-MVKEX
 ipdb_id: 3427
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1992
 month: 6
 player_count: 4

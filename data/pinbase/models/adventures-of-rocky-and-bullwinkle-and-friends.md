@@ -4,7 +4,7 @@ name: Adventures of Rocky and Bullwinkle and Friends
 title_slug: rocky-and-bullwinkle
 opdb_id: G5vnL-MJP3y
 ipdb_id: 23
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1993
 month: 2
 player_count: 4

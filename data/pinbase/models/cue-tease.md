@@ -4,7 +4,7 @@ name: Cue-Tease
 title_slug: cue-tease
 opdb_id: GRYdp-ML0KP
 ipdb_id: 612
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1963
 month: 7
 player_count: 2

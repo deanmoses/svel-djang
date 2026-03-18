@@ -3,7 +3,7 @@ slug: sport-event
 name: Sport Event
 title_slug: sport-event
 ipdb_id: 3467
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1940
 month: 4
 player_count: 1

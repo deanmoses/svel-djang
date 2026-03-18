@@ -4,7 +4,7 @@ name: Sharp Shooter II
 title_slug: sharp-shooter-ii
 opdb_id: Gr8KB-MLqYW
 ipdb_id: 2114
-manufacturer_slug: game-plan
+corporate_entity_slug: game-plan-incorporated
 year: 1983
 month: 1
 player_count: 4

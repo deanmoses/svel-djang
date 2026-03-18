@@ -4,7 +4,7 @@ name: Harbor Lites
 title_slug: blondie
 opdb_id: GRVdN-MLnY4
 ipdb_id: 1121
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1956
 month: 2
 player_count: 1

@@ -4,7 +4,7 @@ name: Game Of Thrones (Pro)
 title_slug: game-of-thrones
 opdb_id: G41d5-MKNwX
 ipdb_id: 6307
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2015
 month: 10
 player_count: 4

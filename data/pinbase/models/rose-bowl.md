@@ -3,7 +3,7 @@ slug: rose-bowl
 name: Rose Bowl
 title_slug: rose-bowl-2
 ipdb_id: 2015
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1937
 month: 8
 player_count: 1

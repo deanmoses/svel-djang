@@ -4,7 +4,7 @@ name: U.S.A. Football
 title_slug: ag-soccer-ball-ag-football
 opdb_id: G5wxv-MP3k9
 ipdb_id: 2710
-manufacturer_slug: alvin-g
+corporate_entity_slug: alvin-g-and-company
 year: 1992
 month: 10
 player_count: 2

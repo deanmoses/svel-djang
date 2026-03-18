@@ -3,7 +3,7 @@ slug: contact-2
 name: Contact
 title_slug: contact-2
 ipdb_id: 3071
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1939
 month: 4
 player_count: 1

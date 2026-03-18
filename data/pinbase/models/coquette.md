@@ -4,7 +4,7 @@ name: Coquette
 title_slug: coquette
 opdb_id: G4NBw-MLxkb
 ipdb_id: 567
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1962
 month: 5
 player_count: 2

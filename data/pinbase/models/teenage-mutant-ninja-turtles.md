@@ -4,7 +4,7 @@ name: Teenage Mutant Ninja Turtles
 title_slug: teenage-mutant-ninja-turtles-2
 opdb_id: Gr8xn-MKN66
 ipdb_id: 2509
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1991
 month: 6
 player_count: 4

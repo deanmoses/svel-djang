@@ -4,7 +4,7 @@ name: Captain Fantastic and the Brown Dirt Cowboy
 title_slug: captain-fantastic-and-the-brown-dirt-cowboy
 opdb_id: GRveZ-MNE38
 ipdb_id: 438
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1975
 month: 9
 player_count: 4

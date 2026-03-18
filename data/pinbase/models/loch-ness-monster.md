@@ -3,7 +3,7 @@ slug: loch-ness-monster
 name: Loch Ness Monster
 title_slug: loch-ness-monster
 ipdb_id: 1465
-manufacturer_slug: game-plan
+corporate_entity_slug: game-plan-incorporated
 year: 1985
 month: 11
 player_count: 4

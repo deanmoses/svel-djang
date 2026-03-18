@@ -4,7 +4,7 @@ name: Circus
 title_slug: circus-2
 opdb_id: GRpw8-MDyqp
 ipdb_id: 3021
-manufacturer_slug: brunswick
+corporate_entity_slug: briarwood-a-division-of-brunswick-manufacturing-company
 year: 1980
 month: 1
 player_count: 1

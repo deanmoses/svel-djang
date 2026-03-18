@@ -4,7 +4,7 @@ name: Gold Ball
 title_slug: gold-ball
 opdb_id: Grjlx-MQkz3
 ipdb_id: 1024
-manufacturer_slug: bally
+corporate_entity_slug: bally-midway-manufacturing-company
 year: 1983
 month: 1
 player_count: 4

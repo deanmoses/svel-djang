@@ -4,7 +4,7 @@ name: Happy Clown
 title_slug: happy-clown
 opdb_id: G5WbJ-MQVn8
 ipdb_id: 1114
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1964
 month: 11
 player_count: 4

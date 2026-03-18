@@ -4,7 +4,7 @@ name: Black Jack
 title_slug: black-jack-2
 opdb_id: G5vWo-MjBkB
 ipdb_id: 308
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1960
 month: 11
 player_count: 1

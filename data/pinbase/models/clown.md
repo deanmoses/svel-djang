@@ -4,7 +4,7 @@ name: Clown
 title_slug: clown
 opdb_id: G5Wjo-MJ9ll
 ipdb_id: 3024
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1985
 month: 7
 player_count: 4

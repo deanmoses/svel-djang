@@ -4,7 +4,7 @@ name: Papillon
 title_slug: papillon
 opdb_id: GRQEO-MLyPy
 ipdb_id: 5763
-manufacturer_slug: videodens
+corporate_entity_slug: video-dens-sa
 year: 1986
 month: 1
 player_count: 4

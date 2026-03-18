@@ -4,7 +4,7 @@ name: Flipper Clown
 title_slug: flipper-clown
 opdb_id: GrJVE-MdEE8
 ipdb_id: 892
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1962
 month: 3
 player_count: 1

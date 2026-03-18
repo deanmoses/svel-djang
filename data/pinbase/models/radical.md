@@ -4,7 +4,7 @@ name: Radical!
 title_slug: radical
 opdb_id: G59ZY-MD8p7
 ipdb_id: 1904
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1990
 month: 1
 player_count: 4

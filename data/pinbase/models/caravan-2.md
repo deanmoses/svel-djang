@@ -4,7 +4,7 @@ name: Caravan
 title_slug: caravan-2
 opdb_id: G5W2D-MePB0
 ipdb_id: 442
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1952
 month: 6
 player_count: 1

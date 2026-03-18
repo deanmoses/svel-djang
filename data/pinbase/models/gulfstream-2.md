@@ -4,7 +4,7 @@ name: Gulfstream
 title_slug: gulfstream-tropic-fun
 opdb_id: G4EJB-MJdE1
 ipdb_id: 1094
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1973
 month: 5
 player_count: 1

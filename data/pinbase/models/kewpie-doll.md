@@ -4,7 +4,7 @@ name: Kewpie Doll
 title_slug: kewpie-doll
 opdb_id: GR6ox-MJP59
 ipdb_id: 1358
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1960
 month: 10
 player_count: 1

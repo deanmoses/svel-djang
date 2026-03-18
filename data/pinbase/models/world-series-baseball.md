@@ -3,7 +3,7 @@ slug: world-series-baseball
 name: World Series Baseball
 title_slug: world-series-baseball
 ipdb_id: 2816
-manufacturer_slug: artists-and-creators-guild-incorporated
+corporate_entity_slug: artists-and-creators-guild-incorporated
 year: 1932
 month: 5
 player_count: 1

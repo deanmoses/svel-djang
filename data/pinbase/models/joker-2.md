@@ -4,7 +4,7 @@ name: Joker
 title_slug: joker
 opdb_id: GRpvZ-MwNEn
 ipdb_id: 1305
-manufacturer_slug: playmatic
+corporate_entity_slug: playmatic
 year: 1974
 month: 1
 player_count: 4

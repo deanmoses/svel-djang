@@ -3,7 +3,7 @@ slug: cracker-jack
 name: Cracker Jack
 title_slug: cracker-jack
 ipdb_id: 3033
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1936
 month: 11
 player_count: 1

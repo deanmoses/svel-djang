@@ -4,7 +4,7 @@ name: Olympic Hockey
 title_slug: olympic-hockey
 opdb_id: G41WY-MJj5r
 ipdb_id: 1709
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1972
 month: 1
 player_count: 2

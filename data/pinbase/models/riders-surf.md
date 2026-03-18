@@ -4,7 +4,7 @@ name: Rider's Surf
 title_slug: riders-surf
 opdb_id: G5Kn3-MW9vE
 ipdb_id: 4102
-manufacturer_slug: joctronic
+corporate_entity_slug: jocmatic-sa
 year: 1986
 month: 1
 player_count: 4

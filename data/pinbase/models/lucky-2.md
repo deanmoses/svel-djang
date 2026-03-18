@@ -3,7 +3,7 @@ slug: lucky-2
 name: Lucky
 title_slug: lucky
 ipdb_id: 3221
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1939
 month: 9
 player_count: 1

@@ -3,7 +3,7 @@ slug: suspense-3
 name: Suspense
 title_slug: suspense-3
 ipdb_id: 2470
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1946
 month: 2
 player_count: 1

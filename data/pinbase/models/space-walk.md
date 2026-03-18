@@ -4,7 +4,7 @@ name: Space Walk
 title_slug: count-down-space-walk
 opdb_id: G56zB-MLEpV
 ipdb_id: 2263
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1979
 month: 1
 player_count: 2

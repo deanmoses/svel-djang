@@ -4,7 +4,7 @@ name: King Kool
 title_slug: king-rock-king-kool
 opdb_id: GRBly-MQ9kl
 ipdb_id: 1371
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1972
 month: 7
 player_count: 2

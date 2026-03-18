@@ -4,7 +4,7 @@ name: Rocket
 title_slug: mercury-rocket
 opdb_id: Gr1JJ-MJY40
 ipdb_id: 1986
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1950
 month: 5
 player_count: 1

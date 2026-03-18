@@ -4,7 +4,7 @@ name: Sinbad (EM)
 title_slug: sinbad
 opdb_id: G4xqN-ML3o5
 ipdb_id: 4673
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1978
 month: 5
 player_count: 4

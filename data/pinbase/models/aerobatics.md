@@ -4,7 +4,7 @@ name: Aerobatics
 title_slug: aerobatics
 opdb_id: G5WJw-MkP98
 ipdb_id: 24
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1977
 month: 2
 player_count: 1

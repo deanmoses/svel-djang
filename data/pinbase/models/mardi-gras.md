@@ -4,7 +4,7 @@ name: Mardi Gras
 title_slug: mardi-gras
 opdb_id: G5V0D-MQNl0
 ipdb_id: 1544
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1962
 month: 10
 player_count: 4

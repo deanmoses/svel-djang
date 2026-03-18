@@ -4,7 +4,7 @@ name: Preview
 title_slug: preview
 opdb_id: G5wXJ-MJ54V
 ipdb_id: 1864
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1962
 month: 8
 player_count: 2

@@ -4,7 +4,7 @@ name: The Simpsons
 title_slug: the-simpsons
 opdb_id: G5VBJ-MLy4l
 ipdb_id: 2158
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1990
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: See Saw
 title_slug: see-saw
 opdb_id: G4lKk-MQ59j
 ipdb_id: 2091
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1970
 month: 9
 player_count: 4

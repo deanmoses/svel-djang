@@ -4,7 +4,7 @@ name: Sea Side
 title_slug: sea-side
 opdb_id: GRVkQ-MP33q
 ipdb_id: 2087
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1967
 month: 12
 player_count: 2

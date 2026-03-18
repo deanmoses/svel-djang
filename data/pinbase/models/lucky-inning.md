@@ -4,7 +4,7 @@ name: Lucky Inning
 title_slug: lucky-inning
 opdb_id: Gj6LP-MNEYx
 ipdb_id: 1489
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1950
 month: 5
 player_count: 1

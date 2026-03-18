@@ -3,7 +3,7 @@ slug: horseshoe
 name: Horseshoe
 title_slug: horseshoe
 ipdb_id: 3158
-manufacturer_slug: abt-manufacturing-company
+corporate_entity_slug: abt-manufacturing-company
 year: 1933
 month: 6
 player_count: 1

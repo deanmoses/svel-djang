@@ -4,7 +4,7 @@ name: Jarama
 title_slug: jarama
 opdb_id: G18KO-MdE9K
 ipdb_id: 6670
-manufacturer_slug: centro-matic
+corporate_entity_slug: centro-matic-sa
 year: 1973
 month: 1
 player_count: 1

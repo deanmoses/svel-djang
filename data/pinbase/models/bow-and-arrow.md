@@ -4,7 +4,7 @@ name: Bow and Arrow
 title_slug: bow-and-arrow
 opdb_id: GRoqq-MJr9K
 ipdb_id: 362
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1975
 month: 11
 player_count: 4

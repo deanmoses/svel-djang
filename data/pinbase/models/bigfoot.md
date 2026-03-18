@@ -4,7 +4,7 @@ name: Big Foot
 title_slug: big-foot
 opdb_id: GR7qv-MQk31
 ipdb_id: 4345
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1978
 month: 1
 player_count: 2

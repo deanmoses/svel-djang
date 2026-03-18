@@ -4,7 +4,7 @@ name: Primus
 title_slug: pabst-blue-ribbon
 opdb_id: GRYX4-MvBpz
 ipdb_id: 6610
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2018
 month: 12
 player_count: 4

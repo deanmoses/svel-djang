@@ -4,7 +4,7 @@ name: Smart Set
 title_slug: smart-set
 opdb_id: G5YQK-MvBzn
 ipdb_id: 2215
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1969
 month: 6
 player_count: 4

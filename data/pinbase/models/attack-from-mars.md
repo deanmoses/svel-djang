@@ -4,7 +4,7 @@ name: Attack from Mars
 title_slug: attack-from-mars
 opdb_id: G4do5-MDlN7
 ipdb_id: 3781
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1995
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: Big Shot
 title_slug: play-pool
 opdb_id: G5n1Q-MJKz4
 ipdb_id: 271
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1973
 month: 8
 player_count: 2

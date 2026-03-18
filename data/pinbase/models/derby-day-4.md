@@ -4,7 +4,7 @@ name: Derby Day
 title_slug: derby-day
 opdb_id: GR9DK-MQoy0
 ipdb_id: 667
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1967
 month: 10
 player_count: 2

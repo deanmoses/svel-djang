@@ -3,7 +3,7 @@ slug: acapulco
 name: Acapulco
 title_slug: acapulco
 ipdb_id: 3
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 player_count: 1
 technology_generation_slug: electromechanical
 credit_refs:

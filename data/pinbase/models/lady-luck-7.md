@@ -3,7 +3,7 @@ slug: lady-luck-7
 name: Lady Luck
 title_slug: lady-luck-6
 ipdb_id: 5429
-manufacturer_slug: bally
+corporate_entity_slug: bally-wulff
 year: 1986
 player_count: 4
 technology_generation_slug: solid-state

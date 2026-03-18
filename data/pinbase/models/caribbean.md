@@ -3,7 +3,7 @@ slug: caribbean
 name: Caribbean
 title_slug: caribbean
 ipdb_id: 449
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1948
 month: 5
 player_count: 1

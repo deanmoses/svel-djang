@@ -3,7 +3,7 @@ slug: hit-parade-3
 name: Hit Parade
 title_slug: hit-parade-3
 ipdb_id: 3150
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1951
 month: 2
 player_count: 1

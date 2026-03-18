@@ -3,7 +3,7 @@ slug: chubbie-2
 name: Chubbie
 title_slug: chubbie
 ipdb_id: 5354
-manufacturer_slug: stoner-manufacturing-company
+corporate_entity_slug: stoner-manufacturing-company
 year: 1938
 month: 11
 player_count: 1

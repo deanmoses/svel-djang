@@ -4,7 +4,7 @@ name: Hit the Deck
 title_slug: hit-the-deck-neptune
 opdb_id: GRoWo-MDzOZ
 ipdb_id: 1201
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1978
 month: 1
 player_count: 1

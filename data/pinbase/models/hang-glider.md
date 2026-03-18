@@ -4,7 +4,7 @@ name: Hang Glider
 title_slug: hang-glider
 opdb_id: GRKpw-M5R0E
 ipdb_id: 1112
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1976
 month: 12
 player_count: 4

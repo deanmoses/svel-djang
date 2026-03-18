@@ -3,7 +3,7 @@ slug: wwe-raw-vs-smackdown
 name: WWE Raw vs. Smackdown
 title_slug: wwe-raw-vs-smackdown
 ipdb_id: 6627
-manufacturer_slug: zizzle-arcade-pinball
+corporate_entity_slug: zizzle-arcade-pinball
 player_count: 2
 technology_generation_slug: solid-state
 credit_refs:

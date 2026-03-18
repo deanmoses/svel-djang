@@ -3,7 +3,7 @@ slug: rapid-fire
 name: Rapid Fire
 title_slug: rapid-fire
 ipdb_id: 3568
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1982
 month: 4
 player_count: 4

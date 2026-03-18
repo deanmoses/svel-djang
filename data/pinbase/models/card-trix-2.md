@@ -4,7 +4,7 @@ name: Card Trix
 title_slug: flip-a-card-card-trix
 opdb_id: GRWZN-MDv6X
 ipdb_id: 3748
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1970
 month: 4
 player_count: 1

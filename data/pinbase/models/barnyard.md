@@ -4,7 +4,7 @@ name: Barnyard
 title_slug: barnyard
 opdb_id: Glllz-M2Ypn
 ipdb_id: 6452
-manufacturer_slug: multimorphic
+corporate_entity_slug: multimorphic-inc
 year: 2017
 month: 7
 player_count: 1

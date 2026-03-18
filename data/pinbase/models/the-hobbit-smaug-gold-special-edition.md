@@ -4,7 +4,7 @@ name: The Hobbit (Smaug Gold)
 title_slug: the-hobbit
 opdb_id: G5bYr-MLezO-AO3J1
 ipdb_id: 6224
-manufacturer_slug: jersey-jack
+corporate_entity_slug: jersey-jack-pinball-inc-lakewood-nj
 year: 2015
 month: 12
 player_count: 4

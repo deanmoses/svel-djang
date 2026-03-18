@@ -4,7 +4,7 @@ name: Transporter the Rescue
 title_slug: transporter-the-rescue
 opdb_id: G5n2D-MLn85
 ipdb_id: 2630
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1989
 month: 1
 player_count: 4

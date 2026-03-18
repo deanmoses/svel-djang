@@ -3,7 +3,7 @@ slug: erbu-rennen
 name: ERBU-RENNEN
 title_slug: erbu-rennen
 ipdb_id: 6033
-manufacturer_slug: erb
+corporate_entity_slug: erich-bttner
 year: 1935
 month: 12
 player_count: 1

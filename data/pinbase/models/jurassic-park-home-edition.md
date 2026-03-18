@@ -4,7 +4,7 @@ name: Jurassic Park (Home Edition)
 title_slug: jurassic-park-home-edition
 opdb_id: GxvvB-MOEKX
 ipdb_id: 6847
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2021
 month: 10
 player_count: 4

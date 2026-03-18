@@ -4,7 +4,7 @@ name: Earth Wind Fire
 title_slug: earth-wind-fire
 opdb_id: GR96Q-MNEnx
 ipdb_id: 3611
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1981
 month: 1
 player_count: 4

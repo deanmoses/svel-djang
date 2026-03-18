@@ -4,7 +4,7 @@ name: Nosferatu
 title_slug: nosferatu
 opdb_id: GyVzp-Mb5wK
 ipdb_id: 5427
-manufacturer_slug: achille-and-chalvignac
+corporate_entity_slug: achille-and-chalvignac
 year: 1985
 month: 10
 player_count: 4

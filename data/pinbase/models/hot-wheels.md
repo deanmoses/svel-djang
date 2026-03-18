@@ -4,7 +4,7 @@ name: Hot Wheels
 title_slug: hot-wheels-2
 opdb_id: GrOY9-Mq14V
 ipdb_id: 3164
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1979
 month: 1
 player_count: 4

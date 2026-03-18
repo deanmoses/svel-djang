@@ -4,7 +4,7 @@ name: Klondike
 title_slug: gold-rush-yukon-klondike
 opdb_id: GR987-M5Rny
 ipdb_id: 1388
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1971
 month: 8
 player_count: 1

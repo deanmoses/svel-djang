@@ -4,7 +4,7 @@ name: Wonderland
 title_slug: wonderland
 opdb_id: GRwPK-MJ6o8
 ipdb_id: 2805
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1955
 month: 4
 player_count: 1

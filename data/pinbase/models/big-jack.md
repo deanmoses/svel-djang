@@ -4,7 +4,7 @@ name: Big Jack
 title_slug: big-jack
 opdb_id: GR937-MDe3z
 ipdb_id: 258
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1968
 month: 10
 player_count: 2

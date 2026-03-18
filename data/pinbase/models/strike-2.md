@@ -3,7 +3,7 @@ slug: strike-2
 name: Strike
 title_slug: strike-2
 ipdb_id: 3772
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1957
 month: 7
 technology_generation_slug: electromechanical

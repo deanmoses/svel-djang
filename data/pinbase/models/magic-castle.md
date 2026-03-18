@@ -4,7 +4,7 @@ name: Magic Castle
 title_slug: magic-castle
 opdb_id: G5v2B-MQ2xy
 ipdb_id: 1511
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1984
 month: 1
 player_count: 4

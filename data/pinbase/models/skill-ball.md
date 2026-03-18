@@ -4,7 +4,7 @@ name: Skill-Ball
 title_slug: skill-ball
 opdb_id: G5zpL-ME02b
 ipdb_id: 2177
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1961
 month: 9
 player_count: 1

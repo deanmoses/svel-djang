@@ -3,7 +3,7 @@ slug: speedway
 name: Speedway
 title_slug: speedway
 ipdb_id: 2282
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1933
 month: 9
 player_count: 1

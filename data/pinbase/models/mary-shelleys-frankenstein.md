@@ -4,7 +4,7 @@ name: Mary Shelley's Frankenstein
 title_slug: frankenstein
 opdb_id: GRB7E-MP3rR
 ipdb_id: 947
-manufacturer_slug: sega
+corporate_entity_slug: sega-pinball-incorporated
 year: 1995
 month: 2
 player_count: 4

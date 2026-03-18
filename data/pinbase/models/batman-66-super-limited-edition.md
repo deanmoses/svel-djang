@@ -4,7 +4,7 @@ name: Batman 66 (Super LE)
 title_slug: batman-66
 opdb_id: GRoz4-MrRPw-A97X1
 ipdb_id: 6356
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2016
 month: 1
 player_count: 4

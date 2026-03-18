@@ -3,7 +3,7 @@ slug: foo-fighters-pro
 name: Foo Fighters (Pro)
 title_slug: foo-fighters
 opdb_id: GpeoL-MyNPq
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2023
 month: 3
 player_count: 4

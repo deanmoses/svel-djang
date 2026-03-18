@@ -4,7 +4,7 @@ name: Darling
 title_slug: jubilee-darling
 opdb_id: Gr3J1-Mx0kk
 ipdb_id: 640
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1973
 month: 9
 player_count: 2

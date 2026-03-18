@@ -4,7 +4,7 @@ name: Rainbow
 title_slug: rainbow
 opdb_id: GRobp-MDRWe
 ipdb_id: 1911
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1956
 month: 12
 player_count: 1

@@ -4,7 +4,7 @@ name: Super Bowling
 title_slug: super-bowling
 opdb_id: GRnBW-MDEBV
 ipdb_id: 4411
-manufacturer_slug: inder
+corporate_entity_slug: industria-electromecnica-de-recreativos-sa
 year: 1974
 month: 1
 player_count: 2

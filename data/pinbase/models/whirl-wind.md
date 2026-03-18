@@ -4,7 +4,7 @@ name: Whirl-Wind
 title_slug: whirl-wind
 opdb_id: G56Ed-MrR7W
 ipdb_id: 2760
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1957
 month: 12
 player_count: 2

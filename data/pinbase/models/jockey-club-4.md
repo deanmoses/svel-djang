@@ -4,7 +4,7 @@ name: Jockey Club
 title_slug: jockey-club
 opdb_id: G4lqL-MD36o
 ipdb_id: 1302
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1954
 month: 4
 player_count: 1

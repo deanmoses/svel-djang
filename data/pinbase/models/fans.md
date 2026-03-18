@@ -4,7 +4,7 @@ name: Fans
 title_slug: doozie-daffie
 opdb_id: GRVk8-MVKb4
 ipdb_id: 4639
-manufacturer_slug: maresa
+corporate_entity_slug: maquinas-recreativas-sociedad-anonima
 year: 1969
 month: 1
 player_count: 1

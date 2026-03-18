@@ -4,7 +4,7 @@ name: Colors
 title_slug: colors
 opdb_id: G5b0Z-MLOKw
 ipdb_id: 545
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1954
 month: 11
 player_count: 1

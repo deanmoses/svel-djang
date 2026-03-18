@@ -4,7 +4,7 @@ name: Airborne
 title_slug: airborne
 opdb_id: G4EZe-MJ424
 ipdb_id: 3783
-manufacturer_slug: capcom
+corporate_entity_slug: capcom-coin-op-incorporated
 year: 1996
 month: 3
 player_count: 4

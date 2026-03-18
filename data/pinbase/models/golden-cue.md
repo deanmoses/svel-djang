@@ -4,7 +4,7 @@ name: Golden Cue
 title_slug: golden-cue
 opdb_id: GRYzo-MP3p7
 ipdb_id: 4383
-manufacturer_slug: sega
+corporate_entity_slug: sega-pinball-incorporated
 year: 1998
 month: 6
 player_count: 4

@@ -4,7 +4,7 @@ name: Big Deal
 title_slug: big-deal
 opdb_id: G5vq2-MDnP0
 ipdb_id: 245
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1977
 month: 5
 player_count: 4

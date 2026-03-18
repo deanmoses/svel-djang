@@ -4,7 +4,7 @@ name: Super Score
 title_slug: super-score
 opdb_id: G43lX-MJ4B2
 ipdb_id: 2440
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1956
 month: 6
 player_count: 1

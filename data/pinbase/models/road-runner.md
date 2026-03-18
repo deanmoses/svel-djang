@@ -4,7 +4,7 @@ name: Road Runner
 title_slug: road-runner
 opdb_id: G421X-ME0nK
 ipdb_id: 3517
-manufacturer_slug: atari
+corporate_entity_slug: atari-incorporated
 year: 1979
 month: 1
 player_count: 2

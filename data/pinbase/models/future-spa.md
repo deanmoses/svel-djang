@@ -4,7 +4,7 @@ name: Future Spa
 title_slug: future-spa
 opdb_id: G5Dbo-M3dv6
 ipdb_id: 974
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1979
 month: 3
 player_count: 4

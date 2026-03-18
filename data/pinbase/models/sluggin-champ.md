@@ -4,7 +4,7 @@ name: Sluggin' Champ
 title_slug: sluggin-champ
 opdb_id: G4xVZ-MW9wv
 ipdb_id: 2213
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1955
 month: 4
 player_count: 1

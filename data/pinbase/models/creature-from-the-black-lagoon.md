@@ -4,7 +4,7 @@ name: Creature from the Black Lagoon
 title_slug: creature-from-the-black-lagoon
 opdb_id: GrNWn-MQdqZ
 ipdb_id: 588
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1992
 month: 12
 player_count: 4

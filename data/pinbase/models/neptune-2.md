@@ -4,7 +4,7 @@ name: Neptune
 title_slug: hit-the-deck-neptune
 opdb_id: GRoWo-MDllp
 ipdb_id: 5177
-manufacturer_slug: giuliano-lodola
+corporate_entity_slug: giuliano-lodola
 year: 1979
 month: 1
 player_count: 1

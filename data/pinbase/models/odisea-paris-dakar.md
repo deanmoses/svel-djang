@@ -4,7 +4,7 @@ name: Odisea Paris Dakar
 title_slug: odisea-paris-dakar
 opdb_id: G5DKQ-M0o3R
 ipdb_id: 4879
-manufacturer_slug: peyper
+corporate_entity_slug: peyper
 year: 1987
 month: 1
 player_count: 4

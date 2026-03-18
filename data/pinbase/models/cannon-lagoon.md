@@ -4,7 +4,7 @@ name: Cannon Lagoon
 title_slug: cannon-lagoon
 opdb_id: G6llq-MwNOZ
 ipdb_id: 6450
-manufacturer_slug: multimorphic
+corporate_entity_slug: multimorphic-inc
 year: 2017
 month: 7
 player_count: 1

@@ -4,7 +4,7 @@ name: Ten Spot
 title_slug: ten-spot
 opdb_id: GRoYk-MLXbp
 ipdb_id: 2517
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1961
 month: 6
 player_count: 1

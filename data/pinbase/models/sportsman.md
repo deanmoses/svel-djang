@@ -4,7 +4,7 @@ name: Sportsman
 title_slug: sportsman
 opdb_id: G432j-MYeew
 ipdb_id: 2306
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1952
 month: 2
 player_count: 1

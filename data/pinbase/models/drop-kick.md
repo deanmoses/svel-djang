@@ -3,7 +3,7 @@ slug: drop-kick
 name: Drop Kick
 title_slug: drop-kick
 ipdb_id: 734
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1934
 month: 10
 player_count: 1

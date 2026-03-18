@@ -4,7 +4,7 @@ name: Olympics
 title_slug: super-star-olympics
 opdb_id: G5WKO-MJZRk
 ipdb_id: 1711
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1975
 month: 1
 player_count: 2

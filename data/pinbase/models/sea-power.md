@@ -3,7 +3,7 @@ slug: sea-power
 name: Sea Power
 title_slug: sea-power
 ipdb_id: 4794
-manufacturer_slug: sullivan-nolan-advertising-company-wwii-conversions-only
+corporate_entity_slug: sullivan-nolan-advertising-company-wwii-conversions-only
 year: 1942
 month: 6
 player_count: 1

@@ -4,7 +4,7 @@ name: The Three Musketeers
 title_slug: the-three-musketeers
 opdb_id: G4q73-MZe1l
 ipdb_id: 4392
-manufacturer_slug: rally
+corporate_entity_slug: rally-aka-rally-play-company
 year: 1964
 month: 1
 player_count: 2

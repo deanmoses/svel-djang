@@ -4,7 +4,7 @@ name: Barb Wire
 title_slug: barb-wire
 opdb_id: GRwyv-MQNwr
 ipdb_id: 3795
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1996
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: Reno
 title_slug: reno
 opdb_id: GRb8E-MDq0R
 ipdb_id: 1946
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1957
 month: 9
 player_count: 1

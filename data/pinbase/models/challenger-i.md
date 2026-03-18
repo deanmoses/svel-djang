@@ -3,7 +3,7 @@ slug: challenger-i
 name: Challenger I
 title_slug: challenger-i
 ipdb_id: 3006
-manufacturer_slug: game-plan
+corporate_entity_slug: game-plan-incorporated
 year: 1980
 player_count: 4
 technology_generation_slug: solid-state

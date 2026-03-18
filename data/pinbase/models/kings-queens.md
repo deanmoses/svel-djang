@@ -4,7 +4,7 @@ name: Kings & Queens
 title_slug: kings-queens
 opdb_id: G4Ne1-ML3dR
 ipdb_id: 1381
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1965
 month: 3
 player_count: 1

@@ -4,7 +4,7 @@ name: Hootenanny
 title_slug: hootenanny
 opdb_id: G4xo0-MJjOK
 ipdb_id: 1236
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1963
 month: 11
 player_count: 1

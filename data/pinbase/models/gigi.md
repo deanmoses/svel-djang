@@ -4,7 +4,7 @@ name: Gigi
 title_slug: gigi
 opdb_id: G43ek-MQd7N
 ipdb_id: 1003
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1963
 month: 12
 player_count: 1

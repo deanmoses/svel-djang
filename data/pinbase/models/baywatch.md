@@ -4,7 +4,7 @@ name: Baywatch
 title_slug: baywatch
 opdb_id: Grxvy-M4oZj
 ipdb_id: 2848
-manufacturer_slug: sega
+corporate_entity_slug: sega-pinball-incorporated
 year: 1995
 month: 2
 player_count: 6

@@ -3,7 +3,7 @@ slug: snooker
 name: Snooker
 title_slug: snooker
 ipdb_id: 2224
-manufacturer_slug: stern-electronics
+corporate_entity_slug: western-equipment-supply-company
 year: 1936
 month: 3
 player_count: 1

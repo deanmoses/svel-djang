@@ -4,7 +4,7 @@ name: Medieval Madness
 title_slug: medieval-madness
 opdb_id: G5pe4-MePZv
 ipdb_id: 4032
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1997
 month: 6
 player_count: 4

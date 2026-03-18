@@ -4,7 +4,7 @@ name: Target Pool
 title_slug: target-pool-mini-pool
 opdb_id: GRbWj-MD3RJ
 ipdb_id: 2502
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1969
 month: 6
 player_count: 1

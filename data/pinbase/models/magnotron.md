@@ -4,7 +4,7 @@ name: Magnotron
 title_slug: magnotron-duotron
 opdb_id: G57OL-MDqr7
 ipdb_id: 1519
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1974
 month: 8
 player_count: 4

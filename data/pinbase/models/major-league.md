@@ -3,7 +3,7 @@ slug: major-league
 name: Major League
 title_slug: major-league
 ipdb_id: 1525
-manufacturer_slug: pamco
+corporate_entity_slug: pacific-amusement-manufacturing-company
 year: 1934
 month: 7
 player_count: 1

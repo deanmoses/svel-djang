@@ -4,7 +4,7 @@ name: Rondeevoo
 title_slug: rondeevoo
 opdb_id: GRQ3b-MrRZ7
 ipdb_id: 2014
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1948
 month: 6
 player_count: 1

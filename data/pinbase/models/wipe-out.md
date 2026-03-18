@@ -4,7 +4,7 @@ name: Wipe Out
 title_slug: wipe-out
 opdb_id: G5w3q-MQYr0
 ipdb_id: 2799
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1993
 month: 1
 player_count: 4

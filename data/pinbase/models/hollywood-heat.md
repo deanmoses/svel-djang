@@ -4,7 +4,7 @@ name: Hollywood Heat
 title_slug: hollywood-heat
 opdb_id: G5B9Z-MLBjW
 ipdb_id: 1219
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1986
 month: 6
 player_count: 4

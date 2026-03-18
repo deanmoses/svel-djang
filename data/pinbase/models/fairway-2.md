@@ -4,7 +4,7 @@ name: Fairway
 title_slug: fairway
 opdb_id: Gr26x-MW9kd
 ipdb_id: 814
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1953
 month: 6
 player_count: 1

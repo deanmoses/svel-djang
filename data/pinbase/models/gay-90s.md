@@ -4,7 +4,7 @@ name: Gay 90's
 title_slug: gay-90s
 opdb_id: Gr88w-MQPp9
 ipdb_id: 989
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1970
 month: 1
 player_count: 4

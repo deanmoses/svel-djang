@@ -4,7 +4,7 @@ name: Drop-A-Card
 title_slug: drop-a-card-pop-a-card
 opdb_id: GRL9Q-MQNXK
 ipdb_id: 735
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1971
 month: 11
 player_count: 1

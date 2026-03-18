@@ -4,7 +4,7 @@ name: 'Operation: Thunder'
 title_slug: operation-thunder
 opdb_id: Gr3Lq-MJZo5
 ipdb_id: 1721
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1992
 month: 3
 player_count: 4

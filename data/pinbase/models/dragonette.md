@@ -4,7 +4,7 @@ name: Dragonette
 title_slug: dragonette-4-belles
 opdb_id: G5DD0-MLynv
 ipdb_id: 730
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1954
 month: 6
 player_count: 1

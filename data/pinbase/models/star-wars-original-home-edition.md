@@ -4,7 +4,7 @@ name: Star Wars (Home Edition)
 title_slug: star-wars-home-edition
 opdb_id: GpePX-MnKq5
 ipdb_id: 6611
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2019
 month: 7
 player_count: 4

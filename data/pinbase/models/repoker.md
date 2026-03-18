@@ -3,7 +3,7 @@ slug: repoker
 name: Repoker
 title_slug: repoker
 ipdb_id: 6455
-manufacturer_slug: tasa
+corporate_entity_slug: talleres-de-automatico-sa
 player_count: 1
 technology_generation_slug: electromechanical
 ---

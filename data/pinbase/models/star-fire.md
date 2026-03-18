@@ -4,7 +4,7 @@ name: Star Fire
 title_slug: star-fire
 opdb_id: G5nOY-ML1yo
 ipdb_id: 3453
-manufacturer_slug: playmatic
+corporate_entity_slug: playmatic
 year: 1985
 month: 1
 player_count: 4

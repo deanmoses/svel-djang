@@ -4,7 +4,7 @@ name: Snooks
 title_slug: snooks
 opdb_id: G5neP-M2YRr
 ipdb_id: 2226
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1951
 month: 6
 player_count: 1

@@ -4,7 +4,7 @@ name: Gondolier
 title_slug: gondolier
 opdb_id: Gr1wP-MDq3y
 ipdb_id: 1058
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1958
 month: 8
 player_count: 2

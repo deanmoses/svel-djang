@@ -4,7 +4,7 @@ name: Supreme x Stern
 title_slug: supreme-x-stern
 opdb_id: G3EnZ-MePOV
 ipdb_id: 6609
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2018
 month: 6
 player_count: 4

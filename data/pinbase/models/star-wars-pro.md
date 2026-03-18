@@ -4,7 +4,7 @@ name: Star Wars (Pro)
 title_slug: star-wars-stern
 opdb_id: G5vLR-MwNwy
 ipdb_id: 6428
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2017
 month: 6
 player_count: 4

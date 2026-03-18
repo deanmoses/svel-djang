@@ -4,7 +4,7 @@ name: 8 Ball
 title_slug: 8-ball-2
 opdb_id: G4dke-M5R3k
 ipdb_id: 765
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1952
 month: 9
 player_count: 1

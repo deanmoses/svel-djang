@@ -4,7 +4,7 @@ name: The World Series
 title_slug: the-world-series
 opdb_id: G2LL3-MOEdP
 ipdb_id: 6069
-manufacturer_slug: sankyo-seiki
+corporate_entity_slug: sankyo-precision-equipment-company-ltd
 year: 1900
 month: 1
 player_count: 1

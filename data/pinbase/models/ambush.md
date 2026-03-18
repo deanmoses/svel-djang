@@ -3,7 +3,7 @@ slug: ambush
 name: Ambush
 title_slug: ambush
 ipdb_id: 6637
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1972
 month: 11
 player_count: 1

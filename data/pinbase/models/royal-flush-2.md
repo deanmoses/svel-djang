@@ -4,7 +4,7 @@ name: Royal Flush
 title_slug: royal-flush-card-whiz
 opdb_id: GrEWx-MJNpE
 ipdb_id: 2035
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1976
 month: 4
 player_count: 4

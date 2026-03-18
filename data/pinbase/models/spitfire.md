@@ -4,7 +4,7 @@ name: Spitfire
 title_slug: spitfire
 opdb_id: G50qY-ML0YB
 ipdb_id: 2296
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1954
 month: 12
 player_count: 1

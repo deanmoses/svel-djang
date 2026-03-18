@@ -3,7 +3,7 @@ slug: sports
 name: Sports
 title_slug: sports
 ipdb_id: 2304
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1939
 month: 7
 player_count: 1

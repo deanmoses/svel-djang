@@ -3,7 +3,7 @@ slug: the-best-wizard
 name: The Best Wizard
 title_slug: the-best-wizard
 ipdb_id: 4919
-manufacturer_slug: rmg
+corporate_entity_slug: skillgame-dba-renato-montanari-giochi
 year: 1972
 player_count: 1
 technology_generation_slug: electromechanical

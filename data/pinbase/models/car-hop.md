@@ -4,7 +4,7 @@ name: Car Hop
 title_slug: car-hop
 opdb_id: Grd6d-MLR8W
 ipdb_id: 3676
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1991
 month: 1
 player_count: 4

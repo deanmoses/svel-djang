@@ -3,7 +3,7 @@ slug: the-brain
 name: The Brain
 title_slug: the-brain
 ipdb_id: 5233
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2006
 player_count: 4
 production_quantity: '1'

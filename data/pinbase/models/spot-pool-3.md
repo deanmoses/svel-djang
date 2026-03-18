@@ -3,7 +3,7 @@ slug: spot-pool-3
 name: Spot Pool
 title_slug: spot-pool-3
 ipdb_id: 3456
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1955
 month: 12
 player_count: 1

@@ -4,7 +4,7 @@ name: Fan-Tas-Tic
 title_slug: fan-tas-tic
 opdb_id: G48VE-MLebR
 ipdb_id: 820
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1972
 month: 9
 player_count: 4

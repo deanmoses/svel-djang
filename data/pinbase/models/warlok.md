@@ -4,7 +4,7 @@ name: Warlok
 title_slug: warlok
 opdb_id: G5z2e-MJ2lR
 ipdb_id: 2754
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1982
 month: 1
 player_count: 4

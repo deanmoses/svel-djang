@@ -4,7 +4,7 @@ name: Austin Powers
 title_slug: austin-powers
 opdb_id: G43BW-M3dKV
 ipdb_id: 4504
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2001
 month: 6
 player_count: 4

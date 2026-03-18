@@ -4,7 +4,7 @@ name: Sinbad Adventures
 title_slug: sinbad
 opdb_id: G4xqN-MJ5bK
 ipdb_id: 3252
-manufacturer_slug: europlay
+corporate_entity_slug: europlay
 year: 1979
 month: 1
 player_count: 1

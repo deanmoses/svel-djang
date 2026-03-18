@@ -3,7 +3,7 @@ slug: sensation-of-1937
 name: Sensation of 1937
 title_slug: sensation-of-1937
 ipdb_id: 3349
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1937
 month: 5
 player_count: 1

@@ -4,7 +4,7 @@ name: Agents 777
 title_slug: agents-777
 opdb_id: Grkpd-MQrjj
 ipdb_id: 26
-manufacturer_slug: game-plan
+corporate_entity_slug: game-plan-incorporated
 year: 1984
 month: 1
 player_count: 4

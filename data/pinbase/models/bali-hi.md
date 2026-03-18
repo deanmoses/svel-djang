@@ -4,7 +4,7 @@ name: Bali-Hi
 title_slug: bali-hi
 opdb_id: GRDJx-MDvRo
 ipdb_id: 135
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1970
 month: 9
 player_count: 4

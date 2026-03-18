@@ -4,7 +4,7 @@ name: Playball
 title_slug: playball-home-run
 opdb_id: GR612-MJ9Bz
 ipdb_id: 1816
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1971
 month: 4
 player_count: 1

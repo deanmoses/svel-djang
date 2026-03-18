@@ -4,7 +4,7 @@ name: Miss Annabelle
 title_slug: miss-annabelle
 opdb_id: G4JqB-MJK9O
 ipdb_id: 3406
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1959
 month: 8
 player_count: 1

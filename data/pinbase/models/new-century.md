@@ -3,7 +3,7 @@ slug: new-century
 name: New Century
 title_slug: new-century
 ipdb_id: 3330
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1933
 month: 3
 player_count: 1

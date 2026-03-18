@@ -4,7 +4,7 @@ name: Space Jam
 title_slug: space-jam
 opdb_id: G482d-Mp4kk
 ipdb_id: 3879
-manufacturer_slug: sega
+corporate_entity_slug: sega-pinball-incorporated
 year: 1996
 month: 12
 player_count: 6

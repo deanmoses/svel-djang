@@ -4,7 +4,7 @@ name: Psychedelic
 title_slug: groovy-crescendo
 opdb_id: GRpKY-MLylE
 ipdb_id: 1873
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1970
 month: 8
 player_count: 1

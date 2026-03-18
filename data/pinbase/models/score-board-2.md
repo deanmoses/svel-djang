@@ -4,7 +4,7 @@ name: Score-Board
 title_slug: score-board
 opdb_id: G42yY-MJj7k
 ipdb_id: 2063
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1956
 month: 4
 player_count: 4

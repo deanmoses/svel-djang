@@ -4,7 +4,7 @@ name: Pot 'O' Gold
 title_slug: pot-o-gold
 opdb_id: G4Xlx-Mq179
 ipdb_id: 1857
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1965
 month: 6
 player_count: 2

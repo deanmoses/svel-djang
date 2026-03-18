@@ -4,7 +4,7 @@ name: Martian Queen
 title_slug: martian-queen
 opdb_id: GllV2-Mp4bZ
 ipdb_id: 5885
-manufacturer_slug: ltd-do-brasil
+corporate_entity_slug: ltd-do-brasil-diverses-eletrnicas-ltda
 year: 1980
 month: 7
 player_count: 2

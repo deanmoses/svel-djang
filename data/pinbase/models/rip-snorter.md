@@ -4,7 +4,7 @@ name: Rip Snorter
 title_slug: rip-snorter
 opdb_id: G9zqb-M61B9
 ipdb_id: 1962
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1949
 month: 10
 player_count: 1

@@ -3,7 +3,7 @@ slug: pirates-of-the-caribbean-dead-mans-chest
 name: Pirates of the Caribbean Dead Man's Chest
 title_slug: pirates-of-the-caribbean-dead-mans-chest
 ipdb_id: 5164
-manufacturer_slug: zizzle-arcade-pinball
+corporate_entity_slug: zizzle-arcade-pinball
 year: 2006
 player_count: 2
 technology_generation_slug: solid-state

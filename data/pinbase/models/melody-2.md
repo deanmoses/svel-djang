@@ -4,7 +4,7 @@ name: Melody
 title_slug: melody
 opdb_id: GwebP-MBRxn
 ipdb_id: 1567
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1948
 month: 2
 player_count: 1

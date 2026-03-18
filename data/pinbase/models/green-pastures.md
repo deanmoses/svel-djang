@@ -4,7 +4,7 @@ name: Green Pastures
 title_slug: green-pastures
 opdb_id: Gr12y-MJYyY
 ipdb_id: 1085
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1954
 month: 1
 player_count: 1

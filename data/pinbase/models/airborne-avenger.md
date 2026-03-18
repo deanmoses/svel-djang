@@ -4,7 +4,7 @@ name: Airborne Avenger
 title_slug: airborne-avenger
 opdb_id: G4dZZ-MKNzE
 ipdb_id: 33
-manufacturer_slug: atari
+corporate_entity_slug: atari-incorporated
 year: 1977
 month: 1
 player_count: 4

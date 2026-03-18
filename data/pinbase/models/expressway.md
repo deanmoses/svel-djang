@@ -4,7 +4,7 @@ name: Expressway
 title_slug: expressway
 opdb_id: G4xK8-MQ5jK
 ipdb_id: 800
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1971
 month: 8
 player_count: 1

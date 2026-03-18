@@ -3,7 +3,7 @@ slug: firestone
 name: Firestone
 title_slug: firestone
 ipdb_id: 858
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1934
 month: 12
 player_count: 1

@@ -4,7 +4,7 @@ name: Struggle Buggies
 title_slug: struggle-buggies
 opdb_id: G4yNL-MJVOY
 ipdb_id: 2407
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1953
 month: 11
 player_count: 1

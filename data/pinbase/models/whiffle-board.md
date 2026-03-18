@@ -3,7 +3,7 @@ slug: whiffle-board
 name: Whiffle Board
 title_slug: whiffle-board
 ipdb_id: 3552
-manufacturer_slug: automatic-industries-incorporated
+corporate_entity_slug: automatic-industries-incorporated
 year: 1931
 month: 6
 player_count: 1

@@ -4,7 +4,7 @@ name: Explorer
 title_slug: explorer
 opdb_id: G5VPX-MQjXJ
 ipdb_id: 4117
-manufacturer_slug: nordamatic
+corporate_entity_slug: nordamatic
 year: 1976
 month: 1
 player_count: 1

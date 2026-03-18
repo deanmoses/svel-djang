@@ -4,7 +4,7 @@ name: The Jetsons
 title_slug: the-jetsons
 opdb_id: GweVl-Mb5lx
 ipdb_id: 6577
-manufacturer_slug: spooky
+corporate_entity_slug: the-pinball-company
 year: 2017
 month: 2
 player_count: 4

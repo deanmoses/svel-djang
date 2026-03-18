@@ -4,7 +4,7 @@ name: Wolf Man
 title_slug: wolf-man
 opdb_id: G4P0b-MD115
 ipdb_id: 4435
-manufacturer_slug: peyper
+corporate_entity_slug: peyper
 year: 1987
 month: 1
 player_count: 4

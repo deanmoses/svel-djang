@@ -4,7 +4,7 @@ name: Cinema
 title_slug: cinema-hollywood
 opdb_id: Grj7K-MOEXv
 ipdb_id: 513
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1976
 month: 3
 player_count: 4

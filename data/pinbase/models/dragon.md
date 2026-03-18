@@ -4,7 +4,7 @@ name: Dragon
 title_slug: dragon
 opdb_id: G4qPZ-ME0Nr
 ipdb_id: 729
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1978
 month: 10
 player_count: 4

@@ -4,7 +4,7 @@ name: Pit Stop
 title_slug: pit-stop
 opdb_id: GrPkj-MLEqv
 ipdb_id: 1806
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1968
 month: 10
 player_count: 2

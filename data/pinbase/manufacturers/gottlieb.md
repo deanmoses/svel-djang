@@ -1,6 +1,7 @@
 ---
 slug: gottlieb
 name: Gottlieb
+opdb_manufacturer_id: 2
 ---
 
 D. Gottlieb & Company holds a singular place in pinball history: it is the oldest pinball manufacturer, and its first machine helped create an entire industry. Founded by [[person:david-gottlieb]] in Chicago in 1927, the company struck gold in 1931 with [[title:baffle-ball]], a simple but addictive game that sold thousands of units and transformed a novelty into a nationwide craze. [[title:baffle-ball]] didn't just launch Gottlieb — it launched the modern amusement business.

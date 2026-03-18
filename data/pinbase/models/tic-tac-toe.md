@@ -4,7 +4,7 @@ name: Tic-Tac-Toe
 title_slug: tic-tac-toe
 opdb_id: GreoN-MJj0y
 ipdb_id: 2559
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1959
 month: 1
 player_count: 1

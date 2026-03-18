@@ -3,7 +3,7 @@ slug: beacon
 name: Beacon
 title_slug: beacon
 ipdb_id: 208
-manufacturer_slug: stoner-manufacturing-company
+corporate_entity_slug: stoner-manufacturing-company
 year: 1934
 month: 12
 player_count: 1

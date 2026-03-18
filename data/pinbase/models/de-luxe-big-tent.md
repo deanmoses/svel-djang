@@ -3,7 +3,7 @@ slug: de-luxe-big-tent
 name: De Luxe Big Tent
 title_slug: de-luxe-big-tent
 ipdb_id: 6952
-manufacturer_slug: keeney
+corporate_entity_slug: j-h-keeney-and-company-incorporated
 year: 1957
 month: 12
 player_count: 1

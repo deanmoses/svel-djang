@@ -3,7 +3,7 @@ slug: lot-o-smoke
 name: Lot-O-Smoke
 title_slug: lot-o-smoke
 ipdb_id: 1478
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1939
 month: 4
 player_count: 1

@@ -3,7 +3,7 @@ slug: sensation
 name: Sensation
 title_slug: sensation
 ipdb_id: 2095
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1934
 month: 11
 player_count: 1

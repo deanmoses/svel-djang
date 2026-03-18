@@ -4,7 +4,7 @@ name: Troubadour
 title_slug: sing-along-melody
 opdb_id: GrPkZ-MW9K8-A96YD
 ipdb_id: 2666
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1967
 month: 10
 player_count: 1

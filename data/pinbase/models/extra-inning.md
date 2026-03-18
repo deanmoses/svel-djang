@@ -4,7 +4,7 @@ name: Extra Inning
 title_slug: extra-inning
 opdb_id: GRLZ2-MYeWd
 ipdb_id: 801
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1971
 month: 5
 player_count: 1

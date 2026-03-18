@@ -4,7 +4,7 @@ name: Derby
 title_slug: derby
 opdb_id: G43O1-MJ51E
 ipdb_id: 3701
-manufacturer_slug: ami
+corporate_entity_slug: ami-spa
 year: 1975
 month: 1
 player_count: 1

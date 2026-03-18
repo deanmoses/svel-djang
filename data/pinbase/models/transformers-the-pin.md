@@ -4,7 +4,7 @@ name: Transformers The Pin
 title_slug: transformers-the-pin
 opdb_id: Grd2o-MQK8Z
 ipdb_id: 5861
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2012
 month: 1
 player_count: 4

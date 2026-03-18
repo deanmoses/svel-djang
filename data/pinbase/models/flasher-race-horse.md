@@ -3,7 +3,7 @@ slug: flasher-race-horse
 name: Flasher (Race Horse)
 title_slug: flasher-race-horse
 ipdb_id: 6746
-manufacturer_slug: mills-novelty-company
+corporate_entity_slug: mills-novelty-company
 year: 1937
 month: 10
 player_count: 1

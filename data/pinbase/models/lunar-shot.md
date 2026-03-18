@@ -4,7 +4,7 @@ name: Lunar Shot
 title_slug: apollo-blast-off
 opdb_id: GRBDj-MLBV6
 ipdb_id: 1501
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1967
 month: 8
 player_count: 1

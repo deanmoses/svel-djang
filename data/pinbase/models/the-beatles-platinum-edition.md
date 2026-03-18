@@ -4,7 +4,7 @@ name: The Beatles (Platinum)
 title_slug: the-beatles
 opdb_id: G0l8P-M85d9-A1ZNY
 ipdb_id: 6562
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2018
 month: 11
 player_count: 4

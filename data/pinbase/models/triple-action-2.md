@@ -4,7 +4,7 @@ name: Triple Action
 title_slug: triple-action-star-action
 opdb_id: GRzny-MJpew
 ipdb_id: 2649
-manufacturer_slug: segasa
+corporate_entity_slug: segasa
 year: 1974
 month: 2
 player_count: 1

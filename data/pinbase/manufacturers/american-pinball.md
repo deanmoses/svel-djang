@@ -1,6 +1,7 @@
 ---
 slug: american-pinball
 name: American Pinball
+opdb_manufacturer_id: 115
 ---
 
 American Pinball entered the market in 2016 as a fresh challenger to the established order. Backed by the Polish Reh family — investors with deep roots in amusement machinery — the company set up operations in Chicago, inheriting the city's long tradition of pinball manufacturing. Their approach combined modern [[displaytype:lcd]] display technology with an emphasis on value, offering feature-rich machines at a price point below the premium tier.

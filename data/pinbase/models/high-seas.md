@@ -4,7 +4,7 @@ name: High Seas
 title_slug: buccaneer-ship-ahoy-high-seas
 opdb_id: G4lNn-MdE31
 ipdb_id: 1175
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1976
 month: 1
 player_count: 1

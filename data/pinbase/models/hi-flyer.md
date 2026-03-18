@@ -4,7 +4,7 @@ name: Hi-Flyer
 title_slug: sky-rider-hi-flyer
 opdb_id: G50Oy-MBRlZ
 ipdb_id: 1167
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1974
 month: 8
 player_count: 2

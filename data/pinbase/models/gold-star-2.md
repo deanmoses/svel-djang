@@ -3,7 +3,7 @@ slug: gold-star-2
 name: Gold Star
 title_slug: gold-star-2
 ipdb_id: 1039
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1940
 month: 10
 player_count: 1

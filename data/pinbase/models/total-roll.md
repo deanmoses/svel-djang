@@ -3,7 +3,7 @@ slug: total-roll
 name: Total Roll
 title_slug: total-roll
 ipdb_id: 3269
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1945
 month: 10
 player_count: 1

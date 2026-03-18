@@ -4,7 +4,7 @@ name: Bonanza
 title_slug: bonanza
 opdb_id: GR6NE-MLWd4
 ipdb_id: 345
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1964
 month: 6
 player_count: 2

@@ -4,7 +4,7 @@ name: Speakeasy
 title_slug: speakeasy
 opdb_id: GRbl7-ML8EY
 ipdb_id: 2270
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1982
 month: 1
 player_count: 2

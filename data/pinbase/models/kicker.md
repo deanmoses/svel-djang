@@ -4,7 +4,7 @@ name: Kicker
 title_slug: kicker
 opdb_id: G5Qed-MLX4Z
 ipdb_id: 1363
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1966
 month: 8
 player_count: 1

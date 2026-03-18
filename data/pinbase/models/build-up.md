@@ -4,7 +4,7 @@ name: Build Up
 title_slug: build-up
 opdb_id: GoEVx-MYeP1
 ipdb_id: 397
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1948
 month: 1
 player_count: 1

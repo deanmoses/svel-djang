@@ -4,7 +4,7 @@ name: Poker Face
 title_slug: poker-face-2
 opdb_id: Grx69-MJ5zd
 ipdb_id: 1836
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1953
 month: 8
 player_count: 1

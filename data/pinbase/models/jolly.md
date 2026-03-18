@@ -3,7 +3,7 @@ slug: jolly
 name: Jolly
 title_slug: jolly
 ipdb_id: 1309
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1940
 month: 3
 player_count: 1

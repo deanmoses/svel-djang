@@ -3,7 +3,7 @@ slug: brooks-dunn
 name: Brooks & Dunn
 title_slug: brooks-dunn
 ipdb_id: 4008
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1996
 month: 8
 player_count: 4

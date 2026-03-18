@@ -4,7 +4,7 @@ name: Centaur
 title_slug: centaur-inder
 opdb_id: G5bE7-MQdXd
 ipdb_id: 4478
-manufacturer_slug: inder
+corporate_entity_slug: industria-electromecnica-de-recreativos-sa
 year: 1979
 month: 1
 player_count: 1

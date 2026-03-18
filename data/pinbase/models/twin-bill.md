@@ -4,7 +4,7 @@ name: Twin Bill
 title_slug: twin-bill
 opdb_id: GrN1B-MJd4V
 ipdb_id: 2685
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1955
 month: 1
 player_count: 1

@@ -3,7 +3,7 @@ slug: official-tournament-pool
 name: Official Tournament Pool
 title_slug: official-tournament-pool
 ipdb_id: 6341
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1955
 month: 9
 player_count: 4

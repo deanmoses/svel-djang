@@ -3,7 +3,7 @@ slug: arlington-park
 name: Arlington Park
 title_slug: arlington-park
 ipdb_id: 3652
-manufacturer_slug: specialty-manufacturing-company
+corporate_entity_slug: specialty-manufacturing-company
 year: 1941
 month: 6
 player_count: 1

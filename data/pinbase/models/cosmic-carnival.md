@@ -3,7 +3,7 @@ slug: cosmic-carnival
 name: Cosmic Carnival
 title_slug: cosmic-carnival-2
 ipdb_id: 6859
-manufacturer_slug: suncoast-pinball
+corporate_entity_slug: suncoast-pinball
 year: 2019
 month: 6
 player_count: 4

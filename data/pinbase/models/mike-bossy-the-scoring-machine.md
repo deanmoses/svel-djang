@@ -3,7 +3,7 @@ slug: mike-bossy-the-scoring-machine
 name: Mike Bossy The Scoring Machine
 title_slug: mike-bossy-the-scoring-machine
 ipdb_id: 1596
-manufacturer_slug: game-plan
+corporate_entity_slug: game-plan-incorporated
 year: 1982
 player_count: 4
 technology_generation_slug: solid-state

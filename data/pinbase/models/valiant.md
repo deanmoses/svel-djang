@@ -4,7 +4,7 @@ name: Valiant
 title_slug: valiant
 opdb_id: G5B1X-MQd9p
 ipdb_id: 2715
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1962
 month: 8
 player_count: 2

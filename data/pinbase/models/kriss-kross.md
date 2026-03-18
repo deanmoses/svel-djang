@@ -3,7 +3,7 @@ slug: kriss-kross
 name: Kriss-Kross
 title_slug: kriss-kross
 ipdb_id: 1396
-manufacturer_slug: a-m-vending-machine-company
+corporate_entity_slug: a-m-vending-machine-company
 year: 1932
 month: 9
 player_count: 1

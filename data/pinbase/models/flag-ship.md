@@ -4,7 +4,7 @@ name: Flag-Ship
 title_slug: flag-ship
 opdb_id: G5pXO-MJ2eo
 ipdb_id: 868
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1957
 month: 1
 player_count: 2

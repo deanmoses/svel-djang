@@ -3,7 +3,7 @@ slug: bee-jay
 name: Bee Jay
 title_slug: bee-jay
 ipdb_id: 219
-manufacturer_slug: pamco
+corporate_entity_slug: pacific-amusement-manufacturing-company
 year: 1936
 month: 11
 player_count: 1

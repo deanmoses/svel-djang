@@ -4,7 +4,7 @@ name: Pretty Baby
 title_slug: pretty-baby
 opdb_id: G5zDw-MQ2Vb
 ipdb_id: 1863
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1965
 month: 1
 player_count: 2

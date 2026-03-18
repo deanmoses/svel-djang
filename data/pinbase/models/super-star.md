@@ -4,7 +4,7 @@ name: Super Star
 title_slug: super-star-big-star
 opdb_id: GRV2y-M0ozp
 ipdb_id: 2446
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1972
 month: 8
 player_count: 1

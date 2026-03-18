@@ -4,7 +4,7 @@ name: Heist
 title_slug: heist
 opdb_id: G18pJ-Mz2bl
 ipdb_id: 6667
-manufacturer_slug: multimorphic
+corporate_entity_slug: multimorphic-inc
 year: 2020
 month: 3
 player_count: 4

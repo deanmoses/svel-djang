@@ -4,7 +4,7 @@ name: Starlite
 title_slug: starlite
 opdb_id: GR0vY-MJV3p
 ipdb_id: 2363
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1953
 month: 3
 player_count: 1

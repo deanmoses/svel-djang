@@ -4,7 +4,7 @@ name: Rawhide
 title_slug: stampede-rawhide
 opdb_id: GRQ79-MQKr5
 ipdb_id: 1923
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1977
 month: 2
 player_count: 4

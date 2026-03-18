@@ -4,7 +4,7 @@ name: Jurassic Park (Pro)
 title_slug: jurassic-park-stern
 opdb_id: GK17D-MdEqz
 ipdb_id: 6573
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2019
 month: 7
 player_count: 4

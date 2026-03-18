@@ -4,7 +4,7 @@ name: Top Score
 title_slug: 300-top-score
 opdb_id: G5W1w-MQVkq
 ipdb_id: 2589
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1975
 month: 10
 player_count: 2

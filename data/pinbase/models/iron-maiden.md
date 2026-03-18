@@ -4,7 +4,7 @@ name: Iron Maiden
 title_slug: iron-maiden-2
 opdb_id: G4yZN-MDEP7
 ipdb_id: 1270
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1981
 month: 10
 player_count: 4

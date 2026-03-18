@@ -4,7 +4,7 @@ name: Class of 1812
 title_slug: class-of-1812
 opdb_id: G5DYX-M0oVW
 ipdb_id: 528
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1991
 month: 1
 player_count: 4

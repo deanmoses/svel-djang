@@ -4,7 +4,7 @@ name: Count-Down
 title_slug: count-down-space-walk
 opdb_id: G56zB-MLv9k
 ipdb_id: 573
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1979
 month: 5
 player_count: 4

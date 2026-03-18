@@ -4,7 +4,7 @@ name: Mardi Gras
 title_slug: mardi-gras-2
 opdb_id: G3Ewl-ME0El
 ipdb_id: 1545
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1948
 month: 5
 player_count: 1

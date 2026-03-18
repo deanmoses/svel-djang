@@ -4,7 +4,7 @@ name: Devil Riders
 title_slug: devil-riders
 opdb_id: G5DPP-MJKbp
 ipdb_id: 672
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1984
 month: 1
 player_count: 4

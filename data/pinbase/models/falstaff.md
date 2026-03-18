@@ -4,7 +4,7 @@ name: Falstaff
 title_slug: falstaff
 opdb_id: GR0Yn-MJN52
 ipdb_id: 816
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1957
 month: 10
 player_count: 4

@@ -3,7 +3,7 @@ slug: american-beauty-senior-de-luxe
 name: American Beauty Senior De Luxe
 title_slug: american-beauty-senior-de-luxe
 ipdb_id: 6894
-manufacturer_slug: gb-daval-company-inc
+corporate_entity_slug: gb-daval-company-inc
 year: 1934
 month: 5
 player_count: 1

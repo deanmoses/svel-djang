@@ -3,7 +3,7 @@ slug: convention
 name: Convention
 title_slug: convention
 ipdb_id: 3031
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1940
 month: 6
 player_count: 1

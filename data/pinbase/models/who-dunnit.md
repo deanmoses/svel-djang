@@ -4,7 +4,7 @@ name: WHO dunnit
 title_slug: who-dunnit
 opdb_id: G50kj-MDqpv
 ipdb_id: 3685
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1995
 month: 1
 player_count: 4

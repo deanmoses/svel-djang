@@ -4,7 +4,7 @@ name: Bounty Hunter
 title_slug: bounty-hunter
 opdb_id: G5nO8-ME0Wo
 ipdb_id: 361
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1985
 month: 7
 player_count: 4

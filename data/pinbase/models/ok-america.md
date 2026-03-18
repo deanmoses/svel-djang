@@ -3,7 +3,7 @@ slug: ok-america
 name: Ok America
 title_slug: ok-america
 ipdb_id: 1699
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1932
 month: 9
 player_count: 1

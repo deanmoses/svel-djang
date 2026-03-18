@@ -3,7 +3,7 @@ slug: bally-alley
 name: Bally Alley
 title_slug: bally-alley
 ipdb_id: 6508
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1973
 month: 11
 player_count: 4

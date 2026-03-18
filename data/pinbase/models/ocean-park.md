@@ -3,7 +3,7 @@ slug: ocean-park
 name: Ocean Park
 title_slug: ocean-park
 ipdb_id: 1690
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1939
 month: 6
 player_count: 1

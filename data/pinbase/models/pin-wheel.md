@@ -4,7 +4,7 @@ name: Pin Wheel
 title_slug: pin-wheel
 opdb_id: Gr8b7-MNERp
 ipdb_id: 1791
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1953
 month: 10
 player_count: 1

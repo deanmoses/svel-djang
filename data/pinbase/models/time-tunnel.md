@@ -4,7 +4,7 @@ name: Time Tunnel
 title_slug: time-tunnel
 opdb_id: GrXZE-Mx0py
 ipdb_id: 2566
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1971
 month: 2
 player_count: 4

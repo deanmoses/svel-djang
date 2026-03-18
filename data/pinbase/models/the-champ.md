@@ -3,7 +3,7 @@ slug: the-champ
 name: The Champ
 title_slug: the-champ
 ipdb_id: 3007
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1940
 month: 8
 player_count: 1

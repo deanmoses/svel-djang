@@ -3,7 +3,7 @@ slug: fun-land-rifle
 name: Fun Land Rifle
 title_slug: fun-land-rifle
 ipdb_id: 6484
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1974
 month: 8
 player_count: 1

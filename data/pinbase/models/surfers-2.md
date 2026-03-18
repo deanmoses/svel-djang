@@ -3,7 +3,7 @@ slug: surfers-2
 name: Surfers
 title_slug: surfers-2
 ipdb_id: 6136
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1967
 player_count: 1
 technology_generation_slug: electromechanical

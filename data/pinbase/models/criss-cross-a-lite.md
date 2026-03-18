@@ -3,7 +3,7 @@ slug: criss-cross-a-lite
 name: Criss Cross 'A' Lite
 title_slug: criss-cross-a-lite
 ipdb_id: 774
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1935
 month: 2
 player_count: 1

@@ -3,7 +3,7 @@ slug: grand-prize-2
 name: Grand Prize
 title_slug: grand-prize-2
 ipdb_id: 4317
-manufacturer_slug: abt-manufacturing-company
+corporate_entity_slug: abt-manufacturing-company
 year: 1936
 month: 2
 player_count: 1

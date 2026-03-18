@@ -4,7 +4,7 @@ name: The Amazing Spider-Man
 title_slug: spider-man-gottlieb
 opdb_id: GrXlr-MOEE2
 ipdb_id: 2285
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1980
 month: 5
 player_count: 4

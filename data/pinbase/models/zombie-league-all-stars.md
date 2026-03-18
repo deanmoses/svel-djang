@@ -3,7 +3,7 @@ slug: zombie-league-all-stars
 name: Zombie League All Stars
 title_slug: zombie-league-all-stars
 ipdb_id: 6503
-manufacturer_slug: valley-dynamo
+corporate_entity_slug: valley-dynamo
 year: 2017
 month: 12
 player_count: 2

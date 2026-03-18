@@ -3,7 +3,7 @@ slug: jiggers-sr
 name: Jiggers (Sr)
 title_slug: jiggers-sr
 ipdb_id: 1293
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1932
 month: 12
 player_count: 1

@@ -4,7 +4,7 @@ name: Harley Davidson
 title_slug: harley-davidson
 opdb_id: G56lO-MDXpW
 ipdb_id: 4455
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 1999
 month: 1
 player_count: 6

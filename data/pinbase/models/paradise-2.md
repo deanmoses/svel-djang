@@ -4,7 +4,7 @@ name: Paradise
 title_slug: paradise-pleasure-isle
 opdb_id: G4yEO-MVKp9
 ipdb_id: 1752
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1965
 month: 11
 player_count: 2

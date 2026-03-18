@@ -1,6 +1,7 @@
 ---
 slug: data-east
 name: Data East
+opdb_manufacturer_id: 10
 ---
 
 Data East Corporation was founded in Japan in 1976 and built its reputation as a video game and arcade cabinet manufacturer, producing titles like BurgerTime and Bad Dudes. In 1987, the company expanded into pinball, establishing a production facility in the United States and entering the American market as a direct competitor to [[manufacturer:bally]], [[manufacturer:williams]], and [[manufacturer:gottlieb]].

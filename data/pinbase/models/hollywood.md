@@ -4,7 +4,7 @@ name: Hollywood
 title_slug: cinema-hollywood
 opdb_id: Grj7K-MQj8k
 ipdb_id: 1214
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1976
 month: 2
 player_count: 2

@@ -4,7 +4,7 @@ name: Egg Head
 title_slug: egg-head
 opdb_id: GrOx6-MLOV0
 ipdb_id: 758
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1961
 month: 12
 player_count: 1

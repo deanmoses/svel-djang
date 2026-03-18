@@ -4,7 +4,7 @@ name: Hollywood
 title_slug: hollywood
 opdb_id: G5WW0-MOEXr
 ipdb_id: 1215
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1961
 month: 5
 player_count: 2

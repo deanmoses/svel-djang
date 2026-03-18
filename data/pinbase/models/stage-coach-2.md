@@ -4,7 +4,7 @@ name: Stage Coach
 title_slug: stage-coach-2
 opdb_id: GRLE7-MQdk0
 ipdb_id: 2337
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1954
 month: 12
 player_count: 1

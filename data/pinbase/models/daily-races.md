@@ -3,7 +3,7 @@ slug: daily-races
 name: Daily Races
 title_slug: daily-races
 ipdb_id: 628
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1936
 month: 3
 player_count: 1

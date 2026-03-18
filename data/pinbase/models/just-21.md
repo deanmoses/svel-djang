@@ -4,7 +4,7 @@ name: Just 21
 title_slug: just-21
 opdb_id: G8ldZ-ME0y8
 ipdb_id: 1344
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1950
 month: 1
 player_count: 1

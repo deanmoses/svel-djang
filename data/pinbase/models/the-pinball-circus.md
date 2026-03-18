@@ -4,7 +4,7 @@ name: Pinball Circus
 title_slug: pinball-circus
 opdb_id: G4qdD-MrR3Z
 ipdb_id: 4354
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1994
 month: 6
 player_count: 4

@@ -4,7 +4,7 @@ name: Alice in Wonderland
 title_slug: alice-in-wonderland
 opdb_id: GkBXQ-M5RB4
 ipdb_id: 47
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1948
 month: 8
 player_count: 1

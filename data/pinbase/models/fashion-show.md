@@ -4,7 +4,7 @@ name: Fashion Show
 title_slug: fashion-show
 opdb_id: Gr2Qb-MDRbp
 ipdb_id: 825
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1962
 month: 6
 player_count: 2

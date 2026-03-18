@@ -4,7 +4,7 @@ name: Super Score
 title_slug: hi-score-super-score
 opdb_id: GR6XE-MJ436
 ipdb_id: 2441
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1967
 month: 4
 player_count: 2

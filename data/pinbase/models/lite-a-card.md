@@ -4,7 +4,7 @@ name: Lite-A-Card
 title_slug: lite-a-card
 opdb_id: G4j03-MQpBy
 ipdb_id: 1453
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1960
 month: 2
 player_count: 2

@@ -3,7 +3,7 @@ slug: bowlette
 name: Bowlette
 title_slug: bowlette
 ipdb_id: 3661
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1950
 month: 2
 player_count: 1

@@ -1,6 +1,7 @@
 ---
 slug: chicago-gaming
 name: Chicago Gaming
+opdb_manufacturer_id: 112
 ---
 
 Chicago Gaming Company occupies a unique niche: it is the foremost modern manufacturer of faithful recreations of classic pinball machines. Founded in 2002, the company recognized that an entire generation of beloved [[manufacturer:williams]] and [[manufacturer:bally]] titles from the 1980s and 1990s had become difficult to find in playable condition, while demand from collectors and operators continued to grow.

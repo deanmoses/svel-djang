@@ -4,7 +4,7 @@ name: Six Sticks
 title_slug: six-sticks
 opdb_id: GRWeJ-MJZ68
 ipdb_id: 2168
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1966
 month: 3
 player_count: 6

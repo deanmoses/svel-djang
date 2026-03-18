@@ -3,7 +3,7 @@ slug: pennant-fever
 name: Pennant Fever
 title_slug: pennant-fever
 ipdb_id: 3335
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1984
 month: 5
 player_count: 2

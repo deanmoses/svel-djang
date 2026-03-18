@@ -4,7 +4,7 @@ name: Fun-Fest
 title_slug: fun-fest-swinger
 opdb_id: G5L1Q-MQ9vN
 ipdb_id: 972
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1973
 month: 2
 player_count: 4

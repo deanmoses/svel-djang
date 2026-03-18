@@ -4,7 +4,7 @@ name: Circus
 title_slug: balls-a-poppin-circus
 opdb_id: G5KJW-MDnKx
 ipdb_id: 520
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1957
 month: 7
 player_count: 1

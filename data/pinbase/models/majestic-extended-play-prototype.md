@@ -3,7 +3,7 @@ slug: majestic-extended-play-prototype
 name: Majestic (Extended Play Prototype)
 title_slug: majestic-extended-play-prototype
 ipdb_id: 7035
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1957
 player_count: 4
 technology_generation_slug: electromechanical

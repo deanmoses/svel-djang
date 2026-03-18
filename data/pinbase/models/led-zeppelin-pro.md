@@ -4,7 +4,7 @@ name: Led Zeppelin (Pro)
 title_slug: led-zeppelin
 opdb_id: Gweel-M9Rk0
 ipdb_id: 6760
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2020
 month: 12
 player_count: 4

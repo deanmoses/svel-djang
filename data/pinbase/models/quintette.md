@@ -4,7 +4,7 @@ name: Quintette
 title_slug: quintette
 opdb_id: GR77w-MJd0Y
 ipdb_id: 1896
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1953
 month: 3
 player_count: 1

@@ -3,7 +3,7 @@ slug: high-ace
 name: High Ace
 title_slug: high-ace
 ipdb_id: 1168
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 player_count: 1
 technology_generation_slug: electromechanical
 credit_refs:

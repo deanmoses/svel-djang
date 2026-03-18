@@ -4,7 +4,7 @@ name: Twenty Grand
 title_slug: twenty-grand
 opdb_id: G5KjL-MePPn
 ipdb_id: 3686
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1952
 month: 12
 player_count: 1

@@ -3,7 +3,7 @@ slug: combination-2
 name: Combination
 title_slug: combination-2
 ipdb_id: 547
-manufacturer_slug: buckley-manufacturing-company
+corporate_entity_slug: buckley-manufacturing-company
 year: 1936
 month: 10
 player_count: 1

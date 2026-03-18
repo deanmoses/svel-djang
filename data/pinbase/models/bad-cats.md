@@ -4,7 +4,7 @@ name: Bad Cats
 title_slug: bad-cats
 opdb_id: GrEBz-MBR3N
 ipdb_id: 127
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1989
 month: 1
 player_count: 4

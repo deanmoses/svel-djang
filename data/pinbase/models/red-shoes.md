@@ -4,7 +4,7 @@ name: Red Shoes
 title_slug: red-shoes
 opdb_id: G50NP-MQp9R
 ipdb_id: 1938
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1950
 month: 11
 player_count: 1

@@ -4,7 +4,7 @@ name: Spot-Pool
 title_slug: spot-pool
 opdb_id: GrZ0J-ML1VK
 ipdb_id: 3457
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1959
 month: 2
 player_count: 1

@@ -4,7 +4,7 @@ name: Godzilla
 title_slug: godzilla
 opdb_id: G5po2-MeP6B
 ipdb_id: 4443
-manufacturer_slug: sega
+corporate_entity_slug: sega-pinball-incorporated
 year: 1998
 month: 1
 player_count: 6

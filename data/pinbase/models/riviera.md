@@ -3,7 +3,7 @@ slug: riviera
 name: Riviera
 title_slug: riviera-2
 ipdb_id: 1967
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1946
 month: 3
 player_count: 1

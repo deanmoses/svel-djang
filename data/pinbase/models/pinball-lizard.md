@@ -4,7 +4,7 @@ name: Pinball Lizard
 title_slug: pinball-lizard
 opdb_id: GR9ko-MLzrW
 ipdb_id: 1464
-manufacturer_slug: game-plan
+corporate_entity_slug: game-plan-incorporated
 year: 1980
 month: 7
 player_count: 4

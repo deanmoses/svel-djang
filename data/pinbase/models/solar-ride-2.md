@@ -4,7 +4,7 @@ name: Solar Ride (EM)
 title_slug: solar-ride
 opdb_id: GRDqo-MQ7k2
 ipdb_id: 4769
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1979
 month: 1
 player_count: 4

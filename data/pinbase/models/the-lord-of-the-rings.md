@@ -4,7 +4,7 @@ name: Lord of the Rings
 title_slug: lord-of-the-rings
 opdb_id: GrqZX-MD15w
 ipdb_id: 4858
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2003
 month: 11
 player_count: 4

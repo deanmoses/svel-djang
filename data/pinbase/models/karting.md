@@ -4,7 +4,7 @@ name: Karting
 title_slug: karting
 opdb_id: GR7zW-MLWov
 ipdb_id: 3188
-manufacturer_slug: rally
+corporate_entity_slug: rally-aka-rally-play-company
 year: 1962
 month: 1
 player_count: 2

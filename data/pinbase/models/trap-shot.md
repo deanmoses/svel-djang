@@ -3,7 +3,7 @@ slug: trap-shot
 name: Trap Shot
 title_slug: trap-shot
 ipdb_id: 2632
-manufacturer_slug: rock-ola-manufacturing-corporation
+corporate_entity_slug: rock-ola-manufacturing-corporation
 year: 1936
 month: 11
 player_count: 1

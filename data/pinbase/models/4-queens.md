@@ -4,7 +4,7 @@ name: 4 Queens
 title_slug: 4-queens
 opdb_id: GRwKx-MJV8q
 ipdb_id: 936
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1970
 month: 12
 player_count: 1

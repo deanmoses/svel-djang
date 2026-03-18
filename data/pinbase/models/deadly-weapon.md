@@ -4,7 +4,7 @@ name: Deadly Weapon
 title_slug: deadly-weapon
 opdb_id: Grj9q-MQ2EZ
 ipdb_id: 645
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1990
 month: 1
 player_count: 4

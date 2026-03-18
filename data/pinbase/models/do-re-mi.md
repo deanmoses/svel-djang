@@ -3,7 +3,7 @@ slug: do-re-mi
 name: Do-Re-Mi
 title_slug: do-re-mi
 ipdb_id: 694
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1941
 month: 5
 player_count: 1

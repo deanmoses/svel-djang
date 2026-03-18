@@ -4,7 +4,7 @@ name: Carolina
 title_slug: carolina
 opdb_id: GkBzD-MW9dn
 ipdb_id: 457
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1949
 month: 3
 player_count: 1

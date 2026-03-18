@@ -4,7 +4,7 @@ name: Shindig
 title_slug: shindig
 opdb_id: Gr3Nj-MLWnx
 ipdb_id: 2117
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1953
 month: 9
 player_count: 1

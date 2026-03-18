@@ -4,7 +4,7 @@ name: Derby Day
 title_slug: derby-day-2
 opdb_id: G5vyY-MJdZy
 ipdb_id: 664
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1956
 month: 4
 player_count: 1

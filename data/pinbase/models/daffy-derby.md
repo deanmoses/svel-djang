@@ -4,7 +4,7 @@ name: Daffy Derby
 title_slug: daffy-derby
 opdb_id: GrZ7y-M3dY2
 ipdb_id: 625
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1954
 month: 6
 player_count: 1

@@ -4,7 +4,7 @@ name: Bloody Roller
 title_slug: bloody-roller
 opdb_id: GrjdW-MJKd5
 ipdb_id: 4123
-manufacturer_slug: playbar
+corporate_entity_slug: playbar-sa
 year: 1987
 month: 1
 player_count: 4

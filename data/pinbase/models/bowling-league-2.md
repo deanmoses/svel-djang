@@ -3,7 +3,7 @@ slug: bowling-league-2
 name: Bowling League
 title_slug: bowling-league-2
 ipdb_id: 6389
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1949
 month: 11
 player_count: 1

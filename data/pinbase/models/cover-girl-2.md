@@ -4,7 +4,7 @@ name: Cover Girl
 title_slug: cover-girl
 opdb_id: GRvbo-MJroP
 ipdb_id: 580
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1962
 month: 7
 player_count: 1

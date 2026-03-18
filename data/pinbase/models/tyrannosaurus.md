@@ -3,7 +3,7 @@ slug: tyrannosaurus
 name: Tyrannosaurus
 title_slug: tyrannosaurus
 ipdb_id: 5344
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 player_count: 4
 technology_generation_slug: solid-state
 credit_refs:

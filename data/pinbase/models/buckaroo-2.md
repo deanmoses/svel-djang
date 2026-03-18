@@ -3,7 +3,7 @@ slug: buckaroo-2
 name: Buckaroo
 title_slug: buckaroo
 ipdb_id: 394
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1939
 month: 7
 player_count: 1

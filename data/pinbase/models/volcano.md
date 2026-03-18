@@ -4,7 +4,7 @@ name: Volcano
 title_slug: volcano
 opdb_id: GrEzp-MDbW3
 ipdb_id: 2742
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1981
 month: 1
 player_count: 4

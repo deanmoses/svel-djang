@@ -3,7 +3,7 @@ slug: attack-from-mars-remake
 name: Attack From Mars (Remake)
 title_slug: attack-from-mars
 opdb_id: G4do5-MkPnV
-manufacturer_slug: chicago-gaming
+corporate_entity_slug: chicago-gaming-company
 year: 2017
 month: 6
 player_count: 4

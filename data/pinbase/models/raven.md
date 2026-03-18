@@ -4,7 +4,7 @@ name: Raven
 title_slug: raven
 opdb_id: GrJWP-MJ7N1
 ipdb_id: 1922
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1986
 month: 3
 player_count: 4

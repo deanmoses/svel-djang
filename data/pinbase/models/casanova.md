@@ -4,7 +4,7 @@ name: Casanova
 title_slug: casanova
 opdb_id: GRYey-MJ5od
 ipdb_id: 460
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1966
 month: 11
 player_count: 2

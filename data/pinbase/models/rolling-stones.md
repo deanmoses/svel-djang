@@ -4,7 +4,7 @@ name: Rolling Stones
 title_slug: rolling-stones
 opdb_id: G5Qz4-MQddv
 ipdb_id: 2010
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1979
 month: 6
 player_count: 4

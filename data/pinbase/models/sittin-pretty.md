@@ -4,7 +4,7 @@ name: Sittin' Pretty
 title_slug: sittin-pretty
 opdb_id: GRp3O-M9RE2
 ipdb_id: 2164
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1958
 month: 11
 player_count: 1

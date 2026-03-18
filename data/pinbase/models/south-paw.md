@@ -3,7 +3,7 @@ slug: south-paw
 name: South-Paw
 title_slug: south-paw
 ipdb_id: 3274
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1941
 month: 6
 player_count: 1

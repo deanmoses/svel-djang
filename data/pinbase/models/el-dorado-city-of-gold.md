@@ -4,7 +4,7 @@ name: El Dorado City of Gold
 title_slug: el-dorado
 opdb_id: GrEZ5-MQ2jo
 ipdb_id: 767
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1984
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: City Slicker
 title_slug: city-slicker
 opdb_id: GrEVb-MLOxJ
 ipdb_id: 527
-manufacturer_slug: bally
+corporate_entity_slug: bally-midway-manufacturing-company
 year: 1987
 month: 3
 player_count: 4

@@ -4,7 +4,7 @@ name: Spin Out
 title_slug: spin-out
 opdb_id: GrPx2-M5RRk
 ipdb_id: 2286
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1975
 month: 7
 player_count: 1

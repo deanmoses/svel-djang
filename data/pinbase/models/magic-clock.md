@@ -4,7 +4,7 @@ name: Magic Clock
 title_slug: magic-clock
 opdb_id: GRBwX-M2YYe
 ipdb_id: 1515
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1960
 month: 12
 player_count: 2

@@ -4,7 +4,7 @@ name: Starfire
 title_slug: starfire
 opdb_id: G4qDp-MDb20
 ipdb_id: 2360
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1956
 month: 9
 player_count: 1

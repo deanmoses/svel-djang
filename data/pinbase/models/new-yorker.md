@@ -3,7 +3,7 @@ slug: new-yorker
 name: New Yorker
 title_slug: new-yorker
 ipdb_id: 4148
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1935
 month: 10
 player_count: 1

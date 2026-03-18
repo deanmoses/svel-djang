@@ -4,7 +4,7 @@ name: South Pacific
 title_slug: south-pacific
 opdb_id: G4q0l-MJdKZ
 ipdb_id: 2244
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1964
 month: 10
 player_count: 2

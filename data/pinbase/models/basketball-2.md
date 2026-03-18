@@ -3,7 +3,7 @@ slug: basketball-2
 name: Basketball
 title_slug: basketball-3
 ipdb_id: 4669
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1938
 month: 2
 player_count: 1

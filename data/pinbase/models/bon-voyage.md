@@ -4,7 +4,7 @@ name: Bon Voyage
 title_slug: bon-voyage
 opdb_id: GRLNQ-MDEb1
 ipdb_id: 343
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1974
 month: 11
 player_count: 1

@@ -4,7 +4,7 @@ name: Jack In The Box
 title_slug: jack-in-the-box-jumping-jack
 opdb_id: Gr2JJ-MnKlB
 ipdb_id: 1277
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1973
 month: 2
 player_count: 4

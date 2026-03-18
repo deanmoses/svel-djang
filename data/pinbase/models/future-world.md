@@ -4,7 +4,7 @@ name: Future World
 title_slug: space-city
 opdb_id: G5Kl7-MDxel
 ipdb_id: 3613
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1978
 month: 1
 player_count: 4

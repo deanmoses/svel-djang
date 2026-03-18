@@ -4,7 +4,7 @@ name: Spin-A-Card
 title_slug: spin-a-card-hearts-and-spades
 opdb_id: G4ZQv-MDeNN
 ipdb_id: 2288
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1969
 month: 1
 player_count: 1

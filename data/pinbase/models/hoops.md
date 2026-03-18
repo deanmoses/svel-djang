@@ -4,7 +4,7 @@ name: Hoops
 title_slug: hoops
 opdb_id: G4j2z-MDb0Z
 ipdb_id: 1235
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1991
 month: 2
 player_count: 4

@@ -3,7 +3,7 @@ slug: turf-queen
 name: Turf Queen
 title_slug: turf-queen
 ipdb_id: 3336
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1938
 month: 2
 player_count: 1

@@ -4,7 +4,7 @@ name: Lucky Smile
 title_slug: lucky-smile
 opdb_id: G4Zjo-MQw84
 ipdb_id: 3886
-manufacturer_slug: inder
+corporate_entity_slug: industria-electromecnica-de-recreativos-sa
 year: 1976
 month: 1
 player_count: 4

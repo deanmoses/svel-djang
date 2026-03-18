@@ -4,7 +4,7 @@ name: Rose-Bowl
 title_slug: rose-bowl
 opdb_id: G4dkb-Mb57V
 ipdb_id: 2016
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1951
 month: 10
 player_count: 1

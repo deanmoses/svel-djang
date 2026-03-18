@@ -3,7 +3,7 @@ slug: marjorie
 name: Marjorie
 title_slug: marjorie
 ipdb_id: 1548
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1947
 month: 7
 player_count: 1

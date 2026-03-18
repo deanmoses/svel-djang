@@ -3,7 +3,7 @@ slug: hole-in-one
 name: Hole In One
 title_slug: hole-in-one
 ipdb_id: 3634
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 player_count: 1
 technology_generation_slug: electromechanical
 credit_refs:

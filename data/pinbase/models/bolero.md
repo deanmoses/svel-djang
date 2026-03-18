@@ -3,7 +3,7 @@ slug: bolero
 name: Bolero
 title_slug: bolero
 ipdb_id: 338
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1951
 month: 12
 player_count: 1

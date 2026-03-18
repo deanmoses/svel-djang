@@ -4,7 +4,7 @@ name: Tahiti
 title_slug: tahiti
 opdb_id: G8loD-M4o9w
 ipdb_id: 2490
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1949
 month: 10
 player_count: 1

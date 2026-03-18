@@ -4,7 +4,7 @@ name: Hurdy Gurdy (Italy)
 title_slug: central-park
 opdb_id: GRpYQ-MdE3y-A1NZ3
 ipdb_id: 4776
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1966
 month: 6
 player_count: 1

@@ -4,7 +4,7 @@ name: Olympics
 title_slug: olympics-2
 opdb_id: G4jE1-MJj3p
 ipdb_id: 1713
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1952
 month: 5
 player_count: 1

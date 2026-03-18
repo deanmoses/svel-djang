@@ -4,7 +4,7 @@ name: Thunder Man
 title_slug: thunder-man
 opdb_id: GRoyw-M4ojr
 ipdb_id: 4666
-manufacturer_slug: apple-time
+corporate_entity_slug: apple-time
 year: 1987
 month: 3
 player_count: 4

@@ -3,7 +3,7 @@ slug: screwy
 name: Screwy
 title_slug: screwy
 ipdb_id: 2075
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1932
 month: 6
 player_count: 1

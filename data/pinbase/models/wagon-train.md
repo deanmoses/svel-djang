@@ -4,7 +4,7 @@ name: Wagon Train
 title_slug: wagon-train
 opdb_id: GrPYn-MQrvK
 ipdb_id: 2746
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1960
 month: 4
 player_count: 1

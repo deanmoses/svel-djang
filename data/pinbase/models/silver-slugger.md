@@ -4,7 +4,7 @@ name: Silver Slugger
 title_slug: silver-slugger
 opdb_id: Gr8jd-MLyxK
 ipdb_id: 2152
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1990
 month: 2
 player_count: 4

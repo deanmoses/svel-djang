@@ -4,7 +4,7 @@ name: Show Boat
 title_slug: show-boat-2
 opdb_id: Gr2KY-MDzXP
 ipdb_id: 2134
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1957
 month: 12
 player_count: 1

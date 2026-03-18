@@ -4,7 +4,7 @@ name: Sharpshooter
 title_slug: sharpshooter-2
 opdb_id: Gll8z-MwNd5
 ipdb_id: 2112
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1949
 month: 5
 player_count: 1

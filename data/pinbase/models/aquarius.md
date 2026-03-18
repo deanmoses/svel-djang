@@ -4,7 +4,7 @@ name: Aquarius
 title_slug: aquarius
 opdb_id: GreKP-MLXzY
 ipdb_id: 79
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1970
 month: 10
 player_count: 1

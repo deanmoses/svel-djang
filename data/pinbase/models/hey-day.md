@@ -3,7 +3,7 @@ slug: hey-day
 name: Hey Day
 title_slug: hey-day
 ipdb_id: 3141
-manufacturer_slug: stern-electronics
+corporate_entity_slug: western-equipment-supply-company
 year: 1938
 month: 3
 player_count: 1

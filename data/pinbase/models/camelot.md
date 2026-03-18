@@ -4,7 +4,7 @@ name: Camelot
 title_slug: camelot-galahad
 opdb_id: G4yY2-MLyny
 ipdb_id: 422
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1970
 month: 2
 player_count: 4

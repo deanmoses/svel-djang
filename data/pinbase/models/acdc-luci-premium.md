@@ -4,7 +4,7 @@ name: AC/DC (LUCI)
 title_slug: ac-dc
 opdb_id: G43W4-MXrPx-AO6D9
 ipdb_id: 6060
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2013
 month: 12
 player_count: 4

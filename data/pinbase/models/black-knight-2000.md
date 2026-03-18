@@ -4,7 +4,7 @@ name: Black Knight 2000
 title_slug: black-knight-2000
 opdb_id: GrxPP-Ml91r
 ipdb_id: 311
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1989
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: New Star's Phoenix
 title_slug: stars-phoenix
 opdb_id: G5VYY-MRjqd
 ipdb_id: 4510
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1987
 month: 8
 player_count: 4

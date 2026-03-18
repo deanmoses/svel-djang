@@ -4,7 +4,7 @@ name: 'CSI: Crime Scene Investigation'
 title_slug: csi
 opdb_id: GRokz-ML8oW
 ipdb_id: 5348
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2008
 month: 11
 player_count: 4

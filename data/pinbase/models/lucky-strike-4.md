@@ -4,7 +4,7 @@ name: Lucky Strike
 title_slug: lucky-strike-bowl-a-strike
 opdb_id: G5BQj-MJ5ep
 ipdb_id: 1498
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1965
 month: 8
 player_count: 1

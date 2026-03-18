@@ -4,7 +4,7 @@ name: Flash
 title_slug: flash
 opdb_id: Grypn-MQdbe
 ipdb_id: 871
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1979
 month: 1
 player_count: 4

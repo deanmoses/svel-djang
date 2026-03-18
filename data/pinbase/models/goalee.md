@@ -3,7 +3,7 @@ slug: goalee
 name: Goalee
 title_slug: goalee
 ipdb_id: 5879
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1945
 month: 9
 player_count: 2

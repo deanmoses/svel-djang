@@ -4,7 +4,7 @@ name: KISS
 title_slug: kiss
 opdb_id: G4jXr-MQ6kz
 ipdb_id: 1386
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1979
 month: 6
 player_count: 4

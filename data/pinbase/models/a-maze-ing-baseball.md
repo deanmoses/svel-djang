@@ -3,7 +3,7 @@ slug: a-maze-ing-baseball
 name: A-MAZE-ING Baseball
 title_slug: a-maze-ing-baseball
 ipdb_id: 4957
-manufacturer_slug: alvin-g
+corporate_entity_slug: alvin-g-and-company
 year: 1994
 player_count: 1
 technology_generation_slug: solid-state

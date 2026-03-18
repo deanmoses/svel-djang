@@ -4,7 +4,7 @@ name: Cabaret
 title_slug: cabaret-2
 opdb_id: GEL0v-M9ROz
 ipdb_id: 5202
-manufacturer_slug: recreativos-franco
+corporate_entity_slug: recreativos-franco
 year: 1975
 month: 1
 player_count: 1

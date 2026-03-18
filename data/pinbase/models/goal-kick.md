@@ -3,7 +3,7 @@ slug: goal-kick
 name: Goal-Kick
 title_slug: goal-kick
 ipdb_id: 1019
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1934
 month: 11
 player_count: 1

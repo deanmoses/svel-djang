@@ -4,7 +4,7 @@ name: Petaco
 title_slug: petaco
 opdb_id: GyVV1-M9Rlp
 ipdb_id: 4883
-manufacturer_slug: juegos-populares
+corporate_entity_slug: juegos-populares-sa
 year: 1984
 month: 1
 player_count: 4

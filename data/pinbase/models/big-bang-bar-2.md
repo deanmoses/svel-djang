@@ -4,7 +4,7 @@ name: Big Bang Bar
 title_slug: big-bang-bar
 opdb_id: G56vo-Ml9Pp
 ipdb_id: 5244
-manufacturer_slug: pmi
+corporate_entity_slug: pinball-manufacturing-inc-a-division-of-illinois-pinball-inc
 year: 2007
 month: 6
 player_count: 4

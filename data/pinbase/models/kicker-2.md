@@ -4,7 +4,7 @@ name: Kicker
 title_slug: abra-ca-dabra-team-one
 opdb_id: GRpZ2-MkP3j
 ipdb_id: 1364
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1977
 month: 2
 player_count: 1

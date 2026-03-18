@@ -4,7 +4,7 @@ name: Iron Man Classic
 title_slug: iron-man
 opdb_id: GRVq4-MDRKr
 ipdb_id: 5652
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2010
 month: 1
 player_count: 4

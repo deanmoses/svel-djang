@@ -4,7 +4,7 @@ name: World Cup
 title_slug: world-cup
 opdb_id: GrNqO-MRjzl
 ipdb_id: 2810
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1978
 month: 5
 player_count: 4

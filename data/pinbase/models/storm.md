@@ -4,7 +4,7 @@ name: Storm
 title_slug: flash
 opdb_id: Grypn-MLEEO
 ipdb_id: 3372
-manufacturer_slug: segasa
+corporate_entity_slug: segasa-dba-sonic
 year: 1979
 month: 1
 player_count: 4

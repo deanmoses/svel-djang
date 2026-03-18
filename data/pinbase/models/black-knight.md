@@ -4,7 +4,7 @@ name: Black Knight
 title_slug: black-knight
 opdb_id: GrO7w-M9R03
 ipdb_id: 310
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1980
 month: 1
 player_count: 4

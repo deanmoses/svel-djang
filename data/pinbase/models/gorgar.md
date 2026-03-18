@@ -4,7 +4,7 @@ name: Gorgar
 title_slug: gorgar
 opdb_id: G5zd6-MJVo4
 ipdb_id: 1062
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1979
 month: 1
 player_count: 4

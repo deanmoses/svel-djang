@@ -4,7 +4,7 @@ name: Arena
 title_slug: arena
 opdb_id: G4EKb-MDx4p
 ipdb_id: 82
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1987
 month: 6
 player_count: 4

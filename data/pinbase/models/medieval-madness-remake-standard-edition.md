@@ -4,7 +4,7 @@ name: Medieval Madness (Remake)
 title_slug: medieval-madness
 opdb_id: G5pe4-MyNkp
 ipdb_id: 6263
-manufacturer_slug: chicago-gaming
+corporate_entity_slug: chicago-gaming-company
 year: 2016
 month: 1
 player_count: 4

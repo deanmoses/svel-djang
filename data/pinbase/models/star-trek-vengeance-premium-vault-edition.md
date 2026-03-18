@@ -3,7 +3,7 @@ slug: star-trek-vengeance-premium-vault-edition
 name: Star Trek (Vengeance Premium Vault Edition)
 title_slug: star-trek-vengeance-premium-vault-edition
 ipdb_id: 6554
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2018
 month: 7
 player_count: 4

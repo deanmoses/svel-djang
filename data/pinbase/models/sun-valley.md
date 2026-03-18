@@ -4,7 +4,7 @@ name: Sun Valley
 title_slug: sun-valley
 opdb_id: GRnvZ-M9RYe
 ipdb_id: 2417
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1962
 month: 10
 player_count: 2

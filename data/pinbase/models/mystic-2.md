@@ -4,7 +4,7 @@ name: Mystic
 title_slug: mystic
 opdb_id: G5Bnl-MLnw6
 ipdb_id: 1650
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1979
 month: 8
 player_count: 4

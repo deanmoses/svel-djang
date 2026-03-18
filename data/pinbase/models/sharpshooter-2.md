@@ -4,7 +4,7 @@ name: Sharpshooter
 title_slug: sharpshooter
 opdb_id: Gr37O-MePr0
 ipdb_id: 2113
-manufacturer_slug: game-plan
+corporate_entity_slug: game-plan-incorporated
 year: 1979
 month: 5
 player_count: 4

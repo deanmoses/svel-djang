@@ -3,7 +3,7 @@ slug: hypnox
 name: Hypnox
 title_slug: hypnox
 ipdb_id: 5226
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1982
 player_count: 4
 technology_generation_slug: solid-state

@@ -4,7 +4,7 @@ name: Bugs Bunny's Birthday Ball
 title_slug: bugs-bunnys-birthday-ball
 opdb_id: GRozL-MDb46
 ipdb_id: 396
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1991
 month: 1
 player_count: 4

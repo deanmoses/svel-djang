@@ -4,7 +4,7 @@ name: Kick Off
 title_slug: kick-off-quarterback
 opdb_id: GRzed-MDBl4
 ipdb_id: 1365
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1975
 month: 5
 player_count: 4

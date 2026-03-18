@@ -4,7 +4,7 @@ name: Hit Parade
 title_slug: hit-parade
 opdb_id: GqZdQ-Mq1wW
 ipdb_id: 1200
-manufacturer_slug: marvel
+corporate_entity_slug: marvel-manufacturing-company
 year: 1948
 month: 7
 player_count: 1

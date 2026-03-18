@@ -4,7 +4,7 @@ name: Flipper
 title_slug: flipper
 opdb_id: GrNXw-MLOYP
 ipdb_id: 891
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1960
 month: 10
 player_count: 1

@@ -4,7 +4,7 @@ name: Lancers
 title_slug: lancers
 opdb_id: G5p6d-MdEVb
 ipdb_id: 1410
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1961
 month: 8
 player_count: 2

@@ -4,7 +4,7 @@ name: Wizard!
 title_slug: wizard
 opdb_id: G4l8K-MJwXy
 ipdb_id: 2803
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1975
 month: 5
 player_count: 4

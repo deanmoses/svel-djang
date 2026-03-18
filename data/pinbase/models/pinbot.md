@@ -4,7 +4,7 @@ name: Pinbot
 title_slug: pinbot
 opdb_id: G41Z8-MJKvP
 ipdb_id: 1796
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1986
 month: 10
 player_count: 4

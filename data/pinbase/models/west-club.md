@@ -4,7 +4,7 @@ name: West Club
 title_slug: west-club
 opdb_id: GRLDP-ML3Oq
 ipdb_id: 3601
-manufacturer_slug: rally
+corporate_entity_slug: rally-aka-rally-play-company
 year: 1967
 month: 6
 player_count: 2

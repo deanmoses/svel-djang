@@ -4,7 +4,7 @@ name: King Pin
 title_slug: king-pin
 opdb_id: Gr3Qk-MQkZ9
 ipdb_id: 1375
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1962
 month: 9
 player_count: 1

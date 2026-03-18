@@ -3,7 +3,7 @@ slug: yanks-2
 name: Yanks
 title_slug: yanks-2
 ipdb_id: 3532
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1942
 month: 2
 player_count: 1

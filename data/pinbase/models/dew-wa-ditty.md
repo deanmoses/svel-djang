@@ -4,7 +4,7 @@ name: Dew-Wa-Ditty
 title_slug: dew-wa-ditty
 opdb_id: GrlvP-MXroy
 ipdb_id: 674
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1948
 month: 1
 player_count: 1

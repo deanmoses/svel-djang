@@ -3,7 +3,7 @@ slug: silver-cup-2
 name: Silver Cup
 title_slug: silver-cup-2
 ipdb_id: 2157
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1936
 month: 3
 player_count: 1

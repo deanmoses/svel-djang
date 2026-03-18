@@ -4,7 +4,7 @@ name: Perky
 title_slug: perky
 opdb_id: G4jN3-MQPRK
 ipdb_id: 3597
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1956
 month: 9
 player_count: 1

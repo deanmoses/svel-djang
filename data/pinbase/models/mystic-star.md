@@ -4,7 +4,7 @@ name: Mystic Star
 title_slug: mystic-star-devil-king
 opdb_id: G5QOw-M61dY
 ipdb_id: 3375
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1986
 month: 1
 player_count: 4

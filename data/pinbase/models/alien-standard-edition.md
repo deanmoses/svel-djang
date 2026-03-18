@@ -4,7 +4,7 @@ name: Alien (Pro)
 title_slug: alien
 opdb_id: G4PBO-MLbr3
 ipdb_id: 6419
-manufacturer_slug: heighway-pinball
+corporate_entity_slug: heighway-pinball-ltd
 year: 2016
 month: 1
 player_count: 4

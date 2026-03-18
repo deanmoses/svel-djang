@@ -4,7 +4,7 @@ name: Wishing Well
 title_slug: wishing-well
 opdb_id: GRoo7-ML8Vo
 ipdb_id: 2801
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1955
 month: 9
 player_count: 1

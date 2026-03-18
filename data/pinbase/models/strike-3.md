@@ -4,7 +4,7 @@ name: Strike
 title_slug: strike
 opdb_id: GRpyl-MQV9B
 ipdb_id: 4507
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1974
 month: 1
 player_count: 1

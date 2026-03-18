@@ -4,7 +4,7 @@ name: Joker
 title_slug: joker-2
 opdb_id: G5vjP-M1rWj
 ipdb_id: 3179
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1968
 month: 6
 player_count: 4

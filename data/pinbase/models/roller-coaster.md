@@ -4,7 +4,7 @@ name: Roller Coaster
 title_slug: roller-coaster
 opdb_id: G42pZ-ML171
 ipdb_id: 2002
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1971
 month: 6
 player_count: 2

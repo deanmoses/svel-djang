@@ -4,7 +4,7 @@ name: King Arthur and his Round Table
 title_slug: king-arthur-and-his-round-table
 opdb_id: GYWOL-MZePp
 ipdb_id: 1367
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1949
 month: 10
 player_count: 1

@@ -4,7 +4,7 @@ name: Skyway
 title_slug: skyway
 opdb_id: G4E1P-MnK7x
 ipdb_id: 2206
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1954
 month: 2
 player_count: 1

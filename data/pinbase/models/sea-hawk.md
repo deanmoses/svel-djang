@@ -3,7 +3,7 @@ slug: sea-hawk
 name: Sea Hawk
 title_slug: sea-hawk
 ipdb_id: 2080
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1941
 month: 3
 player_count: 1

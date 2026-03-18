@@ -4,7 +4,7 @@ name: Bo Bo
 title_slug: bo-bo
 opdb_id: GrPYp-MLBNx
 ipdb_id: 336
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1961
 month: 1
 player_count: 1

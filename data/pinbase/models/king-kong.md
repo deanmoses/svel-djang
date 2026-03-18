@@ -4,7 +4,7 @@ name: King Kong
 title_slug: king-kong
 opdb_id: G5BNq-MDB4d
 ipdb_id: 3194
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1990
 month: 1
 player_count: 4

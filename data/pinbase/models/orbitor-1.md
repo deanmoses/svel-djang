@@ -4,7 +4,7 @@ name: Orbitor 1
 title_slug: orbitor-1
 opdb_id: Grx7Q-Mp45k
 ipdb_id: 1725
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1982
 month: 2
 player_count: 4

@@ -4,7 +4,7 @@ name: Mermaid
 title_slug: mermaid
 opdb_id: G4qo1-MQp5l
 ipdb_id: 1574
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1951
 month: 5
 player_count: 1

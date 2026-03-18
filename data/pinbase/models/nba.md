@@ -4,7 +4,7 @@ name: NBA
 title_slug: nba
 opdb_id: G5K19-MBRlz
 ipdb_id: 5442
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2009
 month: 5
 player_count: 4

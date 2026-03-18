@@ -4,7 +4,7 @@ name: Getaway
 title_slug: getaway
 opdb_id: G4jzK-MRjN0
 ipdb_id: 999
-manufacturer_slug: allied-leisure
+corporate_entity_slug: allied-leisure-industries-incorporated
 year: 1977
 month: 1
 player_count: 4

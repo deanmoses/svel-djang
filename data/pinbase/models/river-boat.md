@@ -4,7 +4,7 @@ name: River Boat
 title_slug: river-boat
 opdb_id: GrP2Z-MjB8X
 ipdb_id: 1965
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1964
 month: 9
 player_count: 1

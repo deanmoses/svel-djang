@@ -3,7 +3,7 @@ slug: big-six
 name: Big Six
 title_slug: big-six
 ipdb_id: 278
-manufacturer_slug: keeney
+corporate_entity_slug: j-h-keeney-and-company-incorporated
 year: 1939
 month: 10
 player_count: 1

@@ -3,7 +3,7 @@ slug: jungle-3
 name: Jungle
 title_slug: jungle-2
 ipdb_id: 1333
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1938
 month: 5
 player_count: 1

@@ -4,7 +4,7 @@ name: Pink Panther
 title_slug: pink-panther
 opdb_id: Gre72-MDE5e
 ipdb_id: 1800
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1981
 month: 3
 player_count: 4

@@ -4,7 +4,7 @@ name: Grand Slam
 title_slug: grand-slam-2
 opdb_id: GrJ9q-MJNkp
 ipdb_id: 1074
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1953
 month: 4
 player_count: 1

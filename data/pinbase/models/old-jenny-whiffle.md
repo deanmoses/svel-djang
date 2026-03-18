@@ -3,7 +3,7 @@ slug: old-jenny-whiffle
 name: Old Jenny (Whiffle)
 title_slug: old-jenny-whiffle
 ipdb_id: 5394
-manufacturer_slug: yohio-manufacturing-company
+corporate_entity_slug: yohio-manufacturing-company
 year: 1931
 player_count: 1
 production_quantity: '10'

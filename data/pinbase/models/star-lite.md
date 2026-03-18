@@ -3,7 +3,7 @@ slug: star-lite
 name: Star Lite
 title_slug: star-lite
 ipdb_id: 2348
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1935
 player_count: 1
 technology_generation_slug: electromechanical

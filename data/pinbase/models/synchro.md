@@ -3,7 +3,7 @@ slug: synchro
 name: Synchro
 title_slug: synchro
 ipdb_id: 4222
-manufacturer_slug: pamco
+corporate_entity_slug: pacific-amusement-manufacturing-company
 year: 1935
 month: 2
 player_count: 1

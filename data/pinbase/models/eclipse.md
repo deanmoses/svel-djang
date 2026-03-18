@@ -4,7 +4,7 @@ name: Eclipse
 title_slug: eclipse
 opdb_id: G4ddn-MLX3E
 ipdb_id: 756
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1982
 month: 1
 player_count: 4

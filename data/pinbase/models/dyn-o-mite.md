@@ -4,7 +4,7 @@ name: Dyn O' Mite
 title_slug: tnt-rock-on-boogie-dyn-o-mite
 opdb_id: G4yLE-MQ7nd
 ipdb_id: 750
-manufacturer_slug: allied-leisure
+corporate_entity_slug: allied-leisure-industries-incorporated
 year: 1975
 month: 1
 player_count: 2

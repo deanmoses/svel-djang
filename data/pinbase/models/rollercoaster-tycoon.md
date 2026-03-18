@@ -4,7 +4,7 @@ name: RollerCoaster Tycoon
 title_slug: rollercoaster-tycoon
 opdb_id: Grybw-M5R0n
 ipdb_id: 4536
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2002
 month: 1
 player_count: 4

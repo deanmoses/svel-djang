@@ -4,7 +4,7 @@ name: Voltan Escapes Cosmic Doom
 title_slug: voltan-escapes-cosmic-doom
 opdb_id: GrkW3-MD8RW
 ipdb_id: 2744
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1978
 month: 1
 player_count: 4

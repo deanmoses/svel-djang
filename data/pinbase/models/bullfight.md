@@ -4,7 +4,7 @@ name: Bullfight
 title_slug: bullfight
 opdb_id: G5pJQ-MQwE5
 ipdb_id: 3667
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1965
 month: 1
 player_count: 1

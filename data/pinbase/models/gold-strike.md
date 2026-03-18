@@ -4,7 +4,7 @@ name: Gold Strike
 title_slug: el-dorado
 opdb_id: GrEZ5-MQ2q4
 ipdb_id: 1042
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1975
 month: 1
 player_count: 1

@@ -4,7 +4,7 @@ name: Back to the Future
 title_slug: back-to-the-future
 opdb_id: GRpbW-MLXq2
 ipdb_id: 126
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1990
 month: 6
 player_count: 4

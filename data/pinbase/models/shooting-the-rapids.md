@@ -4,7 +4,7 @@ name: Shooting the Rapids
 title_slug: shooting-the-rapids
 opdb_id: G41oq-MQVR1
 ipdb_id: 3606
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1979
 month: 1
 player_count: 4

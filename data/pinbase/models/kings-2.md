@@ -4,7 +4,7 @@ name: Kings
 title_slug: kings
 opdb_id: GR7oK-ML1xw
 ipdb_id: 1380
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1957
 month: 9
 player_count: 1

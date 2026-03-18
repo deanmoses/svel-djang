@@ -4,7 +4,7 @@ name: Gemini 2000
 title_slug: centaur
 opdb_id: GrX7q-Mx0Z8
 ipdb_id: 4579
-manufacturer_slug: taito
+corporate_entity_slug: taito-do-brasil-a-division-of-taito-japan
 year: 1982
 month: 1
 player_count: 4

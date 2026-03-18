@@ -3,7 +3,7 @@ slug: spellbinder
 name: Spellbinder
 title_slug: spellbinder
 ipdb_id: 3727
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 player_count: 2
 technology_generation_slug: solid-state
 credit_refs:

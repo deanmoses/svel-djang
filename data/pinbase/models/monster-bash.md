@@ -4,7 +4,7 @@ name: Monster Bash
 title_slug: monster-bash
 opdb_id: Gr3EW-MD3Nj
 ipdb_id: 4441
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1998
 month: 7
 player_count: 4

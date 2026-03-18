@@ -4,7 +4,7 @@ name: Red Show
 title_slug: red-show
 opdb_id: GrP7X-ML05X
 ipdb_id: 3720
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1975
 month: 1
 player_count: 1

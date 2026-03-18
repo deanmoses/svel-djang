@@ -4,7 +4,7 @@ name: Evil Fight
 title_slug: evil-fight
 opdb_id: GRLbx-MLOn8
 ipdb_id: 3085
-manufacturer_slug: playmatic
+corporate_entity_slug: playmatic
 year: 1980
 month: 3
 player_count: 4

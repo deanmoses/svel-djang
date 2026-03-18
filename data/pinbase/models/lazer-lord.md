@@ -3,7 +3,7 @@ slug: lazer-lord
 name: Lazer Lord
 title_slug: lazer-lord
 ipdb_id: 1421
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 player_count: 4
 technology_generation_slug: solid-state
 system_slug: stern-mpu-200

@@ -3,7 +3,7 @@ slug: strat-o-liner
 name: Strat-O-Liner
 title_slug: strat-o-liner
 ipdb_id: 2399
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1940
 month: 11
 player_count: 1

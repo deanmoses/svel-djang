@@ -4,7 +4,7 @@ name: Straight Flush
 title_slug: straight-flush-3-jokers
 opdb_id: GrkK0-MQdjZ
 ipdb_id: 2393
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1970
 month: 10
 player_count: 1

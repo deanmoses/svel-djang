@@ -4,7 +4,7 @@ name: Crescendo
 title_slug: groovy-crescendo
 opdb_id: GRpKY-MJYo1
 ipdb_id: 590
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1970
 month: 5
 player_count: 2

@@ -3,7 +3,7 @@ slug: keep-em-flying
 name: Keep 'Em Flying
 title_slug: keep-em-flying
 ipdb_id: 3191
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1942
 month: 2
 player_count: 1

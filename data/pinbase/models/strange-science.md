@@ -4,7 +4,7 @@ name: Strange Science
 title_slug: strange-science
 opdb_id: G5nzJ-MJVX8
 ipdb_id: 2396
-manufacturer_slug: bally
+corporate_entity_slug: bally-midway-manufacturing-company
 year: 1986
 month: 1
 player_count: 4

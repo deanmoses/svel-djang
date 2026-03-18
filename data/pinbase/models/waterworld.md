@@ -4,7 +4,7 @@ name: Waterworld
 title_slug: waterworld
 opdb_id: G4JK7-MDBe6
 ipdb_id: 3793
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1995
 month: 1
 player_count: 4

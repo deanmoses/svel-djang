@@ -4,7 +4,7 @@ name: Ship-Mates
 title_slug: ship-mates
 opdb_id: G4jvD-MJKjd
 ipdb_id: 2120
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1964
 month: 2
 player_count: 4

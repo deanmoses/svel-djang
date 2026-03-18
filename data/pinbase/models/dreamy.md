@@ -4,7 +4,7 @@ name: Dreamy
 title_slug: dreamy
 opdb_id: GV8Kw-MDl3O
 ipdb_id: 733
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1950
 month: 2
 player_count: 1

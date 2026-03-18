@@ -4,7 +4,7 @@ name: Whiz Kids
 title_slug: whiz-kids
 opdb_id: G4807-M612P
 ipdb_id: 2769
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1952
 month: 3
 player_count: 1

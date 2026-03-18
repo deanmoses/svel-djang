@@ -4,7 +4,7 @@ name: Flower's Child
 title_slug: flowers-child
 opdb_id: GRov2-M5Ren
 ipdb_id: 3785
-manufacturer_slug: rally
+corporate_entity_slug: rally-aka-rally-play-company
 year: 1969
 month: 1
 player_count: 4

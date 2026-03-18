@@ -4,7 +4,7 @@ name: Viking
 title_slug: viking
 opdb_id: G57kN-MQ71K
 ipdb_id: 2737
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1979
 month: 12
 player_count: 4

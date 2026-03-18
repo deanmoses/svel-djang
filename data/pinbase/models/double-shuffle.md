@@ -4,7 +4,7 @@ name: Double-Shuffle
 title_slug: double-shuffle
 opdb_id: GR986-MjBBV
 ipdb_id: 722
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1949
 month: 6
 player_count: 1

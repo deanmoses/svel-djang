@@ -4,7 +4,7 @@ name: Cherokee
 title_slug: cherokeecherokis
 opdb_id: G5BE9-MDlVp
 ipdb_id: 4594
-manufacturer_slug: recreativos-franco
+corporate_entity_slug: recreativos-franco
 year: 1976
 month: 1
 player_count: 4

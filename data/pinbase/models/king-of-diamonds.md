@@ -4,7 +4,7 @@ name: King of Diamonds
 title_slug: king-of-diamonds
 opdb_id: GrlPj-Mo1Ry
 ipdb_id: 1372
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1967
 month: 1
 player_count: 4

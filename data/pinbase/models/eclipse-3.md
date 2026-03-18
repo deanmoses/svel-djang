@@ -3,7 +3,7 @@ slug: eclipse-3
 name: Eclipse
 title_slug: eclipse-3
 ipdb_id: 4147
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1935
 month: 9
 player_count: 1

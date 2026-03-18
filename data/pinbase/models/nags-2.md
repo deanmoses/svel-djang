@@ -4,7 +4,7 @@ name: Nags
 title_slug: nags
 opdb_id: GRV1N-MQ4r2
 ipdb_id: 1654
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1960
 month: 4
 player_count: 1

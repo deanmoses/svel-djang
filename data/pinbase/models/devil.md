@@ -4,7 +4,7 @@ name: Devil
 title_slug: devil
 opdb_id: GRbJN-Mz2yK
 ipdb_id: 3702
-manufacturer_slug: nordamatic
+corporate_entity_slug: nordamatic
 year: 1978
 month: 1
 player_count: 1

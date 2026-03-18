@@ -4,7 +4,7 @@ name: Jacks Open
 title_slug: jacks-open-lucky-hand
 opdb_id: GrPpb-ML3pn
 ipdb_id: 1281
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1977
 month: 2
 player_count: 1

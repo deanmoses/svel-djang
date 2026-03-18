@@ -4,7 +4,7 @@ name: Astronaut
 title_slug: moon-shot-astronaut
 opdb_id: GR7V3-MJpjv
 ipdb_id: 101
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1969
 month: 6
 player_count: 2

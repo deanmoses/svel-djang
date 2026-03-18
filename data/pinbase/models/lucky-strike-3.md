@@ -4,7 +4,7 @@ name: Lucky Strike
 title_slug: el-dorado
 opdb_id: GrEZ5-MJoWX
 ipdb_id: 1497
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1975
 month: 11
 player_count: 1

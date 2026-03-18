@@ -3,7 +3,7 @@ slug: mini-viper
 name: Mini-Viper
 title_slug: mini-viper
 ipdb_id: 4905
-manufacturer_slug: sega
+corporate_entity_slug: sega-pinball-incorporated
 year: 1996
 month: 6
 player_count: 6

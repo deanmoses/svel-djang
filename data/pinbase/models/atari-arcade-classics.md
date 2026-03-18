@@ -3,7 +3,7 @@ slug: atari-arcade-classics
 name: Atari Arcade Classics
 title_slug: atari-arcade-classics
 ipdb_id: 6628
-manufacturer_slug: zizzle-arcade-pinball
+corporate_entity_slug: zizzle-arcade-pinball
 player_count: 2
 technology_generation_slug: solid-state
 credit_refs:

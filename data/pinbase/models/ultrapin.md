@@ -3,7 +3,7 @@ slug: ultrapin
 name: UltraPin
 title_slug: ultrapin
 ipdb_id: 5230
-manufacturer_slug: global-vr
+corporate_entity_slug: global-vr
 year: 2006
 month: 12
 player_count: 4

@@ -4,7 +4,7 @@ name: Campus Queen
 title_slug: gator-sheba-campus-queen
 opdb_id: GRDQ1-MQYrl
 ipdb_id: 424
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1966
 month: 8
 player_count: 4

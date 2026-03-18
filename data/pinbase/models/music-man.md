@@ -4,7 +4,7 @@ name: Music Man
 title_slug: music-man
 opdb_id: Grlb3-MJ4z7
 ipdb_id: 1643
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1960
 month: 8
 player_count: 4

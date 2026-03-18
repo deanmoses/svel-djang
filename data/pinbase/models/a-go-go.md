@@ -4,7 +4,7 @@ name: A-Go-Go
 title_slug: a-go-go
 opdb_id: G5oO9-MJYE4
 ipdb_id: 27
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1966
 month: 5
 player_count: 4

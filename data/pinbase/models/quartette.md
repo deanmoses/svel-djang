@@ -4,7 +4,7 @@ name: Quartette
 title_slug: quartette-four-stars
 opdb_id: G5nn1-MJ7B2
 ipdb_id: 1888
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1952
 month: 2
 player_count: 1

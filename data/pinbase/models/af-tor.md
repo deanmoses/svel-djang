@@ -4,7 +4,7 @@ name: Af-Tor
 title_slug: af-tor
 opdb_id: GRY7E-MLbEo
 ipdb_id: 25
-manufacturer_slug: wico
+corporate_entity_slug: wico-corporation
 year: 1984
 month: 1
 player_count: 4

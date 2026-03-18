@@ -4,7 +4,7 @@ name: Rescue 911
 title_slug: rescue-911
 opdb_id: G5pNW-MVK46
 ipdb_id: 1951
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1994
 month: 5
 player_count: 4

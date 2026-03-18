@@ -3,7 +3,7 @@ slug: hi-boy-2
 name: Hi Boy
 title_slug: hi-boy
 ipdb_id: 3766
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1954
 month: 11
 player_count: 6

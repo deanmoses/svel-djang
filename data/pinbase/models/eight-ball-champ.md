@@ -4,7 +4,7 @@ name: Eight Ball Champ
 title_slug: eight-ball-champ
 opdb_id: G439V-MDvWZ
 ipdb_id: 761
-manufacturer_slug: bally
+corporate_entity_slug: bally-midway-manufacturing-company
 year: 1985
 month: 1
 player_count: 4

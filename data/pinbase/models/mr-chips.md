@@ -3,7 +3,7 @@ slug: mr-chips
 name: Mr. Chips
 title_slug: mr-chips
 ipdb_id: 1636
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1939
 month: 8
 player_count: 1

@@ -4,7 +4,7 @@ name: Buttons and Bows
 title_slug: buttons-and-bows
 opdb_id: Glljy-MjBq2
 ipdb_id: 413
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1949
 month: 3
 player_count: 1

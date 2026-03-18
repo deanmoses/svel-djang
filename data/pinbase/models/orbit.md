@@ -4,7 +4,7 @@ name: Orbit
 title_slug: orbit-outer-space
 opdb_id: G5o1K-MQZby
 ipdb_id: 1724
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1971
 month: 12
 player_count: 4

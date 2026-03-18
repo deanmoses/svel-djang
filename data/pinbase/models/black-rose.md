@@ -4,7 +4,7 @@ name: Black Rose
 title_slug: black-rose
 opdb_id: G5vZd-MQpWZ
 ipdb_id: 313
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1992
 month: 7
 player_count: 4

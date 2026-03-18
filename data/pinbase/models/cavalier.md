@@ -4,7 +4,7 @@ name: Cavalier
 title_slug: cavalier
 opdb_id: GrNEx-MRjEl
 ipdb_id: 474
-manufacturer_slug: recel
+corporate_entity_slug: recel-sa
 year: 1979
 month: 1
 player_count: 4

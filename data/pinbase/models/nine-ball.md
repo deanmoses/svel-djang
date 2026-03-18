@@ -4,7 +4,7 @@ name: Nine Ball
 title_slug: nine-ball
 opdb_id: G4jjx-MDbz2
 ipdb_id: 1678
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1980
 month: 12
 player_count: 4

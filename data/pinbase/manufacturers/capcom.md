@@ -1,6 +1,7 @@
 ---
 slug: capcom
 name: Capcom
+opdb_manufacturer_id: 43
 ---
 
 Capcom is best known for the video games that defined a generation — Street Fighter, Mega Man, Resident Evil — but between 1994 and 1996 the Japanese publisher made a brief, ambitious foray into physical pinball. Partnering with a small US team, Capcom Coin-Op produced just eight pinball titles, each featuring the bright, character-driven aesthetics familiar from the company's gaming catalog.

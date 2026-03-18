@@ -4,7 +4,7 @@ name: Aloha
 title_slug: aloha
 opdb_id: G4kw7-MDl0Y
 ipdb_id: 62
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1961
 month: 11
 player_count: 2

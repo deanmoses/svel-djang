@@ -4,7 +4,7 @@ name: Card Whiz
 title_slug: royal-flush-card-whiz
 opdb_id: GrEWx-MQPPX
 ipdb_id: 447
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1976
 month: 5
 player_count: 2

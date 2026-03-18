@@ -1,6 +1,7 @@
 ---
 slug: atari
 name: Atari
+opdb_manufacturer_id: 27
 ---
 
 The name Atari conjures images of video game dominance, but for a brief period in the late 1970s the Silicon Valley giant made a serious push into pinball. Between 1976 and 1980, Atari produced roughly sixteen pinball titles, hoping to leverage its engineering talent and brand recognition in the coin-op amusement sector.

@@ -3,7 +3,7 @@ slug: zip-3
 name: Zip
 title_slug: zip-3
 ipdb_id: 2839
-manufacturer_slug: the-ad-lee-company-incorporated
+corporate_entity_slug: the-ad-lee-company-incorporated
 year: 1935
 month: 4
 player_count: 1

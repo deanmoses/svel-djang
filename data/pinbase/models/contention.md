@@ -3,7 +3,7 @@ slug: contention
 name: Contention
 title_slug: contention
 ipdb_id: 562
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1940
 month: 5
 player_count: 1

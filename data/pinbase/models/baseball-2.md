@@ -4,7 +4,7 @@ name: Baseball
 title_slug: baseball-batter-up
 opdb_id: G4E2y-MJ5Pv
 ipdb_id: 185
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1970
 month: 6
 player_count: 1

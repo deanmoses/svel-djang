@@ -4,7 +4,7 @@ name: Queen of Hearts
 title_slug: queen-of-hearts
 opdb_id: G5YNB-MLxdV
 ipdb_id: 1891
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1952
 month: 12
 player_count: 1

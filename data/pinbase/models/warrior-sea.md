@@ -3,7 +3,7 @@ slug: warrior-sea
 name: Warrior Sea
 title_slug: warrior-sea
 opdb_id: G9z9p-MYeN2
-manufacturer_slug: electromatic-brasil
+corporate_entity_slug: electromatic-brasil
 year: 1977
 month: 1
 player_count: 4

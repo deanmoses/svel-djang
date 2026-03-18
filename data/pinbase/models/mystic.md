@@ -3,7 +3,7 @@ slug: mystic
 name: Mystic
 title_slug: mystic-2
 ipdb_id: 1649
-manufacturer_slug: pacific-manufacturing-corporation
+corporate_entity_slug: pacific-manufacturing-corporation
 year: 1937
 month: 7
 player_count: 1

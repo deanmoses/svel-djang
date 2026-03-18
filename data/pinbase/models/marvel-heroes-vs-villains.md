@@ -3,7 +3,7 @@ slug: marvel-heroes-vs-villains
 name: Marvel Heroes vs. Villains
 title_slug: marvel-heroes-vs-villains
 ipdb_id: 5165
-manufacturer_slug: zizzle-arcade-pinball
+corporate_entity_slug: zizzle-arcade-pinball
 year: 2006
 player_count: 2
 technology_generation_slug: solid-state

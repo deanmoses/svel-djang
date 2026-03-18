@@ -3,7 +3,7 @@ slug: paramount
 name: Paramount
 title_slug: paramount
 ipdb_id: 1756
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1938
 month: 11
 player_count: 1

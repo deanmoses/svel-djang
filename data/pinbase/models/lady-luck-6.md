@@ -4,7 +4,7 @@ name: Lady Luck
 title_slug: lady-luck-4
 opdb_id: GLWke-M1rEr
 ipdb_id: 5010
-manufacturer_slug: taito
+corporate_entity_slug: taito-do-brasil-a-division-of-taito-japan
 year: 1978
 month: 1
 player_count: 4

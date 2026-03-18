@@ -4,7 +4,7 @@ name: Subway
 title_slug: subway-cross-town
 opdb_id: GrEQy-MwN12
 ipdb_id: 4777
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1966
 month: 10
 player_count: 1

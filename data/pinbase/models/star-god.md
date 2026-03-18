@@ -4,7 +4,7 @@ name: Star God
 title_slug: star-god
 opdb_id: G5vXk-M2Y8r
 ipdb_id: 3458
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1980
 month: 5
 player_count: 4

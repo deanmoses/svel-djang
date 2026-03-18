@@ -4,7 +4,7 @@ name: Black Magic 4
 title_slug: black-magic
 opdb_id: GryXn-MYeE2
 ipdb_id: 3626
-manufacturer_slug: recel
+corporate_entity_slug: recel-sa
 year: 1980
 month: 6
 player_count: 4

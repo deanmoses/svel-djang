@@ -3,7 +3,7 @@ slug: tit-for-tat
 name: Tit For Tat
 title_slug: tit-for-tat
 ipdb_id: 2572
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1935
 month: 7
 player_count: 1

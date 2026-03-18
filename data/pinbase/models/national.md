@@ -3,6 +3,6 @@ slug: national
 name: National
 title_slug: national
 ipdb_id: 3368
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 player_count: 1
 ---

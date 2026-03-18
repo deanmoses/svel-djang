@@ -3,7 +3,7 @@ slug: ace-high-extended-play-prototype
 name: Ace High (Extended Play Prototype)
 title_slug: ace-high-extended-play-prototype
 ipdb_id: 7034
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1957
 player_count: 1
 technology_generation_slug: electromechanical

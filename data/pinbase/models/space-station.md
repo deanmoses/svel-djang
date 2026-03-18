@@ -4,7 +4,7 @@ name: Space Station
 title_slug: space-station
 opdb_id: G5QXO-MQowd
 ipdb_id: 2261
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1987
 month: 1
 player_count: 4

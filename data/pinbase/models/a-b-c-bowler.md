@@ -3,7 +3,7 @@ slug: a-b-c-bowler
 name: A-B-C Bowler
 title_slug: a-b-c-bowler
 ipdb_id: 1
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1941
 month: 8
 player_count: 1

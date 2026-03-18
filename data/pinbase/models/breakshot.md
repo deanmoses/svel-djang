@@ -4,7 +4,7 @@ name: Breakshot
 title_slug: breakshot
 opdb_id: G43oE-M0ok5
 ipdb_id: 3784
-manufacturer_slug: capcom
+corporate_entity_slug: capcom-coin-op-incorporated
 year: 1996
 month: 5
 player_count: 4

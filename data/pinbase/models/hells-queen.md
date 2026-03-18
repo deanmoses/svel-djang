@@ -4,7 +4,7 @@ name: Hell's Queen
 title_slug: hell
 opdb_id: G2LEp-MZeYx-AObZq
 ipdb_id: 5467
-manufacturer_slug: mondialmatic
+corporate_entity_slug: mondialmatic
 year: 1980
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: Surf Rider
 title_slug: surf-rider
 opdb_id: GRwPV-MLO58
 ipdb_id: 2463
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1956
 month: 5
 player_count: 4

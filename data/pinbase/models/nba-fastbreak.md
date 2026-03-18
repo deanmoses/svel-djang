@@ -4,7 +4,7 @@ name: NBA Fastbreak
 title_slug: nba-fastbreak
 opdb_id: GrO0D-MQolo
 ipdb_id: 4023
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1997
 month: 3
 player_count: 4

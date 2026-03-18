@@ -4,7 +4,7 @@ name: Jumpin' Jacks
 title_slug: jumpin-jacks-2
 opdb_id: GrOP0-MJZlx
 ipdb_id: 1330
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1952
 month: 12
 player_count: 1

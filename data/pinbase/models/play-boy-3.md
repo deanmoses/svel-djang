@@ -4,7 +4,7 @@ name: Playboy
 title_slug: playboy
 opdb_id: G43z8-MLO8j
 ipdb_id: 2043
-manufacturer_slug: rally
+corporate_entity_slug: rally-aka-rally-play-company
 year: 1967
 month: 11
 player_count: 2

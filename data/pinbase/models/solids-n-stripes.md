@@ -4,7 +4,7 @@ name: Solids N Stripes
 title_slug: solids-n-stripes
 opdb_id: G5Dv1-MW9ro
 ipdb_id: 2240
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1971
 month: 2
 player_count: 2

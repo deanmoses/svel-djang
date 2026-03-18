@@ -3,7 +3,7 @@ slug: see-saw-2
 name: See-Saw
 title_slug: see-saw-2
 ipdb_id: 2092
-manufacturer_slug: success-games-company
+corporate_entity_slug: success-games-company
 year: 1932
 month: 6
 player_count: 1

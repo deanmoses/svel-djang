@@ -4,7 +4,7 @@ name: White Water
 title_slug: white-water
 opdb_id: GRQKz-MyNXz
 ipdb_id: 2768
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1993
 month: 1
 player_count: 4

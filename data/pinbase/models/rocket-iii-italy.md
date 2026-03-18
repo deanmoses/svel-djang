@@ -3,7 +3,7 @@ slug: rocket-iii-italy
 name: Rocket III (Italy)
 title_slug: rocket-iii-italy
 ipdb_id: 6891
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1967
 player_count: 1
 technology_generation_slug: electromechanical

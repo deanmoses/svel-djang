@@ -3,7 +3,7 @@ slug: joel-silver-the-pinball
 name: Joel Silver, The Pinball
 title_slug: joel-silver-the-pinball
 ipdb_id: 4348
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1991
 month: 2
 player_count: 4

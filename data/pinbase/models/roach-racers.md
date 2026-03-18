@@ -3,7 +3,7 @@ slug: roach-racers
 name: Roach Racers
 title_slug: roach-racers
 ipdb_id: 4456
-manufacturer_slug: sega
+corporate_entity_slug: sega-pinball-incorporated
 year: 1997
 month: 2
 player_count: 1

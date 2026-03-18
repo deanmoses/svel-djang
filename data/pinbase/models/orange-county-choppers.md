@@ -3,7 +3,7 @@ slug: orange-county-choppers
 name: Orange County Choppers
 title_slug: orange-county-choppers
 ipdb_id: 5097
-manufacturer_slug: incredible-technologies-incorporated
+corporate_entity_slug: incredible-technologies-incorporated
 year: 2005
 production_quantity: '12'
 technology_generation_slug: solid-state

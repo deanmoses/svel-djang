@@ -4,7 +4,7 @@ name: Sharkey's Shootout
 title_slug: sharkeys-shootout
 opdb_id: GRwv0-MJ99E
 ipdb_id: 4492
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2000
 month: 9
 player_count: 4

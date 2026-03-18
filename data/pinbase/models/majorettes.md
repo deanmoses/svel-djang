@@ -4,7 +4,7 @@ name: Majorettes
 title_slug: majorettes
 opdb_id: GRwDD-Ml9Br
 ipdb_id: 1528
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1964
 month: 8
 player_count: 1

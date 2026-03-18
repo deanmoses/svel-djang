@@ -4,7 +4,7 @@ name: Double Barrel
 title_slug: double-barrel
 opdb_id: G4dvX-MQKOo
 ipdb_id: 709
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1961
 month: 8
 player_count: 2

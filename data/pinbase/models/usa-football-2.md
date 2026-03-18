@@ -3,7 +3,7 @@ slug: usa-football-2
 name: U.S.A. Football
 title_slug: usa-football
 ipdb_id: 5506
-manufacturer_slug: alvin-g
+corporate_entity_slug: alvin-g-and-company
 year: 1992
 player_count: 1
 production_quantity: '11'

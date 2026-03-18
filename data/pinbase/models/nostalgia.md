@@ -4,7 +4,7 @@ name: Nostalgia
 title_slug: nostalgia
 opdb_id: G5vqv-MJN3K
 ipdb_id: 4564
-manufacturer_slug: sega
+corporate_entity_slug: sega-enterprises-ltd
 year: 1977
 month: 1
 player_count: 2

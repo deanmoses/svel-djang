@@ -4,7 +4,7 @@ name: Spain 82
 title_slug: spain-82
 opdb_id: G4Zo1-MQV0j
 ipdb_id: 3266
-manufacturer_slug: playmatic
+corporate_entity_slug: playmatic
 year: 1982
 month: 1
 player_count: 4

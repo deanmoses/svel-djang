@@ -3,7 +3,7 @@ slug: kabuki
 name: Kabuki
 title_slug: kabuki
 ipdb_id: 4537
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 player_count: 4
 production_quantity: '2'
 technology_generation_slug: solid-state

@@ -4,7 +4,7 @@ name: Mac Attack
 title_slug: mac-attack
 opdb_id: GrJ07-MjB7X
 ipdb_id: 3604
-manufacturer_slug: mr-game
+corporate_entity_slug: mr-game
 year: 1989
 month: 1
 player_count: 4

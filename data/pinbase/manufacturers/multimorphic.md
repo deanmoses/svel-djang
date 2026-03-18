@@ -1,6 +1,7 @@
 ---
 slug: multimorphic
 name: Multimorphic
+opdb_manufacturer_id: 91
 ---
 
 Multimorphic was founded by [[person:gerry-stellenberg]] with a radical premise: that the fundamental architecture of the pinball machine — a fixed playfield matched to a single game — was an unnecessary constraint. The company's P3 (Pinball 3) platform, introduced commercially in 2015, addressed this by creating a modular playfield system in which interchangeable upper playfield sections transform the game experience entirely. The lower playfield incorporates a high-resolution display beneath the playfield glass, enabling software-defined graphics to replace traditional physical inserts.

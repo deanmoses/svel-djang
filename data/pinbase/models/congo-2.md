@@ -4,7 +4,7 @@ name: Congo
 title_slug: congo
 opdb_id: GrNd0-MJNW1
 ipdb_id: 3780
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1995
 month: 11
 player_count: 4

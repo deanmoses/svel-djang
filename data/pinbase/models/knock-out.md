@@ -4,7 +4,7 @@ name: Knock Out
 title_slug: knock-out
 opdb_id: GR6Zq-MJ6nw
 ipdb_id: 1391
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1950
 month: 12
 player_count: 1

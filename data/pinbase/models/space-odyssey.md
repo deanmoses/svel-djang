@@ -4,7 +4,7 @@ name: Space Odyssey
 title_slug: space-mission-space-odyssey
 opdb_id: GRnX6-MJ9qb
 ipdb_id: 2254
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1976
 month: 6
 player_count: 2

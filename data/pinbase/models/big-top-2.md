@@ -4,7 +4,7 @@ name: Big Top
 title_slug: big-top-3
 opdb_id: GYWyw-MBROn
 ipdb_id: 285
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1949
 month: 2
 player_count: 1

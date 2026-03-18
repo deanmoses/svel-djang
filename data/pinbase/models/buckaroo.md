@@ -4,7 +4,7 @@ name: Buckaroo
 title_slug: buckaroo-cow-poke
 opdb_id: GRzow-MQYqx
 ipdb_id: 393
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1965
 month: 6
 player_count: 1

@@ -3,7 +3,7 @@ slug: abra-ca-dabra-2
 name: Abra Ca Dabra
 title_slug: abra-ca-dabra
 ipdb_id: 2876
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1971
 month: 10
 player_count: 1

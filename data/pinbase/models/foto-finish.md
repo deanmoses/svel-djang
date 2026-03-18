@@ -3,7 +3,7 @@ slug: foto-finish
 name: Foto Finish
 title_slug: foto-finish-2
 ipdb_id: 926
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1937
 month: 7
 player_count: 1

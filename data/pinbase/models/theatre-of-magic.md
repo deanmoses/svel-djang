@@ -4,7 +4,7 @@ name: Theatre of Magic
 title_slug: theatre-of-magic
 opdb_id: G5BLE-MQ75Y
 ipdb_id: 2845
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1995
 month: 3
 player_count: 4

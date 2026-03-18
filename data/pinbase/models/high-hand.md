@@ -3,7 +3,7 @@ slug: high-hand
 name: High Hand
 title_slug: high-hand
 ipdb_id: 1172
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1935
 month: 9
 player_count: 1

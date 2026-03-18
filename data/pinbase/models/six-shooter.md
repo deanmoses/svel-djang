@@ -4,7 +4,7 @@ name: Six Shooter
 title_slug: six-shooter
 opdb_id: GreYQ-M4ovO
 ipdb_id: 2166
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1966
 month: 9
 player_count: 6

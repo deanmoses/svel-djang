@@ -4,7 +4,7 @@ name: Strato-Flite
 title_slug: stratoastrosuper-flite
 opdb_id: GrdlQ-ML8wV
 ipdb_id: 2398
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1974
 month: 7
 player_count: 4

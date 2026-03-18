@@ -4,7 +4,7 @@ name: El Toro
 title_slug: el-toro-2
 opdb_id: GrXpk-MDx98
 ipdb_id: 770
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1963
 month: 8
 player_count: 2

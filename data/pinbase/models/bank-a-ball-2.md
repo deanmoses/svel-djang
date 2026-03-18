@@ -4,7 +4,7 @@ name: Bank-A-Ball
 title_slug: bank-a-ball
 opdb_id: G9zpB-MLRzv
 ipdb_id: 171
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1950
 month: 5
 player_count: 1

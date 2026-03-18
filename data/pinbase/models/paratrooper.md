@@ -4,7 +4,7 @@ name: Paratrooper
 title_slug: paratrooper
 opdb_id: GRoj7-Ml91k
 ipdb_id: 1757
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1952
 month: 8
 player_count: 1

@@ -4,7 +4,7 @@ name: Gladiator
 title_slug: gladiator
 opdb_id: GRLE6-MOE67
 ipdb_id: 1010
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1956
 month: 1
 player_count: 2

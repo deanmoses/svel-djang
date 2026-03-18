@@ -4,7 +4,7 @@ name: Frisky
 title_slug: frisky
 opdb_id: GllZX-MwN0r
 ipdb_id: 3113
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1949
 month: 1
 player_count: 1

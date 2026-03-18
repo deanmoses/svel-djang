@@ -4,7 +4,7 @@ name: Lucky Card
 title_slug: jacks-open-lucky-hand
 opdb_id: GrPpb-MLEk7
 ipdb_id: 1485
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1977
 month: 7
 player_count: 1

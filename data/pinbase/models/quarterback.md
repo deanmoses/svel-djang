@@ -4,7 +4,7 @@ name: Quarterback
 title_slug: kick-off-quarterback
 opdb_id: GRzed-MdEx8
 ipdb_id: 1887
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1976
 month: 9
 player_count: 2

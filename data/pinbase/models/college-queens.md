@@ -4,7 +4,7 @@ name: College Queens
 title_slug: college-queens-airport
 opdb_id: GrOQ1-M0oOr
 ipdb_id: 543
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1969
 month: 5
 player_count: 4

@@ -4,7 +4,7 @@ name: Geisha
 title_slug: geisha
 opdb_id: GRb1z-MyN5o
 ipdb_id: 994
-manufacturer_slug: playmatic
+corporate_entity_slug: playmatic
 year: 1973
 month: 1
 player_count: 1

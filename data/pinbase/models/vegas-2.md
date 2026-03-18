@@ -4,7 +4,7 @@ name: Vegas
 title_slug: vegas-2
 opdb_id: GrqVL-MDyKe
 ipdb_id: 2724
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1990
 month: 7
 player_count: 4

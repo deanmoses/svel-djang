@@ -4,7 +4,7 @@ name: Cosmic Princess
 title_slug: cosmic-princess
 opdb_id: G4d9B-MJk65
 ipdb_id: 3967
-manufacturer_slug: allied-leisure
+corporate_entity_slug: leisure-allied-industries
 year: 1979
 month: 1
 player_count: 4

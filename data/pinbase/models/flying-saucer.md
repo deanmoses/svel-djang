@@ -3,7 +3,7 @@ slug: flying-saucer
 name: Flying Saucer
 title_slug: flying-saucer
 ipdb_id: 7011
-manufacturer_slug: midway
+corporate_entity_slug: midway-manufacturing-company
 year: 1967
 month: 10
 player_count: 1

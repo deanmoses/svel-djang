@@ -4,7 +4,7 @@ name: Hayburners
 title_slug: hayburners-jalopy
 opdb_id: GRojj-MQwN3
 ipdb_id: 1142
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1951
 month: 6
 player_count: 1

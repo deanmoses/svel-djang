@@ -4,7 +4,7 @@ name: Fun-Fair
 title_slug: fun-fair
 opdb_id: G5V6N-MDeeO
 ipdb_id: 965
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1958
 month: 3
 player_count: 1

@@ -3,7 +3,7 @@ slug: all-the-way
 name: All The Way
 title_slug: all-the-way
 ipdb_id: 6278
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1964
 month: 10
 player_count: 2

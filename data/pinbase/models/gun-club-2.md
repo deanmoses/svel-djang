@@ -4,7 +4,7 @@ name: Gun Club
 title_slug: gun-club
 opdb_id: G4Pwx-MXrWn
 ipdb_id: 1096
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1953
 month: 10
 player_count: 1

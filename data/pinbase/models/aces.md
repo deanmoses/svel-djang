@@ -3,7 +3,7 @@ slug: aces
 name: Aces
 title_slug: aces
 ipdb_id: 6831
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 player_count: 4
 technology_generation_slug: solid-state
 credit_refs:

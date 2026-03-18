@@ -1,6 +1,7 @@
 ---
 slug: recel
 name: Recel
+opdb_manufacturer_id: 17
 ---
 
 Recel was a Spanish pinball manufacturer active during the late [[technologygeneration:electromechanical]] and early [[technologygeneration:solid-state]] transition period. Like several of its contemporaries in Spain — a country with a surprisingly robust domestic pinball industry — Recel produced machines that circulated primarily through European distribution channels, often unknown to collectors outside the continent.

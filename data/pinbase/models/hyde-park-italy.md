@@ -3,7 +3,7 @@ slug: hyde-park-italy
 name: Hyde Park (Italy)
 title_slug: hyde-park-italy
 ipdb_id: 5678
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1966
 month: 6
 player_count: 2

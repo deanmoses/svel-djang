@@ -4,7 +4,7 @@ name: Sky·Line
 title_slug: skyline
 opdb_id: GRQ6d-MDRlL
 ipdb_id: 3240
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1965
 month: 1
 player_count: 1

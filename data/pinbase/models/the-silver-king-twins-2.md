@@ -3,7 +3,7 @@ slug: the-silver-king-twins-2
 name: The Silver King Twins
 title_slug: the-silver-king-twins-2
 ipdb_id: 6934
-manufacturer_slug: texas-novelty-company
+corporate_entity_slug: texas-novelty-company
 year: 1932
 month: 7
 player_count: 2

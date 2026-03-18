@@ -4,7 +4,7 @@ name: Striker
 title_slug: striker
 opdb_id: G5YEE-MDEVO
 ipdb_id: 2405
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1982
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: Fortune
 title_slug: fortune
 opdb_id: GrEEy-MQ5pv
 ipdb_id: 4380
-manufacturer_slug: petaco
+corporate_entity_slug: procedimientos-electromagnticos-de-tanteo-y-color
 year: 1972
 month: 1
 player_count: 1

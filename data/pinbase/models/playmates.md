@@ -4,7 +4,7 @@ name: PlayMates
 title_slug: domino-playmates
 opdb_id: G4j8k-MDlYy
 ipdb_id: 1828
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1968
 month: 12
 player_count: 1

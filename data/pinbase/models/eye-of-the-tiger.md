@@ -4,7 +4,7 @@ name: Eye Of The Tiger
 title_slug: sinbad
 opdb_id: G4xqN-MLbX0
 ipdb_id: 802
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1978
 month: 6
 player_count: 2

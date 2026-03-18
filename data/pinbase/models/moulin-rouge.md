@@ -4,7 +4,7 @@ name: Moulin Rouge
 title_slug: moulin-rouge
 opdb_id: GRDjY-MJwZ4
 ipdb_id: 1634
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1965
 month: 5
 player_count: 1

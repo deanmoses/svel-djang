@@ -4,7 +4,7 @@ name: Apocalypse Now
 title_slug: apocalypse-now
 opdb_id: G4Zyj-MQK1O
 ipdb_id: 3932
-manufacturer_slug: jeutel
+corporate_entity_slug: jeutel
 year: 1985
 month: 1
 player_count: 4

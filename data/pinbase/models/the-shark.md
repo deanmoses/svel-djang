@@ -4,7 +4,7 @@ name: The Shark
 title_slug: the-shark
 opdb_id: GxvZB-MrRze
 ipdb_id: 4060
-manufacturer_slug: ami
+corporate_entity_slug: ami-spa
 year: 1976
 month: 1
 player_count: 1

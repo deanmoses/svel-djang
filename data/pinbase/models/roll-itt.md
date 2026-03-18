@@ -3,7 +3,7 @@ slug: roll-itt
 name: Roll-Itt
 title_slug: roll-itt
 ipdb_id: 2011
-manufacturer_slug: mason-and-company
+corporate_entity_slug: mason-and-company
 year: 1932
 month: 3
 player_count: 1

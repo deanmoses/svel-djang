@@ -4,7 +4,7 @@ name: Card King
 title_slug: drop-a-card-pop-a-card
 opdb_id: GRL9Q-MJpKr
 ipdb_id: 445
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1971
 month: 8
 player_count: 1

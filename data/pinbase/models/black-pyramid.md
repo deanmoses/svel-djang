@@ -4,7 +4,7 @@ name: Black Pyramid
 title_slug: black-pyramid
 opdb_id: GRVnY-MDz0l
 ipdb_id: 312
-manufacturer_slug: bally
+corporate_entity_slug: bally-midway-manufacturing-company
 year: 1984
 month: 7
 player_count: 4

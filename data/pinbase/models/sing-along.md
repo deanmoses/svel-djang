@@ -4,7 +4,7 @@ name: Sing Along
 title_slug: sing-along-melody
 opdb_id: GrPkZ-MJZk7
 ipdb_id: 2160
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1967
 month: 9
 player_count: 1

@@ -4,7 +4,7 @@ name: Dixieland
 title_slug: dixieland
 opdb_id: GrND7-ML0l9
 ipdb_id: 692
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1968
 month: 4
 player_count: 1

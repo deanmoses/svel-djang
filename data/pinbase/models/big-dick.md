@@ -3,7 +3,7 @@ slug: big-dick
 name: Big Dick
 title_slug: big-dick
 ipdb_id: 4539
-manufacturer_slug: fabulous-fantasies
+corporate_entity_slug: fabulous-fantasies
 year: 1996
 player_count: 1
 production_quantity: '5'

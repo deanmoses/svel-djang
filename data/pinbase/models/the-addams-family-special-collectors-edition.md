@@ -4,7 +4,7 @@ name: The Addams Family Special Collectors Edition
 title_slug: the-addams-family
 opdb_id: G4ODR-MLzY7
 ipdb_id: 21
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1994
 month: 10
 player_count: 4

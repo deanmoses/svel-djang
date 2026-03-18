@@ -4,7 +4,7 @@ name: Humpty Dumpty
 title_slug: humpty-dumpty
 opdb_id: GyVVQ-MVKYX
 ipdb_id: 1254
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1947
 month: 10
 player_count: 1

@@ -3,7 +3,7 @@ slug: bow-and-arrow-2
 name: Bow and Arrow
 title_slug: bow-and-arrow-2
 ipdb_id: 4770
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1974
 player_count: 4
 production_quantity: '17'

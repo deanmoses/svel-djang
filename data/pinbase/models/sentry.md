@@ -3,7 +3,7 @@ slug: sentry
 name: Sentry
 title_slug: sentry
 ipdb_id: 3844
-manufacturer_slug: sullivan-nolan-advertising-company-wwii-conversions-only
+corporate_entity_slug: sullivan-nolan-advertising-company-wwii-conversions-only
 year: 1943
 month: 4
 player_count: 1

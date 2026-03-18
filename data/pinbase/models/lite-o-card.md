@@ -3,7 +3,7 @@ slug: lite-o-card
 name: Lite-O-Card
 title_slug: lite-o-card
 ipdb_id: 1457
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1939
 month: 11
 player_count: 1

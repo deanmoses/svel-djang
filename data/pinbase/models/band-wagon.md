@@ -4,7 +4,7 @@ name: Band Wagon
 title_slug: band-wagon
 opdb_id: G4kvy-MQ7pO
 ipdb_id: 163
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1965
 month: 3
 player_count: 4

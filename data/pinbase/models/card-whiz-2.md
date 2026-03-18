@@ -4,7 +4,7 @@ name: Card Whiz (1P)
 title_slug: royal-flush-card-whiz
 opdb_id: GrEWx-MJkP8
 ipdb_id: 4844
-manufacturer_slug: europlay
+corporate_entity_slug: europlay
 year: 1976
 month: 6
 player_count: 1

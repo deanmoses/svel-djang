@@ -3,7 +3,7 @@ slug: baffle-card
 name: Baffle-Card
 title_slug: baffle-card
 ipdb_id: 132
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1946
 month: 10
 player_count: 1

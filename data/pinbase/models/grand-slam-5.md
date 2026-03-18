@@ -4,7 +4,7 @@ name: Grand Slam
 title_slug: grand-slam-world-series
 opdb_id: G43j1-M9R0y
 ipdb_id: 1078
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1972
 month: 8
 player_count: 1

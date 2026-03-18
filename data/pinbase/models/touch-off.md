@@ -3,7 +3,7 @@ slug: touch-off
 name: Touch-Off
 title_slug: touch-off
 ipdb_id: 3262
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1936
 month: 3
 player_count: 1

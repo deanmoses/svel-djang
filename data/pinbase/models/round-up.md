@@ -4,7 +4,7 @@ name: Round Up
 title_slug: round-up
 opdb_id: G5vKP-M3d8p
 ipdb_id: 2026
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1971
 month: 7
 player_count: 2

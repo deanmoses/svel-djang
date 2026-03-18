@@ -3,7 +3,7 @@ slug: dust-whirls
 name: Dust Whirls
 title_slug: dust-whirls
 ipdb_id: 746
-manufacturer_slug: roy-mcginnis-company
+corporate_entity_slug: roy-mcginnis-company
 year: 1944
 month: 5
 player_count: 1

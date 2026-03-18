@@ -3,7 +3,7 @@ slug: flamingo
 name: Flamingo
 title_slug: flamingo
 ipdb_id: 869
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1947
 month: 7
 player_count: 1

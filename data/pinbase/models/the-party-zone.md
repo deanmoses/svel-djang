@@ -4,7 +4,7 @@ name: The Party Zone
 title_slug: the-party-zone
 opdb_id: G5oBw-ML3Kw
 ipdb_id: 1764
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1991
 month: 1
 player_count: 4

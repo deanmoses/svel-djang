@@ -4,7 +4,7 @@ name: Hyde Park
 title_slug: mayfair-hyde-park
 opdb_id: GrdYD-MQKxj
 ipdb_id: 1258
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1966
 month: 8
 player_count: 2

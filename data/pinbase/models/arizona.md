@@ -3,7 +3,7 @@ slug: arizona
 name: Arizona
 title_slug: arizona
 ipdb_id: 86
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1943
 month: 2
 player_count: 1

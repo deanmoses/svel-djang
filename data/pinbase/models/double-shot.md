@@ -3,7 +3,7 @@ slug: double-shot
 name: Double Shot
 title_slug: double-shot
 ipdb_id: 6979
-manufacturer_slug: games-incorporated
+corporate_entity_slug: games-incorporated
 year: 1958
 month: 2
 player_count: 1

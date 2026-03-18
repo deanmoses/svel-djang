@@ -3,7 +3,7 @@ slug: duet
 name: Duet
 title_slug: duet
 ipdb_id: 3065
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1940
 month: 11
 player_count: 1

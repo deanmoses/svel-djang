@@ -4,7 +4,7 @@ name: High Roller Casino
 title_slug: high-roller-casino
 opdb_id: G4JZ4-ML0pL
 ipdb_id: 4502
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2001
 month: 1
 player_count: 4

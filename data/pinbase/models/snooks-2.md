@@ -3,7 +3,7 @@ slug: snooks-2
 name: Snooks
 title_slug: snooks-2
 ipdb_id: 2227
-manufacturer_slug: stoner-manufacturing-company
+corporate_entity_slug: stoner-manufacturing-company
 year: 1939
 month: 5
 player_count: 1

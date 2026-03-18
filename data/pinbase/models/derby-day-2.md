@@ -3,7 +3,7 @@ slug: derby-day-2
 name: Derby Day
 title_slug: derby-day-3
 ipdb_id: 665
-manufacturer_slug: artists-and-creators-guild-incorporated
+corporate_entity_slug: artists-and-creators-guild-incorporated
 year: 1932
 month: 5
 player_count: 1

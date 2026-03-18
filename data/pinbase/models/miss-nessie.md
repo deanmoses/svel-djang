@@ -4,7 +4,7 @@ name: Miss Nessie
 title_slug: miss-nessie
 opdb_id: G4kJ3-MvB72
 ipdb_id: 3408
-manufacturer_slug: sega
+corporate_entity_slug: sega-enterprises-ltd
 year: 1978
 month: 1
 player_count: 1

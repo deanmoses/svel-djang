@@ -3,7 +3,7 @@ slug: rapid-transit
 name: Rapid Transit
 title_slug: rapid-transit
 ipdb_id: 1921
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1935
 month: 9
 player_count: 1

@@ -3,7 +3,7 @@ slug: marvel
 name: Marvel
 title_slug: marvel
 ipdb_id: 3396
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1938
 month: 9
 player_count: 1

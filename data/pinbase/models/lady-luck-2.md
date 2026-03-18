@@ -4,7 +4,7 @@ name: Lady Luck
 title_slug: lady-luck-3
 opdb_id: GRY0B-MJ9Z3
 ipdb_id: 1403
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1954
 month: 8
 player_count: 4

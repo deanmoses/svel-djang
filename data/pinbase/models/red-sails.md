@@ -3,7 +3,7 @@ slug: red-sails
 name: Red Sails
 title_slug: red-sails
 ipdb_id: 1937
-manufacturer_slug: pamco
+corporate_entity_slug: pacific-amusement-manufacturing-company
 year: 1936
 month: 2
 player_count: 1

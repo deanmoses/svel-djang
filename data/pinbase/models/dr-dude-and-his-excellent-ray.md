@@ -4,7 +4,7 @@ name: Dr. Dude And His Excellent Ray
 title_slug: dr-dude-and-his-excellent-ray
 opdb_id: GRVEJ-MDq1w
 ipdb_id: 737
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1990
 month: 1
 player_count: 4

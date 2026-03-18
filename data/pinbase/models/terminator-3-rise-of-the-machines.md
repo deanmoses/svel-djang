@@ -4,7 +4,7 @@ name: 'Terminator 3: Rise of the Machines'
 title_slug: terminator-3-rise-of-the-machines
 opdb_id: GR91N-MLOyE
 ipdb_id: 4787
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2003
 month: 1
 player_count: 4

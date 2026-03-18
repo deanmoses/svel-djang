@@ -3,7 +3,7 @@ slug: cannon-fire-jr-3
 name: Cannon Fire Jr.
 title_slug: cannon-fire-jr-3
 ipdb_id: 4973
-manufacturer_slug: shyvers
+corporate_entity_slug: shyvers-manufacturing-company-2
 year: 1935
 month: 8
 player_count: 1

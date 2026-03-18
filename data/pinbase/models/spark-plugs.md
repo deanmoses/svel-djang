@@ -4,7 +4,7 @@ name: Spark Plugs
 title_slug: spark-plugs
 opdb_id: GrEd1-Mx0ny
 ipdb_id: 2267
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1951
 month: 9
 player_count: 1

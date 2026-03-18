@@ -4,7 +4,7 @@ name: Lucky Fruit
 title_slug: lucky-fruit
 opdb_id: G5n0W-MQP6n
 ipdb_id: 1487
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1975
 month: 1
 player_count: 1

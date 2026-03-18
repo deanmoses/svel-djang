@@ -4,7 +4,7 @@ name: AC/DC (Pro Vault Edition)
 title_slug: ac-dc
 opdb_id: G43W4-MKNX0
 ipdb_id: 6439
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2017
 month: 5
 player_count: 4

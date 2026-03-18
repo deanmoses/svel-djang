@@ -4,7 +4,7 @@ name: Terrific Lake
 title_slug: terrific-lake
 opdb_id: GBL7d-Mo1zP
 ipdb_id: 5289
-manufacturer_slug: sportmatic
+corporate_entity_slug: sport-matic-sa
 year: 1987
 month: 1
 player_count: 4

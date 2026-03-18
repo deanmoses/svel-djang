@@ -3,7 +3,7 @@ slug: bush-league
 name: Bush-League
 title_slug: bush-league
 ipdb_id: 3759
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1951
 month: 7
 player_count: 1

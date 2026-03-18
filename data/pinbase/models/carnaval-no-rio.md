@@ -3,7 +3,7 @@ slug: carnaval-no-rio
 name: Carnaval no Rio
 title_slug: carnaval-no-rio
 opdb_id: GV89W-MNENN
-manufacturer_slug: ltd-do-brasil
+corporate_entity_slug: ltd-do-brasil-diverses-eletrnicas-ltda
 year: 1977
 month: 1
 player_count: 1

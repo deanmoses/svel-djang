@@ -3,7 +3,7 @@ slug: big-parade
 name: Big Parade
 title_slug: big-parade
 ipdb_id: 265
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1941
 month: 11
 player_count: 1

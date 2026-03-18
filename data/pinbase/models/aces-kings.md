@@ -4,7 +4,7 @@ name: Aces & Kings
 title_slug: aces-kings
 opdb_id: G5oK2-M9R6y
 ipdb_id: 11
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1970
 month: 6
 player_count: 4

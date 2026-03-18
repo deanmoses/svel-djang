@@ -4,7 +4,7 @@ name: Dealer's Choice
 title_slug: dealers-choice-lucky-ace-high-ace
 opdb_id: GRwW9-MDbo7
 ipdb_id: 649
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1974
 month: 3
 player_count: 4

@@ -4,7 +4,7 @@ name: AC/DC (Pro LED)
 title_slug: ac-dc
 opdb_id: G43W4-MKNW0-AOENR
 ipdb_id: 6441
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2014
 month: 1
 player_count: 4

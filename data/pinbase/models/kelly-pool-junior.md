@@ -3,7 +3,7 @@ slug: kelly-pool-junior
 name: Kelly Pool (Junior)
 title_slug: kelly-pool-junior
 ipdb_id: 5161
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1935
 month: 5
 player_count: 1

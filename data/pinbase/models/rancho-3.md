@@ -4,7 +4,7 @@ name: Rancho
 title_slug: rancho
 opdb_id: GrPJz-MLbe6
 ipdb_id: 1918
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1977
 month: 8
 player_count: 2

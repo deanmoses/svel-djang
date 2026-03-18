@@ -4,7 +4,7 @@ name: World Poker Tour
 title_slug: world-poker-tour
 opdb_id: G5poe-MQrb5
 ipdb_id: 5134
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2006
 month: 2
 player_count: 4

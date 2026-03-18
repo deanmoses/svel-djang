@@ -3,7 +3,7 @@ slug: grand-slam-8
 name: Grand Slam
 title_slug: grand-slam-6
 ipdb_id: 4804
-manufacturer_slug: bally
+corporate_entity_slug: bally-midway-manufacturing-company
 player_count: 2
 technology_generation_slug: solid-state
 system_slug: bally-as2518-133

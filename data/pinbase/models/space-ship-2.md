@@ -4,7 +4,7 @@ name: Space Ship
 title_slug: space-ship
 opdb_id: G5YVk-MDBvP
 ipdb_id: 4623
-manufacturer_slug: unidesa
+corporate_entity_slug: universal-de-desarrollos-electronicos-sa
 year: 1986
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: Sweet Sioux
 title_slug: sweet-sioux
 opdb_id: G503n-ML8el
 ipdb_id: 2475
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1959
 month: 8
 player_count: 4

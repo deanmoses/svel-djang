@@ -4,7 +4,7 @@ name: Michael Jordan
 title_slug: michael-jordan
 opdb_id: G57EJ-MLWB9
 ipdb_id: 3425
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1992
 month: 1
 player_count: 4

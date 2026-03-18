@@ -4,7 +4,7 @@ name: Roman Victory
 title_slug: roman-victory
 opdb_id: G2L2p-M4oY4
 ipdb_id: 5493
-manufacturer_slug: taito
+corporate_entity_slug: taito-do-brasil-a-division-of-taito-japan
 year: 1978
 month: 1
 player_count: 4

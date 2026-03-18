@@ -4,7 +4,7 @@ name: Baby Pac-Man
 title_slug: baby-pac-man
 opdb_id: G5Kvx-MQdpl
 ipdb_id: 125
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1982
 month: 1
 player_count: 2

@@ -4,7 +4,7 @@ name: Cowboy
 title_slug: cowboy-big-flipper
 opdb_id: G5wkx-MJoEZ
 ipdb_id: 583
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1970
 month: 1
 player_count: 4

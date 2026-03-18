@@ -3,7 +3,7 @@ slug: score-a-line
 name: Score-A-Line
 title_slug: score-a-line
 ipdb_id: 2066
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1940
 month: 8
 player_count: 1

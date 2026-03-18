@@ -4,7 +4,7 @@ name: Roller Disco
 title_slug: roller-disco
 opdb_id: G48qn-MDEl1
 ipdb_id: 2005
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1980
 month: 2
 player_count: 4

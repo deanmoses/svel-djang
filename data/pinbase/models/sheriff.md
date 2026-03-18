@@ -4,7 +4,7 @@ name: Sheriff
 title_slug: lawman
 opdb_id: GrEXx-MQ9Wb
 ipdb_id: 2116
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1971
 month: 10
 player_count: 4

@@ -4,7 +4,7 @@ name: Stranger Things (Pro)
 title_slug: stranger-things
 opdb_id: Gzy89-MNEeO
 ipdb_id: 6642
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2019
 month: 12
 player_count: 4

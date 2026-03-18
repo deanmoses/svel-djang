@@ -4,7 +4,7 @@ name: Yanks
 title_slug: yanks
 opdb_id: GnP2o-MjByk
 ipdb_id: 2827
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1948
 month: 4
 player_count: 1

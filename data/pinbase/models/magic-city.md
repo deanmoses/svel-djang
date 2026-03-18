@@ -4,7 +4,7 @@ name: Magic City
 title_slug: magic-city-magic-town
 opdb_id: G57xp-MQp1q
 ipdb_id: 1514
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1967
 month: 1
 player_count: 1

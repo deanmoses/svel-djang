@@ -4,7 +4,7 @@ name: Royal Guard
 title_slug: royal-guard-palace-guard
 opdb_id: GRLD2-MD1o1
 ipdb_id: 2037
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1968
 month: 1
 player_count: 1

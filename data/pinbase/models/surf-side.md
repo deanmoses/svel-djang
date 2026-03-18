@@ -4,7 +4,7 @@ name: Surf Side
 title_slug: surf-side
 opdb_id: G48XX-MDO3P
 ipdb_id: 2464
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1967
 month: 12
 player_count: 2

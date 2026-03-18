@@ -3,7 +3,7 @@ slug: slugfest-first-model
 name: SlugFest (First Model)
 title_slug: slugfest-first-model
 ipdb_id: 3281
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1991
 month: 3
 player_count: 2

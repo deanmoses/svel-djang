@@ -4,7 +4,7 @@ name: Black Hole
 title_slug: blackout
 opdb_id: GRwYo-MQ2RR
 ipdb_id: 4087
-manufacturer_slug: giuliano-lodola
+corporate_entity_slug: giuliano-lodola
 year: 1980
 month: 1
 player_count: 4

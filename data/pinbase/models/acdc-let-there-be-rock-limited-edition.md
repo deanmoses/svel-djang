@@ -4,7 +4,7 @@ name: AC/DC (Let There Be Rock LE)
 title_slug: ac-dc
 opdb_id: G43W4-MrRpw-AOPQR
 ipdb_id: 5776
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2012
 month: 1
 player_count: 4

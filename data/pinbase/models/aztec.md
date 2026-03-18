@@ -4,7 +4,7 @@ name: Aztec
 title_slug: aztec
 opdb_id: GRpLk-MQdOY
 ipdb_id: 119
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1976
 month: 7
 player_count: 4

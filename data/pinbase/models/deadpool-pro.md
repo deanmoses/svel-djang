@@ -4,7 +4,7 @@ name: Deadpool (Pro)
 title_slug: deadpool
 opdb_id: G6lnq-Mq1kv
 ipdb_id: 6558
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2018
 month: 8
 player_count: 4

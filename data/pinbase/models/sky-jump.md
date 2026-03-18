@@ -4,7 +4,7 @@ name: Sky Jump
 title_slug: sky-dive
 opdb_id: G4xlK-Mo163
 ipdb_id: 2195
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1974
 month: 5
 player_count: 1

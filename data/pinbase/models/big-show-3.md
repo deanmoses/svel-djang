@@ -3,7 +3,7 @@ slug: big-show-3
 name: Big Show
 title_slug: big-show-3
 ipdb_id: 277
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1940
 month: 2
 player_count: 1

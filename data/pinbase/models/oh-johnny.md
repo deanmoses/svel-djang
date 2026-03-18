@@ -3,7 +3,7 @@ slug: oh-johnny
 name: Oh! Johnny
 title_slug: oh-johnny
 ipdb_id: 1697
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1940
 month: 5
 player_count: 1

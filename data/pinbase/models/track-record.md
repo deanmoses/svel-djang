@@ -3,7 +3,7 @@ slug: track-record
 name: Track Record
 title_slug: track-record
 ipdb_id: 2617
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1939
 month: 2
 player_count: 1

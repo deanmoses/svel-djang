@@ -3,7 +3,7 @@ slug: signal-sr
 name: Signal (Sr)
 title_slug: signal-sr
 ipdb_id: 2143
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1934
 month: 9
 player_count: 1

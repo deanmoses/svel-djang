@@ -4,7 +4,7 @@ name: Fish Tales
 title_slug: fish-tales
 opdb_id: G5Wxd-MLxl3
 ipdb_id: 861
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1992
 month: 1
 player_count: 4

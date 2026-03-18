@@ -4,7 +4,7 @@ name: World Fair
 title_slug: world-fair
 opdb_id: GrEyL-MLqy1
 ipdb_id: 2812
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1964
 month: 4
 player_count: 1

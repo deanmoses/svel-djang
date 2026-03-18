@@ -4,7 +4,7 @@ name: Tennessee
 title_slug: tennessee
 opdb_id: GX2xO-M1rxO
 ipdb_id: 2522
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1948
 month: 2
 player_count: 1

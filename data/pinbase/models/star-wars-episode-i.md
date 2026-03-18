@@ -4,7 +4,7 @@ name: Star Wars Episode I
 title_slug: star-wars-episode-i
 opdb_id: GRL9r-MD34z
 ipdb_id: 4458
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1999
 month: 6
 player_count: 4

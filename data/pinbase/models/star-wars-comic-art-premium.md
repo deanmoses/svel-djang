@@ -4,7 +4,7 @@ name: Star Wars Comic Art (Premium)
 title_slug: star-wars-stern
 opdb_id: G5vLR-ME049-ARrK0
 ipdb_id: 6615
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2019
 month: 10
 player_count: 4

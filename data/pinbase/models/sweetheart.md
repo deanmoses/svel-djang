@@ -4,7 +4,7 @@ name: Sweetheart
 title_slug: sweetheart
 opdb_id: GnPdP-MQrxB
 ipdb_id: 2479
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1950
 month: 5
 player_count: 1

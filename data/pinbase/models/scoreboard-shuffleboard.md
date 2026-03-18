@@ -3,7 +3,7 @@ slug: scoreboard-shuffleboard
 name: Scoreboard (Shuffleboard)
 title_slug: scoreboard-shuffleboard
 ipdb_id: 6387
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1949
 month: 5
 player_count: 4

@@ -4,7 +4,7 @@ name: Wrath of Olympus
 title_slug: wrath-of-olympus
 opdb_id: G5zyN-MJNxr
 ipdb_id: 6468
-manufacturer_slug: riot-pinball
+corporate_entity_slug: riot-pinball-llc
 year: 2015
 month: 9
 player_count: 4

@@ -3,7 +3,7 @@ slug: flying-trapeze
 name: Flying Trapeze
 title_slug: flying-trapeze
 ipdb_id: 907
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1947
 month: 9
 player_count: 1

@@ -3,7 +3,7 @@ slug: pipe-eye
 name: Pipe Eye
 title_slug: pipe-eye
 ipdb_id: 3301
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1934
 month: 10
 player_count: 1

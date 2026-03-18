@@ -4,7 +4,7 @@ name: Crossroads
 title_slug: crossroads
 opdb_id: GR97v-MJwq4
 ipdb_id: 604
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1952
 month: 5
 player_count: 1

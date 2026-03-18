@@ -4,7 +4,7 @@ name: Time Line
 title_slug: time-line
 opdb_id: Gr13q-MXrjY
 ipdb_id: 2564
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1980
 month: 1
 player_count: 4

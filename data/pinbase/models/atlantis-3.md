@@ -4,7 +4,7 @@ name: Atlantis
 title_slug: atlantis-2
 opdb_id: G5w1Z-MDb8x
 ipdb_id: 3690
-manufacturer_slug: nordamatic
+corporate_entity_slug: nordamatic
 year: 1978
 month: 1
 player_count: 1

@@ -4,7 +4,7 @@ name: 'Houdini: Master of Mystery'
 title_slug: houdini
 opdb_id: GvBQX-M0ody
 ipdb_id: 6470
-manufacturer_slug: american-pinball
+corporate_entity_slug: american-pinball-inc
 year: 2017
 month: 10
 player_count: 4

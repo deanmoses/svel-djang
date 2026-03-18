@@ -4,7 +4,7 @@ name: Flying Saucers
 title_slug: flying-saucers
 opdb_id: G4JlO-MLWZ7
 ipdb_id: 906
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1950
 month: 11
 player_count: 1

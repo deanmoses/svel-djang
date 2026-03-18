@@ -4,7 +4,7 @@ name: Fun Land
 title_slug: fun-land-fun-park
 opdb_id: GRwqx-MNE6X
 ipdb_id: 973
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1968
 month: 5
 player_count: 1

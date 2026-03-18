@@ -4,7 +4,7 @@ name: Popeye Saves the Earth
 title_slug: popeye
 opdb_id: GR0lW-MJPVV
 ipdb_id: 1851
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1994
 month: 2
 player_count: 4

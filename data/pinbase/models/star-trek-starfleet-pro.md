@@ -4,7 +4,7 @@ name: Star Trek (Pro)
 title_slug: star-trek-stern
 opdb_id: Gryw4-MwNky
 ipdb_id: 6044
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2013
 month: 10
 player_count: 4

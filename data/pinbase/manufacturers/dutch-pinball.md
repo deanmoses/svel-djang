@@ -1,6 +1,7 @@
 ---
 slug: dutch-pinball
 name: Dutch Pinball
+opdb_manufacturer_id: 54
 ---
 
 Dutch Pinball B.V. is a Netherlands-based manufacturer that achieved considerable attention with its debut machine, [[title:the-big-lebowski]] (2018), based on the Coen Brothers' cult film. The company pursued crowdfunding to bring the project to life, tapping directly into the passionate fan communities that surround both pinball and the film's devoted following.

@@ -4,7 +4,7 @@ name: Elvira and the Party Monsters
 title_slug: elvira-and-the-party-monsters
 opdb_id: Grlxp-MVKBW
 ipdb_id: 782
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1989
 month: 1
 player_count: 4

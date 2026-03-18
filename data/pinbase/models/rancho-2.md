@@ -4,7 +4,7 @@ name: Rancho
 title_slug: buckaroo-cow-poke
 opdb_id: GRzow-MQjZX
 ipdb_id: 1917
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1966
 month: 8
 player_count: 1

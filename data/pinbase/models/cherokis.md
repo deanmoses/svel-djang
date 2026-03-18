@@ -4,7 +4,7 @@ name: Cherokis
 title_slug: cherokeecherokis
 opdb_id: G5BE9-MW9PV
 ipdb_id: 5421
-manufacturer_slug: recreativos-franco
+corporate_entity_slug: recreativos-franco
 year: 1976
 month: 1
 player_count: 1

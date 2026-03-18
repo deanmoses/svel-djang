@@ -2,6 +2,7 @@
 slug: pinball
 name: Pinball
 title_slug: pinball-champ
+corporate_entity_slug: bell-games
 opdb_id: GrPdq-MLONx
 ipdb_id: 3306
 converted_from: pinball-champ-82

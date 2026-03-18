@@ -4,7 +4,7 @@ name: Jai Alai
 title_slug: jai-alai
 opdb_id: GrelY-MQjq8
 ipdb_id: 3174
-manufacturer_slug: segasa
+corporate_entity_slug: segasa-dba-sonic
 year: 1978
 month: 1
 player_count: 4

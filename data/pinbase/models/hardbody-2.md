@@ -3,7 +3,7 @@ slug: hardbody-2
 name: Hardbody
 title_slug: hardbody-2
 ipdb_id: 3137
-manufacturer_slug: bally
+corporate_entity_slug: bally-wulff
 year: 1987
 month: 3
 player_count: 4

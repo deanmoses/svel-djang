@@ -4,7 +4,7 @@ name: Toro
 title_slug: toro
 opdb_id: Gr1Q6-MDe0K
 ipdb_id: 3294
-manufacturer_slug: rally
+corporate_entity_slug: rally-aka-rally-play-company
 year: 1963
 month: 1
 player_count: 2

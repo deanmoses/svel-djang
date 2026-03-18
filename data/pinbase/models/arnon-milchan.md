@@ -3,7 +3,7 @@ slug: arnon-milchan
 name: Arnon Milchan
 title_slug: arnon-milchan
 ipdb_id: 4340
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1993
 month: 9
 player_count: 4

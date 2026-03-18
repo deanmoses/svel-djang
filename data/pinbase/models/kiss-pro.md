@@ -4,7 +4,7 @@ name: KISS (Pro)
 title_slug: kiss-stern
 opdb_id: G4qX5-Mz2Pp
 ipdb_id: 6265
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2015
 month: 5
 player_count: 4

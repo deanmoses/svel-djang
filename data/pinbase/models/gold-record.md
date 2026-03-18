@@ -4,7 +4,7 @@ name: Gold Record
 title_slug: gold-record-top-ten
 opdb_id: G5vwv-MwNNW
 ipdb_id: 1034
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1975
 month: 4
 player_count: 4

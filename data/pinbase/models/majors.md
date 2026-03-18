@@ -3,7 +3,7 @@ slug: majors
 name: Majors
 title_slug: majors
 ipdb_id: 1530
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1939
 month: 1
 player_count: 1

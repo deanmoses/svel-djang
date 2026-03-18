@@ -4,7 +4,7 @@ name: Thing
 title_slug: thing
 opdb_id: GRB6P-MDEed
 ipdb_id: 2531
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1951
 month: 2
 player_count: 1

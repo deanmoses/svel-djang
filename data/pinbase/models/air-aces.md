@@ -4,7 +4,7 @@ name: Air Aces
 title_slug: air-aces
 opdb_id: G420v-M1rYR
 ipdb_id: 28
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1975
 month: 2
 player_count: 4

@@ -4,7 +4,7 @@ name: Fiesta
 title_slug: fiesta-fandango
 opdb_id: Gr1VD-MDEW9
 ipdb_id: 837
-manufacturer_slug: playmatic
+corporate_entity_slug: playmatic
 year: 1976
 month: 6
 player_count: 4

@@ -4,7 +4,7 @@ name: The 30's
 title_slug: speakeasy-the-30s
 opdb_id: G4Xdq-MLBlD
 ipdb_id: 2532
-manufacturer_slug: playmatic
+corporate_entity_slug: playmatic
 year: 1977
 month: 1
 player_count: 1

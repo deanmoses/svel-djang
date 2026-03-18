@@ -4,7 +4,7 @@ name: Hi Dolly
 title_slug: hi-dolly
 opdb_id: G5Ypy-MDxx7
 ipdb_id: 1158
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1965
 month: 4
 player_count: 2

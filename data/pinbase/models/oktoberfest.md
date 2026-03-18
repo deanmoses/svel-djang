@@ -4,7 +4,7 @@ name: Oktoberfest
 title_slug: oktoberfest
 opdb_id: GLWBV-Mz2El
 ipdb_id: 6576
-manufacturer_slug: american-pinball
+corporate_entity_slug: american-pinball-inc
 year: 2018
 month: 10
 player_count: 4

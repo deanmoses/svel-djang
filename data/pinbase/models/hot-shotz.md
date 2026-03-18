@@ -3,7 +3,7 @@ slug: hot-shotz
 name: Hot Shotz
 title_slug: hot-shotz
 ipdb_id: 3161
-manufacturer_slug: bally
+corporate_entity_slug: bally-midway-manufacturing-company
 year: 1985
 player_count: 2
 production_quantity: '6'

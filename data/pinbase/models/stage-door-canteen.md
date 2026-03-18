@@ -3,7 +3,7 @@ slug: stage-door-canteen
 name: Stage Door Canteen
 title_slug: stage-door-canteen
 ipdb_id: 2338
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1945
 month: 11
 player_count: 1

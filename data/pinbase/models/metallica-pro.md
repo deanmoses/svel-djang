@@ -4,7 +4,7 @@ name: Metallica (Pro)
 title_slug: metallica
 opdb_id: GRBE4-MQK1Z
 ipdb_id: 6028
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2013
 month: 4
 player_count: 4

@@ -4,7 +4,7 @@ name: Skill Pool
 title_slug: skill-pool
 opdb_id: G4O66-MW96E
 ipdb_id: 2182
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1963
 month: 6
 player_count: 1

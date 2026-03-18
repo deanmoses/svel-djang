@@ -4,7 +4,7 @@ name: Crossword
 title_slug: crossword
 opdb_id: GRYJD-MLzvN
 ipdb_id: 605
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1959
 month: 4
 player_count: 1

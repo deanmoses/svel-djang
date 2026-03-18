@@ -4,7 +4,7 @@ name: Totem
 title_slug: totem
 opdb_id: G5YDN-M2YB0
 ipdb_id: 5695
-manufacturer_slug: electromatic-brasil
+corporate_entity_slug: electromatic-brasil
 year: 1979
 month: 8
 player_count: 4

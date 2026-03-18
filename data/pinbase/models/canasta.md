@@ -4,7 +4,7 @@ name: Canasta
 title_slug: canasta
 opdb_id: G4lOy-MDXN3
 ipdb_id: 427
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1950
 month: 7
 player_count: 1

@@ -4,7 +4,7 @@ name: Stormy
 title_slug: stormy
 opdb_id: GbPo6-MXrpN
 ipdb_id: 2390
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1948
 month: 1
 player_count: 1

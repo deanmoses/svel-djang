@@ -4,7 +4,7 @@ name: Victory
 title_slug: victory
 opdb_id: GrdBk-Mq18w
 ipdb_id: 2733
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1987
 month: 10
 player_count: 4

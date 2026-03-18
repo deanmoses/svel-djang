@@ -4,7 +4,7 @@ name: Twin Win
 title_slug: twin-win
 opdb_id: G5Q9b-MJ5Zq
 ipdb_id: 2689
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1974
 month: 2
 player_count: 2

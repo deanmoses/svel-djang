@@ -4,7 +4,7 @@ name: Hustler
 title_slug: hustler
 opdb_id: Gpeb0-Mx0R8
 ipdb_id: 6706
-manufacturer_slug: ltd-do-brasil
+corporate_entity_slug: ltd-do-brasil-diverses-eletrnicas-ltda
 year: 1980
 month: 1
 player_count: 2

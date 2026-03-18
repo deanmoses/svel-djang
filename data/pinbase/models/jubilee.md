@@ -4,7 +4,7 @@ name: Jubilee
 title_slug: jubilee
 opdb_id: GrPnx-MJpex
 ipdb_id: 1320
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1955
 month: 5
 player_count: 4

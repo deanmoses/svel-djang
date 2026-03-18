@@ -4,7 +4,7 @@ name: Diamond Jack
 title_slug: king-of-diamonds
 opdb_id: GrlPj-MrR46
 ipdb_id: 676
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1967
 month: 4
 player_count: 1

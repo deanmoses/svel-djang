@@ -3,7 +3,7 @@ slug: pamco-parlay
 name: Pamco Parlay
 title_slug: pamco-parlay
 ipdb_id: 1760
-manufacturer_slug: pamco
+corporate_entity_slug: pacific-amusement-manufacturing-company
 year: 1935
 month: 10
 player_count: 1

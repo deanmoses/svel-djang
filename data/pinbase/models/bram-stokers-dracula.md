@@ -4,7 +4,7 @@ name: Bram Stoker's Dracula
 title_slug: dracula
 opdb_id: G41do-MP3Py
 ipdb_id: 3072
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1993
 month: 1
 player_count: 4

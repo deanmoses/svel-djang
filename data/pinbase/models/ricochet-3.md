@@ -3,7 +3,7 @@ slug: ricochet-3
 name: Ricochet
 title_slug: ricochet-3
 ipdb_id: 5998
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1954
 month: 11
 player_count: 2

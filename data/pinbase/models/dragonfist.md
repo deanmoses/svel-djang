@@ -4,7 +4,7 @@ name: Dragonfist
 title_slug: dragonfist
 opdb_id: GRQkJ-MDxpK
 ipdb_id: 731
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1982
 month: 1
 player_count: 4

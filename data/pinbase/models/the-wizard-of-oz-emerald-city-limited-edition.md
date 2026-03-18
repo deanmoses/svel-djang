@@ -3,7 +3,7 @@ slug: the-wizard-of-oz-emerald-city-limited-edition
 name: The Wizard of Oz Emerald City Limited Edition
 title_slug: the-wizard-of-oz-emerald-city-limited-edition
 ipdb_id: 5967
-manufacturer_slug: jersey-jack
+corporate_entity_slug: jersey-jack-pinball-inc-lakewood-nj
 year: 2013
 month: 4
 player_count: 4

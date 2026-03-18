@@ -4,7 +4,7 @@ name: Champion Pub
 title_slug: champion-pub
 opdb_id: G42k0-MQ6w9
 ipdb_id: 4358
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1998
 month: 1
 player_count: 4

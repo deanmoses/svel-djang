@@ -4,7 +4,7 @@ name: Godzilla (Pro)
 title_slug: godzilla-stern
 opdb_id: GweeP-MW95j
 ipdb_id: 6841
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2021
 month: 9
 player_count: 4

@@ -4,7 +4,7 @@ name: Lights...Camera...Action!
 title_slug: lightscameraaction
 opdb_id: GrlZe-MQY0Y
 ipdb_id: 1445
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1989
 month: 1
 player_count: 4

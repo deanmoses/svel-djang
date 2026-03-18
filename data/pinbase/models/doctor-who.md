@@ -4,7 +4,7 @@ name: Doctor Who
 title_slug: doctor-who
 opdb_id: G4x2Y-MQwwe
 ipdb_id: 738
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1992
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: Sky Divers
 title_slug: sky-divers
 opdb_id: G4dVX-MLlBy
 ipdb_id: 2193
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1964
 month: 4
 player_count: 1

@@ -3,7 +3,7 @@ slug: skyline
 name: Skyline
 title_slug: skyline-2
 ipdb_id: 2203
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1940
 month: 7
 player_count: 1

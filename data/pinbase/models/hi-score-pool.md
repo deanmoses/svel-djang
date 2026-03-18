@@ -4,7 +4,7 @@ name: Hi-Score Pool
 title_slug: hi-score-pool
 opdb_id: GrPZj-MOEY7
 ipdb_id: 1161
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1971
 month: 8
 player_count: 1

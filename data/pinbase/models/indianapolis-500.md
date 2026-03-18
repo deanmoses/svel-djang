@@ -4,7 +4,7 @@ name: Indianapolis 500
 title_slug: indianapolis-500
 opdb_id: Gr8l3-MDWr0
 ipdb_id: 2853
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1995
 month: 6
 player_count: 4

@@ -4,7 +4,7 @@ name: Las Vegas
 title_slug: las-vegas
 opdb_id: G4Jzo-MQ7jl
 ipdb_id: 3820
-manufacturer_slug: mattel
+corporate_entity_slug: mattel-electronics-company
 year: 1977
 month: 1
 player_count: 1

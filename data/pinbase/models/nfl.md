@@ -4,7 +4,7 @@ name: NFL
 title_slug: striker-xtreme-nfl
 opdb_id: GRVjq-MD0z2
 ipdb_id: 4540
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2001
 month: 11
 player_count: 6

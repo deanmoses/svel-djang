@@ -4,7 +4,7 @@ name: Triple X
 title_slug: oxo
 opdb_id: Gr87E-Mo1B0
 ipdb_id: 6497
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1973
 month: 10
 player_count: 2

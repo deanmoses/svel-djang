@@ -3,7 +3,7 @@ slug: rotation
 name: Rotation
 title_slug: rotation
 ipdb_id: 2017
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1936
 month: 2
 player_count: 1

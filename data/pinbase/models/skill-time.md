@@ -3,7 +3,7 @@ slug: skill-time
 name: Skill Time
 title_slug: skill-time
 ipdb_id: 3234
-manufacturer_slug: keeney
+corporate_entity_slug: j-h-keeney-and-company-incorporated
 year: 1937
 month: 10
 player_count: 1

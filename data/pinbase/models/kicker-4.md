@@ -3,7 +3,7 @@ slug: kicker-4
 name: Kicker
 title_slug: kicker-3
 ipdb_id: 6946
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1966
 month: 8
 player_count: 1

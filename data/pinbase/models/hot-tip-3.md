@@ -4,7 +4,7 @@ name: Hot Tip (EM)
 title_slug: hot-tip
 opdb_id: Grep0-MDlv7
 ipdb_id: 1251
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1977
 month: 6
 player_count: 4

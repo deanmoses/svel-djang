@@ -4,7 +4,7 @@ name: Electra-Pool
 title_slug: bank-a-ball-flipper-pool
 opdb_id: GrxdD-MLywn
 ipdb_id: 779
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1965
 month: 10
 player_count: 1

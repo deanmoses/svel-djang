@@ -4,7 +4,7 @@ name: Three Feathers
 title_slug: three-feathers
 opdb_id: GweyB-M3dP4
 ipdb_id: 2537
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1949
 month: 5
 player_count: 1

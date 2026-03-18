@@ -4,7 +4,7 @@ name: Liberty Belle
 title_slug: liberty-belle
 opdb_id: G4Xbk-MQ6d3
 ipdb_id: 1438
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1962
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: Stage Coach
 title_slug: stage-coach
 opdb_id: G4x98-MYe9n
 ipdb_id: 2336
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1968
 month: 6
 player_count: 4

@@ -4,7 +4,7 @@ name: The Flintstones
 title_slug: the-flintstones
 opdb_id: GRK95-MQ674
 ipdb_id: 888
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1994
 month: 7
 player_count: 4

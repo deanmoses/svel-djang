@@ -3,7 +3,7 @@ slug: lightning-44-first-style
 name: Lightning (44, First Style)
 title_slug: lightning-44-first-style
 ipdb_id: 5607
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1934
 month: 4
 player_count: 1

@@ -3,7 +3,7 @@ slug: spacelab
 name: Spacelab
 title_slug: spacelab
 ipdb_id: 6620
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1974
 month: 3
 player_count: 1

@@ -4,7 +4,7 @@ name: Majestic
 title_slug: majestic
 opdb_id: GRQYv-MLn15
 ipdb_id: 1521
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1957
 month: 2
 player_count: 4

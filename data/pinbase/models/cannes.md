@@ -4,7 +4,7 @@ name: Cannes
 title_slug: monaco-cannes
 opdb_id: GRVzL-MZeEB
 ipdb_id: 428
-manufacturer_slug: segasa
+corporate_entity_slug: segasa
 year: 1976
 month: 6
 player_count: 4

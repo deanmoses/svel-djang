@@ -4,7 +4,7 @@ name: Nascar
 title_slug: nascar
 opdb_id: G5YWX-MQ4VW
 ipdb_id: 5093
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2005
 month: 6
 player_count: 4

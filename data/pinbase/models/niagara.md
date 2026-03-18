@@ -4,7 +4,7 @@ name: Niagara
 title_slug: niagara
 opdb_id: G5v3l-ML3Z4
 ipdb_id: 1674
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1951
 month: 12
 player_count: 1

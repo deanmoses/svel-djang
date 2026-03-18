@@ -1,6 +1,7 @@
 ---
 slug: nsm
 name: NSM
+opdb_manufacturer_id: 58
 ---
 
 NSM was a German manufacturer best known for its jukeboxes, which enjoyed considerable success across Europe from the postwar period onward. The company extended its amusement machine portfolio into pinball during the 1970s and 1980s, producing a modest catalog of machines for the European market.

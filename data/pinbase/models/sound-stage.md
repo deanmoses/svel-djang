@@ -4,7 +4,7 @@ name: Sound Stage
 title_slug: juke-box
 opdb_id: G5Qnx-MQKKB
 ipdb_id: 2243
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1976
 month: 7
 player_count: 2

@@ -4,7 +4,7 @@ name: Granada
 title_slug: granada
 opdb_id: GPBdK-M0o99
 ipdb_id: 1063
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1972
 month: 3
 player_count: 1

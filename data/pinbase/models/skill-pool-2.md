@@ -4,7 +4,7 @@ name: Skill-Pool
 title_slug: skill-pool-2
 opdb_id: G5zvZ-MQ9Y3
 ipdb_id: 2183
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1952
 month: 8
 player_count: 1

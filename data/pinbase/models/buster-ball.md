@@ -3,7 +3,7 @@ slug: buster-ball
 name: Buster Ball
 title_slug: buster-ball
 ipdb_id: 409
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1931
 month: 12
 player_count: 1

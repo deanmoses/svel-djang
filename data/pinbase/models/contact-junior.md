@@ -3,7 +3,7 @@ slug: contact-junior
 name: Contact (Junior)
 title_slug: contact-junior
 ipdb_id: 560
-manufacturer_slug: pamco
+corporate_entity_slug: pacific-amusement-manufacturing-company
 year: 1934
 month: 2
 player_count: 1

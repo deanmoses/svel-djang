@@ -4,7 +4,7 @@ name: Captain Nemo
 title_slug: captain-nemo
 opdb_id: GWyB8-MKNEK
 ipdb_id: 6465
-manufacturer_slug: quetzal
+corporate_entity_slug: quetzal-pinball
 year: 2015
 month: 6
 player_count: 4

@@ -3,7 +3,7 @@ slug: gridiron-2
 name: Gridiron
 title_slug: gridiron-2
 ipdb_id: 1088
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1969
 month: 10
 player_count: 2

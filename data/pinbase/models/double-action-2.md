@@ -4,7 +4,7 @@ name: Double Action
 title_slug: double-action
 opdb_id: G5Qwv-MQ2jK
 ipdb_id: 707
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1958
 month: 12
 player_count: 2

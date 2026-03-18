@@ -4,7 +4,7 @@ name: The Walking Dead (Pro)
 title_slug: the-walking-dead
 opdb_id: G5nz5-M3d38
 ipdb_id: 6155
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2014
 month: 10
 player_count: 4

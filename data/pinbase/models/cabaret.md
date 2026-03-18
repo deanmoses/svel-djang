@@ -4,7 +4,7 @@ name: Cabaret
 title_slug: cabaret
 opdb_id: G5nx7-MD10r
 ipdb_id: 415
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1968
 month: 12
 player_count: 4

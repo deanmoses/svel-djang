@@ -4,7 +4,7 @@ name: Explorer
 title_slug: explorer-2
 opdb_id: GRDW6-MXrwl
 ipdb_id: 797
-manufacturer_slug: sega
+corporate_entity_slug: sega-enterprises-ltd
 year: 1976
 month: 1
 player_count: 2

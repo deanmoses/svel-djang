@@ -4,7 +4,7 @@ name: Slugfest
 title_slug: slugfest
 opdb_id: Grkjn-MLnqy
 ipdb_id: 2209
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1952
 month: 3
 player_count: 1

@@ -4,7 +4,7 @@ name: Trade Winds
 title_slug: trade-winds-2
 opdb_id: G0l2e-Mp4Oz
 ipdb_id: 2619
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1948
 month: 4
 player_count: 1

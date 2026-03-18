@@ -4,7 +4,7 @@ name: St. Louis
 title_slug: st-louis
 opdb_id: G7Znb-M3d9q
 ipdb_id: 2409
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1949
 month: 2
 player_count: 1

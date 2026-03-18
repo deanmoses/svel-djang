@@ -4,7 +4,7 @@ name: Blue Skies
 title_slug: blue-skies
 opdb_id: GBLNO-M3dj4
 ipdb_id: 332
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1948
 month: 11
 player_count: 1

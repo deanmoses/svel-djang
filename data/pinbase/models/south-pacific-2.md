@@ -4,7 +4,7 @@ name: South Pacific
 title_slug: mercury-rocket
 opdb_id: Gr1JJ-MDEXl
 ipdb_id: 2245
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1950
 month: 2
 player_count: 1

@@ -4,7 +4,7 @@ name: Scared Stiff
 title_slug: scared-stiff
 opdb_id: G4xbP-Mp45Y
 ipdb_id: 3915
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1996
 month: 1
 player_count: 4

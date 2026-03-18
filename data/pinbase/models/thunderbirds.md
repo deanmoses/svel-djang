@@ -4,7 +4,7 @@ name: Thunderbirds
 title_slug: thunderbirds
 opdb_id: GN6Lq-MrRWB
 ipdb_id: 6617
-manufacturer_slug: homepin
+corporate_entity_slug: homepin-ltd
 year: 2018
 month: 10
 player_count: 4

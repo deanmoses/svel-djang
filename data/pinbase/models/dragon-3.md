@@ -4,7 +4,7 @@ name: Dragon (EM)
 title_slug: dragon
 opdb_id: G4qPZ-MQ404
 ipdb_id: 4697
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1978
 month: 10
 player_count: 4

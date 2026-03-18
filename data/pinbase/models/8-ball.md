@@ -4,7 +4,7 @@ name: 8 Ball
 title_slug: 8-ball
 opdb_id: G592K-MJoxd
 ipdb_id: 764
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1966
 month: 1
 player_count: 2

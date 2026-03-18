@@ -3,7 +3,7 @@ slug: irons-and-woods
 name: Irons and Woods
 title_slug: irons-and-woods
 ipdb_id: 4651
-manufacturer_slug: sega
+corporate_entity_slug: sega-pinball-incorporated
 player_count: 1
 technology_generation_slug: solid-state
 system_slug: sega-whitestar

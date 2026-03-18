@@ -4,7 +4,7 @@ name: Lucky Seven
 title_slug: lucky-seven
 opdb_id: G5D3O-MJKe0
 ipdb_id: 1491
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1978
 month: 3
 player_count: 4

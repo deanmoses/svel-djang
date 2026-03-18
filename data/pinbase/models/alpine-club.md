@@ -4,7 +4,7 @@ name: Alpine Club
 title_slug: alpine-club-ski-club
 opdb_id: G5K3O-MwN2x
 ipdb_id: 63
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1965
 month: 2
 player_count: 1

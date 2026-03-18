@@ -3,7 +3,7 @@ slug: topper
 name: Topper
 title_slug: topper
 ipdb_id: 2593
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1939
 month: 4
 player_count: 1

@@ -4,7 +4,7 @@ name: Taxi
 title_slug: taxi
 opdb_id: GrN90-MJrnj
 ipdb_id: 2505
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1988
 month: 1
 player_count: 4

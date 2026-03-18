@@ -4,7 +4,7 @@ name: Hayburners II
 title_slug: hayburners-ii
 opdb_id: G48Xw-MJ4XY
 ipdb_id: 1143
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1968
 month: 8
 player_count: 2

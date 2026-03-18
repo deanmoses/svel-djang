@@ -4,7 +4,7 @@ name: Big Together
 title_slug: big-together
 opdb_id: G5bNx-MLzNP
 ipdb_id: 4557
-manufacturer_slug: sega
+corporate_entity_slug: sega-enterprises-ltd
 year: 1977
 month: 1
 player_count: 1

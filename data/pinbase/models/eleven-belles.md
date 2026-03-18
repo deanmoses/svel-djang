@@ -4,7 +4,7 @@ name: Eleven Belles
 title_slug: eleven-belles
 opdb_id: GrxEZ-MjB1n
 ipdb_id: 3079
-manufacturer_slug: keeney
+corporate_entity_slug: j-h-keeney-and-company-incorporated
 year: 1958
 month: 1
 player_count: 1

@@ -4,7 +4,7 @@ name: Ten-Up
 title_slug: king-pin-pin-up
 opdb_id: GR6DZ-MLOWE
 ipdb_id: 2521
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1973
 month: 8
 player_count: 1

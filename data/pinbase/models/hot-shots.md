@@ -4,7 +4,7 @@ name: Hot Shots
 title_slug: hot-shots
 opdb_id: GrEVz-MOEzv
 ipdb_id: 1248
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1989
 month: 1
 player_count: 4

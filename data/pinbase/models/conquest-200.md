@@ -4,7 +4,7 @@ name: Conquest 200
 title_slug: new-world-conquest-200
 opdb_id: G4E88-MLEo0
 ipdb_id: 557
-manufacturer_slug: playmatic
+corporate_entity_slug: playmatic
 year: 1976
 month: 1
 player_count: 1

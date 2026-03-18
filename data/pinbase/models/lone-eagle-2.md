@@ -3,7 +3,7 @@ slug: lone-eagle-2
 name: Lone Eagle
 title_slug: lone-eagle-2
 ipdb_id: 5725
-manufacturer_slug: c-d-manufacturing-company
+corporate_entity_slug: c-d-manufacturing-company
 year: 1933
 month: 6
 player_count: 1

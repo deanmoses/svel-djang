@@ -4,7 +4,7 @@ name: Delta Queen
 title_slug: delta-queen
 opdb_id: G5bez-M0oEW
 ipdb_id: 654
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1974
 month: 7
 player_count: 1

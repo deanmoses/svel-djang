@@ -4,7 +4,7 @@ name: Navajo
 title_slug: big-hunt
 opdb_id: GrJPo-MD3kn
 ipdb_id: 3716
-manufacturer_slug: ami
+corporate_entity_slug: ami-spa
 year: 1976
 month: 1
 player_count: 4

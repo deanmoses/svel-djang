@@ -4,7 +4,7 @@ name: Jet Spin
 title_slug: super-spin
 opdb_id: G4qzZ-M0oWR
 ipdb_id: 1290
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1977
 month: 10
 player_count: 4

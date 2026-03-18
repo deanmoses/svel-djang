@@ -3,7 +3,7 @@ slug: 42nd-street
 name: 42nd Street
 title_slug: 42nd-street
 ipdb_id: 923
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1933
 month: 12
 player_count: 1

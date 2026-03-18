@@ -4,7 +4,7 @@ name: Cha Cha Cha
 title_slug: cha-cha-cha
 opdb_id: Grl7B-MYee8
 ipdb_id: 4559
-manufacturer_slug: sega
+corporate_entity_slug: sega-enterprises-ltd
 year: 1978
 month: 1
 player_count: 2

@@ -4,7 +4,7 @@ name: Hi-Diver
 title_slug: hi-diver
 opdb_id: G5DEb-MLeX6
 ipdb_id: 1165
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1959
 month: 4
 player_count: 1

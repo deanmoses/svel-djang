@@ -4,7 +4,7 @@ name: Flipper Parade
 title_slug: flipper-parade
 opdb_id: G5nDZ-M9RoK
 ipdb_id: 895
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1961
 month: 4
 player_count: 1

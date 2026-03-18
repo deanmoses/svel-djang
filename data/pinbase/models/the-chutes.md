@@ -3,7 +3,7 @@ slug: the-chutes
 name: The Chutes
 title_slug: the-chutes
 ipdb_id: 5346
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 player_count: 4
 technology_generation_slug: solid-state
 credit_refs:

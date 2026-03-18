@@ -3,7 +3,7 @@ slug: all-american
 name: All American
 title_slug: all-american
 ipdb_id: 51
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1940
 month: 10
 player_count: 1

@@ -4,7 +4,7 @@ name: Old Chicago
 title_slug: old-chicago
 opdb_id: G4dJE-MQKoo
 ipdb_id: 1704
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1976
 month: 4
 player_count: 4

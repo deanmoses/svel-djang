@@ -4,7 +4,7 @@ name: Lucky Hand
 title_slug: jacks-open-lucky-hand
 opdb_id: GrPpb-MLOZq
 ipdb_id: 1488
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1977
 month: 6
 player_count: 1

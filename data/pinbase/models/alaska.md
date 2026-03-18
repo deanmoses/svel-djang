@@ -4,7 +4,7 @@ name: Alaska
 title_slug: alaska
 opdb_id: G42zD-Mb5YB
 ipdb_id: 3888
-manufacturer_slug: interflip
+corporate_entity_slug: interflip-s-a
 year: 1978
 month: 5
 player_count: 4

@@ -3,7 +3,7 @@ slug: yoyo
 name: YoYo
 title_slug: yoyo
 ipdb_id: 2828
-manufacturer_slug: klebba-novelty-company
+corporate_entity_slug: klebba-novelty-company
 year: 1931
 month: 12
 player_count: 1

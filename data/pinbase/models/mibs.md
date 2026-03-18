@@ -4,7 +4,7 @@ name: Mibs
 title_slug: mibs
 opdb_id: G56P2-MQKR6
 ipdb_id: 1589
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1969
 month: 10
 player_count: 1

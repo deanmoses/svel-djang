@@ -4,7 +4,7 @@ name: Square Head
 title_slug: square-head
 opdb_id: GRKB8-MLqzr
 ipdb_id: 2330
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1963
 month: 6
 player_count: 1

@@ -4,7 +4,7 @@ name: Pool Champion
 title_slug: pool-champion
 opdb_id: G4jex-MLly8
 ipdb_id: 3311
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1985
 month: 1
 player_count: 4

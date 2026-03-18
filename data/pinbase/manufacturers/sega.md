@@ -1,6 +1,7 @@
 ---
 slug: sega
 name: Sega
+opdb_manufacturer_id: 16
 ---
 
 Sega's involvement in pinball spans two distinct chapters under different corporate entities. In the late 1970s, Sega Enterprises manufactured [[technologygeneration:electromechanical]] and early [[technologygeneration:solid-state]] pinball machines in Japan for both domestic and export markets, operating as a full-line amusement company across multiple game categories. These early machines are uncommon on the Western collector market and represent an independent thread of pinball history rooted in Japan's own coin-op industry.

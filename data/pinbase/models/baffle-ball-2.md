@@ -3,7 +3,7 @@ slug: baffle-ball-2
 name: Baffle Ball
 title_slug: baffle-ball-2
 ipdb_id: 130
-manufacturer_slug: keeney
+corporate_entity_slug: keeney-and-sons
 year: 1931
 month: 11
 player_count: 1

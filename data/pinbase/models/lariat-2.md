@@ -4,7 +4,7 @@ name: Lariat
 title_slug: wild-wild-west-lariat
 opdb_id: G5LQ2-MDvYV
 ipdb_id: 1412
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1969
 month: 9
 player_count: 2

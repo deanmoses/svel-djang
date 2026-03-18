@@ -4,7 +4,7 @@ name: Olde King Cole
 title_slug: olde-king-cole
 opdb_id: GK1Lv-MVKN8
 ipdb_id: 1369
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1948
 month: 5
 player_count: 1

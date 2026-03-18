@@ -4,7 +4,7 @@ name: El Paso
 title_slug: el-paso
 opdb_id: GN6dW-M3d6q
 ipdb_id: 768
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1948
 month: 11
 player_count: 1

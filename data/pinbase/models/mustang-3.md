@@ -4,7 +4,7 @@ name: Mustang
 title_slug: mustang-2
 opdb_id: GRVXD-MJN2n
 ipdb_id: 5603
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1964
 month: 1
 player_count: 2

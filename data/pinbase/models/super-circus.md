@@ -4,7 +4,7 @@ name: Super Circus
 title_slug: super-circus
 opdb_id: G4kLJ-Mz2Xp
 ipdb_id: 2430
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1957
 month: 7
 player_count: 2

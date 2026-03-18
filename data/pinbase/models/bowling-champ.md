@@ -4,7 +4,7 @@ name: Bowling Champ
 title_slug: bowling-champ
 opdb_id: Gzyxj-MOEeX
 ipdb_id: 365
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1949
 month: 2
 player_count: 1

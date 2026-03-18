@@ -4,7 +4,7 @@ name: Super Star
 title_slug: super-star
 opdb_id: G3EL3-MjBnR
 ipdb_id: 5158
-manufacturer_slug: recreativos-franco
+corporate_entity_slug: recreativos-franco
 year: 1986
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: Last Lap
 title_slug: last-lap
 opdb_id: GRzKW-MQ6er
 ipdb_id: 3207
-manufacturer_slug: playmatic
+corporate_entity_slug: playmatic
 year: 1978
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: Tournament
 title_slug: tournament
 opdb_id: G5W8D-M9R42
 ipdb_id: 2613
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1955
 month: 8
 player_count: 2

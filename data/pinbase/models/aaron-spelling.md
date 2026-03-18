@@ -3,7 +3,7 @@ slug: aaron-spelling
 name: Aaron Spelling
 title_slug: aaron-spelling
 ipdb_id: 4339
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1992
 month: 2
 player_count: 4

@@ -4,7 +4,7 @@ name: Stop and Go
 title_slug: stop-and-go
 opdb_id: G48pZ-MJkVB
 ipdb_id: 2388
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1951
 month: 3
 player_count: 1

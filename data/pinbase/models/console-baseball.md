@@ -3,7 +3,7 @@ slug: console-baseball
 name: Console Baseball
 title_slug: console-baseball
 ipdb_id: 6393
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1950
 month: 5
 production_quantity: '89'

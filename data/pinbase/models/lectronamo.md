@@ -4,7 +4,7 @@ name: Lectronamo
 title_slug: lectronamo
 opdb_id: GRWd2-MQ4Ye
 ipdb_id: 1429
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1978
 month: 1
 player_count: 4

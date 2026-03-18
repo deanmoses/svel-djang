@@ -3,7 +3,7 @@ slug: daily-double-de-luxe
 name: Daily Double (De Luxe)
 title_slug: daily-double-de-luxe
 ipdb_id: 6916
-manufacturer_slug: daval-manufacturing-co
+corporate_entity_slug: daval-manufacturing-co
 year: 1935
 month: 12
 player_count: 1

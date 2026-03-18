@@ -4,7 +4,7 @@ name: Hit-A-Card
 title_slug: king-of-diamonds
 opdb_id: GrlPj-MLqnR-ARB37
 ipdb_id: 1203
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1967
 month: 3
 player_count: 1

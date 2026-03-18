@@ -3,7 +3,7 @@ slug: the-time-of-your-life
 name: The Time of Your Life
 title_slug: the-time-of-your-life
 ipdb_id: 2529
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1948
 month: 8
 player_count: 1

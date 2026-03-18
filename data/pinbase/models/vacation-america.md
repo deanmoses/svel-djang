@@ -4,7 +4,7 @@ name: Vacation America
 title_slug: vacation-america
 opdb_id: G5nbz-MLeY1
 ipdb_id: 4848
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-gaming-company
 year: 2003
 month: 10
 player_count: 1

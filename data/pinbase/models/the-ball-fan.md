@@ -3,7 +3,7 @@ slug: the-ball-fan
 name: The Ball Fan
 title_slug: the-ball-fan
 ipdb_id: 136
-manufacturer_slug: stoner-manufacturing-company
+corporate_entity_slug: stoner-manufacturing-company
 year: 1935
 month: 6
 player_count: 1

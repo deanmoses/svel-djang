@@ -4,7 +4,7 @@ name: Blue Ribbon
 title_slug: blue-ribbon
 opdb_id: Gr388-MD1On
 ipdb_id: 330
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1965
 month: 12
 player_count: 4

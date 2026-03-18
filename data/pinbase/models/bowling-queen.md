@@ -4,7 +4,7 @@ name: Bowling Queen
 title_slug: bowling-queen
 opdb_id: G4xYD-MD3nw
 ipdb_id: 367
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1964
 month: 7
 player_count: 1

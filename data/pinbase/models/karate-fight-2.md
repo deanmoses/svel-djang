@@ -3,7 +3,7 @@ slug: karate-fight-2
 name: Karate Fight
 title_slug: karate-fight
 ipdb_id: 4663
-manufacturer_slug: bally
+corporate_entity_slug: bally-midway-manufacturing-company
 year: 1986
 month: 6
 player_count: 4

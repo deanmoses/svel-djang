@@ -3,7 +3,7 @@ slug: beauty
 name: Beauty
 title_slug: beauty
 ipdb_id: 215
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1940
 month: 5
 player_count: 1

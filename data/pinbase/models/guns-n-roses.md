@@ -4,7 +4,7 @@ name: Guns N' Roses
 title_slug: guns-n-roses
 opdb_id: GrPKV-MyNoP
 ipdb_id: 1100
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1994
 month: 7
 player_count: 4

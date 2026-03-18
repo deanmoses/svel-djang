@@ -4,7 +4,7 @@ name: Royal Pair
 title_slug: top-card-royal-pair
 opdb_id: G4JND-MDR6K
 ipdb_id: 2038
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1974
 month: 10
 player_count: 1

@@ -4,7 +4,7 @@ name: Blue Note
 title_slug: rock-star
 opdb_id: GRbD8-MLnYW
 ipdb_id: 328
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1979
 month: 2
 player_count: 1

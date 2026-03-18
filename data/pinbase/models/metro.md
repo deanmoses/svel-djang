@@ -4,7 +4,7 @@ name: Metro
 title_slug: metro
 opdb_id: G5K88-MKNpj
 ipdb_id: 1581
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1961
 month: 12
 player_count: 2

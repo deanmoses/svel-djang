@@ -4,7 +4,7 @@ name: Shark
 title_slug: shark-2
 opdb_id: GX29B-MP32P
 ipdb_id: 4582
-manufacturer_slug: taito
+corporate_entity_slug: taito-do-brasil-a-division-of-taito-japan
 year: 1982
 month: 1
 player_count: 4

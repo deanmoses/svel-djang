@@ -4,7 +4,7 @@ name: Apollo 13
 title_slug: apollo-13
 opdb_id: G411e-MJrEL
 ipdb_id: 3592
-manufacturer_slug: sega
+corporate_entity_slug: sega-pinball-incorporated
 year: 1995
 month: 1
 player_count: 6

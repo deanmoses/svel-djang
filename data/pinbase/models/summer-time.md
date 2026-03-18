@@ -4,7 +4,7 @@ name: Summer Time
 title_slug: summer-time
 opdb_id: GJ208-M5R5B
 ipdb_id: 2414
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1948
 month: 9
 player_count: 1

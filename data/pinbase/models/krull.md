@@ -4,7 +4,7 @@ name: Krull
 title_slug: krull
 opdb_id: GV881-MBRNV
 ipdb_id: 1397
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1983
 month: 2
 player_count: 4

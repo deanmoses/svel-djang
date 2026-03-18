@@ -3,7 +3,7 @@ slug: big-prize
 name: Big Prize
 title_slug: big-prize
 ipdb_id: 268
-manufacturer_slug: stern-electronics
+corporate_entity_slug: western-products-incorporated
 year: 1940
 month: 5
 player_count: 1

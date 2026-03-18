@@ -4,7 +4,7 @@ name: Black Rider
 title_slug: black-knight
 opdb_id: GrO7w-Mo1Zl
 ipdb_id: 4085
-manufacturer_slug: giuliano-lodola
+corporate_entity_slug: giuliano-lodola
 year: 1981
 month: 1
 player_count: 4

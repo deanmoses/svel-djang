@@ -4,7 +4,7 @@ name: Jump Shot
 title_slug: jump-shot
 opdb_id: G4dyP-Ml9EY
 ipdb_id: 3745
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1972
 month: 1
 player_count: 1

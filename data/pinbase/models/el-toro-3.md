@@ -4,7 +4,7 @@ name: El Toro
 title_slug: el-toro
 opdb_id: GR6yy-Mb5kj
 ipdb_id: 772
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1972
 month: 4
 player_count: 1

@@ -4,7 +4,7 @@ name: Gin
 title_slug: gin
 opdb_id: GrNNZ-MJoXP
 ipdb_id: 1005
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1974
 month: 11
 player_count: 1

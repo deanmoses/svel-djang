@@ -3,7 +3,7 @@ slug: big-league
 name: Big League
 title_slug: big-league
 ipdb_id: 259
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1940
 month: 2
 player_count: 1

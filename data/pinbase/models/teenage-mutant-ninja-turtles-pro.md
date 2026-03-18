@@ -4,7 +4,7 @@ name: Teenage Mutant Ninja Turtles (Pro)
 title_slug: teenage-mutant-ninja-turtles
 opdb_id: Gd2Xb-Mq1qv
 ipdb_id: 6730
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2020
 month: 6
 player_count: 4

@@ -1,6 +1,7 @@
 ---
 slug: game-plan
 name: Game Plan
+opdb_manufacturer_id: 29
 ---
 
 Game Plan, Inc. was a small American pinball manufacturer active from the mid-1970s through the mid-1980s. Operating out of Wood Dale, Illinois, the company produced a modest catalog of [[technologygeneration:solid-state]] machines during a period of great technological transition in the industry.

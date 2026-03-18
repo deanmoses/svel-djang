@@ -4,7 +4,7 @@ name: Gold Star
 title_slug: gold-star
 opdb_id: GRKyL-MJpbw
 ipdb_id: 1038
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1954
 month: 7
 player_count: 1

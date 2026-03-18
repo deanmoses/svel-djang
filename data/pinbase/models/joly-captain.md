@@ -4,7 +4,7 @@ name: Joly Captain
 title_slug: joly-captain
 opdb_id: G4eVQ-MQKkB
 ipdb_id: 3183
-manufacturer_slug: rally
+corporate_entity_slug: rally-aka-rally-play-company
 year: 1965
 month: 1
 player_count: 2

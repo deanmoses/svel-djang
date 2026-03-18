@@ -4,7 +4,7 @@ name: James Bond 007
 title_slug: james-bond-007-gottlieb
 opdb_id: G4PXJ-MQPlw
 ipdb_id: 1286
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1980
 month: 1
 player_count: 4

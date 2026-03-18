@@ -4,7 +4,7 @@ name: Dealer
 title_slug: dealer
 opdb_id: Grjn1-ML1vB
 ipdb_id: 646
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1953
 month: 12
 player_count: 1

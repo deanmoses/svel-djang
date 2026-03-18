@@ -4,7 +4,7 @@ name: Gun Smoke
 title_slug: gun-smoke
 opdb_id: G5nlX-MVKWR
 ipdb_id: 1098
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1968
 month: 1
 player_count: 2

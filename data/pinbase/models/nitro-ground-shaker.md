@@ -4,7 +4,7 @@ name: Nitro Ground Shaker
 title_slug: nitro-ground-shaker
 opdb_id: GrP6q-M5Rp1
 ipdb_id: 1682
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1980
 month: 1
 player_count: 4

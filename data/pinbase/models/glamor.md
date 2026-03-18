@@ -4,7 +4,7 @@ name: Glamor
 title_slug: glamor
 opdb_id: G5W7q-M3dbp
 ipdb_id: 1012
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1951
 month: 7
 player_count: 1

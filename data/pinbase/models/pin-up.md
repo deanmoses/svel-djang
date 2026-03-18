@@ -4,7 +4,7 @@ name: Pin-Up
 title_slug: king-pin-pin-up
 opdb_id: GR6DZ-MYejd
 ipdb_id: 1789
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1975
 month: 1
 player_count: 1

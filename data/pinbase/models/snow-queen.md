@@ -4,7 +4,7 @@ name: Snow Queen
 title_slug: snow-queen-snow-derby
 opdb_id: GRKZV-MQZ9X
 ipdb_id: 2230
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1970
 month: 11
 player_count: 4

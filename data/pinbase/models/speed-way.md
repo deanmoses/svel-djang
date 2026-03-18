@@ -4,7 +4,7 @@ name: Speed Way
 title_slug: speed-way
 opdb_id: G41WL-MQKn5
 ipdb_id: 2281
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1948
 month: 1
 player_count: 1

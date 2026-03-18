@@ -4,7 +4,7 @@ name: Zira
 title_slug: zira
 opdb_id: G4lDV-MJwkK
 ipdb_id: 3584
-manufacturer_slug: playmatic
+corporate_entity_slug: playmatic
 year: 1980
 month: 1
 player_count: 4

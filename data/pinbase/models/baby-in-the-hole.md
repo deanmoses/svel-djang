@@ -3,7 +3,7 @@ slug: baby-in-the-hole
 name: Baby In The Hole
 title_slug: baby-in-the-hole
 ipdb_id: 4033
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1989
 player_count: 1
 production_quantity: '1'

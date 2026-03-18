@@ -4,7 +4,7 @@ name: College Daze
 title_slug: college-daze
 opdb_id: GZV2Y-Mp4EN
 ipdb_id: 541
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1949
 month: 8
 player_count: 1

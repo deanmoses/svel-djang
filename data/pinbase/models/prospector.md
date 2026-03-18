@@ -4,7 +4,7 @@ name: Prospector
 title_slug: prospector
 opdb_id: Grlzn-MLxnK
 ipdb_id: 1871
-manufacturer_slug: segasa
+corporate_entity_slug: segasa-dba-sonic
 year: 1977
 month: 3
 player_count: 4

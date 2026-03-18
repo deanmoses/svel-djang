@@ -4,7 +4,7 @@ name: Dolly Parton
 title_slug: dolly-parton
 opdb_id: G43Yq-MJ7o4
 ipdb_id: 698
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1978
 month: 10
 player_count: 4

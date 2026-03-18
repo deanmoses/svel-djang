@@ -4,7 +4,7 @@ name: Georgia
 title_slug: georgia
 opdb_id: GRzN9-MyN18
 ipdb_id: 998
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1950
 month: 7
 player_count: 1

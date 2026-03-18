@@ -3,7 +3,7 @@ slug: barrel-roll
 name: Barrel Roll
 title_slug: barrel-roll
 ipdb_id: 179
-manufacturer_slug: allied-amusement-company
+corporate_entity_slug: allied-amusement-company
 year: 1935
 month: 2
 player_count: 1

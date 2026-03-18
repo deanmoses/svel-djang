@@ -4,7 +4,7 @@ name: Race Time
 title_slug: race-time
 opdb_id: G4O8o-MJ4Wp
 ipdb_id: 1898
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1959
 month: 3
 player_count: 2

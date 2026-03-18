@@ -4,7 +4,7 @@ name: Supersonic
 title_slug: supersonic
 opdb_id: G4xyV-MJK7V
 ipdb_id: 3419
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1977
 month: 1
 player_count: 1

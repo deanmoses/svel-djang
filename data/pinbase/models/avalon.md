@@ -3,7 +3,7 @@ slug: avalon
 name: Avalon
 title_slug: avalon
 ipdb_id: 117
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1939
 month: 7
 player_count: 1

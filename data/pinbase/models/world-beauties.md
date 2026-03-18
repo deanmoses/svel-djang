@@ -4,7 +4,7 @@ name: World Beauties
 title_slug: world-beauties
 opdb_id: GRBpL-MLeYk
 ipdb_id: 2807
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1959
 month: 12
 player_count: 1

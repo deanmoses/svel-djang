@@ -4,7 +4,7 @@ name: Gay Paree
 title_slug: gay-paree
 opdb_id: G4dwK-MQK64
 ipdb_id: 991
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1957
 month: 1
 player_count: 4

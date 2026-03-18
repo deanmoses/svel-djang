@@ -4,7 +4,7 @@ name: Flying Circus
 title_slug: flying-circus
 opdb_id: G41Y6-MDePR
 ipdb_id: 902
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1961
 month: 5
 player_count: 2

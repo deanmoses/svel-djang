@@ -4,7 +4,7 @@ name: Fire! Champagne Edition
 title_slug: fire
 opdb_id: G41Lo-MDerP
 ipdb_id: 860
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1987
 month: 1
 player_count: 4

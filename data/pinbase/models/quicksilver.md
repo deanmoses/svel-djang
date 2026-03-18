@@ -4,7 +4,7 @@ name: Quicksilver
 title_slug: quicksilver
 opdb_id: GRBZl-Mb5Zq
 ipdb_id: 1895
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1980
 month: 6
 player_count: 4

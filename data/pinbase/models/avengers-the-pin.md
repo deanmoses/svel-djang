@@ -3,7 +3,7 @@ slug: avengers-the-pin
 name: Avengers The Pin
 title_slug: avengers-the-pin
 ipdb_id: 6373
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2013
 player_count: 2
 technology_generation_slug: solid-state

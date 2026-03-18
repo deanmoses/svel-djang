@@ -4,7 +4,7 @@ name: Rock 'N Roll
 title_slug: jive-time-rock-n-roll
 opdb_id: GrjKk-MLBnP
 ipdb_id: 1981
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1970
 month: 4
 player_count: 1

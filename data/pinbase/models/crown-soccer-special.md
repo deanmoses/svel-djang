@@ -4,7 +4,7 @@ name: Crown Soccer Special
 title_slug: crown-soccer-special
 opdb_id: G5vjW-MJk99
 ipdb_id: 4133
-manufacturer_slug: taito
+corporate_entity_slug: taito-trading-co-ltd
 year: 1967
 month: 7
 player_count: 2

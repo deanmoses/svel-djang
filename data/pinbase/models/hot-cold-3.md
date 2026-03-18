@@ -4,7 +4,7 @@ name: Hot & Cold (4P)
 title_slug: hot-cold
 opdb_id: G5LVp-MJk21
 ipdb_id: 5261
-manufacturer_slug: inder
+corporate_entity_slug: industria-electromecnica-de-recreativos-sa
 year: 1978
 month: 1
 player_count: 4

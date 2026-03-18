@@ -4,7 +4,7 @@ name: Royal Flash
 title_slug: royal-flash
 opdb_id: GrPNp-MQ2w4
 ipdb_id: 5515
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1964
 month: 1
 player_count: 2

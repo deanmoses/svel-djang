@@ -4,7 +4,7 @@ name: Elite Guard
 title_slug: elite-guard
 opdb_id: GrEDX-ML0We
 ipdb_id: 780
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1968
 month: 2
 player_count: 1

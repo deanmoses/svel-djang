@@ -3,7 +3,7 @@ slug: pinbot-2
 name: PIN*BOT
 title_slug: pinbot-2
 ipdb_id: 4130
-manufacturer_slug: unidesa
+corporate_entity_slug: universal-de-desarrollos-electronicos-sa
 year: 1987
 month: 5
 player_count: 4

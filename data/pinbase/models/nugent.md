@@ -4,7 +4,7 @@ name: Nugent
 title_slug: ted-nugent
 opdb_id: G5VWL-MLRjl
 ipdb_id: 1687
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1978
 month: 1
 player_count: 4

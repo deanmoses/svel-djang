@@ -4,7 +4,7 @@ name: Toreador
 title_slug: toreador
 opdb_id: G4810-MJppZ
 ipdb_id: 2597
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1956
 month: 6
 player_count: 2

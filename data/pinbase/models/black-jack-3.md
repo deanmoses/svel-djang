@@ -4,7 +4,7 @@ name: Black Jack (EM)
 title_slug: black-jack
 opdb_id: G5nbD-MDbBo
 ipdb_id: 4498
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1976
 month: 5
 player_count: 4

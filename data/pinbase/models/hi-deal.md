@@ -4,7 +4,7 @@ name: Hi-Deal
 title_slug: hi-deal
 opdb_id: G4joK-M0o8O
 ipdb_id: 1157
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1975
 month: 10
 player_count: 1

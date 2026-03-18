@@ -3,7 +3,7 @@ slug: football-4
 name: Football
 title_slug: football-4
 ipdb_id: 4259
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1935
 month: 10
 player_count: 1

@@ -4,7 +4,7 @@ name: Capersville
 title_slug: capersville
 opdb_id: GrXex-MQk7l
 ipdb_id: 431
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1966
 month: 12
 player_count: 4

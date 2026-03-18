@@ -4,7 +4,7 @@ name: Batman Forever
 title_slug: batman-forever
 opdb_id: G59zN-MLy0N
 ipdb_id: 3593
-manufacturer_slug: sega
+corporate_entity_slug: sega-pinball-incorporated
 year: 1995
 month: 7
 player_count: 6

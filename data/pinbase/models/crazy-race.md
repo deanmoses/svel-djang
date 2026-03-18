@@ -4,7 +4,7 @@ name: Crazy Race
 title_slug: crazy-race
 opdb_id: Gr1k2-MD0Ve
 ipdb_id: 587
-manufacturer_slug: recel
+corporate_entity_slug: recel-sa
 year: 1978
 month: 1
 player_count: 4

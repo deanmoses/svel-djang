@@ -4,7 +4,7 @@ name: Mario Andretti
 title_slug: mario-andretti
 opdb_id: GRBqq-Mp4ZY
 ipdb_id: 3794
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1995
 month: 1
 player_count: 4

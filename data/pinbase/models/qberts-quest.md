@@ -4,7 +4,7 @@ name: Q*Bert's Quest
 title_slug: qberts-quest
 opdb_id: Gr1qn-MYerP
 ipdb_id: 1885
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1983
 month: 3
 player_count: 4

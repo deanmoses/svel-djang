@@ -4,7 +4,7 @@ name: Fireball II
 title_slug: fireball-ii
 opdb_id: Gry7q-MwNE2
 ipdb_id: 854
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1980
 month: 9
 player_count: 4

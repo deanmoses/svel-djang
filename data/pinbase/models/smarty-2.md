@@ -4,7 +4,7 @@ name: Smarty
 title_slug: ding-dong-smarty
 opdb_id: GRop9-MyNYp
 ipdb_id: 2217
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1968
 month: 2
 player_count: 1

@@ -4,7 +4,7 @@ name: Bally Hoo
 title_slug: bally-hoo
 opdb_id: G4NQ7-M85Bk
 ipdb_id: 151
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1969
 month: 10
 player_count: 4

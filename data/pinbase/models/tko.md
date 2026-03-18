@@ -4,7 +4,7 @@ name: T.K.O.
 title_slug: tko
 opdb_id: GrJxV-MJNZ2
 ipdb_id: 4599
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1979
 month: 3
 player_count: 1

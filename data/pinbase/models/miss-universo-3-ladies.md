@@ -4,7 +4,7 @@ name: Miss Universo
 title_slug: miss-universo
 opdb_id: G5VQ8-MJppq
 ipdb_id: 3412
-manufacturer_slug: inder
+corporate_entity_slug: industria-electromecnica-de-recreativos-sa
 year: 1970
 month: 1
 player_count: 1

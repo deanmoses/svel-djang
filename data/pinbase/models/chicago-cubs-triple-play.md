@@ -4,7 +4,7 @@ name: Chicago Cubs 'Triple Play'
 title_slug: chicago-cubs-triple-play
 opdb_id: G5nZJ-MLxrp
 ipdb_id: 502
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1985
 month: 5
 player_count: 4

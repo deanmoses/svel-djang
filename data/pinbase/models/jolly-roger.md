@@ -4,7 +4,7 @@ name: Jolly Roger
 title_slug: jolly-roger
 opdb_id: G4djP-MLnz0
 ipdb_id: 1314
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1967
 month: 12
 player_count: 4

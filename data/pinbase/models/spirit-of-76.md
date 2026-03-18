@@ -4,7 +4,7 @@ name: Spirit of 76
 title_slug: spirit-of-76-pioneer-new-york
 opdb_id: GrlPK-Mx0By
 ipdb_id: 2293
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1975
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: Roto Pool
 title_slug: roto-pool
 opdb_id: G59JJ-Ml9XY
 ipdb_id: 2022
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1958
 month: 5
 player_count: 1

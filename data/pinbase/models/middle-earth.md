@@ -4,7 +4,7 @@ name: Middle Earth
 title_slug: middle-earth
 opdb_id: G4OzV-MJN4z
 ipdb_id: 1590
-manufacturer_slug: atari
+corporate_entity_slug: atari-incorporated
 year: 1978
 month: 2
 player_count: 4

@@ -3,7 +3,7 @@ slug: hi-jack
 name: Hi Jack!
 title_slug: hi-jack
 ipdb_id: 6458
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 player_count: 4
 technology_generation_slug: electromechanical
 credit_refs:

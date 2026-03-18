@@ -4,7 +4,7 @@ name: Volley
 title_slug: volley
 opdb_id: G5Q19-MLeEN
 ipdb_id: 2743
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1976
 month: 8
 player_count: 1

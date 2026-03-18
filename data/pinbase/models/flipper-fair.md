@@ -4,7 +4,7 @@ name: Flipper Fair
 title_slug: flipper-fair
 opdb_id: G4e9z-MD81o
 ipdb_id: 894
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1961
 month: 10
 player_count: 1

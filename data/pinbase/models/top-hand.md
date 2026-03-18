@@ -4,7 +4,7 @@ name: Top Hand
 title_slug: full-house-top-hand
 opdb_id: G4EeX-MLzRl
 ipdb_id: 2581
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1966
 month: 4
 player_count: 1

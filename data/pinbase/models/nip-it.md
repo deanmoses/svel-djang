@@ -4,7 +4,7 @@ name: Nip-It
 title_slug: nip-it
 opdb_id: Gre0B-MYewk
 ipdb_id: 1680
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1973
 month: 7
 player_count: 4

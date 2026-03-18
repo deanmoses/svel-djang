@@ -3,7 +3,7 @@ slug: bonus-baseball
 name: Bonus Baseball
 title_slug: bonus-baseball
 ipdb_id: 350
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1962
 month: 2
 player_count: 1

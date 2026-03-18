@@ -4,7 +4,7 @@ name: Sky Star
 title_slug: sky-dive
 opdb_id: G4xlK-MQkWr
 ipdb_id: 5050
-manufacturer_slug: europlay
+corporate_entity_slug: europlay
 year: 1974
 month: 1
 player_count: 1

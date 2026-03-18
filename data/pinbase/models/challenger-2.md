@@ -4,7 +4,7 @@ name: Challenger
 title_slug: challenger
 opdb_id: G50L9-MDxXD
 ipdb_id: 483
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1971
 month: 3
 player_count: 2

@@ -4,7 +4,7 @@ name: Twister
 title_slug: twister
 opdb_id: GRwbv-MkPP0
 ipdb_id: 3976
-manufacturer_slug: sega
+corporate_entity_slug: sega-pinball-incorporated
 year: 1996
 month: 1
 player_count: 6

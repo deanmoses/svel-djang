@@ -4,7 +4,7 @@ name: Gaucho
 title_slug: gaucho
 opdb_id: GrdqX-MLW81
 ipdb_id: 988
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1963
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: Temptation
 title_slug: temptation-2
 opdb_id: GoEz3-MYeOB
 ipdb_id: 2512
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1948
 month: 11
 player_count: 1

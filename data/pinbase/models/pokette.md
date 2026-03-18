@@ -3,7 +3,7 @@ slug: pokette
 name: Pokette
 title_slug: pokette
 ipdb_id: 1840
-manufacturer_slug: southern-automatic-sales-company
+corporate_entity_slug: southern-automatic-sales-company
 year: 1932
 month: 4
 player_count: 1

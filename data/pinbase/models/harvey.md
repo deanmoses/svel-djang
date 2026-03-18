@@ -4,7 +4,7 @@ name: Harvey
 title_slug: harvey
 opdb_id: G4jbP-MQ4dR
 ipdb_id: 1132
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1951
 month: 5
 player_count: 1

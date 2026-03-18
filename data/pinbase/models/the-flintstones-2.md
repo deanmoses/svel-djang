@@ -4,7 +4,7 @@ name: The Flintstones
 title_slug: the-flintstones-innovative-concepts-ice
 opdb_id: G6lWl-M7Zrd
 ipdb_id: 5136
-manufacturer_slug: ice
+corporate_entity_slug: innovative-concepts-in-entertainment-inc
 year: 1994
 month: 6
 player_count: 1

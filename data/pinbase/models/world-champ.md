@@ -4,7 +4,7 @@ name: World Champ
 title_slug: world-champ
 opdb_id: GRDBb-M0obO
 ipdb_id: 2809
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1957
 month: 8
 player_count: 1

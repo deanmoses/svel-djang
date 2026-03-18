@@ -3,7 +3,7 @@ slug: hill-climb
 name: Hill Climb
 title_slug: hill-climb
 ipdb_id: 5333
-manufacturer_slug: gottlieb
+corporate_entity_slug: mylstar-electronics-incorporated
 player_count: 4
 technology_generation_slug: solid-state
 credit_refs:

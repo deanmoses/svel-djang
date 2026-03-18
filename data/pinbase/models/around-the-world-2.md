@@ -4,7 +4,7 @@ name: Around the World
 title_slug: around-the-world
 opdb_id: G5bpE-MLE4d
 ipdb_id: 93
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1959
 month: 7
 player_count: 2

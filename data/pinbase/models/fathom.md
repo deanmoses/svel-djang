@@ -4,7 +4,7 @@ name: Fathom
 title_slug: fathom
 opdb_id: GrPO3-M9Rpx
 ipdb_id: 829
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1981
 month: 8
 player_count: 4

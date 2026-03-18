@@ -4,7 +4,7 @@ name: Straight Shooter
 title_slug: straight-shooter
 opdb_id: Grk9J-MQ4qp
 ipdb_id: 2394
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1959
 month: 2
 player_count: 1

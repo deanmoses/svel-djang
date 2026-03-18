@@ -1,6 +1,7 @@
 ---
 slug: jersey-jack
 name: Jersey Jack Pinball
+opdb_manufacturer_id: 74
 ---
 
 Jersey Jack Pinball was founded in 2011 by Jack Guarnieri, a veteran of the coin-op industry, with an explicit mission to reinvigorate pinball by pushing production quality, playfield innovation, and visual presentation far beyond the prevailing standard. The company's debut machine, [[title:the-wizard-of-oz]] (2013), announced its ambitions unmistakably: a large [[displaytype:lcd]] display beneath the playfield glass, intricate [[gameplayfeature:multi-level-playfield]] construction, and production values that felt genuinely cinematic.

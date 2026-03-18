@@ -4,7 +4,7 @@ name: Easy Aces
 title_slug: easy-aces
 opdb_id: G5p1j-MJ9zW
 ipdb_id: 754
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1955
 month: 12
 player_count: 1

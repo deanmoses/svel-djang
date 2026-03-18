@@ -4,7 +4,7 @@ name: Palisades
 title_slug: palisades
 opdb_id: GRvvl-MLBzn
 ipdb_id: 1738
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1953
 month: 7
 player_count: 1

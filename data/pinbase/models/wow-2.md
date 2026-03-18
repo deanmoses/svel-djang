@@ -3,7 +3,7 @@ slug: wow-2
 name: '!WOW!'
 title_slug: wow
 ipdb_id: 2819
-manufacturer_slug: mills-novelty-company
+corporate_entity_slug: mills-novelty-company
 year: 1932
 month: 3
 player_count: 1

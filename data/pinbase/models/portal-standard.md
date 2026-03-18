@@ -3,7 +3,7 @@ slug: portal-standard
 name: Portal (Standard)
 title_slug: portal
 opdb_id: GpebN-Mq1rW
-manufacturer_slug: multimorphic
+corporate_entity_slug: multimorphic-inc
 year: 2025
 month: 3
 player_count: 4

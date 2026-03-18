@@ -4,7 +4,7 @@ name: Sea Wolf
 title_slug: sea-wolf
 opdb_id: G57NK-MQwlq
 ipdb_id: 2088
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1959
 month: 7
 player_count: 1

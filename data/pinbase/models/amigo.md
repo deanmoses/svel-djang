@@ -4,7 +4,7 @@ name: Amigo
 title_slug: amigo
 opdb_id: G4ONX-MQY24
 ipdb_id: 71
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1974
 month: 5
 player_count: 4

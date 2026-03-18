@@ -3,7 +3,7 @@ slug: cyclone-4
 name: Cyclone
 title_slug: cyclone-4
 ipdb_id: 618
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1935
 month: 2
 player_count: 1

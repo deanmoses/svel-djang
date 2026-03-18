@@ -3,7 +3,7 @@ slug: mad
 name: Mad
 title_slug: mad
 ipdb_id: 3440
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 player_count: 4
 technology_generation_slug: solid-state
 credit_refs:

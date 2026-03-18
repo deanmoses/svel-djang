@@ -4,7 +4,7 @@ name: High Hand
 title_slug: high-hand-capt-card
 opdb_id: GRYbJ-MnKex
 ipdb_id: 1173
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1973
 month: 7
 player_count: 1

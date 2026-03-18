@@ -4,7 +4,7 @@ name: Time Zone
 title_slug: space-time-time-zone
 opdb_id: GRvE1-MLnBx
 ipdb_id: 2569
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1973
 month: 5
 player_count: 2

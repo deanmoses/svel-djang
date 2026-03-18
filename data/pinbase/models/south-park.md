@@ -4,7 +4,7 @@ name: South Park
 title_slug: south-park
 opdb_id: G4qbD-MQpxv
 ipdb_id: 4444
-manufacturer_slug: sega
+corporate_entity_slug: sega-pinball-incorporated
 year: 1999
 month: 2
 player_count: 6

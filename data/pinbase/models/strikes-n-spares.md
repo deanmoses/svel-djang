@@ -3,7 +3,7 @@ slug: strikes-n-spares
 name: Strikes N' Spares
 title_slug: strikes-n-spares
 ipdb_id: 4336
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1995
 month: 10
 player_count: 4

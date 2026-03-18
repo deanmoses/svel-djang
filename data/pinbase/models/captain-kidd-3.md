@@ -4,7 +4,7 @@ name: Captain Kidd
 title_slug: captain-kidd
 opdb_id: G41YP-MJ6Op
 ipdb_id: 437
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1960
 month: 7
 player_count: 2

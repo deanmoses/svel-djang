@@ -4,7 +4,7 @@ name: Spin Wheel
 title_slug: spin-wheel
 opdb_id: Grlk9-Mp4w4
 ipdb_id: 2287
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1968
 month: 3
 player_count: 4

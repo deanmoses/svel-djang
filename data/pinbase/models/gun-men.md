@@ -4,7 +4,7 @@ name: Gun Men
 title_slug: gun-men
 opdb_id: GryPE-MNE9k
 ipdb_id: 3131
-manufacturer_slug: staal
+corporate_entity_slug: staal-society
 year: 1977
 month: 1
 player_count: 4

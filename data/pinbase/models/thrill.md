@@ -4,7 +4,7 @@ name: Thrill
 title_slug: thrill
 opdb_id: G181j-MNExE
 ipdb_id: 2551
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1948
 month: 9
 player_count: 1

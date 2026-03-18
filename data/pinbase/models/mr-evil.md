@@ -4,7 +4,7 @@ name: Mr. Evil
 title_slug: mr-evil
 opdb_id: G4N3O-MJ5xK
 ipdb_id: 1638
-manufacturer_slug: recel
+corporate_entity_slug: recel-sa
 year: 1978
 month: 1
 player_count: 1

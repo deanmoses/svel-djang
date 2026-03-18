@@ -3,7 +3,7 @@ slug: starlet
 name: Starlet
 title_slug: starlet
 ipdb_id: 2361
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1955
 month: 12
 player_count: 1

@@ -4,7 +4,7 @@ name: Jamboree
 title_slug: jamboree
 opdb_id: GV8B1-MP3b9
 ipdb_id: 1285
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1948
 month: 5
 player_count: 1

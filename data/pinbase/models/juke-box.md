@@ -4,7 +4,7 @@ name: Juke Box
 title_slug: juke-box
 opdb_id: G5Qnx-MJYek
 ipdb_id: 1324
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1976
 month: 9
 player_count: 4

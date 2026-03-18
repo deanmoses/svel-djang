@@ -4,7 +4,7 @@ name: Solar City
 title_slug: el-dorado
 opdb_id: GrEZ5-MJ9y3
 ipdb_id: 2237
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1977
 month: 2
 player_count: 2

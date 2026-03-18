@@ -3,7 +3,7 @@ slug: rat-race
 name: Rat Race
 title_slug: rat-race
 ipdb_id: 3718
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1983
 player_count: 2
 production_quantity: '10'

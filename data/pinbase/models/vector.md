@@ -4,7 +4,7 @@ name: Vector
 title_slug: vector
 opdb_id: G486B-MrRwE
 ipdb_id: 2723
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1981
 month: 3
 player_count: 4

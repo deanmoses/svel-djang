@@ -4,7 +4,7 @@ name: Cobra
 title_slug: cobra
 opdb_id: G50zO-MJ97Z
 ipdb_id: 3026
-manufacturer_slug: bell-games
+corporate_entity_slug: nuova-bell-games
 year: 1987
 month: 2
 player_count: 4

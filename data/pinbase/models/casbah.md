@@ -4,7 +4,7 @@ name: Casbah
 title_slug: jubilee-darling
 opdb_id: Gr3J1-MQr2R
 ipdb_id: 462
-manufacturer_slug: segasa
+corporate_entity_slug: segasa
 year: 1972
 month: 1
 player_count: 1

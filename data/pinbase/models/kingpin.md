@@ -4,7 +4,7 @@ name: Kingpin
 title_slug: kingpin
 opdb_id: G48od-MJNnn
 ipdb_id: 4000
-manufacturer_slug: capcom
+corporate_entity_slug: capcom-coin-op-incorporated
 year: 1996
 month: 12
 player_count: 4

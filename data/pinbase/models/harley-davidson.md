@@ -4,7 +4,7 @@ name: Harley Davidson
 title_slug: harley-davidson
 opdb_id: G56lO-Mx00O
 ipdb_id: 4453
-manufacturer_slug: sega
+corporate_entity_slug: sega-pinball-incorporated
 year: 1999
 month: 1
 player_count: 6

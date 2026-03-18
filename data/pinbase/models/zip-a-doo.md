@@ -4,7 +4,7 @@ name: Zip-A-Doo
 title_slug: zip-a-doo
 opdb_id: GrdKP-MLv2o
 ipdb_id: 2840
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1970
 month: 8
 player_count: 2

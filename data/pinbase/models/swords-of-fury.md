@@ -4,7 +4,7 @@ name: Swords of Fury
 title_slug: swords-of-fury
 opdb_id: GrPzV-MDxj7
 ipdb_id: 2486
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1988
 month: 6
 player_count: 4

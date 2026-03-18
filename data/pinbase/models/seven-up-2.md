@@ -4,7 +4,7 @@ name: Seven Up
 title_slug: seven-up-set-up
 opdb_id: G5BJx-MLO2P
 ipdb_id: 2104
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1969
 month: 12
 player_count: 1

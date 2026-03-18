@@ -4,7 +4,7 @@ name: New York
 title_slug: spirit-of-76-pioneer-new-york
 opdb_id: GrlPK-MJkEl
 ipdb_id: 1673
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1976
 month: 7
 player_count: 2

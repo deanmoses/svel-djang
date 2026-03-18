@@ -3,7 +3,7 @@ slug: revue-2
 name: Revue
 title_slug: revue-2
 ipdb_id: 3899
-manufacturer_slug: th-bergmann
+corporate_entity_slug: th-bergmann-company
 year: 1957
 month: 4
 player_count: 1

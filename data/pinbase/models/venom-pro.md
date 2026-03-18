@@ -3,7 +3,7 @@ slug: venom-pro
 name: Venom (Pro)
 title_slug: venom
 opdb_id: G3EBl-Mq1zy
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2023
 month: 7
 player_count: 4

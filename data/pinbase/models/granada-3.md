@@ -3,7 +3,7 @@ slug: granada-3
 name: Granada
 title_slug: granada
 opdb_id: GPBdK-MjBlR
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1974
 month: 1
 player_count: 1

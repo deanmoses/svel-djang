@@ -4,7 +4,7 @@ name: Solitaire
 title_slug: king-of-diamonds
 opdb_id: GrlPj-MLqnR
 ipdb_id: 2241
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1967
 month: 2
 player_count: 1

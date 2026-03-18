@@ -4,7 +4,7 @@ name: Black Hole
 title_slug: blackout
 opdb_id: GRwYo-MvBnV
 ipdb_id: 5891
-manufacturer_slug: ltd-do-brasil
+corporate_entity_slug: ltd-do-brasil-diverses-eletrnicas-ltda
 year: 1982
 month: 1
 player_count: 2

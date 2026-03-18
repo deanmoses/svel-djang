@@ -4,7 +4,7 @@ name: Ship Ahoy
 title_slug: buccaneer-ship-ahoy-high-seas
 opdb_id: G4lNn-MkPZ8
 ipdb_id: 2119
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1976
 month: 6
 player_count: 1

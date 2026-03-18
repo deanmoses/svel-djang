@@ -4,7 +4,7 @@ name: Diner
 title_slug: diner
 opdb_id: GRWBd-MLy5p
 ipdb_id: 681
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1990
 month: 1
 player_count: 4

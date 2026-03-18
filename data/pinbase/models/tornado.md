@@ -3,7 +3,7 @@ slug: tornado
 name: Tornado
 title_slug: tornado
 ipdb_id: 2598
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1947
 month: 4
 player_count: 1

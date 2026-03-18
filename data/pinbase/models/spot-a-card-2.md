@@ -4,7 +4,7 @@ name: Spot-A-Card
 title_slug: spot-a-card
 opdb_id: GRoYp-MDlXy
 ipdb_id: 2318
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1960
 month: 8
 player_count: 1

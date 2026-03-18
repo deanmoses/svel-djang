@@ -3,7 +3,7 @@ slug: basketball-champ
 name: Basketball Champ
 title_slug: basketball-champ
 ipdb_id: 193
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1947
 month: 1
 player_count: 1

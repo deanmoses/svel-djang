@@ -3,7 +3,7 @@ slug: sea-isle
 name: Sea-Isle
 title_slug: sea-isle
 ipdb_id: 2083
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1947
 month: 11
 player_count: 1

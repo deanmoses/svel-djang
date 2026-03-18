@@ -4,7 +4,7 @@ name: Abra Ca Dabra
 title_slug: abra-ca-dabra-team-one
 opdb_id: GRpZ2-MkPyb
 ipdb_id: 2
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1975
 month: 11
 player_count: 1

@@ -4,7 +4,7 @@ name: Gator
 title_slug: gator-sheba-campus-queen
 opdb_id: GRDQ1-MDRZ9
 ipdb_id: 987
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1969
 month: 6
 player_count: 4

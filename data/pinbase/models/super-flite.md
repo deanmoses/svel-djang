@@ -4,7 +4,7 @@ name: Super-Flite
 title_slug: stratoastrosuper-flite
 opdb_id: GrdlQ-MW9Rl
 ipdb_id: 2452
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1974
 month: 10
 player_count: 2

@@ -4,7 +4,7 @@ name: Tucson
 title_slug: tucson
 opdb_id: GrP8X-MD86N
 ipdb_id: 2678
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1949
 month: 1
 player_count: 1

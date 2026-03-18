@@ -4,7 +4,7 @@ name: Sapporo
 title_slug: sapporo
 opdb_id: G5n67-MQVRQ
 ipdb_id: 2052
-manufacturer_slug: sega
+corporate_entity_slug: sega-enterprises-ltd
 year: 1971
 month: 12
 player_count: 1

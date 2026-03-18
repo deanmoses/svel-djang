@@ -3,7 +3,7 @@ slug: system
 name: System
 title_slug: system
 ipdb_id: 2487
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1936
 month: 5
 player_count: 1

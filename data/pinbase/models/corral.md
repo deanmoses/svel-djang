@@ -4,7 +4,7 @@ name: Corral
 title_slug: corral
 opdb_id: GrlB1-MW9Nd
 ipdb_id: 569
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1961
 month: 9
 player_count: 1

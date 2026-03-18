@@ -3,7 +3,7 @@ slug: super-panic-ball
 name: Super Panic Ball
 title_slug: super-panic-ball
 opdb_id: G7Zjz-Mx0jK
-manufacturer_slug: bandai-namco
+corporate_entity_slug: bandai-namco
 year: 2019
 month: 1
 player_count: 2

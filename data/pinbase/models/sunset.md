@@ -4,7 +4,7 @@ name: Sunset
 title_slug: sunset
 opdb_id: G59Ql-MJNpN
 ipdb_id: 2422
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1962
 month: 11
 player_count: 2

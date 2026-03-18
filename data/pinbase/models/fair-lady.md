@@ -4,7 +4,7 @@ name: Fair Lady
 title_slug: sea-belles-fair-lady
 opdb_id: G41OP-MDvEj
 ipdb_id: 809
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1956
 month: 11
 player_count: 2

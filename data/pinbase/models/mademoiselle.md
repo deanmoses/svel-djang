@@ -4,7 +4,7 @@ name: Mademoiselle
 title_slug: mademoiselle
 opdb_id: GrNVz-MLERP
 ipdb_id: 1506
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1959
 month: 10
 player_count: 2

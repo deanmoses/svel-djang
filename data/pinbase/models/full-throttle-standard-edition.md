@@ -4,7 +4,7 @@ name: Full Throttle
 title_slug: full-throttle
 opdb_id: G5V8q-MQYZ6
 ipdb_id: 6301
-manufacturer_slug: heighway-pinball
+corporate_entity_slug: heighway-pinball-ltd
 year: 2015
 month: 1
 player_count: 4

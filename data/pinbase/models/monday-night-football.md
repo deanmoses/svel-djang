@@ -4,7 +4,7 @@ name: Monday Night Football
 title_slug: monday-night-football
 opdb_id: G5zZ7-Mp474
 ipdb_id: 1616
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1989
 month: 1
 player_count: 4

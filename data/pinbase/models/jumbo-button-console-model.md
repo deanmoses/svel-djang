@@ -3,7 +3,7 @@ slug: jumbo-button-console-model
 name: Jumbo (button console model)
 title_slug: jumbo-button-console-model
 ipdb_id: 6982
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1959
 month: 5
 player_count: 1

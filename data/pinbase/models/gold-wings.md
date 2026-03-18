@@ -4,7 +4,7 @@ name: Gold Wings
 title_slug: gold-wings
 opdb_id: G5WXd-MJrER
 ipdb_id: 1043
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1986
 month: 1
 player_count: 4

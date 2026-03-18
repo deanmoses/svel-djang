@@ -4,7 +4,7 @@ name: Nemesis
 title_slug: nemesis
 opdb_id: GrOLe-MQK3d
 ipdb_id: 4880
-manufacturer_slug: peyper
+corporate_entity_slug: peyper
 year: 1986
 month: 1
 player_count: 4

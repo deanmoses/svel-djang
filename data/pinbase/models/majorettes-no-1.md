@@ -4,7 +4,7 @@ name: Majorettes
 title_slug: majorettes-2
 opdb_id: GryxL-MJV7j
 ipdb_id: 1529
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1952
 month: 4
 player_count: 1

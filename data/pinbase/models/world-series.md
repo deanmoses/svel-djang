@@ -4,7 +4,7 @@ name: World Series
 title_slug: grand-slam-world-series
 opdb_id: G43j1-MQVd4
 ipdb_id: 2813
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1972
 month: 8
 player_count: 1

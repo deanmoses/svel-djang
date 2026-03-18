@@ -3,7 +3,7 @@ slug: dracula-2
 name: Dracula
 title_slug: dracula-3
 ipdb_id: 6325
-manufacturer_slug: lai
+corporate_entity_slug: leisure-allied-industries
 year: 1979
 player_count: 4
 production_quantity: '262'

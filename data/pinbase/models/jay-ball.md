@@ -3,7 +3,7 @@ slug: jay-ball
 name: Jay-Ball
 title_slug: jay-ball
 ipdb_id: 1287
-manufacturer_slug: o-d-jennings-and-company
+corporate_entity_slug: o-d-jennings-and-company
 year: 1932
 month: 2
 player_count: 1

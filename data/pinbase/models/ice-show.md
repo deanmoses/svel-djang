@@ -4,7 +4,7 @@ name: Ice Show
 title_slug: ice-revue-ice-show
 opdb_id: GRnYX-ML0l2
 ipdb_id: 4778
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1966
 month: 1
 player_count: 1

@@ -4,7 +4,7 @@ name: Flicker
 title_slug: boomerang-flicker
 opdb_id: GrEOB-MJZYw
 ipdb_id: 883
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1975
 month: 1
 player_count: 2

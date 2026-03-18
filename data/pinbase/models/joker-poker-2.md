@@ -4,7 +4,7 @@ name: Joker Poker (EM)
 title_slug: joker-poker
 opdb_id: GR9o1-Mx0bX
 ipdb_id: 5078
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1978
 month: 8
 player_count: 4

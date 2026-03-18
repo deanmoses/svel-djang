@@ -4,7 +4,7 @@ name: Diamond Jim
 title_slug: diamond-jim
 opdb_id: GR6bZ-Mp4W4
 ipdb_id: 677
-manufacturer_slug: mali
+corporate_entity_slug: the-henry-wt-mali-co-inc
 year: 1977
 month: 1
 player_count: 1

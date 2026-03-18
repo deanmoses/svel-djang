@@ -4,7 +4,7 @@ name: Wood's Queen (4P)
 title_slug: woods-queen
 opdb_id: G5By3-MJw55
 ipdb_id: 5425
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1976
 month: 1
 player_count: 4

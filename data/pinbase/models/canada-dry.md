@@ -4,7 +4,7 @@ name: Canada Dry
 title_slug: el-dorado
 opdb_id: GrEZ5-ME0Ko
 ipdb_id: 426
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1976
 month: 1
 player_count: 4

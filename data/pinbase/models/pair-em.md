@@ -3,7 +3,7 @@ slug: pair-em
 name: Pair 'Em
 title_slug: pair-em
 ipdb_id: 4247
-manufacturer_slug: stern-electronics
+corporate_entity_slug: western-equipment-supply-company
 year: 1935
 month: 6
 player_count: 1

@@ -4,7 +4,7 @@ name: Fore
 title_slug: fore
 opdb_id: G4k8j-MLO6l
 ipdb_id: 917
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1973
 month: 1
 player_count: 1

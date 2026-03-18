@@ -3,7 +3,7 @@ slug: fantasy-jackpot
 name: Fantasy Jackpot
 title_slug: fantasy-jackpot
 ipdb_id: 3092
-manufacturer_slug: stoner-manufacturing-company
+corporate_entity_slug: stoner-manufacturing-company
 year: 1940
 month: 2
 player_count: 1

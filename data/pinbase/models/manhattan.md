@@ -4,7 +4,7 @@ name: Manhattan
 title_slug: manhattan
 opdb_id: G3EEl-MkP51
 ipdb_id: 1537
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1948
 month: 3
 player_count: 1

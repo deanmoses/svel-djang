@@ -3,7 +3,7 @@ slug: galaxy-4
 name: Galaxy
 title_slug: galaxy-4
 ipdb_id: 6318
-manufacturer_slug: lai
+corporate_entity_slug: leisure-allied-industries
 year: 1980
 player_count: 4
 production_quantity: '183'

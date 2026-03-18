@@ -4,7 +4,7 @@ name: Swing-Along
 title_slug: swing-along
 opdb_id: G5D9e-M4owj
 ipdb_id: 2484
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1963
 month: 7
 player_count: 2

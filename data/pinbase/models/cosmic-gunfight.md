@@ -4,7 +4,7 @@ name: Cosmic Gunfight
 title_slug: cosmic-gunfight
 opdb_id: GRv7B-MLqPd
 ipdb_id: 571
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1982
 month: 6
 player_count: 4

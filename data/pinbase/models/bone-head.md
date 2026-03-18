@@ -4,7 +4,7 @@ name: Bone Head
 title_slug: bone-head
 opdb_id: GELZO-M2YkK
 ipdb_id: 348
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1948
 month: 11
 player_count: 1

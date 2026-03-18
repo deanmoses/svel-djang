@@ -4,7 +4,7 @@ name: Freedom (EM)
 title_slug: freedom
 opdb_id: GR9qY-M0oXW
 ipdb_id: 952
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1976
 month: 7
 player_count: 4

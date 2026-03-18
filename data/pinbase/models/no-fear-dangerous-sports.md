@@ -4,7 +4,7 @@ name: 'No Fear: Dangerous Sports'
 title_slug: no-fear
 opdb_id: Gr2Y2-MDxZq
 ipdb_id: 2852
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1995
 month: 5
 player_count: 4

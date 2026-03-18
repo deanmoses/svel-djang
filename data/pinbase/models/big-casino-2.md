@@ -3,7 +3,7 @@ slug: big-casino-2
 name: Big Casino
 title_slug: big-casino-2
 ipdb_id: 2859
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1936
 month: 2
 player_count: 1

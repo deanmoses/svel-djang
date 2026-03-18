@@ -3,7 +3,7 @@ slug: progress
 name: Progress
 title_slug: progress
 ipdb_id: 1869
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1940
 month: 8
 player_count: 1

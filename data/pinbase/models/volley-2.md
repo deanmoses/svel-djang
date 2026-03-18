@@ -4,7 +4,7 @@ name: Volley
 title_slug: world-cup
 opdb_id: GrNqO-MRjzl-A9y5r
 ipdb_id: 5494
-manufacturer_slug: taito
+corporate_entity_slug: taito-do-brasil-a-division-of-taito-japan
 year: 1980
 month: 1
 player_count: 4

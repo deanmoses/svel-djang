@@ -4,7 +4,7 @@ name: TX-Sector
 title_slug: tx-sector
 opdb_id: GRLzj-MJPYK
 ipdb_id: 2699
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1988
 month: 3
 player_count: 4

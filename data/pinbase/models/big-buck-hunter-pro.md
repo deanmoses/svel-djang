@@ -4,7 +4,7 @@ name: Big Buck Hunter Pro
 title_slug: big-buck-hunter
 opdb_id: G4N6n-MLxER
 ipdb_id: 5513
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2010
 month: 1
 player_count: 4

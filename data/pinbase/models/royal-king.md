@@ -4,7 +4,7 @@ name: Royal King
 title_slug: top-card-royal-pair
 opdb_id: G4JND-MP3qK
 ipdb_id: 4736
-manufacturer_slug: rmg
+corporate_entity_slug: renato-montanari-giochi
 year: 1976
 month: 1
 player_count: 1

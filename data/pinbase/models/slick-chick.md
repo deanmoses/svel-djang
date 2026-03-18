@@ -4,7 +4,7 @@ name: Slick Chick
 title_slug: slick-chick
 opdb_id: Gre8z-MLeK2
 ipdb_id: 2208
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1963
 month: 4
 player_count: 1

@@ -4,7 +4,7 @@ name: Race the Clock
 title_slug: race-the-clock
 opdb_id: G42yx-MJw7V
 ipdb_id: 1897
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1955
 month: 3
 player_count: 4

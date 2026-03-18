@@ -3,7 +3,7 @@ slug: lincoln-fields
 name: Lincoln Fields
 title_slug: lincoln-fields
 ipdb_id: 6940
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1937
 month: 11
 player_count: 1

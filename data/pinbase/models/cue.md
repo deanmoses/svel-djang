@@ -4,7 +4,7 @@ name: Cue
 title_slug: cue
 opdb_id: G4kqd-MDB6w
 ipdb_id: 3873
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1982
 month: 1
 player_count: 4

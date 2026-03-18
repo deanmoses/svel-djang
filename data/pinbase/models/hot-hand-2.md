@@ -3,7 +3,7 @@ slug: hot-hand-2
 name: Hot Hand
 title_slug: hot-hand-2
 ipdb_id: 6471
-manufacturer_slug: lai
+corporate_entity_slug: leisure-allied-industries
 year: 1979
 month: 5
 player_count: 4

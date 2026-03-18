@@ -4,7 +4,7 @@ name: Volèe
 title_slug: volley
 opdb_id: G5Q19-MDEy0
 ipdb_id: 5449
-manufacturer_slug: europlay
+corporate_entity_slug: europlay
 year: 1977
 month: 1
 player_count: 1

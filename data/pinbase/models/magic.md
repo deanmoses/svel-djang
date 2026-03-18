@@ -4,7 +4,7 @@ name: Magic
 title_slug: magic-3
 opdb_id: G8l2L-M9ReW
 ipdb_id: 1508
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1948
 month: 12
 player_count: 1

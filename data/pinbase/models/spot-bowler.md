@@ -4,7 +4,7 @@ name: Spot Bowler
 title_slug: spot-bowler
 opdb_id: G5D0d-MJZVO
 ipdb_id: 2313
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1950
 month: 10
 player_count: 1

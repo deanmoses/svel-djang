@@ -4,7 +4,7 @@ name: Mata Hari
 title_slug: mata-hari-em
 opdb_id: G417e-MDvXz
 ipdb_id: 4501
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1977
 month: 9
 player_count: 4

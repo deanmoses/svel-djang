@@ -4,7 +4,7 @@ name: Al's Garage Band goes on a World Tour
 title_slug: als-garage-band-goes-on-a-world-tour
 opdb_id: GRLz0-MeP4B
 ipdb_id: 3513
-manufacturer_slug: alvin-g
+corporate_entity_slug: alvin-g-and-company
 year: 1992
 month: 1
 player_count: 4

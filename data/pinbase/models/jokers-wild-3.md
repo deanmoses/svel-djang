@@ -4,7 +4,7 @@ name: Joker's Wild
 title_slug: jokers-wild-2
 opdb_id: GrPJ2-MQken
 ipdb_id: 3182
-manufacturer_slug: segasa
+corporate_entity_slug: segasa-dba-sonic
 year: 1977
 month: 1
 player_count: 4

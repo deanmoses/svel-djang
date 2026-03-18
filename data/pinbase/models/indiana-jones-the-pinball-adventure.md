@@ -4,7 +4,7 @@ name: 'Indiana Jones: The Pinball Adventure'
 title_slug: indiana-jones-the-pinball-adventure
 opdb_id: G4xZy-MLno6
 ipdb_id: 1267
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1993
 month: 1
 player_count: 4

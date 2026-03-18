@@ -4,7 +4,7 @@ name: F1 Grand Prix
 title_slug: f1-grand-prix
 opdb_id: G4Oye-MQPw8
 ipdb_id: 3623
-manufacturer_slug: bell-games
+corporate_entity_slug: nuova-bell-games
 year: 1987
 month: 1
 player_count: 4

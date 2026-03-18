@@ -4,7 +4,7 @@ name: Race-Way
 title_slug: race-way
 opdb_id: G57eW-MLnel
 ipdb_id: 1901
-manufacturer_slug: midway
+corporate_entity_slug: midway-manufacturing-company
 year: 1963
 month: 9
 player_count: 2

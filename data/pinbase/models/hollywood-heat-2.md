@@ -3,7 +3,7 @@ slug: hollywood-heat-2
 name: Hollywood Heat
 title_slug: hollywood-heat-2
 ipdb_id: 6687
-manufacturer_slug: vifico-sa
+corporate_entity_slug: vifico-sa
 player_count: 4
 technology_generation_slug: solid-state
 system_slug: gottlieb-system-80b

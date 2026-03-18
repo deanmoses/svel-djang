@@ -4,7 +4,7 @@ name: Flipper Cowboy
 title_slug: flipper-cowboy
 opdb_id: G4yl6-MQ9op
 ipdb_id: 893
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1962
 month: 10
 player_count: 1

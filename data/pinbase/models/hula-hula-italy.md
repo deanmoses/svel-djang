@@ -3,7 +3,7 @@ slug: hula-hula-italy
 name: Hula-Hula (Italy)
 title_slug: hula-hula-italy
 ipdb_id: 6448
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1966
 month: 5
 player_count: 2

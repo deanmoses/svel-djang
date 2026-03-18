@@ -4,7 +4,7 @@ name: Big Valley
 title_slug: big-valley
 opdb_id: Gr1lY-MJ55W
 ipdb_id: 289
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1970
 month: 5
 player_count: 4

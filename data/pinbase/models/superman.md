@@ -4,7 +4,7 @@ name: Superman
 title_slug: superman
 opdb_id: GR73N-MwN9x
 ipdb_id: 2454
-manufacturer_slug: atari
+corporate_entity_slug: atari-incorporated
 year: 1979
 month: 3
 player_count: 4

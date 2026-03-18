@@ -4,7 +4,7 @@ name: Fighting Irish
 title_slug: fighting-irish
 opdb_id: G5bye-ML0v9
 ipdb_id: 843
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1950
 month: 11
 player_count: 1

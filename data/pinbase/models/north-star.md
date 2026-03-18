@@ -4,7 +4,7 @@ name: North Star
 title_slug: north-star
 opdb_id: GRV7Q-MJNez
 ipdb_id: 1683
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1964
 month: 9
 player_count: 1

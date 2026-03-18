@@ -4,7 +4,7 @@ name: Loop the Loop (AAB)
 title_slug: loop-the-loop
 opdb_id: GrkYy-MLWz9
 ipdb_id: 5279
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1966
 month: 1
 player_count: 2

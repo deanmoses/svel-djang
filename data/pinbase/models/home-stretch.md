@@ -3,7 +3,7 @@ slug: home-stretch
 name: Home Stretch
 title_slug: home-stretch
 ipdb_id: 3156
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1937
 month: 6
 player_count: 1

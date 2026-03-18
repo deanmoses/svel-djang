@@ -4,7 +4,7 @@ name: Truck Stop
 title_slug: truck-stop
 opdb_id: G5Y6O-MLn90
 ipdb_id: 2667
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1988
 month: 1
 player_count: 4

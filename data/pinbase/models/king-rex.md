@@ -4,7 +4,7 @@ name: King Rex
 title_slug: king-tut-king-rex
 opdb_id: Gr3qw-MD1PK
 ipdb_id: 1376
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1970
 month: 1
 player_count: 1

@@ -3,7 +3,7 @@ slug: marble
 name: Marble
 title_slug: marble
 ipdb_id: 5546
-manufacturer_slug: abt-manufacturing-company
+corporate_entity_slug: abt-manufacturing-company
 year: 1932
 month: 2
 player_count: 1

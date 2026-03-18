@@ -4,7 +4,7 @@ name: Olympic Games
 title_slug: olympic-games
 opdb_id: GreWJ-MLb7N
 ipdb_id: 3931
-manufacturer_slug: jeutel
+corporate_entity_slug: jeutel
 year: 1984
 month: 1
 player_count: 4

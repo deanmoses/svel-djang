@@ -4,7 +4,7 @@ name: Contest
 title_slug: contest
 opdb_id: GrdEK-MyNjz
 ipdb_id: 564
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1958
 month: 10
 player_count: 4

@@ -4,7 +4,7 @@ name: Super Tris
 title_slug: super-tris
 opdb_id: GRLpx-MJwxe
 ipdb_id: 3731
-manufacturer_slug: cea
+corporate_entity_slug: costruzioni-elettroniche-automatiche
 year: 1979
 month: 1
 player_count: 1

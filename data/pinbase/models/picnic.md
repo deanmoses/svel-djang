@@ -4,7 +4,7 @@ name: Picnic
 title_slug: picnic
 opdb_id: G4yJo-MDnVq
 ipdb_id: 1784
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1958
 month: 4
 player_count: 2

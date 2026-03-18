@@ -3,7 +3,7 @@ slug: fun-spot-61
 name: Fun Spot '61
 title_slug: fun-spot-61
 ipdb_id: 5994
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1961
 month: 4
 player_count: 1

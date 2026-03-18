@@ -4,7 +4,7 @@ name: The Incredible Hulk
 title_slug: the-incredible-hulk
 opdb_id: GRQW7-MLW5P
 ipdb_id: 1266
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1979
 month: 1
 player_count: 4

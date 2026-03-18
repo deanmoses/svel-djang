@@ -3,7 +3,7 @@ slug: peppy-2
 name: Peppy
 title_slug: peppy-2
 ipdb_id: 3358
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1938
 month: 7
 player_count: 1

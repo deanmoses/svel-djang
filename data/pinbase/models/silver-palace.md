@@ -3,7 +3,7 @@ slug: silver-palace
 name: Silver Palace
 title_slug: silver-palace
 ipdb_id: 6514
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 player_count: 4
 technology_generation_slug: solid-state
 credit_refs:

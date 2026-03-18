@@ -4,7 +4,7 @@ name: Excalibur
 title_slug: excalibur
 opdb_id: GrPbb-MJZX6
 ipdb_id: 795
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1988
 month: 1
 player_count: 4

@@ -3,7 +3,7 @@ slug: golden-nugget
 name: Golden Nugget
 title_slug: golden-nugget
 ipdb_id: 1054
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1953
 player_count: 1
 technology_generation_slug: electromechanical

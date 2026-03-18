@@ -3,7 +3,7 @@ slug: sporty
 name: Sporty
 title_slug: sporty
 ipdb_id: 2310
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1940
 month: 4
 player_count: 1

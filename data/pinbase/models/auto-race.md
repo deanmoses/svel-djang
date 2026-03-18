@@ -4,7 +4,7 @@ name: Auto Race
 title_slug: auto-race
 opdb_id: GR9WJ-MLX0W
 ipdb_id: 112
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1956
 month: 9
 player_count: 1

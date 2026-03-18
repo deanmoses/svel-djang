@@ -4,7 +4,7 @@ name: Hoe Down
 title_slug: roy-clark-super-picker
 opdb_id: G4J11-MJ9B1
 ipdb_id: 1252
-manufacturer_slug: allied-leisure
+corporate_entity_slug: allied-leisure-industries-incorporated
 year: 1978
 month: 3
 player_count: 4

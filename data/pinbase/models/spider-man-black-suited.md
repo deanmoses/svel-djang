@@ -4,7 +4,7 @@ name: Spider-Man (Black Suited LE)
 title_slug: spider-man
 opdb_id: G5D94-MyNBN
 ipdb_id: 5650
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2007
 month: 6
 player_count: 4

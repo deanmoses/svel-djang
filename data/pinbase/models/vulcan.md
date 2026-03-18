@@ -4,7 +4,7 @@ name: Vulcan
 title_slug: vulcan
 opdb_id: GRoDo-MDv3l
 ipdb_id: 2745
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1977
 month: 10
 player_count: 4

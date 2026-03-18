@@ -4,7 +4,7 @@ name: Rodeo
 title_slug: rodeo
 opdb_id: GR9vD-MDbkK
 ipdb_id: 1997
-manufacturer_slug: sega
+corporate_entity_slug: sega-enterprises-ltd
 year: 1977
 month: 1
 player_count: 2

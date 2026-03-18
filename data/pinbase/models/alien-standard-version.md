@@ -3,7 +3,7 @@ slug: alien-standard-version
 name: ALIEN (Standard Version)
 title_slug: alien-standard-version
 ipdb_id: 6757
-manufacturer_slug: pinball-brothers-ab
+corporate_entity_slug: pinball-brothers-ab
 year: 2021
 month: 3
 player_count: 4

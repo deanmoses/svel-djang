@@ -4,7 +4,7 @@ name: Genesis
 title_slug: genesis
 opdb_id: Gr2wz-MLBob
 ipdb_id: 996
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1986
 month: 1
 player_count: 4

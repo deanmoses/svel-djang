@@ -3,7 +3,7 @@ slug: road-trip
 name: Road Trip
 title_slug: road-trip
 opdb_id: GQKXy-MNENE
-manufacturer_slug: ramps-pinball
+corporate_entity_slug: ramps-pinball
 year: 2025
 month: 2
 player_count: 4

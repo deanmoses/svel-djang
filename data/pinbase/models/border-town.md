@@ -3,7 +3,7 @@ slug: border-town
 name: Border-Town
 title_slug: border-town
 ipdb_id: 357
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1940
 month: 6
 player_count: 1

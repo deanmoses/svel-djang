@@ -3,7 +3,7 @@ slug: shangrila
 name: Shangri'La
 title_slug: shangrila
 ipdb_id: 3337
-manufacturer_slug: p-s-machine-company
+corporate_entity_slug: p-s-machine-company
 year: 1943
 month: 11
 player_count: 1

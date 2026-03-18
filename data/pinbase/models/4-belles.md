@@ -4,7 +4,7 @@ name: 4-Belles
 title_slug: dragonette-4-belles
 opdb_id: G5DD0-MD014
 ipdb_id: 943
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1954
 month: 9
 player_count: 1

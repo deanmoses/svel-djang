@@ -4,7 +4,7 @@ name: Miss-O
 title_slug: miss-o-cue-t
 opdb_id: G4eqP-MLR0P
 ipdb_id: 1612
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1969
 month: 2
 player_count: 1

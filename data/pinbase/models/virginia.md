@@ -4,7 +4,7 @@ name: Virginia
 title_slug: virginia
 opdb_id: GWy0j-M0oY2
 ipdb_id: 2740
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1948
 month: 3
 player_count: 1

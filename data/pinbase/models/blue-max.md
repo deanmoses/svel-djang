@@ -4,7 +4,7 @@ name: Blue Max
 title_slug: blue-max-red-baron
 opdb_id: GryvE-MD3E5
 ipdb_id: 327
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1975
 month: 7
 player_count: 4

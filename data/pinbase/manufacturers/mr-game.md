@@ -1,6 +1,7 @@
 ---
 slug: mr-game
 name: Mr. Game
+opdb_manufacturer_id: 28
 ---
 
 Mr. Game was an Italian pinball manufacturer active during the late 1980s, producing a small but distinctive catalog of [[technologygeneration:solid-state]] machines. Like several other European manufacturers of the era, Mr. Game operated in a regional market that rewarded bold aesthetics and gameplay experimentation less constrained by the conservative tastes of American operators.

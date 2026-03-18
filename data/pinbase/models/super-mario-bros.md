@@ -4,7 +4,7 @@ name: Super Mario Bros.
 title_slug: super-mario-bros
 opdb_id: GRBzQ-MLO1j
 ipdb_id: 2435
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1992
 month: 4
 player_count: 4

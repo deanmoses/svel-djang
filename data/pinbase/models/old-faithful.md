@@ -4,7 +4,7 @@ name: Old Faithful
 title_slug: old-faithful
 opdb_id: GD7wl-M85We
 ipdb_id: 1705
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1949
 month: 12
 player_count: 1

@@ -4,7 +4,7 @@ name: Super Duo
 title_slug: hi-score-super-score
 opdb_id: GR6XE-M85zX
 ipdb_id: 2431
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1967
 month: 7
 player_count: 2

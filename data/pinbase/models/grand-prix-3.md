@@ -3,7 +3,7 @@ slug: grand-prix-3
 name: Grand Prix
 title_slug: grand-prix-2
 ipdb_id: 5647
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1977
 month: 5
 player_count: 4

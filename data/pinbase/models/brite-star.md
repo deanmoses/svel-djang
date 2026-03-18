@@ -4,7 +4,7 @@ name: Brite Star
 title_slug: brite-star
 opdb_id: G5wdV-ME0O8
 ipdb_id: 378
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1958
 month: 2
 player_count: 2

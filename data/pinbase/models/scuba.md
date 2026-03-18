@@ -4,7 +4,7 @@ name: Scuba
 title_slug: scuba
 opdb_id: G43dw-Mq1XY
 ipdb_id: 2077
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1970
 month: 9
 player_count: 2

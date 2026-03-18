@@ -3,7 +3,7 @@ slug: all-stars
 name: All Stars
 title_slug: all-stars
 ipdb_id: 55
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1968
 month: 2
 player_count: 2

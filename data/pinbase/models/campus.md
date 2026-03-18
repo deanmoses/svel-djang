@@ -3,7 +3,7 @@ slug: campus
 name: Campus
 title_slug: campus
 ipdb_id: 423
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1950
 month: 2
 player_count: 1

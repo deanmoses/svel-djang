@@ -3,7 +3,7 @@ slug: ginger
 name: Ginger
 title_slug: ginger
 ipdb_id: 1007
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1936
 month: 2
 player_count: 1

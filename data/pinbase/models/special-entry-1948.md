@@ -3,7 +3,7 @@ slug: special-entry-1948
 name: Special Entry 1948
 title_slug: special-entry-1948
 ipdb_id: 5570
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1948
 player_count: 1
 technology_generation_slug: electromechanical

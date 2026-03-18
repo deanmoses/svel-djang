@@ -3,7 +3,7 @@ slug: wizard-blocks
 name: Wizard Blocks!
 title_slug: wizard-blocks
 ipdb_id: 4489
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1999
 month: 11
 player_count: 4

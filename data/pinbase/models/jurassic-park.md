@@ -4,7 +4,7 @@ name: Jurassic Park
 title_slug: jurassic-park
 opdb_id: G4ZVB-MJ5lE
 ipdb_id: 1343
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1993
 month: 6
 player_count: 4

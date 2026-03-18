@@ -4,7 +4,7 @@ name: Messalina
 title_slug: messalina
 opdb_id: G4PeZ-MQ6Xw
 ipdb_id: 3600
-manufacturer_slug: rally
+corporate_entity_slug: rally-aka-rally-play-company
 year: 1966
 month: 1
 player_count: 2

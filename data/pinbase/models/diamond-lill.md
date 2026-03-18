@@ -4,7 +4,7 @@ name: Diamond Lill
 title_slug: diamond-lill
 opdb_id: G4Jpq-MLz43
 ipdb_id: 679
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1954
 month: 12
 player_count: 1

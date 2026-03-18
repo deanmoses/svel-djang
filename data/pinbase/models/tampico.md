@@ -4,7 +4,7 @@ name: Tampico
 title_slug: tampico
 opdb_id: G3Eo3-M7Zyq
 ipdb_id: 2495
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1949
 month: 6
 player_count: 1

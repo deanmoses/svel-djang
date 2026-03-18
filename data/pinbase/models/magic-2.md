@@ -4,7 +4,7 @@ name: Magic
 title_slug: magic
 opdb_id: G4eyp-MJ7XY
 ipdb_id: 1509
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1979
 month: 1
 player_count: 4

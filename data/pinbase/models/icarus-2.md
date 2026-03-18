@@ -4,7 +4,7 @@ name: Icarus
 title_slug: icarus-2
 opdb_id: G5pOY-MDbRK
 ipdb_id: 4370
-manufacturer_slug: petaco
+corporate_entity_slug: procedimientos-electromagnticos-de-tanteo-y-color
 year: 1972
 month: 1
 player_count: 1

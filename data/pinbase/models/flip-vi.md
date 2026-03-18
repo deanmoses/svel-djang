@@ -4,7 +4,7 @@ name: Flip-VI
 title_slug: mundial-90-flip-vi
 opdb_id: Gr3yE-MLb3K
 ipdb_id: 4096
-manufacturer_slug: inder
+corporate_entity_slug: industria-electromecnica-de-recreativos-sa
 year: 1990
 month: 1
 player_count: 4

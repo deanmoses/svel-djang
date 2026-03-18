@@ -3,7 +3,7 @@ slug: texas-mustang
 name: Texas Mustang
 title_slug: texas-mustang
 ipdb_id: 2526
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1941
 month: 10
 player_count: 1

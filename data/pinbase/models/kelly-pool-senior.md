@@ -3,7 +3,7 @@ slug: kelly-pool-senior
 name: Kelly Pool (Senior)
 title_slug: kelly-pool-senior
 ipdb_id: 1351
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1935
 month: 4
 player_count: 1

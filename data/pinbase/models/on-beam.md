@@ -4,7 +4,7 @@ name: On Beam
 title_slug: on-beam
 opdb_id: G4XQE-MnKBB
 ipdb_id: 1715
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1969
 month: 8
 player_count: 1

@@ -4,7 +4,7 @@ name: Grand Champion
 title_slug: grand-champion
 opdb_id: G5BdJ-MJPke
 ipdb_id: 1068
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1953
 month: 8
 player_count: 1

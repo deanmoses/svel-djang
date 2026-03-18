@@ -4,7 +4,7 @@ name: Future Queen
 title_slug: future-queen
 opdb_id: GRpBV-MrRbE
 ipdb_id: 3114
-manufacturer_slug: bell-games
+corporate_entity_slug: nuova-bell-games
 year: 1987
 month: 1
 player_count: 4

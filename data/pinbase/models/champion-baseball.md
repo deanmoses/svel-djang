@@ -3,7 +3,7 @@ slug: champion-baseball
 name: Champion Baseball
 title_slug: champion-baseball
 ipdb_id: 3010
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1955
 month: 7
 player_count: 2

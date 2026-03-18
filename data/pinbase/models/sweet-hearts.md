@@ -4,7 +4,7 @@ name: Sweet Hearts
 title_slug: sweet-hearts
 opdb_id: G4JwE-MLXB3
 ipdb_id: 2474
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1963
 month: 9
 player_count: 1

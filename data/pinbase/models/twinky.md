@@ -4,7 +4,7 @@ name: Twinky
 title_slug: twinky
 opdb_id: GrND1-MQ770
 ipdb_id: 2692
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1967
 month: 7
 player_count: 2

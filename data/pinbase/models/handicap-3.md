@@ -4,7 +4,7 @@ name: Handicap
 title_slug: handicap
 opdb_id: G5vdo-MnK8w
 ipdb_id: 1111
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1952
 month: 6
 player_count: 1

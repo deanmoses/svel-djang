@@ -4,7 +4,7 @@ name: Festival
 title_slug: festival
 opdb_id: G4lY9-MLRXe
 ipdb_id: 833
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1966
 month: 8
 player_count: 4

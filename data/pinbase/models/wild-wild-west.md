@@ -4,7 +4,7 @@ name: Wild Wild West
 title_slug: wild-wild-west-lariat
 opdb_id: G5LQ2-MQZ7p
 ipdb_id: 2787
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1969
 month: 8
 player_count: 2

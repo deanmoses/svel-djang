@@ -4,7 +4,7 @@ name: Buck Rogers
 title_slug: buck-rogers
 opdb_id: GRKx7-MJ49e
 ipdb_id: 392
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1980
 month: 1
 player_count: 4

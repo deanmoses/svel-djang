@@ -4,7 +4,7 @@ name: Locomotion
 title_slug: locomotion
 opdb_id: G4d7B-MJVlK
 ipdb_id: 3217
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1981
 month: 1
 player_count: 4

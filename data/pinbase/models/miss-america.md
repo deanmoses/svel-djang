@@ -3,7 +3,7 @@ slug: miss-america
 name: Miss America
 title_slug: miss-america
 ipdb_id: 1608
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1937
 month: 2
 player_count: 1

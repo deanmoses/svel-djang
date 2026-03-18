@@ -3,7 +3,7 @@ slug: ace-high-3
 name: Ace High
 title_slug: ace-high-3
 ipdb_id: 3765
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1954
 month: 7
 player_count: 1

@@ -4,7 +4,7 @@ name: The Games
 title_slug: the-games
 opdb_id: GR9NZ-Ml99O
 ipdb_id: 3391
-manufacturer_slug: gottlieb
+corporate_entity_slug: mylstar-electronics-incorporated
 year: 1984
 month: 1
 player_count: 4

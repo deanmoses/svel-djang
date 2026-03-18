@@ -4,7 +4,7 @@ name: Winner
 title_slug: winner-2
 opdb_id: G42nJ-ML3wj
 ipdb_id: 2792
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1972
 month: 5
 player_count: 2

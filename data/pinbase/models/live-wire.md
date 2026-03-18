@@ -3,7 +3,7 @@ slug: live-wire
 name: Live Wire
 title_slug: live-wire
 ipdb_id: 3216
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1937
 month: 1
 player_count: 1

@@ -4,7 +4,7 @@ name: Naples
 title_slug: naples
 opdb_id: G5Y1D-ML3Xd
 ipdb_id: 1655
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1957
 month: 8
 player_count: 2

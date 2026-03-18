@@ -4,7 +4,7 @@ name: Fire Mountain
 title_slug: fire-mountain
 opdb_id: G4E9p-MDOrl
 ipdb_id: 3097
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1980
 month: 1
 player_count: 4

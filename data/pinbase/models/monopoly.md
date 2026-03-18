@@ -4,7 +4,7 @@ name: Monopoly
 title_slug: monopoly
 opdb_id: G48w3-Mq1Zk
 ipdb_id: 4505
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2001
 month: 9
 player_count: 4

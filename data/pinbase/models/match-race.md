@@ -3,7 +3,7 @@ slug: match-race
 name: Match Race
 title_slug: match-race
 ipdb_id: 3715
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1973
 month: 3
 player_count: 2

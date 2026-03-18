@@ -4,7 +4,7 @@ name: Sea Jockeys
 title_slug: sea-jockeys
 opdb_id: Grl1y-MYeKk
 ipdb_id: 2084
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1951
 month: 11
 player_count: 1

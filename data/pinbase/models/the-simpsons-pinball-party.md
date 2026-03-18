@@ -4,7 +4,7 @@ name: The Simpsons Pinball Party
 title_slug: the-simpsons-pinball-party
 opdb_id: GRvBL-MP3Ev
 ipdb_id: 4674
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2003
 month: 1
 player_count: 4

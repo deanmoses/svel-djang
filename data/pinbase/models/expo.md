@@ -4,7 +4,7 @@ name: Expo
 title_slug: expo-roto
 opdb_id: Gr2jZ-M0olp
 ipdb_id: 798
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1969
 month: 10
 player_count: 2

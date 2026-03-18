@@ -4,7 +4,7 @@ name: Hula-Hula
 title_slug: hula-hula
 opdb_id: GR7Lp-MQKEP
 ipdb_id: 1253
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1965
 month: 7
 player_count: 2

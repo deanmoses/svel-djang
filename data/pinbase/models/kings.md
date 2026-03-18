@@ -3,7 +3,7 @@ slug: kings
 name: Kings
 title_slug: kings-2
 ipdb_id: 1379
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1935
 month: 4
 player_count: 1

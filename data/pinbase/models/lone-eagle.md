@@ -3,7 +3,7 @@ slug: lone-eagle
 name: Lone Eagle
 title_slug: lone-eagle
 ipdb_id: 3950
-manufacturer_slug: lone-eagle-manufacturing-company
+corporate_entity_slug: lone-eagle-manufacturing-company
 year: 1933
 month: 10
 player_count: 1

@@ -4,7 +4,7 @@ name: Brave Team
 title_slug: brave-team
 opdb_id: G5vxV-MDlzX
 ipdb_id: 4480
-manufacturer_slug: inder
+corporate_entity_slug: industria-electromecnica-de-recreativos-sa
 year: 1985
 month: 1
 player_count: 4

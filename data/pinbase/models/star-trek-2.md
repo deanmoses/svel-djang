@@ -4,7 +4,7 @@ name: Star Trek
 title_slug: 4-square-astro
 opdb_id: GryO2-MjB39
 ipdb_id: 2354
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1971
 month: 3
 player_count: 1

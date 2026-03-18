@@ -4,7 +4,7 @@ name: Lady Luck
 title_slug: lady-luck-2
 opdb_id: G5pzQ-MLlr2
 ipdb_id: 1404
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1968
 month: 3
 player_count: 2

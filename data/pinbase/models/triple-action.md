@@ -4,7 +4,7 @@ name: Triple Action
 title_slug: triple-action-star-action
 opdb_id: GRzny-MJ96W
 ipdb_id: 2648
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1974
 month: 2
 player_count: 1

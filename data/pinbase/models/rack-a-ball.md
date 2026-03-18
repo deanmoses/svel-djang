@@ -4,7 +4,7 @@ name: Rack-A-Ball
 title_slug: rack-a-ball
 opdb_id: GrqN3-MLq20
 ipdb_id: 1903
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1962
 month: 12
 player_count: 1

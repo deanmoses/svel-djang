@@ -4,7 +4,7 @@ name: Star Action
 title_slug: triple-action-star-action
 opdb_id: GRzny-M2Yl1
 ipdb_id: 2342
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1974
 month: 1
 player_count: 1

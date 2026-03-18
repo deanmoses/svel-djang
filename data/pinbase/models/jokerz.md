@@ -4,7 +4,7 @@ name: Jokerz!
 title_slug: jokerz
 opdb_id: Gry3j-Mq1Oe
 ipdb_id: 1308
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1988
 month: 1
 player_count: 4

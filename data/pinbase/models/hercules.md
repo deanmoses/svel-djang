@@ -4,7 +4,7 @@ name: Hercules
 title_slug: hercules
 opdb_id: G4NOx-MyNYZ
 ipdb_id: 1155
-manufacturer_slug: atari
+corporate_entity_slug: atari-incorporated
 year: 1979
 month: 5
 player_count: 4

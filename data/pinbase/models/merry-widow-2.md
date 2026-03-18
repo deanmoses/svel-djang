@@ -4,7 +4,7 @@ name: Merry Widow
 title_slug: merry-widow
 opdb_id: GRLxN-MBR9Z
 ipdb_id: 1577
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1963
 month: 10
 player_count: 4

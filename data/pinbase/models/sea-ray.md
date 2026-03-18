@@ -4,7 +4,7 @@ name: Sea Ray
 title_slug: mariner-sea-ray
 opdb_id: G4jBk-MLB1w
 ipdb_id: 2085
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1971
 month: 9
 player_count: 2

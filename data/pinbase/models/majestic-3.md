@@ -3,7 +3,7 @@ slug: majestic-3
 name: Majestic
 title_slug: majestic-3
 ipdb_id: 4150
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1935
 month: 12
 player_count: 1

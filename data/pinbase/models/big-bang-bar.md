@@ -4,7 +4,7 @@ name: Big Bang Bar
 title_slug: big-bang-bar
 opdb_id: G56vo-MLl1Z
 ipdb_id: 4001
-manufacturer_slug: capcom
+corporate_entity_slug: capcom-coin-op-incorporated
 year: 1996
 month: 1
 player_count: 4

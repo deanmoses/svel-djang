@@ -4,7 +4,7 @@ name: Steeple-Chase
 title_slug: steeple-chase
 opdb_id: GrJLB-MQ986
 ipdb_id: 2371
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1957
 month: 10
 player_count: 1

@@ -3,7 +3,7 @@ slug: zip
 name: Zip
 title_slug: zip
 ipdb_id: 2837
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1939
 month: 6
 player_count: 1

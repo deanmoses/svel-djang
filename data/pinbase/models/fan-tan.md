@@ -3,7 +3,7 @@ slug: fan-tan
 name: Fan-Tan
 title_slug: fan-tan
 ipdb_id: 819
-manufacturer_slug: northwest-coin-machine-company
+corporate_entity_slug: northwest-coin-machine-company
 year: 1932
 month: 3
 player_count: 1

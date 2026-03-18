@@ -4,7 +4,7 @@ name: Golden Gloves
 title_slug: golden-gloves
 opdb_id: GRwNV-MQP2V
 ipdb_id: 1050
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1960
 month: 1
 player_count: 1

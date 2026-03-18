@@ -4,7 +4,7 @@ name: Sunshine
 title_slug: sunshine
 opdb_id: G5o8p-M0oN5
 ipdb_id: 2423
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1958
 month: 9
 player_count: 1

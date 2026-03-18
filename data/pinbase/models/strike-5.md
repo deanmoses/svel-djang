@@ -3,7 +3,7 @@ slug: strike-5
 name: Strike
 title_slug: strike-4
 ipdb_id: 5156
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 player_count: 1
 production_quantity: '20'
 technology_generation_slug: electromechanical

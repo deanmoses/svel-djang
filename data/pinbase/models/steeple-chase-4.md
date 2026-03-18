@@ -3,7 +3,7 @@ slug: steeple-chase-4
 name: Steeple Chase
 title_slug: steeple-chase-4
 ipdb_id: 4978
-manufacturer_slug: lindstrom-tool-and-toy-company
+corporate_entity_slug: lindstrom-tool-and-toy-company
 year: 1933
 month: 4
 player_count: 1

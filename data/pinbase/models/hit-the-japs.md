@@ -3,7 +3,7 @@ slug: hit-the-japs
 name: Hit The Japs
 title_slug: hit-the-japs
 ipdb_id: 1202
-manufacturer_slug: victory-games
+corporate_entity_slug: victory-games
 year: 1942
 month: 10
 player_count: 1

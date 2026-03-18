@@ -4,7 +4,7 @@ name: Pistol Poker
 title_slug: pistol-poker
 opdb_id: GRLL9-MDOkz
 ipdb_id: 1805
-manufacturer_slug: alvin-g
+corporate_entity_slug: alvin-g-and-company
 year: 1993
 month: 1
 player_count: 4

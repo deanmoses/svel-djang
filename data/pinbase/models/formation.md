@@ -3,7 +3,7 @@ slug: formation
 name: Formation
 title_slug: formation
 ipdb_id: 918
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1940
 month: 7
 player_count: 1

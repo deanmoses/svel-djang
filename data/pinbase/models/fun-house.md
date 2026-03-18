@@ -4,7 +4,7 @@ name: Fun House
 title_slug: fun-house
 opdb_id: GrEvQ-MePRP
 ipdb_id: 967
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1956
 month: 8
 player_count: 4

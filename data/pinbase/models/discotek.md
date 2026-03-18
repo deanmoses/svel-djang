@@ -4,7 +4,7 @@ name: Discotek
 title_slug: discotek
 opdb_id: GRvlW-MLeXK
 ipdb_id: 687
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1965
 month: 9
 player_count: 2

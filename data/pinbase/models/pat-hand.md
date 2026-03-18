@@ -4,7 +4,7 @@ name: Pat Hand
 title_slug: pat-hand-satin-doll
 opdb_id: G48YQ-M1r1d
 ipdb_id: 1767
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1975
 month: 5
 player_count: 4

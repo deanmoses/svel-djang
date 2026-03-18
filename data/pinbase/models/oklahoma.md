@@ -4,7 +4,7 @@ name: Oklahoma
 title_slug: oklahoma-2
 opdb_id: GnPZo-MjBok
 ipdb_id: 1701
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1949
 month: 6
 player_count: 1

@@ -3,7 +3,7 @@ slug: tropics
 name: Tropics
 title_slug: tropics
 ipdb_id: 2665
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1953
 month: 7
 player_count: 1

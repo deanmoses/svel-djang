@@ -4,7 +4,7 @@ name: World Challenge Soccer
 title_slug: world-challenge-soccer
 opdb_id: GreOx-MQNv1
 ipdb_id: 2808
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1994
 month: 2
 player_count: 4

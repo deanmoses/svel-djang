@@ -3,7 +3,7 @@ slug: boomerang-3
 name: Boomerang
 title_slug: boomerang-2
 ipdb_id: 6338
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 player_count: 4
 production_quantity: '1'
 technology_generation_slug: solid-state

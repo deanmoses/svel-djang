@@ -4,7 +4,7 @@ name: Hang-On
 title_slug: hang-on
 opdb_id: GRVOY-ML1e8
 ipdb_id: 4128
-manufacturer_slug: segasa
+corporate_entity_slug: segasa-dba-sonic
 year: 1988
 month: 1
 player_count: 4

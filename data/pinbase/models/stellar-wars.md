@@ -4,7 +4,7 @@ name: Stellar Wars
 title_slug: stellar-wars
 opdb_id: G4lLp-MQ5Xy
 ipdb_id: 2372
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1979
 month: 3
 player_count: 4

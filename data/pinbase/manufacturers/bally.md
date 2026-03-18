@@ -1,6 +1,7 @@
 ---
 slug: bally
 name: Bally
+opdb_manufacturer_id: 8
 ---
 
 Few names carry more weight in the history of pinball than Bally. Founded in 1931 by [[person:raymond-t-moloney]] — who named the company after his breakthrough success, the Ballyhoo — Bally Manufacturing Corporation grew from a Chicago novelty shop operation into one of the most dominant forces in the amusement industry. For more than five decades, Bally machines set the standard for quality, innovation, and style.

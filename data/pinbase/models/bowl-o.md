@@ -4,7 +4,7 @@ name: Bowl-O
 title_slug: bowl-o
 opdb_id: GRnK7-MQk0V
 ipdb_id: 368
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1970
 month: 4
 player_count: 1

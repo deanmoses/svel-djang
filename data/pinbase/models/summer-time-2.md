@@ -4,7 +4,7 @@ name: Summer Time
 title_slug: travel-time-summer-time
 opdb_id: GrJED-MLOwz
 ipdb_id: 2415
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1973
 month: 2
 player_count: 1

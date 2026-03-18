@@ -4,7 +4,7 @@ name: Shaq Attaq
 title_slug: shaq
 opdb_id: G4PoV-MQr5e
 ipdb_id: 2874
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1995
 month: 2
 player_count: 4

@@ -4,7 +4,7 @@ name: Big Game
 title_slug: big-game
 opdb_id: G4jQw-MJ5rl
 ipdb_id: 249
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1980
 month: 3
 player_count: 4

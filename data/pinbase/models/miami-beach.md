@@ -3,7 +3,7 @@ slug: miami-beach
 name: Miami Beach
 title_slug: miami-beach
 ipdb_id: 1587
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1941
 month: 5
 player_count: 1

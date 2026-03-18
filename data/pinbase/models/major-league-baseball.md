@@ -4,7 +4,7 @@ name: Major League Baseball
 title_slug: major-league-baseball
 opdb_id: GvBeO-M1rN4
 ipdb_id: 1527
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1948
 month: 7
 player_count: 1

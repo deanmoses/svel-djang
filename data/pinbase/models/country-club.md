@@ -3,7 +3,7 @@ slug: country-club
 name: Country Club
 title_slug: country-club
 ipdb_id: 4292
-manufacturer_slug: stern-electronics
+corporate_entity_slug: western-equipment-supply-company
 year: 1936
 month: 10
 player_count: 1

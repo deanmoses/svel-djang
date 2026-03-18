@@ -3,7 +3,7 @@ slug: good-morning-america
 name: Good Morning America
 title_slug: good-morning-america
 ipdb_id: 5274
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2007
 month: 12
 player_count: 4

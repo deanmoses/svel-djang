@@ -4,7 +4,7 @@ name: Lucky Ace
 title_slug: dealers-choice-lucky-ace-high-ace
 opdb_id: GRwW9-MDeO6
 ipdb_id: 1483
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1974
 month: 11
 player_count: 1

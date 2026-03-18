@@ -4,7 +4,7 @@ name: Star Wars
 title_slug: star-wars-data-east
 opdb_id: G420r-MLedz
 ipdb_id: 2358
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1992
 month: 1
 player_count: 4

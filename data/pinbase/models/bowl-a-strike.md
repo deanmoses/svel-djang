@@ -4,7 +4,7 @@ name: Bowl A Strike
 title_slug: lucky-strike-bowl-a-strike
 opdb_id: G5BQj-MDzB7
 ipdb_id: 363
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1965
 month: 11
 player_count: 1

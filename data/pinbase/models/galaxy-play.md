@@ -4,7 +4,7 @@ name: Galaxy Play
 title_slug: galaxy-play
 opdb_id: GRDlQ-MJ9yJ
 ipdb_id: 4631
-manufacturer_slug: cic-play
+corporate_entity_slug: cic-play-sa
 year: 1986
 month: 1
 player_count: 4

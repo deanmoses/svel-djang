@@ -4,7 +4,7 @@ name: Little Chief
 title_slug: little-chief
 opdb_id: G410D-MLX76
 ipdb_id: 1458
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1975
 month: 9
 player_count: 4

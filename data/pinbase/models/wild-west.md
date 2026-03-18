@@ -4,7 +4,7 @@ name: Wild West
 title_slug: wild-west
 opdb_id: G41xJ-MQPzP
 ipdb_id: 2785
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1951
 month: 8
 player_count: 1

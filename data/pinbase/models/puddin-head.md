@@ -4,7 +4,7 @@ name: Puddin' Head
 title_slug: puddin-head
 opdb_id: G2LYd-Ml95y
 ipdb_id: 1874
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1948
 month: 10
 player_count: 1

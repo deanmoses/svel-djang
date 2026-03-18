@@ -3,7 +3,7 @@ slug: the-president
 name: The President
 title_slug: the-president
 ipdb_id: 1862
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1933
 month: 2
 player_count: 1

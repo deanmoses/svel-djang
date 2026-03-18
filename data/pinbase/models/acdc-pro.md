@@ -4,7 +4,7 @@ name: AC/DC (Pro)
 title_slug: ac-dc
 opdb_id: G43W4-MKNW0
 ipdb_id: 5767
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2012
 month: 1
 player_count: 4

@@ -3,7 +3,7 @@ slug: rat-race-2
 name: Rat Race
 title_slug: rat-race-2
 ipdb_id: 5339
-manufacturer_slug: gottlieb
+corporate_entity_slug: mylstar-electronics-incorporated
 player_count: 4
 technology_generation_slug: solid-state
 credit_refs:

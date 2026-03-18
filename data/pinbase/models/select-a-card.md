@@ -4,7 +4,7 @@ name: Select-A-Card
 title_slug: select-a-card
 opdb_id: GyVBQ-M9Rny
 ipdb_id: 2093
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1950
 month: 4
 player_count: 1

@@ -4,7 +4,7 @@ name: Safari
 title_slug: safari
 opdb_id: GR6X2-MQj25
 ipdb_id: 2044
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1968
 month: 5
 player_count: 2

@@ -3,7 +3,7 @@ slug: hula-hula-2
 name: Hula-Hula
 title_slug: hula-hula-2
 ipdb_id: 6324
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1966
 month: 5
 player_count: 2

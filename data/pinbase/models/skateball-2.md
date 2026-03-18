@@ -3,7 +3,7 @@ slug: skateball-2
 name: Skateball
 title_slug: skateball-2
 ipdb_id: 3237
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 player_count: 4
 production_quantity: '1'
 technology_generation_slug: solid-state

@@ -4,7 +4,7 @@ name: 'The Getaway: High Speed II'
 title_slug: the-getaway-high-speed-ii
 opdb_id: Grx8Y-MKNe9
 ipdb_id: 1000
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1992
 month: 2
 player_count: 4

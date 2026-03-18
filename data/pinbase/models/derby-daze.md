@@ -3,7 +3,7 @@ slug: derby-daze
 name: Derby Daze
 title_slug: derby-daze
 ipdb_id: 4460
-manufacturer_slug: sega
+corporate_entity_slug: sega-pinball-incorporated
 year: 1997
 production_quantity: '1'
 technology_generation_slug: solid-state

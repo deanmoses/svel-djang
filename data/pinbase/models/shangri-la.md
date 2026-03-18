@@ -4,7 +4,7 @@ name: Shangri-La
 title_slug: shangri-la
 opdb_id: G50XN-MKNVX
 ipdb_id: 2110
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1967
 month: 3
 player_count: 4

@@ -4,7 +4,7 @@ name: Hee Haw
 title_slug: hee-haw
 opdb_id: G56Jy-Mx0VX
 ipdb_id: 1152
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1973
 month: 4
 player_count: 4

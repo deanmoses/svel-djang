@@ -4,7 +4,7 @@ name: Coronation
 title_slug: coronation
 opdb_id: G4ZLy-Mb54O
 ipdb_id: 568
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1952
 month: 11
 player_count: 1

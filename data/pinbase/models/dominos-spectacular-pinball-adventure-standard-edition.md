@@ -4,7 +4,7 @@ name: Domino's Spectacular Pinball Adventure
 title_slug: dominos
 opdb_id: GxvQ7-MNE7O
 ipdb_id: 6418
-manufacturer_slug: spooky
+corporate_entity_slug: spooky-pinball-llc
 year: 2016
 month: 7
 player_count: 4

@@ -3,7 +3,7 @@ slug: bronco-3
 name: Bronco
 title_slug: bronco-2
 ipdb_id: 6672
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1964
 month: 5
 player_count: 2

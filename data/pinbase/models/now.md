@@ -4,7 +4,7 @@ name: Now
 title_slug: now
 opdb_id: G4JZv-MDlK5
 ipdb_id: 1685
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1971
 month: 4
 player_count: 4

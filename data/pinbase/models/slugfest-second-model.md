@@ -3,7 +3,7 @@ slug: slugfest-second-model
 name: SlugFest (Second Model)
 title_slug: slugfest-second-model
 ipdb_id: 5949
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1991
 player_count: 2
 technology_generation_slug: solid-state

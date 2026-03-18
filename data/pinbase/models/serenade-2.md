@@ -4,7 +4,7 @@ name: Serenade
 title_slug: serenade-2
 opdb_id: G4qpp-MLypr
 ipdb_id: 2098
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1960
 month: 5
 player_count: 2

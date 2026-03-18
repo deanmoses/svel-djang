@@ -4,7 +4,7 @@ name: Grande Domino
 title_slug: domino-playmates
 opdb_id: G4j8k-M9Ry2
 ipdb_id: 1069
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1968
 month: 11
 player_count: 1

@@ -4,7 +4,7 @@ name: Flying Chariots
 title_slug: flying-chariots
 opdb_id: GR6ex-MQkke
 ipdb_id: 901
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1963
 month: 10
 player_count: 2

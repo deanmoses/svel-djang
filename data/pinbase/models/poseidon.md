@@ -4,7 +4,7 @@ name: Poseidon
 title_slug: hit-the-deck-neptune
 opdb_id: GRoWo-MDl6j
 ipdb_id: 1852
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1978
 month: 7
 player_count: 1

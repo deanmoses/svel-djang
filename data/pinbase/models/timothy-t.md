@@ -4,7 +4,7 @@ name: Timothyt
 title_slug: timothyt
 opdb_id: GRBv3-MJ9xx
 ipdb_id: 3735
-manufacturer_slug: cea
+corporate_entity_slug: costruzioni-elettroniche-automatiche
 year: 1977
 month: 1
 player_count: 4

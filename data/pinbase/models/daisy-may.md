@@ -4,7 +4,7 @@ name: Daisy May
 title_slug: daisy-may
 opdb_id: Gred6-Mz2Z8
 ipdb_id: 631
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1954
 month: 6
 player_count: 1

@@ -4,7 +4,7 @@ name: Bus Stop
 title_slug: bus-stop
 opdb_id: G41BE-MLbw7
 ipdb_id: 408
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1964
 month: 12
 player_count: 2

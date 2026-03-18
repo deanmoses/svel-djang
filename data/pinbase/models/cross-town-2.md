@@ -4,7 +4,7 @@ name: Cross Town
 title_slug: subway-cross-town
 opdb_id: GrEQy-MQYkj
 ipdb_id: 601
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1966
 month: 9
 player_count: 1

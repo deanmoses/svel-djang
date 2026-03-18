@@ -4,7 +4,7 @@ name: Bongo
 title_slug: 3-in-line-bongo
 opdb_id: G41e6-M7ZEk
 ipdb_id: 349
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1964
 month: 3
 player_count: 2

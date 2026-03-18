@@ -3,7 +3,7 @@ slug: recorder
 name: Recorder
 title_slug: recorder
 ipdb_id: 3553
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1938
 month: 2
 player_count: 1

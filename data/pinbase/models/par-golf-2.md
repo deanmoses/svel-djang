@@ -3,7 +3,7 @@ slug: par-golf-2
 name: Par Golf
 title_slug: par-golf-2
 ipdb_id: 1747
-manufacturer_slug: artists-and-creators-guild-incorporated
+corporate_entity_slug: artists-and-creators-guild-incorporated
 year: 1932
 month: 4
 player_count: 1

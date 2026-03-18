@@ -4,7 +4,7 @@ name: Swinger
 title_slug: fun-fest-swinger
 opdb_id: G5L1Q-MDx7R
 ipdb_id: 2485
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1972
 month: 12
 player_count: 2

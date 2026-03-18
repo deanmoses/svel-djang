@@ -4,7 +4,7 @@ name: Dancing Lady
 title_slug: dancing-lady
 opdb_id: G5DeY-MNEXX
 ipdb_id: 635
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1966
 month: 11
 player_count: 4

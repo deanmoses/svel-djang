@@ -4,7 +4,7 @@ name: 4 Star
 title_slug: 4-star
 opdb_id: GRnVL-MP3NR
 ipdb_id: 941
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1958
 month: 7
 player_count: 1

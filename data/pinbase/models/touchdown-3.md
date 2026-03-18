@@ -4,7 +4,7 @@ name: Touchdown
 title_slug: touchdown
 opdb_id: G4ldW-MQPNv
 ipdb_id: 2610
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1984
 month: 1
 player_count: 4

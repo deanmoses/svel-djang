@@ -4,7 +4,7 @@ name: Cosmos
 title_slug: cosmos
 opdb_id: G5p2Y-MDqKz
 ipdb_id: 572
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1969
 month: 1
 player_count: 4

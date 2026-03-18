@@ -3,7 +3,7 @@ slug: treasure-chest
 name: Treasure Chest
 title_slug: treasure-chest
 ipdb_id: 2638
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1947
 month: 12
 player_count: 1

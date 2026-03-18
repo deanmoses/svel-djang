@@ -4,7 +4,7 @@ name: Ready...Aim...Fire!
 title_slug: readyaimfire
 opdb_id: GRL2z-MQkqe
 ipdb_id: 1924
-manufacturer_slug: gottlieb
+corporate_entity_slug: mylstar-electronics-incorporated
 year: 1983
 month: 1
 player_count: 4

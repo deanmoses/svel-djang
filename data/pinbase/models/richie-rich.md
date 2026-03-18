@@ -3,7 +3,7 @@ slug: richie-rich
 name: Richie Rich
 title_slug: richie-rich
 ipdb_id: 4344
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1994
 month: 7
 player_count: 4

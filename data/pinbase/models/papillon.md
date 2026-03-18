@@ -4,7 +4,7 @@ name: Papillon
 title_slug: papillon-2
 opdb_id: GR6VW-MBRwz
 ipdb_id: 3934
-manufacturer_slug: jeutel
+corporate_entity_slug: jeutel
 year: 1984
 month: 1
 player_count: 4

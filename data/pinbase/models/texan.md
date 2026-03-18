@@ -4,7 +4,7 @@ name: Texan
 title_slug: texan
 opdb_id: GR9nJ-M1rb3
 ipdb_id: 2525
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1960
 month: 4
 player_count: 4

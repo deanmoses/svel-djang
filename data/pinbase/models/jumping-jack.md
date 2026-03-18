@@ -4,7 +4,7 @@ name: Jumping Jack
 title_slug: jack-in-the-box-jumping-jack
 opdb_id: Gr2JJ-MOExx
 ipdb_id: 1329
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1973
 month: 5
 player_count: 2

@@ -3,7 +3,7 @@ slug: gold-mine-3
 name: Gold Mine
 title_slug: gold-mine-3
 ipdb_id: 4935
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1987
 month: 11
 player_count: 6

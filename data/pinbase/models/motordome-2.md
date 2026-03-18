@@ -3,7 +3,7 @@ slug: motordome-2
 name: Motordome
 title_slug: motordome-2
 ipdb_id: 4551
-manufacturer_slug: bally
+corporate_entity_slug: bally-wulff
 year: 1986
 player_count: 4
 technology_generation_slug: solid-state

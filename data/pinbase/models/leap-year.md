@@ -4,7 +4,7 @@ name: Leap-Year
 title_slug: leap-year
 opdb_id: G9zBb-MRjBv
 ipdb_id: 1427
-manufacturer_slug: marvel
+corporate_entity_slug: marvel-manufacturing-company
 year: 1948
 month: 4
 player_count: 1

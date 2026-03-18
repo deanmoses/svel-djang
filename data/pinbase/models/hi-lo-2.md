@@ -4,7 +4,7 @@ name: Hi-Lo
 title_slug: spin-a-card-hearts-and-spades
 opdb_id: G4ZQv-MOEE1
 ipdb_id: 1184
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1969
 month: 2
 player_count: 1

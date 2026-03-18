@@ -4,7 +4,7 @@ name: Split Second
 title_slug: split-second
 opdb_id: GRLbz-MDnxo
 ipdb_id: 2297
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1981
 month: 1
 player_count: 4

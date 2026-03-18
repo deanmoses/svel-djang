@@ -4,7 +4,7 @@ name: Student Prince
 title_slug: student-prince
 opdb_id: G42XZ-MDvkd
 ipdb_id: 2408
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1968
 month: 6
 player_count: 4

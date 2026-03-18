@@ -4,7 +4,7 @@ name: Metallica Monsters (Premium)
 title_slug: metallica
 opdb_id: GRBE4-MJ9rE-ARZYO
 ipdb_id: 6030
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2013
 month: 1
 player_count: 4

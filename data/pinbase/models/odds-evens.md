@@ -4,7 +4,7 @@ name: Odds & Evens
 title_slug: monte-carlo-odds-evens
 opdb_id: G4NnZ-MD3vq
 ipdb_id: 1692
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1973
 month: 3
 player_count: 1

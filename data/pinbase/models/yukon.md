@@ -4,7 +4,7 @@ name: Yukon
 title_slug: gold-rush-yukon-klondike
 opdb_id: GR987-MQrrP
 ipdb_id: 2829
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1971
 month: 8
 player_count: 1

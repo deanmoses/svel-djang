@@ -4,7 +4,7 @@ name: Palooka
 title_slug: palooka
 opdb_id: G5pJd-MDE1Y
 ipdb_id: 1743
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1964
 month: 4
 player_count: 1

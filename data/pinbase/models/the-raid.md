@@ -4,7 +4,7 @@ name: The Raid
 title_slug: raid
 opdb_id: Grd1n-MDepV
 ipdb_id: 3511
-manufacturer_slug: playmatic
+corporate_entity_slug: playmatic
 year: 1984
 month: 1
 player_count: 4

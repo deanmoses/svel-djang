@@ -4,7 +4,7 @@ name: Night Rider (EM)
 title_slug: night-rider
 opdb_id: GryQj-MLRyd
 ipdb_id: 1677
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1976
 month: 11
 player_count: 4

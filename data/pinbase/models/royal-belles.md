@@ -3,7 +3,7 @@ slug: royal-belles
 name: Royal Belles
 title_slug: royal-belles
 ipdb_id: 6821
-manufacturer_slug: keeney
+corporate_entity_slug: j-h-keeney-and-company-incorporated
 year: 1960
 player_count: 1
 technology_generation_slug: electromechanical

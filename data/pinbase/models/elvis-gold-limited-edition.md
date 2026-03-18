@@ -4,7 +4,7 @@ name: Elvis Gold
 title_slug: elvis
 opdb_id: G4qbX-MJw5r-A93pJ
 ipdb_id: 6032
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2004
 month: 8
 player_count: 4

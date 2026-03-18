@@ -3,7 +3,7 @@ slug: miss-america-3
 name: Miss America
 title_slug: miss-america-3
 ipdb_id: 1610
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1947
 player_count: 1
 production_quantity: '1673'

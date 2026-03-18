@@ -4,7 +4,7 @@ name: Frank Thomas' Big Hurt
 title_slug: frank-thomas-big-hurt
 opdb_id: G4kzN-MQpYx
 ipdb_id: 3591
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1995
 month: 6
 player_count: 4

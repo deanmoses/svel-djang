@@ -4,7 +4,7 @@ name: Universe
 title_slug: universe-2
 opdb_id: GRLy6-MnKV7
 ipdb_id: 2705
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1959
 month: 9
 player_count: 1

@@ -4,7 +4,7 @@ name: Army Navy
 title_slug: army-navy
 opdb_id: G5VNb-MQoZ7
 ipdb_id: 91
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1953
 month: 10
 player_count: 1

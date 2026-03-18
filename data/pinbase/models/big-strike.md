@@ -4,7 +4,7 @@ name: Big Strike
 title_slug: hot-line-big-strike
 opdb_id: GrZex-MQKR0
 ipdb_id: 280
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1966
 month: 8
 player_count: 1

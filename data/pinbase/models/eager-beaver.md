@@ -4,7 +4,7 @@ name: Eager Beaver
 title_slug: eager-beaver
 opdb_id: GrOvq-MDl2q
 ipdb_id: 752
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1965
 month: 4
 player_count: 2

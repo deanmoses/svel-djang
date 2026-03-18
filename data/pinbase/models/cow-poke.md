@@ -4,7 +4,7 @@ name: Cow Poke
 title_slug: buckaroo-cow-poke
 opdb_id: GRzow-M9R2d
 ipdb_id: 581
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1965
 month: 6
 player_count: 1

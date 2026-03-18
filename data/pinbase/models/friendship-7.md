@@ -4,7 +4,7 @@ name: Friendship "7"
 title_slug: friendship-7
 opdb_id: GrxD0-MJjp8
 ipdb_id: 955
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1962
 month: 7
 player_count: 1

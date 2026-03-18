@@ -4,7 +4,7 @@ name: Zodiac
 title_slug: zodiac-planets
 opdb_id: GRBBx-MDBEb
 ipdb_id: 2841
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1971
 month: 8
 player_count: 2

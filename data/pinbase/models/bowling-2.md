@@ -3,5 +3,5 @@ slug: bowling-2
 name: Bowling
 title_slug: bowling-2
 ipdb_id: 6231
-manufacturer_slug: faer-sl
+corporate_entity_slug: fbrica-de-aparatos-electro-mecnicos-recreativos-sl-ofmadrid
 ---

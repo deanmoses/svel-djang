@@ -4,7 +4,7 @@ name: Big Chief
 title_slug: big-chief
 opdb_id: Gr2VB-MdEVE
 ipdb_id: 240
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1965
 month: 9
 player_count: 4

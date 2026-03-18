@@ -3,7 +3,7 @@ slug: stars-3
 name: Stars
 title_slug: stars-3
 ipdb_id: 2365
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1952
 month: 6
 player_count: 1

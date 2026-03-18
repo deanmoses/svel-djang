@@ -4,7 +4,7 @@ name: Grand Lizard
 title_slug: grand-lizard
 opdb_id: G4XPZ-M7Zob
 ipdb_id: 1070
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1986
 month: 1
 player_count: 4

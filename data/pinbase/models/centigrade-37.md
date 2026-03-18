@@ -4,7 +4,7 @@ name: Centigrade 37
 title_slug: centigrade-37
 opdb_id: GrZ1k-MrRKZ
 ipdb_id: 480
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1977
 month: 8
 player_count: 1

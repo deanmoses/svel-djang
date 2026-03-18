@@ -4,7 +4,7 @@ name: Big Casino
 title_slug: big-casino
 opdb_id: GrEvL-MQYNY
 ipdb_id: 239
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1961
 month: 7
 player_count: 1

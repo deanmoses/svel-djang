@@ -4,7 +4,7 @@ name: Trail Drive
 title_slug: trail-drive
 opdb_id: G5QZZ-MLXOj
 ipdb_id: 2625
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1970
 month: 9
 player_count: 1

@@ -3,7 +3,7 @@ slug: deluxe-fun-cruise
 name: Deluxe Fun Cruise
 title_slug: deluxe-fun-cruise
 ipdb_id: 658
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1966
 month: 11
 player_count: 1

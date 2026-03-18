@@ -3,7 +3,7 @@ slug: dux
 name: Dux
 title_slug: dux
 ipdb_id: 748
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1937
 month: 12
 player_count: 1

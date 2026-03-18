@@ -4,7 +4,7 @@ name: Seawitch
 title_slug: seawitch
 opdb_id: GR6kB-MDz81
 ipdb_id: 2089
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1980
 month: 5
 player_count: 4

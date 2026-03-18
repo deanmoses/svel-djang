@@ -4,7 +4,7 @@ name: Top Hat
 title_slug: top-hat
 opdb_id: Gr3xX-MLxyl
 ipdb_id: 2583
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1958
 month: 2
 player_count: 2

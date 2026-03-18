@@ -3,7 +3,7 @@ slug: wahoo
 name: Wahoo
 title_slug: wahoo
 ipdb_id: 2748
-manufacturer_slug: c-f-eckhart-company
+corporate_entity_slug: c-f-eckhart-company
 year: 1933
 month: 8
 player_count: 1

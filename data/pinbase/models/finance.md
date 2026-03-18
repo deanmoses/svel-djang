@@ -3,7 +3,7 @@ slug: finance
 name: Finance
 title_slug: finance
 ipdb_id: 3096
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1936
 month: 4
 player_count: 1

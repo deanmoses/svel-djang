@@ -4,7 +4,7 @@ name: ROCs
 title_slug: rocs
 opdb_id: Gd22x-MNElO
 ipdb_id: 6451
-manufacturer_slug: multimorphic
+corporate_entity_slug: multimorphic-inc
 year: 2020
 month: 7
 player_count: 1

@@ -4,7 +4,7 @@ name: Metal Man
 title_slug: metal-man
 opdb_id: G4x3Y-MDznw
 ipdb_id: 4092
-manufacturer_slug: inder
+corporate_entity_slug: industria-electromecnica-de-recreativos-sa
 year: 1992
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: Andromeda
 title_slug: andromeda
 opdb_id: GrXOZ-MLyb0
 ipdb_id: 73
-manufacturer_slug: game-plan
+corporate_entity_slug: game-plan-incorporated
 year: 1985
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: Six Million Dollar Man
 title_slug: six-million-dollar-man
 opdb_id: GrEke-ML8qN
 ipdb_id: 2165
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1977
 month: 8
 player_count: 6

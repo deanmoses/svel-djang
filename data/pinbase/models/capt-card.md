@@ -4,7 +4,7 @@ name: Capt. Card
 title_slug: high-hand-capt-card
 opdb_id: GRYbJ-MNEz8
 ipdb_id: 433
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1974
 month: 5
 player_count: 1

@@ -3,7 +3,7 @@ slug: ballyview
 name: Ballyview
 title_slug: ballyview
 ipdb_id: 156
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1938
 month: 10
 player_count: 1

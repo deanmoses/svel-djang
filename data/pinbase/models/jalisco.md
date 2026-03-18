@@ -4,7 +4,7 @@ name: Jalisco
 title_slug: jalisco
 opdb_id: G56xZ-MLx84
 ipdb_id: 4667
-manufacturer_slug: recreativos-franco
+corporate_entity_slug: recreativos-franco
 year: 1976
 month: 1
 player_count: 1

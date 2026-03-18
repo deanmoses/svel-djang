@@ -4,7 +4,7 @@ name: Happy Tour
 title_slug: grand-tour-happy-tour
 opdb_id: GrNx1-MNEEp
 ipdb_id: 1119
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1964
 month: 6
 player_count: 1

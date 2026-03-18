@@ -3,7 +3,7 @@ slug: batter-up-4
 name: Batter Up
 title_slug: batter-up-3
 ipdb_id: 4238
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1935
 month: 6
 player_count: 1

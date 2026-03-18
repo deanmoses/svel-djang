@@ -4,7 +4,7 @@ name: The 4 Horsemen
 title_slug: the-4-horsemen
 opdb_id: GRKdD-MLnxD
 ipdb_id: 933
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1950
 month: 9
 player_count: 1

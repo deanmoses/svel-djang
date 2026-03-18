@@ -4,7 +4,7 @@ name: Texas Ranger
 title_slug: lawman
 opdb_id: GrEXx-MYeBw
 ipdb_id: 2527
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1972
 month: 1
 player_count: 1

@@ -4,7 +4,7 @@ name: Melody
 title_slug: sing-along-melody
 opdb_id: GrPkZ-MLeKd
 ipdb_id: 1566
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1967
 month: 10
 player_count: 1

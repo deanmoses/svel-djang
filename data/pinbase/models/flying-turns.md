@@ -4,7 +4,7 @@ name: Flying Turns
 title_slug: flying-turns
 opdb_id: G42xB-MrRXW
 ipdb_id: 910
-manufacturer_slug: midway
+corporate_entity_slug: midway-manufacturing-company
 year: 1964
 month: 7
 player_count: 2

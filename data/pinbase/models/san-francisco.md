@@ -4,7 +4,7 @@ name: San Francisco
 title_slug: san-francisco
 opdb_id: GRLwP-MDnpY
 ipdb_id: 2049
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1964
 month: 5
 player_count: 2

@@ -4,7 +4,7 @@ name: Rodeo
 title_slug: rodeo-2
 opdb_id: G5nNX-MJ950
 ipdb_id: 1994
-manufacturer_slug: midway
+corporate_entity_slug: midway-manufacturing-company
 year: 1964
 month: 10
 player_count: 2

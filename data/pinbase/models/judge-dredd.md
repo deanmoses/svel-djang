@@ -4,7 +4,7 @@ name: Judge Dredd
 title_slug: judge-dredd
 opdb_id: GRoZw-MLW3j
 ipdb_id: 1322
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1993
 month: 1
 player_count: 4

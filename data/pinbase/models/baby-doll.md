@@ -4,7 +4,7 @@ name: Baby Doll
 title_slug: pat-hand-satin-doll
 opdb_id: G48YQ-MYelP
 ipdb_id: 121
-manufacturer_slug: segasa
+corporate_entity_slug: segasa
 year: 1975
 month: 1
 player_count: 1

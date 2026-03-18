@@ -4,7 +4,7 @@ name: Caravan
 title_slug: caravan
 opdb_id: G5WkJ-ME0XK
 ipdb_id: 4034
-manufacturer_slug: playmatic
+corporate_entity_slug: playmatic
 year: 1968
 month: 1
 player_count: 1

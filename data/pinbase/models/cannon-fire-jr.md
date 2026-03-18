@@ -3,7 +3,7 @@ slug: cannon-fire-jr
 name: Cannon Fire Jr.
 title_slug: cannon-fire-jr
 ipdb_id: 4970
-manufacturer_slug: mills-novelty-company
+corporate_entity_slug: mills-novelty-company
 year: 1934
 month: 11
 player_count: 1

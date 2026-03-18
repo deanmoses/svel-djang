@@ -4,7 +4,7 @@ name: Shoot the Moon
 title_slug: shoot-the-moon
 opdb_id: GRLq7-MQY6k
 ipdb_id: 2122
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1951
 month: 11
 player_count: 1

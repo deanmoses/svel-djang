@@ -3,7 +3,7 @@ slug: gay-cruise
 name: Gay Cruise
 title_slug: gay-cruise
 ipdb_id: 990
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 player_count: 1
 production_quantity: '60'
 technology_generation_slug: electromechanical

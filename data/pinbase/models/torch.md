@@ -4,7 +4,7 @@ name: Torch
 title_slug: torch
 opdb_id: G4JbV-M5Rqn
 ipdb_id: 2595
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1980
 month: 2
 player_count: 4

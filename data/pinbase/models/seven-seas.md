@@ -4,7 +4,7 @@ name: Seven Seas
 title_slug: seven-seas
 opdb_id: G4xLZ-MjBd9
 ipdb_id: 2102
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1959
 month: 12
 player_count: 2

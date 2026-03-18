@@ -4,7 +4,7 @@ name: Karate Fight
 title_slug: black-belt-karate-fight
 opdb_id: G562j-MLWYq
 ipdb_id: 1346
-manufacturer_slug: bally
+corporate_entity_slug: bally-wulff
 year: 1986
 month: 6
 player_count: 4

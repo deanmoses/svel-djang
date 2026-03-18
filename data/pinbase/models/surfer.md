@@ -4,7 +4,7 @@ name: Surfer
 title_slug: surf-champ-surfer
 opdb_id: GrZwo-MJNlQ
 ipdb_id: 2465
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1976
 month: 10
 player_count: 2

@@ -4,7 +4,7 @@ name: Totem
 title_slug: totem
 opdb_id: G5YDN-MJKYo
 ipdb_id: 2607
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1979
 month: 1
 player_count: 4

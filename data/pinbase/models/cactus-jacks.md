@@ -4,7 +4,7 @@ name: Cactus Jack's
 title_slug: cactus-jacks
 opdb_id: G5bxy-ML30z
 ipdb_id: 416
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1991
 month: 1
 player_count: 4

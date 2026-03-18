@@ -4,7 +4,7 @@ name: Special Force
 title_slug: special-force
 opdb_id: GRDkX-M61RE
 ipdb_id: 2272
-manufacturer_slug: bally
+corporate_entity_slug: bally-midway-manufacturing-company
 year: 1986
 month: 1
 player_count: 4

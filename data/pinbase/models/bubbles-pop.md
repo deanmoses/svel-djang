@@ -3,7 +3,7 @@ slug: bubbles-pop
 name: Bubbles Pop
 title_slug: bubbles-pop
 ipdb_id: 6717
-manufacturer_slug: weche
+corporate_entity_slug: wee-chin-electric-machinery-inc
 year: 2019
 month: 2
 player_count: 4

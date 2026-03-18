@@ -4,7 +4,7 @@ name: Trade Winds
 title_slug: trade-winds
 opdb_id: G56Qx-MJNnO
 ipdb_id: 2621
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1962
 month: 6
 player_count: 1

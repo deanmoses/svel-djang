@@ -3,7 +3,7 @@ slug: still-crazy
 name: Still Crazy
 title_slug: still-crazy
 ipdb_id: 3730
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1984
 player_count: 1
 production_quantity: '12'

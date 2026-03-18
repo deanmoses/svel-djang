@@ -3,7 +3,7 @@ slug: 4-in-1-pigskin-2010
 name: '4-IN-1 (Pigskin: 2010)'
 title_slug: 4-in-1-pigskin-2010
 ipdb_id: 6010
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1985
 month: 12
 player_count: 2

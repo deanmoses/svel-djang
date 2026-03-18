@@ -3,7 +3,7 @@ slug: fairway
 name: Fairway
 title_slug: fairway-2
 ipdb_id: 813
-manufacturer_slug: c-f-eckhart-company
+corporate_entity_slug: c-f-eckhart-company
 year: 1935
 month: 5
 player_count: 1

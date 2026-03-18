@@ -3,7 +3,7 @@ slug: nudge-it
 name: Nudge-It
 title_slug: nudge-it
 ipdb_id: 3454
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1990
 month: 12
 player_count: 1

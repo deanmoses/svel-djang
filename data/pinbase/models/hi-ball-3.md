@@ -4,7 +4,7 @@ name: Hi Ball
 title_slug: hi-ball
 opdb_id: GR7j6-MDxWl
 ipdb_id: 3709
-manufacturer_slug: tecnoplay
+corporate_entity_slug: tecnoplay
 year: 1988
 month: 1
 player_count: 6

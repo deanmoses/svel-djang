@@ -4,7 +4,7 @@ name: Champion
 title_slug: champion
 opdb_id: G5v11-ML0Nk
 ipdb_id: 3693
-manufacturer_slug: nordamatic
+corporate_entity_slug: nordamatic
 year: 1975
 month: 1
 player_count: 1

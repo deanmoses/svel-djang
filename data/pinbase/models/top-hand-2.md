@@ -4,7 +4,7 @@ name: Top Hand
 title_slug: high-hand-capt-card
 opdb_id: GRYbJ-MQo4P
 ipdb_id: 2582
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1973
 month: 5
 player_count: 1

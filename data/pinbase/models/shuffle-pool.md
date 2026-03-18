@@ -3,7 +3,7 @@ slug: shuffle-pool
 name: Shuffle Pool
 title_slug: shuffle-pool
 ipdb_id: 6819
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1953
 month: 11
 player_count: 4

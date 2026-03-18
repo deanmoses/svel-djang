@@ -4,7 +4,7 @@ name: Alpha 2001
 title_slug: alpha-2001
 opdb_id: GRLdW-MDOz8
 ipdb_id: 3688
-manufacturer_slug: cea
+corporate_entity_slug: costruzioni-elettroniche-automatiche
 year: 1977
 month: 1
 player_count: 1

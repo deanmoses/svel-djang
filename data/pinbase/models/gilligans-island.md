@@ -4,7 +4,7 @@ name: Gilligan's Island
 title_slug: gilligans-island
 opdb_id: GRBxQ-MnKX7
 ipdb_id: 1004
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1991
 month: 4
 player_count: 4

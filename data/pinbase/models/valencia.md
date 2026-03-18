@@ -4,7 +4,7 @@ name: Valencia
 title_slug: valencia-toledo
 opdb_id: G5nj6-MLnwY
 ipdb_id: 2714
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1975
 month: 7
 player_count: 4

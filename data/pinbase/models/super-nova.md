@@ -4,7 +4,7 @@ name: Super Nova
 title_slug: super-nova
 opdb_id: G56KW-MKNNj
 ipdb_id: 2436
-manufacturer_slug: game-plan
+corporate_entity_slug: game-plan-incorporated
 year: 1982
 month: 5
 player_count: 4

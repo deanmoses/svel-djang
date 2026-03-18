@@ -4,7 +4,7 @@ name: Mars God of War
 title_slug: mars-god-of-war
 opdb_id: GrNpY-MJrZw
 ipdb_id: 1549
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1981
 month: 3
 player_count: 4

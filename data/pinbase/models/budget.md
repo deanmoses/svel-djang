@@ -3,7 +3,7 @@ slug: budget
 name: Budget
 title_slug: budget
 ipdb_id: 3666
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1936
 month: 3
 player_count: 1

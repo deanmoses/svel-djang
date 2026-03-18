@@ -1,6 +1,7 @@
 ---
 slug: tecnoplay
 name: Tecnoplay
+opdb_manufacturer_id: 22
 ---
 
 Tecnoplay was an Italian pinball manufacturer active in the late 1980s and early 1990s, producing [[technologygeneration:solid-state]] machines for the European amusement market. Like other Italian manufacturers of the era — including [[manufacturer:mr-game]] and [[manufacturer:zaccaria]] — Tecnoplay operated in a domestic market with distinct tastes and distribution networks, producing machines that rarely reached North American collectors during the company's active years.

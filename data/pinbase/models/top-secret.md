@@ -4,7 +4,7 @@ name: Top-Secret
 title_slug: miss-o-cue-t
 opdb_id: G4eqP-ME067
 ipdb_id: 4956
-manufacturer_slug: maresa
+corporate_entity_slug: maquinas-recreativas-sociedad-anonima
 year: 1969
 month: 1
 player_count: 1

@@ -3,7 +3,7 @@ slug: crosswords
 name: Crosswords
 title_slug: crosswords
 ipdb_id: 606
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 player_count: 1
 production_quantity: '450'
 technology_generation_slug: electromechanical

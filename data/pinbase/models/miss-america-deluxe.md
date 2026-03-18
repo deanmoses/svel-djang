@@ -3,7 +3,7 @@ slug: miss-america-deluxe
 name: Miss America Deluxe
 title_slug: miss-america-deluxe
 ipdb_id: 3403
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1978
 month: 7
 player_count: 1

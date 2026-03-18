@@ -4,7 +4,7 @@ name: Lady Luck
 title_slug: lady-luck
 opdb_id: GR0nO-MdE2B
 ipdb_id: 1402
-manufacturer_slug: bally
+corporate_entity_slug: bally-midway-manufacturing-company
 year: 1986
 month: 2
 player_count: 4

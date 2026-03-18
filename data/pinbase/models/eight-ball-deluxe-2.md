@@ -4,7 +4,7 @@ name: Eight Ball Deluxe (1984 edition)
 title_slug: eight-ball-deluxe
 opdb_id: G5KXk-MLB9V-A1JKr
 ipdb_id: 5021
-manufacturer_slug: bally
+corporate_entity_slug: bally-midway-manufacturing-company
 year: 1984
 month: 1
 player_count: 4

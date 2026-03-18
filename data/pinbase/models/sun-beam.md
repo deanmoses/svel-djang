@@ -3,7 +3,7 @@ slug: sun-beam
 name: Sun Beam
 title_slug: sun-beam
 ipdb_id: 2420
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1941
 month: 2
 player_count: 1

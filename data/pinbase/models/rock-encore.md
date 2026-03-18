@@ -4,7 +4,7 @@ name: Rock Encore
 title_slug: rock
 opdb_id: Grk62-MLeWx
 ipdb_id: 1979
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1986
 month: 4
 player_count: 4

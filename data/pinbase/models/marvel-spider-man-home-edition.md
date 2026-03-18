@@ -4,7 +4,7 @@ name: Spider-Man (Home Edition)
 title_slug: spider-man-home-edition
 opdb_id: G2Ld3-MnKE5
 ipdb_id: 6438
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2016
 month: 11
 player_count: 4

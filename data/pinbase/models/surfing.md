@@ -4,7 +4,7 @@ name: Surfing
 title_slug: surfing
 opdb_id: GrlWn-MYebl
 ipdb_id: 2467
-manufacturer_slug: sega
+corporate_entity_slug: sega-enterprises-ltd
 year: 1976
 month: 1
 player_count: 1

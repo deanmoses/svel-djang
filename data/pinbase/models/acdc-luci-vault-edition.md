@@ -4,7 +4,7 @@ name: AC/DC (LUCI Vault Edition)
 title_slug: ac-dc
 opdb_id: G43W4-MdEjy-ARXn1
 ipdb_id: 6502
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2018
 month: 2
 player_count: 4

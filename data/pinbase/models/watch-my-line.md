@@ -3,7 +3,7 @@ slug: watch-my-line
 name: Watch My Line
 title_slug: watch-my-line
 ipdb_id: 2755
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1951
 month: 7
 player_count: 1

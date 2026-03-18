@@ -4,7 +4,7 @@ name: Star-Jet
 title_slug: star-jet
 opdb_id: GRwEJ-MQY7w
 ipdb_id: 2347
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1963
 month: 12
 player_count: 2

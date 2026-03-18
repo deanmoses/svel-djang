@@ -3,7 +3,7 @@ slug: disney-tron-legacy-4th-edition
 name: Disney TRON Legacy (4th Edition)
 title_slug: disney-tron-legacy-4th-edition
 ipdb_id: 6019
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2013
 player_count: 4
 production_quantity: '200'

@@ -3,7 +3,7 @@ slug: st-moritz
 name: St. Moritz
 title_slug: st-moritz
 ipdb_id: 2410
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1938
 month: 11
 player_count: 1

@@ -3,7 +3,7 @@ slug: whirlpool
 name: Whirlpool
 title_slug: whirlpool
 ipdb_id: 2762
-manufacturer_slug: skilgames-inc
+corporate_entity_slug: skilgames-inc
 year: 1932
 month: 2
 player_count: 1

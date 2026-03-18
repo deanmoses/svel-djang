@@ -4,7 +4,7 @@ name: Bank-A-Ball
 title_slug: bank-a-ball-flipper-pool
 opdb_id: GrxdD-MOEnx
 ipdb_id: 170
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1965
 month: 9
 player_count: 1

@@ -3,7 +3,7 @@ slug: contact-senior
 name: Contact (Senior)
 title_slug: contact-senior
 ipdb_id: 3029
-manufacturer_slug: pamco
+corporate_entity_slug: pacific-amusement-manufacturing-company
 year: 1933
 month: 11
 player_count: 1

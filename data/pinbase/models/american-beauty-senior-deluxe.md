@@ -3,7 +3,7 @@ slug: american-beauty-senior-deluxe
 name: American Beauty Senior Deluxe
 title_slug: american-beauty-senior-deluxe
 ipdb_id: 6895
-manufacturer_slug: daval-manufacturing-co
+corporate_entity_slug: daval-manufacturing-co
 year: 1934
 month: 5
 player_count: 1

@@ -4,7 +4,7 @@ name: Grand Prix
 title_slug: nascar
 opdb_id: G5YWX-MDxXX
 ipdb_id: 5120
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2005
 month: 6
 player_count: 4

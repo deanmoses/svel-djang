@@ -4,7 +4,7 @@ name: Joker
 title_slug: joker-3
 opdb_id: GrXXB-MP3Bn
 ipdb_id: 1304
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1950
 month: 11
 player_count: 1

@@ -4,7 +4,7 @@ name: Alien Poker
 title_slug: alien-poker
 opdb_id: G4yen-MD12Y
 ipdb_id: 48
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1980
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: Hurricane
 title_slug: hurricane
 opdb_id: GrX09-M85bb
 ipdb_id: 1257
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1991
 month: 8
 player_count: 4

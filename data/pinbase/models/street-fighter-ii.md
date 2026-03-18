@@ -4,7 +4,7 @@ name: Street Fighter II
 title_slug: street-fighter-ii
 opdb_id: G5BYQ-MQdBV
 ipdb_id: 2403
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1993
 month: 3
 player_count: 4

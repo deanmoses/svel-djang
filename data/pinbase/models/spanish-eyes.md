@@ -4,7 +4,7 @@ name: Spanish Eyes
 title_slug: spanish-eyes
 opdb_id: GrOjX-MJ47n
 ipdb_id: 2265
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1972
 month: 3
 player_count: 1

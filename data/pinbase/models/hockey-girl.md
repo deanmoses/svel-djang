@@ -4,7 +4,7 @@ name: Hockey Girl
 title_slug: hockey-girl
 opdb_id: Gry16-MD0BB
 ipdb_id: 3153
-manufacturer_slug: rally
+corporate_entity_slug: rally-aka-rally-play-company
 year: 1964
 month: 1
 player_count: 2

@@ -4,7 +4,7 @@ name: Spectrum
 title_slug: spectrum
 opdb_id: GRw7z-MJN9l
 ipdb_id: 2274
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1982
 month: 8
 player_count: 4

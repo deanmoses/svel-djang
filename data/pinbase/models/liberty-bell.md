@@ -4,7 +4,7 @@ name: Liberty Bell
 title_slug: liberty-bell
 opdb_id: GrNJO-MQYd6
 ipdb_id: 1436
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1977
 month: 4
 player_count: 2

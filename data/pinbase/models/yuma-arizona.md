@@ -4,7 +4,7 @@ name: Yuma Arizona
 title_slug: yuma-arizona
 opdb_id: GqZe1-MW9jl
 ipdb_id: 87
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1950
 month: 5
 player_count: 1

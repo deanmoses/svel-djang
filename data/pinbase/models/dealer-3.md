@@ -3,7 +3,7 @@ slug: dealer-3
 name: Dealer
 title_slug: dealer-3
 ipdb_id: 4230
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1935
 month: 5
 player_count: 1

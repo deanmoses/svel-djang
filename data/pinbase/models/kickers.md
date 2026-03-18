@@ -3,7 +3,7 @@ slug: kickers
 name: Kickers
 title_slug: kickers
 ipdb_id: 3193
-manufacturer_slug: shyvers
+corporate_entity_slug: shyvers-manufacturing-company-2
 year: 1937
 month: 8
 player_count: 1

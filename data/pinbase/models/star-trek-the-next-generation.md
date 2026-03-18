@@ -4,7 +4,7 @@ name: 'Star Trek: The Next Generation'
 title_slug: star-trek-the-next-generation
 opdb_id: GR6d8-M1rZd
 ipdb_id: 2357
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1993
 month: 1
 player_count: 4

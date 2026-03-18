@@ -4,7 +4,7 @@ name: Lost In Space
 title_slug: lost-in-space
 opdb_id: GR91x-MLBZE
 ipdb_id: 4442
-manufacturer_slug: sega
+corporate_entity_slug: sega-pinball-incorporated
 year: 1998
 month: 5
 player_count: 6

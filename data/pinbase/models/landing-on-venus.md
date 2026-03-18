@@ -4,7 +4,7 @@ name: Landing on Venus
 title_slug: landing-on-venus
 opdb_id: G4dPD-MDvqp
 ipdb_id: 3205
-manufacturer_slug: rally
+corporate_entity_slug: rally-aka-rally-play-company
 year: 1965
 month: 1
 player_count: 1

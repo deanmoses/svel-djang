@@ -4,7 +4,7 @@ name: Heat Wave
 title_slug: heat-wave
 opdb_id: G5vDW-MJw9y
 ipdb_id: 1148
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1964
 month: 7
 player_count: 1

@@ -4,7 +4,7 @@ name: Black Belt
 title_slug: black-belt-karate-fight
 opdb_id: G562j-MDyoK
 ipdb_id: 303
-manufacturer_slug: bally
+corporate_entity_slug: bally-midway-manufacturing-company
 year: 1986
 month: 7
 player_count: 4

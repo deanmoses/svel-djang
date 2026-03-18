@@ -4,7 +4,7 @@ name: Monaco
 title_slug: monaco-cannes
 opdb_id: GRVzL-MJ2rb
 ipdb_id: 1614
-manufacturer_slug: segasa
+corporate_entity_slug: segasa
 year: 1977
 month: 7
 player_count: 4

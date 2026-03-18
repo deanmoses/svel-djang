@@ -4,7 +4,7 @@ name: GoldenEye
 title_slug: goldeneye
 opdb_id: G43wE-MQV5K
 ipdb_id: 3792
-manufacturer_slug: sega
+corporate_entity_slug: sega-pinball-incorporated
 year: 1996
 month: 3
 player_count: 6

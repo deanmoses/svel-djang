@@ -3,7 +3,7 @@ slug: president-junior
 name: President Junior
 title_slug: president-junior
 ipdb_id: 3316
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1934
 month: 2
 player_count: 1

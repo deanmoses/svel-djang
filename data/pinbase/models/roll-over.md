@@ -3,7 +3,7 @@ slug: roll-over
 name: Roll Over
 title_slug: roll-over
 ipdb_id: 1999
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1937
 month: 2
 player_count: 1

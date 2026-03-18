@@ -4,7 +4,7 @@ name: Universe
 title_slug: universe
 opdb_id: G4dxZ-MVKn9
 ipdb_id: 2706
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1976
 month: 1
 player_count: 4

@@ -3,7 +3,7 @@ slug: discovery
 name: Discovery
 title_slug: discovery
 ipdb_id: 688
-manufacturer_slug: pamco
+corporate_entity_slug: pacific-amusement-manufacturing-company
 year: 1935
 month: 9
 player_count: 1

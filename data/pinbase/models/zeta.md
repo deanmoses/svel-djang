@@ -3,7 +3,7 @@ slug: zeta
 name: Zeta
 title_slug: zeta
 ipdb_id: 2833
-manufacturer_slug: stoner-manufacturing-company
+corporate_entity_slug: stoner-manufacturing-company
 year: 1938
 month: 8
 player_count: 1

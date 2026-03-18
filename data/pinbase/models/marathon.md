@@ -4,7 +4,7 @@ name: Marathon
 title_slug: marathon
 opdb_id: GrEYP-MLy2K
 ipdb_id: 1540
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1955
 month: 10
 player_count: 2

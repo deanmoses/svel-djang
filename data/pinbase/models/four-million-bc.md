@@ -4,7 +4,7 @@ name: Four Million B.C.
 title_slug: four-million-bc
 opdb_id: GRVZ8-M5RO0
 ipdb_id: 935
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1971
 month: 5
 player_count: 4

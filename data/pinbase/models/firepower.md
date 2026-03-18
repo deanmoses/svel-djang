@@ -4,7 +4,7 @@ name: Firepower
 title_slug: firepower
 opdb_id: G5VDd-MJpqO
 ipdb_id: 856
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1980
 month: 2
 player_count: 4

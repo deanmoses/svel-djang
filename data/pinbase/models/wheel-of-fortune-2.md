@@ -4,7 +4,7 @@ name: Wheel of Fortune
 title_slug: wheel-of-fortune
 opdb_id: G417d-MJkXV
 ipdb_id: 5254
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2007
 month: 10
 player_count: 4

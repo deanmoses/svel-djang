@@ -4,7 +4,7 @@ name: Close Encounters of the Third Kind (EM)
 title_slug: close-encounters
 opdb_id: G4qvL-MJ6z6
 ipdb_id: 4692
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1978
 month: 10
 player_count: 4

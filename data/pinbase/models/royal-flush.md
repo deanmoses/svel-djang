@@ -4,7 +4,7 @@ name: Royal Flush
 title_slug: royal-flush
 opdb_id: G4ezN-M0orp
 ipdb_id: 2034
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1957
 month: 3
 player_count: 1

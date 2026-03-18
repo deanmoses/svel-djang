@@ -4,7 +4,7 @@ name: Robocop
 title_slug: robocop
 opdb_id: Grlxe-MJ916
 ipdb_id: 1976
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1989
 month: 11
 player_count: 4

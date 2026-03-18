@@ -4,7 +4,7 @@ name: Three Musketeers
 title_slug: three-musketeers
 opdb_id: GwevP-M6166
 ipdb_id: 2541
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1949
 month: 7
 player_count: 4

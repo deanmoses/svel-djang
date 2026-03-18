@@ -4,7 +4,7 @@ name: Flying Carpet
 title_slug: flying-carpet
 opdb_id: GrNPZ-MJNd0
 ipdb_id: 899
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1972
 month: 3
 player_count: 1

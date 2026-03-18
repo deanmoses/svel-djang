@@ -4,7 +4,7 @@ name: Winner
 title_slug: winner
 opdb_id: Gr33p-MLqdv
 ipdb_id: 2793
-manufacturer_slug: sega
+corporate_entity_slug: sega-enterprises-ltd
 year: 1971
 month: 1
 player_count: 1

@@ -4,7 +4,7 @@ name: 10th Inning
 title_slug: 10th-inning
 opdb_id: GwexB-M7Zxq
 ipdb_id: 3788
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1948
 month: 1
 player_count: 1

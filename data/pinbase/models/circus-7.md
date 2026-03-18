@@ -4,7 +4,7 @@ name: Circus
 title_slug: big-show
 opdb_id: G5oxB-MDzKN
 ipdb_id: 521
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1973
 month: 11
 player_count: 4

@@ -1,6 +1,7 @@
 ---
 slug: homepin
 name: Homepin
+opdb_manufacturer_id: 116
 ---
 
 Homepin is a pinball manufacturer based in New Zealand that drew international attention with [[title:thunderbirds]] (2018), a machine based on the classic British science fiction television series. The project was brought to life through a crowdfunding campaign, and its completion marked a milestone: a commercially produced pinball machine from the southern hemisphere, a region with no prior history of pinball manufacturing at any meaningful scale.

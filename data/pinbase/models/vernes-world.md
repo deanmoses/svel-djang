@@ -4,7 +4,7 @@ name: Verne's World
 title_slug: vernes-world
 opdb_id: G5vYZ-MDlOb
 ipdb_id: 4619
-manufacturer_slug: spinball
+corporate_entity_slug: spinball-sal
 year: 1996
 month: 2
 player_count: 4

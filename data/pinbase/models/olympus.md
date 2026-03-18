@@ -4,7 +4,7 @@ name: Olympus
 title_slug: olympus
 opdb_id: GzyBx-M0ow2
 ipdb_id: 5140
-manufacturer_slug: juegos-populares
+corporate_entity_slug: juegos-populares-sa
 year: 1986
 month: 1
 player_count: 4

@@ -3,7 +3,7 @@ slug: gold-medal
 name: Gold Medal
 title_slug: gold-medal
 ipdb_id: 1030
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1935
 month: 12
 player_count: 1

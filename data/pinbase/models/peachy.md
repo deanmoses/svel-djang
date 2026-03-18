@@ -3,7 +3,7 @@ slug: peachy
 name: Peachy
 title_slug: peachy
 ipdb_id: 3332
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1938
 month: 10
 player_count: 1

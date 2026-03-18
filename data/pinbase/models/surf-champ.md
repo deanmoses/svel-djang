@@ -4,7 +4,7 @@ name: Surf Champ
 title_slug: surf-champ-surfer
 opdb_id: GrZwo-MDnWP
 ipdb_id: 2459
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1976
 month: 8
 player_count: 4

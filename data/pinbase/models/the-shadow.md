@@ -4,7 +4,7 @@ name: The Shadow
 title_slug: the-shadow
 opdb_id: G4jPX-M85YZ
 ipdb_id: 2528
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1994
 month: 11
 player_count: 4

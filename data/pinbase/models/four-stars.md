@@ -4,7 +4,7 @@ name: Four Stars
 title_slug: quartette-four-stars
 opdb_id: G5nn1-MBRRW
 ipdb_id: 942
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1952
 month: 6
 player_count: 1

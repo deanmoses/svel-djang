@@ -4,7 +4,7 @@ name: Tim-Buc-Tu
 title_slug: tim-buc-tu
 opdb_id: GrlpL-MQ6EX
 ipdb_id: 2561
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1956
 month: 1
 player_count: 1

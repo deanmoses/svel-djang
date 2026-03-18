@@ -4,7 +4,7 @@ name: Post Time
 title_slug: paddock-post-time
 opdb_id: GR0W9-MJrpk
 ipdb_id: 1853
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1969
 month: 4
 player_count: 1

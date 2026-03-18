@@ -4,7 +4,7 @@ name: A.G. Football
 title_slug: ag-soccer-ball-ag-football
 opdb_id: G5wxv-MnKkN
 ipdb_id: 2886
-manufacturer_slug: alvin-g
+corporate_entity_slug: alvin-g-and-company
 year: 1992
 month: 1
 player_count: 2

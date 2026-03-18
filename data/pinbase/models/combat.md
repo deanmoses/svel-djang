@@ -4,7 +4,7 @@ name: Combat
 title_slug: combat
 opdb_id: GryPZ-ML07x
 ipdb_id: 3609
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1977
 month: 9
 player_count: 4

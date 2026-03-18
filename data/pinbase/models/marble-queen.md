@@ -4,7 +4,7 @@ name: Marble Queen
 title_slug: marble-queen
 opdb_id: G560e-MDx52
 ipdb_id: 1541
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1953
 month: 6
 player_count: 1

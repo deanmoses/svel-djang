@@ -4,7 +4,7 @@ name: Cosmic Cart Racing
 title_slug: cosmic-cart-racing
 opdb_id: GPBB9-M5R9v
 ipdb_id: 6665
-manufacturer_slug: multimorphic
+corporate_entity_slug: multimorphic-inc
 year: 2018
 month: 10
 player_count: 4

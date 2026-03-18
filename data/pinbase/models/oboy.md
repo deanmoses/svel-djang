@@ -3,7 +3,7 @@ slug: oboy
 name: O'Boy
 title_slug: oboy
 ipdb_id: 1689
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1939
 month: 11
 player_count: 1

@@ -3,7 +3,7 @@ slug: multiplay
 name: Multiplay
 title_slug: multiplay
 ipdb_id: 3431
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1936
 month: 7
 player_count: 1

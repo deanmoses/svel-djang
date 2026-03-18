@@ -4,7 +4,7 @@ name: Rick and Morty (Blood Sucker Edition)
 title_slug: rick-and-morty
 opdb_id: GQKb2-MYek0-ARKeX
 ipdb_id: 6641
-manufacturer_slug: spooky
+corporate_entity_slug: spooky-pinball-llc
 year: 2020
 month: 1
 player_count: 4

@@ -3,7 +3,7 @@ slug: stock-market-2
 name: Stock Market
 title_slug: stock-market-2
 ipdb_id: 3389
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1961
 month: 12
 player_count: 1

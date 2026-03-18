@@ -4,7 +4,7 @@ name: Apollo
 title_slug: apollo-blast-off
 opdb_id: GRBDj-MJ9x6
 ipdb_id: 77
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1967
 month: 6
 player_count: 1

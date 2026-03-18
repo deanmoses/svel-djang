@@ -4,7 +4,7 @@ name: Beatniks
 title_slug: beatniks
 opdb_id: G5bYP-MQV6l
 ipdb_id: 214
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1967
 month: 1
 player_count: 2

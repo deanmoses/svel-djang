@@ -4,7 +4,7 @@ name: Flight 2000
 title_slug: flight-2000
 opdb_id: G48kY-MDxRV
 ipdb_id: 887
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1980
 month: 1
 player_count: 4

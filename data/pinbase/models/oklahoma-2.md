@@ -4,7 +4,7 @@ name: Oklahoma
 title_slug: oklahoma
 opdb_id: GR9nl-MdEZB
 ipdb_id: 1702
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1961
 month: 2
 player_count: 4

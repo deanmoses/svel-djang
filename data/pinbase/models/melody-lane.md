@@ -4,7 +4,7 @@ name: Melody Lane
 title_slug: melody-lane
 opdb_id: G5plO-MDzVY
 ipdb_id: 1568
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1960
 month: 7
 player_count: 2

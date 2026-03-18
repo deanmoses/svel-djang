@@ -4,7 +4,7 @@ name: U-Boat 65
 title_slug: u-boat-65
 opdb_id: GRD67-Mo1Ol
 ipdb_id: 3736
-manufacturer_slug: bell-games
+corporate_entity_slug: nuova-bell-games
 year: 1988
 month: 6
 player_count: 4

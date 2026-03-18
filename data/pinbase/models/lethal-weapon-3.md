@@ -4,7 +4,7 @@ name: Lethal Weapon 3
 title_slug: lethal-weapon
 opdb_id: GRokL-MQP78
 ipdb_id: 1433
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1992
 month: 1
 player_count: 4

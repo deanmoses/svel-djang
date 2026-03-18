@@ -4,7 +4,7 @@ name: Camel Caravan
 title_slug: camel-caravan
 opdb_id: GK1Xj-MkPkl
 ipdb_id: 421
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1949
 month: 6
 player_count: 1

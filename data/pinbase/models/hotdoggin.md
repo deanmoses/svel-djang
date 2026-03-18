@@ -4,7 +4,7 @@ name: Hotdoggin'
 title_slug: hotdoggin
 opdb_id: GrENE-MD0dz
 ipdb_id: 1243
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1979
 month: 12
 player_count: 4

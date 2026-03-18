@@ -4,7 +4,7 @@ name: Ro Go
 title_slug: ro-go
 opdb_id: G42OJ-MD1w4
 ipdb_id: 1969
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1974
 month: 8
 player_count: 4

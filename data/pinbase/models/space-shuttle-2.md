@@ -4,7 +4,7 @@ name: Space Shuttle
 title_slug: space-shuttle-2
 opdb_id: G4q3L-MKN50
 ipdb_id: 2260
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1984
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: Moon Flight
 title_slug: moon-flight
 opdb_id: GreN3-MJ7wJ
 ipdb_id: 1626
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1976
 month: 10
 player_count: 1

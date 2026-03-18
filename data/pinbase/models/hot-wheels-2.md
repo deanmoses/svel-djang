@@ -4,7 +4,7 @@ name: Hot Wheels
 title_slug: hot-wheels
 opdb_id: GEL31-M61W3
 ipdb_id: 6661
-manufacturer_slug: american-pinball
+corporate_entity_slug: american-pinball-inc
 year: 2020
 month: 6
 player_count: 4

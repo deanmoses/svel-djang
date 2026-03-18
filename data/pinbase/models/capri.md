@@ -4,7 +4,7 @@ name: Capri
 title_slug: capri
 opdb_id: Gryoo-MJYv6
 ipdb_id: 432
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1956
 month: 8
 player_count: 1

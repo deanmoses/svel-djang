@@ -4,7 +4,7 @@ name: Aces Top
 title_slug: aces-high
 opdb_id: G56BE-MQYxZ-A1XBn
 ipdb_id: 5236
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1965
 month: 8
 player_count: 4

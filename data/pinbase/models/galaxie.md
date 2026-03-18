@@ -4,7 +4,7 @@ name: Galaxie
 title_slug: 2001-dimension-galaxie
 opdb_id: G48nw-ML02p
 ipdb_id: 978
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1971
 month: 1
 player_count: 1

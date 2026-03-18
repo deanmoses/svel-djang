@@ -3,7 +3,7 @@ slug: airway
 name: Airway
 title_slug: airway
 ipdb_id: 37
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1933
 month: 2
 player_count: 1

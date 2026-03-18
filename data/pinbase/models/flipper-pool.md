@@ -4,7 +4,7 @@ name: Flipper Pool
 title_slug: bank-a-ball-flipper-pool
 opdb_id: GrxdD-MLOPO
 ipdb_id: 896
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1965
 month: 10
 player_count: 1

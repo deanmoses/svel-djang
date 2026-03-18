@@ -4,7 +4,7 @@ name: Atlas
 title_slug: atlas
 opdb_id: GrXLd-MJZ3y
 ipdb_id: 107
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1959
 month: 4
 player_count: 2

@@ -4,7 +4,7 @@ name: Mach 2
 title_slug: mach-2
 opdb_id: G4lVe-MQjwb
 ipdb_id: 4617
-manufacturer_slug: spinball
+corporate_entity_slug: spinball-sal
 year: 1994
 month: 1
 player_count: 4

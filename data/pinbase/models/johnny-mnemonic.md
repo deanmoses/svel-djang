@@ -4,7 +4,7 @@ name: Johnny Mnemonic
 title_slug: johnny-mnemonic
 opdb_id: GR6W8-Mb55B
 ipdb_id: 3683
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1995
 month: 1
 player_count: 4

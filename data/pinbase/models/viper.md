@@ -4,7 +4,7 @@ name: Viper
 title_slug: viper
 opdb_id: G5vXB-MLEve
 ipdb_id: 2739
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1981
 month: 1
 player_count: 4

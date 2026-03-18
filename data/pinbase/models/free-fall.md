@@ -4,7 +4,7 @@ name: Free Fall
 title_slug: sky-dive
 opdb_id: G4xlK-MDEKL
 ipdb_id: 949
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1974
 month: 10
 player_count: 1

@@ -4,7 +4,7 @@ name: Springtime
 title_slug: springtime
 opdb_id: GRVvb-MLz26
 ipdb_id: 2326
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1952
 month: 3
 player_count: 1

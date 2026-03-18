@@ -4,7 +4,7 @@ name: Time Machine
 title_slug: time-machine
 opdb_id: GR99Y-MJ9Zy
 ipdb_id: 2565
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1988
 month: 1
 player_count: 4

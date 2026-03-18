@@ -4,7 +4,7 @@ name: 3 Coins
 title_slug: 3-coins
 opdb_id: GR0Q1-MkPPd
 ipdb_id: 2535
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1962
 month: 2
 player_count: 1

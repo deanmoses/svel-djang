@@ -4,7 +4,7 @@ name: Pin-Bowler
 title_slug: pin-bowler
 opdb_id: GpeZL-MePe1
 ipdb_id: 1788
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1949
 month: 11
 player_count: 1

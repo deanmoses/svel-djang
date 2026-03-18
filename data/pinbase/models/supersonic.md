@@ -4,7 +4,7 @@ name: Supersonic
 title_slug: star-ship
 opdb_id: GRLXd-ME07p
 ipdb_id: 2455
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1979
 month: 10
 player_count: 4

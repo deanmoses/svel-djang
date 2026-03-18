@@ -4,7 +4,7 @@ name: Rainbow
 title_slug: rainbow-2
 opdb_id: GPBKv-MNErK
 ipdb_id: 1910
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1948
 month: 9
 player_count: 1

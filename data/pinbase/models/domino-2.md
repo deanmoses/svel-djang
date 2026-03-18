@@ -4,7 +4,7 @@ name: Domino
 title_slug: domino-playmates
 opdb_id: G4j8k-MJK5K
 ipdb_id: 701
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1968
 month: 9
 player_count: 4

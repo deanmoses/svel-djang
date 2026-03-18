@@ -4,7 +4,7 @@ name: Sweet Add-A-Line
 title_slug: sweet-add-a-line
 opdb_id: GR9xv-MJ60e
 ipdb_id: 2478
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1955
 month: 7
 player_count: 1

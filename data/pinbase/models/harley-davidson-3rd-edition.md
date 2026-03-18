@@ -4,7 +4,7 @@ name: Harley-Davidson (3rd Edition)
 title_slug: harley-davidson
 opdb_id: G56lO-Mq153
 ipdb_id: 5277
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2002
 month: 1
 player_count: 6

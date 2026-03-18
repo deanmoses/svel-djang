@@ -4,7 +4,7 @@ name: Pirate Gold
 title_slug: pirate-gold
 opdb_id: GRQQZ-MLyjq
 ipdb_id: 1804
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1969
 month: 1
 player_count: 1

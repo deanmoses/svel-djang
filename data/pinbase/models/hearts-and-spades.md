@@ -4,7 +4,7 @@ name: Hearts and Spades
 title_slug: spin-a-card-hearts-and-spades
 opdb_id: G4ZQv-MeP8n
 ipdb_id: 1145
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1969
 month: 4
 player_count: 1

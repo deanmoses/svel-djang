@@ -3,7 +3,7 @@ slug: derby-king
 name: Derby King
 title_slug: derby-king
 ipdb_id: 668
-manufacturer_slug: stern-electronics
+corporate_entity_slug: western-products-incorporated
 year: 1938
 month: 11
 player_count: 1

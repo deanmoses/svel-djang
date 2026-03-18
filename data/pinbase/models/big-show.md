@@ -4,7 +4,7 @@ name: Big Show
 title_slug: big-show
 opdb_id: G5oxB-MJZqX
 ipdb_id: 275
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1974
 month: 1
 player_count: 2

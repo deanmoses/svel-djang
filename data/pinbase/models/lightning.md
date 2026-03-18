@@ -4,7 +4,7 @@ name: Lightning
 title_slug: lightning-stern-electronics
 opdb_id: G5pQ8-Mq14e
 ipdb_id: 1441
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1981
 month: 3
 player_count: 4

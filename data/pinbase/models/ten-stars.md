@@ -4,7 +4,7 @@ name: Ten Stars
 title_slug: ten-stars
 opdb_id: G4PW2-MDExV
 ipdb_id: 3373
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1976
 month: 1
 player_count: 1

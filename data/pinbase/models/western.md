@@ -3,7 +3,7 @@ slug: western
 name: Western
 title_slug: western
 ipdb_id: 3574
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1969
 month: 10
 player_count: 2

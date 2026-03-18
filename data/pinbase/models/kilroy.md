@@ -3,7 +3,7 @@ slug: kilroy
 name: Kilroy
 title_slug: kilroy
 ipdb_id: 1366
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1947
 month: 1
 player_count: 1

@@ -4,7 +4,7 @@ name: Four Corners
 title_slug: four-corners
 opdb_id: G5pqj-MQov6
 ipdb_id: 931
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1952
 month: 10
 player_count: 1

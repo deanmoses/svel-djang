@@ -4,7 +4,7 @@ name: North Pole
 title_slug: aloha
 opdb_id: G4kw7-MDl0Y-A9YDv
 ipdb_id: 6310
-manufacturer_slug: playmatic
+corporate_entity_slug: playmatic
 year: 1967
 month: 1
 player_count: 1

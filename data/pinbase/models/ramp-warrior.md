@@ -4,7 +4,7 @@ name: Ramp Warrior
 title_slug: truck-stop
 opdb_id: G5Y6O-MLOqO
 ipdb_id: 3521
-manufacturer_slug: bally
+corporate_entity_slug: bally-midway-manufacturing-company
 year: 1988
 month: 6
 player_count: 4

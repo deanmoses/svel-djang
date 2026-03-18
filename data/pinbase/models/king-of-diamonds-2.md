@@ -4,7 +4,7 @@ name: King of Diamonds
 title_slug: king-of-diamonds
 opdb_id: GrlPj-MQjdp
 ipdb_id: 5239
-manufacturer_slug: retro-pinball
+corporate_entity_slug: retro-pinball-llc
 year: 2010
 month: 8
 player_count: 4

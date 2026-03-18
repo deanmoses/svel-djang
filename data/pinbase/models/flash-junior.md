@@ -3,7 +3,7 @@ slug: flash-junior
 name: Flash (Junior)
 title_slug: flash-junior
 ipdb_id: 5028
-manufacturer_slug: richard-manufacturing-company
+corporate_entity_slug: richard-manufacturing-company
 year: 1932
 month: 12
 player_count: 1

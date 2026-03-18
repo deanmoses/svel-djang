@@ -4,7 +4,7 @@ name: Gondola
 title_slug: gondola
 opdb_id: GELBV-M2Y0o
 ipdb_id: 1057
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1949
 month: 5
 player_count: 1

@@ -3,7 +3,7 @@ slug: total-recall
 name: Total Recall
 title_slug: total-recall
 ipdb_id: 4335
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 player_count: 4
 technology_generation_slug: solid-state
 credit_refs:

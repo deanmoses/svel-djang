@@ -4,7 +4,7 @@ name: Blackbelt
 title_slug: blackbelt
 opdb_id: G5Ljd-MLWj0
 ipdb_id: 316
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1986
 month: 3
 player_count: 4

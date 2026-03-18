@@ -4,7 +4,7 @@ name: Poker Face
 title_slug: poker-face
 opdb_id: G5bzW-MDWbx
 ipdb_id: 1835
-manufacturer_slug: keeney
+corporate_entity_slug: j-h-keeney-and-company-incorporated
 year: 1963
 month: 8
 player_count: 1

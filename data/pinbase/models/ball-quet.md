@@ -3,7 +3,7 @@ slug: ball-quet
 name: Ball-Quet
 title_slug: ball-quet
 ipdb_id: 143
-manufacturer_slug: carnival-supply-company
+corporate_entity_slug: carnival-supply-company
 year: 1932
 month: 2
 player_count: 1

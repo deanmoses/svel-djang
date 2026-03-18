@@ -4,7 +4,7 @@ name: Duette
 title_slug: duette
 opdb_id: G5vyl-MLW1x
 ipdb_id: 742
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1955
 month: 3
 player_count: 2

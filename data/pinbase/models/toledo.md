@@ -4,7 +4,7 @@ name: Toledo
 title_slug: valencia-toledo
 opdb_id: G5nj6-MyNEZ
 ipdb_id: 2577
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1975
 month: 12
 player_count: 2

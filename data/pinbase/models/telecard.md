@@ -4,7 +4,7 @@ name: Telecard
 title_slug: telecard
 opdb_id: G4jBe-MVK67
 ipdb_id: 2511
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1949
 month: 1
 player_count: 1

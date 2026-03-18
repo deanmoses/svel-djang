@@ -4,7 +4,7 @@ name: Big Top
 title_slug: big-top
 opdb_id: G5DV6-M2YYr
 ipdb_id: 287
-manufacturer_slug: wico
+corporate_entity_slug: wico-corporation
 year: 1977
 month: 1
 player_count: 1

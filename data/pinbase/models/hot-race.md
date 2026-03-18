@@ -4,7 +4,7 @@ name: Hot Race
 title_slug: hot-race
 opdb_id: GRVby-MJpdx
 ipdb_id: 4377
-manufacturer_slug: ami
+corporate_entity_slug: ami-spa
 year: 1975
 month: 1
 player_count: 4

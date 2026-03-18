@@ -4,7 +4,7 @@ name: Jig Saw
 title_slug: jig-saw
 opdb_id: G4Nbz-Mz2V8
 ipdb_id: 1291
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1957
 month: 11
 player_count: 1

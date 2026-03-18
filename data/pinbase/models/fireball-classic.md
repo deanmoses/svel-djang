@@ -4,7 +4,7 @@ name: Fireball Classic
 title_slug: fireball
 opdb_id: G48ZN-MLONl
 ipdb_id: 853
-manufacturer_slug: bally
+corporate_entity_slug: bally-midway-manufacturing-company
 year: 1985
 month: 2
 player_count: 4

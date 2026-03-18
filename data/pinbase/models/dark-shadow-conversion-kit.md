@@ -3,7 +3,7 @@ slug: dark-shadow-conversion-kit
 name: Dark Shadow (conversion kit)
 title_slug: dark-shadow-conversion-kit
 ipdb_id: 6723
-manufacturer_slug: bell-games
+corporate_entity_slug: nuova-bell-games
 year: 1985
 player_count: 4
 technology_generation_slug: solid-state

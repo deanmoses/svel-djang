@@ -4,7 +4,7 @@ name: Playtime
 title_slug: playtime
 opdb_id: Gryk2-MvBqb
 ipdb_id: 3894
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1968
 month: 10
 player_count: 2

@@ -4,7 +4,7 @@ name: Double-Up
 title_slug: double-up
 opdb_id: GrZZv-MDn2W
 ipdb_id: 3069
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1970
 month: 10
 player_count: 1

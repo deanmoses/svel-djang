@@ -4,7 +4,7 @@ name: Gridiron
 title_slug: gridiron-pro-football
 opdb_id: G41E2-ML85X
 ipdb_id: 1089
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1977
 month: 12
 player_count: 2

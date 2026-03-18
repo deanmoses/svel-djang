@@ -3,7 +3,7 @@ slug: roto-lite
 name: Roto Lite
 title_slug: roto-lite
 ipdb_id: 2021
-manufacturer_slug: pamco
+corporate_entity_slug: pacific-amusement-manufacturing-company
 year: 1935
 month: 2
 player_count: 1

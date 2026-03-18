@@ -3,7 +3,7 @@ slug: star-trek-starfleet-pro-vault-edition
 name: Star Trek (Starfleet Pro Vault Edition)
 title_slug: star-trek-starfleet-pro-vault-edition
 ipdb_id: 6553
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2018
 month: 6
 player_count: 4

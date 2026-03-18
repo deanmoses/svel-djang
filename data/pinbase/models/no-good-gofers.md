@@ -4,7 +4,7 @@ name: No Good Gofers
 title_slug: no-good-gofers
 opdb_id: G57X4-MLb1y
 ipdb_id: 4338
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1997
 month: 1
 player_count: 4

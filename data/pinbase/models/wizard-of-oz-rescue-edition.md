@@ -3,7 +3,7 @@ slug: wizard-of-oz-rescue-edition
 name: Wizard of Oz (Rescue Edition)
 title_slug: wizard-of-oz-rescue-edition
 ipdb_id: 6853
-manufacturer_slug: jersey-jack
+corporate_entity_slug: jersey-jack-pinball-inc-lakewood-nj
 player_count: 4
 production_quantity: '20'
 technology_generation_slug: solid-state

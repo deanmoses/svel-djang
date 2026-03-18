@@ -4,7 +4,7 @@ name: Up Away
 title_slug: up-away
 opdb_id: G4jOe-M3d1V
 ipdb_id: 3325
-manufacturer_slug: inder
+corporate_entity_slug: industria-electromecnica-de-recreativos-sa
 year: 1975
 month: 1
 player_count: 1

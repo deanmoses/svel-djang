@@ -4,7 +4,7 @@ name: A.G. Soccer-Ball
 title_slug: ag-soccer-ball-ag-football
 opdb_id: G5wxv-MQP9z
 ipdb_id: 120
-manufacturer_slug: alvin-g
+corporate_entity_slug: alvin-g-and-company
 year: 1991
 month: 1
 player_count: 2

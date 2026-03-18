@@ -4,7 +4,7 @@ name: Space Riders
 title_slug: space-riders
 opdb_id: GrdzE-MQ2E6
 ipdb_id: 2258
-manufacturer_slug: atari
+corporate_entity_slug: atari-incorporated
 year: 1978
 month: 1
 player_count: 4

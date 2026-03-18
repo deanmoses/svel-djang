@@ -4,7 +4,7 @@ name: Indiana Jones
 title_slug: indiana-jones
 opdb_id: G4e1d-MJ5Bj
 ipdb_id: 5306
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2008
 month: 5
 player_count: 4

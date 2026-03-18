@@ -4,7 +4,7 @@ name: Rey de Diamantes
 title_slug: king-of-diamonds
 opdb_id: GrlPj-MLEY9
 ipdb_id: 4368
-manufacturer_slug: petaco
+corporate_entity_slug: procedimientos-electromagnticos-de-tanteo-y-color
 year: 1967
 month: 1
 player_count: 1

@@ -4,7 +4,7 @@ name: Vampire
 title_slug: vampire
 opdb_id: GRYZK-MQp44
 ipdb_id: 2716
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1971
 month: 1
 player_count: 2

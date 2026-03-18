@@ -4,7 +4,7 @@ name: Serenade
 title_slug: gondolier
 opdb_id: Gr1wP-MDq3y-AOYEn
 ipdb_id: 4470
-manufacturer_slug: gottlieb
+corporate_entity_slug: alben
 year: 1959
 month: 1
 player_count: 2

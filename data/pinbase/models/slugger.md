@@ -3,7 +3,7 @@ slug: slugger
 name: Slugger
 title_slug: slugger
 ipdb_id: 2210
-manufacturer_slug: midway
+corporate_entity_slug: midway-manufacturing-company
 year: 1963
 month: 2
 player_count: 1

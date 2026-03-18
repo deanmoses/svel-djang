@@ -4,7 +4,7 @@ name: Road Kings
 title_slug: road-kings
 opdb_id: G4NKJ-Mo1Xj
 ipdb_id: 1970
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1986
 month: 7
 player_count: 4

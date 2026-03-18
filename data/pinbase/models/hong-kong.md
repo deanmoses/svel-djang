@@ -4,7 +4,7 @@ name: Hong Kong
 title_slug: hong-kong
 opdb_id: GrEdP-MePnB
 ipdb_id: 1231
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1952
 month: 9
 player_count: 1

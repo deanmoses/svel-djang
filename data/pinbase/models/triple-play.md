@@ -3,7 +3,7 @@ slug: triple-play
 name: Triple Play
 title_slug: triple-play
 ipdb_id: 2651
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1955
 month: 8
 player_count: 1

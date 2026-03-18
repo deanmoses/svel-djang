@@ -4,7 +4,7 @@ name: Firecracker
 title_slug: firecracker
 opdb_id: G5bKj-MJobp
 ipdb_id: 855
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1971
 month: 2
 player_count: 4

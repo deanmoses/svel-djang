@@ -4,7 +4,7 @@ name: Black Gold
 title_slug: black-gold
 opdb_id: G4qy6-MLvvd
 ipdb_id: 306
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1975
 month: 9
 player_count: 1

@@ -4,7 +4,7 @@ name: Harmony
 title_slug: sing-along-melody
 opdb_id: GrPkZ-MW9K8
 ipdb_id: 1127
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1967
 month: 8
 player_count: 1

@@ -3,7 +3,7 @@ slug: 4-in-1-willys-cup
 name: 4-IN-1 (Willy's Cup)
 title_slug: 4-in-1-willys-cup
 ipdb_id: 6011
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1985
 month: 12
 player_count: 2

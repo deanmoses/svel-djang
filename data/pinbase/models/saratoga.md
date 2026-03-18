@@ -4,7 +4,7 @@ name: Saratoga
 title_slug: saratoga
 opdb_id: GllXX-MwNdr
 ipdb_id: 2055
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1948
 month: 10
 player_count: 1

@@ -4,7 +4,7 @@ name: Baseball
 title_slug: baseball
 opdb_id: GoEB8-MBRnb
 ipdb_id: 189
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1947
 month: 10
 player_count: 1

@@ -4,7 +4,7 @@ name: The Wiggler
 title_slug: the-wiggler
 opdb_id: G4x9D-MJjE5
 ipdb_id: 2777
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1967
 month: 8
 player_count: 4

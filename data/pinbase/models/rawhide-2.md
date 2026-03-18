@@ -4,7 +4,7 @@ name: Rawhide
 title_slug: stampede-rawhide
 opdb_id: GRQ79-MePbv
 ipdb_id: 3545
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1977
 month: 4
 player_count: 4

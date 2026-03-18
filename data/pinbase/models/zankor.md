@@ -4,7 +4,7 @@ name: Zankor
 title_slug: zankor
 opdb_id: G5z71-MBRXz
 ipdb_id: 3531
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1986
 month: 1
 player_count: 4

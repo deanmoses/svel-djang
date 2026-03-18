@@ -4,7 +4,7 @@ name: Monte Rosa
 title_slug: monte-rosa
 opdb_id: GrNoL-MJ2by
 ipdb_id: 3416
-manufacturer_slug: sega
+corporate_entity_slug: sega-enterprises-ltd
 year: 1977
 month: 1
 player_count: 4

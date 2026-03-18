@@ -4,7 +4,7 @@ name: Viper Night Drivin'
 title_slug: viper-night-drivin
 opdb_id: G4Obw-ML83d
 ipdb_id: 4359
-manufacturer_slug: sega
+corporate_entity_slug: sega-pinball-incorporated
 year: 1998
 month: 1
 player_count: 6

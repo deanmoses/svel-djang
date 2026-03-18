@@ -4,7 +4,7 @@ name: Gusher
 title_slug: gusher
 opdb_id: G4EoQ-MQYK2
 ipdb_id: 1101
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1958
 month: 9
 player_count: 1

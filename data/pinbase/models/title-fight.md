@@ -4,7 +4,7 @@ name: Title Fight
 title_slug: title-fight
 opdb_id: G4Xw9-MQ7K4
 ipdb_id: 2573
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1990
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: Revenge from Mars
 title_slug: revenge-from-mars
 opdb_id: G50Wr-MLeZP
 ipdb_id: 4446
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1999
 month: 1
 player_count: 4

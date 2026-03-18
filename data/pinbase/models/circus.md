@@ -4,7 +4,7 @@ name: Circus
 title_slug: circus
 opdb_id: G4xXK-Mx01N
 ipdb_id: 515
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1980
 month: 6
 player_count: 4

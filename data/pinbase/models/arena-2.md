@@ -3,7 +3,7 @@ slug: arena-2
 name: Arena
 title_slug: arena-2
 ipdb_id: 6692
-manufacturer_slug: vifico-sa
+corporate_entity_slug: vifico-sa
 player_count: 4
 technology_generation_slug: solid-state
 system_slug: gottlieb-system-80b

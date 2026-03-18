@@ -4,7 +4,7 @@ name: Casino
 title_slug: casino-2
 opdb_id: GRWNb-MD80l
 ipdb_id: 463
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1958
 month: 8
 player_count: 1

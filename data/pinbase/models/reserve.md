@@ -4,7 +4,7 @@ name: Reserve
 title_slug: reserve
 opdb_id: GRQ2j-M61vd
 ipdb_id: 1953
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1961
 month: 10
 player_count: 1

@@ -4,7 +4,7 @@ name: Jungle Princess
 title_slug: jungle-queenprincess
 opdb_id: GrNnr-MJkj3
 ipdb_id: 1339
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1977
 month: 8
 player_count: 2

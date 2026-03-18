@@ -4,7 +4,7 @@ name: Flying Aces
 title_slug: flying-aces
 opdb_id: G5B3L-MQYOx
 ipdb_id: 4024
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1958
 month: 1
 player_count: 2

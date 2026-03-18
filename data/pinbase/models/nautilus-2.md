@@ -4,7 +4,7 @@ name: Nautilus
 title_slug: nautilus-2
 opdb_id: G5np6-MOEor
 ipdb_id: 3381
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1977
 month: 2
 player_count: 1

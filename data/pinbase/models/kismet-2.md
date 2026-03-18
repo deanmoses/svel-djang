@@ -4,7 +4,7 @@ name: Kismet
 title_slug: kismet
 opdb_id: G4ZD0-MjB9O
 ipdb_id: 1385
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1961
 month: 11
 player_count: 4

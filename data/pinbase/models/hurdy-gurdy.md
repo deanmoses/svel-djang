@@ -4,7 +4,7 @@ name: Hurdy Gurdy
 title_slug: central-park
 opdb_id: GRpYQ-MdE3y
 ipdb_id: 1256
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1966
 month: 6
 player_count: 1

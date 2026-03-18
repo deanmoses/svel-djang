@@ -4,7 +4,7 @@ name: Silver Skates
 title_slug: silver-skates
 opdb_id: G4XJ6-MLBw6
 ipdb_id: 2150
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1953
 month: 2
 player_count: 1

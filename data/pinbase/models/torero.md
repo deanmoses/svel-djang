@@ -3,7 +3,7 @@ slug: torero
 name: Torero
 title_slug: torero
 ipdb_id: 6408
-manufacturer_slug: cmc
+corporate_entity_slug: cipriano-martinez-cembrano
 player_count: 1
 technology_generation_slug: electromechanical
 ---

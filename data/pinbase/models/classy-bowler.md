@@ -4,7 +4,7 @@ name: Classy Bowler
 title_slug: classy-bowler
 opdb_id: GrPDn-MD0qb
 ipdb_id: 530
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1956
 month: 7
 player_count: 1

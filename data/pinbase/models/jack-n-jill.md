@@ -4,7 +4,7 @@ name: Jack 'N Jill
 title_slug: jack-n-jill
 opdb_id: GO0EK-MvBdk
 ipdb_id: 1273
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1948
 month: 4
 player_count: 1

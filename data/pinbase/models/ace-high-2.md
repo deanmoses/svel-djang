@@ -4,7 +4,7 @@ name: Ace High
 title_slug: ace-high
 opdb_id: GrlJ3-M2YvO
 ipdb_id: 7
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1957
 month: 2
 player_count: 1

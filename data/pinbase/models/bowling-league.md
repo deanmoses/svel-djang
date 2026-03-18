@@ -3,7 +3,7 @@ slug: bowling-league
 name: Bowling League
 title_slug: bowling-league
 ipdb_id: 366
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1947
 month: 8
 player_count: 1

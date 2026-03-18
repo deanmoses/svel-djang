@@ -4,7 +4,7 @@ name: Night Fever
 title_slug: night-fever
 opdb_id: GR9Po-MePYy
 ipdb_id: 3907
-manufacturer_slug: segasa
+corporate_entity_slug: segasa-dba-sonic
 year: 1979
 month: 1
 player_count: 4

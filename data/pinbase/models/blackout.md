@@ -4,7 +4,7 @@ name: Blackout
 title_slug: blackout
 opdb_id: GRwYo-MQoPw
 ipdb_id: 317
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1980
 month: 6
 player_count: 4

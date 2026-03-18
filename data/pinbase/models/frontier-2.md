@@ -4,7 +4,7 @@ name: Frontier
 title_slug: frontier
 opdb_id: GRwjq-MQ29Y
 ipdb_id: 3706
-manufacturer_slug: bell-games
+corporate_entity_slug: bell-games
 year: 1981
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: Cue-T
 title_slug: miss-o-cue-t
 opdb_id: G4eqP-MYeX8
 ipdb_id: 611
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1968
 month: 11
 player_count: 1

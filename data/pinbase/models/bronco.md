@@ -4,7 +4,7 @@ name: Bronco
 title_slug: bronco
 opdb_id: G42eb-MQo9Z
 ipdb_id: 387
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1963
 month: 11
 player_count: 2

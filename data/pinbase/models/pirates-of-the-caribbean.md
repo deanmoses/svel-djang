@@ -4,7 +4,7 @@ name: Pirates of the Caribbean
 title_slug: pirates-of-the-caribbean
 opdb_id: GR7ZX-MQ23b
 ipdb_id: 5163
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2006
 month: 6
 player_count: 4

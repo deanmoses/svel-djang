@@ -4,7 +4,7 @@ name: Little Joe
 title_slug: little-joe
 opdb_id: GRwO9-MLObY
 ipdb_id: 1460
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1972
 month: 8
 player_count: 4

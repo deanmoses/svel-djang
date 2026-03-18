@@ -4,7 +4,7 @@ name: Big Hit
 title_slug: big-hit
 opdb_id: GRLJp-MDRxv
 ipdb_id: 253
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1977
 month: 3
 player_count: 1

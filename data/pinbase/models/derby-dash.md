@@ -3,7 +3,7 @@ slug: derby-dash
 name: Derby Dash
 title_slug: derby-dash
 ipdb_id: 5282
-manufacturer_slug: bromley-inc
+corporate_entity_slug: bromley-inc
 year: 1995
 player_count: 4
 technology_generation_slug: solid-state

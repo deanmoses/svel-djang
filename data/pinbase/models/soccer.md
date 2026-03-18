@@ -4,7 +4,7 @@ name: Soccer
 title_slug: soccer
 opdb_id: GRoJk-MQk40
 ipdb_id: 2232
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1964
 month: 3
 player_count: 1

@@ -3,7 +3,7 @@ slug: register-3
 name: Register
 title_slug: register-3
 ipdb_id: 1943
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1934
 month: 2
 player_count: 1

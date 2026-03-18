@@ -3,7 +3,7 @@ slug: fiesta-2
 name: Fiesta
 title_slug: fiesta-3
 ipdb_id: 836
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1946
 month: 11
 player_count: 1

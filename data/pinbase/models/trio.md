@@ -4,7 +4,7 @@ name: Trio
 title_slug: trio
 opdb_id: G5LeP-MBRbl
 ipdb_id: 2647
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1965
 month: 7
 player_count: 1

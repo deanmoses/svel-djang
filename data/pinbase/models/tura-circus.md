@@ -3,7 +3,7 @@ slug: tura-circus
 name: Tura-Circus
 title_slug: tura-circus
 ipdb_id: 4751
-manufacturer_slug: tura-automatenfabrik-gmbh
+corporate_entity_slug: tura-automatenfabrik-gmbh
 year: 1933
 month: 8
 player_count: 1

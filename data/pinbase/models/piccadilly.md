@@ -4,7 +4,7 @@ name: Piccadilly
 title_slug: piccadilly
 opdb_id: GR63d-MQ2zo
 ipdb_id: 1782
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1956
 month: 4
 player_count: 2

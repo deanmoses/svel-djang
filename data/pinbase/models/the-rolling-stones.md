@@ -4,7 +4,7 @@ name: The Rolling Stones
 title_slug: the-rolling-stones
 opdb_id: GredR-MDE2K
 ipdb_id: 5668
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2011
 month: 2
 player_count: 4

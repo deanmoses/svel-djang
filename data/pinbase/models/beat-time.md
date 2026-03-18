@@ -4,7 +4,7 @@ name: Beat Time
 title_slug: beat-time
 opdb_id: GRwqD-MD0wX
 ipdb_id: 213
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1967
 month: 9
 player_count: 2

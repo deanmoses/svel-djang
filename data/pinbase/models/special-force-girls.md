@@ -4,7 +4,7 @@ name: Special Force Girls
 title_slug: special-force
 opdb_id: GRDkX-M61RE-A1qKR
 ipdb_id: 3270
-manufacturer_slug: bally
+corporate_entity_slug: bally-wulff
 year: 1986
 month: 8
 player_count: 4

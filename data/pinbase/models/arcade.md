@@ -4,7 +4,7 @@ name: Arcade
 title_slug: arcade
 opdb_id: GrNyB-MDBkE
 ipdb_id: 81
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1951
 month: 11
 player_count: 1

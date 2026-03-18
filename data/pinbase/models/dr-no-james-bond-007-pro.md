@@ -4,7 +4,7 @@ name: James Bond 007 (Pro)
 title_slug: james-bond-007
 opdb_id: GQKyP-Mx0O4
 ipdb_id: 6896
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2022
 month: 9
 player_count: 4

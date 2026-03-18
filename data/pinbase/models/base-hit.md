@@ -3,7 +3,7 @@ slug: base-hit
 name: Base Hit
 title_slug: base-hit
 ipdb_id: 183
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1935
 month: 5
 player_count: 1

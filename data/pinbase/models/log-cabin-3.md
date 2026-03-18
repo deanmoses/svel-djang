@@ -3,7 +3,7 @@ slug: log-cabin-3
 name: Log Cabin
 title_slug: log-cabin-3
 ipdb_id: 5203
-manufacturer_slug: caille-bros
+corporate_entity_slug: caille-bros
 year: 1901
 month: 7
 player_count: 1

@@ -3,7 +3,7 @@ slug: lightning-3
 name: Lightning
 title_slug: lightning-2
 ipdb_id: 3211
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1938
 month: 8
 player_count: 1

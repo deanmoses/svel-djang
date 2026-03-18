@@ -4,7 +4,7 @@ name: Thoro-Bred
 title_slug: thoro-bred
 opdb_id: G4Zdx-Mb56j
 ipdb_id: 2534
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1965
 month: 2
 player_count: 2

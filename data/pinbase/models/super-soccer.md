@@ -4,7 +4,7 @@ name: Super Soccer
 title_slug: soccer-super-soccer
 opdb_id: GRn8D-MQd21
 ipdb_id: 2443
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1975
 month: 1
 player_count: 4

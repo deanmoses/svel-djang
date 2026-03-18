@@ -3,7 +3,7 @@ slug: ballyhoo-3
 name: Ballyhoo
 title_slug: ballyhoo-3
 ipdb_id: 4817
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1932
 month: 1
 player_count: 1

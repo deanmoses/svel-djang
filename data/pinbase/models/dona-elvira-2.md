@@ -4,7 +4,7 @@ name: Dona Elvira 2
 title_slug: dona-elvira-2
 opdb_id: G5oVL-MQ2XK
 ipdb_id: 4621
-manufacturer_slug: sleic
+corporate_entity_slug: creaciones-e-investigaciones-electrnicas-sociedad-limitada
 year: 1996
 month: 1
 player_count: 4

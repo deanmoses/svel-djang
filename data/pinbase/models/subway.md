@@ -3,7 +3,7 @@ slug: subway
 name: Subway
 title_slug: subway
 ipdb_id: 2411
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1934
 month: 9
 player_count: 1

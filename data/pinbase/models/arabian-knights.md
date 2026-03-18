@@ -4,7 +4,7 @@ name: Arabian Knights
 title_slug: arabian-knights
 opdb_id: G59Xv-MJdYp
 ipdb_id: 80
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1953
 month: 11
 player_count: 1

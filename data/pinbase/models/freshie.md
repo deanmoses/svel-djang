@@ -4,7 +4,7 @@ name: Freshie
 title_slug: freshie
 opdb_id: Gzy6x-MOEP8
 ipdb_id: 954
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1949
 month: 9
 player_count: 1

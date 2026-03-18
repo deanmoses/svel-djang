@@ -4,7 +4,7 @@ name: Cosmic
 title_slug: galaxy-stern
 opdb_id: GrdDB-MP3jX
 ipdb_id: 4567
-manufacturer_slug: taito
+corporate_entity_slug: taito-do-brasil-a-division-of-taito-japan
 year: 1982
 month: 1
 player_count: 4

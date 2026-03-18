@@ -4,7 +4,7 @@ name: Pinball (EM)
 title_slug: pinball-stern
 opdb_id: GrZXj-MD3ee
 ipdb_id: 4694
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1977
 month: 8
 player_count: 4

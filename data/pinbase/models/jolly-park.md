@@ -4,7 +4,7 @@ name: Jolly Park
 title_slug: jolly-park
 opdb_id: G4jWq-MLyl0
 ipdb_id: 4618
-manufacturer_slug: spinball
+corporate_entity_slug: spinball-sal
 year: 1995
 month: 1
 player_count: 4

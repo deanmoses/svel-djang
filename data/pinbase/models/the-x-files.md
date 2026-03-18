@@ -4,7 +4,7 @@ name: The X Files
 title_slug: the-x-files
 opdb_id: G4jPq-MQdlK
 ipdb_id: 4137
-manufacturer_slug: sega
+corporate_entity_slug: sega-pinball-incorporated
 year: 1997
 month: 9
 player_count: 6

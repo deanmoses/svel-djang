@@ -4,7 +4,7 @@ name: Wisconsin
 title_slug: wisconsin
 opdb_id: G5pOZ-MOE37
 ipdb_id: 2800
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1948
 month: 4
 player_count: 1

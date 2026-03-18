@@ -4,7 +4,7 @@ name: Tales of the Arabian Nights
 title_slug: tales-of-the-arabian-nights
 opdb_id: G4llj-MQYb2
 ipdb_id: 3824
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1996
 month: 5
 player_count: 4

@@ -4,7 +4,7 @@ name: Twilight Zone
 title_slug: twilight-zone
 opdb_id: GrXzD-MjBPX
 ipdb_id: 2684
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1993
 month: 5
 player_count: 4

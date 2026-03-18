@@ -3,7 +3,7 @@ slug: silver-extended-play-prototype
 name: Silver (Extended Play Prototype)
 title_slug: silver-extended-play-prototype
 ipdb_id: 6907
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1957
 player_count: 1
 production_quantity: '1'

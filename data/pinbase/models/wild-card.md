@@ -4,7 +4,7 @@ name: Wild Card
 title_slug: wild-card
 opdb_id: G4jzL-MwN5n
 ipdb_id: 2778
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1977
 month: 10
 player_count: 1

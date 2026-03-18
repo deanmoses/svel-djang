@@ -4,7 +4,7 @@ name: Star Gazer
 title_slug: star-gazer
 opdb_id: GrZY2-ML0Rb
 ipdb_id: 2346
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1980
 month: 1
 player_count: 4

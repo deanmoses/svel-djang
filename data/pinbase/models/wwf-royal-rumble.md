@@ -4,7 +4,7 @@ name: WWF Royal Rumble
 title_slug: wwf
 opdb_id: G57y6-MLej6
 ipdb_id: 2820
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1994
 month: 5
 player_count: 4

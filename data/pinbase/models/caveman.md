@@ -4,7 +4,7 @@ name: Caveman
 title_slug: caveman
 opdb_id: GR768-MLErr
 ipdb_id: 475
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1982
 month: 1
 player_count: 4

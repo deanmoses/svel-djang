@@ -4,7 +4,7 @@ name: Pinball Magic
 title_slug: pinball-magic
 opdb_id: GrZnn-MJj46
 ipdb_id: 3596
-manufacturer_slug: capcom
+corporate_entity_slug: capcom-coin-op-incorporated
 year: 1995
 month: 1
 player_count: 4

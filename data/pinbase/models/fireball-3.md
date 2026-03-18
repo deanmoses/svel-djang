@@ -4,7 +4,7 @@ name: Fireball (Home Model)
 title_slug: fireball
 opdb_id: G48ZN-MQ56q
 ipdb_id: 4116
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1976
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: Ripley's Believe It or Not!
 title_slug: ripleys-believe-it-or-not
 opdb_id: GRWyB-MLz6Z
 ipdb_id: 4917
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2004
 month: 3
 player_count: 4

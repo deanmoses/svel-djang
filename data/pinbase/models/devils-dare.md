@@ -4,7 +4,7 @@ name: Devil's Dare
 title_slug: devils-dare
 opdb_id: GrNkY-MDbn2
 ipdb_id: 673
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1982
 month: 8
 player_count: 4

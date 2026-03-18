@@ -4,7 +4,7 @@ name: Impacto
 title_slug: impacto
 opdb_id: GvBBX-MKNyd
 ipdb_id: 4868
-manufacturer_slug: recreativos-franco
+corporate_entity_slug: recreativos-franco
 year: 1975
 month: 1
 player_count: 1

@@ -4,7 +4,7 @@ name: Robo-War
 title_slug: robo-war
 opdb_id: GryK3-MQrWk
 ipdb_id: 1975
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1988
 month: 1
 player_count: 4

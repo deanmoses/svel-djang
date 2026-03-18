@@ -3,7 +3,7 @@ slug: 3-ring-circus
 name: 3-Ring Circus
 title_slug: 3-ring-circus
 ipdb_id: 2543
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1932
 month: 7
 player_count: 1

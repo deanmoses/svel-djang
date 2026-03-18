@@ -4,7 +4,7 @@ name: Spider-Man
 title_slug: spider-man
 opdb_id: G5D94-MLnXq
 ipdb_id: 5237
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2007
 month: 6
 player_count: 4

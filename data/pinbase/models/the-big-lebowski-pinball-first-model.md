@@ -4,7 +4,7 @@ name: The Big Lebowski
 title_slug: the-big-lebowski
 opdb_id: G5WBr-MvB3E
 ipdb_id: 6320
-manufacturer_slug: dutch-pinball
+corporate_entity_slug: dutch-pinball
 year: 2015
 month: 5
 player_count: 4

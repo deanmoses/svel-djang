@@ -4,7 +4,7 @@ name: Monster Bash (Remake Special)
 title_slug: monster-bash
 opdb_id: Gr3EW-MXryE
 ipdb_id: 6571
-manufacturer_slug: chicago-gaming
+corporate_entity_slug: chicago-gaming-company
 year: 2018
 month: 10
 player_count: 4

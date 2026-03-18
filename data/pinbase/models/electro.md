@@ -3,7 +3,7 @@ slug: electro
 name: Electro
 title_slug: electro
 ipdb_id: 776
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1934
 month: 6
 player_count: 1

@@ -4,7 +4,7 @@ name: Stargate
 title_slug: stargate
 opdb_id: G50pv-MdE6R
 ipdb_id: 2847
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1995
 month: 3
 player_count: 4

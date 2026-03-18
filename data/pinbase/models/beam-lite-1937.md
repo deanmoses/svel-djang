@@ -3,7 +3,7 @@ slug: beam-lite-1937
 name: Beam-Lite 1937
 title_slug: beam-lite-1937
 ipdb_id: 2850
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1937
 month: 10
 player_count: 1

@@ -4,7 +4,7 @@ name: Happy-Go-Lucky
 title_slug: happy-go-lucky
 opdb_id: GRVJw-MJprP
 ipdb_id: 1120
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1951
 month: 3
 player_count: 1

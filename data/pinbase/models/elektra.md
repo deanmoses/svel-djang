@@ -4,7 +4,7 @@ name: Elektra
 title_slug: elektra
 opdb_id: GRVld-MDE3l
 ipdb_id: 778
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1981
 month: 3
 player_count: 4

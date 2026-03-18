@@ -4,7 +4,7 @@ name: Astro
 title_slug: 4-square-astro
 opdb_id: GryO2-MQN82
 ipdb_id: 99
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1971
 month: 10
 player_count: 1

@@ -3,7 +3,7 @@ slug: summer-time-3
 name: Summer Time
 title_slug: summer-time-2
 ipdb_id: 2416
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1940
 month: 5
 player_count: 1

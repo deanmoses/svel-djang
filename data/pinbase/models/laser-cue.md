@@ -4,7 +4,7 @@ name: Laser Cue
 title_slug: laser-cue
 opdb_id: GRvJV-MJ4bR
 ipdb_id: 1414
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1984
 month: 2
 player_count: 4

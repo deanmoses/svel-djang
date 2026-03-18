@@ -3,7 +3,7 @@ slug: bowling-alley
 name: Bowling Alley
 title_slug: bowling-alley
 ipdb_id: 364
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1939
 month: 2
 player_count: 1

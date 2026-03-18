@@ -4,7 +4,7 @@ name: 3 Jokers
 title_slug: straight-flush-3-jokers
 opdb_id: GrkK0-MDXxZ
 ipdb_id: 2540
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1970
 month: 11
 player_count: 1

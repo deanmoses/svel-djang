@@ -3,7 +3,7 @@ slug: hoosier-baseball
 name: Hoosier Baseball
 title_slug: hoosier-baseball
 ipdb_id: 5162
-manufacturer_slug: hoosier-games-company
+corporate_entity_slug: hoosier-games-company
 year: 1932
 month: 11
 player_count: 1

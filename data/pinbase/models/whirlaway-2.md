@@ -3,7 +3,7 @@ slug: whirlaway-2
 name: Whirlaway
 title_slug: whirlaway-2
 ipdb_id: 3848
-manufacturer_slug: roy-mcginnis-company
+corporate_entity_slug: roy-mcginnis-company
 year: 1943
 month: 7
 player_count: 1

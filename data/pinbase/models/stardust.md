@@ -4,7 +4,7 @@ name: Stardust
 title_slug: stardust
 opdb_id: G4qO8-MJ6x3
 ipdb_id: 2359
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1971
 month: 10
 player_count: 4

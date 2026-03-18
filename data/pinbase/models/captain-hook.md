@@ -4,7 +4,7 @@ name: Captain Hook
 title_slug: captain-hook
 opdb_id: G4jeW-MDb93
 ipdb_id: 434
-manufacturer_slug: game-plan
+corporate_entity_slug: game-plan-incorporated
 year: 1985
 month: 1
 player_count: 4

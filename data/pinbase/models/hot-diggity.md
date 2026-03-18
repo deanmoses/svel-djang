@@ -4,7 +4,7 @@ name: Hot Diggity
 title_slug: hot-diggity
 opdb_id: G4dvK-MvBZb
 ipdb_id: 1242
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1956
 month: 5
 player_count: 1

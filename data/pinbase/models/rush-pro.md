@@ -4,7 +4,7 @@ name: Rush (Pro)
 title_slug: rush
 opdb_id: G2Lkd-MNEdK
 ipdb_id: 6844
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2022
 month: 1
 player_count: 4

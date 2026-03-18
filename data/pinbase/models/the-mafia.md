@@ -4,7 +4,7 @@ name: The Mafia
 title_slug: the-mafia
 opdb_id: GJ2YO-M7ZlR
 ipdb_id: 6639
-manufacturer_slug: team-pinball
+corporate_entity_slug: team-pinball
 year: 2018
 month: 7
 player_count: 4

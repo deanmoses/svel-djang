@@ -4,7 +4,7 @@ name: Asteroid Annie and the Aliens
 title_slug: asteroid-annie-and-the-aliens
 opdb_id: G59bo-MJPxj
 ipdb_id: 98
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1980
 month: 1
 player_count: 1

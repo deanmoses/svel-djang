@@ -3,7 +3,7 @@ slug: dinosaur-eggs
 name: Dinosaur Eggs
 title_slug: dinosaur-eggs
 ipdb_id: 3062
-manufacturer_slug: alvin-g
+corporate_entity_slug: alvin-g-and-company
 year: 1993
 month: 8
 player_count: 1

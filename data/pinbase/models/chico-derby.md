@@ -3,7 +3,7 @@ slug: chico-derby
 name: Chico Derby
 title_slug: chico-derby
 ipdb_id: 504
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1937
 month: 9
 player_count: 1

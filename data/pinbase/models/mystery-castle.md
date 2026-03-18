@@ -4,7 +4,7 @@ name: Mystery Castle
 title_slug: mystery-castle
 opdb_id: G5vZZ-MQNNo
 ipdb_id: 1647
-manufacturer_slug: alvin-g
+corporate_entity_slug: alvin-g-and-company
 year: 1993
 month: 1
 player_count: 4

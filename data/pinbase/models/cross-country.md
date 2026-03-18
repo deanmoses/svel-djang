@@ -4,7 +4,7 @@ name: Cross Country
 title_slug: cross-country
 opdb_id: GRzWL-MRjWy
 ipdb_id: 598
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1963
 month: 3
 player_count: 1

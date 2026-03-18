@@ -3,7 +3,7 @@ slug: thriller-2
 name: Thriller
 title_slug: thriller-2
 ipdb_id: 3491
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1936
 month: 6
 player_count: 1

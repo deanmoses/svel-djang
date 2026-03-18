@@ -4,7 +4,7 @@ name: Red & Ted's Road Show
 title_slug: road-show
 opdb_id: G4dWd-MJ2p6
 ipdb_id: 1972
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1994
 month: 1
 player_count: 4

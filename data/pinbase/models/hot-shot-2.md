@@ -3,7 +3,7 @@ slug: hot-shot-2
 name: Hot Shot
 title_slug: hot-shot
 ipdb_id: 3160
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1994
 month: 10
 player_count: 1

@@ -4,7 +4,7 @@ name: Barracora
 title_slug: barracora
 opdb_id: GRo7K-MQ4e3
 ipdb_id: 177
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1981
 month: 1
 player_count: 4

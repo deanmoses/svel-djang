@@ -4,7 +4,7 @@ name: OXO
 title_slug: oxo
 opdb_id: Gr87E-MLWBP
 ipdb_id: 1733
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1973
 month: 10
 player_count: 4

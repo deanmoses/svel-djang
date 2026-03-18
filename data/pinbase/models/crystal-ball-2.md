@@ -4,7 +4,7 @@ name: Crystal-Ball
 title_slug: crystal-ball
 opdb_id: G8lxD-M0ow9
 ipdb_id: 5498
-manufacturer_slug: automaticos
+corporate_entity_slug: talleres-del-llobregat-sa-automaticos
 year: 1970
 month: 1
 player_count: 1

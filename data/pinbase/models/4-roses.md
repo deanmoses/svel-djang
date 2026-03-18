@@ -4,7 +4,7 @@ name: 4 Roses
 title_slug: 4-roses
 opdb_id: GRWz0-MLOxd
 ipdb_id: 938
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1962
 month: 12
 player_count: 1

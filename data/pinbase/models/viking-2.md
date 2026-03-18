@@ -4,7 +4,7 @@ name: Viking
 title_slug: viking-2
 opdb_id: G42lb-M7Z63
 ipdb_id: 2738
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1960
 month: 10
 player_count: 2

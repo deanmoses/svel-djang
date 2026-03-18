@@ -4,7 +4,7 @@ name: Spring Break
 title_slug: spring-break
 opdb_id: GRLKd-Mp46p
 ipdb_id: 2324
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1987
 month: 1
 player_count: 4

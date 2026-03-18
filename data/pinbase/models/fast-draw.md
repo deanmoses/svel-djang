@@ -4,7 +4,7 @@ name: Fast Draw
 title_slug: fast-draw-quick-draw
 opdb_id: GRVoX-MLE7l
 ipdb_id: 828
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1975
 month: 3
 player_count: 4

@@ -4,7 +4,7 @@ name: Odin
 title_slug: odin
 opdb_id: GJ2d8-M9RWW
 ipdb_id: 4953
-manufacturer_slug: peyper
+corporate_entity_slug: peyper
 year: 1985
 month: 1
 player_count: 4

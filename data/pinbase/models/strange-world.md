@@ -4,7 +4,7 @@ name: Strange World
 title_slug: strange-world
 opdb_id: GRYox-MJV2B
 ipdb_id: 2397
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1978
 month: 2
 player_count: 1

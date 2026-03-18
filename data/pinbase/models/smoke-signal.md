@@ -4,7 +4,7 @@ name: Smoke Signal
 title_slug: smoke-signal
 opdb_id: G48B7-MQpRr
 ipdb_id: 2218
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1955
 month: 5
 player_count: 1

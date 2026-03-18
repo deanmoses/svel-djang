@@ -4,7 +4,7 @@ name: Masquerade
 title_slug: masquerade
 opdb_id: GrjYo-MBRqZ
 ipdb_id: 1553
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1966
 month: 2
 player_count: 4

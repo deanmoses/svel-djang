@@ -3,7 +3,7 @@ slug: peppy
 name: Peppy
 title_slug: peppy
 ipdb_id: 3356
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1956
 month: 9
 player_count: 1

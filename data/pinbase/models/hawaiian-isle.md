@@ -4,7 +4,7 @@ name: Hawaiian Isle
 title_slug: paradise-pleasure-isle
 opdb_id: G4yEO-M4oqr-ARWky
 ipdb_id: 1139
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1966
 month: 1
 player_count: 2

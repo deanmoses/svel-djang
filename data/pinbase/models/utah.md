@@ -4,7 +4,7 @@ name: Utah
 title_slug: utah
 opdb_id: G3Ey3-M4onw
 ipdb_id: 2711
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1949
 month: 9
 player_count: 1

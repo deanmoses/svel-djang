@@ -4,7 +4,7 @@ name: America's Most Haunted
 title_slug: americas-most-haunted
 opdb_id: G4ELZ-MQ27w
 ipdb_id: 6161
-manufacturer_slug: spooky
+corporate_entity_slug: spooky-pinball-llc
 year: 2014
 month: 4
 player_count: 4

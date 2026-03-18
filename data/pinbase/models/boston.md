@@ -4,7 +4,7 @@ name: Boston
 title_slug: boston
 opdb_id: G5n6W-MjBj6
 ipdb_id: 359
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1949
 month: 1
 player_count: 1

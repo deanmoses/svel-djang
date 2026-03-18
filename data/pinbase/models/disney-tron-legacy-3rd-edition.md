@@ -3,7 +3,7 @@ slug: disney-tron-legacy-3rd-edition
 name: Disney TRON Legacy (3rd Edition)
 title_slug: disney-tron-legacy-3rd-edition
 ipdb_id: 6018
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2012
 player_count: 4
 technology_generation_slug: solid-state

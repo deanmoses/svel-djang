@@ -4,7 +4,7 @@ name: Ice-Revue
 title_slug: ice-revue-ice-show
 opdb_id: GRnYX-MQk08
 ipdb_id: 1262
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1965
 month: 12
 player_count: 1

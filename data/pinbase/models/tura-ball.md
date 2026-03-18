@@ -3,7 +3,7 @@ slug: tura-ball
 name: Tura-Ball
 title_slug: tura-ball
 ipdb_id: 4748
-manufacturer_slug: tura-automatenfabrik-gmbh
+corporate_entity_slug: tura-automatenfabrik-gmbh
 year: 1933
 month: 3
 player_count: 1

@@ -3,7 +3,7 @@ slug: royal-flash
 name: Royal Flash
 title_slug: royal-flash-2
 ipdb_id: 2033
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1964
 player_count: 2
 technology_generation_slug: electromechanical

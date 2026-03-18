@@ -4,7 +4,7 @@ name: Tokyo Perfect Drift
 title_slug: tokyo-perfect-drift
 opdb_id: GnP9y-MOEWd
 ipdb_id: 6618
-manufacturer_slug: quetzal
+corporate_entity_slug: quetzal-pinball
 year: 2019
 month: 10
 player_count: 4

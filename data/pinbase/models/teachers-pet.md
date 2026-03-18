@@ -4,7 +4,7 @@ name: Teacher's Pet
 title_slug: teachers-pet
 opdb_id: G5wpD-MDB3n
 ipdb_id: 2506
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1965
 month: 12
 player_count: 1

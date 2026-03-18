@@ -3,7 +3,7 @@ slug: lancer
 name: Lancer
 title_slug: lancer
 ipdb_id: 1409
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1940
 month: 2
 player_count: 1

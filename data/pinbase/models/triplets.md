@@ -4,7 +4,7 @@ name: Triplets
 title_slug: triplets
 opdb_id: GRpdX-MJY3N
 ipdb_id: 2654
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1950
 month: 7
 player_count: 1

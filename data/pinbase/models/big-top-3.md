@@ -4,7 +4,7 @@ name: Big Top
 title_slug: big-top-2
 opdb_id: GR9el-MQdRK
 ipdb_id: 286
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1964
 month: 1
 player_count: 2

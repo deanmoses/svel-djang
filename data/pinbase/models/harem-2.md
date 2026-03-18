@@ -4,7 +4,7 @@ name: Harem
 title_slug: harem
 opdb_id: G4l3P-MQPOV
 ipdb_id: 5086
-manufacturer_slug: playmatic
+corporate_entity_slug: playmatic
 year: 1974
 month: 1
 player_count: 1

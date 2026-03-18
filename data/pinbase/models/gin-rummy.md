@@ -4,7 +4,7 @@ name: Gin Rummy
 title_slug: gin-rummy
 opdb_id: GpeNN-MePxk
 ipdb_id: 1006
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1949
 month: 2
 player_count: 1

@@ -3,7 +3,7 @@ slug: phantom-haus
 name: Phantom Haus
 title_slug: phantom-haus
 ipdb_id: 6840
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1996
 player_count: 1
 production_quantity: '50'

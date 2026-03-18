@@ -4,7 +4,7 @@ name: Champ
 title_slug: champ
 opdb_id: GrZNL-MOE2r
 ipdb_id: 486
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1974
 month: 2
 player_count: 4

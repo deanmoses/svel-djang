@@ -4,7 +4,7 @@ name: Bloody China
 title_slug: strikes-and-spares
 opdb_id: GrleW-MQYkZ
 ipdb_id: 3969
-manufacturer_slug: komplett-flipper
+corporate_entity_slug: komplett-flipper
 year: 1985
 month: 1
 player_count: 4

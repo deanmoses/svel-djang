@@ -4,7 +4,7 @@ name: Atlantis
 title_slug: atlantis
 opdb_id: GrNlV-MDydr
 ipdb_id: 106
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1989
 month: 1
 player_count: 4

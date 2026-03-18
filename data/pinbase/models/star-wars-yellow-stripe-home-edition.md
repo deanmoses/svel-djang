@@ -4,7 +4,7 @@ name: Star Wars Comic Art (Home Edition)
 title_slug: star-wars-home-edition
 opdb_id: GpePX-MnKq5-A1Jkz
 ipdb_id: 6770
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2020
 month: 11
 player_count: 4

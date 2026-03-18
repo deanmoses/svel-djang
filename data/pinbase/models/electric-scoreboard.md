@@ -3,7 +3,7 @@ slug: electric-scoreboard
 name: Electric Scoreboard
 title_slug: electric-scoreboard
 ipdb_id: 2061
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1937
 month: 4
 player_count: 1

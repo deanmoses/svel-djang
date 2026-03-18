@@ -4,7 +4,7 @@ name: Flipper Football
 title_slug: flipper-football
 opdb_id: GRKKk-MLxwP
 ipdb_id: 3945
-manufacturer_slug: capcom
+corporate_entity_slug: capcom-coin-op-incorporated
 year: 1996
 month: 10
 player_count: 6

@@ -3,7 +3,7 @@ slug: big-ten
 name: Big Ten
 title_slug: big-ten
 ipdb_id: 281
-manufacturer_slug: evans
+corporate_entity_slug: h-c-evans-company
 year: 1935
 month: 9
 player_count: 1

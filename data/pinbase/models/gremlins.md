@@ -3,7 +3,7 @@ slug: gremlins
 name: Gremlins
 title_slug: gremlins
 ipdb_id: 4595
-manufacturer_slug: pinball-shop
+corporate_entity_slug: pinball-shop
 year: 1988
 month: 4
 player_count: 4

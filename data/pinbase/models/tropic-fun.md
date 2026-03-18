@@ -4,7 +4,7 @@ name: Tropic Fun
 title_slug: gulfstream-tropic-fun
 opdb_id: G4EJB-ML0ez
 ipdb_id: 2660
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1973
 month: 5
 player_count: 1

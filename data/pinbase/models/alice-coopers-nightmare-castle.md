@@ -4,7 +4,7 @@ name: Alice Cooper's Nightmare Castle
 title_slug: alice-cooper
 opdb_id: GrlXK-M9RV0
 ipdb_id: 6445
-manufacturer_slug: spooky
+corporate_entity_slug: spooky-pinball-llc
 year: 2018
 month: 1
 player_count: 4

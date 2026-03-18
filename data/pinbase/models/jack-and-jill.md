@@ -3,7 +3,7 @@ slug: jack-and-jill
 name: Jack and Jill
 title_slug: jack-and-jill
 ipdb_id: 1274
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1933
 month: 2
 player_count: 2

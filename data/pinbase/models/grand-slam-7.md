@@ -4,7 +4,7 @@ name: Grand Slam
 title_slug: grand-slam-world-series
 opdb_id: G43j1-MJj12
 ipdb_id: 4389
-manufacturer_slug: petaco
+corporate_entity_slug: procedimientos-electromagnticos-de-tanteo-y-color
 year: 1972
 month: 1
 player_count: 1

@@ -4,7 +4,7 @@ name: Diamond Lady
 title_slug: diamond-lady
 opdb_id: G4jXW-MQdrN
 ipdb_id: 678
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1988
 month: 2
 player_count: 4

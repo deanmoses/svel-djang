@@ -4,7 +4,7 @@ name: Harley-Davidson
 title_slug: harley-davidson-bally
 opdb_id: Gr2L0-MDz1W
 ipdb_id: 1126
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1991
 month: 2
 player_count: 4

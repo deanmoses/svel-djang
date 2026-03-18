@@ -4,7 +4,7 @@ name: Stop 'N' Go
 title_slug: stop-n-go
 opdb_id: G43v8-MJPvw
 ipdb_id: 2386
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1964
 month: 8
 player_count: 2

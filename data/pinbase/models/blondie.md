@@ -4,7 +4,7 @@ name: Blondie
 title_slug: blondie
 opdb_id: GRVdN-MLqwD
 ipdb_id: 321
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1956
 month: 6
 player_count: 1

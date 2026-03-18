@@ -4,7 +4,7 @@ name: Magic Circle
 title_slug: magic-circle
 opdb_id: GRb9P-MQN0v
 ipdb_id: 1513
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1965
 month: 6
 player_count: 1

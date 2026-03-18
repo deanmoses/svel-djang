@@ -4,7 +4,7 @@ name: Foto Finish
 title_slug: foto-finish
 opdb_id: GRV1D-MQkOy
 ipdb_id: 927
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1961
 month: 1
 player_count: 1

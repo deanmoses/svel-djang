@@ -4,7 +4,7 @@ name: Chinatown
 title_slug: chinatown
 opdb_id: GRQzX-MQY8N
 ipdb_id: 509
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1952
 month: 10
 player_count: 1

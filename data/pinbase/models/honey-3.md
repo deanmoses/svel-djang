@@ -4,7 +4,7 @@ name: Honey
 title_slug: honey
 opdb_id: G5vO1-MKNYE
 ipdb_id: 1230
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1972
 month: 5
 player_count: 4

@@ -3,7 +3,7 @@ slug: hi-dive
 name: Hi-Dive
 title_slug: hi-dive
 ipdb_id: 1171
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1941
 month: 5
 player_count: 1

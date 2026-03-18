@@ -4,7 +4,7 @@ name: Rocket Ship
 title_slug: rocket-ship
 opdb_id: G4P3n-MYeon
 ipdb_id: 1990
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1958
 month: 3
 player_count: 1

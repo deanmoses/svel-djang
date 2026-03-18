@@ -4,7 +4,7 @@ name: Hot Hand
 title_slug: hot-hand
 opdb_id: GRvNk-MQkro
 ipdb_id: 1244
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1979
 month: 6
 player_count: 4

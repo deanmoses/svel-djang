@@ -4,7 +4,7 @@ name: Big Ben
 title_slug: big-ben
 opdb_id: GRBo3-MLv0z
 ipdb_id: 232
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1975
 month: 4
 player_count: 1

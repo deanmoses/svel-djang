@@ -4,7 +4,7 @@ name: Big Hunt
 title_slug: big-hunt
 opdb_id: GrJPo-MDXVN
 ipdb_id: 3692
-manufacturer_slug: ami
+corporate_entity_slug: ami-spa
 year: 1976
 month: 1
 player_count: 1

@@ -4,7 +4,7 @@ name: Rollergames
 title_slug: rollergames
 opdb_id: Gr1Ko-MnKyx
 ipdb_id: 2006
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1990
 month: 6
 player_count: 4

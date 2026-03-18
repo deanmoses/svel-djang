@@ -3,7 +3,7 @@ slug: the-big-lebowski-pinball-second-model
 name: The Big Lebowski Pinball (Second Model)
 title_slug: the-big-lebowski-pinball-second-model
 ipdb_id: 6833
-manufacturer_slug: dutch-pinball
+corporate_entity_slug: dutch-pinball
 year: 2019
 month: 8
 player_count: 4

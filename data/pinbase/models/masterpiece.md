@@ -3,7 +3,7 @@ slug: masterpiece
 name: Masterpiece
 title_slug: masterpiece
 ipdb_id: 1556
-manufacturer_slug: pamco
+corporate_entity_slug: pacific-amusement-manufacturing-company
 year: 1933
 month: 5
 player_count: 1

@@ -4,7 +4,7 @@ name: Cheetah
 title_slug: cheetah
 opdb_id: GR6kW-Mo1W3
 ipdb_id: 500
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1980
 month: 6
 player_count: 4

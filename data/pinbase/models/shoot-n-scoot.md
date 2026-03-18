@@ -3,7 +3,7 @@ slug: shoot-n-scoot
 name: Shoot 'n Scoot
 title_slug: shoot-n-scoot
 opdb_id: GN66q-MeP0V
-manufacturer_slug: multimorphic
+corporate_entity_slug: multimorphic-inc
 year: 2020
 month: 12
 player_count: 4

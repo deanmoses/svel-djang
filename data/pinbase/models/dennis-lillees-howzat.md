@@ -4,7 +4,7 @@ name: Dennis Lillee's Howzat!
 title_slug: dennis-lillees-howzat
 opdb_id: GRzz6-MJN6K
 ipdb_id: 3909
-manufacturer_slug: hankin
+corporate_entity_slug: a-hankin-company
 year: 1980
 month: 1
 player_count: 4

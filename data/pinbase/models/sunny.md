@@ -4,7 +4,7 @@ name: Sunny
 title_slug: sunny
 opdb_id: GyV3V-MNEVN
 ipdb_id: 2421
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1947
 month: 12
 player_count: 1

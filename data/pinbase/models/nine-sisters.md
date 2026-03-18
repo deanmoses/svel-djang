@@ -4,7 +4,7 @@ name: Nine Sisters
 title_slug: nine-sisters
 opdb_id: GRny1-MDbBZ
 ipdb_id: 1679
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1953
 month: 12
 player_count: 1

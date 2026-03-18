@@ -4,7 +4,7 @@ name: Control Tower
 title_slug: control-tower
 opdb_id: GrPP9-MBRol
 ipdb_id: 566
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1951
 month: 3
 player_count: 1

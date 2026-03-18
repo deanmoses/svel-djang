@@ -4,7 +4,7 @@ name: Cyclone
 title_slug: cyclone-2
 opdb_id: GR9EB-MZe46
 ipdb_id: 615
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1951
 month: 4
 player_count: 1

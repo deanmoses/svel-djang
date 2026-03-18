@@ -4,7 +4,7 @@ name: Hot Shot
 title_slug: play-pool
 opdb_id: G5n1Q-MLvdY
 ipdb_id: 1247
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1973
 month: 9
 player_count: 4

@@ -4,7 +4,7 @@ name: K. C. Jones
 title_slug: k-c-jones
 opdb_id: GryOX-MJpZN
 ipdb_id: 1399
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1949
 month: 11
 player_count: 1

@@ -4,7 +4,7 @@ name: Tri Zone
 title_slug: tri-zone
 opdb_id: GrxNK-MLEzY
 ipdb_id: 2641
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1979
 month: 7
 player_count: 4

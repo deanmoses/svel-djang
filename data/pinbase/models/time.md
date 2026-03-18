@@ -3,7 +3,7 @@ slug: time
 name: Time
 title_slug: time
 ipdb_id: 2562
-manufacturer_slug: pamco
+corporate_entity_slug: pacific-amusement-manufacturing-company
 year: 1935
 month: 2
 player_count: 1

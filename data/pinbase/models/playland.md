@@ -4,7 +4,7 @@ name: Playland!
 title_slug: playland
 opdb_id: G5Q82-MJYll
 ipdb_id: 1826
-manufacturer_slug: esco
+corporate_entity_slug: exhibit-supply-company
 year: 1950
 month: 8
 player_count: 1

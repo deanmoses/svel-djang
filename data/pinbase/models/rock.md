@@ -4,7 +4,7 @@ name: Rock
 title_slug: rock
 opdb_id: Grk62-MD1qe
 ipdb_id: 1978
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1985
 month: 1
 player_count: 4

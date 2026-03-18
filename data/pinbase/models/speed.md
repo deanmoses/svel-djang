@@ -3,7 +3,7 @@ slug: speed
 name: Speed
 title_slug: speed
 ipdb_id: 2275
-manufacturer_slug: daval-manufacturing-co
+corporate_entity_slug: daval-manufacturing-co
 year: 1937
 month: 10
 player_count: 1

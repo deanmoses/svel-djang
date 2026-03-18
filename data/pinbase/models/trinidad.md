@@ -4,7 +4,7 @@ name: Trinidad
 title_slug: trinidad
 opdb_id: G8ljD-Mz2oP
 ipdb_id: 2646
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1948
 month: 3
 player_count: 1

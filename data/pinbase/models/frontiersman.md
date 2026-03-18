@@ -4,7 +4,7 @@ name: Frontiersman
 title_slug: frontiersman
 opdb_id: G4dbe-MQj8R
 ipdb_id: 960
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1955
 month: 11
 player_count: 1

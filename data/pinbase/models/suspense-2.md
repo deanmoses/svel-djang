@@ -4,7 +4,7 @@ name: Suspense
 title_slug: suspense
 opdb_id: G5KQV-MP3Y1
 ipdb_id: 2469
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1969
 month: 5
 player_count: 2

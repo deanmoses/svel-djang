@@ -4,7 +4,7 @@ name: Disco Fever
 title_slug: disco-fever
 opdb_id: G5o9o-MQpN2
 ipdb_id: 686
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1978
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: Target Alpha
 title_slug: el-dorado
 opdb_id: GrEZ5-MDBY0
 ipdb_id: 2500
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1976
 month: 11
 player_count: 4

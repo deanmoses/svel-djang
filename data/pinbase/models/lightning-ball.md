@@ -4,7 +4,7 @@ name: Lightning Ball
 title_slug: lightning-ball
 opdb_id: GR66d-M5Rw0
 ipdb_id: 1442
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1959
 month: 10
 player_count: 1

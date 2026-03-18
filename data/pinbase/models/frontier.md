@@ -4,7 +4,7 @@ name: Frontier
 title_slug: frontier
 opdb_id: GRwjq-MJwrd
 ipdb_id: 959
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1980
 month: 11
 player_count: 4

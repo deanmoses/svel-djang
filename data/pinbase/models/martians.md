@@ -3,7 +3,7 @@ slug: martians
 name: Martians!
 title_slug: martians
 ipdb_id: 5004
-manufacturer_slug: a-a-design-group
+corporate_entity_slug: a-a-design-group
 year: 2004
 month: 4
 player_count: 4

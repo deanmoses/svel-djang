@@ -4,7 +4,7 @@ name: The Addams Family
 title_slug: the-addams-family
 opdb_id: G4ODR-MDXEy
 ipdb_id: 20
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1992
 month: 1
 player_count: 4

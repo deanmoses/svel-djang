@@ -4,7 +4,7 @@ name: Big House
 title_slug: big-house
 opdb_id: GR07v-MDRlz
 ipdb_id: 256
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1989
 month: 4
 player_count: 4

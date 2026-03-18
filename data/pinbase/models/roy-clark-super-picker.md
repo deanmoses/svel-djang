@@ -4,7 +4,7 @@ name: Roy Clark Super Picker
 title_slug: roy-clark-super-picker
 opdb_id: G4J11-MDXwO
 ipdb_id: 2438
-manufacturer_slug: allied-leisure
+corporate_entity_slug: allied-leisure-industries-incorporated
 year: 1977
 month: 1
 player_count: 2

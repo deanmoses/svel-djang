@@ -1,6 +1,7 @@
 ---
 slug: stern-electronics
 name: Stern Electronics
+opdb_manufacturer_id: 137
 ---
 
 Stern Electronics was a Chicago-based manufacturer active from 1977 to 1985, and it is entirely distinct from the [[manufacturer:stern-pinball]] that operates today. Founded by [[person:sam-stern]] — who had previously run [[manufacturer:williams]] — Stern Electronics produced a catalog of [[technologygeneration:solid-state]] machines during the early years of the microprocessor era, competing directly with [[manufacturer:bally]], [[manufacturer:williams]], and [[manufacturer:gottlieb]].

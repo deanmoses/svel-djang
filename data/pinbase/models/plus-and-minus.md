@@ -3,7 +3,7 @@ slug: plus-and-minus
 name: Plus and Minus
 title_slug: plus-and-minus
 ipdb_id: 1833
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1935
 month: 8
 player_count: 1

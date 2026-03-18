@@ -4,7 +4,7 @@ name: Time Fantasy
 title_slug: time-fantasy
 opdb_id: G42Nz-MNEpl
 ipdb_id: 2563
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1983
 month: 3
 player_count: 4

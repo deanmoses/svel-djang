@@ -4,7 +4,7 @@ name: Rag Mop
 title_slug: rag-mop
 opdb_id: G4O9Q-MJZ2E
 ipdb_id: 1905
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1950
 month: 10
 player_count: 1

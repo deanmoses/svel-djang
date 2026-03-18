@@ -4,7 +4,7 @@ name: Sorcerer
 title_slug: sorcerer
 opdb_id: G4qxv-MJPyv
 ipdb_id: 2242
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1985
 month: 3
 player_count: 4

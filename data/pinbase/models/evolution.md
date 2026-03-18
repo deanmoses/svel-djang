@@ -4,7 +4,7 @@ name: Evolution
 title_slug: evolution
 opdb_id: G4dLk-MYe1k
 ipdb_id: 3933
-manufacturer_slug: jeutel
+corporate_entity_slug: jeutel
 year: 1986
 month: 1
 player_count: 4

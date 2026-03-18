@@ -4,7 +4,7 @@ name: Alien Star
 title_slug: alien-star
 opdb_id: G4xwQ-MQpVO
 ipdb_id: 49
-manufacturer_slug: gottlieb
+corporate_entity_slug: mylstar-electronics-incorporated
 year: 1984
 month: 6
 player_count: 4

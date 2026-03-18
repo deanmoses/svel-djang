@@ -4,7 +4,7 @@ name: Jive Time
 title_slug: jive-time-rock-n-roll
 opdb_id: GrjKk-Mx09X
 ipdb_id: 1298
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1970
 month: 4
 player_count: 1

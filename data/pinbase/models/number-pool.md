@@ -3,7 +3,7 @@ slug: number-pool
 name: Number Pool
 title_slug: number-pool
 ipdb_id: 3768
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1956
 month: 10
 technology_generation_slug: electromechanical

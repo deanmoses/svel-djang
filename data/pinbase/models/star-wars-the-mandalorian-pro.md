@@ -4,7 +4,7 @@ name: The Mandalorian (Pro)
 title_slug: the-mandalorian
 opdb_id: GBLLP-MkPpr
 ipdb_id: 6828
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2021
 month: 5
 player_count: 4

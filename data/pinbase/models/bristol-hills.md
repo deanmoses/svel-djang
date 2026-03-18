@@ -4,7 +4,7 @@ name: Bristol Hills
 title_slug: snow-queen-snow-derby
 opdb_id: GRKZV-MwN33
 ipdb_id: 376
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1971
 month: 1
 player_count: 2

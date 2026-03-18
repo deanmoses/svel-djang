@@ -3,7 +3,7 @@ slug: time-out
 name: Time Out
 title_slug: time-out
 ipdb_id: 4992
-manufacturer_slug: ripepi
+corporate_entity_slug: ripepi
 player_count: 1
 technology_generation_slug: electromechanical
 credit_refs:

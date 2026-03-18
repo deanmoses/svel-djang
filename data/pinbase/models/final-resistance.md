@@ -3,7 +3,7 @@ slug: final-resistance
 name: Final Resistance
 title_slug: final-resistance
 opdb_id: G187W-MKNro
-manufacturer_slug: multimorphic
+corporate_entity_slug: multimorphic-inc
 year: 2023
 month: 5
 player_count: 4

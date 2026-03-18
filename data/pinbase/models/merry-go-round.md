@@ -4,7 +4,7 @@ name: Merry-Go-Round
 title_slug: merry-go-round
 opdb_id: G4xj0-MJrNB
 ipdb_id: 1578
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1960
 month: 12
 player_count: 2

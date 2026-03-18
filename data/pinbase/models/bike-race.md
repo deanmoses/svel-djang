@@ -4,7 +4,7 @@ name: Bike Race
 title_slug: bike-race
 opdb_id: G4NzV-MLxYz
 ipdb_id: 4120
-manufacturer_slug: sleic
+corporate_entity_slug: creaciones-e-investigaciones-electrnicas-sociedad-limitada
 year: 1992
 month: 1
 player_count: 4

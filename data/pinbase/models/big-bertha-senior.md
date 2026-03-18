@@ -3,7 +3,7 @@ slug: big-bertha-senior
 name: Big-Bertha (Senior)
 title_slug: big-bertha-senior
 ipdb_id: 233
-manufacturer_slug: daval-manufacturing-co
+corporate_entity_slug: daval-manufacturing-co
 year: 1934
 month: 8
 player_count: 1

@@ -4,7 +4,7 @@ name: Harvest Time
 title_slug: harvest-time
 opdb_id: GrZKd-MyNNN
 ipdb_id: 1131
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1950
 month: 9
 player_count: 1

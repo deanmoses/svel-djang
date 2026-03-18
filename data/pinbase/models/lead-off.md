@@ -3,7 +3,7 @@ slug: lead-off
 name: Lead Off
 title_slug: lead-off
 ipdb_id: 3208
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1940
 month: 7
 player_count: 1

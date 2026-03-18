@@ -4,7 +4,7 @@ name: Trident
 title_slug: trident
 opdb_id: GR0KD-MJpnr
 ipdb_id: 2644
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1979
 month: 3
 player_count: 4

@@ -4,7 +4,7 @@ name: Top Card
 title_slug: top-card-royal-pair
 opdb_id: G4JND-MJ5K8
 ipdb_id: 2580
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1974
 month: 8
 player_count: 1

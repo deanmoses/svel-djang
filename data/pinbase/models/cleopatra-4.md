@@ -4,7 +4,7 @@ name: Cleopatra (EM)
 title_slug: cleopatra
 opdb_id: GrknN-MDqV0
 ipdb_id: 4538
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1977
 month: 11
 player_count: 4

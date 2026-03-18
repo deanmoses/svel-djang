@@ -4,7 +4,7 @@ name: Soccer Kings
 title_slug: soccer-kings
 opdb_id: GR0VJ-MDnEy
 ipdb_id: 2235
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1982
 month: 1
 player_count: 4

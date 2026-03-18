@@ -4,7 +4,7 @@ name: Big Town
 title_slug: big-town
 opdb_id: GrjJL-MDyzl
 ipdb_id: 3607
-manufacturer_slug: playmatic
+corporate_entity_slug: playmatic
 year: 1978
 month: 1
 player_count: 4

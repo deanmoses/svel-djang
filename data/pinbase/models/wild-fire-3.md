@@ -3,7 +3,7 @@ slug: wild-fire-3
 name: Wild Fire
 title_slug: wild-fire-3
 ipdb_id: 3773
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1957
 month: 7
 technology_generation_slug: electromechanical

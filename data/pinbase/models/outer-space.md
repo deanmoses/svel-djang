@@ -4,7 +4,7 @@ name: Outer Space
 title_slug: orbit-outer-space
 opdb_id: G5o1K-MLeEZ
 ipdb_id: 1728
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1972
 month: 2
 player_count: 2

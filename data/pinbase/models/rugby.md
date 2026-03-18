@@ -3,7 +3,7 @@ slug: rugby
 name: Rugby
 title_slug: rugby
 ipdb_id: 3340
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1936
 month: 12
 player_count: 1

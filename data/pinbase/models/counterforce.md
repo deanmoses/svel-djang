@@ -4,7 +4,7 @@ name: Counterforce
 title_slug: counterforce
 opdb_id: GRYPN-Mz2RE
 ipdb_id: 575
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1980
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: Gizmo
 title_slug: gizmo
 opdb_id: G9zw0-M5RdB
 ipdb_id: 1009
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1948
 month: 8
 player_count: 1

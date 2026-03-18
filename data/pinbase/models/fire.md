@@ -4,7 +4,7 @@ name: Fire!
 title_slug: fire
 opdb_id: G41Lo-MJp3y
 ipdb_id: 859
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1987
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: America 1492
 title_slug: america-1492
 opdb_id: G5pjV-MwNNj
 ipdb_id: 5013
-manufacturer_slug: juegos-populares
+corporate_entity_slug: juegos-populares-sa
 year: 1986
 month: 1
 player_count: 4

@@ -1,6 +1,7 @@
 ---
 slug: williams
 name: Williams
+opdb_manufacturer_id: 7
 ---
 
 Williams Electronics is, by virtually any measure, the most celebrated manufacturer in pinball history. Founded in Chicago in 1943 by [[person:harry-williams]] — himself a designer of pioneering games for earlier manufacturers — Williams grew into the company responsible for more canonical pinball titles than any other. [[title:twilight-zone]]. [[title:medieval-madness]]. [[title:the-addams-family]]. [[title:funhouse]]. [[title:black-knight]]. The list of games that defined the hobby's highest aspirations runs through Williams like a spine.

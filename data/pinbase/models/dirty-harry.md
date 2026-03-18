@@ -4,7 +4,7 @@ name: Dirty Harry
 title_slug: dirty-harry
 opdb_id: GrJ2Z-M61Xd
 ipdb_id: 684
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1995
 month: 3
 player_count: 4

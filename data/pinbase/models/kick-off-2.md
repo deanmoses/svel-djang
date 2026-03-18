@@ -4,7 +4,7 @@ name: Kick-Off
 title_slug: kick-off
 opdb_id: Gr8L0-MLRdY
 ipdb_id: 3192
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1958
 month: 3
 player_count: 1

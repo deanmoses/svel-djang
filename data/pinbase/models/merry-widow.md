@@ -4,7 +4,7 @@ name: Merry Widow
 title_slug: merry-widow-2
 opdb_id: GBLqd-MyNOK
 ipdb_id: 1576
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1948
 month: 7
 player_count: 1

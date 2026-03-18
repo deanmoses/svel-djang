@@ -4,7 +4,7 @@ name: Big Daddy
 title_slug: big-daddy
 opdb_id: G50e1-MP3yq
 ipdb_id: 242
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1963
 month: 9
 player_count: 1

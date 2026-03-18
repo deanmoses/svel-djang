@@ -4,7 +4,7 @@ name: Turf Champ
 title_slug: turf-champ
 opdb_id: Grjq3-MLXkO
 ipdb_id: 2670
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1958
 month: 7
 player_count: 1

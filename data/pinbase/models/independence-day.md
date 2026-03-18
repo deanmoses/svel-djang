@@ -4,7 +4,7 @@ name: Independence Day
 title_slug: independence-day
 opdb_id: G4doQ-MKNN9
 ipdb_id: 3878
-manufacturer_slug: sega
+corporate_entity_slug: sega-pinball-incorporated
 year: 1996
 month: 1
 player_count: 6

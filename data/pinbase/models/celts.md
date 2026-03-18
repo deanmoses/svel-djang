@@ -4,7 +4,7 @@ name: Celts
 title_slug: celts
 opdb_id: G9zzB-MvBKz
 ipdb_id: 6824
-manufacturer_slug: haggis
+corporate_entity_slug: haggis-pinball
 year: 2020
 month: 11
 player_count: 4

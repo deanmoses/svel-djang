@@ -4,7 +4,7 @@ name: Fire Cracker
 title_slug: fire-cracker
 opdb_id: GrN2w-MwNyj
 ipdb_id: 850
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1963
 month: 10
 player_count: 2

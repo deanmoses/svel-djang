@@ -4,7 +4,7 @@ name: Action
 title_slug: action
 opdb_id: GrJQv-M2Yjq
 ipdb_id: 15
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1969
 month: 9
 player_count: 1

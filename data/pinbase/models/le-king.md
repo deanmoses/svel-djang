@@ -4,7 +4,7 @@ name: Le King
 title_slug: le-king
 opdb_id: Grqn7-MLE0K
 ipdb_id: 4554
-manufacturer_slug: jeutel
+corporate_entity_slug: jeutel
 year: 1983
 month: 1
 player_count: 4

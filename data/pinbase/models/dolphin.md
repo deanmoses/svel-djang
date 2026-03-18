@@ -4,7 +4,7 @@ name: Dolphin
 title_slug: showtime-dolphin
 opdb_id: GRKNz-M3d4R
 ipdb_id: 699
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1974
 month: 3
 player_count: 2

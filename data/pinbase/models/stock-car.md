@@ -4,7 +4,7 @@ name: Stock Car
 title_slug: road-race-stock-car
 opdb_id: G4PQj-MQ4xo
 ipdb_id: 2378
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1970
 month: 1
 player_count: 1

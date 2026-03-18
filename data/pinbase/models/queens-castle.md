@@ -4,7 +4,7 @@ name: Queen's Castle
 title_slug: house-of-diamonds
 opdb_id: GRVpL-MLqW3
 ipdb_id: 3583
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1978
 month: 1
 player_count: 1

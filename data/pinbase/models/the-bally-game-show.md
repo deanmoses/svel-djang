@@ -4,7 +4,7 @@ name: The Bally Game Show
 title_slug: the-bally-game-show
 opdb_id: G5V92-MJ9XO
 ipdb_id: 985
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1990
 month: 1
 player_count: 4

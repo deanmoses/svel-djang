@@ -4,7 +4,7 @@ name: Paul Bunyan
 title_slug: big-jack
 opdb_id: GR937-MQjK5
 ipdb_id: 1768
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1968
 month: 9
 player_count: 2

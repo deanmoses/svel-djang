@@ -4,7 +4,7 @@ name: Globe Trotter
 title_slug: globe-trotter
 opdb_id: G5pqX-MLx3q
 ipdb_id: 1017
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1951
 month: 11
 player_count: 1

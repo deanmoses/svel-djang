@@ -4,7 +4,7 @@ name: Space Ship
 title_slug: space-ship-2
 opdb_id: G5YXp-MJ4RW
 ipdb_id: 2259
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1961
 month: 12
 player_count: 1

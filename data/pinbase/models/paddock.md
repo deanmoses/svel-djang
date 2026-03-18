@@ -4,7 +4,7 @@ name: Paddock
 title_slug: paddock-post-time
 opdb_id: GR0W9-MD3xO
 ipdb_id: 1735
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1969
 month: 9
 player_count: 1

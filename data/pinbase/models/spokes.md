@@ -3,7 +3,7 @@ slug: spokes
 name: Spokes
 title_slug: spokes
 ipdb_id: 3464
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1938
 month: 8
 player_count: 1

@@ -4,7 +4,7 @@ name: Hit 'N' Run
 title_slug: hit-n-run
 opdb_id: GrPVx-MQZP5
 ipdb_id: 1195
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1952
 month: 3
 player_count: 1

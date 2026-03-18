@@ -4,7 +4,7 @@ name: Flash Gordon
 title_slug: flash-gordon
 opdb_id: G5728-MDbjD
 ipdb_id: 874
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1980
 month: 5
 player_count: 4

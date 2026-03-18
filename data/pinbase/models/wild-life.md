@@ -4,7 +4,7 @@ name: Wild Life
 title_slug: jungle-wild-life-jungle-king
 opdb_id: G5B0y-MJ26Y
 ipdb_id: 2784
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1972
 month: 11
 player_count: 2

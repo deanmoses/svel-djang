@@ -4,7 +4,7 @@ name: Club House
 title_slug: club-house
 opdb_id: G4ly3-MDx4z
 ipdb_id: 538
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1958
 month: 11
 player_count: 1

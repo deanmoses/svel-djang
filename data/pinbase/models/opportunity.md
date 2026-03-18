@@ -3,7 +3,7 @@ slug: opportunity
 name: Opportunity
 title_slug: opportunity
 ipdb_id: 1723
-manufacturer_slug: marvel
+corporate_entity_slug: marvel-manufacturing-company
 year: 1946
 month: 10
 player_count: 1

@@ -4,7 +4,7 @@ name: Polo
 title_slug: polo-mini-cycle
 opdb_id: G59j7-MDE8v
 ipdb_id: 1843
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1970
 month: 2
 player_count: 4

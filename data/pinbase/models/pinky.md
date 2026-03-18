@@ -4,7 +4,7 @@ name: Pinky
 title_slug: pinky
 opdb_id: GrkDY-MQwdB
 ipdb_id: 1801
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1950
 month: 9
 player_count: 1

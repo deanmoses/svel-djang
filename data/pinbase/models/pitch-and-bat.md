@@ -3,7 +3,7 @@ slug: pitch-and-bat
 name: Pitch and Bat
 title_slug: pitch-and-bat
 ipdb_id: 1807
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1966
 month: 2
 player_count: 2

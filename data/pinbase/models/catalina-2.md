@@ -4,7 +4,7 @@ name: Catalina
 title_slug: catalina
 opdb_id: G186W-MNEwK
 ipdb_id: 471
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1948
 month: 2
 player_count: 1

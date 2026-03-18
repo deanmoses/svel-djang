@@ -3,7 +3,7 @@ slug: pokemon-pro
 name: Pokémon (Pro)
 title_slug: pokemon
 opdb_id: GV8wB-Mq12N
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2026
 month: 2
 player_count: 4

@@ -4,7 +4,7 @@ name: Op-Pop-Pop
 title_slug: op-pop-pop
 opdb_id: G4k30-MnK6N
 ipdb_id: 1722
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1969
 month: 4
 player_count: 1

@@ -4,7 +4,7 @@ name: Super Jumbo
 title_slug: super-jumbo-deluxe-jumbo
 opdb_id: GrX36-M7Zew
 ipdb_id: 2434
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1954
 month: 10
 player_count: 4

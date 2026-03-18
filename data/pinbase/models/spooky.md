@@ -4,7 +4,7 @@ name: Spooky
 title_slug: spooky
 opdb_id: Gr1j8-MDxzp
 ipdb_id: 3459
-manufacturer_slug: zaccaria
+corporate_entity_slug: zaccaria
 year: 1987
 month: 1
 player_count: 4

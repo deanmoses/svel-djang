@@ -4,7 +4,7 @@ name: Gunner
 title_slug: gunner
 opdb_id: G4yWX-MJYzZ
 ipdb_id: 4482
-manufacturer_slug: playmatic
+corporate_entity_slug: playmatic
 year: 1974
 month: 1
 player_count: 1

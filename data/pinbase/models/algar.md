@@ -4,7 +4,7 @@ name: Algar
 title_slug: algar
 opdb_id: G5nQQ-MLbbp
 ipdb_id: 42
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1980
 month: 1
 player_count: 4

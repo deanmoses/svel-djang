@@ -4,7 +4,7 @@ name: Hook
 title_slug: hook
 opdb_id: G42EQ-MJYpj
 ipdb_id: 1233
-manufacturer_slug: data-east
+corporate_entity_slug: data-east-pinball-incorporated
 year: 1992
 month: 5
 player_count: 4

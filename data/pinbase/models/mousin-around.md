@@ -4,7 +4,7 @@ name: Mousin' Around!
 title_slug: mousin-around
 opdb_id: G43oq-MJp02
 ipdb_id: 1635
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1989
 month: 1
 player_count: 4

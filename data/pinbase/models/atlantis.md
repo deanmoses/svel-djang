@@ -4,7 +4,7 @@ name: Atlantis
 title_slug: atlantis-3
 opdb_id: G48OE-MD0bk
 ipdb_id: 105
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1975
 month: 1
 player_count: 1

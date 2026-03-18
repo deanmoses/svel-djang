@@ -4,7 +4,7 @@ name: Junk Yard
 title_slug: junk-yard
 opdb_id: GRLlj-MQZN8
 ipdb_id: 4014
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1996
 month: 1
 player_count: 4

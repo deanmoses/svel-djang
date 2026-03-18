@@ -4,7 +4,7 @@ name: Madison Square Gardens
 title_slug: madison-square-gardens
 opdb_id: G4Eb1-M85RZ
 ipdb_id: 1507
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1950
 month: 6
 player_count: 1

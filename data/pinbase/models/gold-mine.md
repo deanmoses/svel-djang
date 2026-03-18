@@ -4,7 +4,7 @@ name: Gold Mine
 title_slug: gold-mine
 opdb_id: Gj6Wj-MnKdl
 ipdb_id: 1032
-manufacturer_slug: marvel
+corporate_entity_slug: marvel-manufacturing-company
 year: 1948
 month: 1
 player_count: 1

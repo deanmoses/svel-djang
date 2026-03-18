@@ -4,7 +4,7 @@ name: Shanghai
 title_slug: shanghai
 opdb_id: Gd2O6-Mb5Ky
 ipdb_id: 2109
-manufacturer_slug: chicago-coin
+corporate_entity_slug: chicago-coin-machine-manufacturing-company
 year: 1948
 month: 4
 player_count: 1

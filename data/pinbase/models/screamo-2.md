@@ -4,7 +4,7 @@ name: Screamo
 title_slug: screamo
 opdb_id: GRpVj-MQVrX
 ipdb_id: 2072
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1954
 month: 3
 player_count: 1

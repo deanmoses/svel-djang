@@ -3,7 +3,7 @@ slug: horoscope
 name: Horoscope
 title_slug: horoscope
 ipdb_id: 1237
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1941
 month: 3
 player_count: 1

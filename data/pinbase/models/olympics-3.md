@@ -4,7 +4,7 @@ name: Olympics
 title_slug: olympics
 opdb_id: Gr8Q6-ML1Ke
 ipdb_id: 1714
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1962
 month: 9
 player_count: 1

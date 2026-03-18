@@ -4,7 +4,7 @@ name: Happy Days
 title_slug: happy-days
 opdb_id: Grl1L-MJZyq
 ipdb_id: 1115
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1952
 month: 7
 player_count: 1

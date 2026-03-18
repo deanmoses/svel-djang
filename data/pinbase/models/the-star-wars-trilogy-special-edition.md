@@ -4,7 +4,7 @@ name: Star Wars Trilogy
 title_slug: star-wars-trilogy
 opdb_id: GrybN-MLl5X
 ipdb_id: 4054
-manufacturer_slug: sega
+corporate_entity_slug: sega-pinball-incorporated
 year: 1997
 month: 3
 player_count: 6

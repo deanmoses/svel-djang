@@ -4,7 +4,7 @@ name: Hi Straight
 title_slug: hi-straight
 opdb_id: G43pX-MYe68
 ipdb_id: 1191
-manufacturer_slug: keeney
+corporate_entity_slug: j-h-keeney-and-company-incorporated
 year: 1960
 month: 1
 player_count: 1

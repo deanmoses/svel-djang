@@ -4,7 +4,7 @@ name: Force II
 title_slug: force-ii
 opdb_id: G5Wpk-MDWpy
 ipdb_id: 916
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1981
 month: 2
 player_count: 4

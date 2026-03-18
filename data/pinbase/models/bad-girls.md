@@ -4,7 +4,7 @@ name: Bad Girls
 title_slug: bad-girls
 opdb_id: G5WOo-MePp0
 ipdb_id: 128
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1988
 month: 1
 player_count: 4

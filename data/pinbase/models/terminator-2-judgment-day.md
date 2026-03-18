@@ -4,7 +4,7 @@ name: 'Terminator 2: Judgment Day'
 title_slug: terminator-2-judgment-day
 opdb_id: GR9Bx-MQkd5
 ipdb_id: 2524
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-games-incorporated-a-subsidiary-of-wms-industries-incorporated
 year: 1991
 month: 7
 player_count: 4

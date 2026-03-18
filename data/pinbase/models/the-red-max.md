@@ -4,7 +4,7 @@ name: The Red Max
 title_slug: the-red-max
 opdb_id: G57W3-MQdzl
 ipdb_id: 1935
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1971
 month: 3
 player_count: 1

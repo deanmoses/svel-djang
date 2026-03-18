@@ -3,7 +3,7 @@ slug: one-on-one-basketball
 name: One on One Basketball
 title_slug: one-on-one-basketball
 ipdb_id: 6626
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1996
 player_count: 2
 production_quantity: '3'

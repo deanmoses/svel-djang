@@ -3,7 +3,7 @@ slug: major-league-model-44
 name: Major League (Model 44)
 title_slug: major-league-model-44
 ipdb_id: 5497
-manufacturer_slug: pamco
+corporate_entity_slug: pacific-amusement-manufacturing-company
 year: 1934
 month: 10
 player_count: 1

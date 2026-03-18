@@ -4,7 +4,7 @@ name: Straight Flush
 title_slug: straight-flush
 opdb_id: G5L06-ML08k
 ipdb_id: 2392
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1957
 month: 11
 player_count: 1

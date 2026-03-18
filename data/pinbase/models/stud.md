@@ -3,7 +3,7 @@ slug: stud
 name: Stud
 title_slug: stud
 ipdb_id: 3989
-manufacturer_slug: globe-manufacturing-company
+corporate_entity_slug: globe-manufacturing-company
 year: 1932
 month: 6
 player_count: 1

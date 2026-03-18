@@ -1,6 +1,7 @@
 ---
 slug: stern-pinball
 name: Stern
+opdb_manufacturer_id: 12
 ---
 
 Stern Pinball is the sole surviving major manufacturer from the era that defined American pinball, and today it is the dominant force in the global industry. The company was effectively founded when [[person:gary-stern]] acquired [[manufacturer:sega]]'s pinball manufacturing assets in 1999 and relaunched operations as Stern Pinball, Inc. — though Gary's family legacy in the industry stretches back to his father [[person:sam-stern]]'s tenure running [[manufacturer:williams]] in an earlier era.

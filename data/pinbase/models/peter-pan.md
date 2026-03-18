@@ -4,7 +4,7 @@ name: Peter Pan
 title_slug: peter-pan
 opdb_id: G4xV9-MJNoO
 ipdb_id: 1776
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1955
 month: 3
 player_count: 1

@@ -3,7 +3,7 @@ slug: meteor-3
 name: Meteor
 title_slug: meteor-3
 ipdb_id: 6207
-manufacturer_slug: lai
+corporate_entity_slug: leisure-allied-industries
 year: 1979
 player_count: 4
 production_quantity: '423'

@@ -3,7 +3,7 @@ slug: startime
 name: Startime
 title_slug: startime
 ipdb_id: 3400
-manufacturer_slug: keeney
+corporate_entity_slug: j-h-keeney-and-company-incorporated
 year: 1961
 month: 10
 player_count: 1

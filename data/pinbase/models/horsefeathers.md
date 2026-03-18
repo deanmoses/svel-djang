@@ -4,7 +4,7 @@ name: Horsefeathers
 title_slug: horsefeathers
 opdb_id: GRwzK-MDzWe
 ipdb_id: 1240
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1952
 month: 1
 player_count: 2

@@ -4,7 +4,7 @@ name: Arrowhead
 title_slug: arrowhead
 opdb_id: Grj3D-M2YKO
 ipdb_id: 95
-manufacturer_slug: keeney
+corporate_entity_slug: j-h-keeney-and-company-incorporated
 year: 1962
 month: 9
 player_count: 2

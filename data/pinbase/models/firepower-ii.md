@@ -4,7 +4,7 @@ name: Firepower II
 title_slug: firepower-ii
 opdb_id: GRWYk-Mb5OV
 ipdb_id: 857
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1983
 month: 1
 player_count: 4

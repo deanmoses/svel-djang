@@ -4,7 +4,7 @@ name: Thunderball
 title_slug: thunderball
 opdb_id: G4J3k-MLnnX
 ipdb_id: 2554
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1982
 month: 5
 player_count: 2

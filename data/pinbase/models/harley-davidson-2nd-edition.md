@@ -4,7 +4,7 @@ name: Harley-Davidson (2nd Edition)
 title_slug: harley-davidson
 opdb_id: G56lO-MZeRq
 ipdb_id: 4664
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2002
 month: 1
 player_count: 6

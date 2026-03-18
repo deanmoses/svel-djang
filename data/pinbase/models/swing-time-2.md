@@ -4,7 +4,7 @@ name: Swing Time
 title_slug: swing-time
 opdb_id: Grk27-MQde8
 ipdb_id: 2483
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1963
 month: 5
 player_count: 1

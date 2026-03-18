@@ -4,7 +4,7 @@ name: Space Time
 title_slug: space-time-time-zone
 opdb_id: GRvE1-MQ2P6
 ipdb_id: 2262
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1972
 month: 9
 player_count: 4

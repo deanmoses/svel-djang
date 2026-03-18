@@ -3,7 +3,7 @@ slug: running-wild
 name: Running Wild
 title_slug: running-wild
 ipdb_id: 2042
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1937
 month: 4
 player_count: 1

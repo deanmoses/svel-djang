@@ -4,7 +4,7 @@ name: World Cup Soccer
 title_slug: world-cup-soccer
 opdb_id: G42E2-MQP9e
 ipdb_id: 2811
-manufacturer_slug: bally
+corporate_entity_slug: midway-manufacturing-company-a-subsidiary-of-wms-industries-incorporated
 year: 1994
 month: 2
 player_count: 4

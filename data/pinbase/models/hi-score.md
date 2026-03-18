@@ -4,7 +4,7 @@ name: Hi-Score
 title_slug: hi-score-super-score
 opdb_id: GR6XE-MQ9eE
 ipdb_id: 1160
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1967
 month: 5
 player_count: 4

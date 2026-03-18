@@ -4,7 +4,7 @@ name: Hearts Gain
 title_slug: hearts-gain
 opdb_id: G4OZ1-MrRN6
 ipdb_id: 4406
-manufacturer_slug: inder
+corporate_entity_slug: industria-electromecnica-de-recreativos-sa
 year: 1971
 month: 1
 player_count: 1

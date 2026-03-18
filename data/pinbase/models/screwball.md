@@ -4,7 +4,7 @@ name: Screwball
 title_slug: screwball
 opdb_id: GpepN-MePek
 ipdb_id: 2074
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1948
 month: 9
 player_count: 1

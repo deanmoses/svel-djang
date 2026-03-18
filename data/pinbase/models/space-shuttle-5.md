@@ -3,7 +3,7 @@ slug: space-shuttle-5
 name: Space Shuttle
 title_slug: space-shuttle-3
 ipdb_id: 5542
-manufacturer_slug: sega
+corporate_entity_slug: sega-enterprises-ltd
 year: 1977
 month: 11
 player_count: 2

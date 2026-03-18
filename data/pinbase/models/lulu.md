@@ -4,7 +4,7 @@ name: Lulu
 title_slug: lulu
 opdb_id: G57ww-Ml98k
 ipdb_id: 1500
-manufacturer_slug: williams
+corporate_entity_slug: williams-manufacturing-company
 year: 1954
 month: 12
 player_count: 1

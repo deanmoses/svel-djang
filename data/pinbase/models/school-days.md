@@ -3,7 +3,7 @@ slug: school-days
 name: School Days
 title_slug: school-days
 ipdb_id: 2058
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1941
 month: 3
 player_count: 1

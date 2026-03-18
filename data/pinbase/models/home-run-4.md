@@ -4,7 +4,7 @@ name: Home Run
 title_slug: playball-home-run
 opdb_id: GR612-MLyRe
 ipdb_id: 1224
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1971
 month: 5
 player_count: 1

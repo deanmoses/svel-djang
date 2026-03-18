@@ -4,7 +4,7 @@ name: Rockettes
 title_slug: rockettes
 opdb_id: GreB8-MQdrd
 ipdb_id: 1991
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1950
 month: 8
 player_count: 1

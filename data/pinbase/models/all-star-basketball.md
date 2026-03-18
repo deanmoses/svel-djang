@@ -4,7 +4,7 @@ name: All-Star Basketball
 title_slug: all-star-basketball
 opdb_id: GRBeJ-MDvKY
 ipdb_id: 54
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1952
 month: 1
 player_count: 1

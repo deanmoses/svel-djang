@@ -4,7 +4,7 @@ name: The Sopranos
 title_slug: the-sopranos
 opdb_id: G5WoB-MDyNZ
 ipdb_id: 5053
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2005
 month: 1
 player_count: 4

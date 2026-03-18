@@ -4,7 +4,7 @@ name: Attack From Mars (Remake LE)
 title_slug: attack-from-mars
 opdb_id: G4do5-MW9z8
 ipdb_id: 6385
-manufacturer_slug: chicago-gaming
+corporate_entity_slug: chicago-gaming-company
 year: 2017
 month: 7
 player_count: 4

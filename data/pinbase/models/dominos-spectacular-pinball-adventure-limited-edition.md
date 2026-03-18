@@ -3,7 +3,7 @@ slug: dominos-spectacular-pinball-adventure-limited-edition
 name: Domino's Spectacular Pinball Adventure (Limited Edition)
 title_slug: dominos-spectacular-pinball-adventure-limited-edition
 ipdb_id: 6586
-manufacturer_slug: spooky
+corporate_entity_slug: spooky-pinball-llc
 year: 2016
 month: 11
 player_count: 4

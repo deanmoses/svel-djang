@@ -4,7 +4,7 @@ name: Punchy the Clown
 title_slug: punchy-the-clown
 opdb_id: G4x2P-MnK03
 ipdb_id: 3508
-manufacturer_slug: alvin-g
+corporate_entity_slug: alvin-g-and-company
 year: 1993
 month: 1
 player_count: 1

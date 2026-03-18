@@ -3,7 +3,7 @@ slug: mascot
 name: Mascot
 title_slug: mascot
 ipdb_id: 1552
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1940
 month: 5
 player_count: 1

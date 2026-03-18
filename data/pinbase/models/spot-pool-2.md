@@ -4,7 +4,7 @@ name: Spot Pool
 title_slug: bank-shot-sure-shot
 opdb_id: GrqL6-MyNxP
 ipdb_id: 2316
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1976
 month: 3
 player_count: 1

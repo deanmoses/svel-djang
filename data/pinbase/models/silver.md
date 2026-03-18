@@ -4,7 +4,7 @@ name: Silver
 title_slug: silver
 opdb_id: G4Xod-M5Rv0
 ipdb_id: 2144
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1957
 month: 8
 player_count: 1

@@ -4,7 +4,7 @@ name: Poker Plus
 title_slug: poker-plus
 opdb_id: GrPyz-MQ5yd
 ipdb_id: 1837
-manufacturer_slug: recel
+corporate_entity_slug: recel-sa
 year: 1978
 month: 4
 player_count: 4

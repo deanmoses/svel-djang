@@ -4,7 +4,7 @@ name: King Rock
 title_slug: king-rock-king-kool
 opdb_id: GRBly-MJ58y
 ipdb_id: 1377
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1972
 month: 5
 player_count: 4

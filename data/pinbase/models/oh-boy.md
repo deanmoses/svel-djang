@@ -4,7 +4,7 @@ name: Oh Boy
 title_slug: oh-boy
 opdb_id: G5nLZ-MQ48w
 ipdb_id: 1696
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronic-manufacturing-corporation
 year: 1964
 month: 2
 player_count: 2

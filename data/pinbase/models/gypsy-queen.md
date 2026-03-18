@@ -4,7 +4,7 @@ name: Gypsy Queen
 title_slug: gypsy-queen
 opdb_id: GR63e-MJVKR
 ipdb_id: 1104
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1955
 month: 2
 player_count: 1

@@ -4,7 +4,7 @@ name: The Munsters (Pro)
 title_slug: the-munsters
 opdb_id: GbPde-M5Rkv
 ipdb_id: 6564
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2019
 month: 1
 player_count: 4

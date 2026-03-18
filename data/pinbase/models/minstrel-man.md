@@ -4,7 +4,7 @@ name: Minstrel Man
 title_slug: minstrel-man
 opdb_id: G4xx7-MDOpj
 ipdb_id: 1607
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1951
 month: 2
 player_count: 1

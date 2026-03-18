@@ -4,7 +4,7 @@ name: 'Avengers: Infinity Quest (Pro)'
 title_slug: avengers-infinity-quest
 opdb_id: Gj66P-M3dxn
 ipdb_id: 6754
-manufacturer_slug: stern-pinball
+corporate_entity_slug: stern-pinball-incorporated
 year: 2020
 month: 9
 player_count: 4

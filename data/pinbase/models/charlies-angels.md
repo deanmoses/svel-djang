@@ -4,7 +4,7 @@ name: Charlie’s Angels
 title_slug: charlies-angels
 opdb_id: G5Woz-MKNq6
 ipdb_id: 492
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company-a-columbia-pictures-industries-company
 year: 1978
 month: 1
 player_count: 4

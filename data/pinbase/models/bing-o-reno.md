@@ -3,7 +3,7 @@ slug: bing-o-reno
 name: Bing O Reno
 title_slug: bing-o-reno
 ipdb_id: 5684
-manufacturer_slug: scientific-machine-corporation
+corporate_entity_slug: scientific-machine-corporation
 year: 1954
 month: 11
 player_count: 1

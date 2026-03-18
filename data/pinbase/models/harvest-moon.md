@@ -4,7 +4,7 @@ name: Harvest Moon
 title_slug: harvest-moon
 opdb_id: GyVZ1-Mp49z
 ipdb_id: 1129
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1948
 month: 12
 player_count: 1

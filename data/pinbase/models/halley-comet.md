@@ -4,7 +4,7 @@ name: Halley Comet
 title_slug: halley-comet
 opdb_id: GR7DY-MQVzp
 ipdb_id: 3936
-manufacturer_slug: juegos-populares
+corporate_entity_slug: juegos-populares-sa
 year: 1986
 month: 1
 player_count: 4

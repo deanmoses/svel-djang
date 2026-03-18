@@ -4,7 +4,7 @@ name: Four Seasons
 title_slug: four-seasons
 opdb_id: G5WQN-ML8Wq
 ipdb_id: 939
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1968
 month: 12
 player_count: 4

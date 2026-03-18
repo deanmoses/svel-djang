@@ -3,7 +3,7 @@ slug: silver-chest
 name: Silver Chest
 title_slug: silver-chest
 ipdb_id: 2145
-manufacturer_slug: genco
+corporate_entity_slug: genco-manufacturing-company
 year: 1953
 month: 4
 player_count: 1

@@ -4,7 +4,7 @@ name: Lost World
 title_slug: lost-world
 opdb_id: G5pEk-MDWe4
 ipdb_id: 1476
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1978
 month: 8
 player_count: 4

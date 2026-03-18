@@ -3,7 +3,7 @@ slug: handicapper
 name: Handicapper
 title_slug: handicapper
 ipdb_id: 3817
-manufacturer_slug: keeney
+corporate_entity_slug: j-h-keeney-and-company-incorporated
 year: 1937
 month: 9
 player_count: 1

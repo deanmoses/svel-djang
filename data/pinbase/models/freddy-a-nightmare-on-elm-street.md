@@ -4,7 +4,7 @@ name: 'Freddy: A Nightmare On Elm Street'
 title_slug: nightmare-on-elm-street
 opdb_id: GRzB7-MD8ld
 ipdb_id: 948
-manufacturer_slug: gottlieb
+corporate_entity_slug: premier-technology
 year: 1994
 month: 1
 player_count: 4

@@ -4,7 +4,7 @@ name: Strike Zone
 title_slug: strike-zone
 opdb_id: GRzYk-MDXRj
 ipdb_id: 2404
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1970
 month: 9
 player_count: 2

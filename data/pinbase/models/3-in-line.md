@@ -4,7 +4,7 @@ name: 3-In-Line
 title_slug: 3-in-line-bongo
 opdb_id: G41e6-MLqRz
 ipdb_id: 2549
-manufacturer_slug: bally
+corporate_entity_slug: bally-manufacturing-corporation
 year: 1963
 month: 7
 player_count: 4

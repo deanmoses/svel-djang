@@ -4,7 +4,7 @@ name: Queen of Diamonds
 title_slug: world-beauties
 opdb_id: GRBpL-MLeYk-ARKrQ
 ipdb_id: 1890
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1959
 month: 6
 player_count: 1

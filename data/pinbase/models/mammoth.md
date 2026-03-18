@@ -3,7 +3,7 @@ slug: mammoth
 name: Mammoth
 title_slug: mammoth
 ipdb_id: 1534
-manufacturer_slug: keeney
+corporate_entity_slug: j-h-keeney-and-company-incorporated
 year: 1935
 month: 11
 player_count: 1

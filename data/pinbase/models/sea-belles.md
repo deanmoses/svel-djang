@@ -4,7 +4,7 @@ name: Sea Belles
 title_slug: sea-belles-fair-lady
 opdb_id: G41OP-MDyk0
 ipdb_id: 2078
-manufacturer_slug: gottlieb
+corporate_entity_slug: d-gottlieb-company
 year: 1956
 month: 9
 player_count: 2

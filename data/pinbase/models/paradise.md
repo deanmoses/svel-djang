@@ -4,7 +4,7 @@ name: Paradise
 title_slug: paradise
 opdb_id: G6lYP-MZewx
 ipdb_id: 1750
-manufacturer_slug: united
+corporate_entity_slug: united-manufacturing-company
 year: 1948
 month: 8
 player_count: 1

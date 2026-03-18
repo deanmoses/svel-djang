@@ -4,7 +4,7 @@ name: Dracula
 title_slug: dracula-2
 opdb_id: G4Zl2-Ml90d
 ipdb_id: 728
-manufacturer_slug: stern-electronics
+corporate_entity_slug: stern-electronics-incorporated
 year: 1979
 month: 1
 player_count: 4

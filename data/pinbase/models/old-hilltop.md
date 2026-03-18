@@ -3,7 +3,7 @@ slug: old-hilltop
 name: Old Hilltop
 title_slug: old-hilltop
 ipdb_id: 1706
-manufacturer_slug: general-vending-sales-corporation
+corporate_entity_slug: general-vending-sales-corporation
 year: 1951
 month: 12
 player_count: 1

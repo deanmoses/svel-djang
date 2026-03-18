@@ -4,7 +4,7 @@ name: Time Warp
 title_slug: time-warp
 opdb_id: G5wJo-MQdvv
 ipdb_id: 2568
-manufacturer_slug: williams
+corporate_entity_slug: williams-electronics-incorporated
 year: 1979
 month: 9
 player_count: 4
