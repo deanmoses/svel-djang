@@ -68,6 +68,41 @@ FROM titles AS t
 INNER JOIN opdb_groups AS g ON t.opdb_group_id = g.opdb_id;
 
 ------------------------------------------------------------
+-- Model → Corporate Entity resolution
+-- Derives the corporate_entity_slug each model should have.
+-- 1. IPDB models: match via ManufacturerId → corporate_entity.ipdb_manufacturer_id
+-- 2. OPDB-only models: match via manufacturer_slug → corporate_entity with same manufacturer_slug
+--    (picks the one with no ipdb_manufacturer_id if multiple exist, else arbitrary)
+------------------------------------------------------------
+
+CREATE OR REPLACE VIEW model_corporate_entity AS
+SELECT
+  m.slug AS model_slug,
+  m.manufacturer_slug,
+  COALESCE(
+    ce_ipdb.slug,
+    ce_mfr.slug
+  ) AS corporate_entity_slug,
+  CASE
+    WHEN ce_ipdb.slug IS NOT NULL THEN 'ipdb'
+    WHEN ce_mfr.slug IS NOT NULL THEN 'manufacturer'
+    ELSE 'unresolved'
+  END AS resolution_method
+FROM models m
+-- For IPDB models: model → ipdb_id → ipdb_machines.ManufacturerId → corporate_entity
+LEFT JOIN ipdb_machines im ON m.ipdb_id = im.IpdbId
+LEFT JOIN corporate_entities ce_ipdb
+  ON ce_ipdb.ipdb_manufacturer_id = im.ManufacturerId
+-- Fallback: match via manufacturer_slug (for non-IPDB models or IPDB "Unknown Manufacturer")
+LEFT JOIN (
+  SELECT DISTINCT ON (manufacturer_slug) slug, manufacturer_slug
+  FROM corporate_entities
+  ORDER BY manufacturer_slug, ipdb_manufacturer_id NULLS FIRST
+) ce_mfr
+  ON ce_mfr.manufacturer_slug = m.manufacturer_slug
+  AND ce_ipdb.slug IS NULL;
+
+------------------------------------------------------------
 -- Slug quality: name faithfulness
 -- Compares each model's slug to a mechanical slugification of its name.
 -- Large edit distance or missing words signal a slug that doesn't
