@@ -32,6 +32,33 @@ Files in `data/explore/` load in numeric order:
 | `06_gaps.sql`      | Gap analysis: what's missing from pinbase?           |
 | `07_quality.sql`   | Slug quality, media audit, backfill proposals        |
 
+## Remote data (Cloudflare R2)
+
+Ingest source files are stored in Cloudflare R2 for access by cloud-based tools
+and the Railway production environment.
+
+```bash
+make pull-ingest   # download R2 → local data/ingest_sources/
+make push-ingest   # upload local data/ingest_sources/ → R2 (requires credentials)
+```
+
+### Rebuilding from R2
+
+```bash
+./scripts/rebuild_explore.sh --remote   # reads JSON from R2 instead of local files
+```
+
+### MotherDuck
+
+To query against remote data in MotherDuck, override `ingest_base` before
+loading the SQL layers:
+
+```sql
+INSTALL httpfs; LOAD httpfs;
+SET VARIABLE ingest_base = 'https://pub-8f33ea1ac628450298edd0d3243ecf5a.r2.dev';
+-- Then run 02_raw.sql etc. as usual
+```
+
 ## Related scripts
 
 - `scripts/apply_markdown_updates.py` — applies backfills to markdown files

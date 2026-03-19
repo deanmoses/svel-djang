@@ -17,6 +17,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "beautifulsoup4>=4.12",
+    "boto3>=1.42.71",
     "django-stubs>=5.2.9",
     "djlint>=1.36.4",
     "duckdb>=1.4.4",

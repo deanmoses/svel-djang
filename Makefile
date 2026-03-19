@@ -1,4 +1,4 @@
-.PHONY: bootstrap dev test lint quality agent-docs api-gen ingest superuser explore pinbase-export
+.PHONY: bootstrap dev test lint quality agent-docs api-gen ingest superuser explore pinbase-export push-ingest pull-ingest
 
 bootstrap:
 	./scripts/bootstrap
@@ -34,3 +34,9 @@ pinbase-export:
 
 explore:
 	./scripts/rebuild_explore.sh
+
+push-ingest:
+	./scripts/push_ingest_sources.sh
+
+pull-ingest:
+	./scripts/pull_ingest_sources.sh

@@ -23,9 +23,13 @@ enrichment commands (Fandom, Wikidata) run separately.
 | `resolve_claims`                    | Re-resolves all catalog entities from claims    |
 
 Internal seed data lives in `data/*.json`. External source files live in
-`data/ingest_sources/` and are **not committed** to the repo. They are stored in a
-private GitHub Gist:
-`https://gist.github.com/deanmoses/03aaee1bc83da6d7db8030d40538ed2d`
+`data/ingest_sources/` and are **not committed** to the repo. They are stored in
+Cloudflare R2 at `https://pub-8f33ea1ac628450298edd0d3243ecf5a.r2.dev/`.
+
+```bash
+make pull-ingest   # download R2 → local data/ingest_sources/
+make push-ingest   # upload local → R2 (requires R2 credentials in .env)
+```
 
 ## External data sources
 
@@ -51,7 +55,7 @@ pipeline:
 All three support `--dump` / `--from-dump` flags to cache raw data locally and
 replay without network calls.
 
-**Fandom data files** (stored in the same Gist):
+**Fandom data files** (stored in R2 with the other ingest sources):
 
 - `fandom_games.json`
 - `fandom_persons.json`
@@ -79,50 +83,35 @@ uv run python manage.py ingest_all
 railway ssh --service pinbase
 ```
 
-### 2. Download the data files from the Gist
-
-`curl` is not available in the container; use Python:
+### 2. Download ingest sources from R2
 
 ```bash
-mkdir -p /tmp/ingest_sources
-python3 -c "
-import urllib.request
-base = 'https://gist.githubusercontent.com/deanmoses/03aaee1bc83da6d7db8030d40538ed2d/raw/'
-files = [
-    'ipdbdatabase.json',
-    'opdb_export_machines.json',
-    'opdb_export_groups.json',
-    'opdb_changelog.json',
-    'machine_sign_copy.csv',
-    'fandom_games.json',
-    'fandom_manufacturers.json',
-    'fandom_persons.json',
-]
-[urllib.request.urlretrieve(base + f, '/tmp/ingest_sources/' + f) or print('Downloaded', f) for f in files]
-"
+.venv/bin/python manage.py pull_ingest_sources --dest /tmp/ingest_sources
 ```
+
+This fetches the manifest from R2, downloads files (with SHA-256 verification),
+and skips files already present with matching checksums.
 
 ### 3. Run the ingest pipeline
 
 ```bash
-uv run python manage.py ingest_all \
-  --ipdb /tmp/ingest_sources/ipdbdatabase.json \
+.venv/bin/python manage.py ingest_all --write \
+  --ipdb /tmp/ingest_sources/ipdb_xantari.json \
   --opdb /tmp/ingest_sources/opdb_export_machines.json \
-  --opdb-groups /tmp/ingest_sources/opdb_export_groups.json \
   --opdb-changelog /tmp/ingest_sources/opdb_changelog.json \
-  --csv /tmp/ingest_sources/machine_sign_copy.csv
+  --export-dir /tmp/ingest_sources/pinbase_export/
 ```
 
 ### 4. Run optional enrichment (if needed)
 
 ```bash
-uv run python manage.py ingest_fandom \
+.venv/bin/python manage.py ingest_fandom \
   --from-dump /tmp/ingest_sources/fandom_games.json \
   --from-dump-persons /tmp/ingest_sources/fandom_persons.json \
   --from-dump-manufacturers /tmp/ingest_sources/fandom_manufacturers.json
 
-uv run python manage.py ingest_wikidata
-uv run python manage.py ingest_wikidata_manufacturers
+.venv/bin/python manage.py ingest_wikidata
+.venv/bin/python manage.py ingest_wikidata_manufacturers
 ```
 
 ## Resetting the production database
