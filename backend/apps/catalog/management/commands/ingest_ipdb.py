@@ -10,7 +10,7 @@ written in bulk after all records are processed.
 from __future__ import annotations
 
 import json
-from apps.catalog.ingestion.constants import DEFAULT_IPDB_PATH
+from apps.catalog.ingestion.constants import DEFAULT_EXPORT_DIR, DEFAULT_IPDB_PATH
 import logging
 import re
 from html import unescape
@@ -167,12 +167,10 @@ _NARRATIVE_FEATURE_PATTERNS: list[tuple[re.Pattern, str]] = [
 ]
 
 
-_SYSTEMS_JSON = Path(__file__).parents[5] / "data" / "systems.json"
-
-
-def _load_mpu_to_system_slug() -> dict[str, str]:
-    """Build {mpu_string: system_slug} from data/systems.json."""
-    with open(_SYSTEMS_JSON) as f:
+def _load_mpu_to_system_slug(export_dir: str) -> dict[str, str]:
+    """Build {mpu_string: system_slug} from the pinbase export's system.json."""
+    systems_path = Path(export_dir) / "system.json"
+    with open(systems_path) as f:
         systems = json.load(f)
     return {
         mpu: system["slug"]
@@ -269,10 +267,16 @@ class Command(BaseCommand):
             default=DEFAULT_IPDB_PATH,
             help="Path to IPDB JSON dump.",
         )
+        parser.add_argument(
+            "--export-dir",
+            default=DEFAULT_EXPORT_DIR,
+            help="Path to exported Pinbase JSON directory.",
+        )
 
     def handle(self, *args, **options):
         ipdb_path = options["ipdb"]
-        mpu_to_slug = _load_mpu_to_system_slug()
+        export_dir = options["export_dir"]
+        mpu_to_slug = _load_mpu_to_system_slug(export_dir)
 
         from django.contrib.contenttypes.models import ContentType
 
@@ -401,8 +405,8 @@ class Command(BaseCommand):
         if unknown_mpu_strings:
             lines = "\n".join(f"  {s}" for s in sorted(unknown_mpu_strings))
             raise CommandError(
-                f"Unknown MPU strings not in data/systems.json:\n{lines}\n"
-                "Add entries to data/systems.json and run ingest_pinbase_systems before re-ingesting."
+                f"Unknown MPU strings not in pinbase systems:\n{lines}\n"
+                "Add mpu_strings entries to data/pinbase/systems/ and re-export before re-ingesting."
             )
 
         # --- Bulk-assert all collected claims ---

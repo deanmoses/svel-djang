@@ -52,7 +52,13 @@ def credit_roles(db):
     from pathlib import Path
 
     data = json.loads(
-        (Path(__file__).parents[4] / "data" / "credit_roles.json").read_text()
+        (
+            Path(__file__).parents[4]
+            / "data"
+            / "ingest_sources"
+            / "pinbase_export"
+            / "credit_role.json"
+        ).read_text()
     )
     return CreditRole.objects.bulk_create(
         [CreditRole(**entry) for entry in data],

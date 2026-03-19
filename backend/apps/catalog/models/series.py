@@ -14,7 +14,6 @@ class Franchise(Linkable, TimeStampedModel):
     """An IP grouping that spans manufacturers and eras.
 
     e.g., Indiana Jones, Star Trek. Most Titles do not belong to a Franchise.
-    Seeded from franchises.json.
     """
 
     link_url_pattern = "/franchises/{slug}"

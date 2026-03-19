@@ -14,8 +14,7 @@ class System(Linkable, TimeStampedModel):
     """An electronic hardware generation for pinball machines.
 
     e.g. WPC-95, System 6, SAM System, SPIKE.
-    MachineModel.system FK is resolved from 'system' slug claims,
-    created by IPDB ingest (via mpu_strings mapping) or admin.
+    MachineModel.system FK is resolved from 'system' slug claims.
     """
 
     link_url_pattern = "/systems/{slug}"
