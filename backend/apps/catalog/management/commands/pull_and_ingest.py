@@ -50,7 +50,7 @@ class Command(BaseCommand):
             "ipdb": f"{dest}/ipdb_xantari.json",
             "opdb": f"{dest}/opdb_export_machines.json",
             "opdb_changelog": f"{dest}/opdb_changelog.json",
-            "export_dir": f"{dest}/pinbase_export/",
+            "export_dir": f"{dest}/pinbase/",
         }
         if write:
             kwargs["write"] = True

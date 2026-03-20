@@ -662,7 +662,7 @@ Before narrowing OPDB/IPDB ingest, add the new Pinbase Markdown data to DuckDB s
 
 Steps:
 
-1. Write a Python export script that reads `data/pinbase/**/*.md` via the shared loader and emits normalized JSON files into `data/explore/pinbase_export/`.
+1. Write a Python export script that reads `data/pinbase/**/*.md` via the shared loader and emits normalized JSON files into `data/explore/pinbase/`.
 2. Add DuckDB views in `01_raw.sql` that read those exported JSON files as `pinbase_md_models`, `pinbase_md_titles`, etc. — alongside the existing `pinbase_models`, `pinbase_titles` views that read `data/*.json`.
 3. Write comparison queries: join Markdown-layer data against merged views and OPDB/IPDB raw views to surface discrepancies in slugs, names, relationships, and field coverage.
 4. Fix data quality issues discovered during exploration: slug naming (e.g. obscure games holding simple slugs, slugs that don't match full names), relationship correctness, missing fields.

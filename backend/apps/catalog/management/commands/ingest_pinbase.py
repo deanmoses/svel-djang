@@ -58,7 +58,7 @@ from apps.provenance.models import Claim, Source
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_EXPORT_DIR = Path(__file__).parents[5] / "data" / "explore" / "pinbase_export"
+DEFAULT_EXPORT_DIR = Path(__file__).parents[5] / "data" / "explore" / "pinbase"
 
 # Map authored credit role names to CreditRole slugs.
 _CREDIT_ROLE_MAP: dict[str, str] = {
