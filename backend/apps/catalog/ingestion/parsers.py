@@ -102,6 +102,7 @@ def parse_ipdb_manufacturer_string(raw: str | None) -> dict[str, str]:
 
 
 # US state names for disambiguating IPDB location parsing.
+# Includes IPDB typo variants (e.g. "NewYork") so they're recognized as states.
 _US_STATES = frozenset(
     {
         "Alabama",
@@ -154,8 +155,132 @@ _US_STATES = frozenset(
         "West Virginia",
         "Wisconsin",
         "Wyoming",
+        # IPDB typos
+        "NewYork",
+        "SouthCarolina",
     }
 )
+
+# Canonical country names — every country that appears in the data must be here.
+# Values from the normalization map are included automatically.
+_KNOWN_COUNTRIES = frozenset(
+    {
+        "Argentina",
+        "Australia",
+        "Austria",
+        "Belgium",
+        "Brazil",
+        "Canada",
+        "China",
+        "France",
+        "Germany",
+        "Italy",
+        "Japan",
+        "Netherlands",
+        "New Zealand",
+        "Portugal",
+        "Russia",
+        "Slovenia",
+        "Spain",
+        "Sweden",
+        "Taiwan",
+        "United Kingdom",
+        "USA",
+    }
+)
+
+# Canonical US state names (post-normalization) for validating US addresses.
+_CANONICAL_US_STATES = frozenset(
+    {
+        "Alabama",
+        "Alaska",
+        "Arizona",
+        "Arkansas",
+        "California",
+        "Colorado",
+        "Connecticut",
+        "D.C.",
+        "Delaware",
+        "Florida",
+        "Georgia",
+        "Hawaii",
+        "Idaho",
+        "Illinois",
+        "Indiana",
+        "Iowa",
+        "Kansas",
+        "Kentucky",
+        "Louisiana",
+        "Maine",
+        "Maryland",
+        "Massachusetts",
+        "Michigan",
+        "Minnesota",
+        "Mississippi",
+        "Missouri",
+        "Montana",
+        "Nebraska",
+        "Nevada",
+        "New Hampshire",
+        "New Jersey",
+        "New Mexico",
+        "New York",
+        "North Carolina",
+        "North Dakota",
+        "Ohio",
+        "Oklahoma",
+        "Oregon",
+        "Pennsylvania",
+        "Rhode Island",
+        "South Carolina",
+        "South Dakota",
+        "Tennessee",
+        "Texas",
+        "Utah",
+        "Vermont",
+        "Virginia",
+        "Washington",
+        "West Virginia",
+        "Wisconsin",
+        "Wyoming",
+    }
+)
+
+# Normalization maps ported from pinexplore/sql/01_reference.sql.
+_COUNTRY_NORMALIZATION: dict[str, str] = {
+    "England": "United Kingdom",
+    "Britain": "United Kingdom",
+    "UK": "United Kingdom",
+    "U.K.": "United Kingdom",
+    "West Germany": "Germany",
+    "Holland": "Netherlands",
+    "The Netherlands": "Netherlands",
+    "R.O.C.": "Taiwan",
+}
+
+_STATE_NORMALIZATION: dict[str, str] = {
+    "NewYork": "New York",
+    "SouthCarolina": "South Carolina",
+}
+
+# Per-manufacturer-ID location overrides for IPDB records with malformed
+# location strings (missing commas, multi-city HQs, etc.).
+_IPDB_LOCATION_OVERRIDES: dict[int, dict[str, str]] = {
+    532: {"city": "Chicago", "state": "Illinois", "country": "USA"},
+    607: {"city": "Long Island City", "state": "New York", "country": "USA"},
+    764: {"city": "Lincoln", "state": "Nebraska", "country": "USA"},
+    696: {"city": "Youngstown", "state": "Ohio", "country": "USA"},
+    439: {"city": "Madrid", "state": "", "country": "Spain"},
+    364: {"city": "Marcoussis", "state": "", "country": "France"},
+    135: {"city": "Avenza", "state": "", "country": "Italy"},
+}
+
+
+def _normalize_location(result: dict[str, str]) -> dict[str, str]:
+    """Apply state and country normalization to a parsed location dict."""
+    result["state"] = _STATE_NORMALIZATION.get(result["state"], result["state"])
+    result["country"] = _COUNTRY_NORMALIZATION.get(result["country"], result["country"])
+    return result
 
 
 def parse_ipdb_location(location: str) -> dict[str, str]:
@@ -168,25 +293,81 @@ def parse_ipdb_location(location: str) -> dict[str, str]:
     - 1-part US state: "Illinois" → ""/state/USA
     - 1-part non-US: "Germany" → ""/""/country
 
+    Strips parenthetical suffixes (e.g. years that leaked into location).
+    Normalizes country and state names (e.g. "England" → "United Kingdom",
+    "NewYork" → "New York").
+
     Returns dict with keys: city, state, country (all default to "").
     """
     if not location:
         return {"city": "", "state": "", "country": ""}
 
+    # Strip parenthetical suffixes (e.g. "(0-1925)" years that leaked into location)
+    location = re.sub(r"\s*\(.*?\)\s*$", "", location)
+
     parts = [p.strip() for p in location.split(",")]
 
     if len(parts) >= 3:
-        return {"city": parts[0], "state": parts[1], "country": parts[2]}
+        return _normalize_location(
+            {"city": parts[0], "state": parts[1], "country": parts[2]}
+        )
 
     if len(parts) == 2:
         if parts[1] in _US_STATES:
-            return {"city": parts[0], "state": parts[1], "country": "USA"}
-        return {"city": parts[0], "state": "", "country": parts[1]}
+            return _normalize_location(
+                {"city": parts[0], "state": parts[1], "country": "USA"}
+            )
+        return _normalize_location({"city": parts[0], "state": "", "country": parts[1]})
 
     # Single part
     if parts[0] in _US_STATES:
-        return {"city": "", "state": parts[0], "country": "USA"}
-    return {"city": "", "state": "", "country": parts[0]}
+        return _normalize_location({"city": "", "state": parts[0], "country": "USA"})
+    return _normalize_location({"city": "", "state": "", "country": parts[0]})
+
+
+class LocationValidationError(ValueError):
+    """Raised when a parsed IPDB location contains unrecognized values."""
+
+
+def _validate_location(result: dict[str, str], mfr_id: int, raw: str) -> None:
+    """Validate a parsed location dict against known countries and states.
+
+    Raises ``LocationValidationError`` for unrecognized values so the ingest
+    fails loudly rather than silently storing bad data.
+    """
+    country = result["country"]
+    state = result["state"]
+
+    if country and country not in _KNOWN_COUNTRIES:
+        raise LocationValidationError(
+            f"IPDB manufacturer {mfr_id}: unknown country {country!r} "
+            f"(from {raw!r}). Add it to _KNOWN_COUNTRIES in parsers.py, "
+            f"or add a normalization mapping, or add an override."
+        )
+
+    if country == "USA" and state and state not in _CANONICAL_US_STATES:
+        raise LocationValidationError(
+            f"IPDB manufacturer {mfr_id}: unknown US state {state!r} "
+            f"(from {raw!r}). Add it to _CANONICAL_US_STATES in parsers.py, "
+            f"or add a normalization mapping, or add an override."
+        )
+
+
+def get_ipdb_location(mfr_id: int, location: str) -> dict[str, str]:
+    """Get normalized location for an IPDB manufacturer.
+
+    Checks per-manufacturer overrides first (for malformed IPDB strings),
+    then falls back to ``parse_ipdb_location``.
+
+    Raises ``LocationValidationError`` if the result contains an unrecognized
+    country or US state.
+    """
+    override = _IPDB_LOCATION_OVERRIDES.get(mfr_id)
+    if override is not None:
+        return dict(override)
+    result = parse_ipdb_location(location)
+    _validate_location(result, mfr_id, location)
+    return result
 
 
 def parse_credit_string(raw: str | None) -> list[str]:

@@ -15,10 +15,13 @@ from ninja.errors import HttpError
 from ninja.pagination import PageNumberPagination, paginate
 from ninja.security import django_auth
 
+from django.utils.text import slugify
+
 from ..cache import MANUFACTURERS_ALL_KEY, invalidate_all
 from .constants import DEFAULT_PAGE_SIZE
 from .helpers import _build_activity, _claims_prefetch, _extract_image_urls
 from .schemas import ClaimPatchSchema, ClaimSchema, RelatedTitleSchema
+from .titles import FacetRef, _dedup_facet_refs
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -31,6 +34,11 @@ class ManufacturerGridSchema(Schema):
     model_count: int = 0
     thumbnail_url: Optional[str] = None
     search_text: Optional[str] = None
+    locations: list[FacetRef] = []
+    year_min: Optional[int] = None
+    year_max: Optional[int] = None
+    persons: list[FacetRef] = []
+    tech_generations: list[FacetRef] = []
 
 
 class ManufacturerSchema(Schema):
@@ -166,6 +174,34 @@ def _manufacturer_qs():
     )
 
 
+def _build_location_refs(entities) -> list[dict]:
+    """Build composite location FacetRefs at every granularity level.
+
+    For an address with city="Chicago", state="Illinois", country="USA",
+    emits three refs:
+      - "Chicago, Illinois, USA"
+      - "Illinois, USA"
+      - "USA"
+    """
+    refs: dict[str, str] = {}  # slug -> display name
+    for entity in entities:
+        for addr in entity.addresses.all():
+            parts = []
+            if addr.city:
+                parts.append(addr.city)
+            if addr.state:
+                parts.append(addr.state)
+            if addr.country:
+                parts.append(addr.country)
+            # Emit a ref for each suffix: [city,state,country], [state,country], [country]
+            for i in range(len(parts)):
+                name = ", ".join(parts[i:])
+                slug = slugify(name)
+                if slug and slug not in refs:
+                    refs[slug] = name
+    return [{"slug": s, "name": n} for s, n in refs.items()]
+
+
 # ---------------------------------------------------------------------------
 # Router
 # ---------------------------------------------------------------------------
@@ -212,9 +248,9 @@ def list_all_manufacturers(request):
                     Prefetch(
                         "models",
                         queryset=MachineModel.objects.filter(variant_of__isnull=True)
-                        .exclude(extra_data={})
-                        .order_by(F("year").desc(nulls_last=True))
-                        .only("id", "corporate_entity_id", "year", "extra_data"),
+                        .select_related("technology_generation")
+                        .prefetch_related("credits__person")
+                        .order_by(F("year").desc(nulls_last=True)),
                     ),
                 ),
             ),
@@ -225,31 +261,44 @@ def list_all_manufacturers(request):
     result = []
     for mfr in qs:
         thumb = None
+        search_parts: list[str] = []
+        tech_gen_pairs: list[tuple[str, str]] = []
+        person_pairs: list[tuple[str, str]] = []
+
+        model_years: list[int] = []
+
         for entity in mfr.entities.all():
-            for model in entity.models.all():
-                thumb, _ = _extract_image_urls(model.extra_data)
-                if thumb:
-                    break
-            if thumb:
-                break
-        # Build search text from entities and addresses.
-        parts: list[str] = []
-        for entity in mfr.entities.all():
-            parts.append(entity.name)
+            search_parts.append(entity.name)
             for addr in entity.addresses.all():
                 if addr.city:
-                    parts.append(addr.city)
+                    search_parts.append(addr.city)
                 if addr.state:
-                    parts.append(addr.state)
+                    search_parts.append(addr.state)
                 if addr.country:
-                    parts.append(addr.country)
+                    search_parts.append(addr.country)
+            for model in entity.models.all():
+                if thumb is None and model.extra_data:
+                    thumb, _ = _extract_image_urls(model.extra_data)
+                if model.year is not None:
+                    model_years.append(model.year)
+                if model.technology_generation:
+                    tg = model.technology_generation
+                    tech_gen_pairs.append((tg.slug, tg.name))
+                for credit in model.credits.all():
+                    person_pairs.append((credit.person.slug, credit.person.name))
+
         result.append(
             {
                 "name": mfr.name,
                 "slug": mfr.slug,
                 "model_count": mfr.model_count,
                 "thumbnail_url": thumb,
-                "search_text": " | ".join(parts) if parts else None,
+                "search_text": " | ".join(search_parts) if search_parts else None,
+                "locations": _build_location_refs(mfr.entities.all()),
+                "year_min": min(model_years) if model_years else None,
+                "year_max": max(model_years) if model_years else None,
+                "persons": _dedup_facet_refs(person_pairs),
+                "tech_generations": _dedup_facet_refs(tech_gen_pairs),
             }
         )
     cache.set(MANUFACTURERS_ALL_KEY, result, timeout=None)

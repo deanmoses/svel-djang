@@ -26,9 +26,10 @@ from apps.catalog.ingestion.ipdb.records import IpdbRecord
 from apps.catalog.ingestion.person_lookup import build_person_lookup
 from apps.catalog.ingestion.ipdb_title_fixes import TITLE_FIXES
 from apps.catalog.ingestion.parsers import (
+    LocationValidationError,
+    get_ipdb_location,
     parse_credit_string,
     parse_ipdb_date,
-    parse_ipdb_location,
     parse_ipdb_machine_type,
     parse_ipdb_manufacturer_string,
 )
@@ -550,7 +551,10 @@ class Command(BaseCommand):
 
             # --- Step 3: Create address on CE when location is available ---
             if location:
-                addr = parse_ipdb_location(location)
+                try:
+                    addr = get_ipdb_location(mfr_id, location)
+                except LocationValidationError as exc:
+                    raise CommandError(str(exc)) from exc
                 if addr["city"] or addr["state"] or addr["country"]:
                     Address.objects.get_or_create(
                         corporate_entity=ce,

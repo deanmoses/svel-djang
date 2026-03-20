@@ -380,13 +380,13 @@ export interface FacetOption {
 	count: number;
 }
 
-export function buildFacetRefOptions(
-	titles: FacetedTitle[],
-	extractor: (t: FacetedTitle) => FacetRef[],
+export function buildFacetRefOptions<T>(
+	items: T[],
+	extractor: (t: T) => FacetRef[],
 	counts: Map<string, number>
 ): FacetOption[] {
 	const seen = new Map<string, string>();
-	for (const t of titles) {
+	for (const t of items) {
 		for (const ref of extractor(t)) {
 			if (!seen.has(ref.slug)) seen.set(ref.slug, ref.name);
 		}
@@ -398,13 +398,13 @@ export function buildFacetRefOptions(
 	}));
 }
 
-export function buildSingleRefOptions(
-	titles: FacetedTitle[],
-	extractor: (t: FacetedTitle) => FacetRef | null | undefined,
+export function buildSingleRefOptions<T>(
+	items: T[],
+	extractor: (t: T) => FacetRef | null | undefined,
 	counts: Map<string, number>
 ): FacetOption[] {
 	const seen = new Map<string, string>();
-	for (const t of titles) {
+	for (const t of items) {
 		const ref = extractor(t);
 		if (ref && !seen.has(ref.slug)) seen.set(ref.slug, ref.name);
 	}
