@@ -348,14 +348,12 @@ class Command(BaseCommand):
         source = self.editorial_source
         ct_id = ContentType.objects.get_for_model(CorporateEntity).pk
         mfr_by_slug = {m.slug: m for m in Manufacturer.objects.all()}
-        existing_keys = set(
-            CorporateEntity.objects.values_list("manufacturer_id", "name")
-        )
+        existing_slugs = set(CorporateEntity.objects.values_list("slug", flat=True))
 
         objs = []
         valid_entries = []
         missing_mfr: list[str] = []
-        seen_keys: set[tuple[int, str]] = set()
+        seen_slugs: set[str] = set()
 
         for entry in entries:
             mfr_slug = entry["manufacturer_slug"]
@@ -367,16 +365,11 @@ class Command(BaseCommand):
                 )
                 continue
 
-            # Skip duplicates by (manufacturer, name) — data quality issue.
-            key = (mfr.pk, entry["name"])
-            if key in seen_keys:
-                logger.warning(
-                    "Duplicate corporate entity %r for %r — skipping",
-                    entry["name"],
-                    mfr_slug,
-                )
+            slug = entry.get("slug", "")
+            if slug in seen_slugs:
+                logger.warning("Duplicate corporate entity slug %r — skipping", slug)
                 continue
-            seen_keys.add(key)
+            seen_slugs.add(slug)
 
             objs.append(
                 CorporateEntity(
@@ -396,9 +389,7 @@ class Command(BaseCommand):
             update_fields=["name", "year_start", "year_end"],
         )
 
-        created = sum(
-            1 for o in objs if (o.manufacturer_id, o.name) not in existing_keys
-        )
+        created = sum(1 for o in objs if o.slug not in existing_slugs)
         self.stdout.write(
             f"  Corporate entities: {created} created, {len(objs) - created} updated"
         )

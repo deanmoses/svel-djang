@@ -93,12 +93,7 @@ class CorporateEntity(TimeStampedModel):
         ordering = ["manufacturer", "year_start"]
         verbose_name = "corporate entity"
         verbose_name_plural = "corporate entities"
-        constraints = [
-            models.UniqueConstraint(
-                fields=["manufacturer", "name"],
-                name="catalog_unique_corporate_entity_per_manufacturer",
-            ),
-        ]
+        constraints = []
 
     def __str__(self) -> str:
         if self.year_start:

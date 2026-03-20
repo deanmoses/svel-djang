@@ -963,13 +963,6 @@ class Migration(migrations.Migration):
                 "ordering": ["value"],
             },
         ),
-        migrations.AddConstraint(
-            model_name="corporateentity",
-            constraint=models.UniqueConstraint(
-                fields=("manufacturer", "name"),
-                name="catalog_unique_corporate_entity_per_manufacturer",
-            ),
-        ),
         migrations.AlterUniqueTogether(
             name="modelabbreviation",
             unique_together={("machine_model", "value")},
