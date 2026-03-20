@@ -190,6 +190,10 @@ class Command(BaseCommand):
         for rec in aliases:
             pm = by_opdb_id.get(rec.opdb_id)
 
+            # Fallback: match by ipdb_id (pinbase may store the parent opdb_id).
+            if not pm and rec.ipdb_id:
+                pm = by_ipdb_id.get(rec.ipdb_id)
+
             if pm:
                 alias_linked += 1
             else:
