@@ -1,6 +1,7 @@
-"""Tests for the ingest_pinbase_models command."""
+"""Tests for model ingestion via ingest_pinbase command."""
 
 import json
+import os
 import tempfile
 
 import pytest
@@ -66,22 +67,22 @@ def model_with_opdb_name_simple(db, opdb_source):
 
 
 def _write_models_json(entries):
-    """Write entries to a temp file and return the path."""
-    f = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
-    json.dump(entries, f)
-    f.close()
-    return f.name
+    """Write entries to a temp export dir and return the dir path."""
+    export_dir = tempfile.mkdtemp()
+    with open(os.path.join(export_dir, "model.json"), "w") as f:
+        json.dump(entries, f)
+    return export_dir
 
 
 @pytest.mark.django_db
 class TestIngestPinbaseModels:
     def test_creates_name_claim(self, model_with_opdb_name_simple):
         mm = model_with_opdb_name_simple
-        path = _write_models_json(
+        export_dir = _write_models_json(
             [{"opdb_id": "Gtest-Mtest", "name": "Foo (Limited Edition)"}]
         )
 
-        call_command("ingest_pinbase_models", path=path)
+        call_command("ingest_pinbase", export_dir=export_dir)
 
         source = Source.objects.get(slug="pinbase")
         claim = mm.claims.get(source=source, field_name="name", is_active=True)
@@ -89,29 +90,31 @@ class TestIngestPinbaseModels:
 
     def test_pinbase_wins_resolution(self, model_with_opdb_name_simple):
         mm = model_with_opdb_name_simple
-        path = _write_models_json(
+        export_dir = _write_models_json(
             [{"opdb_id": "Gtest-Mtest", "name": "Foo (Limited Edition)"}]
         )
 
-        call_command("ingest_pinbase_models", path=path)
+        call_command("ingest_pinbase", export_dir=export_dir)
         resolve_model(mm)
         mm.refresh_from_db()
 
         assert mm.name == "Foo (Limited Edition)"
 
     def test_skips_unknown_opdb_id(self, db):
-        path = _write_models_json([{"opdb_id": "Gfake-Mfake", "name": "Nonexistent"}])
+        export_dir = _write_models_json(
+            [{"opdb_id": "Gfake-Mfake", "name": "Nonexistent"}]
+        )
         # Should not raise
-        call_command("ingest_pinbase_models", path=path)
+        call_command("ingest_pinbase", export_dir=export_dir)
 
     def test_idempotent(self, model_with_opdb_name_simple):
         mm = model_with_opdb_name_simple
-        path = _write_models_json(
+        export_dir = _write_models_json(
             [{"opdb_id": "Gtest-Mtest", "name": "Foo (Limited Edition)"}]
         )
 
-        call_command("ingest_pinbase_models", path=path)
-        call_command("ingest_pinbase_models", path=path)
+        call_command("ingest_pinbase", export_dir=export_dir)
+        call_command("ingest_pinbase", export_dir=export_dir)
 
         source = Source.objects.get(slug="pinbase")
         assert (
@@ -121,7 +124,7 @@ class TestIngestPinbaseModels:
 
     def test_description_claim(self, model_with_opdb_name_simple):
         mm = model_with_opdb_name_simple
-        path = _write_models_json(
+        export_dir = _write_models_json(
             [
                 {
                     "opdb_id": "Gtest-Mtest",
@@ -131,7 +134,7 @@ class TestIngestPinbaseModels:
             ]
         )
 
-        call_command("ingest_pinbase_models", path=path)
+        call_command("ingest_pinbase", export_dir=export_dir)
 
         source = Source.objects.get(slug="pinbase")
         claim = mm.claims.get(source=source, field_name="description", is_active=True)
@@ -139,17 +142,17 @@ class TestIngestPinbaseModels:
 
     def test_display_type_claim(self, model_with_opdb_name_simple):
         mm = model_with_opdb_name_simple
-        path = _write_models_json(
+        export_dir = _write_models_json(
             [
                 {
                     "opdb_id": "Gtest-Mtest",
                     "name": "Foo (Limited Edition)",
-                    "display_type": "alphanumeric",
+                    "display_type_slug": "alphanumeric",
                 }
             ]
         )
 
-        call_command("ingest_pinbase_models", path=path)
+        call_command("ingest_pinbase", export_dir=export_dir)
 
         source = Source.objects.get(slug="pinbase")
         claim = mm.claims.get(source=source, field_name="display_type", is_active=True)
@@ -163,7 +166,7 @@ class TestIngestPinbaseModels:
         child = MachineModel.objects.create(
             name="Child Model", opdb_id="Gtest-Mchild", slug="child-model"
         )
-        path = _write_models_json(
+        export_dir = _write_models_json(
             [
                 {"slug": "parent-model", "opdb_id": "Gtest-Mparent"},
                 {
@@ -174,7 +177,7 @@ class TestIngestPinbaseModels:
             ]
         )
 
-        call_command("ingest_pinbase_models", path=path)
+        call_command("ingest_pinbase", export_dir=export_dir)
 
         source = Source.objects.get(slug="pinbase")
         claim = child.claims.get(source=source, field_name="variant_of", is_active=True)
@@ -188,7 +191,7 @@ class TestIngestPinbaseModels:
         child = MachineModel.objects.create(
             name="Child Model", opdb_id="Gtest-Mchild", slug="child-model"
         )
-        path = _write_models_json(
+        export_dir = _write_models_json(
             [
                 {"slug": "parent-model", "opdb_id": "Gtest-Mparent"},
                 {
@@ -199,7 +202,7 @@ class TestIngestPinbaseModels:
             ]
         )
 
-        call_command("ingest_pinbase_models", path=path)
+        call_command("ingest_pinbase", export_dir=export_dir)
         resolve_model(child)
         child.refresh_from_db()
 
@@ -217,7 +220,7 @@ class TestIngestPinbaseModels:
             slug="child-model",
             variant_of=MachineModel.objects.get(opdb_id="Gtest-Mwrong"),
         )
-        path = _write_models_json(
+        export_dir = _write_models_json(
             [
                 {"slug": "right-parent", "opdb_id": "Gtest-Mright"},
                 {
@@ -228,7 +231,7 @@ class TestIngestPinbaseModels:
             ]
         )
 
-        call_command("ingest_pinbase_models", path=path)
+        call_command("ingest_pinbase", export_dir=export_dir)
         resolve_model(child)
         child.refresh_from_db()
 
@@ -247,7 +250,7 @@ class TestIngestPinbaseModels:
             variant_of=model_a,
         )
         # models.json says B is the real parent, A is the variant.
-        path = _write_models_json(
+        export_dir = _write_models_json(
             [
                 {"slug": "model-b-le", "opdb_id": "Gtest-Mb"},
                 {
@@ -258,7 +261,7 @@ class TestIngestPinbaseModels:
             ]
         )
 
-        call_command("ingest_pinbase_models", path=path)
+        call_command("ingest_pinbase", export_dir=export_dir)
         # Resolution resets all FKs to None, then applies winners.
         # model_b has no variant_of claim, so it stays None.
         resolve_model(model_a)
@@ -272,11 +275,11 @@ class TestIngestPinbaseModels:
     def test_is_conversion_claim(self, model_with_opdb_name_simple):
         """is_conversion: true asserts a claim."""
         mm = model_with_opdb_name_simple
-        path = _write_models_json(
+        export_dir = _write_models_json(
             [{"opdb_id": "Gtest-Mtest", "name": "Dark Rider", "is_conversion": True}]
         )
 
-        call_command("ingest_pinbase_models", path=path)
+        call_command("ingest_pinbase", export_dir=export_dir)
 
         source = Source.objects.get(slug="pinbase")
         claim = mm.claims.get(source=source, field_name="is_conversion", is_active=True)
@@ -290,7 +293,7 @@ class TestIngestPinbaseModels:
         conv_mm = MachineModel.objects.create(
             name="Dark Rider", opdb_id="Gtest-Mconv", slug="dark-rider"
         )
-        path = _write_models_json(
+        export_dir = _write_models_json(
             [
                 {"slug": "star-trek", "opdb_id": "Gtest-Msrc", "name": "Star Trek"},
                 {
@@ -303,7 +306,7 @@ class TestIngestPinbaseModels:
             ]
         )
 
-        call_command("ingest_pinbase_models", path=path)
+        call_command("ingest_pinbase", export_dir=export_dir)
 
         source = Source.objects.get(slug="pinbase")
         claim = conv_mm.claims.get(
@@ -314,11 +317,11 @@ class TestIngestPinbaseModels:
     def test_is_conversion_resolves(self, model_with_opdb_name_simple):
         """is_conversion claim resolves to boolean on model."""
         mm = model_with_opdb_name_simple
-        path = _write_models_json(
+        export_dir = _write_models_json(
             [{"opdb_id": "Gtest-Mtest", "name": "Dark Rider", "is_conversion": True}]
         )
 
-        call_command("ingest_pinbase_models", path=path)
+        call_command("ingest_pinbase", export_dir=export_dir)
         resolve_model(mm)
         mm.refresh_from_db()
 
@@ -332,7 +335,7 @@ class TestIngestPinbaseModels:
         conv_mm = MachineModel.objects.create(
             name="Dark Rider", opdb_id="Gtest-Mconv", slug="dark-rider"
         )
-        path = _write_models_json(
+        export_dir = _write_models_json(
             [
                 {"slug": "star-trek", "opdb_id": "Gtest-Msrc", "name": "Star Trek"},
                 {
@@ -345,7 +348,7 @@ class TestIngestPinbaseModels:
             ]
         )
 
-        call_command("ingest_pinbase_models", path=path)
+        call_command("ingest_pinbase", export_dir=export_dir)
         resolve_model(conv_mm)
         conv_mm.refresh_from_db()
 
@@ -355,11 +358,11 @@ class TestIngestPinbaseModels:
     def test_is_conversion_without_source(self, model_with_opdb_name_simple):
         """is_conversion without converted_from only asserts is_conversion claim."""
         mm = model_with_opdb_name_simple
-        path = _write_models_json(
+        export_dir = _write_models_json(
             [{"opdb_id": "Gtest-Mtest", "name": "Mystery Conv", "is_conversion": True}]
         )
 
-        call_command("ingest_pinbase_models", path=path)
+        call_command("ingest_pinbase", export_dir=export_dir)
 
         source = Source.objects.get(slug="pinbase")
         assert mm.claims.filter(
@@ -375,17 +378,17 @@ class TestIngestPinbaseModels:
         mm = MachineModel.objects.create(
             name="Test Model", opdb_id="Gtest-Mtest", slug="test-model"
         )
-        path = _write_models_json(
+        export_dir = _write_models_json(
             [
                 {
                     "slug": "test-model",
                     "opdb_id": "Gtest-Mtest",
-                    "title": "test-title",
+                    "title_slug": "test-title",
                 },
             ]
         )
 
-        call_command("ingest_pinbase_models", path=path)
+        call_command("ingest_pinbase", export_dir=export_dir)
 
         source = Source.objects.get(slug="pinbase")
         claim = mm.claims.get(source=source, field_name="title", is_active=True)
@@ -399,17 +402,17 @@ class TestIngestPinbaseModels:
         mm = MachineModel.objects.create(
             name="Test Model", opdb_id="Gtest-Mtest", slug="test-model"
         )
-        path = _write_models_json(
+        export_dir = _write_models_json(
             [
                 {
                     "slug": "test-model",
                     "opdb_id": "Gtest-Mtest",
-                    "title": "test-title",
+                    "title_slug": "test-title",
                 },
             ]
         )
 
-        call_command("ingest_pinbase_models", path=path)
+        call_command("ingest_pinbase", export_dir=export_dir)
         resolve_model(mm)
         mm.refresh_from_db()
 

@@ -20,12 +20,11 @@ def manufacturer(db):
 
 
 @pytest.fixture
-def ipdb_only_model(db, manufacturer):
+def ipdb_only_model(db):
     """An IPDB-only model with no opdb_id."""
     return MachineModel.objects.create(
         name="Alien Poker",
         ipdb_id=20,
-        manufacturer=manufacturer,
     )
 
 
@@ -40,33 +39,30 @@ def opdb_title(db):
 
 
 @pytest.fixture
-def ipdb_model_matching_opdb(db, manufacturer, opdb_title):
+def ipdb_model_matching_opdb(db, opdb_title):
     """An IPDB-only model whose name matches an existing OPDB title."""
     return MachineModel.objects.create(
         name="High Speed",
         ipdb_id=1100,
-        manufacturer=manufacturer,
     )
 
 
 @pytest.fixture
-def ipdb_model_base_name_match(db, manufacturer, opdb_title):
+def ipdb_model_base_name_match(db, opdb_title):
     """An IPDB-only model whose base name (w/o parenthetical) matches an OPDB title."""
     return MachineModel.objects.create(
         name="High Speed (Junior)",
         ipdb_id=1101,
-        manufacturer=manufacturer,
     )
 
 
 @pytest.fixture
-def opdb_model(db, manufacturer):
+def opdb_model(db):
     """A model with an OPDB ID (should be skipped)."""
     return MachineModel.objects.create(
         name="Medieval Madness",
         opdb_id="G5pe4-M1",
         ipdb_id=4032,
-        manufacturer=manufacturer,
     )
 
 
@@ -151,11 +147,11 @@ class TestGenerateIpdbTitles:
         assert "High Speed (Junior)" in title.needs_review_notes
         assert "G1234" in title.needs_review_notes
 
-    def test_flags_ambiguous_multi_match(self, db, manufacturer, ipdb_source):
+    def test_flags_ambiguous_multi_match(self, db, ipdb_source):
         """When name matches multiple OPDB titles, flag as ambiguous."""
         Title.objects.create(opdb_id="G4kw7", name="Aloha", slug="aloha")
         Title.objects.create(opdb_id="GxYz1", name="Aloha", slug="aloha-2")
-        MachineModel.objects.create(name="Aloha", ipdb_id=50, manufacturer=manufacturer)
+        MachineModel.objects.create(name="Aloha", ipdb_id=50)
 
         call_command("ingest_ipdb_titles")
 

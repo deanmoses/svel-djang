@@ -6,14 +6,14 @@
 	let mfr = $derived(data.manufacturer);
 
 	let yearsActive = $derived(() => {
-		if (mfr.founded_year && mfr.dissolved_year) return `${mfr.founded_year}–${mfr.dissolved_year}`;
-		if (mfr.founded_year) return `${mfr.founded_year}–present`;
-		if (mfr.dissolved_year) return `dissolved ${mfr.dissolved_year}`;
+		if (mfr.year_start && mfr.year_end) return `${mfr.year_start}–${mfr.year_end}`;
+		if (mfr.year_start) return `${mfr.year_start}–present`;
+		if (mfr.year_end) return `dissolved ${mfr.year_end}`;
 		return null;
 	});
 
 	let hasInfo = $derived(
-		mfr.country || mfr.headquarters || mfr.founded_year || mfr.dissolved_year || mfr.website
+		mfr.country || mfr.headquarters || mfr.year_start || mfr.year_end || mfr.website
 	);
 </script>
 

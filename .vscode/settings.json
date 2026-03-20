@@ -41,24 +41,5 @@
   "files.trimFinalNewlines": true,
   "python-envs.pythonProjects": [],
 
-  "json.schemas": [
-    { "fileMatch": ["data/cabinets.json"], "url": "./data/schemas/cabinets.schema.json" },
-    { "fileMatch": ["data/corporate_entities.json"], "url": "./data/schemas/corporate_entities.schema.json" },
-    { "fileMatch": ["data/credit_roles.json"], "url": "./data/schemas/credit_roles.schema.json" },
-    { "fileMatch": ["data/credits.json"], "url": "./data/schemas/credits.schema.json" },
-    { "fileMatch": ["data/display_subtypes.json"], "url": "./data/schemas/display_subtypes.schema.json" },
-    { "fileMatch": ["data/display_types.json"], "url": "./data/schemas/display_types.schema.json" },
-    { "fileMatch": ["data/franchises.json"], "url": "./data/schemas/franchises.schema.json" },
-    { "fileMatch": ["data/game_formats.json"], "url": "./data/schemas/game_formats.schema.json" },
-    { "fileMatch": ["data/gameplay_features.json"], "url": "./data/schemas/gameplay_features.schema.json" },
-    { "fileMatch": ["data/manufacturers.json"], "url": "./data/schemas/manufacturers.schema.json" },
-    { "fileMatch": ["data/models.json"], "url": "./data/schemas/models.schema.json" },
-    { "fileMatch": ["data/people.json"], "url": "./data/schemas/people.schema.json" },
-    { "fileMatch": ["data/series.json"], "url": "./data/schemas/series.schema.json" },
-    { "fileMatch": ["data/systems.json"], "url": "./data/schemas/systems.schema.json" },
-    { "fileMatch": ["data/tags.json"], "url": "./data/schemas/tags.schema.json" },
-    { "fileMatch": ["data/technology_generations.json"], "url": "./data/schemas/technology_generations.schema.json" },
-    { "fileMatch": ["data/technology_subgenerations.json"], "url": "./data/schemas/technology_subgenerations.schema.json" },
-    { "fileMatch": ["data/titles.json"], "url": "./data/schemas/titles.schema.json" }
-  ]
+  "json.schemas": []
 }

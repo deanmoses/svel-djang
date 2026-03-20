@@ -15,7 +15,11 @@ FIXTURES = "apps/catalog/tests/fixtures"
 @pytest.fixture
 def _run_ipdb(db, credit_roles):
     """Run ingest_ipdb with the sample fixture."""
-    call_command("ingest_ipdb", ipdb=f"{FIXTURES}/ipdb_sample.json")
+    call_command(
+        "ingest_ipdb",
+        ipdb=f"{FIXTURES}/ipdb_sample.json",
+        export_dir=FIXTURES,
+    )
 
 
 @pytest.mark.django_db
@@ -41,7 +45,6 @@ class TestIngestIpdb:
         claim_fields = set(active_claims.values_list("field_name", flat=True))
         assert "name" in claim_fields
         assert "year" in claim_fields
-        assert "manufacturer" in claim_fields
         assert "technology_generation" in claim_fields
         assert "ipdb_rating" in claim_fields
 
@@ -91,7 +94,11 @@ class TestIngestIpdb:
         assert type_claim.value == "pure-mechanical"
 
     def test_idempotent(self):
-        call_command("ingest_ipdb", ipdb=f"{FIXTURES}/ipdb_sample.json")
+        call_command(
+            "ingest_ipdb",
+            ipdb=f"{FIXTURES}/ipdb_sample.json",
+            export_dir=FIXTURES,
+        )
         assert MachineModel.objects.count() == 4
         assert Person.objects.count() == 6
 
@@ -134,5 +141,12 @@ class TestIngestIpdbUnknownMpu:
                 }
             )
         )
+        # Empty system.json so no MPU strings are known.
+        empty_export = tmp_path / "system.json"
+        empty_export.write_text("[]")
         with pytest.raises(CommandError, match="Unknown MPU strings"):
-            call_command("ingest_ipdb", ipdb=str(fixture))
+            call_command(
+                "ingest_ipdb",
+                ipdb=str(fixture),
+                export_dir=str(tmp_path),
+            )

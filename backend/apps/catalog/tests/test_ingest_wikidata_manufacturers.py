@@ -23,17 +23,12 @@ def _seed_db(db):
     """Pre-seed the DB with a manufacturer that matches the Wikidata fixture.
 
     Mirrors what ingest_manufacturers does: create the record then assert
-    name/trade_name claims from the originating source so that resolve()
+    name claims from the originating source so that resolve()
     can restore them (claims are the sole source of truth for these fields).
     """
-    # "Williams" is our brand-level record; the Wikidata label is
-    # "Williams Electronics" — matched via trade_name lookup.
-    mfr = Manufacturer.objects.create(
-        name="Williams", trade_name="Williams Electronics"
-    )
+    mfr = Manufacturer.objects.create(name="Williams")
     ipdb = Source.objects.create(name="IPDB", source_type="database", priority=10)
     Claim.objects.assert_claim(mfr, "name", "Williams", source=ipdb)
-    Claim.objects.assert_claim(mfr, "trade_name", "Williams Electronics", source=ipdb)
     # "Obscure Pinball Co" has no DB record — exercises the no-match path.
 
 
@@ -71,10 +66,6 @@ class TestIngestWikidataManufacturers:
         field_names = set(active.values_list("field_name", flat=True))
         assert field_names >= {
             "wikidata.description",
-            "founded_year",
-            "dissolved_year",
-            "country",
-            "headquarters",
             "logo_url",
             "website",
         }
@@ -86,26 +77,6 @@ class TestIngestWikidataManufacturers:
             mfr.extra_data.get("wikidata.description")
             == "American manufacturer of pinball machines and arcade games"
         )
-
-    def test_resolved_founded_year(self):
-        mfr = Manufacturer.objects.get(name="Williams")
-        mfr.refresh_from_db()
-        assert mfr.founded_year == 1943
-
-    def test_resolved_dissolved_year(self):
-        mfr = Manufacturer.objects.get(name="Williams")
-        mfr.refresh_from_db()
-        assert mfr.dissolved_year == 1999
-
-    def test_resolved_country(self):
-        mfr = Manufacturer.objects.get(name="Williams")
-        mfr.refresh_from_db()
-        assert mfr.country == "United States of America"
-
-    def test_resolved_headquarters(self):
-        mfr = Manufacturer.objects.get(name="Williams")
-        mfr.refresh_from_db()
-        assert mfr.headquarters == "Chicago"
 
     def test_resolved_logo_url_uses_https(self):
         mfr = Manufacturer.objects.get(name="Williams")

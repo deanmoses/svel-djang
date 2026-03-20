@@ -67,12 +67,13 @@ class MachineModel(Linkable, TimeStampedModel):
     description = MarkdownField(blank=True)
 
     # Core filterable fields
-    manufacturer = models.ForeignKey(
-        "Manufacturer",
-        on_delete=models.PROTECT,
+    corporate_entity = models.ForeignKey(
+        "CorporateEntity",
+        on_delete=models.SET_NULL,
         related_name="models",
         null=True,
         blank=True,
+        help_text="Specific corporate incarnation that produced this model (resolved from claims).",
     )
     year = models.PositiveSmallIntegerField(null=True, blank=True)
     month = models.PositiveSmallIntegerField(null=True, blank=True)
@@ -171,15 +172,15 @@ class MachineModel(Linkable, TimeStampedModel):
     class Meta:
         ordering = ["name"]
         indexes = [
-            models.Index(fields=["manufacturer", "year"]),
+            models.Index(fields=["corporate_entity", "year"]),
             models.Index(fields=["technology_generation", "year"]),
             models.Index(fields=["display_type"]),
         ]
 
     def __str__(self) -> str:
         parts = [self.name]
-        if self.manufacturer:
-            parts.append(f"({self.manufacturer})")
+        if self.corporate_entity:
+            parts.append(f"({self.corporate_entity})")
         if self.year:
             parts.append(f"[{self.year}]")
         return " ".join(parts)
@@ -187,8 +188,8 @@ class MachineModel(Linkable, TimeStampedModel):
     def save(self, *args, **kwargs):
         if not self.slug:
             parts = [self.name]
-            if self.manufacturer:
-                parts.append(self.manufacturer.trade_name or self.manufacturer.name)
+            if self.corporate_entity:
+                parts.append(self.corporate_entity.name)
             if self.year:
                 parts.append(str(self.year))
             self.slug = unique_slug(self, " ".join(parts), "model")

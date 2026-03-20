@@ -62,10 +62,10 @@ class TestModelsAPI:
         names = [m["name"] for m in data["items"]]
         assert names[-1] == "Unknown Year Game"
 
-    def test_list_models_ordering_stable(self, client, manufacturer, db):
+    def test_list_models_ordering_stable(self, client, db):
         """Models with the same year are sorted by name for stability."""
-        MachineModel.objects.create(name="Zeta", manufacturer=manufacturer, year=2000)
-        MachineModel.objects.create(name="Alpha", manufacturer=manufacturer, year=2000)
+        MachineModel.objects.create(name="Zeta", year=2000)
+        MachineModel.objects.create(name="Alpha", year=2000)
         resp = client.get("/api/models/?ordering=-year")
         data = resp.json()
         names = [m["name"] for m in data["items"]]
@@ -91,10 +91,9 @@ class TestModelsAPI:
         assert "Medieval Madness" in names
         assert "Medieval Madness (LE)" in names
 
-    def test_list_models_thumbnail(self, client, manufacturer, db):
+    def test_list_models_thumbnail(self, client, db):
         MachineModel.objects.create(
             name="With Image",
-            manufacturer=manufacturer,
             extra_data={"opdb.images": SAMPLE_IMAGES},
         )
         resp = client.get("/api/models/")
@@ -121,10 +120,9 @@ class TestModelsAPI:
         assert year_claims[0]["source_name"] == "IPDB"
         assert year_claims[0]["is_winner"] is True
 
-    def test_get_model_detail_images(self, client, manufacturer, db):
+    def test_get_model_detail_images(self, client, db):
         pm = MachineModel.objects.create(
             name="With Image",
-            manufacturer=manufacturer,
             extra_data={"opdb.images": SAMPLE_IMAGES},
         )
         resp = client.get(f"/api/models/{pm.slug}")
@@ -138,10 +136,9 @@ class TestModelsAPI:
         assert data["thumbnail_url"] is None
         assert data["hero_image_url"] is None
 
-    def test_get_model_detail_variant_features(self, client, manufacturer, db):
+    def test_get_model_detail_variant_features(self, client, db):
         pm = MachineModel.objects.create(
             name="With Features",
-            manufacturer=manufacturer,
             extra_data={"opdb.variant_features": ["Castle attack", "Gold trim"]},
         )
         resp = client.get(f"/api/models/{pm.slug}")

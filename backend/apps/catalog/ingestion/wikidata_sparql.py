@@ -212,8 +212,8 @@ class WikidataManufacturer:
     qid: str  # e.g. "Q180268"
     name: str  # Wikidata label, e.g. "Williams Electronics"
     description: str  # Short Wikidata description, may be ""
-    founded_year: int | None
-    dissolved_year: int | None
+    year_start: int | None
+    year_end: int | None
     country: str | None  # English label, e.g. "United States of America"
     headquarters: str | None  # English label, e.g. "Chicago"
     logo_url: str | None
@@ -384,8 +384,8 @@ def parse_manufacturer_sparql_results(data: dict) -> list[WikidataManufacturer]:
                 qid=qid,
                 name=binding.get("manufacturerLabel", {}).get("value", ""),
                 description="",
-                founded_year=None,
-                dissolved_year=None,
+                year_start=None,
+                year_end=None,
                 country=None,
                 headquarters=None,
                 logo_url=None,
@@ -405,16 +405,16 @@ def parse_manufacturer_sparql_results(data: dict) -> list[WikidataManufacturer]:
         # Only set fields that aren't already populated (first binding wins).
         if not wm.description:
             wm.description = binding.get("manufacturerDescription", {}).get("value", "")
-        if wm.founded_year is None:
+        if wm.year_start is None:
             year, _, _ = parse_wikidata_date(
                 binding.get("inception", {}).get("value"), precision=None
             )
-            wm.founded_year = year
-        if wm.dissolved_year is None:
+            wm.year_start = year
+        if wm.year_end is None:
             year, _, _ = parse_wikidata_date(
                 binding.get("dissolution", {}).get("value"), precision=None
             )
-            wm.dissolved_year = year
+            wm.year_end = year
         if wm.country is None:
             wm.country = binding.get("countryLabel", {}).get("value") or None
         if wm.headquarters is None:

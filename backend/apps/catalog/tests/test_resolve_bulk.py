@@ -124,21 +124,25 @@ class TestResolveBulkTitle:
 @pytest.mark.django_db
 class TestResolveBulkManufacturer:
     def test_resolves_with_int_fields(self, opdb):
-        m = Manufacturer.objects.create(name="", slug="stern")
+        from apps.catalog.models import CorporateEntity
+        from apps.catalog.resolve._entities import CORPORATE_ENTITY_DIRECT_FIELDS
 
-        Claim.objects.assert_claim(m, "name", "Stern Pinball", source=opdb)
-        Claim.objects.assert_claim(m, "founded_year", "1999", source=opdb)
-        Claim.objects.assert_claim(m, "country", "US", source=opdb)
-
-        _resolve_bulk(
-            Manufacturer,
-            MANUFACTURER_DIRECT_FIELDS,
+        m = Manufacturer.objects.create(name="Stern Pinball", slug="stern")
+        ce = CorporateEntity.objects.create(
+            manufacturer=m, name="Stern Pinball, Inc.", slug="stern-pinball-inc"
         )
 
-        m.refresh_from_db()
-        assert m.name == "Stern Pinball"
-        assert m.founded_year == 1999
-        assert m.country == "US"
+        Claim.objects.assert_claim(ce, "name", "Stern Pinball, Inc.", source=opdb)
+        Claim.objects.assert_claim(ce, "year_start", "1999", source=opdb)
+
+        _resolve_bulk(
+            CorporateEntity,
+            CORPORATE_ENTITY_DIRECT_FIELDS,
+        )
+
+        ce.refresh_from_db()
+        assert ce.name == "Stern Pinball, Inc."
+        assert ce.year_start == 1999
 
 
 @pytest.mark.django_db

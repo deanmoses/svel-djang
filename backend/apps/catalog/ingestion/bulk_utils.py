@@ -42,7 +42,7 @@ def generate_unique_slug(base_name: str, existing_slugs: set[str]) -> str:
 _BUSINESS_SUFFIXES = re.compile(
     r",?\s+(?:Manufacturing|Electronics|Industries|Enterprises"
     r"|Games|Pinball|Technologies|Company|Corporation"
-    r"|Inc\.?|Ltd\.?|Co\.?|LLC|GmbH|S\.?A\.?|s\.?p\.?a\.?)"
+    r"|Incorporated|Limited|Inc\.?|Ltd\.?|Co\.?|LLC|GmbH|S\.?A\.?|s\.?p\.?a\.?)"
     r"$",
     re.IGNORECASE,
 )
@@ -70,7 +70,7 @@ def normalize_manufacturer_name(name: str) -> str:
 class ManufacturerResolver:
     """Resolve manufacturer names to slugs, auto-creating on miss.
 
-    Caches name→slug and trade_name→slug lookups from the database at
+    Caches name→slug lookups from the database at
     construction time.  Also loads CorporateEntity name→manufacturer slug
     for IPDB's 3-priority resolution cascade.
 
@@ -85,13 +85,17 @@ class ManufacturerResolver:
 
         self._name_to_slug: dict[str, str] = {}
         self._slug_to_mfr: dict[str, Manufacturer] = {}
+        self._opdb_id_to_mfr: dict[int, Manufacturer] = {}
+        self._wikidata_id_to_mfr: dict[str, Manufacturer] = {}
         self._slugs: set[str] = set()
         for m in Manufacturer.objects.all():
             self._name_to_slug[m.name.lower()] = m.slug
-            if m.trade_name:
-                self._name_to_slug[m.trade_name.lower()] = m.slug
             self._slugs.add(m.slug)
             self._slug_to_mfr[m.slug] = m
+            if m.opdb_manufacturer_id is not None:
+                self._opdb_id_to_mfr[m.opdb_manufacturer_id] = m
+            if m.wikidata_id:
+                self._wikidata_id_to_mfr[m.wikidata_id] = m
 
         self._entity_to_slug: dict[str, str] = {
             ce.name.lower(): ce.manufacturer.slug
@@ -109,7 +113,7 @@ class ManufacturerResolver:
                 self._normalized_to_slug[key] = m.slug
 
     def resolve(self, name: str) -> str | None:
-        """Look up a manufacturer by name or trade name. Returns slug or None."""
+        """Look up a manufacturer by name. Returns slug or None."""
         return self._name_to_slug.get(name.lower())
 
     def resolve_normalized(self, name: str) -> str | None:
@@ -120,8 +124,20 @@ class ManufacturerResolver:
         key = normalize_manufacturer_name(name)
         return self._normalized_to_slug.get(key)
 
+    def get_by_slug(self, slug: str) -> Manufacturer | None:
+        """Look up a Manufacturer by slug. Returns instance or None."""
+        return self._slug_to_mfr.get(slug)
+
+    def get_by_opdb_id(self, opdb_id: int) -> Manufacturer | None:
+        """Look up a Manufacturer by OPDB manufacturer ID. Returns instance or None."""
+        return self._opdb_id_to_mfr.get(opdb_id)
+
+    def get_by_wikidata_id(self, qid: str) -> Manufacturer | None:
+        """Look up a Manufacturer by Wikidata QID. Returns instance or None."""
+        return self._wikidata_id_to_mfr.get(qid)
+
     def resolve_object(self, name: str) -> Manufacturer | None:
-        """Look up by name or trade name. Returns Manufacturer instance or None."""
+        """Look up by name. Returns Manufacturer instance or None."""
         slug = self.resolve(name)
         return self._slug_to_mfr.get(slug) if slug else None
 
@@ -134,7 +150,7 @@ class ManufacturerResolver:
         """Look up a manufacturer via CorporateEntity name. Returns slug or None."""
         return self._entity_to_slug.get(name.lower())
 
-    def resolve_or_create(self, name: str, *, trade_name: str = "") -> str:
+    def resolve_or_create(self, name: str) -> str:
         """Look up or auto-create a manufacturer, returning its slug.
 
         On miss, creates a Manufacturer row and updates internal caches so
@@ -150,10 +166,7 @@ class ManufacturerResolver:
         mfr = Manufacturer.objects.create(
             name=name,
             slug=slug,
-            trade_name=trade_name,
         )
         self._name_to_slug[name.lower()] = slug
-        if trade_name:
-            self._name_to_slug[trade_name.lower()] = slug
         self._slug_to_mfr[slug] = mfr
         return slug

@@ -7,9 +7,8 @@ import pytest
 from django.core.management import call_command
 from django.core.management.base import CommandError
 
-from apps.catalog.models import MachineModel, Title
-from apps.catalog.resolve import resolve_model
-from apps.provenance.models import Source
+from apps.catalog.models import MachineModel
+from apps.provenance.models import Claim, Source
 
 FIXTURES = "apps/catalog/tests/fixtures"
 
@@ -17,16 +16,19 @@ FIXTURES = "apps/catalog/tests/fixtures"
 @pytest.fixture
 def _setup_ipdb_first(db):
     """Seed IPDB data so OPDB can match by ipdb_id."""
-    call_command("ingest_ipdb", ipdb=f"{FIXTURES}/ipdb_sample.json")
+    call_command(
+        "ingest_ipdb",
+        ipdb=f"{FIXTURES}/ipdb_sample.json",
+        export_dir=FIXTURES,
+    )
 
 
 @pytest.fixture
 def _run_opdb(db, _setup_ipdb_first):
-    """Run ingest_opdb with groups after IPDB seed."""
+    """Run ingest_opdb after IPDB seed."""
     call_command(
         "ingest_opdb",
         opdb=f"{FIXTURES}/opdb_sample.json",
-        groups=f"{FIXTURES}/opdb_groups_sample.json",
     )
 
 
@@ -64,22 +66,32 @@ class TestIngestOpdb:
         )
         assert display_claim.value == "dot-matrix"
 
-    def test_opdb_manufacturer_claim(self):
-        pm = MachineModel.objects.get(opdb_id="G1111-MTest1")
+    def test_no_manufacturer_claims(self):
+        """OPDB no longer asserts manufacturer claims — MachineModel uses corporate_entity."""
         source = Source.objects.get(slug="opdb")
-        mfr_claim = pm.claims.get(
+        assert not Claim.objects.filter(
             source=source, field_name="manufacturer", is_active=True
-        )
-        # OPDB resolves manufacturer name "Williams" to slug at ingest time.
-        # IPDB runs first and auto-creates the Williams manufacturer.
-        assert mfr_claim.value == "williams"
+        ).exists()
+
+    def test_no_title_claims(self):
+        """OPDB no longer asserts title claims — Pinbase owns title grouping."""
+        source = Source.objects.get(slug="opdb")
+        assert not Claim.objects.filter(
+            source=source, field_name="title", is_active=True
+        ).exists()
+
+    def test_no_variant_of_claims(self):
+        """OPDB no longer asserts variant_of claims — Pinbase owns relationships."""
+        source = Source.objects.get(slug="opdb")
+        assert not Claim.objects.filter(
+            source=source, field_name="variant_of", is_active=True
+        ).exists()
 
     def test_idempotent(self):
         initial_count = MachineModel.objects.count()
         call_command(
             "ingest_opdb",
             opdb=f"{FIXTURES}/opdb_sample.json",
-            groups=f"{FIXTURES}/opdb_groups_sample.json",
         )
         assert MachineModel.objects.count() == initial_count
 
@@ -126,48 +138,26 @@ class TestIngestOpdbNewFields:
 
 @pytest.mark.django_db
 @pytest.mark.usefixtures("_run_opdb")
-class TestIngestOpdbGroups:
-    def test_creates_titles(self):
-        assert Title.objects.count() == 3
-        mm = Title.objects.get(opdb_id="G1111")
-        assert mm.name == "Medieval Madness"
-        assert list(mm.abbreviations.values_list("value", flat=True)) == ["MM"]
-
-    def test_title_claim_on_machine(self):
-        pm = MachineModel.objects.get(opdb_id="G1111-MTest1")
-        source = Source.objects.get(slug="opdb")
-        claim = pm.claims.get(source=source, field_name="title", is_active=True)
-        assert claim.value == "medieval-madness"
-
-    def test_title_claim_on_unmatched_machine(self):
-        pm = MachineModel.objects.get(opdb_id="G2222-MTest2")
-        source = Source.objects.get(slug="opdb")
-        claim = pm.claims.get(source=source, field_name="title", is_active=True)
-        assert claim.value == "stern-exclusive-game"
-
-
-@pytest.mark.django_db
-@pytest.mark.usefixtures("_run_opdb")
 class TestIngestOpdbAliases:
     def test_alias_created(self):
         variant = MachineModel.objects.get(opdb_id="G1111-MTest1-AAlias")
         assert variant.name == "Medieval Madness (LE)"
 
-    def test_alias_linked_to_parent(self):
-        parent = MachineModel.objects.get(opdb_id="G1111-MTest1")
+    def test_alias_no_variant_of(self):
+        """OPDB aliases are flat models — no variant_of relationship."""
         variant = MachineModel.objects.get(opdb_id="G1111-MTest1-AAlias")
-        resolve_model(variant)
-        variant.refresh_from_db()
-        assert variant.variant_of == parent
+        source = Source.objects.get(slug="opdb")
+        assert not variant.claims.filter(
+            source=source, field_name="variant_of", is_active=True
+        ).exists()
 
-    def test_alias_has_claims(self):
+    def test_alias_has_scalar_claims(self):
         variant = MachineModel.objects.get(opdb_id="G1111-MTest1-AAlias")
         source = Source.objects.get(slug="opdb")
         claims = variant.claims.filter(source=source, is_active=True)
         field_names = set(claims.values_list("field_name", flat=True))
         assert "name" in field_names
         assert "opdb.variant_features" in field_names
-        assert "title" in field_names
 
     def test_alias_features_claim(self):
         variant = MachineModel.objects.get(opdb_id="G1111-MTest1-AAlias")
@@ -177,152 +167,16 @@ class TestIngestOpdbAliases:
         )
         assert "Gold trim" in claim.value
 
-    def test_total_model_count(self):
-        # 4 from IPDB + 1 new OPDB machine (G2222) + 1 variant (G1111-AAlias)
-        # + 2 from non-physical group (1 promoted + 1 variant) = 8
-        assert MachineModel.objects.count() == 8
-
-
-@pytest.mark.django_db
-@pytest.mark.usefixtures("_run_opdb")
-class TestIngestOpdbNonPhysical:
-    def test_non_physical_machine_not_created(self):
-        """The non-physical combo label should NOT become a MachineModel."""
+    def test_non_physical_aliases_skipped(self):
+        """Aliases whose parent is non-physical are skipped (parent not in lookup)."""
         assert not MachineModel.objects.filter(opdb_id="G3333-MCombo").exists()
+        assert not MachineModel.objects.filter(opdb_id="G3333-MCombo-APrem").exists()
+        assert not MachineModel.objects.filter(opdb_id="G3333-MCombo-ALE").exists()
 
-    def test_premium_alias_promoted(self):
-        """The alias with 'Premium edition' feature should be a standalone model."""
-        pm = MachineModel.objects.get(opdb_id="G3333-MCombo-APrem")
-        assert pm.variant_of is None
-
-    def test_le_alias_points_to_promoted(self):
-        """The remaining alias should point to the promoted model."""
-        promoted = MachineModel.objects.get(opdb_id="G3333-MCombo-APrem")
-        variant = MachineModel.objects.get(opdb_id="G3333-MCombo-ALE")
-        resolve_model(variant)
-        variant.refresh_from_db()
-        assert variant.variant_of == promoted
-
-    def test_non_physical_idempotent(self):
-        """Re-running ingest should not change the result."""
-        initial_count = MachineModel.objects.count()
-        call_command(
-            "ingest_opdb",
-            opdb=f"{FIXTURES}/opdb_sample.json",
-            groups=f"{FIXTURES}/opdb_groups_sample.json",
-        )
-        assert MachineModel.objects.count() == initial_count
-        # Verify relationships preserved after resolution.
-        promoted = MachineModel.objects.get(opdb_id="G3333-MCombo-APrem")
-        variant = MachineModel.objects.get(opdb_id="G3333-MCombo-ALE")
-        resolve_model(promoted)
-        resolve_model(variant)
-        promoted.refresh_from_db()
-        variant.refresh_from_db()
-        assert promoted.variant_of is None
-        assert variant.variant_of == promoted
-
-
-@pytest.mark.django_db
-class TestOpdbNonPhysicalHeuristics:
-    def test_le_preferred_over_ce(self):
-        """Limited Edition is promoted over Collector's Edition."""
-        path = _opdb_dump(
-            machines=[
-                {
-                    "opdb_id": "GTEST-MNP",
-                    "name": "Test (LE/CE)",
-                    "physical_machine": 0,
-                }
-            ],
-            aliases=[
-                {
-                    "opdb_id": "GTEST-MNP-ACE",
-                    "name": "Test (CE)",
-                    "features": ["Collector's edition"],
-                },
-                {
-                    "opdb_id": "GTEST-MNP-ALE",
-                    "name": "Test (LE)",
-                    "features": ["Limited edition"],
-                },
-            ],
-        )
-        call_command("ingest_opdb", opdb=path)
-        le = MachineModel.objects.get(opdb_id="GTEST-MNP-ALE")
-        ce = MachineModel.objects.get(opdb_id="GTEST-MNP-ACE")
-        resolve_model(le)
-        resolve_model(ce)
-        le.refresh_from_db()
-        ce.refresh_from_db()
-        assert le.variant_of is None
-        assert ce.variant_of == le
-
-    def test_pe_preferred_over_ce(self):
-        """Platinum Edition is promoted over Collector's Edition."""
-        path = _opdb_dump(
-            machines=[
-                {
-                    "opdb_id": "GTEST-MNP2",
-                    "name": "Test (PE/CE)",
-                    "physical_machine": 0,
-                }
-            ],
-            aliases=[
-                {
-                    "opdb_id": "GTEST-MNP2-ACE",
-                    "name": "Test (CE)",
-                    "features": ["Collector's edition"],
-                },
-                {
-                    "opdb_id": "GTEST-MNP2-APE",
-                    "name": "Test (PE)",
-                    "features": ["Platinum edition"],
-                },
-            ],
-        )
-        call_command("ingest_opdb", opdb=path)
-        pe = MachineModel.objects.get(opdb_id="GTEST-MNP2-APE")
-        ce = MachineModel.objects.get(opdb_id="GTEST-MNP2-ACE")
-        resolve_model(pe)
-        resolve_model(ce)
-        pe.refresh_from_db()
-        ce.refresh_from_db()
-        assert pe.variant_of is None
-        assert ce.variant_of == pe
-
-    def test_ce_never_promoted_when_alternative_exists(self):
-        """Collector's Edition is always a variant, even without known features."""
-        path = _opdb_dump(
-            machines=[
-                {
-                    "opdb_id": "GTEST-MNP3",
-                    "name": "Test (Standard/CE)",
-                    "physical_machine": 0,
-                }
-            ],
-            aliases=[
-                {
-                    "opdb_id": "GTEST-MNP3-ACE",
-                    "name": "Test (CE)",
-                    "features": ["Collector's edition"],
-                },
-                {
-                    "opdb_id": "GTEST-MNP3-AStd",
-                    "name": "Test (Standard)",
-                    "features": [],
-                },
-            ],
-        )
-        call_command("ingest_opdb", opdb=path)
-        std = MachineModel.objects.get(opdb_id="GTEST-MNP3-AStd")
-        ce = MachineModel.objects.get(opdb_id="GTEST-MNP3-ACE")
-        resolve_model(std)
-        resolve_model(ce)
-        std.refresh_from_db()
-        ce.refresh_from_db()
-        assert std.variant_of is None
-        assert ce.variant_of == std
+    def test_total_model_count(self):
+        # 4 from IPDB + 1 new OPDB machine (G2222) + 1 alias (G1111-AAlias) = 6
+        # Non-physical parent (G3333-MCombo) skipped → its aliases also skipped.
+        assert MachineModel.objects.count() == 6
 
 
 @pytest.mark.django_db
@@ -389,32 +243,18 @@ class TestOpdbAbortsMissingOpdbId:
 @pytest.mark.django_db
 class TestOpdbConflictBranches:
     def test_matched_model_keeps_existing_opdb_id(self):
-        MachineModel.objects.create(name="Test Game", ipdb_id=9999, opdb_id="GOLD-M1")
-        path = _opdb_dump(
-            machines=[{"opdb_id": "GNEW-M1", "ipdb_id": 9999, "name": "Test Game"}]
-        )
+        """Models matched by opdb_id keep their existing opdb_id."""
+        MachineModel.objects.create(name="Test Game", opdb_id="GOLD-M1")
+        path = _opdb_dump(machines=[{"opdb_id": "GOLD-M1", "name": "Test Game"}])
         call_command("ingest_opdb", opdb=path)
-        pm = MachineModel.objects.get(ipdb_id=9999)
-        assert pm.opdb_id == "GOLD-M1"
+        pm = MachineModel.objects.get(opdb_id="GOLD-M1")
+        assert pm.name == "Test Game"
 
-    def test_opdb_id_set_when_no_conflict(self):
-        MachineModel.objects.create(name="Test Game", ipdb_id=9999)
-        path = _opdb_dump(
-            machines=[{"opdb_id": "GNEW-M1", "ipdb_id": 9999, "name": "Test Game"}]
-        )
+    def test_new_model_created_with_opdb_id(self):
+        path = _opdb_dump(machines=[{"opdb_id": "GNEW-M1", "name": "Brand New Game"}])
         call_command("ingest_opdb", opdb=path)
-        pm = MachineModel.objects.get(ipdb_id=9999)
-        assert pm.opdb_id == "GNEW-M1"
-
-    def test_opdb_id_not_set_when_already_owned(self):
-        MachineModel.objects.create(name="Owner", opdb_id="GNEW-M1")
-        MachineModel.objects.create(name="Test Game", ipdb_id=9999)
-        path = _opdb_dump(
-            machines=[{"opdb_id": "GNEW-M1", "ipdb_id": 9999, "name": "Test Game"}]
-        )
-        call_command("ingest_opdb", opdb=path)
-        pm = MachineModel.objects.get(ipdb_id=9999)
-        assert pm.opdb_id is None
+        pm = MachineModel.objects.get(opdb_id="GNEW-M1")
+        assert pm.name == "Brand New Game"
 
 
 @pytest.mark.django_db
@@ -426,17 +266,27 @@ class TestOpdbAliasEdgeCases:
         call_command("ingest_opdb", opdb=path)
         assert not MachineModel.objects.filter(name="Orphan Alias").exists()
 
-    def test_alias_links_to_parent_from_same_run(self):
+    def test_alias_created_when_parent_exists(self):
         path = _opdb_dump(
             machines=[{"opdb_id": "GNEW-M1", "name": "New Parent"}],
             aliases=[{"opdb_id": "GNEW-M1-AAlias", "name": "New Alias"}],
         )
         call_command("ingest_opdb", opdb=path)
-        parent = MachineModel.objects.get(opdb_id="GNEW-M1")
+        assert MachineModel.objects.filter(opdb_id="GNEW-M1").exists()
+        assert MachineModel.objects.filter(opdb_id="GNEW-M1-AAlias").exists()
+
+    def test_alias_has_no_variant_of_claim(self):
+        """Even when parent exists, OPDB does not assert variant_of."""
+        path = _opdb_dump(
+            machines=[{"opdb_id": "GNEW-M1", "name": "New Parent"}],
+            aliases=[{"opdb_id": "GNEW-M1-AAlias", "name": "New Alias"}],
+        )
+        call_command("ingest_opdb", opdb=path)
         alias = MachineModel.objects.get(opdb_id="GNEW-M1-AAlias")
-        resolve_model(alias)
-        alias.refresh_from_db()
-        assert alias.variant_of == parent
+        source = Source.objects.get(slug="opdb")
+        assert not alias.claims.filter(
+            source=source, field_name="variant_of", is_active=True
+        ).exists()
 
 
 @pytest.mark.django_db
@@ -446,31 +296,9 @@ class TestOpdbFKClaimGuards:
 
     # FK fields that _collect_claims emits for OPDB records.
     OPDB_FK_FIELDS = [
-        "manufacturer",
         "technology_generation",
         "display_type",
-        "title",
-        "variant_of",
     ]
-
-    def test_variant_of_claim_matches_resolved_fk(self):
-        """Every model with variant_of set must have a matching OPDB claim."""
-        source = Source.objects.get(slug="opdb")
-        for pm in MachineModel.objects.all():
-            resolve_model(pm)
-        for pm in MachineModel.objects.filter(variant_of__isnull=False).select_related(
-            "variant_of"
-        ):
-            claim = pm.claims.filter(
-                source=source, field_name="variant_of", is_active=True
-            ).first()
-            assert claim is not None, (
-                f"{pm.slug} has variant_of={pm.variant_of.slug} but no OPDB claim"
-            )
-            assert claim.value == pm.variant_of.slug, (
-                f"{pm.slug} variant_of claim value={claim.value} "
-                f"!= resolved FK slug={pm.variant_of.slug}"
-            )
 
     @pytest.mark.parametrize("fk_field", OPDB_FK_FIELDS)
     def test_fk_field_has_opdb_claim(self, fk_field):
@@ -492,101 +320,65 @@ class TestOpdbFKClaimGuards:
 
 
 @pytest.mark.django_db
-@pytest.mark.usefixtures("_run_opdb")
-class TestOpdbAliasVariantOfClaims:
-    """variant_of must go through the claims system so it survives resolution."""
+class TestOpdbStaleRelationshipCleanup:
+    """Stale variant_of and title claims from prior OPDB runs are deactivated."""
 
-    def test_alias_variant_of_claim_exists(self):
-        """OPDB ingest should emit a variant_of claim for aliases."""
-        parent = MachineModel.objects.get(opdb_id="G1111-MTest1")
-        variant = MachineModel.objects.get(opdb_id="G1111-MTest1-AAlias")
-        source = Source.objects.get(slug="opdb")
-        claim = variant.claims.get(
-            source=source, field_name="variant_of", is_active=True
+    def test_stale_variant_of_deactivated(self):
+        """Pre-existing OPDB variant_of claims are cleaned up."""
+        source, _ = Source.objects.get_or_create(
+            slug="opdb",
+            defaults={"name": "OPDB", "source_type": "database", "priority": 200},
         )
-        assert claim.value == parent.slug
-
-    def test_alias_variant_of_survives_resolution(self):
-        """variant_of must persist after resolve_model (claims-based resolution)."""
-        parent = MachineModel.objects.get(opdb_id="G1111-MTest1")
-        variant = MachineModel.objects.get(opdb_id="G1111-MTest1-AAlias")
-        resolve_model(variant)
-        variant.refresh_from_db()
-        assert variant.variant_of == parent
-
-    def test_nonphysical_variant_of_claim_exists(self):
-        """Remaining aliases in non-physical groups should have variant_of claims."""
-        promoted = MachineModel.objects.get(opdb_id="G3333-MCombo-APrem")
-        variant = MachineModel.objects.get(opdb_id="G3333-MCombo-ALE")
-        source = Source.objects.get(slug="opdb")
-        claim = variant.claims.get(
-            source=source, field_name="variant_of", is_active=True
+        pm = MachineModel.objects.create(
+            name="Old Variant", opdb_id="GSTALE-MVar", slug="old-variant"
         )
-        assert claim.value == promoted.slug
+        from django.contrib.contenttypes.models import ContentType
 
-    def test_nonphysical_variant_of_survives_resolution(self):
-        """Non-physical group variant_of must persist after resolution."""
-        promoted = MachineModel.objects.get(opdb_id="G3333-MCombo-APrem")
-        variant = MachineModel.objects.get(opdb_id="G3333-MCombo-ALE")
-        resolve_model(variant)
-        variant.refresh_from_db()
-        assert variant.variant_of == promoted
-
-    def test_promoted_alias_no_variant_of_after_resolution(self):
-        """Promoted aliases should have no variant_of claim or FK after resolution."""
-        promoted = MachineModel.objects.get(opdb_id="G3333-MCombo-APrem")
-        source = Source.objects.get(slug="opdb")
-        assert not promoted.claims.filter(
+        ct_id = ContentType.objects.get_for_model(MachineModel).pk
+        Claim.objects.create(
+            content_type_id=ct_id,
+            object_id=pm.pk,
+            source=source,
+            field_name="variant_of",
+            value="some-parent",
+            is_active=True,
+        )
+        assert Claim.objects.filter(
             source=source, field_name="variant_of", is_active=True
         ).exists()
-        resolve_model(promoted)
-        promoted.refresh_from_db()
-        assert promoted.variant_of is None
 
+        call_command("ingest_opdb", opdb=f"{FIXTURES}/opdb_sample.json")
 
-@pytest.mark.django_db
-class TestOpdbVariantOfSweep:
-    """Stale variant_of claims must be swept on rerun."""
+        assert not Claim.objects.filter(
+            source=source, field_name="variant_of", is_active=True
+        ).exists()
 
-    def test_rerun_promotion_clears_stale_variant_of(self):
-        """When a parent becomes non-physical, alias gets promoted and variant_of is swept."""
-        # Run 1: physical parent + alias → alias is a variant.
-        path1 = _opdb_dump(
-            machines=[{"opdb_id": "GSWP-M1", "name": "Sweep Parent"}],
-            aliases=[
-                {
-                    "opdb_id": "GSWP-M1-APrem",
-                    "name": "Sweep (Premium)",
-                    "features": ["Premium edition"],
-                },
-            ],
+    def test_stale_title_deactivated(self):
+        """Pre-existing OPDB title claims are cleaned up."""
+        source, _ = Source.objects.get_or_create(
+            slug="opdb",
+            defaults={"name": "OPDB", "source_type": "database", "priority": 200},
         )
-        call_command("ingest_opdb", opdb=path1)
-        variant = MachineModel.objects.get(opdb_id="GSWP-M1-APrem")
-        resolve_model(variant)
-        variant.refresh_from_db()
-        parent = MachineModel.objects.get(opdb_id="GSWP-M1")
-        assert variant.variant_of == parent
-
-        # Run 2: parent becomes non-physical → alias is promoted to standalone.
-        path2 = _opdb_dump(
-            machines=[
-                {
-                    "opdb_id": "GSWP-M1",
-                    "name": "Sweep (Premium/LE)",
-                    "physical_machine": 0,
-                },
-            ],
-            aliases=[
-                {
-                    "opdb_id": "GSWP-M1-APrem",
-                    "name": "Sweep (Premium)",
-                    "features": ["Premium edition"],
-                },
-            ],
+        pm = MachineModel.objects.create(
+            name="Old Titled", opdb_id="GSTALE-MTit", slug="old-titled"
         )
-        call_command("ingest_opdb", opdb=path2)
-        variant.refresh_from_db()
-        resolve_model(variant)
-        variant.refresh_from_db()
-        assert variant.variant_of is None
+        from django.contrib.contenttypes.models import ContentType
+
+        ct_id = ContentType.objects.get_for_model(MachineModel).pk
+        Claim.objects.create(
+            content_type_id=ct_id,
+            object_id=pm.pk,
+            source=source,
+            field_name="title",
+            value="some-title",
+            is_active=True,
+        )
+        assert Claim.objects.filter(
+            source=source, field_name="title", is_active=True
+        ).exists()
+
+        call_command("ingest_opdb", opdb=f"{FIXTURES}/opdb_sample.json")
+
+        assert not Claim.objects.filter(
+            source=source, field_name="title", is_active=True
+        ).exists()

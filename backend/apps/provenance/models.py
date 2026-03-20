@@ -162,9 +162,22 @@ class ClaimManager(models.Manager):
         duplicates_removed = len(pending_claims) - len(deduped)
 
         # 2. Fetch existing active claims from this source.
-        existing: dict[tuple[int, int, str], Claim] = {}
-        for claim in self.filter(source=source, is_active=True):
-            existing[(claim.content_type_id, claim.object_id, claim.claim_key)] = claim
+        # Use values_list to avoid full ORM object instantiation — on large
+        # sources (40-50k+ claims) the overhead of JSONField deserialization
+        # on full Claim objects causes multi-minute stalls on SQLite.
+        existing: dict[tuple[int, int, str], tuple] = {}
+        for row in self.filter(source=source, is_active=True).values_list(
+            "pk",
+            "content_type_id",
+            "object_id",
+            "claim_key",
+            "value",
+            "citation",
+            "needs_review",
+            "needs_review_notes",
+        ):
+            pk, ct_id, obj_id, ck, val, cit, nr, nrn = row
+            existing[(ct_id, obj_id, ck)] = (val, cit, nr, nrn, pk)
 
         # 3. Diff: skip unchanged, collect superseded + new.
         to_deactivate_ids: list[int] = []
@@ -172,16 +185,16 @@ class ClaimManager(models.Manager):
         for new_claim in deduped:
             key = (new_claim.content_type_id, new_claim.object_id, new_claim.claim_key)
             old = existing.get(key)
-            if (
-                old
-                and old.value == new_claim.value
-                and old.citation == new_claim.citation
-                and old.needs_review == new_claim.needs_review
-                and old.needs_review_notes == new_claim.needs_review_notes
-            ):
-                continue  # Already correct
             if old:
-                to_deactivate_ids.append(old.pk)
+                old_val, old_cit, old_nr, old_nrn, old_pk = old
+                if (
+                    old_val == new_claim.value
+                    and old_cit == new_claim.citation
+                    and old_nr == new_claim.needs_review
+                    and old_nrn == new_claim.needs_review_notes
+                ):
+                    continue  # Already correct
+                to_deactivate_ids.append(old_pk)
             to_create.append(new_claim)
 
         # 4. Sweep: deactivate stale relationship claims not in pending set.
@@ -201,20 +214,15 @@ class ClaimManager(models.Manager):
 
             stale_ids: list[int] = []
             for ct_id, obj_ids in parent_groups.items():
-                candidates = self.filter(
+                for pk, c_ct_id, c_obj_id, c_ck in self.filter(
                     source=source,
                     field_name=sweep_field,
                     is_active=True,
                     content_type_id=ct_id,
                     object_id__in=obj_ids,
-                )
-                for c in candidates:
-                    if (
-                        c.content_type_id,
-                        c.object_id,
-                        c.claim_key,
-                    ) not in pending_keys:
-                        stale_ids.append(c.pk)
+                ).values_list("pk", "content_type_id", "object_id", "claim_key"):
+                    if (c_ct_id, c_obj_id, c_ck) not in pending_keys:
+                        stale_ids.append(pk)
 
             to_deactivate_ids.extend(stale_ids)
             swept = len(stale_ids)
@@ -295,6 +303,7 @@ class Claim(models.Model):
             models.Index(fields=["source", "content_type", "object_id"]),
             models.Index(fields=["user", "content_type", "object_id"]),
             models.Index(fields=["field_name", "is_active"]),
+            models.Index(fields=["source", "is_active"]),
         ]
         constraints = [
             models.CheckConstraint(

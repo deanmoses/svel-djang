@@ -7,7 +7,7 @@ This script parses the source file and generates two output files:
 - AGENTS.md: includes START_AGENTS...END_AGENTS blocks, excludes START_CLAUDE...END_CLAUDE
 
 Usage:
-    python scripts/build_agent_docs.py
+    python3 scripts/build_agent_docs.py
 
 The source file uses markers on their own lines:
     START_CLAUDE / END_CLAUDE - content appears only in CLAUDE.md

@@ -10,10 +10,9 @@
 	function mfrToFormFields(m: typeof mfr) {
 		return {
 			name: m.name,
-			trade_name: m.trade_name,
 			description: m.description ?? '',
-			founded_year: m.founded_year ?? '',
-			dissolved_year: m.dissolved_year ?? '',
+			year_start: m.year_start ?? '',
+			year_end: m.year_end ?? '',
 			country: m.country ?? '',
 			headquarters: m.headquarters ?? '',
 			logo_url: m.logo_url ?? '',
@@ -80,11 +79,6 @@
 			</div>
 
 			<div class="field-group">
-				<label for="ef-trade-name">Trade name</label>
-				<input id="ef-trade-name" type="text" bind:value={editFields.trade_name} />
-			</div>
-
-			<div class="field-group">
 				<label for="ef-description">Description</label>
 				<textarea id="ef-description" rows="4" bind:value={editFields.description}></textarea>
 			</div>
@@ -93,25 +87,25 @@
 				<legend>Years active</legend>
 				<div class="date-row">
 					<div class="field-group">
-						<label for="ef-founded-year">Founded</label>
+						<label for="ef-year-start">Founded</label>
 						<input
-							id="ef-founded-year"
+							id="ef-year-start"
 							type="number"
 							min="1800"
 							max="2100"
 							step="1"
-							bind:value={editFields.founded_year}
+							bind:value={editFields.year_start}
 						/>
 					</div>
 					<div class="field-group">
-						<label for="ef-dissolved-year">Dissolved</label>
+						<label for="ef-year-end">Dissolved</label>
 						<input
-							id="ef-dissolved-year"
+							id="ef-year-end"
 							type="number"
 							min="1800"
 							max="2100"
 							step="1"
-							bind:value={editFields.dissolved_year}
+							bind:value={editFields.year_end}
 						/>
 					</div>
 				</div>

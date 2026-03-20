@@ -152,8 +152,16 @@ def _serialize_title_list(title) -> dict:
     if machines:
         thumbnail_url, _ = _extract_image_urls(machines[0].extra_data or {})
         first = machines[0]
-        manufacturer_name = first.manufacturer.name if first.manufacturer else None
-        manufacturer_slug = first.manufacturer.slug if first.manufacturer else None
+        manufacturer_name = (
+            first.corporate_entity.manufacturer.name
+            if first.corporate_entity and first.corporate_entity.manufacturer
+            else None
+        )
+        manufacturer_slug = (
+            first.corporate_entity.manufacturer.slug
+            if first.corporate_entity and first.corporate_entity.manufacturer
+            else None
+        )
         year = first.year
 
     # Franchise (direct on Title) and Series (M2M on Title)
@@ -382,7 +390,7 @@ def _title_models_prefetch():
         "machine_models",
         queryset=MachineModel.objects.filter(variant_of__isnull=True)
         .select_related(
-            "manufacturer",
+            "corporate_entity__manufacturer",
             "technology_generation",
             "display_type",
             "display_subtype",

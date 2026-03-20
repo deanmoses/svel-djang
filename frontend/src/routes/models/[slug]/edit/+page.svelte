@@ -241,9 +241,7 @@
 		color: var(--color-text-muted);
 	}
 
-	.field-group input,
-	.field-group select,
-	.field-group textarea {
+	.field-group input {
 		font-size: var(--font-size-1);
 		color: var(--color-text-primary);
 		background-color: var(--color-surface);
@@ -254,16 +252,10 @@
 		font-family: inherit;
 	}
 
-	.field-group input:focus,
-	.field-group select:focus,
-	.field-group textarea:focus {
+	.field-group input:focus {
 		outline: 2px solid var(--color-accent);
 		outline-offset: -1px;
 		border-color: var(--color-accent);
-	}
-
-	textarea {
-		resize: vertical;
 	}
 
 	.form-actions {

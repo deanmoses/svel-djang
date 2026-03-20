@@ -27,17 +27,13 @@ def manufacturer(db):
 
 
 @pytest.fixture
-def pm1(db, manufacturer):
-    return MachineModel.objects.create(
-        name="Medieval Madness", manufacturer=manufacturer, year=1997
-    )
+def pm1(db):
+    return MachineModel.objects.create(name="Medieval Madness", year=1997)
 
 
 @pytest.fixture
-def pm2(db, manufacturer):
-    return MachineModel.objects.create(
-        name="Monster Bash", manufacturer=manufacturer, year=1998
-    )
+def pm2(db):
+    return MachineModel.objects.create(name="Monster Bash", year=1998)
 
 
 @pytest.fixture

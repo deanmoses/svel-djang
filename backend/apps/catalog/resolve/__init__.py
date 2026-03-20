@@ -30,7 +30,7 @@ from ._helpers import (
     get_field_defaults,
 )
 from ._relationships import (
-    _resolve_all_tags,
+    resolve_all_tags,
     resolve_all_credits,
     resolve_all_gameplay_features,
     resolve_all_model_abbreviations,
@@ -167,15 +167,21 @@ def resolve_model(machine_model: MachineModel) -> MachineModel:
     return machine_model
 
 
-def resolve_all() -> int:
+def resolve_all(stdout=None) -> int:
     """Re-resolve every MachineModel from its claims (bulk-optimized).
 
     Pre-fetches all lookup tables and claims in ~4 queries, resolves
     in memory, then writes back with a single bulk_update().
     Also resolves taxonomy models.
     """
+
+    def _status(msg: str) -> None:
+        if stdout:
+            stdout.write(f"  {msg}")
+
     # 0a. Resolve taxonomy models first (they are FK targets).
     _resolve_all_taxonomy()
+    _status("Taxonomy resolved")
 
     # 0b. Resolve titles (they are FK targets for MachineModel).
     franchise_lookup = {f.slug: f for f in Franchise.objects.all()}
@@ -184,6 +190,7 @@ def resolve_all() -> int:
         TITLE_DIRECT_FIELDS,
         fk_handlers={"franchise": ("franchise", franchise_lookup)},
     )
+    _status("Titles resolved")
 
     # 0c. Resolve title abbreviations.
     resolve_all_title_abbreviations(list(Title.objects.all()))
@@ -194,6 +201,7 @@ def resolve_all() -> int:
 
     # 2. Pre-fetch all active claims, grouped by object_id (~1 query).
     claims_by_model = _build_claims_by_model()
+    _status(f"Loaded {sum(len(v) for v in claims_by_model.values())} winning claims")
 
     # 3. Load all MachineModels (~1 query).
     all_models = list(MachineModel.objects.all())
@@ -226,9 +234,11 @@ def resolve_all() -> int:
     # batch size × field count). PostgreSQL uses a more efficient UPDATE FROM
     # VALUES syntax and handles larger batches fine.
     MachineModel.objects.bulk_update(all_models, update_fields, batch_size=100)
+    _status(f"Wrote {len(all_models)} models")
 
     # 9. Bulk-resolve credit relationships.
     resolve_all_credits(all_models)
+    _status("Credits resolved")
 
     # 10. Bulk-resolve theme relationships.
     resolve_all_themes(all_models)
@@ -237,10 +247,12 @@ def resolve_all() -> int:
     resolve_all_gameplay_features(all_models)
 
     # 12. Bulk-resolve tag relationships.
-    _resolve_all_tags(all_models)
+    resolve_all_tags(all_models)
+    _status("Themes, features, tags resolved")
 
     # 13. Bulk-resolve model abbreviations.
     resolve_all_model_abbreviations(all_models)
+    _status("Abbreviations resolved")
 
     return len(all_models)
 

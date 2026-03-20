@@ -128,8 +128,8 @@ class FandomPerson:
 class FandomManufacturer:
     page_id: int
     title: str
-    founded_year: int | None = None
-    dissolved_year: int | None = None
+    year_start: int | None = None
+    year_end: int | None = None
     headquarters: str = ""
     website: str = ""
     description: str = ""
@@ -248,8 +248,8 @@ def parse_manufacturer_pages(data: dict) -> list[FandomManufacturer]:
             FandomManufacturer(
                 page_id=page_id,
                 title=title,
-                founded_year=fields.get("founded_year"),
-                dissolved_year=fields.get("dissolved_year"),
+                year_start=fields.get("year_start"),
+                year_end=fields.get("year_end"),
                 headquarters=fields.get("headquarters", ""),
                 website=fields.get("website", ""),
                 description=description,
@@ -484,7 +484,7 @@ def _strip_templates(text: str) -> str:
 def _parse_company_template(wikitext: str) -> dict | None:
     """Extract fields from the ``{{Company}}`` template in wikitext.
 
-    Returns a dict with keys ``founded_year``, ``dissolved_year``,
+    Returns a dict with keys ``year_start``, ``year_end``,
     ``headquarters``, ``website``.  Returns ``None`` if no Company template
     is found; missing/unparseable values are ``None`` or ``""``.
     """
@@ -526,8 +526,8 @@ def _parse_company_template(wikitext: str) -> dict | None:
     defunct_raw = _extract_field(block, "defunct")
 
     return {
-        "founded_year": _int_year(founded_raw) if founded_raw else None,
-        "dissolved_year": _int_year(defunct_raw) if defunct_raw else None,
+        "year_start": _int_year(founded_raw) if founded_raw else None,
+        "year_end": _int_year(defunct_raw) if defunct_raw else None,
         "headquarters": _extract_field(block, "headquarters").strip(),
         "website": website,
     }

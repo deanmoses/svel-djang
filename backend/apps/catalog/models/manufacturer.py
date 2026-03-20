@@ -22,10 +22,11 @@ class Manufacturer(Linkable, TimeStampedModel):
 
     name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
-    trade_name = models.CharField(
-        max_length=200,
+    opdb_manufacturer_id = models.IntegerField(
+        unique=True,
+        null=True,
         blank=True,
-        help_text='Brand name if different (e.g., "Bally" for Midway Manufacturing)',
+        help_text="OPDB manufacturer_id for this brand.",
     )
     wikidata_id = models.CharField(
         max_length=20,
@@ -35,10 +36,6 @@ class Manufacturer(Linkable, TimeStampedModel):
         help_text="Wikidata QID, e.g. Q180268",
     )
     description = MarkdownField(blank=True)
-    founded_year = models.IntegerField(null=True, blank=True)
-    dissolved_year = models.IntegerField(null=True, blank=True)
-    country = models.CharField(max_length=200, null=True, blank=True)
-    headquarters = models.CharField(max_length=200, null=True, blank=True)
     logo_url = models.URLField(null=True, blank=True)
     website = models.URLField(blank=True)
 
@@ -51,13 +48,11 @@ class Manufacturer(Linkable, TimeStampedModel):
         ordering = ["name"]
 
     def __str__(self) -> str:
-        if self.trade_name and self.trade_name != self.name:
-            return f"{self.trade_name} ({self.name})"
         return self.name
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = unique_slug(self, self.trade_name or self.name, "manufacturer")
+            self.slug = unique_slug(self, self.name, "manufacturer")
         super().save(*args, **kwargs)
 
 
@@ -73,21 +68,29 @@ class CorporateEntity(TimeStampedModel):
         on_delete=models.CASCADE,
         related_name="entities",
     )
+    slug = models.SlugField(max_length=300, unique=True, blank=True)
     description = MarkdownField(blank=True)
     name = models.CharField(
         max_length=300,
         help_text='Full corporate name, e.g., "D. Gottlieb & Company"',
     )
-    years_active = models.CharField(
-        max_length=50,
+    ipdb_manufacturer_id = models.IntegerField(
+        unique=True,
+        null=True,
         blank=True,
-        help_text='Operating period, e.g., "1931-1977"',
+        help_text="IPDB ManufacturerId for this corporate entity.",
+    )
+    year_start = models.IntegerField(
+        null=True, blank=True, help_text="Year this corporate entity was established."
+    )
+    year_end = models.IntegerField(
+        null=True, blank=True, help_text="Year this corporate entity ceased operations."
     )
 
     claims = GenericRelation("provenance.Claim")
 
     class Meta:
-        ordering = ["manufacturer", "years_active"]
+        ordering = ["manufacturer", "year_start"]
         verbose_name = "corporate entity"
         verbose_name_plural = "corporate entities"
         constraints = [
@@ -98,8 +101,9 @@ class CorporateEntity(TimeStampedModel):
         ]
 
     def __str__(self) -> str:
-        if self.years_active:
-            return f"{self.name} ({self.years_active})"
+        if self.year_start:
+            end = self.year_end or "present"
+            return f"{self.name} ({self.year_start}-{end})"
         return self.name
 
 

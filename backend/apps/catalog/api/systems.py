@@ -86,7 +86,7 @@ def get_system(request, slug: str):
             Prefetch(
                 "machine_models",
                 queryset=MachineModel.objects.filter(variant_of__isnull=True)
-                .select_related("manufacturer", "title")
+                .select_related("corporate_entity__manufacturer", "title")
                 .order_by(F("year").desc(nulls_last=True), "name"),
             )
         ),
@@ -103,7 +103,11 @@ def get_system(request, slug: str):
                 "name": m.title.name,
                 "slug": m.title.slug,
                 "year": m.year,
-                "manufacturer_name": (m.manufacturer.name if m.manufacturer else None),
+                "manufacturer_name": (
+                    m.corporate_entity.manufacturer.name
+                    if m.corporate_entity and m.corporate_entity.manufacturer
+                    else None
+                ),
                 "thumbnail_url": thumbnail_url,
             }
         elif titles[key]["thumbnail_url"] is None:

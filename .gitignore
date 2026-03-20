@@ -32,6 +32,9 @@ backend/openapi.json
 
 # SQLite
 *.sqlite3
+*.sqlite3-journal
+*.sqlite3-wal
+*.sqlite3-shm
 db.sqlite3
 
 # IDE
@@ -53,9 +56,5 @@ backend/staticfiles/
 backend/media/
 backend/cache/
 
-# DuckDB
-*.duckdb
-*.duckdb.wal
-
-# Data dumps (large source files, not committed)
-data/dump1/
+# Ingest sources (pulled from R2, not committed)
+data/ingest_sources/

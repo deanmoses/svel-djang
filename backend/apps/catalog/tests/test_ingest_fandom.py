@@ -380,8 +380,8 @@ def _seed_manufacturers_db(db):
 
 @pytest.mark.django_db
 class TestIngestFandomManufacturers:
-    def test_founded_year_claim_asserted(self, _seed_manufacturers_db):
-        """founded_year claim should be created for Williams Electronics."""
+    def test_year_start_claim_asserted(self, _seed_manufacturers_db):
+        """year_start claim should be created for Williams Electronics."""
         call_command(
             "ingest_fandom",
             from_dump=SAMPLE,
@@ -389,30 +389,11 @@ class TestIngestFandomManufacturers:
             from_dump_manufacturers=MANUFACTURERS_SAMPLE,
         )
         williams = Manufacturer.objects.get(name="Williams Electronics")
+        # year_start, year_end, headquarters are now on CorporateEntity.
+        # Fandom ingest no longer creates claims for these fields on Manufacturer.
         assert Claim.objects.filter(
-            object_id=williams.pk, field_name="founded_year"
+            object_id=williams.pk, field_name="fandom.description"
         ).exists()
-
-    def test_founded_year_resolved(self, _seed_manufacturers_db):
-        """resolve_manufacturer() should populate founded_year from the claim."""
-        call_command(
-            "ingest_fandom",
-            from_dump=SAMPLE,
-            from_dump_persons=PERSONS_SAMPLE,
-            from_dump_manufacturers=MANUFACTURERS_SAMPLE,
-        )
-        williams = Manufacturer.objects.get(name="Williams Electronics")
-        assert williams.founded_year == 1943
-
-    def test_dissolved_year_resolved(self, _seed_manufacturers_db):
-        call_command(
-            "ingest_fandom",
-            from_dump=SAMPLE,
-            from_dump_persons=PERSONS_SAMPLE,
-            from_dump_manufacturers=MANUFACTURERS_SAMPLE,
-        )
-        williams = Manufacturer.objects.get(name="Williams Electronics")
-        assert williams.dissolved_year == 1999
 
     def test_unmatched_manufacturer_not_created(self, _seed_manufacturers_db):
         """'Unknown Co' is in the dump but not the DB — must NOT be created."""
@@ -451,7 +432,7 @@ class TestIngestFandomManufacturers:
         williams = Manufacturer.objects.get(name="Williams Electronics")
         assert (
             Claim.objects.filter(
-                object_id=williams.pk, field_name="founded_year"
+                object_id=williams.pk, field_name="fandom.description"
             ).count()
             == 1
         )
@@ -508,13 +489,13 @@ class TestParseCompanyTemplate:
         "'''Williams Electronics''' was a major pinball manufacturer.\n"
     )
 
-    def test_founded_year(self):
+    def test_year_start(self):
         result = _parse_company_template(self.WILLIAMS_WIKITEXT)
-        assert result["founded_year"] == 1943
+        assert result["year_start"] == 1943
 
-    def test_dissolved_year(self):
+    def test_year_end(self):
         result = _parse_company_template(self.WILLIAMS_WIKITEXT)
-        assert result["dissolved_year"] == 1999
+        assert result["year_end"] == 1999
 
     def test_headquarters(self):
         result = _parse_company_template(self.WILLIAMS_WIKITEXT)
@@ -531,8 +512,8 @@ class TestParseCompanyTemplate:
         wikitext = "{{Company\n  | title1=Minimal Co\n}}\n"
         result = _parse_company_template(wikitext)
         assert result is not None
-        assert result["founded_year"] is None
-        assert result["dissolved_year"] is None
+        assert result["year_start"] is None
+        assert result["year_end"] is None
         assert result["headquarters"] == ""
 
 
@@ -592,7 +573,7 @@ class TestParseManufacturerPages:
         }
         assert parse_manufacturer_pages(data) == []
 
-    def test_founded_year_parsed(self):
+    def test_year_start_parsed(self):
         data = {
             "manufacturers": [
                 {
@@ -603,7 +584,7 @@ class TestParseManufacturerPages:
             ]
         }
         mfrs = parse_manufacturer_pages(data)
-        assert mfrs[0].founded_year == 1943
+        assert mfrs[0].year_start == 1943
 
     def test_no_company_template_still_included(self):
         """Pages without {{Company}} are included (description only)."""
@@ -618,7 +599,7 @@ class TestParseManufacturerPages:
         }
         mfrs = parse_manufacturer_pages(data)
         assert len(mfrs) == 1
-        assert mfrs[0].founded_year is None
+        assert mfrs[0].year_start is None
 
     def test_sorted_by_title(self):
         data = {

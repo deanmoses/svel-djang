@@ -28,7 +28,6 @@ from .schemas import ClaimPatchSchema, ClaimSchema, RelatedTitleSchema
 class ManufacturerGridSchema(Schema):
     name: str
     slug: str
-    trade_name: str
     model_count: int = 0
     thumbnail_url: Optional[str] = None
     search_text: Optional[str] = None
@@ -37,7 +36,6 @@ class ManufacturerGridSchema(Schema):
 class ManufacturerSchema(Schema):
     name: str
     slug: str
-    trade_name: str
     model_count: int = 0
 
 
@@ -49,7 +47,9 @@ class AddressSchema(Schema):
 
 class CorporateEntitySchema(Schema):
     name: str
-    years_active: str
+    slug: str
+    year_start: int | None
+    year_end: int | None
     addresses: list[AddressSchema]
 
 
@@ -61,11 +61,10 @@ class SystemSchema(Schema):
 class ManufacturerDetailSchema(Schema):
     name: str
     slug: str
-    trade_name: str
     description: str = ""
     description_html: str = ""
-    founded_year: int | None = None
-    dissolved_year: int | None = None
+    year_start: int | None = None
+    year_end: int | None = None
     country: str | None = None
     headquarters: str | None = None
     logo_url: str | None = None
@@ -98,7 +97,9 @@ def _collect_titles(models, *, include_manufacturer: bool = False) -> list[dict]
             }
             if include_manufacturer:
                 entry["manufacturer_name"] = (
-                    m.manufacturer.name if m.manufacturer else None
+                    m.corporate_entity.manufacturer.name
+                    if m.corporate_entity and m.corporate_entity.manufacturer
+                    else None
                 )
             titles[key] = entry
         elif titles[key]["thumbnail_url"] is None:
@@ -119,19 +120,16 @@ def _serialize_manufacturer_detail(mfr) -> dict:
     return {
         "name": mfr.name,
         "slug": mfr.slug,
-        "trade_name": mfr.trade_name,
         "description": mfr.description,
         **render_markdown_fields(mfr),
-        "founded_year": mfr.founded_year,
-        "dissolved_year": mfr.dissolved_year,
-        "country": mfr.country,
-        "headquarters": mfr.headquarters,
         "logo_url": mfr.logo_url,
         "website": mfr.website,
         "entities": [
             {
                 "name": e.name,
-                "years_active": e.years_active,
+                "slug": e.slug,
+                "year_start": e.year_start,
+                "year_end": e.year_end,
                 "addresses": [
                     {"city": a.city, "state": a.state, "country": a.country}
                     for a in e.addresses.all()
@@ -139,7 +137,9 @@ def _serialize_manufacturer_detail(mfr) -> dict:
             }
             for e in mfr.entities.all()
         ],
-        "titles": _collect_titles(mfr.non_variant_models),
+        "titles": _collect_titles(
+            m for e in mfr.entities.all() for m in e.models.all()
+        ),
         "systems": [{"name": s.name, "slug": s.slug} for s in mfr.systems.all()],
         "activity": _build_activity(getattr(mfr, "active_claims", [])),
     }
@@ -151,16 +151,15 @@ def _manufacturer_qs():
     return Manufacturer.objects.prefetch_related(
         Prefetch(
             "entities",
-            queryset=CorporateEntity.objects.prefetch_related("addresses").order_by(
-                "years_active"
-            ),
-        ),
-        Prefetch(
-            "models",
-            queryset=MachineModel.objects.filter(variant_of__isnull=True)
-            .select_related("technology_generation", "title")
-            .order_by(F("year").desc(nulls_last=True), "name"),
-            to_attr="non_variant_models",
+            queryset=CorporateEntity.objects.prefetch_related(
+                "addresses",
+                Prefetch(
+                    "models",
+                    queryset=MachineModel.objects.filter(variant_of__isnull=True)
+                    .select_related("technology_generation", "title")
+                    .order_by(F("year").desc(nulls_last=True), "name"),
+                ),
+            ).order_by("year_start"),
         ),
         Prefetch("systems", queryset=System.objects.order_by("name")),
         _claims_prefetch(),
@@ -180,9 +179,9 @@ def list_manufacturers(request):
     from ..models import Manufacturer
 
     return list(
-        Manufacturer.objects.annotate(model_count=Count("models"))
+        Manufacturer.objects.annotate(model_count=Count("entities__models"))
         .order_by("name")
-        .values("name", "slug", "trade_name", "model_count")
+        .values("name", "slug", "model_count")
     )
 
 
@@ -200,20 +199,24 @@ def list_all_manufacturers(request):
 
     qs = (
         Manufacturer.objects.annotate(
-            model_count=Count("models", filter=Q(models__variant_of__isnull=True))
+            model_count=Count(
+                "entities__models",
+                filter=Q(entities__models__variant_of__isnull=True),
+            )
         )
         .prefetch_related(
             Prefetch(
-                "models",
-                queryset=MachineModel.objects.filter(variant_of__isnull=True)
-                .exclude(extra_data={})
-                .order_by(F("year").desc(nulls_last=True))
-                .only("id", "manufacturer_id", "year", "extra_data"),
-                to_attr="models_with_images",
-            ),
-            Prefetch(
                 "entities",
-                queryset=CorporateEntity.objects.prefetch_related("addresses"),
+                queryset=CorporateEntity.objects.prefetch_related(
+                    "addresses",
+                    Prefetch(
+                        "models",
+                        queryset=MachineModel.objects.filter(variant_of__isnull=True)
+                        .exclude(extra_data={})
+                        .order_by(F("year").desc(nulls_last=True))
+                        .only("id", "corporate_entity_id", "year", "extra_data"),
+                    ),
+                ),
             ),
         )
         .order_by("-model_count")
@@ -222,14 +225,15 @@ def list_all_manufacturers(request):
     result = []
     for mfr in qs:
         thumb = None
-        for model in mfr.models_with_images:
-            thumb, _ = _extract_image_urls(model.extra_data)
+        for entity in mfr.entities.all():
+            for model in entity.models.all():
+                thumb, _ = _extract_image_urls(model.extra_data)
+                if thumb:
+                    break
             if thumb:
                 break
-        # Build search text from name, trade_name, entities, and addresses.
+        # Build search text from entities and addresses.
         parts: list[str] = []
-        if mfr.trade_name and mfr.trade_name != mfr.name:
-            parts.append(mfr.trade_name)
         for entity in mfr.entities.all():
             parts.append(entity.name)
             for addr in entity.addresses.all():
@@ -243,7 +247,6 @@ def list_all_manufacturers(request):
             {
                 "name": mfr.name,
                 "slug": mfr.slug,
-                "trade_name": mfr.trade_name,
                 "model_count": mfr.model_count,
                 "thumbnail_url": thumb,
                 "search_text": " | ".join(parts) if parts else None,

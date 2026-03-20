@@ -20,7 +20,7 @@
 	items={manufacturers.data}
 	loading={manufacturers.loading}
 	error={manufacturers.error}
-	filterFields={(item) => [item.name, item.trade_name]}
+	filterFields={(item) => [item.name]}
 	placeholder="Search manufacturers..."
 	entityName="manufacturer"
 >
@@ -29,7 +29,6 @@
 			slug={mfr.slug}
 			name={mfr.name}
 			thumbnailUrl={mfr.thumbnail_url}
-			tradeName={mfr.trade_name}
 			modelCount={mfr.model_count}
 		/>
 	{/snippet}

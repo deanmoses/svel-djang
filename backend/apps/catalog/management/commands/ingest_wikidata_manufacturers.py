@@ -115,8 +115,12 @@ class Command(BaseCommand):
         unmatched_count = 0
 
         for wm in wikidata_manufacturers:
-            mfr = resolver.resolve_object(wm.name)
-            match_type = "exact"
+            # Priority: match by Wikidata QID first, then by name.
+            mfr = resolver.get_by_wikidata_id(wm.qid)
+            match_type = "wikidata_id"
+            if mfr is None:
+                mfr = resolver.resolve_object(wm.name)
+                match_type = "exact"
             if mfr is None:
                 mfr = resolver.resolve_normalized_object(wm.name)
                 match_type = "normalized"
@@ -125,7 +129,11 @@ class Command(BaseCommand):
                 self.stdout.write(f"  [NO MATCH]  {wm.name} ({wm.qid})")
                 continue
 
-            tag = "MATCH" if match_type == "exact" else "MATCH~"
+            tag = {
+                "wikidata_id": "MATCH:QID",
+                "exact": "MATCH",
+                "normalized": "MATCH~",
+            }[match_type]
             self.stdout.write(f"  [{tag:10s}] {wm.name} ({wm.qid}) → {mfr.name}")
             pending_claims.extend(_collect_manufacturer_claims(wm, mfr, ct_id))
             matched_pairs.append((wm, mfr))
@@ -187,12 +195,10 @@ def _collect_manufacturer_claims(
 
     if wm.description:
         add("wikidata.description", wm.description)
-    add("founded_year", wm.founded_year)
-    add("dissolved_year", wm.dissolved_year)
-    add("country", wm.country)
-    add("headquarters", wm.headquarters)
     add("logo_url", wm.logo_url)
     if wm.website:
         add("website", wm.website)
+    # year_start, year_end, country, headquarters are now on CorporateEntity.
+    # TODO: Wikidata ingest should create CE claims instead of Manufacturer claims.
 
     return claims

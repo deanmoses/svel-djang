@@ -74,15 +74,6 @@ repos:
         files: ^(CLAUDE|AGENTS)\.md$
         pass_filenames: false
 
-      # Validate data/*.json against schemas
-      - id: check-data-schemas
-        name: validate data JSON schemas
-        entry: scripts/check_data_schemas.sh
-        language: script
-        files: ^data/
-        exclude: ^data/(schemas/|dump1/|explore/)
-        pass_filenames: false
-
       # Frontend lint + type check
       - id: frontend-lint
         name: frontend lint

@@ -7,22 +7,22 @@ Fetches (or loads from local dumps) three categories of data:
 - **Persons** (Category:People) — creates missing ``Person`` records and asserts
   a ``bio`` claim from the page's prose stub.
 - **Manufacturers** (Category:Manufacturers) — asserts structured claims
-  (founded_year, dissolved_year, headquarters, website, description) for
+  (year_start, year_end, headquarters, website, description) for
   matched ``Manufacturer`` records.
 
 Usage::
 
     # Live fetch (saves dumps for later re-use):
     python manage.py ingest_fandom \\
-        --dump data/dump1/fandom_games.json \\
-        --dump-persons data/dump1/fandom_persons.json \\
-        --dump-manufacturers data/dump1/fandom_manufacturers.json
+        --dump data/ingest_sources/fandom_games.json \\
+        --dump-persons data/ingest_sources/fandom_persons.json \\
+        --dump-manufacturers data/ingest_sources/fandom_manufacturers.json
 
     # Re-run from existing dumps (no network calls):
     python manage.py ingest_fandom \\
-        --from-dump data/dump1/fandom_games.json \\
-        --from-dump-persons data/dump1/fandom_persons.json \\
-        --from-dump-manufacturers data/dump1/fandom_manufacturers.json
+        --from-dump data/ingest_sources/fandom_games.json \\
+        --from-dump-persons data/ingest_sources/fandom_persons.json \\
+        --from-dump-manufacturers data/ingest_sources/fandom_manufacturers.json
 """
 
 from __future__ import annotations
@@ -518,9 +518,8 @@ def _collect_manufacturer_claims(
     # (it resets all resolvable fields before applying winning claims).
     add("name", fm.title)
     add("fandom.description", fm.description)
-    add("founded_year", fm.founded_year)
-    add("dissolved_year", fm.dissolved_year)
-    add("headquarters", fm.headquarters)
     add("website", fm.website)
+    # year_start, year_end, headquarters are now on CorporateEntity.
+    # TODO: Fandom ingest should create CE claims instead of Manufacturer claims.
 
     return claims

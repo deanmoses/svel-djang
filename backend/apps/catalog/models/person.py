@@ -64,8 +64,6 @@ class Person(Linkable, TimeStampedModel):
 class PersonAlias(TimeStampedModel):
     """An alternate name for a Person, used to match variant spellings from
     external sources (e.g. "Keith Johnson" → "Keith P. Johnson").
-
-    Populated from data/people.json by ingest_pinbase_people.
     """
 
     person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name="aliases")

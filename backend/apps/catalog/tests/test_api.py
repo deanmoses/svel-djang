@@ -22,19 +22,17 @@ class TestSystemsAPI:
         )
 
     @pytest.fixture
-    def system_with_machines(self, system, manufacturer):
+    def system_with_machines(self, system):
         t1 = Title.objects.create(name="Medieval Madness", opdb_id="G5pe4-s")
         t2 = Title.objects.create(name="No Good Gofers", opdb_id="T-ngg")
         MachineModel.objects.create(
             name="Medieval Madness",
-            manufacturer=manufacturer,
             year=1997,
             system=system,
             title=t1,
         )
         MachineModel.objects.create(
             name="No Good Gofers",
-            manufacturer=manufacturer,
             year=1997,
             system=system,
             title=t2,
@@ -51,12 +49,11 @@ class TestSystemsAPI:
         assert len(data["titles"]) == 2
 
     def test_get_system_detail_titles_sorted_year_desc(
-        self, client, system_with_machines, manufacturer
+        self, client, system_with_machines
     ):
         t3 = Title.objects.create(name="Old Title", opdb_id="T-old-s")
         MachineModel.objects.create(
             name="Old Game",
-            manufacturer=manufacturer,
             year=1990,
             system=system_with_machines,
             title=t3,

@@ -62,11 +62,10 @@ class TestValidateCatalogClean:
         assert "0 error(s)" in captured.out
         assert "0 warning(s)" in captured.out
 
-    def test_clean_model_no_errors(self, db, manufacturer, title, capsys):
+    def test_clean_model_no_errors(self, db, title, capsys):
         MachineModel.objects.create(
             name="Medieval Madness",
             slug="medieval-madness-williams-1997",
-            manufacturer=manufacturer,
             title=title,
             year=1997,
         )
@@ -99,14 +98,11 @@ class TestNamelessEntities:
 
 
 class TestConversionVariantConflict:
-    def test_conversion_with_variant_of_is_error(self, db, manufacturer, capsys):
-        parent = MachineModel.objects.create(
-            name="Parent", slug="parent", manufacturer=manufacturer
-        )
+    def test_conversion_with_variant_of_is_error(self, db, capsys):
+        parent = MachineModel.objects.create(name="Parent", slug="parent")
         MachineModel.objects.create(
             name="Child",
             slug="child",
-            manufacturer=manufacturer,
             is_conversion=True,
             variant_of=parent,
         )
@@ -117,31 +113,19 @@ class TestConversionVariantConflict:
 
 
 class TestVariantChains:
-    def test_variant_chain_is_warning(self, db, manufacturer, capsys):
-        root = MachineModel.objects.create(
-            name="Root", slug="root", manufacturer=manufacturer
-        )
-        mid = MachineModel.objects.create(
-            name="Mid", slug="mid", manufacturer=manufacturer, variant_of=root
-        )
-        MachineModel.objects.create(
-            name="Leaf", slug="leaf", manufacturer=manufacturer, variant_of=mid
-        )
+    def test_variant_chain_is_warning(self, db, capsys):
+        root = MachineModel.objects.create(name="Root", slug="root")
+        mid = MachineModel.objects.create(name="Mid", slug="mid", variant_of=root)
+        MachineModel.objects.create(name="Leaf", slug="leaf", variant_of=mid)
         call_command("validate_catalog")
         captured = capsys.readouterr()
         assert "variant_of chains" in captured.out
         assert "0 error(s)" in captured.out
 
-    def test_variant_chain_fails_with_fail_on_warn(self, db, manufacturer, capsys):
-        root = MachineModel.objects.create(
-            name="Root", slug="root", manufacturer=manufacturer
-        )
-        mid = MachineModel.objects.create(
-            name="Mid", slug="mid", manufacturer=manufacturer, variant_of=root
-        )
-        MachineModel.objects.create(
-            name="Leaf", slug="leaf", manufacturer=manufacturer, variant_of=mid
-        )
+    def test_variant_chain_fails_with_fail_on_warn(self, db, capsys):
+        root = MachineModel.objects.create(name="Root", slug="root")
+        mid = MachineModel.objects.create(name="Mid", slug="mid", variant_of=root)
+        MachineModel.objects.create(name="Leaf", slug="leaf", variant_of=mid)
         with pytest.raises(SystemExit, match="1"):
             call_command("validate_catalog", "--fail-on-warn")
 
@@ -156,12 +140,12 @@ class TestDuplicatePersons:
 
 
 class TestUnresolvedFKClaims:
-    def test_unresolved_manufacturer_claim_is_warning(self, db, ipdb, capsys):
+    def test_unresolved_system_claim_is_warning(self, db, ipdb, capsys):
         pm = MachineModel.objects.create(name="Test", slug="test-model")
-        Claim.objects.assert_claim(pm, "manufacturer", "nonexistent-mfr", source=ipdb)
+        Claim.objects.assert_claim(pm, "system", "nonexistent-sys", source=ipdb)
         call_command("validate_catalog")
         captured = capsys.readouterr()
-        assert "unresolved manufacturer claim" in captured.out
+        assert "unresolved system claim" in captured.out
 
 
 class TestUnresolvedCreditClaims:
@@ -239,14 +223,12 @@ class TestGoldenRecords:
         return _write
 
     def test_golden_model_passes(self, db, golden_file, capsys):
-        mfr = Manufacturer.objects.create(name="Stern", slug="stern-pinball")
         t = Title.objects.create(
             name="Godzilla", slug="godzilla-stern", opdb_id="GweeP"
         )
         MachineModel.objects.create(
             name="Godzilla (Premium)",
             slug="godzilla-premium",
-            manufacturer=mfr,
             title=t,
             ipdb_id=6842,
             opdb_id="GweeP-Ml9pZ-ARZoY",
@@ -258,7 +240,6 @@ class TestGoldenRecords:
                         "slug": "godzilla-premium",
                         "expect": {
                             "name": "Godzilla (Premium)",
-                            "manufacturer_slug": "stern-pinball",
                             "title_slug": "godzilla-stern",
                             "ipdb_id": 6842,
                             "opdb_id": "GweeP-Ml9pZ-ARZoY",
@@ -275,11 +256,9 @@ class TestGoldenRecords:
         assert "0 error(s)" in captured.out
 
     def test_golden_model_wrong_field_is_error(self, db, golden_file, capsys):
-        mfr = Manufacturer.objects.create(name="Stern", slug="stern-pinball")
         MachineModel.objects.create(
             name="Godzilla (Premium)",
             slug="godzilla-premium",
-            manufacturer=mfr,
             ipdb_id=6842,
         )
         golden_file(
@@ -347,16 +326,13 @@ class TestGoldenRecords:
         assert "golden record(s) passed" in captured.out
 
     def test_golden_variant_of_checked(self, db, golden_file, capsys):
-        mfr = Manufacturer.objects.create(name="Stern", slug="stern-pinball")
         parent = MachineModel.objects.create(
             name="Godzilla (Premium)",
             slug="godzilla-premium",
-            manufacturer=mfr,
         )
         MachineModel.objects.create(
             name="Godzilla (LE)",
             slug="godzilla-le",
-            manufacturer=mfr,
             variant_of=parent,
         )
         golden_file(

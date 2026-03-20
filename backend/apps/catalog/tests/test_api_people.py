@@ -33,21 +33,15 @@ class TestPeopleAPI:
         assert data["titles"][0]["year"] == 1997
 
     def test_get_person_detail_year_desc_nulls_last(
-        self, client, person, manufacturer, db, credit_roles
+        self, client, person, db, credit_roles
     ):
         role = CreditRole.objects.get(slug="design")
         t1 = Title.objects.create(name="Old Title", opdb_id="T-old")
         t2 = Title.objects.create(name="New Title", opdb_id="T-new")
         t3 = Title.objects.create(name="No Year Title", opdb_id="T-noyear-p")
-        old = MachineModel.objects.create(
-            name="Old Game", manufacturer=manufacturer, year=1990, title=t1
-        )
-        new = MachineModel.objects.create(
-            name="New Game", manufacturer=manufacturer, year=2020, title=t2
-        )
-        no_year = MachineModel.objects.create(
-            name="No Year Game", manufacturer=manufacturer, title=t3
-        )
+        old = MachineModel.objects.create(name="Old Game", year=1990, title=t1)
+        new = MachineModel.objects.create(name="New Game", year=2020, title=t2)
+        no_year = MachineModel.objects.create(name="No Year Game", title=t3)
         for m in (old, new, no_year):
             Credit.objects.create(model=m, person=person, role=role)
         resp = client.get(f"/api/people/{person.slug}")

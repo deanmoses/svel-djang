@@ -18,13 +18,6 @@ class TestManufacturerResolver:
         resolver = ManufacturerResolver()
         assert resolver.resolve("Williams") == "williams"
 
-    def test_resolve_by_trade_name(self):
-        Manufacturer.objects.create(
-            name="Midway Manufacturing", slug="bally", trade_name="Bally"
-        )
-        resolver = ManufacturerResolver()
-        assert resolver.resolve("Bally") == "bally"
-
     def test_resolve_case_insensitive(self):
         Manufacturer.objects.create(name="Gottlieb", slug="gottlieb")
         resolver = ManufacturerResolver()
@@ -57,11 +50,10 @@ class TestManufacturerResolver:
 
     def test_resolve_or_create_new(self):
         resolver = ManufacturerResolver()
-        slug = resolver.resolve_or_create("Jersey Jack", trade_name="JJP")
+        slug = resolver.resolve_or_create("Jersey Jack")
         assert slug == "jersey-jack"
         mfr = Manufacturer.objects.get(slug=slug)
         assert mfr.name == "Jersey Jack"
-        assert mfr.trade_name == "JJP"
 
     def test_resolve_or_create_caches_result(self):
         resolver = ManufacturerResolver()
@@ -69,11 +61,6 @@ class TestManufacturerResolver:
         slug2 = resolver.resolve_or_create("Spooky Pinball")
         assert slug1 == slug2
         assert Manufacturer.objects.filter(name="Spooky Pinball").count() == 1
-
-    def test_resolve_or_create_caches_trade_name(self):
-        resolver = ManufacturerResolver()
-        resolver.resolve_or_create("Some Company", trade_name="TradeCo")
-        assert resolver.resolve("TradeCo") == "some-company"
 
     def test_resolve_or_create_handles_slug_collision(self):
         Manufacturer.objects.create(name="Acme", slug="acme")
@@ -112,15 +99,6 @@ class TestManufacturerResolver:
         mfr = Manufacturer.objects.create(name="Stern", slug="stern")
         resolver = ManufacturerResolver()
         result = resolver.resolve_object("Stern")
-        assert result is not None
-        assert result.pk == mfr.pk
-
-    def test_resolve_object_by_trade_name(self):
-        mfr = Manufacturer.objects.create(
-            name="Midway Manufacturing", slug="bally", trade_name="Bally"
-        )
-        resolver = ManufacturerResolver()
-        result = resolver.resolve_object("Bally")
         assert result is not None
         assert result.pk == mfr.pk
 
@@ -171,6 +149,12 @@ class TestNormalizeManufacturerName:
 
     def test_gmbh_suffix(self):
         assert normalize_manufacturer_name("Löwen GmbH") == "löwen"
+
+    def test_incorporated_suffix(self):
+        assert normalize_manufacturer_name("Stern Pinball, Incorporated") == "stern"
+
+    def test_limited_suffix(self):
+        assert normalize_manufacturer_name("Data East Limited") == "data east"
 
     def test_preserves_core_name(self):
         assert normalize_manufacturer_name("Jersey Jack Pinball") == "jersey jack"

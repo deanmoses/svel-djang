@@ -34,9 +34,6 @@
 	<header>
 		<Breadcrumb crumbs={[{ label: 'Manufacturers', href: '/manufacturers' }]} current={mfr.name} />
 		<h1>{mfr.name}</h1>
-		{#if mfr.trade_name && mfr.trade_name !== mfr.name}
-			<p class="trade-name">Trade name: {mfr.trade_name}</p>
-		{/if}
 		{#if mfr.description_html}
 			<Markdown html={mfr.description_html} />
 		{/if}
@@ -70,11 +67,5 @@
 		font-weight: 700;
 		color: var(--color-text-primary);
 		margin-bottom: var(--size-2);
-	}
-
-	.trade-name {
-		font-size: var(--font-size-2);
-		color: var(--color-text-muted);
-		margin-top: var(--size-2);
 	}
 </style>

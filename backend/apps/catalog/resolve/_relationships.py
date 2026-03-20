@@ -227,8 +227,12 @@ def resolve_all_gameplay_features(
     _resolve_all_m2m(M2M_FIELDS["gameplay_feature"], all_models, model_ids=model_ids)
 
 
-def _resolve_all_tags(all_models: list[MachineModel]) -> None:
-    _resolve_all_m2m(M2M_FIELDS["tag"], all_models)
+def resolve_all_tags(
+    all_models: list[MachineModel],
+    *,
+    model_ids: set[int] | None = None,
+) -> None:
+    _resolve_all_m2m(M2M_FIELDS["tag"], all_models, model_ids=model_ids)
 
 
 # ------------------------------------------------------------------

@@ -62,7 +62,11 @@ def _serialize_title_list(title) -> dict:
     if machines:
         thumbnail_url, _ = _extract_image_urls(machines[0].extra_data or {})
         first = machines[0]
-        manufacturer_name = first.manufacturer.name if first.manufacturer else None
+        manufacturer_name = (
+            first.corporate_entity.manufacturer.name
+            if first.corporate_entity and first.corporate_entity.manufacturer
+            else None
+        )
         year = first.year
     return {
         "name": title.name,
@@ -136,7 +140,7 @@ def get_series(request, slug: str):
         Prefetch(
             "machine_models",
             queryset=MachineModel.objects.filter(variant_of__isnull=True)
-            .select_related("manufacturer")
+            .select_related("corporate_entity__manufacturer")
             .order_by("year", "name"),
         ),
     )

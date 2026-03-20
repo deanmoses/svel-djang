@@ -4,6 +4,16 @@ Pinbase is populated via Django management commands. The main pipeline
 (`ingest_all`) seeds internal data then imports external sources. Optional
 enrichment commands (Fandom, Wikidata) run separately.
 
+## Data sources
+
+Catalog data and external source files are maintained in the
+[pindata](https://github.com/deanmoses/pindata) repo and published to
+Cloudflare R2. Pinbase pulls them locally before running the ingest pipeline:
+
+```bash
+make pull-ingest   # download R2 → local data/ingest_sources/
+```
+
 ## Pipeline overview
 
 `ingest_all` runs these steps in order:
@@ -21,11 +31,6 @@ enrichment commands (Fandom, Wikidata) run separately.
 | `ingest_pinbase_titles`             | Sets Title franchise and Series memberships     |
 | `ingest_pinbase_signs`              | Imports museum sign copy from CSV               |
 | `resolve_claims`                    | Re-resolves all catalog entities from claims    |
-
-Internal seed data lives in `data/*.json`. External source files live in
-`data/dump1/` and are **not committed** to the repo. They are stored in a
-private GitHub Gist:
-`https://gist.github.com/deanmoses/03aaee1bc83da6d7db8030d40538ed2d`
 
 ## External data sources
 
@@ -51,7 +56,7 @@ pipeline:
 All three support `--dump` / `--from-dump` flags to cache raw data locally and
 replay without network calls.
 
-**Fandom data files** (stored in the same Gist):
+**Fandom data files** (stored in R2 with the other ingest sources):
 
 - `fandom_games.json`
 - `fandom_persons.json`
@@ -59,11 +64,16 @@ replay without network calls.
 
 ## Running locally
 
-With the data files present in `data/dump1/`:
+```bash
+make pull-ingest   # download data from R2
+make ingest        # run the full pipeline
+```
+
+Or as a single command:
 
 ```bash
 cd backend
-uv run python manage.py ingest_all
+uv run python manage.py pull_and_ingest --dest ../data/ingest_sources
 ```
 
 ## Running against production (Railway)
@@ -73,56 +83,27 @@ uv run python manage.py ingest_all
 - Railway CLI installed and logged in (`railway login`)
 - Project linked (`railway link`)
 
-### 1. SSH into the Railway service
+### 1. Pull data and run ingest
 
 ```bash
 railway ssh --service pinbase
+.venv/bin/python manage.py pull_and_ingest
 ```
 
-### 2. Download the data files from the Gist
+This pulls ingest sources from R2 (with SHA-256 verification, skipping
+unchanged files), then runs the full `ingest_all` pipeline. Add `--dry-run`
+to verify without committing changes.
 
-`curl` is not available in the container; use Python:
-
-```bash
-mkdir -p /tmp/dump1
-python3 -c "
-import urllib.request
-base = 'https://gist.githubusercontent.com/deanmoses/03aaee1bc83da6d7db8030d40538ed2d/raw/'
-files = [
-    'ipdbdatabase.json',
-    'opdb_export_machines.json',
-    'opdb_export_groups.json',
-    'opdb_changelog.json',
-    'machine_sign_copy.csv',
-    'fandom_games.json',
-    'fandom_manufacturers.json',
-    'fandom_persons.json',
-]
-[urllib.request.urlretrieve(base + f, '/tmp/dump1/' + f) or print('Downloaded', f) for f in files]
-"
-```
-
-### 3. Run the ingest pipeline
+### 2. Run optional enrichment (if needed)
 
 ```bash
-uv run python manage.py ingest_all \
-  --ipdb /tmp/dump1/ipdbdatabase.json \
-  --opdb /tmp/dump1/opdb_export_machines.json \
-  --opdb-groups /tmp/dump1/opdb_export_groups.json \
-  --opdb-changelog /tmp/dump1/opdb_changelog.json \
-  --csv /tmp/dump1/machine_sign_copy.csv
-```
+.venv/bin/python manage.py ingest_fandom \
+  --from-dump /tmp/ingest_sources/fandom_games.json \
+  --from-dump-persons /tmp/ingest_sources/fandom_persons.json \
+  --from-dump-manufacturers /tmp/ingest_sources/fandom_manufacturers.json
 
-### 4. Run optional enrichment (if needed)
-
-```bash
-uv run python manage.py ingest_fandom \
-  --from-dump /tmp/dump1/fandom_games.json \
-  --from-dump-persons /tmp/dump1/fandom_persons.json \
-  --from-dump-manufacturers /tmp/dump1/fandom_manufacturers.json
-
-uv run python manage.py ingest_wikidata
-uv run python manage.py ingest_wikidata_manufacturers
+.venv/bin/python manage.py ingest_wikidata
+.venv/bin/python manage.py ingest_wikidata_manufacturers
 ```
 
 ## Resetting the production database

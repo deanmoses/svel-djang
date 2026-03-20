@@ -28,11 +28,11 @@ class TestAllEndpointCache:
         machine_model.save()
         assert cache.get(MODELS_ALL_KEY) is None
 
-    def test_new_model_appears_after_invalidation(self, client, machine_model, stern):
+    def test_new_model_appears_after_invalidation(self, client, machine_model):
         resp1 = client.get("/api/models/all/")
         count_before = len(resp1.json())
 
-        MachineModel.objects.create(name="Godzilla", manufacturer=stern, year=2021)
+        MachineModel.objects.create(name="Godzilla", year=2021)
         resp2 = client.get("/api/models/all/")
         assert len(resp2.json()) == count_before + 1
 

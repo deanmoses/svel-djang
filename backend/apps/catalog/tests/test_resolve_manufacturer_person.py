@@ -32,11 +32,9 @@ def person(db):
 class TestResolveManufacturer:
     def test_basic_resolution(self, mfr, ipdb):
         Claim.objects.assert_claim(mfr, "name", "Williams", source=ipdb)
-        Claim.objects.assert_claim(mfr, "trade_name", "WMS", source=ipdb)
 
         resolved = resolve_manufacturer(mfr)
         assert resolved.name == "Williams"
-        assert resolved.trade_name == "WMS"
 
     def test_higher_priority_wins(self, mfr, ipdb, editorial):
         Claim.objects.assert_claim(mfr, "name", "Williams Low", source=ipdb)
@@ -46,21 +44,21 @@ class TestResolveManufacturer:
         assert resolved.name == "Williams High"
 
     def test_deactivated_claim_is_not_applied(self, mfr, ipdb):
-        Claim.objects.assert_claim(mfr, "trade_name", "Old Name", source=ipdb)
+        Claim.objects.assert_claim(mfr, "description", "Old desc", source=ipdb)
         # Supersede it.
-        Claim.objects.assert_claim(mfr, "trade_name", "New Name", source=ipdb)
+        Claim.objects.assert_claim(mfr, "description", "New desc", source=ipdb)
 
         resolved = resolve_manufacturer(mfr)
-        assert resolved.trade_name == "New Name"
+        assert resolved.description == "New desc"
         assert mfr.claims.filter(is_active=False).count() == 1
 
     def test_no_claims_resets_to_defaults(self, mfr):
         """Claims are the sole source of truth: a field with no active claim is blanked."""
-        mfr.trade_name = "Something"
+        mfr.description = "Something"
         mfr.save()
 
         resolved = resolve_manufacturer(mfr)
-        assert resolved.trade_name == ""
+        assert resolved.description == ""
 
     def test_all_claims_removed_field_blanked(self, mfr, ipdb):
         """Deactivating all claims for a field blanks it on the next resolve."""

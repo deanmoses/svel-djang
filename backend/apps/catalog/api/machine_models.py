@@ -171,14 +171,17 @@ def _build_model_list_qs(
 
     qs = (
         MachineModel.objects.select_related(
-            "manufacturer", "technology_generation", "display_type", "title"
+            "corporate_entity__manufacturer",
+            "technology_generation",
+            "display_type",
+            "title",
         )
         .prefetch_related("themes")
         .filter(variant_of__isnull=True)
     )
 
     if manufacturer:
-        qs = qs.filter(manufacturer__slug=manufacturer)
+        qs = qs.filter(corporate_entity__manufacturer__slug=manufacturer)
     if type:
         qs = qs.filter(technology_generation__slug=type)
     if subgeneration:
@@ -226,8 +229,16 @@ def _serialize_model_list(pm) -> dict:
     return {
         "name": pm.name,
         "slug": pm.slug,
-        "manufacturer_name": pm.manufacturer.name if pm.manufacturer else None,
-        "manufacturer_slug": pm.manufacturer.slug if pm.manufacturer else None,
+        "manufacturer_name": (
+            pm.corporate_entity.manufacturer.name
+            if pm.corporate_entity and pm.corporate_entity.manufacturer
+            else None
+        ),
+        "manufacturer_slug": (
+            pm.corporate_entity.manufacturer.slug
+            if pm.corporate_entity and pm.corporate_entity.manufacturer
+            else None
+        ),
         "year": pm.year,
         "technology_generation_name": (
             pm.technology_generation.name if pm.technology_generation else None
@@ -316,8 +327,16 @@ def _serialize_model_detail(pm) -> dict:
         "slug": pm.slug,
         "description": pm.description,
         **render_markdown_fields(pm),
-        "manufacturer_name": pm.manufacturer.name if pm.manufacturer else None,
-        "manufacturer_slug": pm.manufacturer.slug if pm.manufacturer else None,
+        "manufacturer_name": (
+            pm.corporate_entity.manufacturer.name
+            if pm.corporate_entity and pm.corporate_entity.manufacturer
+            else None
+        ),
+        "manufacturer_slug": (
+            pm.corporate_entity.manufacturer.slug
+            if pm.corporate_entity and pm.corporate_entity.manufacturer
+            else None
+        ),
         "year": pm.year,
         "month": pm.month,
         "technology_generation_name": (
@@ -417,7 +436,7 @@ def _model_detail_qs():
     from ..models import Credit, MachineModel
 
     return MachineModel.objects.select_related(
-        "manufacturer",
+        "corporate_entity__manufacturer",
         "title",
         "title__franchise",
         "system",
@@ -441,7 +460,7 @@ def _model_detail_qs():
         Prefetch(
             "title__machine_models",
             queryset=MachineModel.objects.filter(variant_of__isnull=True)
-            .select_related("manufacturer", "technology_generation")
+            .select_related("corporate_entity__manufacturer", "technology_generation")
             .prefetch_related("variants")
             .order_by("year", "name"),
         ),
@@ -501,14 +520,10 @@ def list_models(
 def _build_search_text(pm) -> str:
     """Build a pipe-separated search text from all related entity names."""
     parts: list[str] = []
-    if pm.manufacturer:
-        parts.append(pm.manufacturer.name)
-        if (
-            pm.manufacturer.trade_name
-            and pm.manufacturer.trade_name != pm.manufacturer.name
-        ):
-            parts.append(pm.manufacturer.trade_name)
-        for entity in pm.manufacturer.entities.all():
+    if pm.corporate_entity and pm.corporate_entity.manufacturer:
+        mfr = pm.corporate_entity.manufacturer
+        parts.append(mfr.name)
+        for entity in mfr.entities.all():
             parts.append(entity.name)
             for addr in entity.addresses.all():
                 if addr.city:
@@ -558,7 +573,7 @@ def list_recent_models(request):
 
     qs = (
         MachineModel.objects.filter(variant_of__isnull=True)
-        .select_related("manufacturer")
+        .select_related("corporate_entity__manufacturer")
         .order_by(
             F("year").desc(nulls_last=True),
             F("month").desc(nulls_last=True),
@@ -577,7 +592,11 @@ def list_recent_models(request):
             {
                 "name": m.name,
                 "slug": m.slug,
-                "manufacturer_name": m.manufacturer.name if m.manufacturer else None,
+                "manufacturer_name": (
+                    m.corporate_entity.manufacturer.name
+                    if m.corporate_entity and m.corporate_entity.manufacturer
+                    else None
+                ),
                 "year": m.year,
                 "thumbnail_url": thumbnail_url,
             }
@@ -600,7 +619,7 @@ def list_all_models(request):
         return result
     qs = (
         MachineModel.objects.select_related(
-            "manufacturer",
+            "corporate_entity__manufacturer",
             "technology_generation",
             "technology_subgeneration",
             "display_type",
@@ -616,7 +635,7 @@ def list_all_models(request):
             "gameplay_features",
             "variants",
             "abbreviations",
-            "manufacturer__entities__addresses",
+            "corporate_entity__manufacturer__entities__addresses",
             Prefetch(
                 "credits",
                 queryset=Credit.objects.filter(model__isnull=False).select_related(
@@ -635,7 +654,9 @@ def list_all_models(request):
                 "slug": pm.slug,
                 "year": pm.year,
                 "manufacturer_name": (
-                    pm.manufacturer.name if pm.manufacturer else None
+                    pm.corporate_entity.manufacturer.name
+                    if pm.corporate_entity and pm.corporate_entity.manufacturer
+                    else None
                 ),
                 "technology_generation_name": (
                     pm.technology_generation.name if pm.technology_generation else None

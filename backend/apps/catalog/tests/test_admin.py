@@ -52,7 +52,7 @@ class TestManufacturerAdminClaims:
         mfr.name = "Gottlieb Updated"
 
         ma = ManufacturerAdmin(Manufacturer, AdminSite())
-        form = _MockForm(["name"], {"name": "Gottlieb Updated", "trade_name": ""})
+        form = _MockForm(["name"], {"name": "Gottlieb Updated"})
         ma.save_model(admin_request, mfr, form, change=True)
 
         claim = Claim.objects.get(
@@ -64,29 +64,11 @@ class TestManufacturerAdminClaims:
         )
         assert claim.value == "Gottlieb Updated"
 
-    def test_changed_trade_name_asserts_claim(self, admin_request):
-        mfr = Manufacturer.objects.create(name="Midway Manufacturing")
-        mfr.trade_name = "Bally"
-
-        ma = ManufacturerAdmin(Manufacturer, AdminSite())
-        form = _MockForm(
-            ["trade_name"], {"name": "Midway Manufacturing", "trade_name": "Bally"}
-        )
-        ma.save_model(admin_request, mfr, form, change=True)
-
-        claim = Claim.objects.get(
-            content_type__model="manufacturer",
-            object_id=mfr.pk,
-            field_name="trade_name",
-            is_active=True,
-        )
-        assert claim.value == "Bally"
-
     def test_unchanged_field_creates_no_claim(self, admin_request):
         mfr = Manufacturer.objects.create(name="Williams")
 
         ma = ManufacturerAdmin(Manufacturer, AdminSite())
-        form = _MockForm([], {"name": "Williams", "trade_name": ""})
+        form = _MockForm([], {"name": "Williams"})
         ma.save_model(admin_request, mfr, form, change=True)
 
         assert not Claim.objects.filter(
@@ -97,9 +79,7 @@ class TestManufacturerAdminClaims:
         mfr = Manufacturer.objects.create(name="Bally")
 
         ma = ManufacturerAdmin(Manufacturer, AdminSite())
-        form = _MockForm(
-            ["slug"], {"name": "Bally", "trade_name": "", "slug": "bally-v2"}
-        )
+        form = _MockForm(["slug"], {"name": "Bally", "slug": "bally-v2"})
         ma.save_model(admin_request, mfr, form, change=True)
 
         assert not Claim.objects.filter(user=admin_request.user).exists()
@@ -109,7 +89,7 @@ class TestManufacturerAdminClaims:
         mfr.name = "Gottlieb Renamed"
 
         ma = ManufacturerAdmin(Manufacturer, AdminSite())
-        form = _MockForm(["name"], {"name": "Gottlieb Renamed", "trade_name": ""})
+        form = _MockForm(["name"], {"name": "Gottlieb Renamed"})
         ma.save_model(admin_request, mfr, form, change=True)
 
         mfr.refresh_from_db()
@@ -181,45 +161,6 @@ class TestMachineModelAdminClaims:
             is_active=True,
         )
         assert claim.value == 1997
-
-    def test_manufacturer_fk_serialized_as_slug(self, admin_request):
-        mfr = Manufacturer.objects.create(name="Williams", slug="williams")
-        pm = MachineModel.objects.create(name="Medieval Madness")
-        pm.manufacturer = mfr
-
-        mma = MachineModelAdmin(MachineModel, AdminSite())
-        form = _MockForm(
-            ["manufacturer"], {"name": "Medieval Madness", "manufacturer": mfr}
-        )
-        mma.save_model(admin_request, pm, form, change=True)
-
-        claim = Claim.objects.get(
-            content_type__model="machinemodel",
-            object_id=pm.pk,
-            field_name="manufacturer",
-            is_active=True,
-        )
-        assert claim.value == "williams"
-
-    def test_manufacturer_cleared_deactivates_user_claim(self, admin_request):
-        # Pre-existing user claim for manufacturer.
-        mfr = Manufacturer.objects.create(name="Bally")
-        pm = MachineModel.objects.create(name="Eight Ball", manufacturer=mfr)
-        prior_claim = Claim.objects.assert_claim(
-            pm, "manufacturer", "Bally", user=admin_request.user
-        )
-
-        # Admin clears the manufacturer field.
-        pm.manufacturer = None
-        mma = MachineModelAdmin(MachineModel, AdminSite())
-        form = _MockForm(["manufacturer"], {"name": "Eight Ball", "manufacturer": None})
-        mma.save_model(admin_request, pm, form, change=True)
-
-        prior_claim.refresh_from_db()
-        assert not prior_claim.is_active
-        assert not Claim.objects.filter(
-            object_id=pm.pk, field_name="manufacturer", is_active=True
-        ).exists()
 
     def test_title_fk_serialized_as_slug(self, admin_request):
         title = Title.objects.create(

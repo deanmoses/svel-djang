@@ -23,17 +23,17 @@ class TestTitlesAPI:
         return Title.objects.create(name="Medieval Madness", opdb_id="G5pe4")
 
     @pytest.fixture
-    def title_with_machines(self, title, manufacturer):
+    def title_with_machines(self, title, williams_entity):
         MachineModel.objects.create(
             name="Medieval Madness",
-            manufacturer=manufacturer,
+            corporate_entity=williams_entity,
             year=1997,
             title=title,
             extra_data={"opdb.images": SAMPLE_IMAGES},
         )
         MachineModel.objects.create(
             name="Medieval Madness (Remake)",
-            manufacturer=manufacturer,
+            corporate_entity=williams_entity,
             year=2015,
             title=title,
         )
@@ -106,7 +106,7 @@ class TestTitlesAllFacets:
         cache.clear()
 
     @pytest.fixture
-    def faceted_title(self, db, manufacturer, solid_state, credit_roles):
+    def faceted_title(self, db, williams_entity, solid_state, credit_roles):
         title = Title.objects.create(name="Medieval Madness", opdb_id="G5pe4")
         franchise = Franchise.objects.create(name="Castle Games")
         title.franchise = franchise
@@ -122,7 +122,7 @@ class TestTitlesAllFacets:
 
         m1 = MachineModel.objects.create(
             name="Medieval Madness",
-            manufacturer=manufacturer,
+            corporate_entity=williams_entity,
             year=1997,
             title=title,
             technology_generation=solid_state,
@@ -137,7 +137,7 @@ class TestTitlesAllFacets:
         # Second model with different year to test year_min/year_max
         MachineModel.objects.create(
             name="Medieval Madness (Remake)",
-            manufacturer=manufacturer,
+            corporate_entity=williams_entity,
             year=2015,
             title=title,
             technology_generation=solid_state,

@@ -119,8 +119,16 @@ def _serialize_title_machine(pm) -> dict:
         "name": pm.name,
         "slug": pm.slug,
         "year": pm.year,
-        "manufacturer_name": pm.manufacturer.name if pm.manufacturer else None,
-        "manufacturer_slug": pm.manufacturer.slug if pm.manufacturer else None,
+        "manufacturer_name": (
+            pm.corporate_entity.manufacturer.name
+            if pm.corporate_entity and pm.corporate_entity.manufacturer
+            else None
+        ),
+        "manufacturer_slug": (
+            pm.corporate_entity.manufacturer.slug
+            if pm.corporate_entity and pm.corporate_entity.manufacturer
+            else None
+        ),
         "technology_generation_name": (
             pm.technology_generation.name if pm.technology_generation else None
         ),

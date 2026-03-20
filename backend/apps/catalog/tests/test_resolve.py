@@ -4,7 +4,6 @@ from django.utils import timezone
 from apps.catalog.claims import build_relationship_claim
 from apps.catalog.models import (
     Title,
-    Manufacturer,
     MachineModel,
     System,
     TechnologyGeneration,
@@ -80,18 +79,6 @@ class TestResolveModel:
 
         resolved = resolve_model(pm)
         assert list(resolved.abbreviations.values_list("value", flat=True)) == ["MM"]
-
-    def test_manufacturer_resolution_by_slug(self, pm, ipdb):
-        mfr = Manufacturer.objects.create(name="Williams", slug="williams")
-        Claim.objects.assert_claim(pm, "manufacturer", "williams", source=ipdb)
-
-        resolved = resolve_model(pm)
-        assert resolved.manufacturer == mfr
-
-    def test_manufacturer_resolution_unknown_slug(self, pm, ipdb):
-        Claim.objects.assert_claim(pm, "manufacturer", "nonexistent-slug", source=ipdb)
-        resolved = resolve_model(pm)
-        assert resolved.manufacturer is None
 
     def test_int_coercion(self, pm, ipdb):
         Claim.objects.assert_claim(pm, "year", "1997", source=ipdb)
@@ -189,7 +176,6 @@ class TestResolveAll:
         opdb = Source.objects.create(
             name="OPDB", slug="opdb", source_type="database", priority=20
         )
-        Manufacturer.objects.create(name="Williams", slug="williams")
         Title.objects.create(opdb_id="G1111", name="Medieval Madness", slug="mm")
         TechnologyGeneration.objects.create(name="Solid State", slug="solid-state")
 
@@ -203,7 +189,6 @@ class TestResolveAll:
         for pm in (pm_bulk, pm_single):
             Claim.objects.assert_claim(pm, "name", "Medieval Madness", source=ipdb)
             Claim.objects.assert_claim(pm, "year", 1997, source=opdb)
-            Claim.objects.assert_claim(pm, "manufacturer", "williams", source=ipdb)
             Claim.objects.assert_claim(pm, "title", "G1111", source=opdb)
             Claim.objects.assert_claim(
                 pm, "abbreviation", abbr_val, source=ipdb, claim_key=abbr_key
@@ -220,7 +205,6 @@ class TestResolveAll:
 
         assert pm_bulk.name == pm_single.name
         assert pm_bulk.year == pm_single.year
-        assert pm_bulk.manufacturer_id == pm_single.manufacturer_id
         assert pm_bulk.title_id == pm_single.title_id
         assert pm_bulk.technology_generation_id == pm_single.technology_generation_id
         assert pm_bulk.extra_data == pm_single.extra_data

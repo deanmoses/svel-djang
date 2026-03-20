@@ -19,6 +19,7 @@ class OpdbRecord:
     name: str = "Unknown"
     ipdb_id: int | None = None
     manufacturer_name: str = ""
+    manufacturer_id: int | None = None
     manufacture_date: str = ""
     physical_machine: int = 1
     is_machine: bool = False
@@ -42,6 +43,7 @@ class OpdbRecord:
             name=d.get("name", "Unknown"),
             ipdb_id=d.get("ipdb_id"),
             manufacturer_name=mfr.get("name", ""),
+            manufacturer_id=mfr.get("manufacturer_id"),
             manufacture_date=d.get("manufacture_date", ""),
             physical_machine=d.get("physical_machine", 1),
             is_machine=d.get("is_machine") is True,

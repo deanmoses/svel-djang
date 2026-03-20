@@ -25,7 +25,9 @@ class Title(Linkable, TimeStampedModel):
     opdb_id = models.CharField(
         max_length=50,
         unique=True,
-        verbose_name="group ID",
+        null=True,
+        blank=True,
+        verbose_name="OPDB group ID",
         help_text='OPDB group ID (e.g., "G5pe4") or synthetic ID (e.g., "ipdb:1234").',
     )
     name = models.CharField(max_length=300)

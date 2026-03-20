@@ -78,7 +78,7 @@ def _winning_claims(content_type, field_name: str) -> list[Claim]:
 
 # Default location for golden records. Overridden in tests via monkeypatch.
 GOLDEN_RECORDS_PATH = (
-    Path(__file__).resolve().parents[5] / "data" / "golden_records.json"
+    Path(__file__).resolve().parents[2] / "fixtures" / "golden_records.json"
 )
 
 
@@ -223,11 +223,11 @@ def check_duplicate_manufacturers(result: ValidationResult) -> None:
             result.warn(f"  {d['lower_name']!r} (×{d['cnt']}): {slugs}")
 
 
-def check_models_without_manufacturer(result: ValidationResult) -> None:
-    """Models without a manufacturer are likely ingestion gaps."""
-    count = MachineModel.objects.filter(manufacturer__isnull=True).count()
+def check_models_without_corporate_entity(result: ValidationResult) -> None:
+    """Models without a corporate entity are likely ingestion gaps."""
+    count = MachineModel.objects.filter(corporate_entity__isnull=True).count()
     if count:
-        result.warn(f"{count} model(s) have no manufacturer")
+        result.warn(f"{count} model(s) have no corporate entity")
 
 
 def check_models_without_year(result: ValidationResult) -> None:
@@ -556,7 +556,7 @@ ALL_CHECKS = [
     check_variant_chains,
     check_duplicate_persons,
     check_duplicate_manufacturers,
-    check_models_without_manufacturer,
+    check_models_without_corporate_entity,
     check_models_without_year,
     check_titles_needing_review,
     check_orphan_claims,

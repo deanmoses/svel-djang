@@ -79,7 +79,7 @@
 		if (!isSearching) return [];
 		return manufacturers.data.filter(
 			(m) =>
-				textMatches(normalizedQuery, m.name, m.trade_name) ||
+				textMatches(normalizedQuery, m.name) ||
 				(m.search_text && normalizeText(m.search_text).includes(normalizedQuery))
 		);
 	});
@@ -154,7 +154,6 @@
 						slug={mfr.slug}
 						name={mfr.name}
 						thumbnailUrl={mfr.thumbnail_url}
-						tradeName={mfr.trade_name}
 						modelCount={mfr.model_count}
 					/>
 				{/each}

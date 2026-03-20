@@ -26,13 +26,20 @@ def editorial_source(db):
 
 @pytest.fixture
 def manufacturer(db):
-    return Manufacturer.objects.create(name="Williams", trade_name="Williams")
+    return Manufacturer.objects.create(name="Williams")
 
 
 @pytest.fixture
-def machine_model(db, manufacturer):
+def corporate_entity(db, manufacturer):
+    return CorporateEntity.objects.create(
+        name="Williams Electronics", manufacturer=manufacturer
+    )
+
+
+@pytest.fixture
+def machine_model(db, corporate_entity):
     return MachineModel.objects.create(
-        name="Medieval Madness", manufacturer=manufacturer, year=1997
+        name="Medieval Madness", corporate_entity=corporate_entity, year=1997
     )
 
 
@@ -63,20 +70,12 @@ class TestManufacturer:
     def test_auto_slug(self, manufacturer):
         assert manufacturer.slug == "williams"
 
-    def test_str_with_trade_name(self, db):
-        mfr = Manufacturer.objects.create(
-            name="Midway Manufacturing", trade_name="Bally"
-        )
-        assert "Bally" in str(mfr)
-        assert "Midway" in str(mfr)
-
-    def test_str_without_trade_name(self, manufacturer):
+    def test_str(self, manufacturer):
         assert str(manufacturer) == "Williams"
 
     def test_slug_deduplication(self, db, manufacturer):
-        mfr2 = Manufacturer.objects.create(
-            name="Williams Duplicate", trade_name="Williams"
-        )
+        # "Williams!" slugifies to "williams" which collides with the fixture.
+        mfr2 = Manufacturer.objects.create(name="Williams!")
         assert mfr2.slug == "williams-2"
 
 
@@ -88,7 +87,9 @@ class TestCorporateEntity:
         entity = CorporateEntity.objects.create(
             manufacturer=manufacturer,
             name="Williams Manufacturing Company",
-            years_active="1943-1985",
+            slug="williams-mfg",
+            year_start=1943,
+            year_end=1985,
         )
         assert entity.manufacturer == manufacturer
 
@@ -96,15 +97,19 @@ class TestCorporateEntity:
         entity = CorporateEntity.objects.create(
             manufacturer=manufacturer,
             name="Williams Manufacturing Company",
-            years_active="1943-1985",
+            slug="williams-mfg",
+            year_start=1943,
+            year_end=1985,
         )
         assert "Williams Manufacturing Company" in str(entity)
-        assert "1943-1985" in str(entity)
+        assert "1943" in str(entity)
+        assert "1985" in str(entity)
 
     def test_str_without_years(self, manufacturer):
         entity = CorporateEntity.objects.create(
             manufacturer=manufacturer,
             name="Williams Manufacturing Company",
+            slug="williams-mfg",
         )
         assert str(entity) == "Williams Manufacturing Company"
 
@@ -112,12 +117,16 @@ class TestCorporateEntity:
         CorporateEntity.objects.create(
             manufacturer=manufacturer,
             name="Williams Manufacturing Company",
-            years_active="1943-1985",
+            slug="williams-mfg",
+            year_start=1943,
+            year_end=1985,
         )
         CorporateEntity.objects.create(
             manufacturer=manufacturer,
             name="Williams Electronics",
-            years_active="1985-1999",
+            slug="williams-elec",
+            year_start=1985,
+            year_end=1999,
         )
         assert manufacturer.entities.count() == 2
 
@@ -126,23 +135,23 @@ class TestCorporateEntity:
 
 
 class TestMachineModel:
-    def test_auto_slug_with_manufacturer_year(self, machine_model):
-        assert machine_model.slug == "medieval-madness-williams-1997"
+    def test_auto_slug_with_corporate_entity_year(self, machine_model):
+        assert machine_model.slug == "medieval-madness-williams-electronics-1997"
 
-    def test_auto_slug_without_manufacturer(self, db):
+    def test_auto_slug_without_corporate_entity(self, db):
         pm = MachineModel.objects.create(name="Test Game")
         assert pm.slug == "test-game"
 
     def test_str(self, machine_model):
         assert "Medieval Madness" in str(machine_model)
-        assert "Williams" in str(machine_model)
+        assert "Williams Electronics" in str(machine_model)
         assert "1997" in str(machine_model)
 
-    def test_slug_deduplication(self, db, manufacturer, machine_model):
+    def test_slug_deduplication(self, db, corporate_entity, machine_model):
         pm2 = MachineModel.objects.create(
-            name="Medieval Madness", manufacturer=manufacturer, year=1997
+            name="Medieval Madness", corporate_entity=corporate_entity, year=1997
         )
-        assert pm2.slug == "medieval-madness-williams-1997-2"
+        assert pm2.slug == "medieval-madness-williams-electronics-1997-2"
 
 
 # --- Person ---

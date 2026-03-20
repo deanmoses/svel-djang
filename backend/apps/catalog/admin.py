@@ -187,7 +187,14 @@ class AddressInline(admin.TabularInline):
 class CorporateEntityInline(admin.TabularInline):
     model = CorporateEntity
     extra = 0
-    fields = ("name", "years_active")
+    fields = ("name", "year_start", "year_end")
+
+
+@admin.register(CorporateEntity)
+class CorporateEntityAdmin(admin.ModelAdmin):
+    list_display = ("name", "manufacturer", "year_start", "year_end")
+    search_fields = ("name", "manufacturer__name")
+    autocomplete_fields = ("manufacturer",)
 
 
 # ---------------------------------------------------------------------------
@@ -305,10 +312,9 @@ class ManufacturerAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
 
     list_display = (
         "name",
-        "trade_name",
         "entity_count",
     )
-    search_fields = ("name", "trade_name")
+    search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
     inlines = (CorporateEntityInline, ClaimInline)
 
@@ -443,16 +449,16 @@ class MachineModelAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
 
     list_display = (
         "name",
-        "manufacturer",
+        "corporate_entity",
         "year",
         "technology_generation",
         "display_type",
         "ipdb_id",
     )
-    list_filter = ("technology_generation", "display_type", "manufacturer")
-    search_fields = ("name", "ipdb_id", "manufacturer__name")
+    list_filter = ("technology_generation", "display_type", "corporate_entity")
+    search_fields = ("name", "ipdb_id", "corporate_entity__name")
     autocomplete_fields = (
-        "manufacturer",
+        "corporate_entity",
         "title",
         "variant_of",
         "converted_from",
@@ -479,7 +485,7 @@ class MachineModelAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
                 "fields": (
                     "name",
                     "slug",
-                    "manufacturer",
+                    "corporate_entity",
                     "title",
                     "variant_of",
                     "converted_from",

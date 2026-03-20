@@ -34,7 +34,7 @@ class TestPatchManufacturerClaimsAuth:
     def test_anonymous_gets_401(self, client, mfr):
         resp = client.patch(
             f"/api/manufacturers/{mfr.slug}/claims/",
-            data='{"fields": {"trade_name": "WMS"}}',
+            data='{"fields": {"description": "WMS"}}',
             content_type="application/json",
         )
         assert resp.status_code in (401, 403)
@@ -43,7 +43,7 @@ class TestPatchManufacturerClaimsAuth:
         client.force_login(user)
         resp = client.patch(
             f"/api/manufacturers/{mfr.slug}/claims/",
-            data='{"fields": {"trade_name": "WMS"}}',
+            data='{"fields": {"description": "WMS"}}',
             content_type="application/json",
         )
         assert resp.status_code == 200
@@ -86,39 +86,39 @@ class TestPatchManufacturerClaimsPersistence:
         client.force_login(user)
         client.patch(
             f"/api/manufacturers/{mfr.slug}/claims/",
-            data='{"fields": {"trade_name": "WMS"}}',
+            data='{"fields": {"description": "WMS"}}',
             content_type="application/json",
         )
-        claim = mfr.claims.get(user=user, field_name="trade_name", is_active=True)
+        claim = mfr.claims.get(user=user, field_name="description", is_active=True)
         assert claim.value == "WMS"
 
     def test_model_resolved_and_returned(self, client, user, mfr):
         client.force_login(user)
         resp = client.patch(
             f"/api/manufacturers/{mfr.slug}/claims/",
-            data='{"fields": {"trade_name": "WMS"}}',
+            data='{"fields": {"description": "WMS"}}',
             content_type="application/json",
         )
         data = resp.json()
-        assert data["trade_name"] == "WMS"
+        assert data["description"] == "WMS"
         mfr.refresh_from_db()
-        assert mfr.trade_name == "WMS"
+        assert mfr.description == "WMS"
 
     def test_repeated_edit_supersedes_previous(self, client, user, mfr):
         client.force_login(user)
         client.patch(
             f"/api/manufacturers/{mfr.slug}/claims/",
-            data='{"fields": {"trade_name": "First"}}',
+            data='{"fields": {"description": "First"}}',
             content_type="application/json",
         )
         client.patch(
             f"/api/manufacturers/{mfr.slug}/claims/",
-            data='{"fields": {"trade_name": "Second"}}',
+            data='{"fields": {"description": "Second"}}',
             content_type="application/json",
         )
-        active = mfr.claims.filter(user=user, field_name="trade_name", is_active=True)
+        active = mfr.claims.filter(user=user, field_name="description", is_active=True)
         inactive = mfr.claims.filter(
-            user=user, field_name="trade_name", is_active=False
+            user=user, field_name="description", is_active=False
         )
         assert active.count() == 1
         assert inactive.count() == 1
@@ -128,33 +128,34 @@ class TestPatchManufacturerClaimsPersistence:
         source = Source.objects.create(
             name="LowPri", source_type="database", priority=10
         )
-        Claim.objects.assert_claim(mfr, "trade_name", "Source Name", source=source)
+        Claim.objects.assert_claim(mfr, "description", "Source Name", source=source)
         from apps.catalog.resolve import resolve_manufacturer
 
         resolve_manufacturer(mfr)
         mfr.refresh_from_db()
-        assert mfr.trade_name == "Source Name"
+        assert mfr.description == "Source Name"
 
         client.force_login(user)
         resp = client.patch(
             f"/api/manufacturers/{mfr.slug}/claims/",
-            data='{"fields": {"trade_name": "User Name"}}',
+            data='{"fields": {"description": "User Name"}}',
             content_type="application/json",
         )
         assert resp.status_code == 200
-        assert resp.json()["trade_name"] == "User Name"
+        assert resp.json()["description"] == "User Name"
 
     def test_response_includes_activity(self, client, user, mfr):
         client.force_login(user)
         resp = client.patch(
             f"/api/manufacturers/{mfr.slug}/claims/",
-            data='{"fields": {"trade_name": "WMS"}}',
+            data='{"fields": {"description": "WMS"}}',
             content_type="application/json",
         )
         data = resp.json()
         assert "activity" in data
         assert any(
-            c["field_name"] == "trade_name" and c["is_winner"] for c in data["activity"]
+            c["field_name"] == "description" and c["is_winner"]
+            for c in data["activity"]
         )
 
 

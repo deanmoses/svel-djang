@@ -87,7 +87,10 @@ def _serialize_person_detail(person) -> dict:
                 "slug": title.slug,
                 "year": c.model.year,
                 "manufacturer_name": (
-                    c.model.manufacturer.name if c.model.manufacturer else None
+                    c.model.corporate_entity.manufacturer.name
+                    if c.model.corporate_entity
+                    and c.model.corporate_entity.manufacturer
+                    else None
                 ),
                 "thumbnail_url": thumbnail_url,
                 "roles": [],
@@ -125,7 +128,9 @@ def _person_qs():
         Prefetch(
             "credits",
             queryset=Credit.objects.filter(model__isnull=False)
-            .select_related("model__title", "model__manufacturer", "role")
+            .select_related(
+                "model__title", "model__corporate_entity__manufacturer", "role"
+            )
             .order_by(F("model__year").desc(nulls_last=True), "model__name"),
         ),
         _claims_prefetch(),

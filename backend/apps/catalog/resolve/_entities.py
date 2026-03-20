@@ -58,12 +58,7 @@ def _sync_markdown_references(obj) -> None:
 
 MANUFACTURER_DIRECT_FIELDS: dict[str, str] = {
     "name": "name",
-    "trade_name": "trade_name",
     "description": "description",
-    "founded_year": "founded_year",
-    "dissolved_year": "dissolved_year",
-    "country": "country",
-    "headquarters": "headquarters",
     "logo_url": "logo_url",
     "website": "website",
 }
@@ -95,7 +90,8 @@ THEME_DIRECT_FIELDS: dict[str, str] = {
 CORPORATE_ENTITY_DIRECT_FIELDS: dict[str, str] = {
     "name": "name",
     "description": "description",
-    "years_active": "years_active",
+    "year_start": "year_start",
+    "year_end": "year_end",
 }
 
 SYSTEM_DIRECT_FIELDS: dict[str, str] = {

@@ -23,7 +23,6 @@ __all__ = [
 class TechnologyGeneration(Linkable, TimeStampedModel):
     """A major technological era: Pure Mechanical, Electromechanical, Solid State.
 
-    Replaces the old MachineType enum. Seeded from technology_generations.json.
     Name and display_order are claim-controlled; description is direct editorial.
     """
 
@@ -52,7 +51,6 @@ class TechnologySubgeneration(Linkable, TimeStampedModel):
     """A subdivision within a TechnologyGeneration.
 
     e.g., Solid State → Discrete Logic, Integrated (MPU), PC-Based.
-    Seeded from technology_subgenerations.json.
     """
 
     link_url_pattern = "/technology-subgenerations/{slug}"
@@ -84,7 +82,7 @@ class TechnologySubgeneration(Linkable, TimeStampedModel):
 class DisplayType(Linkable, TimeStampedModel):
     """A display technology category: Score Reels, DMD, LCD, etc.
 
-    Replaces the old DisplayType enum. Seeded from display_types.json.
+    Replaces the old DisplayType enum.
     """
 
     link_url_pattern = "/display-types/{slug}"
@@ -111,7 +109,7 @@ class DisplayType(Linkable, TimeStampedModel):
 class DisplaySubtype(Linkable, TimeStampedModel):
     """A subdivision within a DisplayType.
 
-    e.g., LCD → Standard LCD, HD LCD. Seeded from display_subtypes.json.
+    e.g., LCD → Standard LCD, HD LCD.
     """
 
     link_url_pattern = "/display-subtypes/{slug}"
@@ -141,10 +139,7 @@ class DisplaySubtype(Linkable, TimeStampedModel):
 
 
 class Cabinet(Linkable, TimeStampedModel):
-    """Physical cabinet form factor: Floor, Tabletop, Countertop, Cocktail.
-
-    Seeded from cabinets.json.
-    """
+    """Physical cabinet form factor: Floor, Tabletop, Countertop, Cocktail."""
 
     link_url_pattern = "/cabinets/{slug}"
 
@@ -168,10 +163,7 @@ class Cabinet(Linkable, TimeStampedModel):
 
 
 class GameFormat(Linkable, TimeStampedModel):
-    """Game format: Pinball, Bagatelle, Shuffle Alley, Pitch-and-Bat.
-
-    Seeded from game_formats.json.
-    """
+    """Game format: Pinball, Bagatelle, Shuffle Alley, Pitch-and-Bat."""
 
     link_url_pattern = "/game-formats/{slug}"
 
@@ -196,8 +188,7 @@ class GameFormat(Linkable, TimeStampedModel):
 
 class GameplayFeature(Linkable, TimeStampedModel):
     """A gameplay mechanism: Flippers, Pop Bumpers, Ramps, Multiball, etc.
-
-    Seeded from gameplay_features.json. Linked to MachineModel via M2M.
+    Linked to MachineModel via M2M.
     """
 
     link_url_pattern = "/gameplay-features/{slug}"
@@ -224,7 +215,7 @@ class GameplayFeature(Linkable, TimeStampedModel):
 class Tag(Linkable, TimeStampedModel):
     """A classification tag: Home Use, Prototype, Widebody, Remake, etc.
 
-    Seeded from tags.json. Linked to MachineModel via M2M relationship claims.
+    Linked to MachineModel via M2M relationship claims.
     """
 
     link_url_pattern = "/tags/{slug}"
@@ -249,10 +240,7 @@ class Tag(Linkable, TimeStampedModel):
 
 
 class CreditRole(Linkable, TimeStampedModel):
-    """A credit role category: Design, Art, Software, etc.
-
-    Seeded from credit_roles.json.
-    """
+    """A credit role category: Design, Art, Software, etc."""
 
     link_url_pattern = "/credit-roles/{slug}"
 

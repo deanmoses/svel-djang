@@ -7,7 +7,7 @@
       "slug": "godzilla-premium",
       "expect": {
         "name": "Godzilla (Premium)",
-        "manufacturer_slug": "stern-pinball",
+        "corporate_entity_slug": "stern-pinball-incorporated",
         "title_slug": "godzilla-stern",
         "ipdb_id": 6842,
         "opdb_id": "GweeP-Ml9pZ-ARZoY",
@@ -20,7 +20,7 @@
       "slug": "godzilla-limited-edition",
       "expect": {
         "name": "Godzilla (Limited Edition)",
-        "manufacturer_slug": "stern-pinball",
+        "corporate_entity_slug": "stern-pinball-incorporated",
         "title_slug": "godzilla-stern",
         "ipdb_id": 6843,
         "opdb_id": "GweeP-Ml9pZ-A9vXB",
@@ -33,7 +33,7 @@
       "slug": "godzilla-70th-anniversary",
       "expect": {
         "name": "Godzilla (70th Anniversary)",
-        "manufacturer_slug": "stern-pinball",
+        "corporate_entity_slug": "stern-pinball-incorporated",
         "title_slug": "godzilla-stern",
         "opdb_id": "GweeP-Ml9pZ-AOvNL",
         "variant_of_slug": "godzilla-premium",
@@ -45,7 +45,7 @@
       "slug": "toy-story-4-limited-edition",
       "expect": {
         "name": "Toy Story 4 (Limited Edition)",
-        "manufacturer_slug": "jersey-jack",
+        "corporate_entity_slug": "jersey-jack-pinball-inc-elk-grove-village-il",
         "title_slug": "toy-story-4",
         "ipdb_id": 6950,
         "opdb_id": "GJ2o0-MrRye-ARNwE",
@@ -58,7 +58,7 @@
       "slug": "toy-story-4-collectors-edition",
       "expect": {
         "name": "Toy Story 4 (Collector's Edition)",
-        "manufacturer_slug": "jersey-jack",
+        "corporate_entity_slug": "jersey-jack-pinball-inc-elk-grove-village-il",
         "title_slug": "toy-story-4",
         "ipdb_id": 6951,
         "opdb_id": "GJ2o0-MrRye-AO62p",
@@ -71,7 +71,7 @@
       "slug": "ultraman-kaiju-rumble-standard-edition",
       "expect": {
         "name": "Ultraman: Kaiju Rumble (Standard Edition)",
-        "manufacturer_slug": "spooky",
+        "corporate_entity_slug": "spooky-pinball-llc",
         "title_slug": "ultraman-kaiju-rumble",
         "opdb_id": "GBLLd-MdEON",
         "variant_of_slug": null,
@@ -83,7 +83,7 @@
       "slug": "ultraman-kaiju-rumble-collectors-edition",
       "expect": {
         "name": "Ultraman: Kaiju Rumble (Collector's Edition)",
-        "manufacturer_slug": "spooky",
+        "corporate_entity_slug": "spooky-pinball-llc",
         "title_slug": "ultraman-kaiju-rumble",
         "opdb_id": "GBLLd-MdEON-A9QJL",
         "variant_of_slug": "ultraman-kaiju-rumble-standard-edition",
@@ -95,7 +95,7 @@
       "slug": "eight-ball",
       "expect": {
         "name": "Eight Ball",
-        "manufacturer_slug": "bally",
+        "corporate_entity_slug": "bally-manufacturing-corporation",
         "title_slug": "eight-ball",
         "ipdb_id": 760,
         "opdb_id": "GrN7J-MJ78q",
@@ -108,7 +108,7 @@
       "slug": "eight-ball-deluxe",
       "expect": {
         "name": "Eight Ball Deluxe",
-        "manufacturer_slug": "bally",
+        "corporate_entity_slug": "bally-manufacturing-corporation",
         "title_slug": "eight-ball-deluxe",
         "ipdb_id": 762,
         "opdb_id": "G5KXk-MLB9V",
@@ -157,7 +157,7 @@
       "slug": "jurassic-park-premium",
       "expect": {
         "name": "Jurassic Park (Premium)",
-        "manufacturer_slug": "stern-pinball",
+        "corporate_entity_slug": "stern-pinball-incorporated",
         "title_slug": "jurassic-park-stern",
         "ipdb_id": 6574,
         "opdb_id": "GK17D-MKNKd-A15Yn",
@@ -170,7 +170,7 @@
       "slug": "jurassic-park-limited-edition",
       "expect": {
         "name": "Jurassic Park (Limited Edition)",
-        "manufacturer_slug": "stern-pinball",
+        "corporate_entity_slug": "stern-pinball-incorporated",
         "title_slug": "jurassic-park-stern",
         "ipdb_id": 6575,
         "opdb_id": "GK17D-MKNKd-AOyKv",
@@ -183,7 +183,7 @@
       "slug": "jurassic-park-30th-anniversary",
       "expect": {
         "name": "Jurassic Park (30th Anniversary)",
-        "manufacturer_slug": "stern-pinball",
+        "corporate_entity_slug": "stern-pinball-incorporated",
         "title_slug": "jurassic-park-stern",
         "opdb_id": "GK17D-MKNKd-AOxoz",
         "variant_of_slug": "jurassic-park-premium",
