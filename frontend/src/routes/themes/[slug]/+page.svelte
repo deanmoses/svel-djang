@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import EntityDetailLayout from '$lib/components/EntityDetailLayout.svelte';
 	import ClientFilteredGrid from '$lib/components/grid/ClientFilteredGrid.svelte';
 	import MachineCard from '$lib/components/cards/MachineCard.svelte';
@@ -12,6 +13,17 @@
 	descriptionHtml={theme.description_html}
 	breadcrumbs={[{ label: 'Themes', href: '/themes' }]}
 >
+	{#if theme.children.length > 0}
+		<section>
+			<h2>Sub-themes ({theme.children.length})</h2>
+			<ul class="theme-list">
+				{#each theme.children as child (child.slug)}
+					<li><a href={resolve(`/themes/${child.slug}`)}>{child.name}</a></li>
+				{/each}
+			</ul>
+		</section>
+	{/if}
+
 	{#if theme.machines.length === 0}
 		<p class="empty">No machines with this theme.</p>
 	{:else}
@@ -38,6 +50,15 @@
 		font-weight: 600;
 		color: var(--color-text-primary);
 		margin-bottom: var(--size-3);
+	}
+
+	.theme-list {
+		list-style: none;
+		padding: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--size-2) var(--size-4);
+		margin-bottom: var(--size-6);
 	}
 
 	.empty {

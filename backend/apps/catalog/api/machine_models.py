@@ -144,6 +144,11 @@ class MachineModelDetailSchema(Schema):
     converted_from_slug: Optional[str] = None
     converted_from_year: Optional[int] = None
     conversions: list[ConversionSchema] = []
+    is_remake: bool = False
+    remake_of_name: Optional[str] = None
+    remake_of_slug: Optional[str] = None
+    remake_of_year: Optional[int] = None
+    remakes: list[ConversionSchema] = []
     title_models: list[TitleMachineSchema] = []
 
 
@@ -399,6 +404,13 @@ def _serialize_model_detail(pm) -> dict:
             {"name": c.name, "slug": c.slug, "year": c.year}
             for c in pm.conversions.all()
         ],
+        "is_remake": pm.is_remake,
+        "remake_of_name": pm.remake_of.name if pm.remake_of else None,
+        "remake_of_slug": pm.remake_of.slug if pm.remake_of else None,
+        "remake_of_year": pm.remake_of.year if pm.remake_of else None,
+        "remakes": [
+            {"name": r.name, "slug": r.slug, "year": r.year} for r in pm.remakes.all()
+        ],
         "title_name": pm.title.name if pm.title else None,
         "title_slug": pm.title.slug if pm.title else None,
         "cabinet_name": pm.cabinet.name if pm.cabinet else None,
@@ -449,10 +461,12 @@ def _model_detail_qs():
         "game_format",
         "variant_of",
         "converted_from",
+        "remake_of",
     ).prefetch_related(
         "variants",
         "variant_of__variants",
         "conversions",
+        "remakes",
         "themes",
         "gameplay_features",
         "abbreviations",

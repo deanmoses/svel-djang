@@ -183,6 +183,34 @@
 				</SidebarSection>
 			{/if}
 
+			{#if model.remake_of_slug}
+				<SidebarSection heading="Remake Of" note="This game is a remake of:">
+					<SidebarList>
+						<SidebarListItem>
+							<a href={resolve(`/models/${model.remake_of_slug}`)}>{model.remake_of_name}</a>
+							{#if model.remake_of_year}
+								<span class="muted">{model.remake_of_year}</span>
+							{/if}
+						</SidebarListItem>
+					</SidebarList>
+				</SidebarSection>
+			{/if}
+
+			{#if model.remakes && model.remakes.length > 0}
+				<SidebarSection heading="Remakes" note="Later remakes of this machine:">
+					<SidebarList>
+						{#each model.remakes as remake (remake.slug)}
+							<SidebarListItem>
+								<a href={resolve(`/models/${remake.slug}`)}>{remake.name}</a>
+								{#if remake.year}
+									<span class="muted">{remake.year}</span>
+								{/if}
+							</SidebarListItem>
+						{/each}
+					</SidebarList>
+				</SidebarSection>
+			{/if}
+
 			<ModelHierarchy
 				models={model.title_models}
 				heading="Other Models In Title"

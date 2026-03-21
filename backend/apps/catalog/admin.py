@@ -28,6 +28,7 @@ from .models import (
     TechnologyGeneration,
     TechnologySubgeneration,
     Theme,
+    ThemeAlias,
     Title,
     TitleAbbreviation,
 )
@@ -382,6 +383,11 @@ class SeriesAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
         return obj.titles.count()
 
 
+class ThemeAliasInline(admin.TabularInline):
+    model = ThemeAlias
+    extra = 0
+
+
 @admin.register(Theme)
 class ThemeAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
     CLAIM_FIELDS = frozenset(THEME_DIRECT_FIELDS)
@@ -392,7 +398,8 @@ class ThemeAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
     list_display = ("name", "machine_count")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
-    inlines = (ClaimInline,)
+    filter_horizontal = ("parents",)
+    inlines = (ThemeAliasInline, ClaimInline)
 
     @admin.display(description="Machines")
     def machine_count(self, obj):

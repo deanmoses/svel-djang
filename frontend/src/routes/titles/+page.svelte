@@ -13,6 +13,7 @@
 	import TitleFilterSidebar from '$lib/components/TitleFilterSidebar.svelte';
 	import { pageTitle } from '$lib/constants';
 	import {
+		expandTitlesWithAncestorThemes,
 		filterTitles,
 		filtersFromParams,
 		filtersToParams,
@@ -25,8 +26,17 @@
 	// Data loading
 	// -----------------------------------------------------------------------
 	const titles = createAsyncLoader(async () => {
-		const { data } = await client.GET('/api/titles/all/');
-		return (data ?? []) as FacetedTitle[];
+		const [titlesRes, themesRes] = await Promise.all([
+			client.GET('/api/titles/all/'),
+			client.GET('/api/themes/')
+		]);
+		const raw = (titlesRes.data ?? []) as FacetedTitle[];
+		const themeHierarchy = (themesRes.data ?? []) as {
+			slug: string;
+			name: string;
+			parent_slugs: string[];
+		}[];
+		return expandTitlesWithAncestorThemes(raw, themeHierarchy);
 	}, [] as FacetedTitle[]);
 
 	// -----------------------------------------------------------------------

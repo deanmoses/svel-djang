@@ -42,6 +42,7 @@ DIRECT_FIELDS: dict[str, str] = {
     "opdb_id": "opdb_id",
     "pinside_id": "pinside_id",
     "is_conversion": "is_conversion",
+    "is_remake": "is_remake",
 }
 
 
@@ -75,6 +76,7 @@ FK_FIELDS: dict[str, FKFieldSpec] = {
     "corporate_entity": FKFieldSpec("corporate_entity", CorporateEntity, "slug"),
     "variant_of": FKFieldSpec("variant_of", MachineModel, "slug"),
     "converted_from": FKFieldSpec("converted_from", MachineModel, "slug"),
+    "remake_of": FKFieldSpec("remake_of", MachineModel, "slug"),
 }
 
 

@@ -11,7 +11,7 @@ from ninja.decorators import decorate_view
 from apps.core.markdown import render_markdown_fields
 
 from .helpers import _serialize_title_machine
-from .schemas import TitleMachineSchema
+from .schemas import ThemeSchema, TitleMachineSchema
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -21,6 +21,7 @@ from .schemas import TitleMachineSchema
 class ThemeListSchema(Schema):
     name: str
     slug: str
+    parent_slugs: list[str] = []
 
 
 class ThemeDetailSchema(Schema):
@@ -28,6 +29,9 @@ class ThemeDetailSchema(Schema):
     slug: str
     description: str = ""
     description_html: str = ""
+    aliases: list[str] = []
+    parents: list[ThemeSchema] = []
+    children: list[ThemeSchema] = []
     machines: list[TitleMachineSchema]
 
 
@@ -43,7 +47,15 @@ themes_router = Router(tags=["themes"])
 def list_themes(request):
     from ..models import Theme
 
-    return list(Theme.objects.order_by("name").values("name", "slug"))
+    themes = Theme.objects.prefetch_related("parents").order_by("name")
+    return [
+        {
+            "name": t.name,
+            "slug": t.slug,
+            "parent_slugs": [p.slug for p in t.parents.all()],
+        }
+        for t in themes
+    ]
 
 
 @themes_router.get("/{slug}", response=ThemeDetailSchema)
@@ -53,6 +65,9 @@ def get_theme(request, slug: str):
 
     theme = get_object_or_404(
         Theme.objects.prefetch_related(
+            "parents",
+            "children",
+            "aliases",
             Prefetch(
                 "machine_models",
                 queryset=MachineModel.objects.filter(variant_of__isnull=True)
@@ -60,7 +75,7 @@ def get_theme(request, slug: str):
                     "corporate_entity__manufacturer", "technology_generation"
                 )
                 .order_by(F("year").desc(nulls_last=True), "name"),
-            )
+            ),
         ),
         slug=slug,
     )
@@ -69,5 +84,10 @@ def get_theme(request, slug: str):
         "slug": theme.slug,
         "description": theme.description,
         **render_markdown_fields(theme),
+        "aliases": [a.value for a in theme.aliases.all()],
+        "parents": [{"name": t.name, "slug": t.slug} for t in theme.parents.all()],
+        "children": [
+            {"name": t.name, "slug": t.slug} for t in theme.children.order_by("name")
+        ],
         "machines": [_serialize_title_machine(pm) for pm in theme.machine_models.all()],
     }

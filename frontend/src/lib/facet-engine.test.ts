@@ -9,6 +9,7 @@ import {
 	buildSingleRefOptions,
 	buildPlayerCountOptions,
 	getActiveFilterLabels,
+	expandTitlesWithAncestorThemes,
 	type FacetedTitle,
 	type FilterState
 } from './facet-engine';
@@ -527,5 +528,76 @@ describe('filtersToParams', () => {
 		const sp = filtersToParams(original, new URLSearchParams());
 		const restored = filtersFromParams(sp);
 		expect(restored).toEqual(original);
+	});
+});
+
+// ---------------------------------------------------------------------------
+// Theme hierarchy expansion
+// ---------------------------------------------------------------------------
+
+describe('expandTitlesWithAncestorThemes', () => {
+	const hierarchy = [
+		{ slug: 'sports', name: 'Sports', parent_slugs: [] },
+		{ slug: 'racing', name: 'Racing', parent_slugs: ['sports'] },
+		{ slug: 'air-racing', name: 'Air Racing', parent_slugs: ['sports', 'racing'] },
+		{ slug: 'medieval', name: 'Medieval', parent_slugs: [] }
+	];
+
+	it('adds ancestor themes to titles', () => {
+		const titles = [
+			makeTitle({
+				slug: 'air-race-pin',
+				themes: [{ slug: 'air-racing', name: 'Air Racing' }]
+			})
+		];
+		const expanded = expandTitlesWithAncestorThemes(titles, hierarchy);
+		const slugs = expanded[0].themes.map((t) => t.slug).sort();
+		expect(slugs).toEqual(['air-racing', 'racing', 'sports']);
+	});
+
+	it('does not duplicate themes already present', () => {
+		const titles = [
+			makeTitle({
+				slug: 'sport-pin',
+				themes: [
+					{ slug: 'air-racing', name: 'Air Racing' },
+					{ slug: 'sports', name: 'Sports' }
+				]
+			})
+		];
+		const expanded = expandTitlesWithAncestorThemes(titles, hierarchy);
+		const slugs = expanded[0].themes.map((t) => t.slug).sort();
+		expect(slugs).toEqual(['air-racing', 'racing', 'sports']);
+	});
+
+	it('leaves titles with no themes unchanged', () => {
+		const titles = [makeTitle({ slug: 'no-theme', themes: [] })];
+		const expanded = expandTitlesWithAncestorThemes(titles, hierarchy);
+		expect(expanded[0].themes).toEqual([]);
+	});
+
+	it('returns original titles when hierarchy is empty', () => {
+		const titles = [makeTitle({ themes: [{ slug: 'medieval', name: 'Medieval' }] })];
+		const expanded = expandTitlesWithAncestorThemes(titles, []);
+		expect(expanded).toBe(titles);
+	});
+
+	it('makes parent theme filter match titles with child themes', () => {
+		const titles = [
+			makeTitle({
+				slug: 'air-race-pin',
+				themes: [{ slug: 'air-racing', name: 'Air Racing' }]
+			}),
+			makeTitle({
+				slug: 'medieval-pin',
+				themes: [{ slug: 'medieval', name: 'Medieval' }]
+			})
+		];
+		const expanded = expandTitlesWithAncestorThemes(titles, hierarchy);
+		const filtered = filterTitles(expanded, {
+			...emptyFilterState(),
+			themes: ['sports']
+		});
+		expect(filtered.map((t) => t.slug)).toEqual(['air-race-pin']);
 	});
 });

@@ -45,6 +45,7 @@ from apps.catalog.models import (
     TechnologyGeneration,
     TechnologySubgeneration,
     Theme,
+    ThemeAlias,
     Title,
 )
 from apps.catalog.resolve import (
@@ -53,6 +54,7 @@ from apps.catalog.resolve import (
     _resolve_bulk,
     resolve_all_credits,
     resolve_all_tags,
+    resolve_all_themes,
     resolve_all_title_abbreviations,
     resolve_corporate_entity,
 )
@@ -145,6 +147,7 @@ class Command(BaseCommand):
         )
 
         self._ingest_taxonomy()
+        self._sync_theme_parents_and_aliases()
         self._ingest_manufacturers()
         self._ingest_corporate_entities()
         self._ingest_systems()
@@ -279,6 +282,76 @@ class Command(BaseCommand):
                 f"{stats['created']} claims created, "
                 f"{stats['unchanged']} unchanged"
             )
+
+    # ------------------------------------------------------------------
+    # Phase 1b: Theme parents & aliases (structural, not claim-controlled)
+    # ------------------------------------------------------------------
+
+    def _sync_theme_parents_and_aliases(self):
+        entries = self._load("theme.json")
+        if not entries:
+            return
+
+        themes_by_name = {t.name: t for t in Theme.objects.all()}
+
+        # --- Parents (M2M set per theme) ---
+        parents_set = 0
+        for entry in entries:
+            theme = themes_by_name.get(entry["name"])
+            if theme is None:
+                continue
+            parent_names = entry.get("parents", [])
+            if not parent_names:
+                theme.parents.clear()
+                continue
+            parent_pks = []
+            for pname in parent_names:
+                parent = themes_by_name.get(pname)
+                if parent is None:
+                    logger.warning(
+                        "Theme parent %r not found for theme %r — skipping",
+                        pname,
+                        entry["name"],
+                    )
+                    continue
+                parent_pks.append(parent.pk)
+            theme.parents.set(parent_pks)
+            parents_set += len(parent_pks)
+
+        self.stdout.write(f"  Theme parents: {parents_set} relationships set")
+
+        # --- Aliases (diff-based sync) ---
+        all_theme_pks = {t.pk for t in themes_by_name.values()}
+        existing_aliases: dict[int, dict[str, int]] = {}
+        for pk, theme_id, value in ThemeAlias.objects.filter(
+            theme_id__in=all_theme_pks
+        ).values_list("pk", "theme_id", "value"):
+            existing_aliases.setdefault(theme_id, {})[value.lower()] = pk
+
+        to_create: list[ThemeAlias] = []
+        stale_pks: list[int] = []
+
+        for entry in entries:
+            theme = themes_by_name.get(entry["name"])
+            if theme is None:
+                continue
+            desired = {a.lower(): a for a in entry.get("aliases", [])}
+            existing = existing_aliases.get(theme.pk, {})
+            for lower_val, original_val in desired.items():
+                if lower_val not in existing:
+                    to_create.append(ThemeAlias(theme=theme, value=original_val))
+            for lower_val, alias_pk in existing.items():
+                if lower_val not in desired:
+                    stale_pks.append(alias_pk)
+
+        if stale_pks:
+            ThemeAlias.objects.filter(pk__in=stale_pks).delete()
+        if to_create:
+            ThemeAlias.objects.bulk_create(to_create)
+
+        self.stdout.write(
+            f"  Theme aliases: {len(to_create)} created, {len(stale_pks)} deleted"
+        )
 
     # ------------------------------------------------------------------
     # Phase 2: Manufacturers
@@ -880,6 +953,19 @@ class Command(BaseCommand):
                     )
                 )
 
+            # Description claim.
+            description = entry.get("description")
+            if description:
+                touched_ids.add(title.pk)
+                pending_claims.append(
+                    Claim(
+                        content_type_id=ct_id,
+                        object_id=title.pk,
+                        field_name="description",
+                        value=description,
+                    )
+                )
+
             # Franchise claim.
             franchise_slug = entry.get("franchise_slug")
             if franchise_slug:
@@ -1117,6 +1203,7 @@ class Command(BaseCommand):
         pending_claims: list[Claim] = []
         credit_claims: list[Claim] = []
         tag_claims: list[Claim] = []
+        theme_claims: list[Claim] = []
         matched_pks: set[int] = set()
         matched = 0
         skipped = 0
@@ -1128,6 +1215,10 @@ class Command(BaseCommand):
 
             matched += 1
             matched_pks.add(mm.pk)
+
+            # Infer is_remake from remake_of presence.
+            if entry.get("remake_of"):
+                entry.setdefault("is_remake", True)
 
             for claim_field, json_key in self.MODEL_CLAIM_FIELDS.items():
                 value = entry.get(json_key)
@@ -1174,6 +1265,21 @@ class Command(BaseCommand):
                     )
                 )
 
+            # Theme relationship claims.
+            for theme_slug in entry.get("theme_slugs") or []:
+                claim_key, value = build_relationship_claim(
+                    "theme", {"theme_slug": theme_slug}
+                )
+                theme_claims.append(
+                    Claim(
+                        content_type_id=ct_id,
+                        object_id=mm.pk,
+                        field_name="theme",
+                        claim_key=claim_key,
+                        value=value,
+                    )
+                )
+
         self.stdout.write(
             f"  Models: {models_created} created, {matched} matched, {skipped} skipped"
         )
@@ -1209,3 +1315,14 @@ class Command(BaseCommand):
                 f"{tag_stats['swept']} swept"
             )
             resolve_all_tags([], model_ids=matched_pks)
+
+        if theme_claims or matched_pks:
+            theme_stats = Claim.objects.bulk_assert_claims(
+                source, theme_claims, sweep_field="theme", authoritative_scope=scope
+            )
+            self.stdout.write(
+                f"  Themes: {theme_stats['created']} created, "
+                f"{theme_stats['unchanged']} unchanged, "
+                f"{theme_stats['swept']} swept"
+            )
+            resolve_all_themes([], model_ids=matched_pks)

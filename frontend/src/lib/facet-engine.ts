@@ -544,6 +544,90 @@ export function getActiveFilterLabels(
 	return labels;
 }
 
+// ---------------------------------------------------------------------------
+// Theme hierarchy expansion — adds ancestor themes to each title so that
+// filtering by a parent theme (e.g. "Sports") also matches titles whose
+// models only have a child theme (e.g. "Air Racing").
+// ---------------------------------------------------------------------------
+
+interface ThemeHierarchyEntry {
+	slug: string;
+	name: string;
+	parent_slugs: string[];
+}
+
+/**
+ * Build a map from each theme slug to the set of all ancestor slugs
+ * (transitive closure, including itself).
+ */
+function buildAncestorMap(themes: ThemeHierarchyEntry[]): Map<string, Set<string>> {
+	const parentMap = new Map<string, string[]>();
+	for (const t of themes) {
+		parentMap.set(t.slug, t.parent_slugs);
+	}
+
+	const cache = new Map<string, Set<string>>();
+
+	function ancestors(slug: string, visited: Set<string>): Set<string> {
+		if (cache.has(slug)) return cache.get(slug)!;
+		const result = new Set<string>([slug]);
+		if (visited.has(slug)) return result; // cycle guard
+		visited.add(slug);
+		for (const p of parentMap.get(slug) ?? []) {
+			for (const a of ancestors(p, visited)) {
+				result.add(a);
+			}
+		}
+		cache.set(slug, result);
+		return result;
+	}
+
+	for (const t of themes) {
+		ancestors(t.slug, new Set());
+	}
+	return cache;
+}
+
+/**
+ * Expand each title's `.themes` to include all ancestor themes.
+ * Returns new title objects (does not mutate the originals).
+ */
+export function expandTitlesWithAncestorThemes(
+	titles: FacetedTitle[],
+	themeHierarchy: ThemeHierarchyEntry[]
+): FacetedTitle[] {
+	if (themeHierarchy.length === 0) return titles;
+
+	const ancestorMap = buildAncestorMap(themeHierarchy);
+	const nameMap = new Map<string, string>();
+	for (const t of themeHierarchy) {
+		nameMap.set(t.slug, t.name);
+	}
+
+	return titles.map((title) => {
+		if (title.themes.length === 0) return title;
+
+		const expanded = new Map<string, string>();
+		for (const theme of title.themes) {
+			const allAncestors = ancestorMap.get(theme.slug);
+			if (allAncestors) {
+				for (const slug of allAncestors) {
+					if (!expanded.has(slug)) {
+						expanded.set(slug, nameMap.get(slug) ?? slug);
+					}
+				}
+			} else {
+				expanded.set(theme.slug, theme.name);
+			}
+		}
+
+		return {
+			...title,
+			themes: Array.from(expanded.entries()).map(([slug, name]) => ({ slug, name }))
+		};
+	});
+}
+
 export function buildPlayerCountOptions(
 	counts: Map<number, number>
 ): { value: number; label: string; count: number }[] {
