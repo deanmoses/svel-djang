@@ -277,7 +277,7 @@ def resolve_all(stdout=None) -> int:
     resolve_all_tags(all_models)
     _status("Themes, features, reward types, tags resolved")
 
-    # 13. Bulk-resolve model abbreviations.
+    # 14. Bulk-resolve model abbreviations.
     resolve_all_model_abbreviations(all_models)
     _status("Abbreviations resolved")
 

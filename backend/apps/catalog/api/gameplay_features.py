@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from django.db.models import F, Prefetch
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
@@ -10,8 +9,7 @@ from ninja.decorators import decorate_view
 
 from apps.core.markdown import render_markdown_fields
 
-from .helpers import _serialize_title_machine
-from .schemas import GameplayFeatureSchema, TitleMachineSchema
+from .schemas import GameplayFeatureSchema
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -33,7 +31,6 @@ class GameplayFeatureDetailSchema(Schema):
     aliases: list[str] = []
     parents: list[GameplayFeatureSchema] = []
     children: list[GameplayFeatureSchema] = []
-    machines: list[TitleMachineSchema]
 
 
 # ---------------------------------------------------------------------------
@@ -57,12 +54,12 @@ def list_gameplay_features(request):
         f.pk: [c.pk for c in f.children.all()] for f in features
     }
 
-    # Fetch all (gameplay_feature_pk, machinemodel_pk) through-table rows in one query.
+    # Fetch (gameplay_feature_pk, machinemodel_pk) for non-variant machines only.
     Through = MachineModel.gameplay_features.through
     feature_to_model_pks: dict[int, set[int]] = {}
-    for gf_pk, mm_pk in Through.objects.values_list(
-        "gameplayfeature_id", "machinemodel_id"
-    ):
+    for gf_pk, mm_pk in Through.objects.filter(
+        machinemodel__variant_of__isnull=True
+    ).values_list("gameplayfeature_id", "machinemodel_id"):
         feature_to_model_pks.setdefault(gf_pk, set()).add(mm_pk)
 
     def _get_descendants(pk: int) -> set[int]:
@@ -96,22 +93,10 @@ def list_gameplay_features(request):
 @gameplay_features_router.get("/{slug}", response=GameplayFeatureDetailSchema)
 @decorate_view(cache_control(public=True, max_age=300))
 def get_gameplay_feature(request, slug: str):
-    from ..models import GameplayFeature, MachineModel
+    from ..models import GameplayFeature
 
     feature = get_object_or_404(
-        GameplayFeature.objects.prefetch_related(
-            "parents",
-            "children",
-            "aliases",
-            Prefetch(
-                "machine_models",
-                queryset=MachineModel.objects.filter(variant_of__isnull=True)
-                .select_related(
-                    "corporate_entity__manufacturer", "technology_generation"
-                )
-                .order_by(F("year").desc(nulls_last=True), "name"),
-            ),
-        ),
+        GameplayFeature.objects.prefetch_related("parents", "children", "aliases"),
         slug=slug,
     )
 
@@ -136,8 +121,5 @@ def get_gameplay_feature(request, slug: str):
         "parents": [{"name": p.name, "slug": p.slug} for p in feature.parents.all()],
         "children": [
             {"name": c.name, "slug": c.slug} for c in feature.children.order_by("name")
-        ],
-        "machines": [
-            _serialize_title_machine(pm) for pm in feature.machine_models.all()
         ],
     }
