@@ -245,6 +245,7 @@ def list_all_manufacturers(request):
                 "entities",
                 queryset=CorporateEntity.objects.prefetch_related(
                     "addresses",
+                    "aliases",
                     Prefetch(
                         "models",
                         queryset=MachineModel.objects.filter(variant_of__isnull=True)
@@ -269,6 +270,8 @@ def list_all_manufacturers(request):
 
         for entity in mfr.entities.all():
             search_parts.append(entity.name)
+            for alias in entity.aliases.all():
+                search_parts.append(alias.value)
             for addr in entity.addresses.all():
                 if addr.city:
                     search_parts.append(addr.city)

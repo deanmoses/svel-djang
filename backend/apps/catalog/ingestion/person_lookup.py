@@ -14,7 +14,7 @@ def build_person_lookup() -> dict[str, Person]:
 
     External ingest commands (IPDB, OPDB, Fandom, etc.) use this to match
     credit names to existing Person records.  Aliases from
-    ``data/people.json`` allow variant spellings (e.g. "Keith Johnson")
+    ``data/people.json`` allow alternative spellings (e.g. "Keith Johnson")
     to resolve to the canonical Person ("Keith P. Johnson").
 
     On collision (alias value matches an existing person's canonical name

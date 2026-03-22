@@ -29,7 +29,8 @@ from ._helpers import (
     build_fk_lookups,
     get_field_defaults,
 )
-from ._relationships import (
+from ._relationships import (  # noqa: F401
+    resolve_all_aliases,
     resolve_all_credits,
     resolve_all_gameplay_features,
     resolve_all_model_abbreviations,
@@ -37,6 +38,7 @@ from ._relationships import (
     resolve_all_tags,
     resolve_all_themes,
     resolve_all_title_abbreviations,
+    resolve_corporate_entity_aliases,
     resolve_credits,
     resolve_gameplay_feature_aliases,
     resolve_gameplay_feature_parents,
@@ -200,11 +202,7 @@ def resolve_all(stdout=None) -> int:
     # 0a2. Resolve entity hierarchy and aliases.
     resolve_theme_parents()
     resolve_gameplay_feature_parents()
-    resolve_theme_aliases()
-    resolve_manufacturer_aliases()
-    resolve_person_aliases()
-    resolve_gameplay_feature_aliases()
-    resolve_reward_type_aliases()
+    resolve_all_aliases()
     _status("Hierarchy and aliases resolved")
 
     # 0b. Resolve titles (they are FK targets for MachineModel).

@@ -68,7 +68,7 @@ class Person(Linkable, TimeStampedModel):
 
 
 class PersonAlias(AliasBase):
-    """An alternate name for a Person, used to match variant spellings from
+    """An alternate name for a Person, used to match alternative spellings from
     external sources (e.g. "Keith Johnson" → "Keith P. Johnson").
     """
 

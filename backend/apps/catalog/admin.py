@@ -11,6 +11,7 @@ from .models import (
     Address,
     Cabinet,
     CorporateEntity,
+    CorporateEntityAlias,
     Credit,
     CreditRole,
     DisplaySubtype,
@@ -21,8 +22,10 @@ from .models import (
     GameplayFeatureAlias,
     MachineModel,
     Manufacturer,
+    ManufacturerAlias,
     ModelAbbreviation,
     Person,
+    PersonAlias,
     RewardType,
     RewardTypeAlias,
     Series,
@@ -196,40 +199,32 @@ class CorporateEntityInline(admin.TabularInline):
     fields = ("name", "year_start", "year_end")
 
 
-class ThemeAliasInline(admin.TabularInline):
-    """Read-only inline — aliases are materialized from claims, not directly editable."""
+def alias_inline(alias_model):
+    """Create a read-only TabularInline for an alias model.
 
-    model = ThemeAlias
-    extra = 0
-    readonly_fields = ("value",)
-    can_delete = False
+    Aliases are materialized from claims, not directly editable.
+    """
 
-    def has_add_permission(self, request, obj=None):
-        return False
+    class AliasInline(admin.TabularInline):
+        model = alias_model
+        extra = 0
+        readonly_fields = ("value",)
+        can_delete = False
 
+        def has_add_permission(self, request, obj=None):
+            return False
 
-class GameplayFeatureAliasInline(admin.TabularInline):
-    """Read-only inline — aliases are materialized from claims, not directly editable."""
-
-    model = GameplayFeatureAlias
-    extra = 0
-    readonly_fields = ("value",)
-    can_delete = False
-
-    def has_add_permission(self, request, obj=None):
-        return False
+    AliasInline.__name__ = f"{alias_model.__name__}Inline"
+    AliasInline.__qualname__ = AliasInline.__name__
+    return AliasInline
 
 
-class RewardTypeAliasInline(admin.TabularInline):
-    """Read-only inline — aliases are materialized from claims, not directly editable."""
-
-    model = RewardTypeAlias
-    extra = 0
-    readonly_fields = ("value",)
-    can_delete = False
-
-    def has_add_permission(self, request, obj=None):
-        return False
+ThemeAliasInline = alias_inline(ThemeAlias)
+GameplayFeatureAliasInline = alias_inline(GameplayFeatureAlias)
+RewardTypeAliasInline = alias_inline(RewardTypeAlias)
+ManufacturerAliasInline = alias_inline(ManufacturerAlias)
+PersonAliasInline = alias_inline(PersonAlias)
+CorporateEntityAliasInline = alias_inline(CorporateEntityAlias)
 
 
 @admin.register(CorporateEntity)
@@ -237,6 +232,7 @@ class CorporateEntityAdmin(admin.ModelAdmin):
     list_display = ("name", "manufacturer", "year_start", "year_end")
     search_fields = ("name", "manufacturer__name")
     autocomplete_fields = ("manufacturer",)
+    inlines = (CorporateEntityAliasInline, AddressInline, ClaimInline)
 
 
 # ---------------------------------------------------------------------------
@@ -372,7 +368,7 @@ class ManufacturerAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
     )
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
-    inlines = (CorporateEntityInline, ClaimInline)
+    inlines = (CorporateEntityInline, ManufacturerAliasInline, ClaimInline)
 
     @admin.display(description="Entities")
     def entity_count(self, obj):
@@ -485,7 +481,7 @@ class PersonAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
     list_display = ("name", "credit_count")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
-    inlines = (ClaimInline,)
+    inlines = (PersonAliasInline, ClaimInline)
 
     @admin.display(description="Credits")
     def credit_count(self, obj):

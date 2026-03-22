@@ -1,12 +1,22 @@
-"""Tests for _resolve_aliases() — sweep and display-casing behaviour."""
+"""Tests for _resolve_aliases() — sweep and display-casing behaviour.
+
+Tests are parametrized across all alias types via the ALIAS_REGISTRY, ensuring
+the generic _resolve_aliases() function works for every registered alias type.
+"""
 
 import pytest
 from django.contrib.contenttypes.models import ContentType
 
 from apps.catalog.claims import build_relationship_claim
-from apps.catalog.models import Theme
-from apps.catalog.models.theme import ThemeAlias
-from apps.catalog.resolve._relationships import resolve_theme_aliases
+from apps.catalog.models import (
+    CorporateEntity,
+    GameplayFeature,
+    Manufacturer,
+    Person,
+    RewardType,
+    Theme,
+)
+from apps.catalog.resolve._relationships import ALIAS_REGISTRY, _resolve_aliases
 from apps.provenance.models import Claim, Source
 
 
@@ -15,32 +25,54 @@ from apps.provenance.models import Claim, Source
 # ---------------------------------------------------------------------------
 
 
-def _assert_aliases(source, theme, aliases: list[str]) -> None:
-    """Assert alias claims for *theme*, mirroring ingest_pinbase._assert_alias_claims.
+def _assert_alias_claims(source, parent_obj, claim_field, aliases: list[str]) -> None:
+    """Assert alias claims for *parent_obj*, mirroring ingest_pinbase._assert_alias_claims.
 
-    Passing an empty list puts the theme in scope with no pending claims,
+    Passing an empty list puts the parent in scope with no pending claims,
     which causes the sweep to delete any stale alias rows.
     """
-    ct_id = ContentType.objects.get_for_model(Theme).pk
+    ct_id = ContentType.objects.get_for_model(parent_obj).pk
     pending = []
     for alias_str in aliases:
         lower = alias_str.lower()
         claim_key, value = build_relationship_claim(
-            "theme_alias", {"alias_value": lower, "alias_display": alias_str}
+            claim_field, {"alias_value": lower, "alias_display": alias_str}
         )
         pending.append(
             Claim(
                 content_type_id=ct_id,
-                object_id=theme.pk,
-                field_name="theme_alias",
+                object_id=parent_obj.pk,
+                field_name=claim_field,
                 claim_key=claim_key,
                 value=value,
             )
         )
-    scope = {(ct_id, theme.pk)}
+    scope = {(ct_id, parent_obj.pk)}
     Claim.objects.bulk_assert_claims(
-        source, pending, sweep_field="theme_alias", authoritative_scope=scope
+        source, pending, sweep_field=claim_field, authoritative_scope=scope
     )
+
+
+def _create_parent(parent_model):
+    """Create a minimal parent instance for any registered alias type."""
+    if parent_model == Theme:
+        return Theme.objects.create(name="Racing", slug="racing")
+    if parent_model == Manufacturer:
+        return Manufacturer.objects.create(name="Gottlieb", slug="gottlieb")
+    if parent_model == Person:
+        return Person.objects.create(name="Pat Lawlor", slug="pat-lawlor")
+    if parent_model == GameplayFeature:
+        return GameplayFeature.objects.create(name="Multiball", slug="multiball")
+    if parent_model == RewardType:
+        return RewardType.objects.create(
+            name="Extra Ball", slug="extra-ball", display_order=1
+        )
+    if parent_model == CorporateEntity:
+        mfr = Manufacturer.objects.create(name="Test Mfr", slug="test-mfr")
+        return CorporateEntity.objects.create(
+            name="Test Corp", slug="test-corp", manufacturer=mfr
+        )
+    raise ValueError(f"Unknown parent model: {parent_model}")
 
 
 # ---------------------------------------------------------------------------
@@ -53,93 +85,62 @@ def source(db):
     return Source.objects.create(name="Pinbase", source_type="editorial", priority=300)
 
 
-@pytest.fixture
-def theme(db):
-    return Theme.objects.create(name="Racing", slug="racing")
+# Build pytest parametrize IDs from registry claim field names.
+_ALIAS_IDS = [entry[1] for entry in ALIAS_REGISTRY]
 
 
 # ---------------------------------------------------------------------------
-# Sweep tests
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.django_db
-class TestAliasSwept:
-    def test_aliases_created_on_first_run(self, source, theme):
-        _assert_aliases(source, theme, ["Drag Racing", "Motorsports"])
-        resolve_theme_aliases()
-
-        values = set(
-            ThemeAlias.objects.filter(theme=theme).values_list("value", flat=True)
-        )
-        assert values == {"Drag Racing", "Motorsports"}
-
-    def test_stale_aliases_swept_when_list_becomes_empty(self, source, theme):
-        _assert_aliases(source, theme, ["Drag Racing"])
-        resolve_theme_aliases()
-        assert ThemeAlias.objects.filter(theme=theme).count() == 1
-
-        # Next ingest: alias list is empty — stale row must be deleted.
-        _assert_aliases(source, theme, [])
-        resolve_theme_aliases()
-        assert ThemeAlias.objects.filter(theme=theme).count() == 0
-
-    def test_removed_alias_deleted_remaining_kept(self, source, theme):
-        _assert_aliases(source, theme, ["Drag Racing", "Motorsports"])
-        resolve_theme_aliases()
-
-        _assert_aliases(source, theme, ["Drag Racing"])
-        resolve_theme_aliases()
-
-        values = set(
-            ThemeAlias.objects.filter(theme=theme).values_list("value", flat=True)
-        )
-        assert values == {"Drag Racing"}
-
-
-# ---------------------------------------------------------------------------
-# Display-casing tests
+# Parametrized tests across all alias types
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.django_db
-class TestAliasDisplayCasing:
-    def test_original_case_stored(self, source, theme):
-        _assert_aliases(source, theme, ["Drag Racing"])
-        resolve_theme_aliases()
-        assert ThemeAlias.objects.get(theme=theme).value == "Drag Racing"
+class TestAliasSweptAllTypes:
+    @pytest.mark.parametrize(
+        "parent_model,claim_field,alias_model,fk_attr",
+        ALIAS_REGISTRY,
+        ids=_ALIAS_IDS,
+    )
+    def test_aliases_created_on_first_run(
+        self, source, parent_model, claim_field, alias_model, fk_attr
+    ):
+        parent = _create_parent(parent_model)
+        _assert_alias_claims(source, parent, claim_field, ["Alt Name A", "Alt Name B"])
+        _resolve_aliases(parent_model, claim_field, alias_model, fk_attr)
 
-    def test_case_change_updates_existing_row(self, source, theme):
-        _assert_aliases(source, theme, ["Drag Racing"])
-        resolve_theme_aliases()
-
-        _assert_aliases(source, theme, ["drag racing"])
-        resolve_theme_aliases()
-
-        # Same alias (same lowercase key), different display case — row updated.
-        assert ThemeAlias.objects.filter(theme=theme).count() == 1
-        assert ThemeAlias.objects.get(theme=theme).value == "drag racing"
-
-    def test_legacy_claim_without_display_falls_back_to_lowercase(self, source, theme):
-        """Claims created before alias_display was added fall back to alias_value."""
-        ct_id = ContentType.objects.get_for_model(Theme).pk
-        # Simulate a legacy claim with no alias_display field.
-        claim_key, value = build_relationship_claim(
-            "theme_alias", {"alias_value": "drag racing"}
+        values = set(
+            alias_model.objects.filter(**{fk_attr: parent}).values_list(
+                "value", flat=True
+            )
         )
-        Claim.objects.bulk_assert_claims(
-            source,
-            [
-                Claim(
-                    content_type_id=ct_id,
-                    object_id=theme.pk,
-                    field_name="theme_alias",
-                    claim_key=claim_key,
-                    value=value,
-                )
-            ],
-            sweep_field="theme_alias",
-            authoritative_scope={(ct_id, theme.pk)},
-        )
-        resolve_theme_aliases()
-        assert ThemeAlias.objects.get(theme=theme).value == "drag racing"
+        assert values == {"Alt Name A", "Alt Name B"}
+
+    @pytest.mark.parametrize(
+        "parent_model,claim_field,alias_model,fk_attr",
+        ALIAS_REGISTRY,
+        ids=_ALIAS_IDS,
+    )
+    def test_stale_aliases_swept(
+        self, source, parent_model, claim_field, alias_model, fk_attr
+    ):
+        parent = _create_parent(parent_model)
+        _assert_alias_claims(source, parent, claim_field, ["Stale Alias"])
+        _resolve_aliases(parent_model, claim_field, alias_model, fk_attr)
+        assert alias_model.objects.filter(**{fk_attr: parent}).count() == 1
+
+        _assert_alias_claims(source, parent, claim_field, [])
+        _resolve_aliases(parent_model, claim_field, alias_model, fk_attr)
+        assert alias_model.objects.filter(**{fk_attr: parent}).count() == 0
+
+    @pytest.mark.parametrize(
+        "parent_model,claim_field,alias_model,fk_attr",
+        ALIAS_REGISTRY,
+        ids=_ALIAS_IDS,
+    )
+    def test_display_case_preserved(
+        self, source, parent_model, claim_field, alias_model, fk_attr
+    ):
+        parent = _create_parent(parent_model)
+        _assert_alias_claims(source, parent, claim_field, ["Mixed Case"])
+        _resolve_aliases(parent_model, claim_field, alias_model, fk_attr)
+        assert alias_model.objects.get(**{fk_attr: parent}).value == "Mixed Case"

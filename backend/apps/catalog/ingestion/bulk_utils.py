@@ -103,10 +103,19 @@ class ManufacturerResolver:
             if key not in self._name_to_slug:
                 self._name_to_slug[key] = alias.manufacturer.slug
 
+        from apps.catalog.models import CorporateEntityAlias
+
         self._entity_to_slug: dict[str, str] = {
             ce.name.lower(): ce.manufacturer.slug
             for ce in CorporateEntity.objects.select_related("manufacturer").all()
         }
+        # Include corporate entity aliases in entity lookup.
+        for alias in CorporateEntityAlias.objects.select_related(
+            "corporate_entity__manufacturer"
+        ).all():
+            key = alias.value.lower()
+            if key not in self._entity_to_slug:
+                self._entity_to_slug[key] = alias.corporate_entity.manufacturer.slug
 
         # Normalized-name fallback: strip business suffixes.
         # Only usable when the normalized form maps to exactly one record.

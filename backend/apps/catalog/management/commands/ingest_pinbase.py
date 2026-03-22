@@ -58,6 +58,7 @@ from apps.catalog.resolve import (
     resolve_all_themes,
     resolve_all_title_abbreviations,
     resolve_corporate_entity,
+    resolve_corporate_entity_aliases,
     resolve_gameplay_feature_aliases,
     resolve_gameplay_feature_parents,
     resolve_manufacturer_aliases,
@@ -743,6 +744,23 @@ class Command(BaseCommand):
             )
             for ce in objs:
                 resolve_corporate_entity(ce)
+
+        # Assert alias claims.
+        aliases_by_pk: dict[int, list[str]] = {}
+        for obj, entry in zip(objs, valid_entries):
+            entry_aliases = entry.get("aliases", [])
+            if entry_aliases:
+                aliases_by_pk[obj.pk] = entry_aliases
+
+        if aliases_by_pk:
+            alias_stats = self._assert_alias_claims(
+                source, ct_id, aliases_by_pk, "corporate_entity_alias"
+            )
+            self.stdout.write(
+                f"  CE aliases: {alias_stats['created']} created, "
+                f"{alias_stats['unchanged']} unchanged"
+            )
+        resolve_corporate_entity_aliases()
 
     # ------------------------------------------------------------------
     # Phase 4: Systems

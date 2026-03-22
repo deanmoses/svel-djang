@@ -14,6 +14,8 @@ from django.db.models import Case, F, IntegerField, Value, When
 from apps.provenance.models import Claim
 
 from ..models import (
+    CorporateEntity,
+    CorporateEntityAlias,
     Credit,
     CreditRole,
     GameplayFeature,
@@ -767,6 +769,26 @@ def _resolve_aliases(
         alias_model.objects.filter(pk=pk).update(value=display_val)
 
 
+# ---------------------------------------------------------------------------
+# Alias registry — drives resolve_all_aliases()
+# ---------------------------------------------------------------------------
+# Each tuple: (parent_model, claim_field_name, alias_model, parent_fk_attr)
+
+ALIAS_REGISTRY: list[tuple] = [
+    (Theme, "theme_alias", ThemeAlias, "theme"),
+    (Manufacturer, "manufacturer_alias", ManufacturerAlias, "manufacturer"),
+    (Person, "person_alias", PersonAlias, "person"),
+    (GameplayFeature, "gameplay_feature_alias", GameplayFeatureAlias, "feature"),
+    (RewardType, "reward_type_alias", RewardTypeAlias, "reward_type"),
+    (
+        CorporateEntity,
+        "corporate_entity_alias",
+        CorporateEntityAlias,
+        "corporate_entity",
+    ),
+]
+
+
 def resolve_theme_aliases() -> None:
     _resolve_aliases(Theme, "theme_alias", ThemeAlias, "theme")
 
@@ -789,6 +811,21 @@ def resolve_gameplay_feature_aliases() -> None:
 
 def resolve_reward_type_aliases() -> None:
     _resolve_aliases(RewardType, "reward_type_alias", RewardTypeAlias, "reward_type")
+
+
+def resolve_corporate_entity_aliases() -> None:
+    _resolve_aliases(
+        CorporateEntity,
+        "corporate_entity_alias",
+        CorporateEntityAlias,
+        "corporate_entity",
+    )
+
+
+def resolve_all_aliases() -> None:
+    """Resolve all alias types from the registry."""
+    for parent_model, claim_field, alias_model, fk_attr in ALIAS_REGISTRY:
+        _resolve_aliases(parent_model, claim_field, alias_model, fk_attr)
 
 
 # ------------------------------------------------------------------

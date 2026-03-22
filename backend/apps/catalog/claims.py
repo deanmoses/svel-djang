@@ -32,6 +32,7 @@ RELATIONSHIP_SCHEMAS: dict[str, dict[str, str]] = {
     "person_alias": {"alias_value": "alias"},
     "gameplay_feature_alias": {"alias_value": "alias"},
     "reward_type_alias": {"alias_value": "alias"},
+    "corporate_entity_alias": {"alias_value": "alias"},
     # Hierarchy parent namespaces — claim lives on the child object
     "theme_parent": {"parent_slug": "parent"},
     "gameplay_feature_parent": {"parent_slug": "parent"},

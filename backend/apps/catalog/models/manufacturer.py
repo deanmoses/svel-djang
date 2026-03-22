@@ -14,7 +14,13 @@ from apps.core.models import (
     unique_slug,
 )
 
-__all__ = ["Manufacturer", "ManufacturerAlias", "CorporateEntity", "Address"]
+__all__ = [
+    "Manufacturer",
+    "ManufacturerAlias",
+    "CorporateEntity",
+    "CorporateEntityAlias",
+    "Address",
+]
 
 
 class Manufacturer(Linkable, TimeStampedModel):
@@ -64,7 +70,7 @@ class Manufacturer(Linkable, TimeStampedModel):
 
 
 class ManufacturerAlias(AliasBase):
-    """An alternate name for a Manufacturer, used to match variant spellings
+    """An alternate name for a Manufacturer, used to match alternative spellings
     from external sources.
     """
 
@@ -125,6 +131,24 @@ class CorporateEntity(TimeStampedModel):
             end = self.year_end or "present"
             return f"{self.name} ({self.year_start}-{end})"
         return self.name
+
+
+class CorporateEntityAlias(AliasBase):
+    """An alternate name for a CorporateEntity, used to match alternative spellings
+    from external sources.
+    """
+
+    corporate_entity = models.ForeignKey(
+        CorporateEntity, on_delete=models.CASCADE, related_name="aliases"
+    )
+
+    class Meta(AliasBase.Meta):
+        constraints = [
+            models.UniqueConstraint(
+                Lower("value"),
+                name="catalog_unique_corporate_entity_alias_lower",
+            ),
+        ]
 
 
 class Address(models.Model):

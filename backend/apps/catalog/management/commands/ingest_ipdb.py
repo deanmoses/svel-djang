@@ -41,6 +41,7 @@ from apps.catalog.ingestion.vocabulary import (
 from apps.catalog.models import (
     Address,
     CorporateEntity,
+    CorporateEntityAlias,
     GameplayFeature,
     MachineModel,
     Person,
@@ -316,6 +317,12 @@ class Command(BaseCommand):
             if ce.ipdb_manufacturer_id is not None
         }
         ce_by_name: dict[str, CorporateEntity] = {ce.name.lower(): ce for ce in all_ces}
+        for alias in CorporateEntityAlias.objects.select_related(
+            "corporate_entity__manufacturer"
+        ).all():
+            key = alias.value.lower()
+            if key not in ce_by_name:
+                ce_by_name[key] = alias.corporate_entity
         ce_slugs: set[str] = {ce.slug for ce in all_ces}
 
         with open(ipdb_path) as f:

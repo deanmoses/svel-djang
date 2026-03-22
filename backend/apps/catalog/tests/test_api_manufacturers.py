@@ -1,5 +1,6 @@
 from apps.catalog.models import (
     CorporateEntity,
+    CorporateEntityAlias,
     MachineModel,
     Title,
 )
@@ -117,6 +118,19 @@ class TestManufacturersAPI:
         resp = client.get(f"/api/manufacturers/{manufacturer.slug}")
         years = [t["year"] for t in resp.json()["titles"]]
         assert years == [2020, 1995, 1960]
+
+    def test_list_all_manufacturers_search_text_includes_ce_aliases(
+        self, client, williams_entity, db
+    ):
+        """CE aliases should appear in search_text so the frontend can match them."""
+        CorporateEntityAlias.objects.create(
+            corporate_entity=williams_entity, value="Williams Elektronik"
+        )
+        MachineModel.objects.create(name="Test Game", corporate_entity=williams_entity)
+        resp = client.get("/api/manufacturers/all/")
+        data = resp.json()
+        mfr = data[0]
+        assert "Williams Elektronik" in mfr["search_text"]
 
     def test_get_manufacturer_detail_nulls_last(
         self, client, manufacturer, williams_entity, db
