@@ -223,10 +223,6 @@ Do NOT skip step 1. Do NOT write the fix first "to understand the problem" and b
 
 For new behavior, include tests. Consider writing the test first, though sometimes that's more trouble than it's worth.
 
-### IPDB Ingest Failures — Non-Negotiable
-
-When `ingest_ipdb` fails or produces wrong output while parsing a `NotableFeatures` string, add that **complete, verbatim** `NotableFeatures` string as a new test case in `TestExtractIpdbGameplayFeatures` before fixing the code. Use the IpdbId in the test name for traceability. Do this before touching the parser.
-
 ## Rules
 
 - Don't silence linter warnings — fix the underlying issue
