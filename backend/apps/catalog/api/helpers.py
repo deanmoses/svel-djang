@@ -96,6 +96,32 @@ def _extract_variant_features(extra_data: dict) -> list[str]:
     return [str(f) for f in features]
 
 
+def _get_feature_descendant_slugs(slug: str) -> set[str]:
+    """Return *slug* plus all transitive child feature slugs.
+
+    Two queries: one for all features, one for the children M2M.  The BFS
+    then runs entirely in Python.  For a leaf feature this returns {slug}.
+    For an unknown slug it still returns {slug} (the filter just won't match).
+    """
+    from ..models import GameplayFeature
+
+    features = list(
+        GameplayFeature.objects.prefetch_related("children").only("pk", "slug")
+    )
+    children_map: dict[str, list[str]] = {
+        f.slug: [c.slug for c in f.children.all()] for f in features
+    }
+    result: set[str] = {slug}
+    stack = [slug]
+    while stack:
+        current = stack.pop()
+        for child_slug in children_map.get(current, []):
+            if child_slug not in result:
+                result.add(child_slug)
+                stack.append(child_slug)
+    return result
+
+
 def _serialize_title_machine(pm) -> dict:
     """Serialize a MachineModel for use in title/theme/system machine lists."""
     thumbnail_url, _ = _extract_image_urls(pm.extra_data or {})

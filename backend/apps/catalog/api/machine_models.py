@@ -22,6 +22,7 @@ from .helpers import (
     _claims_prefetch,
     _extract_image_urls,
     _extract_variant_features,
+    _get_feature_descendant_slugs,
     _serialize_title_machine,
 )
 from .schemas import (
@@ -202,7 +203,9 @@ def _build_model_list_qs(
     if display_subtype:
         qs = qs.filter(display_subtype__slug=display_subtype)
     if feature:
-        qs = qs.filter(gameplay_features__slug=feature)
+        qs = qs.filter(
+            gameplay_features__slug__in=_get_feature_descendant_slugs(feature)
+        )
     if reward_type:
         qs = qs.filter(reward_types__slug=reward_type)
     if game_format:
