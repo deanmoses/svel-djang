@@ -9,3 +9,6 @@ build/
 
 # Generated
 src/lib/api/schema.d.ts
+
+# Test caches
+.pytest_cache/
