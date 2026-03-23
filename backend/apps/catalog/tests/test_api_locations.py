@@ -155,6 +155,78 @@ class TestStateDetail:
         assert "Chicago" in city_names
         assert "Elk Grove Village" in city_names
 
+    def test_cities_sorted_by_manufacturer_count_then_name(self, client, db):
+        alpha = Manufacturer.objects.create(name="Alpha Manufacturing")
+        alpha_entity = CorporateEntity.objects.create(
+            name="Alpha Manufacturing",
+            slug="alpha-manufacturing",
+            manufacturer=alpha,
+        )
+        Address.objects.create(
+            corporate_entity=alpha_entity,
+            city="Albany",
+            state="Illinois",
+            country="USA",
+        )
+
+        zeta_one = Manufacturer.objects.create(name="Zeta One")
+        zeta_one_entity = CorporateEntity.objects.create(
+            name="Zeta One",
+            slug="zeta-one",
+            manufacturer=zeta_one,
+        )
+        Address.objects.create(
+            corporate_entity=zeta_one_entity,
+            city="Zephyr",
+            state="Illinois",
+            country="USA",
+        )
+
+        zeta_two = Manufacturer.objects.create(name="Zeta Two")
+        zeta_two_entity = CorporateEntity.objects.create(
+            name="Zeta Two",
+            slug="zeta-two",
+            manufacturer=zeta_two,
+        )
+        Address.objects.create(
+            corporate_entity=zeta_two_entity,
+            city="Zephyr",
+            state="Illinois",
+            country="USA",
+        )
+
+        resp = client.get("/api/locations/usa/illinois")
+        data = resp.json()
+
+        assert [city["name"] for city in data["cities"]] == ["Zephyr", "Albany"]
+
+
+class TestLocationsCacheInvalidation:
+    def test_country_detail_refreshes_when_address_changes(self, client, db):
+        _setup_locations(db)
+
+        initial = client.get("/api/locations/usa")
+        assert initial.status_code == 200
+        assert initial.json()["manufacturer_count"] == 3
+
+        williams_entity = CorporateEntity.objects.get(slug="williams-electronics")
+        Address.objects.create(
+            corporate_entity=williams_entity,
+            city="Rockford",
+            state="Illinois",
+            country="USA",
+        )
+
+        refreshed = client.get("/api/locations/usa")
+        data = refreshed.json()
+
+        assert data["manufacturer_count"] == 3
+        assert {city["name"] for city in data["states"][0]["cities"]} == {
+            "Chicago",
+            "Elk Grove Village",
+            "Rockford",
+        }
+
     def test_includes_manufacturers(self, client, db):
         _setup_locations(db)
         resp = client.get("/api/locations/usa/illinois")

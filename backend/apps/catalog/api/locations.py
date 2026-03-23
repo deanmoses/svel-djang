@@ -180,7 +180,7 @@ def _serialize_cities(cities_dict):
             }
             for city_slug, city_data in cities_dict.items()
         ],
-        key=lambda c: c["name"],
+        key=lambda c: (-c["manufacturer_count"], c["name"]),
     )
 
 

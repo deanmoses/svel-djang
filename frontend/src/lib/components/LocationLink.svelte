@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { components } from '$lib/api/schema';
+	import { buildLocationParts } from '$lib/location-links';
 	import { resolveHref } from '$lib/utils';
 
 	let {
@@ -10,29 +11,12 @@
 
 	type Part = { text: string; href?: string };
 
-	let parts = $derived.by(() => {
-		const result: Part[] = [];
-		if (addr.city) {
-			const href =
-				addr.country_slug && addr.state_slug
-					? resolveHref(`/locations/${addr.country_slug}/${addr.state_slug}/${addr.city_slug}`)
-					: undefined;
-			result.push({ text: addr.city, href });
-		}
-		if (addr.state) {
-			const href = addr.country_slug
-				? resolveHref(`/locations/${addr.country_slug}/${addr.state_slug}`)
-				: undefined;
-			result.push({ text: addr.state, href });
-		}
-		if (addr.country) {
-			result.push({
-				text: addr.country,
-				href: resolveHref(`/locations/${addr.country_slug}`)
-			});
-		}
-		return result;
-	});
+	let parts = $derived.by((): Part[] =>
+		buildLocationParts(addr).map((part) => ({
+			...part,
+			href: part.href ? resolveHref(part.href) : undefined
+		}))
+	);
 </script>
 
 {#if parts.length > 0}
