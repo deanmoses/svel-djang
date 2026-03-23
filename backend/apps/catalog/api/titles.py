@@ -16,7 +16,12 @@ from apps.core.markdown import render_markdown_fields
 from .constants import DEFAULT_PAGE_SIZE
 from .helpers import _extract_image_urls, _serialize_title_machine
 from .machine_models import CreditSchema, MachineModelDetailSchema
-from .schemas import SeriesRefSchema, ThemeSchema, TitleMachineSchema
+from .schemas import (
+    GameplayFeatureSchema,
+    SeriesRefSchema,
+    ThemeSchema,
+    TitleMachineSchema,
+)
 from ..cache import TITLES_ALL_KEY
 
 # ---------------------------------------------------------------------------
@@ -77,7 +82,7 @@ class AgreedSpecsSchema(Schema):
     display_subtype_name: Optional[str] = None
     display_subtype_slug: Optional[str] = None
     themes: list[ThemeSchema] = []
-    gameplay_features: list[FacetRef] = []
+    gameplay_features: list[GameplayFeatureSchema] = []
     reward_types: list[FacetRef] = []
     production_quantity: Optional[str] = None
 
@@ -305,18 +310,27 @@ def _compute_agreed_specs(models) -> dict:
         specs["themes"] = [{"name": n, "slug": s} for s, n in sorted(theme_sets[0])]
 
     # Gameplay features: intersection across all models.
-    gf_sets = [
-        frozenset((gf.slug, gf.name) for gf in m.gameplay_features.all())
-        for m in models
-    ]
-    if gf_sets and all(gf_sets):
-        common = gf_sets[0]
-        for s in gf_sets[1:]:
-            common &= s
-        if common:
-            specs["gameplay_features"] = [
-                {"slug": s, "name": n} for s, n in sorted(common)
-            ]
+    # Build {slug: (name, count)} per model from prefetched through-model rows.
+    gf_maps: list[dict[str, tuple[str, int | None]]] = []
+    for m in models:
+        gf_map: dict[str, tuple[str, int | None]] = {}
+        for t in m.machinemodelgameplayfeature_set.all():
+            gf_map[t.gameplayfeature.slug] = (t.gameplayfeature.name, t.count)
+        gf_maps.append(gf_map)
+
+    if gf_maps and all(gf_maps):
+        # Intersect on slug; include count only when all models agree.
+        common_slugs = set(gf_maps[0])
+        for gf_map in gf_maps[1:]:
+            common_slugs &= set(gf_map)
+        if common_slugs:
+            result = []
+            for slug in sorted(common_slugs):
+                name = gf_maps[0][slug][0]
+                counts = [gf_map[slug][1] for gf_map in gf_maps]
+                count = counts[0] if all(c == counts[0] for c in counts) else None
+                result.append({"slug": slug, "name": name, "count": count})
+            specs["gameplay_features"] = result
 
     # Reward types: intersection across all models.
     rt_sets = [
@@ -410,7 +424,7 @@ def _serialize_title_detail(title) -> dict:
 
 
 def _title_models_prefetch():
-    from ..models import MachineModel
+    from ..models import MachineModel, MachineModelGameplayFeature
 
     return Prefetch(
         "machine_models",
@@ -427,6 +441,12 @@ def _title_models_prefetch():
         .prefetch_related(
             "themes",
             "gameplay_features",
+            Prefetch(
+                "machinemodelgameplayfeature_set",
+                queryset=MachineModelGameplayFeature.objects.select_related(
+                    "gameplayfeature"
+                ),
+            ),
             "reward_types",
             "credits__person",
             "credits__role",

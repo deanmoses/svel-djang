@@ -14,7 +14,7 @@ from apps.core.models import (
     unique_slug,
 )
 
-__all__ = ["GameplayFeature", "GameplayFeatureAlias"]
+__all__ = ["GameplayFeature", "GameplayFeatureAlias", "MachineModelGameplayFeature"]
 
 
 class GameplayFeature(Linkable, TimeStampedModel):
@@ -49,6 +49,27 @@ class GameplayFeature(Linkable, TimeStampedModel):
         if not self.slug:
             self.slug = unique_slug(self, self.name, "feature")
         super().save(*args, **kwargs)
+
+
+class MachineModelGameplayFeature(TimeStampedModel):
+    """Through model for MachineModel ↔ GameplayFeature, carrying optional count."""
+
+    machinemodel = models.ForeignKey("MachineModel", on_delete=models.CASCADE)
+    gameplayfeature = models.ForeignKey(GameplayFeature, on_delete=models.CASCADE)
+    count = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        help_text="Quantity from source data, e.g. Flippers (2) → count=2.",
+    )
+
+    class Meta:
+        unique_together = [("machinemodel", "gameplayfeature")]
+
+    def __str__(self) -> str:
+        label = f"{self.machinemodel} → {self.gameplayfeature}"
+        if self.count is not None:
+            label += f" ({self.count})"
+        return label
 
 
 class GameplayFeatureAlias(AliasBase):

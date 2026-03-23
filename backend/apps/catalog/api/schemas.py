@@ -67,6 +67,7 @@ class SeriesRefSchema(Schema):
 class GameplayFeatureSchema(Schema):
     name: str
     slug: str
+    count: Optional[int] = None
 
 
 class RewardTypeSchema(Schema):

@@ -178,10 +178,10 @@ class GameplayFeatureInline(admin.TabularInline):
 
     model = MachineModel.gameplay_features.through
     extra = 0
-    readonly_fields = ("gameplayfeature",)
+    readonly_fields = ("gameplayfeature", "count")
     can_delete = False
-    verbose_name = "theme"
-    verbose_name_plural = "themes"
+    verbose_name = "gameplay feature"
+    verbose_name_plural = "gameplay features"
 
     def has_add_permission(self, request, obj=None):
         return False

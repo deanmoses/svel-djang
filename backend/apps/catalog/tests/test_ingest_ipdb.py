@@ -219,8 +219,12 @@ class TestExtractIpdbGameplayFeatures:
     """
 
     def _slugs(self, raw: str) -> set[str]:
-        slugs, _ = _extract_ipdb_gameplay_features(raw, _FM)
-        return set(slugs)
+        pairs, _ = _extract_ipdb_gameplay_features(raw, _FM)
+        return {slug for slug, _count in pairs}
+
+    def _counts(self, raw: str) -> dict[str, int | None]:
+        pairs, _ = _extract_ipdb_gameplay_features(raw, _FM)
+        return {slug: count for slug, count in pairs}
 
     def _unmatched(self, raw: str) -> list[str]:
         _, unmatched = _extract_ipdb_gameplay_features(raw, _FM)
@@ -494,5 +498,54 @@ class TestExtractIpdbGameplayFeatures:
         # must appear only once in the output list.
         # IpdbId 876-style: "Kick-out hole" and a hypothetical plural back-to-back.
         raw = "Passive bumpers (12), Kick-out hole (1), Kick-out holes (1)."
-        slugs, _ = _extract_ipdb_gameplay_features(raw, _FM)
-        assert slugs.count("kick-out-holes") == 1
+        pairs, _ = _extract_ipdb_gameplay_features(raw, _FM)
+        slug_list = [slug for slug, _count in pairs]
+        assert slug_list.count("kick-out-holes") == 1
+
+    # --- Count extraction tests ---
+
+    def test_count_single_feature(self):
+        # "Flippers (2)" → flippers with count 2
+        raw = "Flippers (2)."
+        assert self._counts(raw) == {"flippers": 2}
+
+    def test_count_multiple_features(self):
+        # Full string with multiple counts
+        raw = "Flippers (2), Pop bumpers (3), Slingshots (2), Standup targets (8)."
+        counts = self._counts(raw)
+        assert counts["flippers"] == 2
+        assert counts["pop-bumpers"] == 3
+        assert counts["slingshots"] == 2
+        assert counts["standup-targets"] == 8
+
+    def test_count_multiball_not_stored(self):
+        # "Multiball (3)" → 3-ball-multiball slug with NO count
+        # The parenthesized number is a qualifier, not a quantity.
+        raw = "Flippers (2), Multiball (3)"
+        counts = self._counts(raw)
+        assert counts["flippers"] == 2
+        assert counts["3-ball-multiball"] is None
+
+    def test_count_multiball_paren_complex_not_stored(self):
+        # "Multiball (2-Ball, 3-Ball)" → slug variants with no count
+        raw = "Multiball (2-Ball, 3-Ball, 4-Ball)"
+        counts = self._counts(raw)
+        assert counts["2-ball-multiball"] is None
+        assert counts["3-ball-multiball"] is None
+        assert counts["4-ball-multiball"] is None
+
+    def test_count_narrative_no_count(self):
+        # Narrative-only features have no count
+        raw = "3-ball Multiball. Ball Save."
+        counts = self._counts(raw)
+        assert counts["3-ball-multiball"] is None
+        assert counts["ball-save"] is None
+
+    def test_count_mixed_counted_and_narrative(self):
+        # IpdbId 106-style: structured features with counts + narrative multiball
+        raw = "Flippers (2), Pop bumpers (3), Spinning target (1), 3-ball Multiball."
+        counts = self._counts(raw)
+        assert counts["flippers"] == 2
+        assert counts["pop-bumpers"] == 3
+        assert counts["spinning-targets"] == 1
+        assert counts["3-ball-multiball"] is None

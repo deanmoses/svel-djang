@@ -92,7 +92,8 @@
 		<dd>
 			{#each model.gameplay_features as feature, i (feature.slug)}
 				{#if i > 0},{/if}
-				<a href={resolve(`/gameplay-features/${feature.slug}`)}>{feature.name}</a>
+				<a href={resolve(`/gameplay-features/${feature.slug}`)}>{feature.name}</a
+				>{#if feature.count}&nbsp;({feature.count}){/if}
 			{/each}
 		</dd>
 	{/if}

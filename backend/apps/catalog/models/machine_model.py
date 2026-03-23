@@ -146,6 +146,7 @@ class MachineModel(Linkable, TimeStampedModel):
     )
     gameplay_features = models.ManyToManyField(
         "GameplayFeature",
+        through="MachineModelGameplayFeature",
         blank=True,
         related_name="machine_models",
         help_text="Gameplay features (materialized from relationship claims).",

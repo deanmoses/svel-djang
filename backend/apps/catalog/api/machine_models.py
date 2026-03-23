@@ -432,7 +432,12 @@ def _serialize_model_detail(pm) -> dict:
             pm.display_subtype.slug if pm.display_subtype else None
         ),
         "gameplay_features": [
-            {"name": gf.name, "slug": gf.slug} for gf in pm.gameplay_features.all()
+            {
+                "name": t.gameplayfeature.name,
+                "slug": t.gameplayfeature.slug,
+                "count": t.count,
+            }
+            for t in pm.machinemodelgameplayfeature_set.all()
         ],
         "reward_types": [
             {"name": rt.name, "slug": rt.slug} for rt in pm.reward_types.all()
@@ -456,7 +461,7 @@ def _serialize_model_detail(pm) -> dict:
 
 def _model_detail_qs():
     """Return the queryset used for model detail / patch endpoints."""
-    from ..models import Credit, MachineModel
+    from ..models import Credit, MachineModel, MachineModelGameplayFeature
 
     return MachineModel.objects.select_related(
         "corporate_entity__manufacturer",
@@ -479,7 +484,12 @@ def _model_detail_qs():
         "conversions",
         "remakes",
         "themes",
-        "gameplay_features",
+        Prefetch(
+            "machinemodelgameplayfeature_set",
+            queryset=MachineModelGameplayFeature.objects.select_related(
+                "gameplayfeature"
+            ).order_by("gameplayfeature__name"),
+        ),
         "reward_types",
         "abbreviations",
         "title__series",

@@ -21,6 +21,7 @@ from ..models import (
     GameplayFeature,
     GameplayFeatureAlias,
     MachineModel,
+    MachineModelGameplayFeature,
     Manufacturer,
     ManufacturerAlias,
     ModelAbbreviation,
@@ -56,12 +57,6 @@ class M2MFieldSpec:
 
 M2M_FIELDS: dict[str, M2MFieldSpec] = {
     "theme": M2MFieldSpec("theme", "theme_slug", "themes", Theme),
-    "gameplay_feature": M2MFieldSpec(
-        "gameplay_feature",
-        "gameplay_feature_slug",
-        "gameplay_features",
-        GameplayFeature,
-    ),
     "reward_type": M2MFieldSpec(
         "reward_type",
         "reward_type_slug",
@@ -214,7 +209,50 @@ def resolve_themes(machine_model: MachineModel) -> None:
 
 
 def resolve_gameplay_features(machine_model: MachineModel) -> None:
-    _resolve_m2m_single(machine_model, M2M_FIELDS["gameplay_feature"])
+    """Resolve gameplay feature claims into through-model rows for a single machine."""
+    winners = _pick_relationship_winners(machine_model, "gameplay_feature")
+
+    slug_lookup: dict[str, int] = dict(
+        GameplayFeature.objects.values_list("slug", "pk")
+    )
+
+    desired: dict[int, int | None] = {}  # {feature_pk: count}
+    for claim in winners.values():
+        val = claim.value
+        if not val.get("exists", True):
+            continue
+        feature_pk = slug_lookup.get(val["gameplay_feature_slug"])
+        if not feature_pk:
+            logger.warning(
+                "Unresolved gameplay_feature slug %r in claim for %s",
+                val["gameplay_feature_slug"],
+                machine_model,
+            )
+            continue
+        desired[feature_pk] = val.get("count")
+
+    existing = {
+        row.gameplayfeature_id: row
+        for row in MachineModelGameplayFeature.objects.filter(
+            machinemodel=machine_model
+        )
+    }
+
+    to_delete_pks = [row.pk for fk, row in existing.items() if fk not in desired]
+    if to_delete_pks:
+        MachineModelGameplayFeature.objects.filter(pk__in=to_delete_pks).delete()
+
+    for feature_pk, count in desired.items():
+        row = existing.get(feature_pk)
+        if row is None:
+            MachineModelGameplayFeature.objects.create(
+                machinemodel=machine_model,
+                gameplayfeature_id=feature_pk,
+                count=count,
+            )
+        elif row.count != count:
+            row.count = count
+            row.save(update_fields=["count"])
 
 
 def resolve_tags(machine_model: MachineModel) -> None:
@@ -239,7 +277,109 @@ def resolve_all_gameplay_features(
     *,
     model_ids: set[int] | None = None,
 ) -> None:
-    _resolve_all_m2m(M2M_FIELDS["gameplay_feature"], all_models, model_ids=model_ids)
+    """Bulk-resolve gameplay feature claims into through-model rows with counts."""
+    from django.contrib.contenttypes.models import ContentType
+
+    ct = ContentType.objects.get_for_model(MachineModel)
+
+    slug_lookup: dict[str, int] = dict(
+        GameplayFeature.objects.values_list("slug", "pk")
+    )
+
+    claims_qs = Claim.objects.filter(
+        is_active=True, content_type=ct, field_name="gameplay_feature"
+    )
+    if model_ids is not None:
+        claims_qs = claims_qs.filter(object_id__in=model_ids)
+    claims = (
+        claims_qs.select_related("source", "user__profile")
+        .annotate(
+            effective_priority=Case(
+                When(source__isnull=False, then=F("source__priority")),
+                When(user__isnull=False, then=F("user__profile__priority")),
+                default=Value(0),
+                output_field=IntegerField(),
+            )
+        )
+        .order_by("object_id", "claim_key", "-effective_priority", "-created_at")
+    )
+
+    # Pick winner per (object_id, claim_key).
+    winners_by_model: dict[int, list[Claim]] = {}
+    seen: set[tuple[int, str]] = set()
+    for claim in claims:
+        key = (claim.object_id, claim.claim_key)
+        if key not in seen:
+            seen.add(key)
+            winners_by_model.setdefault(claim.object_id, []).append(claim)
+
+    # Desired (feature_pk, count) from winning claims.
+    desired_by_model: dict[int, dict[int, int | None]] = {}
+    for mid, claims_list in winners_by_model.items():
+        desired: dict[int, int | None] = {}
+        for claim in claims_list:
+            val = claim.value
+            if not val.get("exists", True):
+                continue
+            feature_pk = slug_lookup.get(val["gameplay_feature_slug"])
+            if feature_pk is None:
+                logger.warning(
+                    "Unresolved gameplay_feature slug %r in claim (model pk=%s)",
+                    val["gameplay_feature_slug"],
+                    mid,
+                )
+                continue
+            desired[feature_pk] = val.get("count")
+        desired_by_model[mid] = desired
+
+    # Pre-fetch existing through-table rows.
+    all_model_ids = model_ids if model_ids is not None else {pm.pk for pm in all_models}
+    existing_by_model: dict[int, dict[int, tuple[int, int | None]]] = {}
+    for row in MachineModelGameplayFeature.objects.filter(
+        machinemodel_id__in=all_model_ids
+    ).values_list("pk", "machinemodel_id", "gameplayfeature_id", "count"):
+        pk, mid, fk_id, count = row
+        existing_by_model.setdefault(mid, {})[fk_id] = (pk, count)
+
+    # Diff and apply.
+    to_create: list[MachineModelGameplayFeature] = []
+    to_delete_pks: list[int] = []
+    to_update: list[tuple[int, int | None]] = []  # (pk, new_count)
+
+    for mid in all_model_ids:
+        desired = desired_by_model.get(mid, {})
+        existing = existing_by_model.get(mid, {})
+
+        for feature_pk, count in desired.items():
+            if feature_pk not in existing:
+                to_create.append(
+                    MachineModelGameplayFeature(
+                        machinemodel_id=mid,
+                        gameplayfeature_id=feature_pk,
+                        count=count,
+                    )
+                )
+            else:
+                row_pk, existing_count = existing[feature_pk]
+                if existing_count != count:
+                    to_update.append((row_pk, count))
+
+        for feature_pk, (row_pk, _) in existing.items():
+            if feature_pk not in desired:
+                to_delete_pks.append(row_pk)
+
+    if to_delete_pks:
+        MachineModelGameplayFeature.objects.filter(pk__in=to_delete_pks).delete()
+    if to_create:
+        MachineModelGameplayFeature.objects.bulk_create(to_create, batch_size=2000)
+    if to_update:
+        rows = MachineModelGameplayFeature.objects.in_bulk([pk for pk, _ in to_update])
+        for pk, count in to_update:
+            row = rows[pk]
+            row.count = count
+        MachineModelGameplayFeature.objects.bulk_update(
+            list(rows.values()), ["count"], batch_size=2000
+        )
 
 
 def resolve_reward_types(machine_model: MachineModel) -> None:

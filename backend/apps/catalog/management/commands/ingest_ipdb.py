@@ -191,8 +191,8 @@ def _resolve_multiball_slugs(paren_content: str, valid_slugs: set[str]) -> list[
 
 def _extract_ipdb_gameplay_features(
     raw: str, feature_map: dict[str, str]
-) -> tuple[list[str], list[str]]:
-    """Extract gameplay feature slugs from an IPDB notable_features string.
+) -> tuple[list[tuple[str, int | None]], list[str]]:
+    """Extract gameplay feature slugs and counts from an IPDB notable_features string.
 
     Uses a structured 4-step pipeline:
     1. Clean: strip prefix, normalize mojibake, insert comma before period+uppercase.
@@ -203,17 +203,21 @@ def _extract_ipdb_gameplay_features(
        Also apply _NARRATIVE_FEATURE_PATTERNS and n-ball-multiball
        narrative patterns to the full cleaned text.
 
-    Returns (slugs, unmatched_terms).
+    Returns ``([(slug, count | None), ...], unmatched_terms)``.
+
+    For multiball the parenthesized number is consumed into the slug
+    (e.g. "Multiball (3)" → "3-ball-multiball") and is NOT stored as a
+    count.  Narrative-pattern matches have ``count=None``.
     """
     seen: set[str] = set()
-    slugs: list[str] = []
+    pairs: list[tuple[str, int | None]] = []
     unmatched: list[str] = []
     valid_slugs = set(feature_map.values())
 
-    def _add(slug: str) -> None:
+    def _add(slug: str, count: int | None = None) -> None:
         if slug not in seen:
             seen.add(slug)
-            slugs.append(slug)
+            pairs.append((slug, count))
 
     # Step 1: Clean.
     cleaned = raw
@@ -242,7 +246,7 @@ def _extract_ipdb_gameplay_features(
         m = _COUNT_SEGMENT_RE.match(segment)
         if m:
             term = m.group(1).strip().lower()
-            qty = m.group(2)
+            qty = int(m.group(2))
             if not term:
                 continue
             slug = feature_map.get(term)
@@ -251,10 +255,10 @@ def _extract_ipdb_gameplay_features(
                 # quantity — it identifies WHICH multiball variant.
                 # "Multiball (3)" → 3-ball-multiball, not multiball qty=3.
                 if slug == _MULTIBALL_SLUG:
-                    for s in _resolve_multiball_slugs(qty, valid_slugs):
+                    for s in _resolve_multiball_slugs(str(qty), valid_slugs):
                         _add(s)
                 else:
-                    _add(slug)
+                    _add(slug, qty)
             else:
                 unmatched.append(term)
             continue
@@ -293,10 +297,10 @@ def _extract_ipdb_gameplay_features(
     # If a specific n-ball-multiball variant was found, suppress the generic
     # "multiball" slug — the hierarchy already links variants to the parent.
     if any(s.endswith("-ball-multiball") for s in seen) and _MULTIBALL_SLUG in seen:
-        slugs.remove(_MULTIBALL_SLUG)
+        pairs = [(s, c) for s, c in pairs if s != _MULTIBALL_SLUG]
         seen.discard(_MULTIBALL_SLUG)
 
-    return slugs, unmatched
+    return pairs, unmatched
 
 
 def _extract_ipdb_reward_types(raw: str, reward_map: dict[str, str]) -> list[str]:
@@ -502,7 +506,7 @@ class Command(BaseCommand):
         pending_claims: list[Claim] = []
         credit_queue: list[tuple[int, str, str]] = []
         theme_queue: list[tuple[int, list[str]]] = []  # (model_pk, [slugs])
-        gameplay_feature_queue: list[tuple[int, list[str]]] = []
+        gameplay_feature_queue: list[tuple[int, list[tuple[str, int | None]]]] = []
         reward_type_queue: list[tuple[int, list[str]]] = []
         unmatched_feature_terms: list[str] = []
         unknown_mpu_strings: set[str] = set()
@@ -583,7 +587,7 @@ class Command(BaseCommand):
         pending_claims: list[Claim],
         credit_queue: list[tuple[int, str, str]],
         theme_queue: list[tuple[int, list[str]]],
-        gameplay_feature_queue: list[tuple[int, list[str]]],
+        gameplay_feature_queue: list[tuple[int, list[tuple[str, int | None]]]],
         reward_type_queue: list[tuple[int, list[str]]],
         feature_map: dict[str, str],
         reward_map: dict[str, str],
@@ -792,12 +796,12 @@ class Command(BaseCommand):
         # Collect gameplay feature and reward type slugs for bulk creation later.
         if rec.notable_features:
             raw_features = unescape(rec.notable_features)
-            feature_slugs, unmatched = _extract_ipdb_gameplay_features(
+            feature_pairs, unmatched = _extract_ipdb_gameplay_features(
                 raw_features, feature_map
             )
             unmatched_feature_terms.extend(unmatched)
-            if feature_slugs:
-                gameplay_feature_queue.append((pm.pk, feature_slugs))
+            if feature_pairs:
+                gameplay_feature_queue.append((pm.pk, feature_pairs))
             reward_slugs = _extract_ipdb_reward_types(raw_features, reward_map)
             if reward_slugs:
                 reward_type_queue.append((pm.pk, reward_slugs))
@@ -987,7 +991,7 @@ class Command(BaseCommand):
 
     def _bulk_create_gameplay_features(
         self,
-        gameplay_feature_queue: list[tuple[int, list[str]]],
+        gameplay_feature_queue: list[tuple[int, list[tuple[str, int | None]]]],
         source,
         all_model_ids: set[int],
     ) -> None:
@@ -1003,8 +1007,8 @@ class Command(BaseCommand):
 
         # Verify all referenced slugs exist.
         all_slugs: set[str] = set()
-        for _, slugs in gameplay_feature_queue:
-            all_slugs.update(slugs)
+        for _, pairs in gameplay_feature_queue:
+            all_slugs.update(slug for slug, _count in pairs)
 
         existing_slugs = set(
             GameplayFeature.objects.filter(slug__in=all_slugs).values_list(
@@ -1021,13 +1025,15 @@ class Command(BaseCommand):
         # Build gameplay feature relationship claims.
         ct_machine = ContentType.objects.get_for_model(MachineModel).pk
         feature_claims: list[Claim] = []
-        for pm_pk, slugs in gameplay_feature_queue:
-            for slug in slugs:
+        for pm_pk, pairs in gameplay_feature_queue:
+            for slug, count in pairs:
                 if slug not in existing_slugs:
                     continue
                 claim_key, value = build_relationship_claim(
                     "gameplay_feature", {"gameplay_feature_slug": slug}
                 )
+                if count is not None:
+                    value["count"] = count
                 feature_claims.append(
                     Claim(
                         content_type_id=ct_machine,
