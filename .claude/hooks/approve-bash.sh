@@ -23,6 +23,7 @@ ALLOWED_PREFIXES=(
   "git branch"
   "git cherry-pick"
   "git checkout"
+  "git commit"
   "git count-objects"
   "git diff"
   "git fetch"
