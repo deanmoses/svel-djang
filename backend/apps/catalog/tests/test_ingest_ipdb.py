@@ -182,6 +182,11 @@ _FM = {
     "gobble hole": "gobble-holes",
     "gobble holes": "gobble-holes",
     "horseshoe diverter": "horseshoe-diverters",
+    "multiball": "multiball",
+    "2-ball multiball": "2-ball-multiball",
+    "3-ball multiball": "3-ball-multiball",
+    "4-ball multiball": "4-ball-multiball",
+    "6-ball multiball": "6-ball-multiball",
     "kick-out hole": "kick-out-holes",
     "kick-out holes": "kick-out-holes",
     "newton ball": "newton-balls",
@@ -406,8 +411,76 @@ class TestExtractIpdbGameplayFeatures:
             "3-bank-standup-targets",
             "spinning-targets",
             "vertical-up-kickers",
-            "multiball",
+            "3-ball-multiball",
         }
+
+    def test_ipdb_195_multiball_3_count(self):
+        # IpdbId 195: "Multiball (3)" → 3-ball-multiball via count pipeline
+        raw = "Flippers (2), Multiball (3)"
+        assert self._slugs(raw) == {"flippers", "3-ball-multiball"}
+
+    def test_ipdb_528_multiball_2_count(self):
+        # IpdbId 528: "Multiball (2)" → 2-ball-multiball via count pipeline
+        raw = "Multiball (2)"
+        assert self._slugs(raw) == {"2-ball-multiball"}
+
+    def test_ipdb_778_multiball_paren_2_ball(self):
+        # IpdbId 778: "Multiball (2-ball)" — hyphenated variant in parens
+        raw = "Flippers (6), Kick-out holes (2), Rollunder spinners (2). Multiball (2-ball), Captive ball (1), 2-in-line drop targets, Three-level playfield, Speech, Plexiglas main playfield covering. No pop bumpers on this game."
+        assert "2-ball-multiball" in self._slugs(raw)
+        assert "multiball" not in self._slugs(raw)
+
+    def test_ipdb_5767_multiball_paren_multiple(self):
+        # IpdbId 5767: "Multiball (2-Ball, 3-Ball, 4-Ball)" — multiple variants
+        raw = "Flippers (2), Pop bumpers (3), Slingshots (2), Standup targets (15), Spinning target (1), Rotating ball cannon, Multiball (2-Ball, 3-Ball, 4-Ball). Cabinet advertised as 55 inches long, 27 inches wide, and 75 1/2 inches high; 250 lbs."
+        slugs = self._slugs(raw)
+        assert {"2-ball-multiball", "3-ball-multiball", "4-ball-multiball"} <= slugs
+        assert "multiball" not in slugs
+
+    def test_ipdb_3072_multiball_paren_modes_not_balls(self):
+        # IpdbId 3072: "Multiball (3 Modes)" — 3 is mode count, NOT ball count
+        raw = "Flippers (2), Ramps (2), Multiball (3 Modes), Autoplunger."
+        assert "multiball" in self._slugs(raw)
+        assert "3-ball-multiball" not in self._slugs(raw)
+
+    def test_ipdb_4664_multiball_paren_ball_and_modes(self):
+        # IpdbId 4664: "Multiball (4 ball, 3 modes)" — 4 is balls, 3 is modes
+        raw = "Flippers (2), Pop bumpers (4), 4-bank drop targets (2), Multiball (4 ball, 3 modes), Up-post between flippers, Shaker motor."
+        slugs = self._slugs(raw)
+        assert "4-ball-multiball" in slugs
+        assert "3-ball-multiball" not in slugs
+
+    def test_ipdb_49_multiball_2_narrative(self):
+        # IpdbId 49: "2-ball multiball" in narrative text
+        raw = "Flippers (2), Pop bumpers (3), Slingshots (2), Standup targets (6), Kick-out hole (1), Spinning target (1), Rollunder (1), 2-ball multiball. Has speech.\r\n\r\nActual measured weight: 225 lbs (includes legs)."
+        assert self._slugs(raw) == {
+            "flippers",
+            "pop-bumpers",
+            "slingshots",
+            "standup-targets",
+            "kick-out-holes",
+            "spinning-targets",
+            "rollunders",
+            "2-ball-multiball",
+        }
+
+    def test_ipdb_610_multiball_compound_narrative(self):
+        # IpdbId 610: "2-ball and 3-ball Multiball" — compound narrative phrase
+        raw = "Flippers (2), Slingshots (4), 7-bank drop targets (2), Standup targets (21), Kick-out holes (3), Captive balls (2), Kick-target (1), 2-ball and 3-ball Multiball."
+        slugs = self._slugs(raw)
+        assert {"2-ball-multiball", "3-ball-multiball"} <= slugs
+        assert "multiball" not in slugs
+
+    def test_ipdb_82_three_ball_multiball_spelled_out(self):
+        # IpdbId 82: "Three ball multiball" — spelled-out number
+        raw = "Flippers (2), 4-bank drop targets (1). Three ball multiball. Right outlane detour gate (between outlane and inlane). Shooter lane detour gate (between shooter lane and outlane). No pop bumpers on this game."
+        assert "3-ball-multiball" in self._slugs(raw)
+        assert "multiball" not in self._slugs(raw)
+
+    def test_multiball_unknown_count_falls_back_to_generic(self):
+        # 5-ball-multiball not in vocabulary → falls back to generic "multiball"
+        raw = "Flippers (2), Multiball (5)."
+        assert self._slugs(raw) == {"flippers", "multiball"}
 
     def test_unmatched_terms_returned(self):
         # IpdbId 302: "horseshoe diverter" is in _FM; the narrative preamble
