@@ -7,6 +7,7 @@
 	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
 	import ExpandableSidebarList from '$lib/components/ExpandableSidebarList.svelte';
 	import LocationLink from '$lib/components/LocationLink.svelte';
+	import AttributionLine from '$lib/components/AttributionLine.svelte';
 	import Markdown from '$lib/components/Markdown.svelte';
 	import SidebarList from '$lib/components/SidebarList.svelte';
 	import SidebarListItem from '$lib/components/SidebarListItem.svelte';
@@ -64,6 +65,7 @@
 			{#if mfr.description?.html}
 				<div class="description">
 					<Markdown html={mfr.description.html} />
+					<AttributionLine attribution={mfr.description.attribution} />
 				</div>
 			{/if}
 

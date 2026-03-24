@@ -2,6 +2,7 @@
 	import { resolve } from '$app/paths';
 	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
 	import ClientFilteredGrid from '$lib/components/grid/ClientFilteredGrid.svelte';
+	import AttributionLine from '$lib/components/AttributionLine.svelte';
 	import Markdown from '$lib/components/Markdown.svelte';
 	import SidebarList from '$lib/components/SidebarList.svelte';
 	import SidebarListItem from '$lib/components/SidebarListItem.svelte';
@@ -28,6 +29,7 @@
 		{#snippet main()}
 			{#if system.description?.html}
 				<Markdown html={system.description.html} />
+				<AttributionLine attribution={system.description.attribution} />
 			{/if}
 
 			{#if system.titles.length === 0}

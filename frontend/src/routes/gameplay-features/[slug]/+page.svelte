@@ -3,6 +3,7 @@
 	import client from '$lib/api/client';
 	import { createPaginatedLoader } from '$lib/paginated-loader.svelte';
 	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
+	import AttributionLine from '$lib/components/AttributionLine.svelte';
 	import Markdown from '$lib/components/Markdown.svelte';
 	import TwoColumnLayout from '$lib/components/TwoColumnLayout.svelte';
 	import SidebarSection from '$lib/components/SidebarSection.svelte';
@@ -41,6 +42,7 @@
 			{#if profile.description?.html}
 				<div class="description">
 					<Markdown html={profile.description.html} />
+					<AttributionLine attribution={profile.description.attribution} />
 				</div>
 			{/if}
 			<PaginatedSection

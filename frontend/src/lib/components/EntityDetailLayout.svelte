@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import AttributionLine from './AttributionLine.svelte';
 	import Breadcrumb from './Breadcrumb.svelte';
 	import Markdown from './Markdown.svelte';
 	import { pageTitle } from '$lib/constants';
@@ -29,6 +30,7 @@
 		<h1>{name}</h1>
 		{#if description?.html}
 			<Markdown html={description.html} />
+			<AttributionLine attribution={description.attribution} />
 		{/if}
 	</header>
 

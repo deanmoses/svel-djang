@@ -6,6 +6,7 @@
 	import ModelSpecsSidebar from '$lib/components/ModelSpecsSidebar.svelte';
 	import CreditsList from '$lib/components/CreditsList.svelte';
 	import ExternalLinksSidebarSection from '$lib/components/ExternalLinksSidebarSection.svelte';
+	import AttributionLine from '$lib/components/AttributionLine.svelte';
 	import Markdown from '$lib/components/Markdown.svelte';
 	import HeroHeader from '$lib/components/HeroHeader.svelte';
 	import RatingsSidebarSection from '$lib/components/RatingsSidebarSection.svelte';
@@ -71,6 +72,7 @@
 				<section class="prose">
 					<h2>About</h2>
 					<Markdown html={title.description.html} />
+					<AttributionLine attribution={title.description.attribution} />
 				</section>
 			{/if}
 

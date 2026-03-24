@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AttributionLine from '$lib/components/AttributionLine.svelte';
 	import Markdown from '$lib/components/Markdown.svelte';
 	import SearchableGrid from '$lib/components/grid/SearchableGrid.svelte';
 	import TitleCard from '$lib/components/cards/TitleCard.svelte';
@@ -64,6 +65,7 @@
 {#if person.description?.html}
 	<section class="bio">
 		<Markdown html={person.description.html} />
+		<AttributionLine attribution={person.description.attribution} />
 	</section>
 {/if}
 
