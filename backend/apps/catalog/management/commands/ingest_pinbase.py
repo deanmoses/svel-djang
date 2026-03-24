@@ -53,11 +53,13 @@ from apps.catalog.resolve import (
     _resolve_bulk,
     resolve_all_corporate_entity_locations,
     resolve_all_credits,
+    resolve_all_gameplay_feature_entities,
     resolve_all_gameplay_features,
     resolve_all_location_aliases,
     resolve_all_locations,
     resolve_all_reward_types,
     resolve_all_tags,
+    resolve_all_theme_entities,
     resolve_all_themes,
     resolve_all_title_abbreviations,
     resolve_corporate_entity,
@@ -135,12 +137,10 @@ TAXONOMY_REGISTRY = [
     ("display_type.json", DisplayType, True, None),
     ("cabinet.json", Cabinet, True, None),
     ("game_format.json", GameFormat, True, None),
-    ("gameplay_feature.json", GameplayFeature, False, None),
     ("reward_type.json", RewardType, True, None),
     ("tag.json", Tag, True, None),
     ("credit_role.json", CreditRole, True, None),
     ("franchise.json", Franchise, False, None),
-    ("theme.json", Theme, False, None),
     # Child models (parents must be seeded first).
     (
         "technology_subgeneration.json",
@@ -257,8 +257,9 @@ class Command(BaseCommand):
 
         self._ingest_locations()
         self._ingest_taxonomy()
-        self._sync_theme_parents_and_aliases()
-        self._sync_gameplay_feature_parents_and_aliases()
+        self._ingest_themes()
+        self._ingest_gameplay_features()
+        self._sync_reward_type_aliases()
         self._ingest_manufacturers()
         self._ingest_corporate_entities()
         self._ingest_systems()
@@ -594,22 +595,63 @@ class Command(BaseCommand):
             )
 
     # ------------------------------------------------------------------
-    # ------------------------------------------------------------------
-    # Phase 1b: Theme parents & aliases (claim-controlled)
+    # Phase 1b: Themes (entities + parents + aliases)
     # ------------------------------------------------------------------
 
-    def _sync_theme_parents_and_aliases(self):
+    def _ingest_themes(self):
         entries = self._load("theme.json")
         if not entries:
             return
 
         source = self.pinbase_source
-        themes_by_name = {t.name: t for t in Theme.objects.all()}
-        ct_id = ContentType.objects.get_for_model(Theme).pk
+        ct = ContentType.objects.get_for_model(Theme)
+
+        # --- Entity upsert ---
+        objs = [
+            Theme(slug=e["slug"], name=e["name"], description=e.get("description", ""))
+            for e in entries
+        ]
+        objs = Theme.objects.bulk_create(
+            objs,
+            update_conflicts=True,
+            unique_fields=["slug"],
+            update_fields=["name", "description"],
+        )
+
+        # --- Entity claims ---
+        pending_claims: list[Claim] = []
+        for obj, entry in zip(objs, entries):
+            pending_claims.append(
+                Claim(
+                    content_type_id=ct.pk,
+                    object_id=obj.pk,
+                    field_name="name",
+                    value=obj.name,
+                )
+            )
+            description = entry.get("description", "")
+            if description:
+                pending_claims.append(
+                    Claim(
+                        content_type_id=ct.pk,
+                        object_id=obj.pk,
+                        field_name="description",
+                        value=description,
+                    )
+                )
+
+        stats = self._assert_claims_split_descriptions(Theme, pending_claims)
+        resolve_all_theme_entities()
+        self.stdout.write(
+            f"  Theme: {len(entries)} records — "
+            f"{stats['created']} claims created, "
+            f"{stats['unchanged']} unchanged"
+        )
 
         # --- Parents (claim-controlled) ---
-        parent_claims: list[Claim] = []
+        themes_by_name = {t.name: t for t in Theme.objects.all()}
         all_theme_pks: set[int] = {t.pk for t in themes_by_name.values()}
+        parent_claims: list[Claim] = []
 
         for entry in entries:
             theme = themes_by_name.get(entry["name"])
@@ -629,7 +671,7 @@ class Command(BaseCommand):
                 )
                 parent_claims.append(
                     Claim(
-                        content_type_id=ct_id,
+                        content_type_id=ct.pk,
                         object_id=theme.pk,
                         field_name="theme_parent",
                         claim_key=claim_key,
@@ -656,7 +698,7 @@ class Command(BaseCommand):
             aliases_by_pk[theme.pk] = entry.get("aliases", [])
 
         alias_stats = self._assert_alias_claims(
-            source, ct_id, aliases_by_pk, "theme_alias"
+            source, ct.pk, aliases_by_pk, "theme_alias"
         )
         resolve_theme_aliases()
         self.stdout.write(
@@ -665,21 +707,66 @@ class Command(BaseCommand):
         )
 
     # ------------------------------------------------------------------
-    # Phase 1d: GameplayFeature parents & aliases (claim-controlled)
+    # Phase 1d: Gameplay features (entities + parents + aliases)
     # ------------------------------------------------------------------
 
-    def _sync_gameplay_feature_parents_and_aliases(self):
+    def _ingest_gameplay_features(self):
         entries = self._load("gameplay_feature.json")
         if not entries:
             return
 
         source = self.pinbase_source
-        features_by_slug = {f.slug: f for f in GameplayFeature.objects.all()}
-        ct_id = ContentType.objects.get_for_model(GameplayFeature).pk
-        all_feature_pks: set[int] = {f.pk for f in features_by_slug.values()}
+        ct = ContentType.objects.get_for_model(GameplayFeature)
+
+        # --- Entity upsert ---
+        objs = [
+            GameplayFeature(
+                slug=e["slug"], name=e["name"], description=e.get("description", "")
+            )
+            for e in entries
+        ]
+        objs = GameplayFeature.objects.bulk_create(
+            objs,
+            update_conflicts=True,
+            unique_fields=["slug"],
+            update_fields=["name", "description"],
+        )
+
+        # --- Entity claims ---
+        pending_claims: list[Claim] = []
+        for obj, entry in zip(objs, entries):
+            pending_claims.append(
+                Claim(
+                    content_type_id=ct.pk,
+                    object_id=obj.pk,
+                    field_name="name",
+                    value=obj.name,
+                )
+            )
+            description = entry.get("description", "")
+            if description:
+                pending_claims.append(
+                    Claim(
+                        content_type_id=ct.pk,
+                        object_id=obj.pk,
+                        field_name="description",
+                        value=description,
+                    )
+                )
+
+        stats = self._assert_claims_split_descriptions(GameplayFeature, pending_claims)
+        resolve_all_gameplay_feature_entities()
+        self.stdout.write(
+            f"  GameplayFeature: {len(entries)} records — "
+            f"{stats['created']} claims created, "
+            f"{stats['unchanged']} unchanged"
+        )
 
         # --- Parents (claim-controlled, identified by slug) ---
+        features_by_slug = {f.slug: f for f in GameplayFeature.objects.all()}
+        all_feature_pks: set[int] = {f.pk for f in features_by_slug.values()}
         parent_claims: list[Claim] = []
+
         for entry in entries:
             feature = features_by_slug.get(entry["slug"])
             if feature is None:
@@ -695,7 +782,7 @@ class Command(BaseCommand):
                 )
                 parent_claims.append(
                     Claim(
-                        content_type_id=ct_id,
+                        content_type_id=ct.pk,
                         object_id=feature.pk,
                         field_name="gameplay_feature_parent",
                         claim_key=claim_key,
@@ -725,7 +812,7 @@ class Command(BaseCommand):
             aliases_by_pk[feature.pk] = entry.get("aliases", [])
 
         alias_stats = self._assert_alias_claims(
-            source, ct_id, aliases_by_pk, "gameplay_feature_alias"
+            source, ct.pk, aliases_by_pk, "gameplay_feature_alias"
         )
         resolve_gameplay_feature_aliases()
         self.stdout.write(
@@ -733,27 +820,34 @@ class Command(BaseCommand):
             f"{alias_stats['unchanged']} unchanged, {alias_stats['swept']} swept"
         )
 
-        # --- RewardType aliases ---
-        rt_entries = self._load("reward_type.json")
-        if rt_entries:
-            rt_by_slug = {r.slug: r for r in RewardType.objects.all()}
-            rt_ct_id = ContentType.objects.get_for_model(RewardType).pk
-            rt_aliases_by_pk: dict[int, list[str]] = {}
-            for entry in rt_entries:
-                rt = rt_by_slug.get(entry["slug"])
-                if rt is None:
-                    continue
-                rt_aliases_by_pk[rt.pk] = entry.get("aliases", [])
+    # ------------------------------------------------------------------
+    # Phase 1e: RewardType aliases
+    # ------------------------------------------------------------------
 
-            rt_alias_stats = self._assert_alias_claims(
-                source, rt_ct_id, rt_aliases_by_pk, "reward_type_alias"
-            )
-            resolve_reward_type_aliases()
-            self.stdout.write(
-                f"  RewardType aliases: {rt_alias_stats['created']} created, "
-                f"{rt_alias_stats['unchanged']} unchanged, "
-                f"{rt_alias_stats['swept']} swept"
-            )
+    def _sync_reward_type_aliases(self):
+        rt_entries = self._load("reward_type.json")
+        if not rt_entries:
+            return
+
+        source = self.pinbase_source
+        rt_by_slug = {r.slug: r for r in RewardType.objects.all()}
+        rt_ct_id = ContentType.objects.get_for_model(RewardType).pk
+        rt_aliases_by_pk: dict[int, list[str]] = {}
+        for entry in rt_entries:
+            rt = rt_by_slug.get(entry["slug"])
+            if rt is None:
+                continue
+            rt_aliases_by_pk[rt.pk] = entry.get("aliases", [])
+
+        rt_alias_stats = self._assert_alias_claims(
+            source, rt_ct_id, rt_aliases_by_pk, "reward_type_alias"
+        )
+        resolve_reward_type_aliases()
+        self.stdout.write(
+            f"  RewardType aliases: {rt_alias_stats['created']} created, "
+            f"{rt_alias_stats['unchanged']} unchanged, "
+            f"{rt_alias_stats['swept']} swept"
+        )
 
     # ------------------------------------------------------------------
     # Phase 2: Manufacturers

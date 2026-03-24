@@ -273,6 +273,15 @@ def _resolve_bulk(
     # 3. Compute field defaults once.
     field_defaults = get_field_defaults(model_class, direct_fields)
 
+    # Identify UNIQUE direct fields — these must NOT be reset to their
+    # default when no claim exists, or bulk_update will crash with a
+    # UNIQUE constraint violation when multiple objects share the default.
+    unique_attrs: set[str] = set()
+    for claim_field, attr in direct_fields.items():
+        field = model_class._meta.get_field(attr)
+        if field.unique:
+            unique_attrs.add(attr)
+
     # Collect FK attribute names for bulk_update.
     fk_update_fields: list[str] = []
     if fk_handlers:
@@ -287,8 +296,12 @@ def _resolve_bulk(
     for obj in all_objs:
         winners = claims_by_obj.get(obj.pk, {})
 
-        # Reset direct fields.
+        # Reset direct fields (skip UNIQUE fields — they keep their
+        # existing value unless a winning claim explicitly sets them).
+        winner_attrs = {direct_fields[fn] for fn in winners if fn in direct_fields}
         for attr, default in field_defaults.items():
+            if attr in unique_attrs and attr not in winner_attrs:
+                continue
             setattr(obj, attr, default)
 
         # Reset FK fields.
@@ -372,6 +385,11 @@ def resolve_gameplay_feature(feature: GameplayFeature) -> GameplayFeature:
 def resolve_all_gameplay_feature_entities() -> int:
     """Bulk-resolve claims for all GameplayFeature instances."""
     return _resolve_bulk(GameplayFeature, GAMEPLAY_FEATURE_DIRECT_FIELDS)
+
+
+def resolve_all_theme_entities() -> int:
+    """Bulk-resolve claims for all Theme instances."""
+    return _resolve_bulk(Theme, THEME_DIRECT_FIELDS)
 
 
 def resolve_theme(theme: Theme) -> Theme:

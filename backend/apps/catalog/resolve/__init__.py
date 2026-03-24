@@ -79,6 +79,7 @@ from ._entities import (  # noqa: F401
     _resolve_bulk as _resolve_bulk,
     _resolve_single as _resolve_single,
     resolve_all_gameplay_feature_entities as resolve_all_gameplay_feature_entities,
+    resolve_all_theme_entities as resolve_all_theme_entities,
     resolve_all_locations as resolve_all_locations,
     resolve_corporate_entity as resolve_corporate_entity,
     resolve_franchise as resolve_franchise,
@@ -221,9 +222,10 @@ def resolve_machine_models(stdout=None) -> int:
     _status("Locations resolved")
 
     # 0a. Resolve taxonomy models (they are FK targets for MachineModel).
-    # Includes themes, gameplay features, and all other taxonomy entities.
     _resolve_all_taxonomy()
-    _status("Taxonomy resolved")
+    resolve_all_theme_entities()
+    resolve_all_gameplay_feature_entities()
+    _status("Taxonomy, themes, gameplay features resolved")
 
     # 0a2. Resolve entity hierarchy and aliases.
     resolve_theme_parents()

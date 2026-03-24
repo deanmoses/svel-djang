@@ -202,6 +202,45 @@ class TestResolveBulkMarkdownReferences:
 
 
 @pytest.mark.django_db
+class TestResolveBulkUniqueFieldSafety:
+    """UNIQUE fields must not be reset when no claim exists, or bulk_update
+    will crash with an IntegrityError when multiple objects share the default."""
+
+    def test_unique_name_preserved_when_no_claim(self, opdb):
+        """Objects without a name claim keep their existing name."""
+        from apps.catalog.models import Theme
+        from apps.catalog.resolve import THEME_DIRECT_FIELDS
+
+        t1 = Theme.objects.create(name="Horror", slug="horror")
+        t2 = Theme.objects.create(name="Sports", slug="sports")
+
+        # Only t1 gets a name claim; t2 has none.
+        Claim.objects.assert_claim(t1, "name", "Horror Movies", source=opdb)
+
+        _resolve_bulk(Theme, THEME_DIRECT_FIELDS)
+
+        t1.refresh_from_db()
+        t2.refresh_from_db()
+        assert t1.name == "Horror Movies"  # Updated by claim.
+        assert t2.name == "Sports"  # Preserved — not reset to "".
+
+    def test_non_unique_field_still_resets(self, opdb):
+        """Non-unique fields are still reset to default when no claim exists."""
+        from apps.catalog.models import Theme
+        from apps.catalog.resolve import THEME_DIRECT_FIELDS
+
+        t = Theme.objects.create(name="Horror", slug="horror", description="Old desc")
+
+        # Name claim but no description claim.
+        Claim.objects.assert_claim(t, "name", "Horror", source=opdb)
+
+        _resolve_bulk(Theme, THEME_DIRECT_FIELDS)
+
+        t.refresh_from_db()
+        assert t.description == ""  # Reset to default.
+
+
+@pytest.mark.django_db
 class TestResolveBulkTaxonomy:
     def test_malformed_int_claim_uses_default(self, opdb):
         """Non-parseable integer on a non-null field should fall back to 0, not None."""

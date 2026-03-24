@@ -14,6 +14,8 @@ _RESOLVE_OPTIONS = [
     ("manufacturers", "Manufacturers", "~700 entities, < 1s"),
     ("corporate-entities", "Corporate Entities", "~700 entities, < 1s"),
     ("people", "People", "~600 entities, < 1s"),
+    ("themes", "Themes", "~600 entities, < 1s"),
+    ("gameplay-features", "Gameplay Features", "~170 entities, < 1s"),
     ("titles", "Titles", "~6,000 entities, ~3s"),
     ("models", "Machine Models + relationships", "~7,000 entities, ~20s"),
     ("all", "Everything", "All of the above in dependency order, ~25s"),
@@ -45,6 +47,16 @@ def _run_resolve(target: str) -> tuple[str, int]:
     elif target == "people":
         count = _resolve_bulk(Person, PERSON_DIRECT_FIELDS)
         return "people", count
+    elif target == "themes":
+        from apps.catalog.resolve import resolve_all_theme_entities
+
+        count = resolve_all_theme_entities()
+        return "themes", count
+    elif target == "gameplay-features":
+        from apps.catalog.resolve import resolve_all_gameplay_feature_entities
+
+        count = resolve_all_gameplay_feature_entities()
+        return "gameplay features", count
     elif target == "titles":
         from apps.catalog.models import Franchise, Title
         from apps.catalog.resolve import TITLE_DIRECT_FIELDS
