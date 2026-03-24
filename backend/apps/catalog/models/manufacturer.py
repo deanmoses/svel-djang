@@ -19,7 +19,6 @@ __all__ = [
     "ManufacturerAlias",
     "CorporateEntity",
     "CorporateEntityAlias",
-    "Address",
 ]
 
 
@@ -149,19 +148,3 @@ class CorporateEntityAlias(AliasBase):
                 name="catalog_unique_corporate_entity_alias_lower",
             ),
         ]
-
-
-class Address(models.Model):
-    corporate_entity = models.ForeignKey(
-        CorporateEntity, on_delete=models.CASCADE, related_name="addresses"
-    )
-    city = models.CharField(max_length=255, blank=True)
-    state = models.CharField(max_length=255, blank=True)
-    country = models.CharField(max_length=255, blank=True)
-
-    class Meta:
-        verbose_name_plural = "addresses"
-
-    def __str__(self):
-        parts = [p for p in (self.city, self.state, self.country) if p]
-        return ", ".join(parts)

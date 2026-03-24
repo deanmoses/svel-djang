@@ -3,7 +3,7 @@
 import pytest
 
 from apps.catalog.ingestion.parsers import (
-    LocationValidationError,
+    _IPDBLocationLookup,
     get_ipdb_location,
     map_opdb_display,
     map_opdb_type,
@@ -14,6 +14,7 @@ from apps.catalog.ingestion.parsers import (
     parse_ipdb_manufacturer_string,
     parse_opdb_date,
 )
+from apps.catalog.models import Location, LocationAlias
 
 
 class TestParseIpdbDate:
@@ -249,6 +250,14 @@ class TestParseIpdbLocation:
             "country": "USA",
         }
 
+    def test_scotland_normalized_to_united_kingdom(self):
+        result = parse_ipdb_location("Edinburgh, Scotland")
+        assert result == {"city": "Edinburgh", "state": "", "country": "United Kingdom"}
+
+    def test_wales_normalized_to_united_kingdom(self):
+        result = parse_ipdb_location("Cardiff, Wales")
+        assert result == {"city": "Cardiff", "state": "", "country": "United Kingdom"}
+
     # Three-part with normalization
     def test_three_parts_with_country_normalization(self):
         result = parse_ipdb_location("Cardiff, Wales, UK")
@@ -272,55 +281,140 @@ class TestParseIpdbLocation:
         assert result == {"city": "New York", "state": "New York", "country": "USA"}
 
 
-class TestGetIpdbLocation:
-    def test_override_chicago_illinois(self):
-        result = get_ipdb_location(532, "Chicago Illinois")
-        assert result == {"city": "Chicago", "state": "Illinois", "country": "USA"}
+def _make_location(location_path, name, location_type, parent=None):
+    slug = location_path.rsplit("/", 1)[-1]
+    return Location.objects.create(
+        location_path=location_path,
+        slug=slug,
+        name=name,
+        location_type=location_type,
+        parent=parent,
+    )
 
-    def test_override_long_island_city(self):
-        result = get_ipdb_location(607, "Long Island City, Queens, New York")
-        assert result == {
-            "city": "Long Island City",
-            "state": "New York",
-            "country": "USA",
+
+class TestIPDBLocationLookup:
+    @pytest.fixture()
+    def loc_tree(self, db):
+        usa = _make_location("usa", "USA", "country")
+        il = _make_location("usa/il", "Illinois", "state", parent=usa)
+        chicago = _make_location("usa/il/chicago", "Chicago", "city", parent=il)
+        nl = _make_location("netherlands", "Netherlands", "country")
+        reuver = _make_location("netherlands/reuver", "Reuver", "city", parent=nl)
+        italy = _make_location("italy", "Italy", "country")
+        bo = _make_location("italy/bo", "Bologna Province", "province", parent=italy)
+        bologna = _make_location("italy/bo/bologna", "Bologna", "city", parent=bo)
+        return {
+            "usa": usa,
+            "il": il,
+            "chicago": chicago,
+            "nl": nl,
+            "reuver": reuver,
+            "italy": italy,
+            "bo": bo,
+            "bologna": bologna,
         }
 
-    def test_override_madrid(self):
-        result = get_ipdb_location(439, "Madrid")
-        assert result == {"city": "Madrid", "state": "", "country": "Spain"}
+    def test_us_city_state_country(self, loc_tree):
+        lookup = _IPDBLocationLookup()
+        assert (
+            lookup.resolve({"city": "Chicago", "state": "Illinois", "country": "USA"})
+            == "usa/il/chicago"
+        )
 
-    def test_fallback_to_parser(self):
-        result = get_ipdb_location(999, "Chicago, Illinois")
-        assert result == {"city": "Chicago", "state": "Illinois", "country": "USA"}
+    def test_country_only(self, loc_tree):
+        lookup = _IPDBLocationLookup()
+        assert lookup.resolve({"city": "", "state": "", "country": "USA"}) == "usa"
 
-    def test_override_returns_copy(self):
-        """Modifying the returned dict should not affect the override."""
-        result = get_ipdb_location(532, "anything")
-        result["city"] = "modified"
-        assert get_ipdb_location(532, "anything")["city"] == "Chicago"
+    def test_state_no_city(self, loc_tree):
+        lookup = _IPDBLocationLookup()
+        assert (
+            lookup.resolve({"city": "", "state": "Illinois", "country": "USA"})
+            == "usa/il"
+        )
 
-    def test_unknown_country_raises(self):
-        with pytest.raises(
-            LocationValidationError, match="unknown country 'Freedonia'"
-        ):
-            get_ipdb_location(999, "Springfield, Freedonia")
+    def test_city_direct_child_of_country(self, loc_tree):
+        """Netherlands→Reuver has no subdivision; city is a direct child of country."""
+        lookup = _IPDBLocationLookup()
+        assert (
+            lookup.resolve({"city": "Reuver", "state": "", "country": "Netherlands"})
+            == "netherlands/reuver"
+        )
 
-    def test_unknown_us_state_raises(self):
-        with pytest.raises(
-            LocationValidationError, match="unknown US state 'Freedonia'"
-        ):
-            get_ipdb_location(999, "Springfield, Freedonia, USA")
+    def test_city_deep_hierarchy(self, loc_tree):
+        """Bologna is under Italy/Province; resolved via country-wide fallback."""
+        lookup = _IPDBLocationLookup()
+        assert (
+            lookup.resolve({"city": "Bologna", "state": "", "country": "Italy"})
+            == "italy/bo/bologna"
+        )
 
-    def test_known_country_passes(self):
-        result = get_ipdb_location(999, "Bologna, Italy")
-        assert result["country"] == "Italy"
+    def test_alias_resolution(self, loc_tree):
+        LocationAlias.objects.create(location=loc_tree["usa"], value="United States")
+        lookup = _IPDBLocationLookup()
+        assert (
+            lookup.resolve({"city": "", "state": "", "country": "United States"})
+            == "usa"
+        )
 
-    def test_normalized_country_passes(self):
-        """Countries that normalize to known values should pass validation."""
-        result = get_ipdb_location(999, "London, England")
-        assert result["country"] == "United Kingdom"
+    def test_unknown_country_returns_none(self, loc_tree):
+        lookup = _IPDBLocationLookup()
+        assert (
+            lookup.resolve({"city": "Springfield", "state": "", "country": "Freedonia"})
+            is None
+        )
 
-    def test_override_skips_validation(self):
-        """Overrides are trusted and bypass validation."""
-        result = get_ipdb_location(532, "total garbage")
-        assert result["country"] == "USA"
+    def test_unknown_state_returns_none(self, loc_tree):
+        lookup = _IPDBLocationLookup()
+        assert (
+            lookup.resolve(
+                {"city": "Springfield", "state": "Freedonia", "country": "USA"}
+            )
+            is None
+        )
+
+    def test_empty_addr_returns_none(self, loc_tree):
+        lookup = _IPDBLocationLookup()
+        assert lookup.resolve({"city": "", "state": "", "country": ""}) is None
+
+
+class TestGetIpdbLocation:
+    @pytest.fixture()
+    def loc_tree(self, db):
+        usa = _make_location("usa", "USA", "country")
+        il = _make_location("usa/il", "Illinois", "state", parent=usa)
+        _make_location("usa/il/chicago", "Chicago", "city", parent=il)
+        ny = _make_location("usa/ny", "New York", "state", parent=usa)
+        _make_location("usa/ny/long-island-city", "Long Island City", "city", parent=ny)
+        spain = _make_location("spain", "Spain", "country")
+        mad = _make_location("spain/mad", "Madrid Community", "community", parent=spain)
+        madrid_prov = _make_location(
+            "spain/mad/madrid", "Madrid", "province", parent=mad
+        )
+        _make_location("spain/mad/madrid/madrid", "Madrid", "city", parent=madrid_prov)
+
+    def test_override_returns_path(self, loc_tree):
+        lookup = _IPDBLocationLookup()
+        assert get_ipdb_location(532, "Chicago Illinois", lookup) == "usa/il/chicago"
+
+    def test_override_long_island_city(self, loc_tree):
+        lookup = _IPDBLocationLookup()
+        assert (
+            get_ipdb_location(607, "Long Island City, Queens, New York", lookup)
+            == "usa/ny/long-island-city"
+        )
+
+    def test_override_madrid_resolves_to_city(self, loc_tree):
+        lookup = _IPDBLocationLookup()
+        assert get_ipdb_location(439, "Madrid", lookup) == "spain/mad/madrid/madrid"
+
+    def test_fallback_resolves_via_lookup(self, loc_tree):
+        lookup = _IPDBLocationLookup()
+        assert get_ipdb_location(999, "Chicago, Illinois", lookup) == "usa/il/chicago"
+
+    def test_empty_location_returns_none(self, loc_tree):
+        lookup = _IPDBLocationLookup()
+        assert get_ipdb_location(999, "", lookup) is None
+
+    def test_unresolvable_returns_none(self, loc_tree):
+        lookup = _IPDBLocationLookup()
+        assert get_ipdb_location(999, "Springfield, Freedonia", lookup) is None

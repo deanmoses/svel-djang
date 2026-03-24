@@ -6,7 +6,7 @@
 	let {
 		addr
 	}: {
-		addr: components['schemas']['AddressSchema'];
+		addr: components['schemas']['CorporateEntityLocationSchema'];
 	} = $props();
 
 	type Part = { text: string; href?: string };

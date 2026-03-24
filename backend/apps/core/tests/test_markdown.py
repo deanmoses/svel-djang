@@ -103,8 +103,10 @@ class TestRenderMarkdownFields:
         assert "<em>italic</em>" in result["description_html"]
 
     def test_no_markdown_fields(self):
-        from apps.catalog.models import Address
+        from apps.catalog.models import Location
 
-        addr = Address(city="Chicago")
-        result = render_markdown_fields(addr)
+        loc = Location(
+            location_path="usa", slug="usa", name="USA", location_type="country"
+        )
+        result = render_markdown_fields(loc)
         assert result == {}

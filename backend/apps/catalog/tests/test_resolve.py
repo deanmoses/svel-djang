@@ -3,13 +3,18 @@ from django.utils import timezone
 
 from apps.catalog.claims import build_relationship_claim
 from apps.catalog.models import (
-    Title,
+    CorporateEntity,
+    CorporateEntityLocation,
+    Location,
+    Manufacturer,
     MachineModel,
     System,
     TechnologyGeneration,
     Theme,
+    Title,
 )
 from apps.catalog.resolve import resolve_all, resolve_model, resolve_themes
+from apps.catalog.resolve._relationships import resolve_all_corporate_entity_locations
 from apps.provenance.models import Claim, Source
 
 
@@ -383,3 +388,64 @@ class TestResolveSystem:
         resolve_model(pm)
         pm.refresh_from_db()
         assert pm.system is None
+
+
+@pytest.mark.django_db
+class TestResolveCorporateEntityLocations:
+    def _make_ce(self, slug):
+        mfr = Manufacturer.objects.create(name=slug)
+        return CorporateEntity.objects.create(name=slug, slug=slug, manufacturer=mfr)
+
+    def _make_location(self, path):
+        return Location.objects.create(
+            location_path=path,
+            slug=path.rsplit("/", 1)[-1],
+            name=path,
+            location_type="city",
+        )
+
+    def _assert_address(self, source, ce, path):
+        claim_key, value = build_relationship_claim("address", {"location_path": path})
+        Claim.objects.assert_claim(
+            ce, "address", value, source=source, claim_key=claim_key
+        )
+
+    def test_creates_cel_from_active_claim(self, db):
+        source = Source.objects.create(name="PB", source_type="editorial", priority=300)
+        ce = self._make_ce("williams")
+        loc = self._make_location("usa/il/chicago")
+        self._assert_address(source, ce, "usa/il/chicago")
+
+        resolve_all_corporate_entity_locations()
+
+        assert CorporateEntityLocation.objects.filter(
+            corporate_entity=ce, location=loc
+        ).exists()
+
+    def test_deletes_stale_cel_when_claim_deactivated(self, db):
+        source = Source.objects.create(name="PB", source_type="editorial", priority=300)
+        ce = self._make_ce("williams")
+        self._make_location("usa/il/chicago")
+        self._assert_address(source, ce, "usa/il/chicago")
+        resolve_all_corporate_entity_locations()
+        assert CorporateEntityLocation.objects.filter(corporate_entity=ce).count() == 1
+
+        ce.claims.filter(is_active=True).update(is_active=False)
+        result = resolve_all_corporate_entity_locations()
+
+        assert result["deleted"] == 1
+        assert not CorporateEntityLocation.objects.filter(corporate_entity=ce).exists()
+
+    def test_handles_multiple_ces(self, db):
+        source = Source.objects.create(name="PB", source_type="editorial", priority=300)
+        ce1 = self._make_ce("williams")
+        ce2 = self._make_ce("bally")
+        self._make_location("usa/il/chicago")
+        self._make_location("usa/il/elk-grove-village")
+        self._assert_address(source, ce1, "usa/il/chicago")
+        self._assert_address(source, ce2, "usa/il/elk-grove-village")
+
+        result = resolve_all_corporate_entity_locations()
+
+        assert result["created"] == 2
+        assert CorporateEntityLocation.objects.count() == 2

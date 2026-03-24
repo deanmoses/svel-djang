@@ -30,7 +30,7 @@
 		auth.load();
 	});
 
-	let hasEntityAddresses = $derived(mfr.entities.some((e) => e.addresses.length > 0));
+	let hasEntityAddresses = $derived(mfr.entities.some((e) => e.locations.length > 0));
 
 	let isDetail = $derived(
 		!page.url.pathname.endsWith('/edit') &&
@@ -109,7 +109,7 @@
 											{/if}
 										</span>
 									{/if}
-									{#each entity.addresses as addr, i (i)}
+									{#each entity.locations as addr, i (i)}
 										<LocationLink {addr} />
 									{/each}
 								</div>

@@ -26,6 +26,8 @@ RELATIONSHIP_SCHEMAS: dict[str, dict[str, str]] = {
     "gameplay_feature": {"gameplay_feature_slug": "gameplay_feature"},
     "reward_type": {"reward_type_slug": "reward_type"},
     "abbreviation": {"value": "value"},
+    # Address relationship — claim lives on CorporateEntity
+    "address": {"location_path": "location"},
     # Alias namespaces — claim lives on the parent object
     "theme_alias": {"alias_value": "alias"},
     "manufacturer_alias": {"alias_value": "alias"},
@@ -33,6 +35,7 @@ RELATIONSHIP_SCHEMAS: dict[str, dict[str, str]] = {
     "gameplay_feature_alias": {"alias_value": "alias"},
     "reward_type_alias": {"alias_value": "alias"},
     "corporate_entity_alias": {"alias_value": "alias"},
+    "location_alias": {"alias_value": "alias"},
     # Hierarchy parent namespaces — claim lives on the child object
     "theme_parent": {"parent_slug": "parent"},
     "gameplay_feature_parent": {"parent_slug": "parent"},

@@ -9,20 +9,7 @@
 			const { data } = await client.GET('/api/locations/');
 			return data ?? { countries: [] };
 		},
-		{
-			countries: [] as {
-				name: string;
-				slug: string;
-				manufacturer_count: number;
-				cities: { name: string; slug: string; manufacturer_count: number }[];
-				states: {
-					name: string;
-					slug: string;
-					manufacturer_count: number;
-					cities: { name: string; slug: string; manufacturer_count: number }[];
-				}[];
-			}[]
-		}
+		{ countries: [] }
 	);
 </script>
 
@@ -45,60 +32,23 @@
 		<p class="status">No locations found.</p>
 	{:else}
 		<div class="countries">
-			{#each locations.data.countries as country (country.slug)}
+			{#each locations.data.countries as country (country.location_path)}
 				<section class="country-section">
 					<h2>
-						<a href={resolveHref(`/locations/${country.slug}`)}>
+						<a href={resolveHref(`/locations/${country.location_path}`)}>
 							{country.name}
 						</a>
 						<span class="count">{country.manufacturer_count}</span>
 					</h2>
 
-					{#if country.cities.length > 0}
-						<ul class="city-list top-level">
-							{#each country.cities as city (city.slug)}
+					{#if country.children.length > 0}
+						<ul class="child-list">
+							{#each country.children as child (child.location_path)}
 								<li>
-									<a
-										href={resolveHref(`/locations/${country.slug}/cities/${city.slug}`)}
-										class="location-row"
-									>
-										<span class="location-name">{city.name}</span>
-										<span class="count">{city.manufacturer_count}</span>
+									<a href={resolveHref(`/locations/${child.location_path}`)} class="location-row">
+										<span class="location-name">{child.name}</span>
+										<span class="count">{child.manufacturer_count}</span>
 									</a>
-								</li>
-							{/each}
-						</ul>
-					{/if}
-
-					{#if country.states.length > 0}
-						<ul class="state-list">
-							{#each country.states as state (state.slug)}
-								<li>
-									<a
-										href={resolveHref(`/locations/${country.slug}/${state.slug}`)}
-										class="location-row"
-									>
-										<span class="location-name">{state.name}</span>
-										<span class="count">{state.manufacturer_count}</span>
-									</a>
-
-									{#if state.cities.length > 0}
-										<ul class="city-list">
-											{#each state.cities as city (city.slug)}
-												<li>
-													<a
-														href={resolveHref(
-															`/locations/${country.slug}/${state.slug}/${city.slug}`
-														)}
-														class="location-row"
-													>
-														<span class="location-name">{city.name}</span>
-														<span class="count">{city.manufacturer_count}</span>
-													</a>
-												</li>
-											{/each}
-										</ul>
-									{/if}
 								</li>
 							{/each}
 						</ul>
@@ -155,15 +105,10 @@
 		color: var(--color-accent);
 	}
 
-	.state-list,
-	.city-list {
+	.child-list {
 		list-style: none;
 		padding: 0;
 		margin: 0;
-	}
-
-	.city-list {
-		padding-left: var(--size-5);
 	}
 
 	.location-row {

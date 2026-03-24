@@ -11,6 +11,7 @@ from apps.catalog.claims import build_relationship_claim
 from apps.catalog.models import (
     CorporateEntity,
     GameplayFeature,
+    Location,
     Manufacturer,
     Person,
     RewardType,
@@ -71,6 +72,10 @@ def _create_parent(parent_model):
         mfr = Manufacturer.objects.create(name="Test Mfr", slug="test-mfr")
         return CorporateEntity.objects.create(
             name="Test Corp", slug="test-corp", manufacturer=mfr
+        )
+    if parent_model == Location:
+        return Location.objects.create(
+            location_path="usa", slug="usa", name="USA", location_type="country"
         )
     raise ValueError(f"Unknown parent model: {parent_model}")
 

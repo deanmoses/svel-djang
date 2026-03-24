@@ -26,7 +26,7 @@ from apps.catalog.ingestion.ipdb.records import IpdbRecord
 from apps.catalog.ingestion.person_lookup import build_person_lookup
 from apps.catalog.ingestion.ipdb_title_fixes import TITLE_FIXES
 from apps.catalog.ingestion.parsers import (
-    LocationValidationError,
+    _IPDBLocationLookup,
     get_ipdb_location,
     parse_credit_string,
     parse_ipdb_date,
@@ -39,9 +39,9 @@ from apps.catalog.ingestion.vocabulary import (
     build_reward_type_map,
 )
 from apps.catalog.models import (
-    Address,
     CorporateEntity,
     CorporateEntityAlias,
+    CorporateEntityLocation,
     GameplayFeature,
     MachineModel,
     Person,
@@ -378,6 +378,15 @@ class Command(BaseCommand):
         ipdb_path = options["ipdb"]
         mpu_to_slug = _load_mpu_to_system_slug()
 
+        # Build location lookup (DB-backed; used to validate IPDB location strings).
+        location_lookup = _IPDBLocationLookup()
+        # Pre-load all CE→location_path mappings for compatibility checks.
+        ce_location_paths: dict[int, set[str]] = {}
+        for cel in CorporateEntityLocation.objects.select_related("location").all():
+            ce_location_paths.setdefault(cel.corporate_entity_id, set()).add(
+                cel.location.location_path
+            )
+
         # Build DB-driven vocabulary maps.
         feature_map = build_feature_slug_map()
         reward_map = build_reward_type_map()
@@ -530,6 +539,8 @@ class Command(BaseCommand):
                 ce_by_ipdb_id,
                 ce_by_name,
                 ce_slugs,
+                location_lookup,
+                ce_location_paths,
             )
 
         if unknown_mpu_strings:
@@ -598,6 +609,8 @@ class Command(BaseCommand):
         ce_by_ipdb_id: dict[int, CorporateEntity],
         ce_by_name: dict[str, CorporateEntity],
         ce_slugs: set[str],
+        location_lookup: "_IPDBLocationLookup",
+        ce_location_paths: dict[int, set[str]],
     ) -> None:
         """Collect claims, credits, theme slugs, and feature slugs for a single IPDB record."""
         # Collect claims for mapped fields.
@@ -709,18 +722,33 @@ class Command(BaseCommand):
                 )
             )
 
-            # --- Step 3: Create address on CE when location is available ---
+            # --- Step 3: Validate CE location against canonical Location records ---
             if location:
-                try:
-                    addr = get_ipdb_location(mfr_id, location)
-                except LocationValidationError as exc:
-                    raise CommandError(str(exc)) from exc
-                if addr["city"] or addr["state"] or addr["country"]:
-                    Address.objects.get_or_create(
-                        corporate_entity=ce,
-                        city=addr["city"],
-                        state=addr["state"],
-                        country=addr["country"],
+                resolved_path = get_ipdb_location(mfr_id, location, location_lookup)
+                if resolved_path is None:
+                    raise CommandError(
+                        f"IPDB mfr {mfr_id}: {location!r} does not resolve to any "
+                        f"canonical Location. Add an alias to pindata or add an IPDB "
+                        f"override in parsers.py."
+                    )
+                ce_paths = ce_location_paths.get(ce.pk, set())
+                if not ce_paths:
+                    raise CommandError(
+                        f"IPDB mfr {mfr_id} ({ce.slug!r}): has location data but "
+                        f"this CE has no pinbase-curated location. "
+                        f"Curate this CE in pindata first."
+                    )
+                compatible = any(
+                    p == resolved_path
+                    or p.startswith(resolved_path + "/")
+                    or resolved_path.startswith(p + "/")
+                    for p in ce_paths
+                )
+                if not compatible:
+                    raise CommandError(
+                        f"IPDB mfr {mfr_id}: location mismatch — "
+                        f"pinbase={ce_paths!r}, ipdb={resolved_path!r}. "
+                        f"Fix in pindata or add an IPDB override in parsers.py."
                     )
 
         # MPU: emit 'system' slug claim if known, else collect for deferred error.

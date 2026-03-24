@@ -1,38 +1,18 @@
 import type { components } from '$lib/api/schema';
 
-type AddressSchema = components['schemas']['AddressSchema'];
+type CorporateEntityLocationSchema = components['schemas']['CorporateEntityLocationSchema'];
 
 export type LocationPart = {
 	text: string;
-	href?: string;
+	href: string;
 };
 
-export function buildLocationParts(addr: AddressSchema): LocationPart[] {
-	const parts: LocationPart[] = [];
-
-	if (addr.city) {
-		const href =
-			addr.country_slug && addr.state_slug
-				? `/locations/${addr.country_slug}/${addr.state_slug}/${addr.city_slug}`
-				: addr.country_slug
-					? `/locations/${addr.country_slug}/cities/${addr.city_slug}`
-					: undefined;
-		parts.push({ text: addr.city, href });
+export function buildLocationParts(loc: CorporateEntityLocationSchema): LocationPart[] {
+	const parts: LocationPart[] = [
+		{ text: loc.display_name, href: `/locations/${loc.location_path}` }
+	];
+	for (const ancestor of loc.ancestors) {
+		parts.push({ text: ancestor.display_name, href: `/locations/${ancestor.location_path}` });
 	}
-
-	if (addr.state) {
-		const href = addr.country_slug
-			? `/locations/${addr.country_slug}/${addr.state_slug}`
-			: undefined;
-		parts.push({ text: addr.state, href });
-	}
-
-	if (addr.country) {
-		parts.push({
-			text: addr.country,
-			href: addr.country_slug ? `/locations/${addr.country_slug}` : undefined
-		});
-	}
-
 	return parts;
 }

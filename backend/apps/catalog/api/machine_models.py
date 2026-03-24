@@ -563,13 +563,12 @@ def _build_search_text(pm) -> str:
         parts.append(mfr.name)
         for entity in mfr.entities.all():
             parts.append(entity.name)
-            for addr in entity.addresses.all():
-                if addr.city:
-                    parts.append(addr.city)
-                if addr.state:
-                    parts.append(addr.state)
-                if addr.country:
-                    parts.append(addr.country)
+            for cel in entity.locations.all():
+                loc = cel.location
+                while loc is not None:
+                    if loc.name:
+                        parts.append(loc.name)
+                    loc = loc.parent
     if pm.system:
         parts.append(pm.system.name)
     if pm.technology_generation:
@@ -673,7 +672,7 @@ def list_all_models(request):
             "gameplay_features",
             "variants",
             "abbreviations",
-            "corporate_entity__manufacturer__entities__addresses",
+            "corporate_entity__manufacturer__entities__locations__location",
             Prefetch(
                 "credits",
                 queryset=Credit.objects.filter(model__isnull=False).select_related(

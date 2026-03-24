@@ -24,7 +24,6 @@ from django.core.management.base import BaseCommand, CommandError
 from apps.catalog.claims import build_relationship_claim, make_authoritative_scope
 from apps.catalog.ingestion.bulk_utils import generate_unique_slug
 from apps.catalog.models import (
-    Address,
     Cabinet,
     CorporateEntity,
     Credit,
@@ -34,6 +33,7 @@ from apps.catalog.models import (
     Franchise,
     GameFormat,
     GameplayFeature,
+    Location,
     MachineModel,
     Manufacturer,
     Person,
@@ -51,8 +51,11 @@ from apps.catalog.resolve import (
     MANUFACTURER_DIRECT_FIELDS,
     TITLE_DIRECT_FIELDS,
     _resolve_bulk,
+    resolve_all_corporate_entity_locations,
     resolve_all_credits,
     resolve_all_gameplay_features,
+    resolve_all_location_aliases,
+    resolve_all_locations,
     resolve_all_reward_types,
     resolve_all_tags,
     resolve_all_themes,
@@ -72,6 +75,21 @@ from apps.provenance.models import Claim, Source
 logger = logging.getLogger(__name__)
 
 DEFAULT_EXPORT_DIR = Path(__file__).parents[5] / "data" / "explore" / "pinbase"
+
+
+def _parent_path(location_path: str) -> str | None:
+    """Return the parent location_path by dropping the last segment, or None."""
+    parts = location_path.rsplit("/", 1)
+    return parts[0] if len(parts) > 1 else None
+
+
+def _resolve_ce_location_path(entry: dict, loc_by_path: dict) -> str | None:
+    """Return the canonical location_path for a CE entry, or None if absent."""
+    path = (entry.get("headquarters_location") or "").strip()
+    if not path:
+        return None
+    return path if path in loc_by_path else None
+
 
 # Map authored credit role names to CreditRole slugs.
 _CREDIT_ROLE_MAP: dict[str, str] = {
@@ -208,6 +226,7 @@ class Command(BaseCommand):
             },
         )
 
+        self._ingest_locations()
         self._ingest_taxonomy()
         self._sync_theme_parents_and_aliases()
         self._sync_gameplay_feature_parents_and_aliases()
@@ -268,6 +287,131 @@ class Command(BaseCommand):
             return []
         with open(path) as f:
             return json.load(f)
+
+    # ------------------------------------------------------------------
+    # Phase 0: Locations
+    # ------------------------------------------------------------------
+
+    def _ingest_locations(self):
+        """Ingest canonical Location records from location.json.
+
+        Runs before all other phases so that location_path lookups are
+        available when corporate entities are ingested.
+        """
+        entries = self._load("location.json")
+        if not entries:
+            return
+
+        source = self.pinbase_source
+        ct = ContentType.objects.get_for_model(Location)
+
+        # Sort: countries first (type order 0), then intermediates (1), then cities (2).
+        # Within each tier, sort by location_path so parents always precede children.
+        TYPE_ORDER = {"country": 0, "city": 2}
+        entries_sorted = sorted(
+            entries,
+            key=lambda e: (TYPE_ORDER.get(e["type"], 1), e["location_path"]),
+        )
+
+        # Pass 1: upsert Location rows (slug + display fields).
+        objs = Location.objects.bulk_create(
+            [
+                Location(
+                    location_path=e["location_path"],
+                    slug=e["slug"],
+                    name=e["name"],
+                    location_type=e["type"],
+                    code=e.get("code", ""),
+                    short_name=e.get("short_name", ""),
+                    divisions=e.get("divisions"),
+                )
+                for e in entries_sorted
+            ],
+            update_conflicts=True,
+            unique_fields=["location_path"],
+            update_fields=[
+                "slug",
+                "name",
+                "location_type",
+                "code",
+                "short_name",
+                "divisions",
+            ],
+        )
+
+        # Pass 2: build scalar + FK claims and alias data.
+        pending_claims: list[Claim] = []
+        alias_by_pk: dict[int, list[str]] = {}
+
+        for obj, entry in zip(objs, entries_sorted):
+            pending_claims.append(
+                Claim(
+                    content_type_id=ct.pk,
+                    object_id=obj.pk,
+                    field_name="name",
+                    value=entry["name"],
+                )
+            )
+            pending_claims.append(
+                Claim(
+                    content_type_id=ct.pk,
+                    object_id=obj.pk,
+                    field_name="location_type",
+                    value=entry["type"],
+                )
+            )
+            if entry.get("code"):
+                pending_claims.append(
+                    Claim(
+                        content_type_id=ct.pk,
+                        object_id=obj.pk,
+                        field_name="code",
+                        value=entry["code"],
+                    )
+                )
+            if entry.get("short_name"):
+                pending_claims.append(
+                    Claim(
+                        content_type_id=ct.pk,
+                        object_id=obj.pk,
+                        field_name="short_name",
+                        value=entry["short_name"],
+                    )
+                )
+            if entry.get("divisions"):
+                pending_claims.append(
+                    Claim(
+                        content_type_id=ct.pk,
+                        object_id=obj.pk,
+                        field_name="divisions",
+                        value=entry["divisions"],
+                    )
+                )
+            parent_path = _parent_path(entry["location_path"])
+            if parent_path:
+                pending_claims.append(
+                    Claim(
+                        content_type_id=ct.pk,
+                        object_id=obj.pk,
+                        field_name="parent_location",
+                        value=parent_path,
+                    )
+                )
+            if entry.get("aliases"):
+                alias_by_pk[obj.pk] = entry["aliases"]
+
+        Claim.objects.bulk_assert_claims(source, pending_claims)
+        resolve_all_locations()
+
+        alias_stats = self._assert_alias_claims(
+            source, ct.pk, alias_by_pk, "location_alias"
+        )
+        resolve_all_location_aliases()
+
+        self.stdout.write(
+            f"  Locations: {len(objs)} upserted, "
+            f"{alias_stats['created']} aliases created"
+        )
 
     # ------------------------------------------------------------------
     # Phase 1: Taxonomy
@@ -670,6 +814,7 @@ class Command(BaseCommand):
                     slug=entry.get("slug", ""),
                     year_start=entry.get("year_start"),
                     year_end=entry.get("year_end"),
+                    ipdb_manufacturer_id=entry.get("ipdb_manufacturer_id"),
                 )
             )
             valid_entries.append(entry)
@@ -678,7 +823,7 @@ class Command(BaseCommand):
             objs,
             update_conflicts=True,
             unique_fields=["slug"],
-            update_fields=["name", "year_start", "year_end"],
+            update_fields=["name", "year_start", "year_end", "ipdb_manufacturer_id"],
         )
 
         created = sum(1 for o in objs if o.slug not in existing_slugs)
@@ -686,21 +831,6 @@ class Command(BaseCommand):
             f"  Corporate entities: {created} created, {len(objs) - created} updated"
         )
 
-        # Create Address records.
-        addresses_created = 0
-        for obj, entry in zip(objs, valid_entries):
-            city = entry.get("headquarters_city", "")
-            state = entry.get("headquarters_state", "")
-            country = entry.get("headquarters_country", "")
-            if city or state or country:
-                _, addr_created = Address.objects.get_or_create(
-                    corporate_entity=obj, city=city, state=state, country=country
-                )
-                if addr_created:
-                    addresses_created += 1
-
-        if addresses_created:
-            self.stdout.write(f"  Addresses: {addresses_created} created")
         if missing_mfr:
             self.stderr.write(
                 f"  Warning: {len(missing_mfr)} missing manufacturer slug(s)"
@@ -761,6 +891,46 @@ class Command(BaseCommand):
                 f"{alias_stats['unchanged']} unchanged"
             )
         resolve_corporate_entity_aliases()
+
+        # Assert address relationship claims and sync CorporateEntityLocation rows.
+        loc_by_path = {
+            loc.location_path: loc
+            for loc in Location.objects.only("location_path", "pk")
+        }
+        address_claims: list[Claim] = []
+        all_ce_pks: set[int] = {obj.pk for obj in objs}
+
+        for obj, entry in zip(objs, valid_entries):
+            hq_path = _resolve_ce_location_path(entry, loc_by_path)
+            if hq_path:
+                claim_key, value = build_relationship_claim(
+                    "address", {"location_path": hq_path}
+                )
+                address_claims.append(
+                    Claim(
+                        content_type_id=ct_id,
+                        object_id=obj.pk,
+                        field_name="address",
+                        claim_key=claim_key,
+                        value=value,
+                    )
+                )
+            elif entry.get("headquarters_location"):
+                raise CommandError(
+                    f"CE {entry['slug']!r}: headquarters_location "
+                    f"{entry['headquarters_location']!r} is not a known canonical Location."
+                )
+
+        Claim.objects.bulk_assert_claims(
+            source,
+            address_claims,
+            sweep_field="address",
+            authoritative_scope=make_authoritative_scope(CorporateEntity, all_ce_pks),
+        )
+        loc_stats = resolve_all_corporate_entity_locations()
+        self.stdout.write(
+            f"  Locations: {loc_stats['created']} created, {loc_stats['deleted']} deleted"
+        )
 
     # ------------------------------------------------------------------
     # Phase 4: Systems

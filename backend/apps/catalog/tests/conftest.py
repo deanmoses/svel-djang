@@ -3,8 +3,10 @@ from django.test import Client
 
 from apps.catalog.models import (
     CorporateEntity,
+    CorporateEntityLocation,
     CreditRole,
     GameplayFeature,
+    Location,
     MachineModel,
     Manufacturer,
     Person,
@@ -121,6 +123,55 @@ _IPDB_NARRATIVE_FEATURE_SLUGS = [
     "multi-level-playfield",
     "head-to-head",
 ]
+
+
+@pytest.fixture
+def ipdb_locations(db):
+    """Create Location records and pinbase-curated CE+CEL rows for the IPDB fixture.
+
+    IPDB validation requires CEs to already have pinbase-curated locations.
+    The fixture covers the three manufacturers in ipdb_sample.json:
+    Gottlieb (93) and Williams (351) in Chicago, Bally/Midway (349) in Franklin Park.
+    """
+    usa = Location.objects.create(
+        location_path="usa", slug="usa", name="USA", location_type="country"
+    )
+    il = Location.objects.create(
+        location_path="usa/il",
+        slug="il",
+        name="Illinois",
+        location_type="state",
+        parent=usa,
+    )
+    chicago = Location.objects.create(
+        location_path="usa/il/chicago",
+        slug="chicago",
+        name="Chicago",
+        location_type="city",
+        parent=il,
+    )
+    franklin_park = Location.objects.create(
+        location_path="usa/il/franklin-park",
+        slug="franklin-park",
+        name="Franklin Park",
+        location_type="city",
+        parent=il,
+    )
+
+    def _make_ce(name, slug, ipdb_id, location):
+        mfr = Manufacturer.objects.create(name=name, slug=slug)
+        ce = CorporateEntity.objects.create(
+            name=name,
+            slug=slug,
+            manufacturer=mfr,
+            ipdb_manufacturer_id=ipdb_id,
+        )
+        CorporateEntityLocation.objects.create(corporate_entity=ce, location=location)
+        return ce
+
+    _make_ce("D. Gottlieb & Company", "d-gottlieb-co", 93, chicago)
+    _make_ce("Midway Manufacturing Company", "midway-manufacturing", 349, franklin_park)
+    _make_ce("Williams Electronic Games", "williams-electronic-games", 351, chicago)
 
 
 @pytest.fixture

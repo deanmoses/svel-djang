@@ -463,3 +463,29 @@ def _resolve_all_taxonomy() -> None:
     """Resolve claims for all taxonomy models."""
     for model_class, direct_fields in TAXONOMY_MODELS:
         _resolve_bulk(model_class, direct_fields)
+
+
+# ------------------------------------------------------------------
+# Location resolvers
+# ------------------------------------------------------------------
+
+LOCATION_DIRECT_FIELDS: dict[str, str] = {
+    "name": "name",
+    "location_type": "location_type",
+    "code": "code",
+    "short_name": "short_name",
+    "description": "description",
+    "divisions": "divisions",
+}
+
+
+def resolve_all_locations() -> int:
+    """Bulk-resolve claims for all Location instances, including parent FK."""
+    from ..models import Location
+
+    loc_lookup = {loc.location_path: loc for loc in Location.objects.all()}
+    return _resolve_bulk(
+        Location,
+        LOCATION_DIRECT_FIELDS,
+        fk_handlers={"parent_location": ("parent", loc_lookup)},
+    )

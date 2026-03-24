@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import Optional
 
 from django.core.cache import cache
-from django.utils.text import slugify
 from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
@@ -26,73 +25,55 @@ class LocationManufacturerSchema(Schema):
     thumbnail_url: Optional[str] = None
 
 
-class CityRef(Schema):
+class LocationChildRef(Schema):
     name: str
     slug: str
+    location_path: str
+    location_type: str
     manufacturer_count: int = 0
 
 
-class StateRef(Schema):
+class LocationAncestorRef(Schema):
     name: str
     slug: str
-    manufacturer_count: int = 0
-    cities: list[CityRef] = []
+    location_path: str
 
 
-class CountryRef(Schema):
+class LocationIndexCountry(Schema):
     name: str
     slug: str
+    location_path: str
     manufacturer_count: int = 0
-    states: list[StateRef] = []
-    cities: list[CityRef] = []
+    children: list[LocationChildRef] = []
 
 
 class LocationIndexSchema(Schema):
-    countries: list[CountryRef]
+    countries: list[LocationIndexCountry]
 
 
-class CountryDetailSchema(Schema):
+class LocationDetailSchema(Schema):
     name: str
     slug: str
+    location_path: str
+    location_type: str
     manufacturer_count: int = 0
-    states: list[StateRef]
-    cities: list[CityRef]
-    manufacturers: list[LocationManufacturerSchema]
-
-
-class StateDetailSchema(Schema):
-    name: str
-    slug: str
-    country_name: str
-    country_slug: str
-    manufacturer_count: int = 0
-    cities: list[CityRef]
-    manufacturers: list[LocationManufacturerSchema]
-
-
-class CityDetailSchema(Schema):
-    name: str
-    slug: str
-    state_name: str | None = None
-    state_slug: str | None = None
-    country_name: str
-    country_slug: str
-    manufacturer_count: int = 0
-    manufacturers: list[LocationManufacturerSchema]
+    ancestors: list[LocationAncestorRef] = []
+    children: list[LocationChildRef] = []
+    manufacturers: list[LocationManufacturerSchema] = []
 
 
 # ---------------------------------------------------------------------------
-# Helpers
+# Tree building
 # ---------------------------------------------------------------------------
 
 
 def _get_location_tree():
-    """Build a hierarchical location tree from Address records.
+    """Build location data from Location + CorporateEntityLocation records.
 
-    Returns a dict keyed by country_slug with structure::
-
-        {name, manufacturers: set[pk], states: {state_slug -> {name, manufacturers, cities}},
-         cities: {city_slug -> {name, manufacturers}}}
+    Returns a tuple (nodes, children_index) where:
+    - nodes: dict[location_path, {name, slug, location_type, parent_path,
+                                  location_path, manufacturer_pks: frozenset}]
+    - children_index: dict[parent_path_or_None, list[location_path]]
 
     Results are cached; invalidated by ``invalidate_all()``.
     """
@@ -100,88 +81,68 @@ def _get_location_tree():
     if result is not None:
         return result
 
-    from ..models import Address
+    from ..models import CorporateEntityLocation, Location
 
-    addresses = (
-        Address.objects.select_related(
-            "corporate_entity__manufacturer",
-        )
-        .filter(corporate_entity__manufacturer__isnull=False)
-        .values_list(
-            "country",
-            "state",
-            "city",
-            "corporate_entity__manufacturer__pk",
-            "corporate_entity__manufacturer__name",
-            "corporate_entity__manufacturer__slug",
-        )
+    # Load all locations with parent chains (up to 4 levels deep).
+    all_locs = list(
+        Location.objects.select_related("parent__parent__parent__parent").all()
     )
 
-    # Build the tree
-    countries: dict[str, dict] = {}  # slug -> {name, manufacturers, states}
+    # Accumulate manufacturer PKs at each location and all its ancestors.
+    mfr_pks_by_path: dict[str, set[int]] = {}
+    for cel in CorporateEntityLocation.objects.select_related(
+        "location__parent__parent__parent__parent",
+        "corporate_entity__manufacturer",
+    ).filter(corporate_entity__manufacturer__isnull=False):
+        mfr_pk = cel.corporate_entity.manufacturer_id
+        loc = cel.location
+        while loc is not None:
+            mfr_pks_by_path.setdefault(loc.location_path, set()).add(mfr_pk)
+            loc = loc.parent
 
-    for country, state, city, mfr_pk, mfr_name, mfr_slug in addresses:
-        if not country:
-            continue
+    nodes: dict[str, dict] = {}
+    children_index: dict[str | None, list[str]] = {}
+    for loc in all_locs:
+        parent_path = loc.parent.location_path if loc.parent else None
+        nodes[loc.location_path] = {
+            "name": loc.name,
+            "slug": loc.slug,
+            "location_path": loc.location_path,
+            "location_type": loc.location_type,
+            "parent_path": parent_path,
+            "manufacturer_pks": frozenset(
+                mfr_pks_by_path.get(loc.location_path, set())
+            ),
+        }
+        children_index.setdefault(parent_path, []).append(loc.location_path)
 
-        country_slug = slugify(country)
-        if country_slug not in countries:
-            countries[country_slug] = {
-                "name": country,
-                "manufacturers": set(),
-                "states": {},
-                "cities": {},  # cities with no state
-            }
-        countries[country_slug]["manufacturers"].add(mfr_pk)
-
-        if state:
-            state_slug = slugify(state)
-            states = countries[country_slug]["states"]
-            if state_slug not in states:
-                states[state_slug] = {
-                    "name": state,
-                    "manufacturers": set(),
-                    "cities": {},
-                }
-            states[state_slug]["manufacturers"].add(mfr_pk)
-
-            if city:
-                city_slug = slugify(city)
-                cities = states[state_slug]["cities"]
-                if city_slug not in cities:
-                    cities[city_slug] = {
-                        "name": city,
-                        "manufacturers": set(),
-                    }
-                cities[city_slug]["manufacturers"].add(mfr_pk)
-        elif city:
-            # City with no state — store directly on the country
-            city_slug = slugify(city)
-            direct_cities = countries[country_slug]["cities"]
-            if city_slug not in direct_cities:
-                direct_cities[city_slug] = {
-                    "name": city,
-                    "manufacturers": set(),
-                }
-            direct_cities[city_slug]["manufacturers"].add(mfr_pk)
-
-    cache.set(LOCATIONS_TREE_KEY, countries, timeout=None)
-    return countries
+    tree = (nodes, children_index)
+    cache.set(LOCATIONS_TREE_KEY, tree, timeout=None)
+    return tree
 
 
-def _serialize_cities(cities_dict):
-    """Serialize a {slug: {name, manufacturers}} dict into a sorted list."""
+def _children_of(path: str | None, nodes: dict, children_index: dict) -> list[dict]:
+    """Return child nodes sorted by manufacturer_count desc, then name."""
     return sorted(
-        [
-            {
-                "name": city_data["name"],
-                "slug": city_slug,
-                "manufacturer_count": len(city_data["manufacturers"]),
-            }
-            for city_slug, city_data in cities_dict.items()
-        ],
-        key=lambda c: (-c["manufacturer_count"], c["name"]),
+        [nodes[p] for p in children_index.get(path, []) if p in nodes],
+        key=lambda n: (-len(n["manufacturer_pks"]), n["name"]),
     )
+
+
+def _ancestors_of(path: str, nodes: dict) -> list[dict]:
+    """Return ancestor chain from root to immediate parent (root first)."""
+    ancestors: list[dict] = []
+    node = nodes.get(path)
+    if node is None:
+        return ancestors
+    parent_path = node["parent_path"]
+    while parent_path is not None:
+        parent = nodes.get(parent_path)
+        if parent is None:
+            break
+        ancestors.insert(0, parent)
+        parent_path = parent["parent_path"]
+    return ancestors
 
 
 def _get_manufacturers_for_pks(pks):
@@ -225,7 +186,6 @@ def _get_manufacturers_for_pks(pks):
                     thumb, _ = _extract_image_urls(model.extra_data)
                     if thumb:
                         break
-
         result.append(
             {
                 "name": mfr.name,
@@ -247,155 +207,100 @@ locations_router = Router(tags=["locations"])
 @locations_router.get("/", response=LocationIndexSchema)
 @decorate_view(cache_control(public=True, max_age=300))
 def list_locations(request):
-    """Return all countries with their state/city hierarchy and manufacturer counts."""
-    tree = _get_location_tree()
+    """Return all countries with their direct children and manufacturer counts."""
+    nodes, children_index = _get_location_tree()
 
     countries = []
-    for country_slug, country_data in sorted(tree.items(), key=lambda x: x[1]["name"]):
-        states = []
-        for state_slug, state_data in sorted(
-            country_data["states"].items(), key=lambda x: x[1]["name"]
-        ):
-            states.append(
-                {
-                    "name": state_data["name"],
-                    "slug": state_slug,
-                    "manufacturer_count": len(state_data["manufacturers"]),
-                    "cities": _serialize_cities(state_data["cities"]),
-                }
-            )
+    for country_path in sorted(
+        children_index.get(None, []), key=lambda p: nodes[p]["name"]
+    ):
+        country = nodes[country_path]
+        children = _children_of(country_path, nodes, children_index)
         countries.append(
             {
-                "name": country_data["name"],
-                "slug": country_slug,
-                "manufacturer_count": len(country_data["manufacturers"]),
-                "states": states,
-                "cities": _serialize_cities(country_data["cities"]),
+                "name": country["name"],
+                "slug": country["slug"],
+                "location_path": country_path,
+                "manufacturer_count": len(country["manufacturer_pks"]),
+                "children": [
+                    {
+                        "name": c["name"],
+                        "slug": c["slug"],
+                        "location_path": c["location_path"],
+                        "location_type": c["location_type"],
+                        "manufacturer_count": len(c["manufacturer_pks"]),
+                    }
+                    for c in children
+                ],
             }
         )
 
     return {"countries": countries}
 
 
-@locations_router.get("/{country_slug}", response=CountryDetailSchema)
-@decorate_view(cache_control(public=True, max_age=300))
-def get_country(request, country_slug: str):
-    """Return a country's manufacturers and state/city breakdown."""
-    tree = _get_location_tree()
+def _get_location_detail(location_path: str) -> dict:
+    """Shared implementation for all location detail endpoints."""
+    nodes, children_index = _get_location_tree()
 
-    country_data = tree.get(country_slug)
-    if not country_data:
-        raise HttpError(404, "Country not found")
+    node = nodes.get(location_path)
+    if not node:
+        raise HttpError(404, "Location not found")
 
-    states = []
-    for state_slug, state_data in sorted(
-        country_data["states"].items(), key=lambda x: x[1]["name"]
-    ):
-        states.append(
+    ancestors = _ancestors_of(location_path, nodes)
+    children = _children_of(location_path, nodes, children_index)
+
+    return {
+        "name": node["name"],
+        "slug": node["slug"],
+        "location_path": location_path,
+        "location_type": node["location_type"],
+        "manufacturer_count": len(node["manufacturer_pks"]),
+        "ancestors": [
+            {"name": a["name"], "slug": a["slug"], "location_path": a["location_path"]}
+            for a in ancestors
+        ],
+        "children": [
             {
-                "name": state_data["name"],
-                "slug": state_slug,
-                "manufacturer_count": len(state_data["manufacturers"]),
-                "cities": _serialize_cities(state_data["cities"]),
+                "name": c["name"],
+                "slug": c["slug"],
+                "location_path": c["location_path"],
+                "location_type": c["location_type"],
+                "manufacturer_count": len(c["manufacturer_pks"]),
             }
-        )
-
-    return {
-        "name": country_data["name"],
-        "slug": country_slug,
-        "manufacturer_count": len(country_data["manufacturers"]),
-        "states": states,
-        "cities": _serialize_cities(country_data["cities"]),
-        "manufacturers": _get_manufacturers_for_pks(country_data["manufacturers"]),
+            for c in children
+        ],
+        "manufacturers": _get_manufacturers_for_pks(node["manufacturer_pks"]),
     }
 
 
-@locations_router.get("/{country_slug}/{state_slug}", response=StateDetailSchema)
+# Ninja's path converter syntax doesn't support Django's <path:...> wildcard,
+# so we define explicit routes for each supported hierarchy depth (1–4 segments).
+# Pindata's maximum depth is 4 (e.g. france/idf/essonne/marcoussis).
+
+
+@locations_router.get("/{s1}", response=LocationDetailSchema)
 @decorate_view(cache_control(public=True, max_age=300))
-def get_state(request, country_slug: str, state_slug: str):
-    """Return a state's manufacturers and city breakdown."""
-    tree = _get_location_tree()
-
-    country_data = tree.get(country_slug)
-    if not country_data:
-        raise HttpError(404, "Country not found")
-
-    state_data = country_data["states"].get(state_slug)
-    if not state_data:
-        raise HttpError(404, "State not found")
-
-    return {
-        "name": state_data["name"],
-        "slug": state_slug,
-        "country_name": country_data["name"],
-        "country_slug": country_slug,
-        "manufacturer_count": len(state_data["manufacturers"]),
-        "cities": _serialize_cities(state_data["cities"]),
-        "manufacturers": _get_manufacturers_for_pks(state_data["manufacturers"]),
-    }
+def get_location_1(request, s1: str):
+    """Return detail for a single-segment location (e.g. 'usa')."""
+    return _get_location_detail(s1)
 
 
-# NOTE: This literal "cities" route must be registered before the
-# /{country_slug}/{state_slug}/{city_slug} parameterised route so that
-# Django's URL resolver matches the literal first.  A state slugged
-# "cities" would be shadowed — but no such state exists in practice.
-@locations_router.get(
-    "/{country_slug}/cities/{city_slug}",
-    response=CityDetailSchema,
-)
+@locations_router.get("/{s1}/{s2}", response=LocationDetailSchema)
 @decorate_view(cache_control(public=True, max_age=300))
-def get_country_city(request, country_slug: str, city_slug: str):
-    """Return a city (no state) and its manufacturers."""
-    tree = _get_location_tree()
-
-    country_data = tree.get(country_slug)
-    if not country_data:
-        raise HttpError(404, "Country not found")
-
-    city_data = country_data["cities"].get(city_slug)
-    if not city_data:
-        raise HttpError(404, "City not found")
-
-    return {
-        "name": city_data["name"],
-        "slug": city_slug,
-        "state_name": None,
-        "state_slug": None,
-        "country_name": country_data["name"],
-        "country_slug": country_slug,
-        "manufacturer_count": len(city_data["manufacturers"]),
-        "manufacturers": _get_manufacturers_for_pks(city_data["manufacturers"]),
-    }
+def get_location_2(request, s1: str, s2: str):
+    """Return detail for a two-segment location (e.g. 'usa/il')."""
+    return _get_location_detail(f"{s1}/{s2}")
 
 
-@locations_router.get(
-    "/{country_slug}/{state_slug}/{city_slug}",
-    response=CityDetailSchema,
-)
+@locations_router.get("/{s1}/{s2}/{s3}", response=LocationDetailSchema)
 @decorate_view(cache_control(public=True, max_age=300))
-def get_city(request, country_slug: str, state_slug: str, city_slug: str):
-    """Return a city's manufacturers."""
-    tree = _get_location_tree()
+def get_location_3(request, s1: str, s2: str, s3: str):
+    """Return detail for a three-segment location (e.g. 'usa/il/chicago')."""
+    return _get_location_detail(f"{s1}/{s2}/{s3}")
 
-    country_data = tree.get(country_slug)
-    if not country_data:
-        raise HttpError(404, "Country not found")
 
-    state_data = country_data["states"].get(state_slug)
-    if not state_data:
-        raise HttpError(404, "State not found")
-
-    city_data = state_data["cities"].get(city_slug)
-    if not city_data:
-        raise HttpError(404, "City not found")
-
-    return {
-        "name": city_data["name"],
-        "slug": city_slug,
-        "state_name": state_data["name"],
-        "state_slug": state_slug,
-        "country_name": country_data["name"],
-        "country_slug": country_slug,
-        "manufacturer_count": len(city_data["manufacturers"]),
-        "manufacturers": _get_manufacturers_for_pks(city_data["manufacturers"]),
-    }
+@locations_router.get("/{s1}/{s2}/{s3}/{s4}", response=LocationDetailSchema)
+@decorate_view(cache_control(public=True, max_age=300))
+def get_location_4(request, s1: str, s2: str, s3: str, s4: str):
+    """Return detail for a four-segment location (e.g. 'france/idf/essonne/marcoussis')."""
+    return _get_location_detail(f"{s1}/{s2}/{s3}/{s4}")

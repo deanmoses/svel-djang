@@ -15,7 +15,6 @@ from ninja.errors import HttpError
 from ninja.pagination import PageNumberPagination, paginate
 from ninja.security import django_auth
 
-from django.utils.text import slugify
 
 from ..cache import MANUFACTURERS_ALL_KEY, invalidate_all
 from .constants import DEFAULT_PAGE_SIZE
@@ -47,13 +46,17 @@ class ManufacturerSchema(Schema):
     model_count: int = 0
 
 
-class AddressSchema(Schema):
-    city: str
-    state: str
-    country: str
-    city_slug: str = ""
-    state_slug: str = ""
-    country_slug: str = ""
+class CorporateEntityLocationAncestorRef(Schema):
+    display_name: str
+    location_path: str
+
+
+class CorporateEntityLocationSchema(Schema):
+    location_path: str
+    location_type: str
+    display_name: str
+    slug: str
+    ancestors: list[CorporateEntityLocationAncestorRef] = []
 
 
 class CorporateEntitySchema(Schema):
@@ -61,7 +64,7 @@ class CorporateEntitySchema(Schema):
     slug: str
     year_start: int | None
     year_end: int | None
-    addresses: list[AddressSchema]
+    locations: list[CorporateEntityLocationSchema]
 
 
 class SystemSchema(Schema):
@@ -127,6 +130,21 @@ def _collect_titles(models, *, include_manufacturer: bool = False) -> list[dict]
     return sorted(titles.values(), key=lambda t: (t["year"] is None, -(t["year"] or 0)))
 
 
+def _location_ancestors(loc) -> list[dict]:
+    """Return ancestor locations from immediate parent up to root, in order."""
+    ancestors = []
+    current = loc.parent
+    while current is not None:
+        ancestors.append(
+            {
+                "display_name": current.short_name or current.name,
+                "location_path": current.location_path,
+            }
+        )
+        current = current.parent
+    return ancestors
+
+
 def _serialize_manufacturer_detail(mfr) -> dict:
     """Serialize a Manufacturer into the detail response dict.
 
@@ -180,16 +198,15 @@ def _serialize_manufacturer_detail(mfr) -> dict:
                 "slug": e.slug,
                 "year_start": e.year_start,
                 "year_end": e.year_end,
-                "addresses": [
+                "locations": [
                     {
-                        "city": a.city,
-                        "state": a.state,
-                        "country": a.country,
-                        "city_slug": slugify(a.city) if a.city else "",
-                        "state_slug": slugify(a.state) if a.state else "",
-                        "country_slug": slugify(a.country) if a.country else "",
+                        "location_path": cel.location.location_path,
+                        "location_type": cel.location.location_type,
+                        "display_name": cel.location.short_name or cel.location.name,
+                        "slug": cel.location.slug,
+                        "ancestors": _location_ancestors(cel.location),
                     }
-                    for a in e.addresses.all()
+                    for cel in e.locations.all()
                 ],
             }
             for e in mfr.entities.all()
@@ -206,11 +223,18 @@ def _serialize_manufacturer_detail(mfr) -> dict:
 def _manufacturer_qs():
     from ..models import CorporateEntity, MachineModel, Manufacturer, System
 
+    from ..models import CorporateEntityLocation
+
     return Manufacturer.objects.prefetch_related(
         Prefetch(
             "entities",
             queryset=CorporateEntity.objects.prefetch_related(
-                "addresses",
+                Prefetch(
+                    "locations",
+                    queryset=CorporateEntityLocation.objects.select_related(
+                        "location__parent__parent__parent"
+                    ),
+                ),
                 Prefetch(
                     "models",
                     queryset=MachineModel.objects.filter(variant_of__isnull=True)
@@ -226,31 +250,19 @@ def _manufacturer_qs():
 
 
 def _build_location_refs(entities) -> list[dict]:
-    """Build composite location FacetRefs at every granularity level.
+    """Build location FacetRefs for each location and all its ancestors.
 
-    For an address with city="Chicago", state="Illinois", country="USA",
-    emits three refs:
-      - "Chicago, Illinois, USA"
-      - "Illinois, USA"
-      - "USA"
+    Uses location_path as the slug so refs are globally unique and stable.
     """
-    refs: dict[str, str] = {}  # slug -> display name
+    refs: dict[str, str] = {}  # location_path -> name
     for entity in entities:
-        for addr in entity.addresses.all():
-            parts = []
-            if addr.city:
-                parts.append(addr.city)
-            if addr.state:
-                parts.append(addr.state)
-            if addr.country:
-                parts.append(addr.country)
-            # Emit a ref for each suffix: [city,state,country], [state,country], [country]
-            for i in range(len(parts)):
-                name = ", ".join(parts[i:])
-                slug = slugify(name)
-                if slug and slug not in refs:
-                    refs[slug] = name
-    return [{"slug": s, "name": n} for s, n in refs.items()]
+        for cel in entity.locations.all():
+            loc = cel.location
+            while loc is not None:
+                if loc.location_path not in refs:
+                    refs[loc.location_path] = loc.name
+                loc = loc.parent
+    return [{"slug": path, "name": name} for path, name in refs.items()]
 
 
 # ---------------------------------------------------------------------------
@@ -280,9 +292,12 @@ def list_all_manufacturers(request):
     if result is not None:
         return result
 
-    from ..models import MachineModel, Manufacturer
-
-    from ..models import CorporateEntity
+    from ..models import (
+        CorporateEntity,
+        CorporateEntityLocation,
+        MachineModel,
+        Manufacturer,
+    )
 
     qs = (
         Manufacturer.objects.annotate(
@@ -295,7 +310,12 @@ def list_all_manufacturers(request):
             Prefetch(
                 "entities",
                 queryset=CorporateEntity.objects.prefetch_related(
-                    "addresses",
+                    Prefetch(
+                        "locations",
+                        queryset=CorporateEntityLocation.objects.select_related(
+                            "location__parent__parent__parent__parent"
+                        ),
+                    ),
                     "aliases",
                     Prefetch(
                         "models",
@@ -323,13 +343,12 @@ def list_all_manufacturers(request):
             search_parts.append(entity.name)
             for alias in entity.aliases.all():
                 search_parts.append(alias.value)
-            for addr in entity.addresses.all():
-                if addr.city:
-                    search_parts.append(addr.city)
-                if addr.state:
-                    search_parts.append(addr.state)
-                if addr.country:
-                    search_parts.append(addr.country)
+            for cel in entity.locations.all():
+                loc = cel.location
+                while loc is not None:
+                    if loc.name:
+                        search_parts.append(loc.name)
+                    loc = loc.parent
             for model in entity.models.all():
                 if thumb is None and model.extra_data:
                     thumb, _ = _extract_image_urls(model.extra_data)

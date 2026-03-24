@@ -2,36 +2,34 @@ import { describe, expect, it } from 'vitest';
 import { buildLocationParts } from './location-links';
 
 describe('buildLocationParts', () => {
-	it('links stateless cities through the country city route', () => {
+	it('returns leaf plus ancestors using display_name', () => {
 		expect(
 			buildLocationParts({
-				city: 'Bologna',
-				state: '',
-				country: 'Italy',
-				city_slug: 'bologna',
-				state_slug: '',
-				country_slug: 'italy'
+				location_path: 'usa/il/chicago',
+				location_type: 'city',
+				display_name: 'Chicago',
+				slug: 'chicago',
+				ancestors: [
+					{ display_name: 'Illinois', location_path: 'usa/il' },
+					{ display_name: 'USA', location_path: 'usa' }
+				]
 			})
 		).toEqual([
-			{ text: 'Bologna', href: '/locations/italy/cities/bologna' },
-			{ text: 'Italy', href: '/locations/italy' }
+			{ text: 'Chicago', href: '/locations/usa/il/chicago' },
+			{ text: 'Illinois', href: '/locations/usa/il' },
+			{ text: 'USA', href: '/locations/usa' }
 		]);
 	});
 
-	it('links stateful cities through the state city route', () => {
+	it('returns just the leaf when there are no ancestors', () => {
 		expect(
 			buildLocationParts({
-				city: 'Chicago',
-				state: 'Illinois',
-				country: 'USA',
-				city_slug: 'chicago',
-				state_slug: 'illinois',
-				country_slug: 'usa'
+				location_path: 'italy',
+				location_type: 'country',
+				display_name: 'Italy',
+				slug: 'italy',
+				ancestors: []
 			})
-		).toEqual([
-			{ text: 'Chicago', href: '/locations/usa/illinois/chicago' },
-			{ text: 'Illinois', href: '/locations/usa/illinois' },
-			{ text: 'USA', href: '/locations/usa' }
-		]);
+		).toEqual([{ text: 'Italy', href: '/locations/italy' }]);
 	});
 });

@@ -161,94 +161,11 @@ _US_STATES = frozenset(
     }
 )
 
-# Canonical country names — every country that appears in the data must be here.
-# Values from the normalization map are included automatically.
-_KNOWN_COUNTRIES = frozenset(
-    {
-        "Argentina",
-        "Australia",
-        "Austria",
-        "Belgium",
-        "Brazil",
-        "Canada",
-        "China",
-        "France",
-        "Germany",
-        "Italy",
-        "Japan",
-        "Netherlands",
-        "New Zealand",
-        "Portugal",
-        "Russia",
-        "Slovenia",
-        "Spain",
-        "Sweden",
-        "Taiwan",
-        "United Kingdom",
-        "USA",
-    }
-)
-
-# Canonical US state names (post-normalization) for validating US addresses.
-_CANONICAL_US_STATES = frozenset(
-    {
-        "Alabama",
-        "Alaska",
-        "Arizona",
-        "Arkansas",
-        "California",
-        "Colorado",
-        "Connecticut",
-        "D.C.",
-        "Delaware",
-        "Florida",
-        "Georgia",
-        "Hawaii",
-        "Idaho",
-        "Illinois",
-        "Indiana",
-        "Iowa",
-        "Kansas",
-        "Kentucky",
-        "Louisiana",
-        "Maine",
-        "Maryland",
-        "Massachusetts",
-        "Michigan",
-        "Minnesota",
-        "Mississippi",
-        "Missouri",
-        "Montana",
-        "Nebraska",
-        "Nevada",
-        "New Hampshire",
-        "New Jersey",
-        "New Mexico",
-        "New York",
-        "North Carolina",
-        "North Dakota",
-        "Ohio",
-        "Oklahoma",
-        "Oregon",
-        "Pennsylvania",
-        "Rhode Island",
-        "South Carolina",
-        "South Dakota",
-        "Tennessee",
-        "Texas",
-        "Utah",
-        "Vermont",
-        "Virginia",
-        "Washington",
-        "West Virginia",
-        "Wisconsin",
-        "Wyoming",
-    }
-)
-
 # Normalization maps ported from pinexplore/sql/01_reference.sql.
 _COUNTRY_NORMALIZATION: dict[str, str] = {
     "England": "United Kingdom",
+    "Scotland": "United Kingdom",
+    "Wales": "United Kingdom",
     "Britain": "United Kingdom",
     "UK": "United Kingdom",
     "U.K.": "United Kingdom",
@@ -265,14 +182,34 @@ _STATE_NORMALIZATION: dict[str, str] = {
 
 # Per-manufacturer-ID location overrides for IPDB records with malformed
 # location strings (missing commas, multi-city HQs, etc.).
-_IPDB_LOCATION_OVERRIDES: dict[int, dict[str, str]] = {
-    532: {"city": "Chicago", "state": "Illinois", "country": "USA"},
-    607: {"city": "Long Island City", "state": "New York", "country": "USA"},
-    764: {"city": "Lincoln", "state": "Nebraska", "country": "USA"},
-    696: {"city": "Youngstown", "state": "Ohio", "country": "USA"},
-    439: {"city": "Madrid", "state": "", "country": "Spain"},
-    364: {"city": "Marcoussis", "state": "", "country": "France"},
-    135: {"city": "Avenza", "state": "", "country": "Italy"},
+# Values are canonical location_path strings from Location records.
+_IPDB_LOCATION_OVERRIDES: dict[int, str] = {
+    # "Chicago Illinois" — missing comma between city and state.
+    532: "usa/il/chicago",
+    # "Long Island City, Queens, New York" — Queens is not a state.
+    607: "usa/ny/long-island-city",
+    # Malformed Nebraska string.
+    764: "usa/ne/lincoln",
+    # Malformed Ohio string.
+    696: "usa/oh/youngstown",
+    # "Madrid" alone — ambiguous between Madrid province and city; use city.
+    439: "spain/mad/madrid/madrid",
+    # Malformed France string — Marcoussis is in Essonne, Île-de-France.
+    364: "france/idf/essonne/marcoussis",
+    # Malformed Italy string — Avenza is in Massa-Carrara province.
+    135: "italy/ms/avenza",
+    # IPDB spells "Pittsburgh, Kansas" with an h — correct spelling is Pittsburg (no h).
+    290: "usa/ks/pittsburg",
+    # IPDB incorrectly lists Tecnoplay under Italy — it is in the country of San Marino.
+    313: "san-marino/san-marino",
+    # IPDB drops the h from Pittsburgh, PA — correct spelling has an h.
+    433: "usa/pa/pittsburgh",
+    # IPDB says "Brabant, Belgium" — Brabant is a historical region; correct location is Aartselaar.
+    590: "belgium/aartselaar",
+    # IPDB says "Taiwan, R.O.C." — country is named "Taiwan" in pindata.
+    761: "taiwan/kaohsiung",
+    # IPDB includes "Hertfordshire" county which isn't in pindata; Hoddesdon is a direct child of uk/eng.
+    770: "uk/eng/hoddesdon",
 }
 
 
@@ -325,49 +262,113 @@ def parse_ipdb_location(location: str) -> dict[str, str]:
     return _normalize_location({"city": "", "state": "", "country": parts[0]})
 
 
-class LocationValidationError(ValueError):
-    """Raised when a parsed IPDB location contains unrecognized values."""
+def _get_location_root(loc):
+    """Walk the parent chain to find the root (country) Location."""
+    while loc.parent is not None:
+        loc = loc.parent
+    return loc
 
 
-def _validate_location(result: dict[str, str], mfr_id: int, raw: str) -> None:
-    """Validate a parsed location dict against known countries and states.
+class _IPDBLocationLookup:
+    """Resolves parsed IPDB {city, state, country} dicts to canonical location_path strings.
 
-    Raises ``LocationValidationError`` for unrecognized values so the ingest
-    fails loudly rather than silently storing bad data.
+    Builds lookup tables from Location + LocationAlias records at construction time.
+    Handles arbitrary hierarchy depths: US 3-level (country→state→city) and
+    European 4-level (country→region→province→city) via a country-wide fallback map.
     """
-    country = result["country"]
-    state = result["state"]
 
-    if country and country not in _KNOWN_COUNTRIES:
-        raise LocationValidationError(
-            f"IPDB manufacturer {mfr_id}: unknown country {country!r} "
-            f"(from {raw!r}). Add it to _KNOWN_COUNTRIES in parsers.py, "
-            f"or add a normalization mapping, or add an override."
+    def __init__(self) -> None:
+        from apps.catalog.models import Location, LocationAlias
+
+        # (parent_path_or_None, lower_name) → location_path (direct parent relationships)
+        self._by_parent: dict[tuple[str | None, str], str] = {}
+        # country_path → {lower_name → location_path} (any descendant within country)
+        self._by_country: dict[str, dict[str, str]] = {}
+
+        locs = list(
+            Location.objects.select_related("parent__parent__parent__parent").all()
         )
+        for loc in locs:
+            parent_path = loc.parent.location_path if loc.parent else None
+            self._by_parent.setdefault(
+                (parent_path, loc.name.lower()), loc.location_path
+            )
 
-    if country == "USA" and state and state not in _CANONICAL_US_STATES:
-        raise LocationValidationError(
-            f"IPDB manufacturer {mfr_id}: unknown US state {state!r} "
-            f"(from {raw!r}). Add it to _CANONICAL_US_STATES in parsers.py, "
-            f"or add a normalization mapping, or add an override."
-        )
+            root = _get_location_root(loc)
+            if root.location_path != loc.location_path:
+                country_map = self._by_country.setdefault(root.location_path, {})
+                country_map.setdefault(loc.name.lower(), loc.location_path)
+
+        aliases = LocationAlias.objects.select_related(
+            "location__parent__parent__parent__parent"
+        ).all()
+        for alias in aliases:
+            loc = alias.location
+            parent_path = loc.parent.location_path if loc.parent else None
+            val = alias.value.lower()
+            self._by_parent.setdefault((parent_path, val), loc.location_path)
+
+            root = _get_location_root(loc)
+            if root.location_path != loc.location_path:
+                country_map = self._by_country.setdefault(root.location_path, {})
+                country_map.setdefault(val, loc.location_path)
+
+    def resolve(self, addr: dict[str, str]) -> str | None:
+        """Resolve a parsed {city, state, country} dict to a location_path, or None."""
+        country_name = addr.get("country", "").strip()
+        state_name = addr.get("state", "").strip()
+        city_name = addr.get("city", "").strip()
+
+        if not country_name:
+            return None
+
+        country_path = self._by_parent.get((None, country_name.lower()))
+        if not country_path:
+            return None
+
+        if not state_name and not city_name:
+            return country_path
+
+        if state_name:
+            subdiv_path = self._by_parent.get((country_path, state_name.lower()))
+            if not subdiv_path:
+                # For 4-level hierarchies (Spain, France) the subdivision is not a
+                # direct child of the country — search all country descendants.
+                subdiv_path = self._by_country.get(country_path, {}).get(
+                    state_name.lower()
+                )
+            if not subdiv_path:
+                return None
+            if not city_name:
+                return subdiv_path
+            return self._by_parent.get((subdiv_path, city_name.lower()))
+
+        # City with no state — try direct child of country first (e.g. Netherlands→Reuver),
+        # then fall back to any descendant within the country (handles 4-level hierarchies).
+        path = self._by_parent.get((country_path, city_name.lower()))
+        if path:
+            return path
+        return self._by_country.get(country_path, {}).get(city_name.lower())
 
 
-def get_ipdb_location(mfr_id: int, location: str) -> dict[str, str]:
-    """Get normalized location for an IPDB manufacturer.
+def get_ipdb_location(
+    mfr_id: int, location: str, lookup: _IPDBLocationLookup
+) -> str | None:
+    """Resolve an IPDB manufacturer's location string to a canonical location_path.
 
-    Checks per-manufacturer overrides first (for malformed IPDB strings),
-    then falls back to ``parse_ipdb_location``.
+    Checks per-manufacturer overrides first (for malformed IPDB strings), then
+    parses the location string and resolves it via the DB-backed lookup.
 
-    Raises ``LocationValidationError`` if the result contains an unrecognized
-    country or US state.
+    Returns the location_path string, or None if the location string is empty
+    or cannot be resolved.
     """
     override = _IPDB_LOCATION_OVERRIDES.get(mfr_id)
     if override is not None:
-        return dict(override)
-    result = parse_ipdb_location(location)
-    _validate_location(result, mfr_id, location)
-    return result
+        return override
+    addr = parse_ipdb_location(location)
+    if not any(addr.values()):
+        return None
+    return lookup.resolve(addr)
 
 
 def parse_credit_string(raw: str | None) -> list[str]:

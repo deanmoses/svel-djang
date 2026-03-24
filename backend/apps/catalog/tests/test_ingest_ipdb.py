@@ -21,7 +21,7 @@ def _mpu_strings(db):
 
 
 @pytest.fixture
-def _run_ipdb(db, credit_roles, _mpu_strings, ipdb_narrative_features):
+def _run_ipdb(db, credit_roles, _mpu_strings, ipdb_locations, ipdb_narrative_features):
     """Run ingest_ipdb with the sample fixture."""
     call_command(
         "ingest_ipdb",

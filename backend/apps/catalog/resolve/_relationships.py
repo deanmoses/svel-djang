@@ -16,10 +16,13 @@ from apps.provenance.models import Claim
 from ..models import (
     CorporateEntity,
     CorporateEntityAlias,
+    CorporateEntityLocation,
     Credit,
     CreditRole,
     GameplayFeature,
     GameplayFeatureAlias,
+    Location,
+    LocationAlias,
     MachineModel,
     MachineModelGameplayFeature,
     Manufacturer,
@@ -926,6 +929,7 @@ ALIAS_REGISTRY: list[tuple] = [
         CorporateEntityAlias,
         "corporate_entity",
     ),
+    (Location, "location_alias", LocationAlias, "location"),
 ]
 
 
@@ -1080,3 +1084,72 @@ def resolve_theme_parents() -> None:
 
 def resolve_gameplay_feature_parents() -> None:
     _resolve_parents(GameplayFeature, claim_field_prefix="gameplay_feature")
+
+
+# ------------------------------------------------------------------
+# Location alias resolver
+# ------------------------------------------------------------------
+
+
+def resolve_all_location_aliases() -> None:
+    """Resolve location_alias claims into LocationAlias rows."""
+    _resolve_aliases(Location, "location_alias", LocationAlias, "location")
+
+
+# ------------------------------------------------------------------
+# CorporateEntityLocation resolver
+# ------------------------------------------------------------------
+
+
+def resolve_all_corporate_entity_locations() -> dict[str, int]:
+    """Sync CorporateEntityLocation rows from active 'address' claims on CorporateEntity.
+
+    Loads ALL existing CorporateEntityLocation rows so that CEs whose claims
+    were all deactivated also have their stale rows removed.
+    """
+    from collections import defaultdict
+
+    from django.contrib.contenttypes.models import ContentType
+
+    ce_ct = ContentType.objects.get_for_model(CorporateEntity)
+    loc_by_path = {loc.location_path: loc for loc in Location.objects.all()}
+
+    active_claims = Claim.objects.filter(
+        content_type=ce_ct, field_name="address", is_active=True
+    ).values("object_id", "value")
+
+    desired: dict[int, set[str]] = defaultdict(set)
+    for row in active_claims:
+        path = (row["value"] or {}).get("location_path", "")
+        if path and path in loc_by_path:
+            desired[row["object_id"]].add(path)
+
+    created = deleted = 0
+
+    # Load ALL existing rows so stale rows for CEs with no active claims are cleaned up.
+    all_existing = CorporateEntityLocation.objects.select_related("location").all()
+    current: dict[int, dict[str, CorporateEntityLocation]] = defaultdict(dict)
+    for cel in all_existing:
+        current[cel.corporate_entity_id][cel.location.location_path] = cel
+
+    # Create missing rows.
+    for ce_pk, paths in desired.items():
+        for path in paths:
+            if path not in current[ce_pk]:
+                CorporateEntityLocation.objects.create(
+                    corporate_entity_id=ce_pk,
+                    location=loc_by_path[path],
+                )
+                created += 1
+
+    # Delete stale rows (path no longer desired, or CE lost all claims).
+    stale_pks: list[int] = []
+    for ce_pk, path_map in current.items():
+        wanted = desired.get(ce_pk, set())
+        for path, cel in path_map.items():
+            if path not in wanted:
+                stale_pks.append(cel.pk)
+    if stale_pks:
+        deleted = CorporateEntityLocation.objects.filter(pk__in=stale_pks).delete()[0]
+
+    return {"created": created, "deleted": deleted}

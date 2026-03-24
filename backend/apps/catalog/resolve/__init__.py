@@ -31,8 +31,10 @@ from ._helpers import (
 )
 from ._relationships import (  # noqa: F401
     resolve_all_aliases,
+    resolve_all_corporate_entity_locations,
     resolve_all_credits,
     resolve_all_gameplay_features,
+    resolve_all_location_aliases,
     resolve_all_model_abbreviations,
     resolve_all_reward_types,
     resolve_all_tags,
@@ -59,6 +61,7 @@ from ._entities import (  # noqa: F401
     CORPORATE_ENTITY_DIRECT_FIELDS as CORPORATE_ENTITY_DIRECT_FIELDS,
     FRANCHISE_DIRECT_FIELDS as FRANCHISE_DIRECT_FIELDS,
     GAMEPLAY_FEATURE_DIRECT_FIELDS as GAMEPLAY_FEATURE_DIRECT_FIELDS,
+    LOCATION_DIRECT_FIELDS as LOCATION_DIRECT_FIELDS,
     MANUFACTURER_DIRECT_FIELDS as MANUFACTURER_DIRECT_FIELDS,
     PERSON_DIRECT_FIELDS as PERSON_DIRECT_FIELDS,
     SERIES_DIRECT_FIELDS as SERIES_DIRECT_FIELDS,
@@ -71,6 +74,7 @@ from ._entities import (  # noqa: F401
     _resolve_bulk as _resolve_bulk,
     _resolve_single as _resolve_single,
     resolve_all_gameplay_feature_entities as resolve_all_gameplay_feature_entities,
+    resolve_all_locations as resolve_all_locations,
     resolve_corporate_entity as resolve_corporate_entity,
     resolve_franchise as resolve_franchise,
     resolve_gameplay_feature as resolve_gameplay_feature,
@@ -194,7 +198,12 @@ def resolve_all(stdout=None) -> int:
         if stdout:
             stdout.write(f"  {msg}")
 
-    # 0a. Resolve taxonomy models first (they are FK targets).
+    # 0. Resolve locations first (they are FK targets for CorporateEntityLocation).
+    resolve_all_locations()
+    resolve_all_location_aliases()
+    _status("Locations resolved")
+
+    # 0a. Resolve taxonomy models (they are FK targets for MachineModel).
     _resolve_all_taxonomy()
     resolve_all_gameplay_feature_entities()
     _status("Taxonomy resolved")
@@ -204,6 +213,10 @@ def resolve_all(stdout=None) -> int:
     resolve_gameplay_feature_parents()
     resolve_all_aliases()
     _status("Hierarchy and aliases resolved")
+
+    # 0a3. Sync CorporateEntityLocation rows from address claims.
+    resolve_all_corporate_entity_locations()
+    _status("Corporate entity locations resolved")
 
     # 0b. Resolve titles (they are FK targets for MachineModel).
     franchise_lookup = {f.slug: f for f in Franchise.objects.all()}

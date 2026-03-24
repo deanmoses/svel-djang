@@ -8,10 +8,12 @@ from django.core.exceptions import ValidationError
 from apps.provenance.models import Claim
 
 from .models import (
-    Address,
     Cabinet,
     CorporateEntity,
     CorporateEntityAlias,
+    CorporateEntityLocation,
+    Location,
+    LocationAlias,
     Credit,
     CreditRole,
     DisplaySubtype,
@@ -187,10 +189,15 @@ class GameplayFeatureInline(admin.TabularInline):
         return False
 
 
-class AddressInline(admin.TabularInline):
-    model = Address
+class CorporateEntityLocationInline(admin.TabularInline):
+    model = CorporateEntityLocation
     extra = 0
-    fields = ("city", "state", "country")
+    raw_id_fields = ("location",)
+    readonly_fields = ("location",)
+    can_delete = False
+
+    def has_add_permission(self, request, obj=None):
+        return False
 
 
 class CorporateEntityInline(admin.TabularInline):
@@ -232,7 +239,23 @@ class CorporateEntityAdmin(admin.ModelAdmin):
     list_display = ("name", "manufacturer", "year_start", "year_end")
     search_fields = ("name", "manufacturer__name")
     autocomplete_fields = ("manufacturer",)
-    inlines = (CorporateEntityAliasInline, AddressInline, ClaimInline)
+    inlines = (CorporateEntityAliasInline, CorporateEntityLocationInline, ClaimInline)
+
+
+# ---------------------------------------------------------------------------
+# Location
+# ---------------------------------------------------------------------------
+
+LocationAliasInline = alias_inline(LocationAlias)
+
+
+@admin.register(Location)
+class LocationAdmin(admin.ModelAdmin):
+    list_display = ("location_path", "name", "location_type", "parent")
+    search_fields = ("location_path", "name")
+    list_filter = ("location_type",)
+    raw_id_fields = ("parent",)
+    inlines = (LocationAliasInline,)
 
 
 # ---------------------------------------------------------------------------

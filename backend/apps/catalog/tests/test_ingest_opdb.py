@@ -21,7 +21,9 @@ def _mpu_strings(db):
 
 
 @pytest.fixture
-def _setup_ipdb_first(db, _mpu_strings, ipdb_narrative_features, credit_roles):
+def _setup_ipdb_first(
+    db, _mpu_strings, ipdb_locations, ipdb_narrative_features, credit_roles
+):
     """Seed IPDB data so OPDB can match by ipdb_id."""
     call_command(
         "ingest_ipdb",

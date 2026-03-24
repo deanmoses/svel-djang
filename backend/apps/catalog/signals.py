@@ -14,9 +14,10 @@ def _invalidate_cache(sender, **kwargs):
 def connect():
     """Connect cache-invalidation signals. Called from AppConfig.ready()."""
     from .models import (
-        Address,
-        Credit,
         CorporateEntity,
+        CorporateEntityLocation,
+        Credit,
+        Location,
         MachineModel,
         Manufacturer,
         Person,
@@ -24,7 +25,8 @@ def connect():
     )
 
     for model in (
-        Address,
+        Location,
+        CorporateEntityLocation,
         MachineModel,
         Manufacturer,
         Person,
