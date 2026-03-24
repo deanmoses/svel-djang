@@ -105,6 +105,30 @@ def _normalize_credit_role(raw: str) -> str:
 
 # Taxonomy registry: (json_filename, model_class, has_display_order, parent_config)
 # parent_config: (model_fk_field, parent_model, json_fk_key) or None
+# Maps model class → source slug suffix for per-entity AI description sources.
+AI_DESC_SOURCE_REGISTRY: list[tuple[type, str]] = [
+    (MachineModel, "model"),
+    (Title, "title"),
+    (Manufacturer, "manufacturer"),
+    (CorporateEntity, "corporate-entity"),
+    (Person, "person"),
+    (GameplayFeature, "gameplay-feature"),
+    (Theme, "theme"),
+    (Franchise, "franchise"),
+    (Series, "series"),
+    (Cabinet, "cabinet"),
+    (CreditRole, "credit-role"),
+    (DisplayType, "display-type"),
+    (DisplaySubtype, "display-subtype"),
+    (GameFormat, "game-format"),
+    (RewardType, "reward-type"),
+    (System, "system"),
+    (Tag, "tag"),
+    (TechnologyGeneration, "technology-generation"),
+    (TechnologySubgeneration, "technology-subgeneration"),
+    (Location, "location"),
+]
+
 TAXONOMY_REGISTRY = [
     # Top-level (no parent FK) — order matters: parents before children.
     ("technology_generation.json", TechnologyGeneration, True, None),
@@ -216,15 +240,20 @@ class Command(BaseCommand):
                 "priority": 300,
             },
         )
-        self.titles_source, _ = Source.objects.update_or_create(
-            slug="pinbase-titles",
-            defaults={
-                "name": "Pinbase Titles Seed",
-                "source_type": "editorial",
-                "priority": 300,
-                "url": "",
-            },
-        )
+
+        # Per-entity-type AI description sources. Each can be toggled
+        # independently via is_enabled in admin.
+        self._ai_desc_sources: dict[type, Source] = {}
+        for model_class, slug_suffix in AI_DESC_SOURCE_REGISTRY:
+            src, _ = Source.objects.get_or_create(
+                slug=f"pinbase-ai-desc-{slug_suffix}",
+                defaults={
+                    "name": f"Pinbase AI Descriptions ({model_class.__name__})",
+                    "source_type": Source.SourceType.EDITORIAL,
+                    "priority": 300,
+                },
+            )
+            self._ai_desc_sources[model_class] = src
 
         self._ingest_locations()
         self._ingest_taxonomy()
@@ -243,6 +272,46 @@ class Command(BaseCommand):
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
+
+    def _assert_claims_split_descriptions(
+        self,
+        model_class: type,
+        pending_claims: list[Claim],
+        **kwargs,
+    ) -> dict[str, int]:
+        """Assert claims, routing description claims to the AI description source.
+
+        Non-description claims go to self.pinbase_source.
+        Description claims go to the per-entity AI description source.
+        Returns combined stats from both bulk_assert_claims calls.
+        """
+        desc_claims = [c for c in pending_claims if c.field_name == "description"]
+        other_claims = [c for c in pending_claims if c.field_name != "description"]
+
+        stats: dict[str, int] = {
+            "unchanged": 0,
+            "created": 0,
+            "superseded": 0,
+            "swept": 0,
+            "duplicates_removed": 0,
+        }
+
+        if other_claims:
+            s = Claim.objects.bulk_assert_claims(
+                self.pinbase_source, other_claims, **kwargs
+            )
+            for k in stats:
+                stats[k] += s[k]
+
+        if desc_claims:
+            ai_source = self._ai_desc_sources.get(model_class)
+            if ai_source is None:
+                ai_source = self.pinbase_source
+            s = Claim.objects.bulk_assert_claims(ai_source, desc_claims)
+            for k in stats:
+                stats[k] += s[k]
+
+        return stats
 
     def _assert_alias_claims(
         self,
@@ -418,8 +487,6 @@ class Command(BaseCommand):
     # ------------------------------------------------------------------
 
     def _ingest_taxonomy(self):
-        source = self.pinbase_source
-
         for (
             json_file,
             model_class,
@@ -518,7 +585,7 @@ class Command(BaseCommand):
                         )
                     )
 
-            stats = Claim.objects.bulk_assert_claims(source, pending_claims)
+            stats = self._assert_claims_split_descriptions(model_class, pending_claims)
             label = model_class.__name__
             self.stdout.write(
                 f"  {label}: {len(data)} records — "
@@ -743,7 +810,7 @@ class Command(BaseCommand):
                 )
 
         if pending_claims:
-            stats = Claim.objects.bulk_assert_claims(source, pending_claims)
+            stats = self._assert_claims_split_descriptions(Manufacturer, pending_claims)
             self.stdout.write(
                 f"  Claims: {stats['unchanged']} unchanged, "
                 f"{stats['created']} created, {stats['superseded']} superseded"
@@ -867,7 +934,9 @@ class Command(BaseCommand):
                 )
 
         if pending_claims:
-            stats = Claim.objects.bulk_assert_claims(source, pending_claims)
+            stats = self._assert_claims_split_descriptions(
+                CorporateEntity, pending_claims
+            )
             self.stdout.write(
                 f"  Claims: {stats['unchanged']} unchanged, "
                 f"{stats['created']} created, {stats['superseded']} superseded"
@@ -941,7 +1010,6 @@ class Command(BaseCommand):
         if not entries:
             return
 
-        source = self.pinbase_source
         ct_id = ContentType.objects.get_for_model(System).pk
         mfr_by_slug = {m.slug: m for m in Manufacturer.objects.all()}
         subgen_by_slug = {t.slug: t for t in TechnologySubgeneration.objects.all()}
@@ -996,7 +1064,7 @@ class Command(BaseCommand):
                     )
 
         if pending_claims:
-            stats = Claim.objects.bulk_assert_claims(source, pending_claims)
+            stats = self._assert_claims_split_descriptions(System, pending_claims)
             self.stdout.write(
                 f"  Claims: {stats['created']} created, {stats['unchanged']} unchanged"
             )
@@ -1082,7 +1150,7 @@ class Command(BaseCommand):
                     )
 
         if pending_claims:
-            stats = Claim.objects.bulk_assert_claims(source, pending_claims)
+            stats = self._assert_claims_split_descriptions(Person, pending_claims)
             self.stdout.write(
                 f"  Claims: {stats['created']} created, {stats['unchanged']} unchanged"
             )
@@ -1114,7 +1182,6 @@ class Command(BaseCommand):
         if not series_entries:
             return
 
-        source = self.pinbase_source
         ct_id = ContentType.objects.get_for_model(Series).pk
         existing_slugs = set(Series.objects.values_list("slug", flat=True))
 
@@ -1153,7 +1220,7 @@ class Command(BaseCommand):
                     )
 
         if pending_claims:
-            stats = Claim.objects.bulk_assert_claims(source, pending_claims)
+            stats = self._assert_claims_split_descriptions(Series, pending_claims)
             self.stdout.write(
                 f"  Claims: {stats['created']} created, {stats['unchanged']} unchanged"
             )
@@ -1203,7 +1270,6 @@ class Command(BaseCommand):
         if not entries:
             return
 
-        source = self.titles_source
         ct_id = ContentType.objects.get_for_model(Title).pk
 
         titles_by_opdb_id = {t.opdb_id: t for t in Title.objects.all()}
@@ -1347,7 +1413,7 @@ class Command(BaseCommand):
         # Assert claims.
         claim_stats: dict = {}
         if pending_claims:
-            claim_stats = Claim.objects.bulk_assert_claims(source, pending_claims)
+            claim_stats = self._assert_claims_split_descriptions(Title, pending_claims)
 
         # Resolve touched titles.
         if touched_ids:
@@ -1677,7 +1743,9 @@ class Command(BaseCommand):
         )
 
         # Assert scalar claims.
-        claim_stats = Claim.objects.bulk_assert_claims(source, pending_claims)
+        claim_stats = self._assert_claims_split_descriptions(
+            MachineModel, pending_claims
+        )
         self.stdout.write(
             f"  Claims: {claim_stats['unchanged']} unchanged, "
             f"{claim_stats['created']} created, "

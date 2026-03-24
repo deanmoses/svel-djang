@@ -136,7 +136,7 @@ class TestIngestPinbaseModels:
 
         call_command("ingest_pinbase", export_dir=export_dir)
 
-        source = Source.objects.get(slug="pinbase")
+        source = Source.objects.get(slug="pinbase-ai-desc-model")
         claim = mm.claims.get(source=source, field_name="description", is_active=True)
         assert claim.value == "A test description"
 
