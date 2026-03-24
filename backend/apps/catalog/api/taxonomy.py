@@ -8,9 +8,8 @@ from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
 
-from apps.core.markdown import render_markdown_fields
-
-from .schemas import TitleMachineSchema
+from .helpers import _build_rich_text
+from .schemas import RichTextSchema, TitleMachineSchema
 
 
 # ---------------------------------------------------------------------------
@@ -23,8 +22,7 @@ def _serialize_taxonomy(obj) -> dict:
         "name": obj.name,
         "slug": obj.slug,
         "display_order": obj.display_order,
-        "description": obj.description,
-        **render_markdown_fields(obj),
+        "description": _build_rich_text(obj, "description"),
     }
 
 
@@ -37,8 +35,7 @@ class TaxonomySchema(Schema):
     name: str
     slug: str
     display_order: int
-    description: str
-    description_html: str = ""
+    description: RichTextSchema = RichTextSchema()
 
 
 # ---------------------------------------------------------------------------

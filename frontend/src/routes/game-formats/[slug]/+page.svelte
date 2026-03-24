@@ -18,7 +18,7 @@
 
 <EntityDetailLayout
 	name={profile.name}
-	descriptionHtml={profile.description_html}
+	description={profile.description}
 	breadcrumbs={[{ label: 'Game Formats', href: '/game-formats' }]}
 >
 	<PaginatedSection

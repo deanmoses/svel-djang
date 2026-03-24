@@ -10,9 +10,8 @@ from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
 
-from apps.core.markdown import render_markdown_fields
-
-from .helpers import _extract_image_urls
+from .helpers import _build_rich_text, _claims_prefetch, _extract_image_urls
+from .schemas import RichTextSchema
 
 
 # ---------------------------------------------------------------------------
@@ -39,8 +38,7 @@ class FranchiseListSchema(Schema):
 class FranchiseDetailSchema(Schema):
     name: str
     slug: str
-    description: str = ""
-    description_html: str = ""
+    description: RichTextSchema = RichTextSchema()
     titles: list[TitleRefSchema]
 
 
@@ -118,13 +116,16 @@ def get_franchise(request, slug: str):
         ),
     )
     franchise = get_object_or_404(
-        Franchise.objects.prefetch_related(Prefetch("titles", queryset=titles_qs)),
+        Franchise.objects.prefetch_related(
+            Prefetch("titles", queryset=titles_qs), _claims_prefetch()
+        ),
         slug=slug,
     )
     return {
         "name": franchise.name,
         "slug": franchise.slug,
-        "description": franchise.description,
-        **render_markdown_fields(franchise),
+        "description": _build_rich_text(
+            franchise, "description", getattr(franchise, "active_claims", [])
+        ),
         "titles": [_serialize_title_list(t) for t in franchise.titles.all()],
     }

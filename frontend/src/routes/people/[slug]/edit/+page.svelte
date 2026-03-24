@@ -10,7 +10,7 @@
 	function personToFormFields(p: typeof person) {
 		return {
 			name: p.name,
-			description: p.description,
+			description: p.description?.text ?? '',
 			nationality: p.nationality ?? '',
 			birth_year: p.birth_year ?? '',
 			birth_month: p.birth_month ?? '',

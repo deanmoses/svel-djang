@@ -10,9 +10,8 @@ from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
 
-from apps.core.markdown import render_markdown_fields
-
-from .helpers import _extract_image_urls
+from .helpers import _build_rich_text, _claims_prefetch, _extract_image_urls
+from .schemas import RichTextSchema
 from .machine_models import CreditSchema
 
 # ---------------------------------------------------------------------------
@@ -33,8 +32,7 @@ class TitleRefSchema(Schema):
 class SeriesListSchema(Schema):
     name: str
     slug: str
-    description: str = ""
-    description_html: str = ""
+    description: RichTextSchema = RichTextSchema()
     title_count: int = 0
     thumbnail_url: Optional[str] = None
 
@@ -42,8 +40,7 @@ class SeriesListSchema(Schema):
 class SeriesDetailSchema(Schema):
     name: str
     slug: str
-    description: str = ""
-    description_html: str = ""
+    description: RichTextSchema = RichTextSchema()
     titles: list[TitleRefSchema]
     credits: list[CreditSchema] = []
 
@@ -116,8 +113,7 @@ def list_series(request):
             {
                 "name": s.name,
                 "slug": s.slug,
-                "description": s.description,
-                **render_markdown_fields(s),
+                "description": _build_rich_text(s, "description"),
                 "title_count": s.title_count,
                 "thumbnail_url": thumb,
             }
@@ -151,14 +147,16 @@ def get_series(request, slug: str):
         Series.objects.prefetch_related(
             Prefetch("titles", queryset=titles_qs),
             Prefetch("credits", queryset=credits_qs),
+            _claims_prefetch(),
         ),
         slug=slug,
     )
     return {
         "name": series.name,
         "slug": series.slug,
-        "description": series.description,
-        **render_markdown_fields(series),
+        "description": _build_rich_text(
+            series, "description", getattr(series, "active_claims", [])
+        ),
         "titles": [_serialize_title_list(t) for t in series.titles.all()],
         "credits": [
             {

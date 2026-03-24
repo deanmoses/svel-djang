@@ -9,7 +9,7 @@
 
 <EntityDetailLayout
 	name={franchise.name}
-	descriptionHtml={franchise.description_html}
+	description={franchise.description}
 	breadcrumbs={[{ label: 'Franchises', href: '/franchises' }]}
 >
 	{#if franchise.titles.length === 0}

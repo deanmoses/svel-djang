@@ -9,7 +9,7 @@
 
 <EntityDetailLayout
 	name={profile.name}
-	descriptionHtml={profile.description_html}
+	description={profile.description}
 	breadcrumbs={[{ label: 'Reward Types', href: '/reward-types' }]}
 >
 	{#if profile.machines.length === 0}

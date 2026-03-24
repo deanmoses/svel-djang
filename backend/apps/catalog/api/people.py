@@ -15,12 +15,15 @@ from ninja.errors import HttpError
 from ninja.pagination import PageNumberPagination, paginate
 from ninja.security import django_auth
 
-from apps.core.markdown import render_markdown_fields
-
 from ..cache import PEOPLE_ALL_KEY, invalidate_all
 from .constants import DEFAULT_PAGE_SIZE
-from .helpers import _build_activity, _claims_prefetch, _extract_image_urls
-from .schemas import ClaimPatchSchema, ClaimSchema, RelatedTitleSchema
+from .helpers import (
+    _build_activity,
+    _build_rich_text,
+    _claims_prefetch,
+    _extract_image_urls,
+)
+from .schemas import ClaimPatchSchema, ClaimSchema, RelatedTitleSchema, RichTextSchema
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -47,8 +50,7 @@ class PersonTitleSchema(RelatedTitleSchema):
 class PersonDetailSchema(Schema):
     name: str
     slug: str
-    description: str
-    description_html: str = ""
+    description: RichTextSchema = RichTextSchema()
     birth_year: int | None = None
     birth_month: int | None = None
     birth_day: int | None = None
@@ -105,8 +107,9 @@ def _serialize_person_detail(person) -> dict:
     return {
         "name": person.name,
         "slug": person.slug,
-        "description": person.description,
-        **render_markdown_fields(person),
+        "description": _build_rich_text(
+            person, "description", getattr(person, "active_claims", [])
+        ),
         "birth_year": person.birth_year,
         "birth_month": person.birth_month,
         "birth_day": person.birth_day,

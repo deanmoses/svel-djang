@@ -38,9 +38,9 @@
 
 	<TwoColumnLayout>
 		{#snippet main()}
-			{#if profile.description_html}
+			{#if profile.description?.html}
 				<div class="description">
-					<Markdown html={profile.description_html} />
+					<Markdown html={profile.description.html} />
 				</div>
 			{/if}
 			<PaginatedSection

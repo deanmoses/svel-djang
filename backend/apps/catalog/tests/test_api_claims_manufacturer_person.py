@@ -235,7 +235,7 @@ class TestPatchPersonClaimsPersistence:
             content_type="application/json",
         )
         data = resp.json()
-        assert data["description"] == "A great designer."
+        assert data["description"]["text"] == "A great designer."
         assert data["name"] == "Pat Lawlor"
         person.refresh_from_db()
         assert person.description == "A great designer."

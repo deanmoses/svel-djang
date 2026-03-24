@@ -7,9 +7,8 @@ from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
 
-from apps.core.markdown import render_markdown_fields
-
-from .schemas import GameplayFeatureSchema
+from .helpers import _build_rich_text, _claims_prefetch
+from .schemas import GameplayFeatureSchema, RichTextSchema
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -26,8 +25,7 @@ class GameplayFeatureListSchema(Schema):
 class GameplayFeatureDetailSchema(Schema):
     name: str
     slug: str
-    description: str = ""
-    description_html: str = ""
+    description: RichTextSchema = RichTextSchema()
     aliases: list[str] = []
     parents: list[GameplayFeatureSchema] = []
     children: list[GameplayFeatureSchema] = []
@@ -96,7 +94,9 @@ def get_gameplay_feature(request, slug: str):
     from ..models import GameplayFeature
 
     feature = get_object_or_404(
-        GameplayFeature.objects.prefetch_related("parents", "children", "aliases"),
+        GameplayFeature.objects.prefetch_related(
+            "parents", "children", "aliases", _claims_prefetch()
+        ),
         slug=slug,
     )
 
@@ -115,8 +115,9 @@ def get_gameplay_feature(request, slug: str):
     return {
         "name": feature.name,
         "slug": feature.slug,
-        "description": feature.description,
-        **render_markdown_fields(feature),
+        "description": _build_rich_text(
+            feature, "description", getattr(feature, "active_claims", [])
+        ),
         "aliases": display_aliases,
         "parents": [{"name": p.name, "slug": p.slug} for p in feature.parents.all()],
         "children": [

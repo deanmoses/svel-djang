@@ -8,10 +8,8 @@ from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
 
-from apps.core.markdown import render_markdown_fields
-
-from .helpers import _serialize_title_machine
-from .schemas import ThemeSchema, TitleMachineSchema
+from .helpers import _build_rich_text, _claims_prefetch, _serialize_title_machine
+from .schemas import RichTextSchema, ThemeSchema, TitleMachineSchema
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -27,8 +25,7 @@ class ThemeListSchema(Schema):
 class ThemeDetailSchema(Schema):
     name: str
     slug: str
-    description: str = ""
-    description_html: str = ""
+    description: RichTextSchema = RichTextSchema()
     aliases: list[str] = []
     parents: list[ThemeSchema] = []
     children: list[ThemeSchema] = []
@@ -68,6 +65,7 @@ def get_theme(request, slug: str):
             "parents",
             "children",
             "aliases",
+            _claims_prefetch(),
             Prefetch(
                 "machine_models",
                 queryset=MachineModel.objects.filter(variant_of__isnull=True)
@@ -82,8 +80,9 @@ def get_theme(request, slug: str):
     return {
         "name": theme.name,
         "slug": theme.slug,
-        "description": theme.description,
-        **render_markdown_fields(theme),
+        "description": _build_rich_text(
+            theme, "description", getattr(theme, "active_claims", [])
+        ),
         "aliases": [a.value for a in theme.aliases.all()],
         "parents": [{"name": t.name, "slug": t.slug} for t in theme.parents.all()],
         "children": [

@@ -26,8 +26,8 @@
 
 	<TwoColumnLayout>
 		{#snippet main()}
-			{#if system.description_html}
-				<Markdown html={system.description_html} />
+			{#if system.description?.html}
+				<Markdown html={system.description.html} />
 			{/if}
 
 			{#if system.titles.length === 0}

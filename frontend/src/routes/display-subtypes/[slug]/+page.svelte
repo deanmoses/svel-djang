@@ -16,7 +16,7 @@
 	});
 </script>
 
-<EntityDetailLayout name={profile.name} descriptionHtml={profile.description_html}>
+<EntityDetailLayout name={profile.name} description={profile.description}>
 	<PaginatedSection
 		loader={machines}
 		heading="Machines"

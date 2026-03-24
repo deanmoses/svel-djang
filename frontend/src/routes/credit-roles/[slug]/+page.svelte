@@ -13,8 +13,8 @@
 <article>
 	<header>
 		<h1>{profile.name}</h1>
-		{#if profile.description_html}
-			<Markdown html={profile.description_html} />
+		{#if profile.description?.html}
+			<Markdown html={profile.description.html} />
 		{/if}
 	</header>
 </article>

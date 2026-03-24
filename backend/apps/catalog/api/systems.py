@@ -10,8 +10,8 @@ from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
 
-from .helpers import _extract_image_urls
-from .schemas import RelatedTitleSchema
+from .helpers import _build_rich_text, _claims_prefetch, _extract_image_urls
+from .schemas import RelatedTitleSchema, RichTextSchema
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -34,8 +34,7 @@ class SiblingSystemSchema(Schema):
 class SystemDetailSchema(Schema):
     name: str
     slug: str
-    description: str = ""
-    description_html: str = ""
+    description: RichTextSchema = RichTextSchema()
     manufacturer_name: Optional[str] = None
     manufacturer_slug: Optional[str] = None
     titles: list[RelatedTitleSchema]
@@ -83,12 +82,13 @@ def get_system(request, slug: str):
 
     system = get_object_or_404(
         System.objects.select_related("manufacturer").prefetch_related(
+            _claims_prefetch(),
             Prefetch(
                 "machine_models",
                 queryset=MachineModel.objects.filter(variant_of__isnull=True)
                 .select_related("corporate_entity__manufacturer", "title")
                 .order_by(F("year").desc(nulls_last=True), "name"),
-            )
+            ),
         ),
         slug=slug,
     )
@@ -124,13 +124,12 @@ def get_system(request, slug: str):
             .values("name", "slug")
         )
 
-    from apps.core.markdown import render_markdown_fields
-
     return {
         "name": system.name,
         "slug": system.slug,
-        "description": system.description,
-        **render_markdown_fields(system),
+        "description": _build_rich_text(
+            system, "description", getattr(system, "active_claims", [])
+        ),
         "manufacturer_name": system.manufacturer.name if system.manufacturer else None,
         "manufacturer_slug": system.manufacturer.slug if system.manufacturer else None,
         "titles": list(titles.values()),

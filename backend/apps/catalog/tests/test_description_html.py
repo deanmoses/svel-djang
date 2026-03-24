@@ -58,8 +58,8 @@ class TestManufacturerDescriptionHtml:
         )
         resp = client.get("/api/systems/wpc-95")
         data = resp.json()
-        assert "/manufacturers/williams" in data["description_html"]
-        assert "Williams" in data["description_html"]
+        assert "/manufacturers/williams" in data["description"]["html"]
+        assert "Williams" in data["description"]["html"]
 
 
 class TestSystemDescriptionHtml:
@@ -67,13 +67,13 @@ class TestSystemDescriptionHtml:
         resp = client.get("/api/systems/wpc-95")
         assert resp.status_code == 200
         data = resp.json()
-        assert "description_html" in data
-        assert data["description_html"] != ""
+        assert "html" in data["description"]
+        assert data["description"]["html"] != ""
 
     def test_raw_description_also_present(self, client, system_with_description):
         resp = client.get("/api/systems/wpc-95")
         data = resp.json()
-        assert data["description"] == "The final WPC generation."
+        assert data["description"]["text"] == "The final WPC generation."
 
 
 @pytest.mark.django_db

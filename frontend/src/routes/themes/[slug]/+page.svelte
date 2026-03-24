@@ -10,7 +10,7 @@
 
 <EntityDetailLayout
 	name={theme.name}
-	descriptionHtml={theme.description_html}
+	description={theme.description}
 	breadcrumbs={[{ label: 'Themes', href: '/themes' }]}
 >
 	{#if theme.children.length > 0}
