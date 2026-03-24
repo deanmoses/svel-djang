@@ -94,6 +94,10 @@ def resolve_view(request):
         label, count = _run_resolve(target)
         elapsed = time.monotonic() - start
 
+        from apps.catalog.cache import invalidate_all
+
+        invalidate_all()
+
         if count >= 0:
             messages.success(request, f"Resolved {count} {label} in {elapsed:.1f}s.")
         else:
