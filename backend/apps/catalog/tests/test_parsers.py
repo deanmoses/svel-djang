@@ -372,7 +372,7 @@ class TestIPDBLocationLookup:
             is None
         )
 
-    def test_empty_addr_returns_none(self, loc_tree):
+    def test_empty_parsed_returns_none(self, loc_tree):
         lookup = _IPDBLocationLookup()
         assert lookup.resolve({"city": "", "state": "", "country": ""}) is None
 

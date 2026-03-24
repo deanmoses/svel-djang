@@ -81,7 +81,7 @@ class LocationAlias(AliasBase):
 class CorporateEntityLocation(models.Model):
     """Associates a CorporateEntity with a canonical Location.
 
-    One-to-many: a CE can have addresses in multiple locations.
+    One-to-many: a CE can have multiple locations.
     ``location`` points to the most specific known level (city, subdivision,
     or country).  The full hierarchy is accessible via ``location.parent``.
 

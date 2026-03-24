@@ -313,11 +313,11 @@ class _IPDBLocationLookup:
                 country_map = self._by_country.setdefault(root.location_path, {})
                 country_map.setdefault(val, loc.location_path)
 
-    def resolve(self, addr: dict[str, str]) -> str | None:
+    def resolve(self, parsed: dict[str, str]) -> str | None:
         """Resolve a parsed {city, state, country} dict to a location_path, or None."""
-        country_name = addr.get("country", "").strip()
-        state_name = addr.get("state", "").strip()
-        city_name = addr.get("city", "").strip()
+        country_name = parsed.get("country", "").strip()
+        state_name = parsed.get("state", "").strip()
+        city_name = parsed.get("city", "").strip()
 
         if not country_name:
             return None
@@ -365,10 +365,10 @@ def get_ipdb_location(
     override = _IPDB_LOCATION_OVERRIDES.get(mfr_id)
     if override is not None:
         return override
-    addr = parse_ipdb_location(location)
-    if not any(addr.values()):
+    parsed = parse_ipdb_location(location)
+    if not any(parsed.values()):
         return None
-    return lookup.resolve(addr)
+    return lookup.resolve(parsed)
 
 
 def parse_credit_string(raw: str | None) -> list[str]:

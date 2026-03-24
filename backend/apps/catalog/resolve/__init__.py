@@ -214,7 +214,7 @@ def resolve_all(stdout=None) -> int:
     resolve_all_aliases()
     _status("Hierarchy and aliases resolved")
 
-    # 0a3. Sync CorporateEntityLocation rows from address claims.
+    # 0a3. Sync CorporateEntityLocation rows from location claims.
     resolve_all_corporate_entity_locations()
     _status("Corporate entity locations resolved")
 

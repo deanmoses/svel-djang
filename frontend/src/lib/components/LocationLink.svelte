@@ -4,15 +4,15 @@
 	import { resolveHref } from '$lib/utils';
 
 	let {
-		addr
+		loc
 	}: {
-		addr: components['schemas']['CorporateEntityLocationSchema'];
+		loc: components['schemas']['CorporateEntityLocationSchema'];
 	} = $props();
 
 	type Part = { text: string; href?: string };
 
 	let parts = $derived.by((): Part[] =>
-		buildLocationParts(addr).map((part) => ({
+		buildLocationParts(loc).map((part) => ({
 			...part,
 			href: part.href ? resolveHref(part.href) : undefined
 		}))

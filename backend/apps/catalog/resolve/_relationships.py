@@ -1102,7 +1102,7 @@ def resolve_all_location_aliases() -> None:
 
 
 def resolve_all_corporate_entity_locations() -> dict[str, int]:
-    """Sync CorporateEntityLocation rows from active 'address' claims on CorporateEntity.
+    """Sync CorporateEntityLocation rows from active 'location' claims on CorporateEntity.
 
     Loads ALL existing CorporateEntityLocation rows so that CEs whose claims
     were all deactivated also have their stale rows removed.

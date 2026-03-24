@@ -30,7 +30,7 @@
 		auth.load();
 	});
 
-	let hasEntityAddresses = $derived(mfr.entities.some((e) => e.locations.length > 0));
+	let hasEntityLocations = $derived(mfr.entities.some((e) => e.locations.length > 0));
 
 	let isDetail = $derived(
 		!page.url.pathname.endsWith('/edit') &&
@@ -109,8 +109,8 @@
 											{/if}
 										</span>
 									{/if}
-									{#each entity.locations as addr, i (i)}
-										<LocationLink {addr} />
+									{#each entity.locations as loc, i (i)}
+										<LocationLink {loc} />
 									{/each}
 								</div>
 							</SidebarListItem>
@@ -119,7 +119,7 @@
 				</SidebarSection>
 			{/if}
 
-			{#if !hasEntityAddresses && (mfr.headquarters || mfr.country)}
+			{#if !hasEntityLocations && (mfr.headquarters || mfr.country)}
 				<SidebarSection heading="Location">
 					<p class="sidebar-value">
 						{[mfr.headquarters, mfr.country].filter(Boolean).join(', ')}

@@ -1,4 +1,4 @@
-"""Manufacturer, CorporateEntity, and Address models."""
+"""Manufacturer and CorporateEntity models."""
 
 from __future__ import annotations
 

@@ -892,12 +892,12 @@ class Command(BaseCommand):
             )
         resolve_corporate_entity_aliases()
 
-        # Assert address relationship claims and sync CorporateEntityLocation rows.
+        # Assert location relationship claims and sync CorporateEntityLocation rows.
         loc_by_path = {
             loc.location_path: loc
             for loc in Location.objects.only("location_path", "pk")
         }
-        address_claims: list[Claim] = []
+        location_claims: list[Claim] = []
         all_ce_pks: set[int] = {obj.pk for obj in objs}
 
         for obj, entry in zip(objs, valid_entries):
@@ -906,7 +906,7 @@ class Command(BaseCommand):
                 claim_key, value = build_relationship_claim(
                     "location", {"location_path": hq_path}
                 )
-                address_claims.append(
+                location_claims.append(
                     Claim(
                         content_type_id=ct_id,
                         object_id=obj.pk,
@@ -923,7 +923,7 @@ class Command(BaseCommand):
 
         Claim.objects.bulk_assert_claims(
             source,
-            address_claims,
+            location_claims,
             sweep_field="location",
             authoritative_scope=make_authoritative_scope(CorporateEntity, all_ce_pks),
         )

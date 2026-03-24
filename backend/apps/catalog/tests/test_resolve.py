@@ -404,7 +404,7 @@ class TestResolveCorporateEntityLocations:
             location_type="city",
         )
 
-    def _assert_address(self, source, ce, path):
+    def _assert_location(self, source, ce, path):
         claim_key, value = build_relationship_claim("location", {"location_path": path})
         Claim.objects.assert_claim(
             ce, "location", value, source=source, claim_key=claim_key
@@ -414,7 +414,7 @@ class TestResolveCorporateEntityLocations:
         source = Source.objects.create(name="PB", source_type="editorial", priority=300)
         ce = self._make_ce("williams")
         loc = self._make_location("usa/il/chicago")
-        self._assert_address(source, ce, "usa/il/chicago")
+        self._assert_location(source, ce, "usa/il/chicago")
 
         resolve_all_corporate_entity_locations()
 
@@ -426,7 +426,7 @@ class TestResolveCorporateEntityLocations:
         source = Source.objects.create(name="PB", source_type="editorial", priority=300)
         ce = self._make_ce("williams")
         self._make_location("usa/il/chicago")
-        self._assert_address(source, ce, "usa/il/chicago")
+        self._assert_location(source, ce, "usa/il/chicago")
         resolve_all_corporate_entity_locations()
         assert CorporateEntityLocation.objects.filter(corporate_entity=ce).count() == 1
 
@@ -442,8 +442,8 @@ class TestResolveCorporateEntityLocations:
         ce2 = self._make_ce("bally")
         self._make_location("usa/il/chicago")
         self._make_location("usa/il/elk-grove-village")
-        self._assert_address(source, ce1, "usa/il/chicago")
-        self._assert_address(source, ce2, "usa/il/elk-grove-village")
+        self._assert_location(source, ce1, "usa/il/chicago")
+        self._assert_location(source, ce2, "usa/il/elk-grove-village")
 
         result = resolve_all_corporate_entity_locations()
 
