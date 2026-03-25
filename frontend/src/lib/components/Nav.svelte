@@ -384,7 +384,7 @@
 	/* ---- Dark mode ---- */
 	@media (prefers-color-scheme: dark) {
 		.site-header {
-			background-color: var(--color-surface);
+			background-color: #26221d;
 		}
 
 		.site-header::before {
@@ -392,7 +392,7 @@
 		}
 
 		.torn-edge {
-			background: var(--color-surface);
+			background: #26221d;
 		}
 
 		.site-title {
@@ -433,7 +433,7 @@
 
 		@media (max-width: 640px) {
 			.site-nav {
-				background-color: var(--color-surface);
+				background-color: #26221d;
 				border-bottom-color: var(--color-border-soft);
 			}
 		}
