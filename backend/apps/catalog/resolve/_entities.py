@@ -16,15 +16,12 @@ from apps.provenance.models import Claim
 
 from ..models import (
     Cabinet,
-    CorporateEntity,
     CreditRole,
     DisplaySubtype,
     DisplayType,
     Franchise,
     GameFormat,
     GameplayFeature,
-    Manufacturer,
-    Person,
     RewardType,
     Series,
     System,
@@ -34,7 +31,12 @@ from ..models import (
     Theme,
     Title,
 )
-from ._helpers import _annotate_priority, _coerce, get_field_defaults
+from ._helpers import (
+    _annotate_priority,
+    _coerce,
+    _resolve_fk_generic,
+    get_field_defaults,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -190,12 +192,25 @@ def _resolve_single(
         setattr(obj, attr, default)
 
     # Apply winners.
+    model_class = type(obj)
     has_extra_data = hasattr(obj, "extra_data")
     extra_data: dict = {} if has_extra_data else None
     for field_name, claim in winners.items():
         if field_name in direct_fields:
             attr = direct_fields[field_name]
-            setattr(obj, attr, _coerce(type(obj), attr, claim.value))
+            field = model_class._meta.get_field(attr)
+            if field.is_relation:
+                setattr(
+                    obj,
+                    attr,
+                    _resolve_fk_generic(
+                        model_class,
+                        attr,
+                        claim.value,
+                    ),
+                )
+            else:
+                setattr(obj, attr, _coerce(model_class, attr, claim.value))
         elif has_extra_data:
             extra_data[field_name] = claim.value
     if has_extra_data:
@@ -268,12 +283,23 @@ def _resolve_bulk(
     # default when no claim exists, or bulk_update will crash with a
     # UNIQUE constraint violation when multiple objects share the default.
     unique_attrs: set[str] = set()
+    # Identify FK fields in direct_fields and pre-build lookups.
+    fk_fields: set[str] = set()
+    fk_lookups: dict[str, dict[str, object]] = {}
+    fk_lookups_map = getattr(model_class, "claim_fk_lookups", {})
     for claim_field, attr in direct_fields.items():
         field = model_class._meta.get_field(attr)
         if field.unique:
             unique_attrs.add(attr)
+        if field.is_relation:
+            fk_fields.add(attr)
+            lookup_key = fk_lookups_map.get(attr, "slug")
+            target_model = field.related_model
+            fk_lookups[attr] = {
+                getattr(obj, lookup_key): obj for obj in target_model.objects.all()
+            }
 
-    # Collect FK attribute names for bulk_update.
+    # Collect FK attribute names for bulk_update (legacy fk_handlers).
     fk_update_fields: list[str] = []
     if fk_handlers:
         for fk_field, _lookup in fk_handlers.values():
@@ -305,7 +331,19 @@ def _resolve_bulk(
         for field_name, claim in winners.items():
             if field_name in direct_fields:
                 attr = direct_fields[field_name]
-                setattr(obj, attr, _coerce(model_class, attr, claim.value))
+                if attr in fk_fields:
+                    setattr(
+                        obj,
+                        attr,
+                        _resolve_fk_generic(
+                            model_class,
+                            attr,
+                            claim.value,
+                            lookup=fk_lookups.get(attr),
+                        ),
+                    )
+                else:
+                    setattr(obj, attr, _coerce(model_class, attr, claim.value))
             elif fk_handlers and field_name in fk_handlers:
                 fk_field, lookup = fk_handlers[field_name]
                 slug = str(claim.value).strip() if claim.value else ""
@@ -345,149 +383,74 @@ def _resolve_bulk(
 
 
 # ------------------------------------------------------------------
-# Public entity resolvers
+# Generic entity resolvers (model-driven)
 # ------------------------------------------------------------------
 
 
-def resolve_manufacturer(mfr: Manufacturer) -> Manufacturer:
-    """Resolve active claims into the given Manufacturer's fields."""
-    _resolve_single(mfr, MANUFACTURER_DIRECT_FIELDS)
-    mfr.save()
-    _sync_markdown_references(mfr)
-    return mfr
+def resolve_entity(obj):
+    """Resolve all claim-controlled fields on any entity.
 
+    Discovers claim-controlled fields by introspecting the model (via
+    ``get_claim_fields``), resolves winners, applies them (including FK
+    fields), saves, and syncs markdown references.
+    """
+    from apps.core.models import get_claim_fields
 
-def resolve_person(person: Person) -> Person:
-    """Resolve active claims into the given Person's fields."""
-    _resolve_single(person, PERSON_DIRECT_FIELDS)
-    person.save()
-    _sync_markdown_references(person)
-    return person
-
-
-def resolve_gameplay_feature(feature: GameplayFeature) -> GameplayFeature:
-    """Resolve active claims into the given GameplayFeature's fields."""
-    _resolve_single(feature, GAMEPLAY_FEATURE_DIRECT_FIELDS)
-    feature.save()
-    _sync_markdown_references(feature)
-    return feature
-
-
-def resolve_all_gameplay_feature_entities() -> int:
-    """Bulk-resolve claims for all GameplayFeature instances."""
-    return _resolve_bulk(GameplayFeature, GAMEPLAY_FEATURE_DIRECT_FIELDS)
-
-
-def resolve_all_theme_entities() -> int:
-    """Bulk-resolve claims for all Theme instances."""
-    return _resolve_bulk(Theme, THEME_DIRECT_FIELDS)
-
-
-def resolve_theme(theme: Theme) -> Theme:
-    """Resolve active claims into the given Theme's fields."""
-    _resolve_single(theme, THEME_DIRECT_FIELDS)
-    theme.save()
-    _sync_markdown_references(theme)
-    return theme
-
-
-def resolve_corporate_entity(entity: CorporateEntity) -> CorporateEntity:
-    """Resolve active claims into the given CorporateEntity's fields."""
-    _resolve_single(entity, CORPORATE_ENTITY_DIRECT_FIELDS)
-    entity.save()
-    return entity
-
-
-def resolve_system(system: System) -> System:
-    """Resolve active claims into the given System's fields."""
-    _resolve_single(system, SYSTEM_DIRECT_FIELDS)
-    system.save()
-    _sync_markdown_references(system)
-    return system
-
-
-def resolve_title(title: Title) -> Title:
-    """Resolve active claims into the given Title's fields."""
-    _resolve_single(title, TITLE_DIRECT_FIELDS)
-    # Handle franchise FK.
-    franchise_claim = (
-        _annotate_priority(title.claims.filter(field_name="franchise"))
-        .order_by("-effective_priority", "-created_at")
-        .first()
-    )
-    if franchise_claim:
-        slug = str(franchise_claim.value).strip()
-        title.franchise = Franchise.objects.filter(slug=slug).first()
-        if not title.franchise:
-            logger.warning("Unmatched franchise claim slug: %r", franchise_claim.value)
-    else:
-        title.franchise = None
-    title.save()
-    _sync_markdown_references(title)
-
-    # Resolve relationship claims after scalar save.
-    from ._relationships import resolve_title_abbreviations
-
-    resolve_title_abbreviations(title)
-    return title
-
-
-# ------------------------------------------------------------------
-# Taxonomy resolution
-# ------------------------------------------------------------------
-
-
-def resolve_taxonomy(obj):
-    """Resolve active claims into a single taxonomy model instance."""
-    _resolve_single(obj, TAXONOMY_DIRECT_FIELDS)
+    fields = get_claim_fields(type(obj))
+    _resolve_single(obj, fields)
     obj.save()
     _sync_markdown_references(obj)
     return obj
 
 
-def resolve_franchise(franchise: Franchise) -> Franchise:
-    """Resolve active claims into the given Franchise's fields."""
-    _resolve_single(franchise, FRANCHISE_DIRECT_FIELDS)
-    franchise.save()
-    _sync_markdown_references(franchise)
-    return franchise
+def resolve_all_entities(model_class, *, object_ids=None) -> int:
+    """Bulk-resolve all claim-controlled fields for all instances of a model.
+
+    Discovers claim-controlled fields by introspecting the model.
+    """
+    from apps.core.models import get_claim_fields
+
+    fields = get_claim_fields(model_class)
+    return _resolve_bulk(model_class, fields, object_ids=object_ids)
 
 
-def resolve_series(series: Series) -> Series:
-    """Resolve active claims into the given Series's fields."""
-    _resolve_single(series, SERIES_DIRECT_FIELDS)
-    series.save()
-    _sync_markdown_references(series)
-    return series
+# ------------------------------------------------------------------
+# Legacy entity resolvers (delegate to resolve_entity/resolve_all_entities)
+#
+# These thin wrappers preserve backward compatibility for existing callers
+# (tests, ingest commands). New code should use resolve_entity() and
+# resolve_all_entities() directly.
+# ------------------------------------------------------------------
+
+
+# fmt: off
+def resolve_manufacturer(mfr):          return resolve_entity(mfr)  # noqa: E704
+def resolve_person(person):             return resolve_entity(person)  # noqa: E704
+def resolve_gameplay_feature(feature):  return resolve_entity(feature)  # noqa: E704
+def resolve_theme(theme):               return resolve_entity(theme)  # noqa: E704
+def resolve_corporate_entity(entity):   return resolve_entity(entity)  # noqa: E704
+def resolve_system(system):             return resolve_entity(system)  # noqa: E704
+def resolve_taxonomy(obj):              return resolve_entity(obj)  # noqa: E704
+def resolve_franchise(franchise):       return resolve_entity(franchise)  # noqa: E704
+def resolve_series(series):             return resolve_entity(series)  # noqa: E704
+def resolve_all_gameplay_feature_entities(): return resolve_all_entities(GameplayFeature)  # noqa: E704
+def resolve_all_theme_entities():       return resolve_all_entities(Theme)  # noqa: E704
+# fmt: on
+
+
+def resolve_title(title: Title) -> Title:
+    """Resolve Title scalars."""
+    return resolve_entity(title)
 
 
 def _resolve_all_taxonomy() -> None:
-    """Resolve claims for all taxonomy models."""
-    for model_class, direct_fields in TAXONOMY_MODELS:
-        _resolve_bulk(model_class, direct_fields)
-
-
-# ------------------------------------------------------------------
-# Location resolvers
-# ------------------------------------------------------------------
-
-LOCATION_DIRECT_FIELDS: dict[str, str] = {
-    "name": "name",
-    "location_type": "location_type",
-    "code": "code",
-    "short_name": "short_name",
-    "description": "description",
-    "divisions": "divisions",
-}
+    """Resolve claims for all taxonomy models (legacy)."""
+    for model_class, _direct_fields in TAXONOMY_MODELS:
+        resolve_all_entities(model_class)
 
 
 def resolve_all_locations() -> int:
-    """Bulk-resolve claims for all Location instances, including parent FK."""
+    """Bulk-resolve claims for all Location instances."""
     from ..models import Location
 
-    loc_lookup = {loc.location_path: loc for loc in Location.objects.all()}
-    return _resolve_bulk(
-        Location,
-        LOCATION_DIRECT_FIELDS,
-        fk_handlers={"parent_location": ("parent", loc_lookup)},
-    )
+    return resolve_all_entities(Location)

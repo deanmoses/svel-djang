@@ -40,62 +40,52 @@ from .models import (
     Title,
     TitleAbbreviation,
 )
-from .resolve import (
-    DIRECT_FIELDS,
-    FK_FIELDS,
-    FRANCHISE_DIRECT_FIELDS,
-    GAMEPLAY_FEATURE_DIRECT_FIELDS,
-    MANUFACTURER_DIRECT_FIELDS,
-    PERSON_DIRECT_FIELDS,
-    SERIES_DIRECT_FIELDS,
-    SYSTEM_DIRECT_FIELDS,
-    TAXONOMY_DIRECT_FIELDS,
-    THEME_DIRECT_FIELDS,
-    TITLE_DIRECT_FIELDS,
-    resolve_franchise,
-    resolve_gameplay_feature,
-    resolve_manufacturer,
-    resolve_model,
-    resolve_person,
-    resolve_series,
-    resolve_system,
-    resolve_taxonomy,
-    resolve_theme,
-    resolve_title,
-)
+from .resolve import resolve_model
 
 
 class ProvenanceSaveMixin:
     """Routes writes to claim-controlled fields through the provenance system.
 
-    Subclasses define:
-    - ``CLAIM_FIELDS``: frozenset of form field names that are claim-controlled.
-    - ``_to_claim_value(field_name, value)``: serialize a form value for storage
-      in a Claim (override for FK fields).
-    - ``_resolve(obj)``: call the appropriate resolve function after asserting claims.
+    Discovers claim-controlled fields from the model via ``get_claim_fields()``.
+    Subclasses may override ``CLAIM_FIELDS`` for custom behavior or
+    ``_resolve(obj)`` if resolution needs extra steps beyond the generic path.
 
     On save, any changed claim-controlled field is asserted as a user Claim, then
     the object is re-resolved so the materialized fields stay consistent.
     """
 
-    CLAIM_FIELDS: frozenset = frozenset()
+    CLAIM_FIELDS: frozenset | None = None  # None = auto-discover from model
+
+    def _get_claim_fields(self):
+        if self.CLAIM_FIELDS is not None:
+            return self.CLAIM_FIELDS
+        from apps.core.models import get_claim_fields
+
+        return frozenset(get_claim_fields(self.model))
 
     def _to_claim_value(self, field_name: str, value):
+        from django.db import models as db_models
+
         from apps.core.markdown_links import prepare_markdown_claim_value
 
+        # FK values are stored as slugs in claims.
+        if value is not None and isinstance(value, db_models.Model):
+            return value.slug
         value = prepare_markdown_claim_value(field_name, value, self.model)
         if isinstance(value, Decimal):
             return str(value)
         return value
 
     def _resolve(self, obj) -> None:
-        raise NotImplementedError
+        from .resolve import resolve_entity
+
+        resolve_entity(obj)
 
     def save_model(self, request, obj, form, change):
         # Persist the object first (required to have a PK for claim creation).
         super().save_model(request, obj, form, change)
 
-        changed = [f for f in form.changed_data if f in self.CLAIM_FIELDS]
+        changed = [f for f in form.changed_data if f in self._get_claim_fields()]
         if not changed:
             return
 
@@ -263,17 +253,8 @@ class LocationAdmin(admin.ModelAdmin):
 # ---------------------------------------------------------------------------
 
 
-class TaxonomyAdminMixin(ProvenanceSaveMixin):
-    """Shared ProvenanceSaveMixin for taxonomy models."""
-
-    CLAIM_FIELDS = frozenset(TAXONOMY_DIRECT_FIELDS)
-
-    def _resolve(self, obj):
-        resolve_taxonomy(obj)
-
-
 @admin.register(TechnologyGeneration)
-class TechnologyGenerationAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
+class TechnologyGenerationAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
     list_display = ("display_order", "name", "slug")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
@@ -281,7 +262,7 @@ class TechnologyGenerationAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(TechnologySubgeneration)
-class TechnologySubgenerationAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
+class TechnologySubgenerationAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
     list_display = ("display_order", "name", "technology_generation", "slug")
     list_filter = ("technology_generation",)
     search_fields = ("name",)
@@ -290,7 +271,7 @@ class TechnologySubgenerationAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(DisplayType)
-class DisplayTypeAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
+class DisplayTypeAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
     list_display = ("display_order", "name", "slug")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
@@ -298,7 +279,7 @@ class DisplayTypeAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(DisplaySubtype)
-class DisplaySubtypeAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
+class DisplaySubtypeAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
     list_display = ("display_order", "name", "display_type", "slug")
     list_filter = ("display_type",)
     search_fields = ("name",)
@@ -307,7 +288,7 @@ class DisplaySubtypeAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(Cabinet)
-class CabinetAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
+class CabinetAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
     list_display = ("display_order", "name", "slug")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
@@ -315,7 +296,7 @@ class CabinetAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(GameFormat)
-class GameFormatAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
+class GameFormatAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
     list_display = ("display_order", "name", "slug")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
@@ -324,11 +305,6 @@ class GameFormatAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
 
 @admin.register(GameplayFeature)
 class GameplayFeatureAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
-    CLAIM_FIELDS = frozenset(GAMEPLAY_FEATURE_DIRECT_FIELDS)
-
-    def _resolve(self, obj):
-        resolve_gameplay_feature(obj)
-
     list_display = ("name", "slug")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
@@ -337,7 +313,7 @@ class GameplayFeatureAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
 
 
 @admin.register(RewardType)
-class RewardTypeAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
+class RewardTypeAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
     list_display = ("display_order", "name", "slug")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
@@ -345,7 +321,7 @@ class RewardTypeAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(Tag)
-class TagAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
+class TagAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
     list_display = ("display_order", "name", "slug")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
@@ -353,7 +329,7 @@ class TagAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(CreditRole)
-class CreditRoleAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
+class CreditRoleAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
     list_display = ("display_order", "name", "slug")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
@@ -362,11 +338,6 @@ class CreditRoleAdmin(TaxonomyAdminMixin, admin.ModelAdmin):
 
 @admin.register(Franchise)
 class FranchiseAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
-    CLAIM_FIELDS = frozenset(FRANCHISE_DIRECT_FIELDS)
-
-    def _resolve(self, obj):
-        resolve_franchise(obj)
-
     list_display = ("name", "slug")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
@@ -380,11 +351,6 @@ class FranchiseAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
 
 @admin.register(Manufacturer)
 class ManufacturerAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
-    CLAIM_FIELDS = frozenset(MANUFACTURER_DIRECT_FIELDS)
-
-    def _resolve(self, obj):
-        resolve_manufacturer(obj)
-
     list_display = (
         "name",
         "entity_count",
@@ -424,11 +390,6 @@ class ModelAbbreviationInline(admin.TabularInline):
 
 @admin.register(Title)
 class TitleAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
-    CLAIM_FIELDS = frozenset(TITLE_DIRECT_FIELDS)
-
-    def _resolve(self, obj):
-        resolve_title(obj)
-
     list_display = ("name", "opdb_id", "machine_model_count")
     search_fields = ("name", "opdb_id")
     prepopulated_fields = {"slug": ("name",)}
@@ -441,11 +402,6 @@ class TitleAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
 
 @admin.register(Series)
 class SeriesAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
-    CLAIM_FIELDS = frozenset(SERIES_DIRECT_FIELDS)
-
-    def _resolve(self, obj):
-        resolve_series(obj)
-
     list_display = ("name", "slug", "title_count")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
@@ -459,11 +415,6 @@ class SeriesAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
 
 @admin.register(Theme)
 class ThemeAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
-    CLAIM_FIELDS = frozenset(THEME_DIRECT_FIELDS)
-
-    def _resolve(self, obj):
-        resolve_theme(obj)
-
     list_display = ("name", "machine_count")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
@@ -477,11 +428,6 @@ class ThemeAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
 
 @admin.register(System)
 class SystemAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
-    CLAIM_FIELDS = frozenset(SYSTEM_DIRECT_FIELDS)
-
-    def _resolve(self, obj):
-        resolve_system(obj)
-
     list_display = ("name", "manufacturer", "machine_count")
     search_fields = ("name",)
     list_filter = ("manufacturer",)
@@ -496,11 +442,6 @@ class SystemAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
 
 @admin.register(Person)
 class PersonAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
-    CLAIM_FIELDS = frozenset(PERSON_DIRECT_FIELDS)
-
-    def _resolve(self, obj):
-        resolve_person(obj)
-
     list_display = ("name", "credit_count")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
@@ -513,13 +454,6 @@ class PersonAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
 
 @admin.register(MachineModel)
 class MachineModelAdmin(ProvenanceSaveMixin, admin.ModelAdmin):
-    CLAIM_FIELDS = frozenset(DIRECT_FIELDS) | frozenset(FK_FIELDS)
-
-    def _to_claim_value(self, field_name: str, value):
-        if value is not None and field_name in FK_FIELDS:
-            return getattr(value, FK_FIELDS[field_name].lookup_key)
-        return super()._to_claim_value(field_name, value)
-
     def _resolve(self, obj):
         resolve_model(obj)
 

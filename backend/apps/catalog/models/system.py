@@ -18,6 +18,7 @@ class System(Linkable, TimeStampedModel):
     """
 
     link_url_pattern = "/systems/{slug}"
+    claims_exempt = frozenset({"manufacturer", "technology_subgeneration"})
 
     name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True, blank=True)

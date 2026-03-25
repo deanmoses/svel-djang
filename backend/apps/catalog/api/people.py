@@ -216,9 +216,11 @@ def patch_person_claims(request, slug: str, data: ClaimPatchSchema):
     from apps.provenance.models import Claim
 
     from ..models import Person
-    from ..resolve import PERSON_DIRECT_FIELDS, resolve_person
+    from apps.core.models import get_claim_fields
 
-    editable_fields = set(PERSON_DIRECT_FIELDS.keys())
+    from ..resolve import resolve_entity
+
+    editable_fields = set(get_claim_fields(Person))
     unknown = set(data.fields.keys()) - editable_fields
     if unknown:
         raise HttpError(422, f"Unknown or non-editable fields: {sorted(unknown)}")
@@ -232,7 +234,7 @@ def patch_person_claims(request, slug: str, data: ClaimPatchSchema):
             raise HttpError(422, "; ".join(exc.messages)) from exc
         Claim.objects.assert_claim(person, field_name, value, user=request.user)
 
-    resolve_person(person)
+    resolve_entity(person)
     invalidate_all()
 
     person = get_object_or_404(_person_qs(), slug=person.slug)

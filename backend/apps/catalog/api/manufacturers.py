@@ -401,9 +401,11 @@ def patch_manufacturer_claims(request, slug: str, data: ClaimPatchSchema):
     from apps.provenance.models import Claim
 
     from ..models import Manufacturer
-    from ..resolve import MANUFACTURER_DIRECT_FIELDS, resolve_manufacturer
+    from apps.core.models import get_claim_fields
 
-    editable_fields = set(MANUFACTURER_DIRECT_FIELDS.keys())
+    from ..resolve import resolve_entity
+
+    editable_fields = set(get_claim_fields(Manufacturer))
     unknown = set(data.fields.keys()) - editable_fields
     if unknown:
         raise HttpError(422, f"Unknown or non-editable fields: {sorted(unknown)}")
@@ -417,7 +419,7 @@ def patch_manufacturer_claims(request, slug: str, data: ClaimPatchSchema):
             raise HttpError(422, "; ".join(exc.messages)) from exc
         Claim.objects.assert_claim(mfr, field_name, value, user=request.user)
 
-    resolve_manufacturer(mfr)
+    resolve_entity(mfr)
     invalidate_all()
 
     mfr = get_object_or_404(_manufacturer_qs(), slug=mfr.slug)

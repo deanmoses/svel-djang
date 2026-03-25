@@ -21,6 +21,7 @@ class Person(Linkable, TimeStampedModel):
     """A person involved in pinball machine design (designer, artist, etc.)."""
 
     link_url_pattern = "/people/{slug}"
+    claims_exempt = frozenset({"wikidata_id"})
 
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True, blank=True)

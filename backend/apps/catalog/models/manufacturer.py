@@ -31,6 +31,7 @@ class Manufacturer(Linkable, TimeStampedModel):
     """
 
     link_url_pattern = "/manufacturers/{slug}"
+    claims_exempt = frozenset({"opdb_manufacturer_id", "wikidata_id"})
 
     name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
@@ -92,6 +93,8 @@ class CorporateEntity(TimeStampedModel):
     IPDB tracks corporate entities (e.g., four separate entries for Gottlieb
     across its ownership eras). Each entity maps to one brand-level Manufacturer.
     """
+
+    claims_exempt = frozenset({"manufacturer", "ipdb_manufacturer_id"})
 
     manufacturer = models.ForeignKey(
         Manufacturer,

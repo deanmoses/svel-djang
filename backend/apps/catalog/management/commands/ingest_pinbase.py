@@ -463,7 +463,7 @@ class Command(BaseCommand):
                     Claim(
                         content_type_id=ct.pk,
                         object_id=obj.pk,
-                        field_name="parent_location",
+                        field_name="parent",
                         value=parent_path,
                     )
                 )

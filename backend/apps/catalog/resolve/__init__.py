@@ -63,10 +63,10 @@ from ._relationships import (  # noqa: F401
 
 # Re-exports: explicit `as` aliases satisfy ruff F401 for public API.
 from ._entities import (  # noqa: F401
+    # Legacy field map constants (still used by some ingest commands and tests).
     CORPORATE_ENTITY_DIRECT_FIELDS as CORPORATE_ENTITY_DIRECT_FIELDS,
     FRANCHISE_DIRECT_FIELDS as FRANCHISE_DIRECT_FIELDS,
     GAMEPLAY_FEATURE_DIRECT_FIELDS as GAMEPLAY_FEATURE_DIRECT_FIELDS,
-    LOCATION_DIRECT_FIELDS as LOCATION_DIRECT_FIELDS,
     MANUFACTURER_DIRECT_FIELDS as MANUFACTURER_DIRECT_FIELDS,
     PERSON_DIRECT_FIELDS as PERSON_DIRECT_FIELDS,
     SERIES_DIRECT_FIELDS as SERIES_DIRECT_FIELDS,
@@ -75,12 +75,17 @@ from ._entities import (  # noqa: F401
     TAXONOMY_MODELS as TAXONOMY_MODELS,
     THEME_DIRECT_FIELDS as THEME_DIRECT_FIELDS,
     TITLE_DIRECT_FIELDS as TITLE_DIRECT_FIELDS,
+    # Internals used by the orchestrator and tests.
     _resolve_all_taxonomy,
     _resolve_bulk as _resolve_bulk,
     _resolve_single as _resolve_single,
+    # Generic resolvers (preferred API).
+    resolve_all_entities as resolve_all_entities,
+    resolve_entity as resolve_entity,
+    # Legacy wrappers (delegate to resolve_entity/resolve_all_entities).
     resolve_all_gameplay_feature_entities as resolve_all_gameplay_feature_entities,
-    resolve_all_theme_entities as resolve_all_theme_entities,
     resolve_all_locations as resolve_all_locations,
+    resolve_all_theme_entities as resolve_all_theme_entities,
     resolve_corporate_entity as resolve_corporate_entity,
     resolve_franchise as resolve_franchise,
     resolve_gameplay_feature as resolve_gameplay_feature,
@@ -172,34 +177,58 @@ def resolve_machine_models(stdout=None) -> int:
         if stdout:
             stdout.write(f"  {msg}")
 
-    # 0. Resolve locations first (they are FK targets for CorporateEntityLocation).
-    resolve_all_locations()
+    # 0. Resolve entity scalars in dependency order (FK targets first).
+    from ..models import (
+        Location,
+        Theme,
+        GameplayFeature,
+    )
+    from ..models.taxonomy import (
+        TechnologyGeneration,
+        TechnologySubgeneration,
+        DisplayType,
+        DisplaySubtype,
+        Cabinet,
+        GameFormat,
+        RewardType,
+        Tag,
+        CreditRole,
+    )
+
+    resolve_all_entities(Location)
     resolve_all_location_aliases()
     _status("Locations resolved")
 
-    # 0a. Resolve taxonomy models (they are FK targets for MachineModel).
-    _resolve_all_taxonomy()
-    resolve_all_theme_entities()
-    resolve_all_gameplay_feature_entities()
+    from ..models import Series, System
+
+    for tax_model in [
+        TechnologyGeneration,
+        TechnologySubgeneration,
+        DisplayType,
+        DisplaySubtype,
+        Cabinet,
+        GameFormat,
+        RewardType,
+        Tag,
+        CreditRole,
+        Franchise,
+        Series,
+        System,
+    ]:
+        resolve_all_entities(tax_model)
+    resolve_all_entities(Theme)
+    resolve_all_entities(GameplayFeature)
     _status("Taxonomy, themes, gameplay features resolved")
 
-    # 0a2. Resolve entity hierarchy and aliases.
     resolve_theme_parents()
     resolve_gameplay_feature_parents()
     resolve_all_aliases()
     _status("Hierarchy and aliases resolved")
 
-    # 0a3. Sync CorporateEntityLocation rows from location claims.
     resolve_all_corporate_entity_locations()
     _status("Corporate entity locations resolved")
 
-    # 0b. Resolve titles (they are FK targets for MachineModel).
-    franchise_lookup = {f.slug: f for f in Franchise.objects.all()}
-    _resolve_bulk(
-        Title,
-        TITLE_DIRECT_FIELDS,
-        fk_handlers={"franchise": ("franchise", franchise_lookup)},
-    )
+    resolve_all_entities(Title)
     _status("Titles resolved")
 
     # 0c. Resolve title abbreviations.

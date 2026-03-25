@@ -24,57 +24,68 @@ _RESOLVE_OPTIONS = [
 
 def _run_resolve(target: str) -> tuple[str, int]:
     """Run resolution for the given target. Returns (label, count)."""
-    from apps.catalog.models import CorporateEntity, Manufacturer, Person
-    from apps.catalog.resolve import (
-        CORPORATE_ENTITY_DIRECT_FIELDS,
-        MANUFACTURER_DIRECT_FIELDS,
-        PERSON_DIRECT_FIELDS,
-        _resolve_bulk,
-        resolve_machine_models,
-    )
+    from apps.catalog.resolve import resolve_all_entities, resolve_machine_models
 
     if target == "taxonomy":
-        from apps.catalog.resolve._entities import _resolve_all_taxonomy
-
-        _resolve_all_taxonomy()
-        return "taxonomy entities", -1
-    elif target == "manufacturers":
-        count = _resolve_bulk(Manufacturer, MANUFACTURER_DIRECT_FIELDS)
-        return "manufacturers", count
-    elif target == "corporate-entities":
-        count = _resolve_bulk(CorporateEntity, CORPORATE_ENTITY_DIRECT_FIELDS)
-        return "corporate entities", count
-    elif target == "people":
-        count = _resolve_bulk(Person, PERSON_DIRECT_FIELDS)
-        return "people", count
-    elif target == "themes":
-        from apps.catalog.resolve import resolve_all_theme_entities
-
-        count = resolve_all_theme_entities()
-        return "themes", count
-    elif target == "gameplay-features":
-        from apps.catalog.resolve import resolve_all_gameplay_feature_entities
-
-        count = resolve_all_gameplay_feature_entities()
-        return "gameplay features", count
-    elif target == "titles":
-        from apps.catalog.models import Franchise, Title
-        from apps.catalog.resolve import TITLE_DIRECT_FIELDS
-
-        franchise_lookup = {f.slug: f for f in Franchise.objects.all()}
-        count = _resolve_bulk(
-            Title,
-            TITLE_DIRECT_FIELDS,
-            fk_handlers={"franchise": ("franchise", franchise_lookup)},
+        from apps.catalog.models.taxonomy import (
+            Cabinet,
+            CreditRole,
+            DisplaySubtype,
+            DisplayType,
+            GameFormat,
+            RewardType,
+            Tag,
+            TechnologyGeneration,
+            TechnologySubgeneration,
         )
-        return "titles", count
+
+        total = 0
+        for m in [
+            TechnologyGeneration,
+            TechnologySubgeneration,
+            DisplayType,
+            DisplaySubtype,
+            Cabinet,
+            GameFormat,
+            RewardType,
+            Tag,
+            CreditRole,
+        ]:
+            total += resolve_all_entities(m)
+        return "taxonomy entities", total
+    elif target == "manufacturers":
+        from apps.catalog.models import Manufacturer
+
+        return "manufacturers", resolve_all_entities(Manufacturer)
+    elif target == "corporate-entities":
+        from apps.catalog.models import CorporateEntity
+
+        return "corporate entities", resolve_all_entities(CorporateEntity)
+    elif target == "people":
+        from apps.catalog.models import Person
+
+        return "people", resolve_all_entities(Person)
+    elif target == "themes":
+        from apps.catalog.models import Theme
+
+        return "themes", resolve_all_entities(Theme)
+    elif target == "gameplay-features":
+        from apps.catalog.models import GameplayFeature
+
+        return "gameplay features", resolve_all_entities(GameplayFeature)
+    elif target == "titles":
+        from apps.catalog.models import Title
+
+        return "titles", resolve_all_entities(Title)
     elif target == "models":
         count = resolve_machine_models()
         return "models + all entities", count
     elif target == "all":
-        _resolve_bulk(Manufacturer, MANUFACTURER_DIRECT_FIELDS)
-        _resolve_bulk(CorporateEntity, CORPORATE_ENTITY_DIRECT_FIELDS)
-        _resolve_bulk(Person, PERSON_DIRECT_FIELDS)
+        from apps.catalog.models import CorporateEntity, Manufacturer, Person
+
+        resolve_all_entities(Manufacturer)
+        resolve_all_entities(CorporateEntity)
+        resolve_all_entities(Person)
         count = resolve_machine_models()
         return "all entities", count
     else:

@@ -113,6 +113,48 @@ def _resolve_fk(
 
 
 # ------------------------------------------------------------------
+# Generic FK resolution (model-introspected)
+# ------------------------------------------------------------------
+
+
+def _resolve_fk_generic(
+    model_class: type[models.Model],
+    field_name: str,
+    value,
+    lookup: dict[str, Any] | None = None,
+) -> Any | None:
+    """Resolve a claim value to an FK instance by introspecting the Django field.
+
+    Uses ``slug`` as the default lookup key on the target model.  Models can
+    override this per-FK via a ``claim_fk_lookups`` class attribute::
+
+        class Location(models.Model):
+            claim_fk_lookups = {"parent": "location_path"}
+
+    If *lookup* is provided (pre-fetched slug→instance dict), it is used
+    instead of hitting the database.
+    """
+    if not value:
+        return None
+    key = str(value).strip()
+    if not key:
+        return None
+
+    field = model_class._meta.get_field(field_name)
+    target_model = field.related_model
+    fk_lookups_map = getattr(model_class, "claim_fk_lookups", {})
+    lookup_key = fk_lookups_map.get(field_name, "slug")
+
+    if lookup is not None:
+        result = lookup.get(key)
+    else:
+        result = target_model.objects.filter(**{lookup_key: key}).first()
+    if not result:
+        logger.warning("Unmatched %s claim value: %r", field_name, value)
+    return result
+
+
+# ------------------------------------------------------------------
 # Type coercion (auto-detected from Django model field)
 # ------------------------------------------------------------------
 

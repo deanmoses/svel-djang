@@ -27,6 +27,9 @@ class Location(models.Model):
     are claim-controlled — pindata is the authoritative source.
     """
 
+    claims_exempt = frozenset({"location_path"})
+    claim_fk_lookups = {"parent": "location_path"}
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     location_path = models.CharField(max_length=500, unique=True)

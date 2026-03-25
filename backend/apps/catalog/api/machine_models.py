@@ -736,9 +736,11 @@ def patch_model_claims(request, slug: str, data: ClaimPatchSchema):
     from apps.provenance.models import Claim
 
     from ..models import MachineModel
-    from ..resolve import DIRECT_FIELDS, resolve_model
+    from apps.core.models import get_claim_fields
 
-    editable_fields = set(DIRECT_FIELDS.keys())
+    from ..resolve import resolve_model
+
+    editable_fields = set(get_claim_fields(MachineModel))
     unknown = set(data.fields.keys()) - editable_fields
     if unknown:
         raise HttpError(422, f"Unknown or non-editable fields: {sorted(unknown)}")
