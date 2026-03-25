@@ -15,26 +15,19 @@ from ._helpers import _annotate_priority
 
 from ..models import (
     CorporateEntity,
-    CorporateEntityAlias,
     CorporateEntityLocation,
     Credit,
     CreditRole,
     GameplayFeature,
-    GameplayFeatureAlias,
     Location,
-    LocationAlias,
     MachineModel,
     MachineModelGameplayFeature,
     Manufacturer,
-    ManufacturerAlias,
     ModelAbbreviation,
     Person,
-    PersonAlias,
     RewardType,
-    RewardTypeAlias,
     Tag,
     Theme,
-    ThemeAlias,
     Title,
     TitleAbbreviation,
 )
@@ -604,10 +597,11 @@ def resolve_all_model_abbreviations(
 def _resolve_aliases(
     parent_model,
     claim_field_name: str,
-    alias_model,
-    parent_fk_attr: str,
 ) -> None:
     """Bulk-resolve alias claims into alias model rows.
+
+    Derives the alias model and FK column from ``parent_model.aliases``,
+    so callers only need to supply the parent model and claim field name.
 
     Reads claim_field_name claims on parent_model instances, diffs against
     current alias rows, creates missing rows, updates display-case changes,
@@ -616,6 +610,11 @@ def _resolve_aliases(
     alias_display (original case) for user-facing display.
     """
     from django.contrib.contenttypes.models import ContentType
+
+    # Derive alias model and FK column from the GenericRelation / ForeignKey.
+    rel = parent_model.aliases.rel
+    alias_model = rel.related_model
+    fk_col = rel.field.name + "_id"
 
     ct = ContentType.objects.get_for_model(parent_model)
 
@@ -648,7 +647,6 @@ def _resolve_aliases(
         desired_by_parent[parent_id] = desired
 
     # Pre-fetch existing alias rows, keyed by lowercase value: {lower → (pk, stored_value)}.
-    fk_col = parent_fk_attr + "_id"
     all_parent_ids = set(parent_model.objects.values_list("pk", flat=True))
     existing_by_parent: dict[int, dict[str, tuple[int, str]]] = {}
     for row in alias_model.objects.values_list("pk", fk_col, "value"):
@@ -690,61 +688,47 @@ def _resolve_aliases(
 # ---------------------------------------------------------------------------
 # Alias registry — drives resolve_all_aliases()
 # ---------------------------------------------------------------------------
-# Each tuple: (parent_model, claim_field_name, alias_model, parent_fk_attr)
+# Each tuple: (parent_model, claim_field_name)
 
-ALIAS_REGISTRY: list[tuple] = [
-    (Theme, "theme_alias", ThemeAlias, "theme"),
-    (Manufacturer, "manufacturer_alias", ManufacturerAlias, "manufacturer"),
-    (Person, "person_alias", PersonAlias, "person"),
-    (GameplayFeature, "gameplay_feature_alias", GameplayFeatureAlias, "feature"),
-    (RewardType, "reward_type_alias", RewardTypeAlias, "reward_type"),
-    (
-        CorporateEntity,
-        "corporate_entity_alias",
-        CorporateEntityAlias,
-        "corporate_entity",
-    ),
-    (Location, "location_alias", LocationAlias, "location"),
+ALIAS_TYPES: list[tuple[type, str]] = [
+    (Theme, "theme_alias"),
+    (Manufacturer, "manufacturer_alias"),
+    (Person, "person_alias"),
+    (GameplayFeature, "gameplay_feature_alias"),
+    (RewardType, "reward_type_alias"),
+    (CorporateEntity, "corporate_entity_alias"),
+    (Location, "location_alias"),
 ]
 
 
 def resolve_theme_aliases() -> None:
-    _resolve_aliases(Theme, "theme_alias", ThemeAlias, "theme")
+    _resolve_aliases(Theme, "theme_alias")
 
 
 def resolve_manufacturer_aliases() -> None:
-    _resolve_aliases(
-        Manufacturer, "manufacturer_alias", ManufacturerAlias, "manufacturer"
-    )
+    _resolve_aliases(Manufacturer, "manufacturer_alias")
 
 
 def resolve_person_aliases() -> None:
-    _resolve_aliases(Person, "person_alias", PersonAlias, "person")
+    _resolve_aliases(Person, "person_alias")
 
 
 def resolve_gameplay_feature_aliases() -> None:
-    _resolve_aliases(
-        GameplayFeature, "gameplay_feature_alias", GameplayFeatureAlias, "feature"
-    )
+    _resolve_aliases(GameplayFeature, "gameplay_feature_alias")
 
 
 def resolve_reward_type_aliases() -> None:
-    _resolve_aliases(RewardType, "reward_type_alias", RewardTypeAlias, "reward_type")
+    _resolve_aliases(RewardType, "reward_type_alias")
 
 
 def resolve_corporate_entity_aliases() -> None:
-    _resolve_aliases(
-        CorporateEntity,
-        "corporate_entity_alias",
-        CorporateEntityAlias,
-        "corporate_entity",
-    )
+    _resolve_aliases(CorporateEntity, "corporate_entity_alias")
 
 
 def resolve_all_aliases() -> None:
     """Resolve all alias types from the registry."""
-    for parent_model, claim_field, alias_model, fk_attr in ALIAS_REGISTRY:
-        _resolve_aliases(parent_model, claim_field, alias_model, fk_attr)
+    for parent_model, claim_field in ALIAS_TYPES:
+        _resolve_aliases(parent_model, claim_field)
 
 
 # ------------------------------------------------------------------
@@ -856,7 +840,7 @@ def resolve_gameplay_feature_parents() -> None:
 
 def resolve_all_location_aliases() -> None:
     """Resolve location_alias claims into LocationAlias rows."""
-    _resolve_aliases(Location, "location_alias", LocationAlias, "location")
+    _resolve_aliases(Location, "location_alias")
 
 
 # ------------------------------------------------------------------

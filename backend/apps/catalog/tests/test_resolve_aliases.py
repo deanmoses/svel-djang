@@ -1,6 +1,6 @@
 """Tests for _resolve_aliases() — sweep and display-casing behaviour.
 
-Tests are parametrized across all alias types via the ALIAS_REGISTRY, ensuring
+Tests are parametrized across all alias types via ALIAS_TYPES, ensuring
 the generic _resolve_aliases() function works for every registered alias type.
 """
 
@@ -17,7 +17,7 @@ from apps.catalog.models import (
     RewardType,
     Theme,
 )
-from apps.catalog.resolve._relationships import ALIAS_REGISTRY, _resolve_aliases
+from apps.catalog.resolve._relationships import ALIAS_TYPES, _resolve_aliases
 from apps.provenance.models import Claim, Source
 
 
@@ -90,8 +90,18 @@ def source(db):
     return Source.objects.create(name="Pinbase", source_type="editorial", priority=300)
 
 
-# Build pytest parametrize IDs from registry claim field names.
-_ALIAS_IDS = [entry[1] for entry in ALIAS_REGISTRY]
+# Build pytest parametrize IDs from claim field names.
+_ALIAS_IDS = [entry[1] for entry in ALIAS_TYPES]
+
+
+def _get_alias_model(parent_model):
+    """Derive alias model from the parent's ``aliases`` relation."""
+    return parent_model.aliases.rel.related_model
+
+
+def _get_fk_attr(parent_model):
+    """Derive FK attr name from the parent's ``aliases`` relation."""
+    return parent_model.aliases.rel.field.name
 
 
 # ---------------------------------------------------------------------------
@@ -102,17 +112,17 @@ _ALIAS_IDS = [entry[1] for entry in ALIAS_REGISTRY]
 @pytest.mark.django_db
 class TestAliasSweptAllTypes:
     @pytest.mark.parametrize(
-        "parent_model,claim_field,alias_model,fk_attr",
-        ALIAS_REGISTRY,
+        "parent_model,claim_field",
+        ALIAS_TYPES,
         ids=_ALIAS_IDS,
     )
-    def test_aliases_created_on_first_run(
-        self, source, parent_model, claim_field, alias_model, fk_attr
-    ):
+    def test_aliases_created_on_first_run(self, source, parent_model, claim_field):
         parent = _create_parent(parent_model)
         _assert_alias_claims(source, parent, claim_field, ["Alt Name A", "Alt Name B"])
-        _resolve_aliases(parent_model, claim_field, alias_model, fk_attr)
+        _resolve_aliases(parent_model, claim_field)
 
+        alias_model = _get_alias_model(parent_model)
+        fk_attr = _get_fk_attr(parent_model)
         values = set(
             alias_model.objects.filter(**{fk_attr: parent}).values_list(
                 "value", flat=True
@@ -121,31 +131,33 @@ class TestAliasSweptAllTypes:
         assert values == {"Alt Name A", "Alt Name B"}
 
     @pytest.mark.parametrize(
-        "parent_model,claim_field,alias_model,fk_attr",
-        ALIAS_REGISTRY,
+        "parent_model,claim_field",
+        ALIAS_TYPES,
         ids=_ALIAS_IDS,
     )
-    def test_stale_aliases_swept(
-        self, source, parent_model, claim_field, alias_model, fk_attr
-    ):
+    def test_stale_aliases_swept(self, source, parent_model, claim_field):
         parent = _create_parent(parent_model)
+        alias_model = _get_alias_model(parent_model)
+        fk_attr = _get_fk_attr(parent_model)
+
         _assert_alias_claims(source, parent, claim_field, ["Stale Alias"])
-        _resolve_aliases(parent_model, claim_field, alias_model, fk_attr)
+        _resolve_aliases(parent_model, claim_field)
         assert alias_model.objects.filter(**{fk_attr: parent}).count() == 1
 
         _assert_alias_claims(source, parent, claim_field, [])
-        _resolve_aliases(parent_model, claim_field, alias_model, fk_attr)
+        _resolve_aliases(parent_model, claim_field)
         assert alias_model.objects.filter(**{fk_attr: parent}).count() == 0
 
     @pytest.mark.parametrize(
-        "parent_model,claim_field,alias_model,fk_attr",
-        ALIAS_REGISTRY,
+        "parent_model,claim_field",
+        ALIAS_TYPES,
         ids=_ALIAS_IDS,
     )
-    def test_display_case_preserved(
-        self, source, parent_model, claim_field, alias_model, fk_attr
-    ):
+    def test_display_case_preserved(self, source, parent_model, claim_field):
         parent = _create_parent(parent_model)
+        alias_model = _get_alias_model(parent_model)
+        fk_attr = _get_fk_attr(parent_model)
+
         _assert_alias_claims(source, parent, claim_field, ["Mixed Case"])
-        _resolve_aliases(parent_model, claim_field, alias_model, fk_attr)
+        _resolve_aliases(parent_model, claim_field)
         assert alias_model.objects.get(**{fk_attr: parent}).value == "Mixed Case"
