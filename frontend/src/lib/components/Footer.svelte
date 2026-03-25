@@ -17,7 +17,6 @@
 <style>
 	.site-footer {
 		border-top: 1px solid var(--color-border-soft);
-		margin-top: var(--size-8);
 		padding: var(--size-5) 0;
 	}
 
