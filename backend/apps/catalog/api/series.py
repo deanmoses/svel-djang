@@ -15,12 +15,13 @@ from ninja.security import django_auth
 from .edit_claims import execute_claims, validate_scalar_fields
 from .helpers import (
     _build_activity,
+    _build_edit_history,
     _build_rich_text,
     _claims_prefetch,
     _extract_image_urls,
 )
 from .machine_models import CreditSchema
-from .schemas import ClaimPatchSchema, ClaimSchema, RichTextSchema
+from .schemas import ChangeSetSchema, ClaimPatchSchema, ClaimSchema, RichTextSchema
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -212,3 +213,13 @@ def patch_series_claims(request, slug: str, data: ClaimPatchSchema):
 
     series = get_object_or_404(_series_detail_qs(), slug=series.slug)
     return _serialize_series_detail(series)
+
+
+@series_router.get("/{slug}/edit-history/", response=list[ChangeSetSchema])
+@decorate_view(cache_control(no_cache=True))
+def get_series_edit_history(request, slug: str):
+    """Return changeset-grouped edit history with old/new diffs."""
+    from ..models import Series
+
+    series_obj = get_object_or_404(Series, slug=slug)
+    return _build_edit_history(series_obj)

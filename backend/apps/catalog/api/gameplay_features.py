@@ -10,8 +10,14 @@ from ninja.errors import HttpError
 from ninja.security import django_auth
 
 from .edit_claims import execute_claims, plan_parent_claims, validate_scalar_fields
-from .helpers import _build_activity, _build_rich_text, _claims_prefetch
+from .helpers import (
+    _build_activity,
+    _build_edit_history,
+    _build_rich_text,
+    _claims_prefetch,
+)
 from .schemas import (
+    ChangeSetSchema,
     ClaimSchema,
     HierarchyClaimPatchSchema,
     GameplayFeatureSchema,
@@ -183,3 +189,13 @@ def patch_gameplay_feature_claims(request, slug: str, data: HierarchyClaimPatchS
 
     feature = get_object_or_404(_detail_qs(), slug=feature.slug)
     return _serialize_detail(feature)
+
+
+@gameplay_features_router.get("/{slug}/edit-history/", response=list[ChangeSetSchema])
+@decorate_view(cache_control(no_cache=True))
+def get_gameplay_feature_edit_history(request, slug: str):
+    """Return changeset-grouped edit history with old/new diffs."""
+    from ..models import GameplayFeature
+
+    feature = get_object_or_404(GameplayFeature, slug=slug)
+    return _build_edit_history(feature)

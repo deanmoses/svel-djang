@@ -18,11 +18,18 @@ from ..cache import PEOPLE_ALL_KEY
 from .constants import DEFAULT_PAGE_SIZE
 from .helpers import (
     _build_activity,
+    _build_edit_history,
     _build_rich_text,
     _claims_prefetch,
     _extract_image_urls,
 )
-from .schemas import ClaimPatchSchema, ClaimSchema, RelatedTitleSchema, RichTextSchema
+from .schemas import (
+    ChangeSetSchema,
+    ClaimPatchSchema,
+    ClaimSchema,
+    RelatedTitleSchema,
+    RichTextSchema,
+)
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -225,3 +232,13 @@ def patch_person_claims(request, slug: str, data: ClaimPatchSchema):
 
     person = get_object_or_404(_person_qs(), slug=person.slug)
     return _serialize_person_detail(person)
+
+
+@people_router.get("/{slug}/edit-history/", response=list[ChangeSetSchema])
+@decorate_view(cache_control(no_cache=True))
+def get_person_edit_history(request, slug: str):
+    """Return changeset-grouped edit history with old/new diffs."""
+    from ..models import Person
+
+    person = get_object_or_404(Person, slug=slug)
+    return _build_edit_history(person)

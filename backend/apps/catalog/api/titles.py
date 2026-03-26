@@ -17,6 +17,7 @@ from .constants import DEFAULT_PAGE_SIZE
 from .edit_claims import ClaimSpec, execute_claims, validate_scalar_fields
 from .helpers import (
     _build_activity,
+    _build_edit_history,
     _build_rich_text,
     _claims_prefetch,
     _extract_image_urls,
@@ -24,6 +25,7 @@ from .helpers import (
 )
 from .machine_models import CreditSchema, MachineModelDetailSchema
 from .schemas import (
+    ChangeSetSchema,
     ClaimSchema,
     GameplayFeatureSchema,
     RichTextSchema,
@@ -615,3 +617,13 @@ def patch_title_claims(request, slug: str, data: TitleClaimPatchSchema):
 
     title = get_object_or_404(_detail_qs(), slug=title.slug)
     return _serialize_title_detail(title)
+
+
+@titles_router.get("/{slug}/edit-history/", response=list[ChangeSetSchema])
+@decorate_view(cache_control(no_cache=True))
+def get_title_edit_history(request, slug: str):
+    """Return changeset-grouped edit history with old/new diffs."""
+    from ..models import Title
+
+    title = get_object_or_404(Title, slug=slug)
+    return _build_edit_history(title)

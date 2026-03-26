@@ -13,11 +13,13 @@ from ninja.security import django_auth
 from .edit_claims import execute_claims, plan_parent_claims, validate_scalar_fields
 from .helpers import (
     _build_activity,
+    _build_edit_history,
     _build_rich_text,
     _claims_prefetch,
     _serialize_title_machine,
 )
 from .schemas import (
+    ChangeSetSchema,
     ClaimSchema,
     HierarchyClaimPatchSchema,
     RichTextSchema,
@@ -153,3 +155,13 @@ def patch_theme_claims(request, slug: str, data: HierarchyClaimPatchSchema):
 
     theme = get_object_or_404(_detail_qs(), slug=theme.slug)
     return _serialize_detail(theme)
+
+
+@themes_router.get("/{slug}/edit-history/", response=list[ChangeSetSchema])
+@decorate_view(cache_control(no_cache=True))
+def get_theme_edit_history(request, slug: str):
+    """Return changeset-grouped edit history with old/new diffs."""
+    from ..models import Theme
+
+    theme = get_object_or_404(Theme, slug=slug)
+    return _build_edit_history(theme)

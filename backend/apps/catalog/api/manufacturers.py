@@ -19,11 +19,18 @@ from ..cache import MANUFACTURERS_ALL_KEY
 from .constants import DEFAULT_PAGE_SIZE
 from .helpers import (
     _build_activity,
+    _build_edit_history,
     _build_rich_text,
     _claims_prefetch,
     _extract_image_urls,
 )
-from .schemas import ClaimPatchSchema, ClaimSchema, RelatedTitleSchema, RichTextSchema
+from .schemas import (
+    ChangeSetSchema,
+    ClaimPatchSchema,
+    ClaimSchema,
+    RelatedTitleSchema,
+    RichTextSchema,
+)
 from .titles import FacetRef, _dedup_facet_refs
 
 # ---------------------------------------------------------------------------
@@ -410,3 +417,13 @@ def patch_manufacturer_claims(request, slug: str, data: ClaimPatchSchema):
 
     mfr = get_object_or_404(_manufacturer_qs(), slug=mfr.slug)
     return _serialize_manufacturer_detail(mfr)
+
+
+@manufacturers_router.get("/{slug}/edit-history/", response=list[ChangeSetSchema])
+@decorate_view(cache_control(no_cache=True))
+def get_manufacturer_edit_history(request, slug: str):
+    """Return changeset-grouped edit history with old/new diffs."""
+    from ..models import Manufacturer
+
+    mfr = get_object_or_404(Manufacturer, slug=slug)
+    return _build_edit_history(mfr)

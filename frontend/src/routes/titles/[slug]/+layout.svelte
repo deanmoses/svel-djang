@@ -29,10 +29,13 @@
 	});
 
 	let isDetail = $derived(
-		!page.url.pathname.endsWith('/edit') && !page.url.pathname.endsWith('/activity')
+		!page.url.pathname.endsWith('/edit') &&
+			!page.url.pathname.endsWith('/activity') &&
+			!page.url.pathname.endsWith('/edit-history')
 	);
 	let isEdit = $derived(page.url.pathname.endsWith('/edit'));
 	let isActivity = $derived(page.url.pathname.endsWith('/activity'));
+	let isEditHistory = $derived(page.url.pathname.endsWith('/edit-history'));
 
 	let metaItems = $derived.by(() => {
 		if (!md) return [];
@@ -85,6 +88,8 @@
 					<Tab active={isEdit} href={resolve(`/titles/${slug}/edit`)}>Edit</Tab>
 				{/if}
 				<Tab active={isActivity} href={resolve(`/titles/${slug}/activity`)}>Activity</Tab>
+				<Tab active={isEditHistory} href={resolve(`/titles/${slug}/edit-history`)}>Edit History</Tab
+				>
 			</TabNav>
 
 			{@render children()}

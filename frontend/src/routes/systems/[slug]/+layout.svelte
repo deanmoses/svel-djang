@@ -22,10 +22,13 @@
 	});
 
 	let isDetail = $derived(
-		!page.url.pathname.endsWith('/edit') && !page.url.pathname.endsWith('/activity')
+		!page.url.pathname.endsWith('/edit') &&
+			!page.url.pathname.endsWith('/activity') &&
+			!page.url.pathname.endsWith('/edit-history')
 	);
 	let isEdit = $derived(page.url.pathname.endsWith('/edit'));
 	let isActivity = $derived(page.url.pathname.endsWith('/activity'));
+	let isEditHistory = $derived(page.url.pathname.endsWith('/edit-history'));
 </script>
 
 <svelte:head>
@@ -53,6 +56,9 @@
 					<Tab active={isEdit} href={resolve(`/systems/${slug}/edit`)}>Edit</Tab>
 				{/if}
 				<Tab active={isActivity} href={resolve(`/systems/${slug}/activity`)}>Activity</Tab>
+				<Tab active={isEditHistory} href={resolve(`/systems/${slug}/edit-history`)}
+					>Edit History</Tab
+				>
 			</TabNav>
 
 			{@render children()}

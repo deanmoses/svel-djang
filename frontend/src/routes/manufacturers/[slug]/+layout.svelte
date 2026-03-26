@@ -36,10 +36,12 @@
 	let isDetail = $derived(
 		!page.url.pathname.endsWith('/edit') &&
 			!page.url.pathname.endsWith('/activity') &&
-			!page.url.pathname.endsWith('/systems')
+			!page.url.pathname.endsWith('/systems') &&
+			!page.url.pathname.endsWith('/edit-history')
 	);
 	let isEdit = $derived(page.url.pathname.endsWith('/edit'));
 	let isActivity = $derived(page.url.pathname.endsWith('/activity'));
+	let isEditHistory = $derived(page.url.pathname.endsWith('/edit-history'));
 
 	function websiteHostname(url: string): string {
 		try {
@@ -75,6 +77,9 @@
 					<Tab active={isEdit} href={resolve(`/manufacturers/${slug}/edit`)}>Edit</Tab>
 				{/if}
 				<Tab active={isActivity} href={resolve(`/manufacturers/${slug}/activity`)}>Activity</Tab>
+				<Tab active={isEditHistory} href={resolve(`/manufacturers/${slug}/edit-history`)}
+					>Edit History</Tab
+				>
 			</TabNav>
 
 			{@render children()}

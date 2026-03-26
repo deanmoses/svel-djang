@@ -15,11 +15,12 @@ from ninja.security import django_auth
 from .edit_claims import execute_claims, validate_scalar_fields
 from .helpers import (
     _build_activity,
+    _build_edit_history,
     _build_rich_text,
     _claims_prefetch,
     _extract_image_urls,
 )
-from .schemas import ClaimPatchSchema, ClaimSchema, RichTextSchema
+from .schemas import ChangeSetSchema, ClaimPatchSchema, ClaimSchema, RichTextSchema
 
 
 # ---------------------------------------------------------------------------
@@ -181,3 +182,13 @@ def patch_franchise_claims(request, slug: str, data: ClaimPatchSchema):
         "titles": [_serialize_title_list(t) for t in franchise.titles.all()],
         "activity": _build_activity(getattr(franchise, "active_claims", [])),
     }
+
+
+@franchises_router.get("/{slug}/edit-history/", response=list[ChangeSetSchema])
+@decorate_view(cache_control(no_cache=True))
+def get_franchise_edit_history(request, slug: str):
+    """Return changeset-grouped edit history with old/new diffs."""
+    from ..models import Franchise
+
+    franchise = get_object_or_404(Franchise, slug=slug)
+    return _build_edit_history(franchise)

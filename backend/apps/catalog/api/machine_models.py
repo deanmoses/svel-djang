@@ -17,6 +17,7 @@ from ..cache import MODELS_ALL_KEY
 from .constants import DEFAULT_PAGE_SIZE
 from .helpers import (
     _build_activity,
+    _build_edit_history,
     _build_rich_text,
     _claims_prefetch,
     _extract_image_attribution,
@@ -27,6 +28,7 @@ from .helpers import (
 )
 from .schemas import (
     AttributionSchema,
+    ChangeSetSchema,
     ClaimPatchSchema,
     ClaimSchema,
     FranchiseRefSchema,
@@ -752,3 +754,13 @@ def patch_model_claims(request, slug: str, data: ClaimPatchSchema):
 
     pm = get_object_or_404(_model_detail_qs(), slug=slug)
     return _serialize_model_detail(pm)
+
+
+@models_router.get("/{slug}/edit-history/", response=list[ChangeSetSchema])
+@decorate_view(cache_control(no_cache=True))
+def get_model_edit_history(request, slug: str):
+    """Return changeset-grouped edit history with old/new diffs."""
+    from ..models import MachineModel
+
+    pm = get_object_or_404(MachineModel, slug=slug)
+    return _build_edit_history(pm)
