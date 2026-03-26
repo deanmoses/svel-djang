@@ -53,6 +53,80 @@ def validate_scalar_fields(model_class, fields: dict) -> list[ClaimSpec]:
     return specs
 
 
+def plan_parent_claims(
+    entity,
+    desired_slugs: set[str],
+    *,
+    model_class,
+    claim_field_name: str,
+) -> list[ClaimSpec]:
+    """Validate parent hierarchy changes and return diff-based ClaimSpecs.
+
+    Works for any model with a self-referencing ``parents`` M2M resolved
+    via relationship claims (GameplayFeature, Theme).
+
+    Raises HttpError 422 on invalid slugs, self-links, or cycles.
+    """
+    from apps.catalog.claims import build_relationship_claim
+
+    if entity.slug in desired_slugs:
+        raise HttpError(422, f"A {model_class.__name__} cannot be its own parent.")
+
+    existing = set(
+        model_class.objects.filter(slug__in=desired_slugs).values_list(
+            "slug", flat=True
+        )
+    )
+    missing = desired_slugs - existing
+    if missing:
+        raise HttpError(422, f"Unknown parent slugs: {sorted(missing)}")
+
+    # Cycle detection: for each proposed parent, walk up the existing
+    # graph (excluding the edited entity's current parents, since
+    # they're being replaced). If we reach the edited entity, reject.
+    if desired_slugs:
+        all_entities = model_class.objects.prefetch_related("parents").all()
+        parent_map: dict[str, set[str]] = {}
+        for e in all_entities:
+            if e.slug == entity.slug:
+                continue
+            parent_map[e.slug] = {p.slug for p in e.parents.all()}
+
+        for start_slug in desired_slugs:
+            visited: set[str] = set()
+            stack = [start_slug]
+            while stack:
+                current = stack.pop()
+                if current == entity.slug:
+                    raise HttpError(
+                        422,
+                        f"Adding parent '{start_slug}' would create a cycle.",
+                    )
+                if current in visited:
+                    continue
+                visited.add(current)
+                stack.extend(parent_map.get(current, set()))
+
+    # Diff against current M2M state
+    current_slugs = set(entity.parents.values_list("slug", flat=True))
+    specs: list[ClaimSpec] = []
+    for parent_slug in desired_slugs - current_slugs:
+        claim_key, value = build_relationship_claim(
+            claim_field_name, {"parent_slug": parent_slug}
+        )
+        specs.append(
+            ClaimSpec(field_name=claim_field_name, value=value, claim_key=claim_key)
+        )
+    for parent_slug in current_slugs - desired_slugs:
+        claim_key, value = build_relationship_claim(
+            claim_field_name, {"parent_slug": parent_slug}, exists=False
+        )
+        specs.append(
+            ClaimSpec(field_name=claim_field_name, value=value, claim_key=claim_key)
+        )
+    return specs
+
+
 def execute_claims(
     entity,
     specs: list[ClaimSpec],

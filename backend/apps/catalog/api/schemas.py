@@ -30,7 +30,7 @@ class ClaimPatchSchema(Schema):
     fields: dict[str, Any]
 
 
-class GameplayFeatureClaimPatchSchema(Schema):
+class HierarchyClaimPatchSchema(Schema):
     fields: dict[str, Any] = {}
     parents: list[str] | None = None
     note: str = ""
