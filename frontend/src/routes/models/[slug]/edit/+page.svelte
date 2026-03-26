@@ -1,8 +1,11 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
-	import { auth } from '$lib/auth.svelte';
 	import client from '$lib/api/client';
+	import EditFormShell from '$lib/components/form/EditFormShell.svelte';
+	import TextField from '$lib/components/form/TextField.svelte';
+	import NumberField from '$lib/components/form/NumberField.svelte';
+	import MonthSelect from '$lib/components/form/MonthSelect.svelte';
 
 	let { data } = $props();
 	let model = $derived(data.model);
@@ -33,7 +36,9 @@
 		const original = modelToFormFields(model);
 		const changed: Record<string, unknown> = {};
 		for (const key of Object.keys(editFields) as (keyof typeof editFields)[]) {
-			const val = editFields[key];
+			// Number inputs return NaN when cleared; treat as empty
+			let val: unknown = editFields[key];
+			if (typeof val === 'number' && isNaN(val)) val = '';
 			if (String(val) !== String(original[key])) {
 				changed[key] = val === '' ? null : val;
 			}
@@ -65,235 +70,83 @@
 	}
 </script>
 
-{#if auth.isAuthenticated}
-	<section class="edit-form">
-		<h2>Edit</h2>
-		<form
-			onsubmit={(e) => {
-				e.preventDefault();
-				saveChanges();
-			}}
-		>
-			<div class="field-group">
-				<label for="ef-name">Name</label>
-				<input id="ef-name" type="text" bind:value={editFields.name} />
-			</div>
+<EditFormShell {saveStatus} {saveError} onsave={saveChanges}>
+	<TextField label="Name" bind:value={editFields.name} />
 
-			<div class="form-row">
-				<div class="field-group">
-					<label for="ef-year">Year</label>
-					<input id="ef-year" type="number" min="1940" max="2100" bind:value={editFields.year} />
-				</div>
-				<div class="field-group">
-					<label for="ef-month">Month</label>
-					<input id="ef-month" type="number" min="1" max="12" bind:value={editFields.month} />
-				</div>
-			</div>
+	<fieldset class="date-group">
+		<legend>Date</legend>
+		<div class="date-row">
+			<NumberField label="Year" bind:value={editFields.year} min={1800} max={2100} />
+			<MonthSelect label="Month" bind:value={editFields.month} />
+		</div>
+	</fieldset>
 
-			<div class="form-row">
-				<div class="field-group">
-					<label for="ef-players">Players</label>
-					<input
-						id="ef-players"
-						type="number"
-						min="1"
-						max="8"
-						bind:value={editFields.player_count}
-					/>
-				</div>
-				<div class="field-group">
-					<label for="ef-flippers">Flippers</label>
-					<input
-						id="ef-flippers"
-						type="number"
-						min="0"
-						max="10"
-						bind:value={editFields.flipper_count}
-					/>
-				</div>
-			</div>
+	<div class="row-2">
+		<NumberField label="Players" bind:value={editFields.player_count} min={1} max={8} />
+		<NumberField label="Flippers" bind:value={editFields.flipper_count} min={0} max={10} />
+	</div>
 
-			<div class="field-group">
-				<label for="ef-production">Production quantity</label>
-				<input
-					id="ef-production"
-					type="number"
-					min="0"
-					bind:value={editFields.production_quantity}
-				/>
-			</div>
+	<NumberField label="Production quantity" bind:value={editFields.production_quantity} min={0} />
 
-			<fieldset>
-				<legend>Cross-reference IDs</legend>
-				<div class="form-row">
-					<div class="field-group">
-						<label for="ef-ipdb">IPDB ID</label>
-						<input id="ef-ipdb" type="number" min="1" bind:value={editFields.ipdb_id} />
-					</div>
-					<div class="field-group">
-						<label for="ef-opdb">OPDB ID</label>
-						<input id="ef-opdb" type="text" bind:value={editFields.opdb_id} />
-					</div>
-					<div class="field-group">
-						<label for="ef-pinside">Pinside ID</label>
-						<input id="ef-pinside" type="number" min="1" bind:value={editFields.pinside_id} />
-					</div>
-				</div>
-			</fieldset>
+	<fieldset class="xref-group">
+		<legend>Cross-reference IDs</legend>
+		<div class="row-3">
+			<NumberField label="IPDB ID" bind:value={editFields.ipdb_id} min={1} />
+			<TextField label="OPDB ID" bind:value={editFields.opdb_id} />
+			<NumberField label="Pinside ID" bind:value={editFields.pinside_id} min={1} />
+		</div>
+	</fieldset>
 
-			<fieldset>
-				<legend>Ratings</legend>
-				<div class="form-row">
-					<div class="field-group">
-						<label for="ef-ipdb-rating">IPDB rating</label>
-						<input
-							id="ef-ipdb-rating"
-							type="number"
-							min="0"
-							max="10"
-							step="0.01"
-							bind:value={editFields.ipdb_rating}
-						/>
-					</div>
-					<div class="field-group">
-						<label for="ef-pinside-rating">Pinside rating</label>
-						<input
-							id="ef-pinside-rating"
-							type="number"
-							min="0"
-							max="10"
-							step="0.01"
-							bind:value={editFields.pinside_rating}
-						/>
-					</div>
-				</div>
-			</fieldset>
-
-			<div class="form-actions">
-				<button type="submit" class="btn-save" disabled={saveStatus === 'saving'}>
-					{saveStatus === 'saving' ? 'Saving…' : 'Save changes'}
-				</button>
-				{#if saveStatus === 'saved'}
-					<span class="save-feedback saved">Saved</span>
-				{/if}
-				{#if saveStatus === 'error'}
-					<span class="save-feedback error">{saveError}</span>
-				{/if}
-			</div>
-		</form>
-	</section>
-{:else}
-	<p class="not-authenticated">Sign in to edit this record.</p>
-{/if}
+	<fieldset class="ratings-group">
+		<legend>Ratings</legend>
+		<div class="row-2">
+			<NumberField
+				label="IPDB rating"
+				bind:value={editFields.ipdb_rating}
+				min={0}
+				max={10}
+				step={0.01}
+			/>
+			<NumberField
+				label="Pinside rating"
+				bind:value={editFields.pinside_rating}
+				min={0}
+				max={10}
+				step={0.01}
+			/>
+		</div>
+	</fieldset>
+</EditFormShell>
 
 <style>
-	h2 {
-		font-size: var(--font-size-3);
-		font-weight: 600;
-		color: var(--color-text-primary);
-		margin-bottom: var(--size-3);
-	}
-
-	.edit-form {
-		margin-bottom: var(--size-6);
-	}
-
-	form {
-		display: flex;
-		flex-direction: column;
-		gap: var(--size-4);
-	}
-
-	fieldset {
+	.date-group,
+	.xref-group,
+	.ratings-group {
 		border: 1px solid var(--color-border-soft);
 		border-radius: var(--radius-2);
-		padding: var(--size-4);
-		display: flex;
-		flex-direction: column;
-		gap: var(--size-4);
+		padding: var(--size-3);
+		margin: 0;
 	}
 
-	legend {
-		font-size: var(--font-size-1);
-		font-weight: 600;
-		color: var(--color-text-muted);
-		padding: 0 var(--size-2);
-	}
-
-	.form-row {
-		display: flex;
-		gap: var(--size-4);
-	}
-
-	.form-row .field-group {
-		flex: 1;
-	}
-
-	.field-group {
-		display: flex;
-		flex-direction: column;
-		gap: var(--size-1);
-	}
-
-	.field-group label {
+	.date-group legend,
+	.xref-group legend,
+	.ratings-group legend {
 		font-size: var(--font-size-1);
 		font-weight: 500;
 		color: var(--color-text-muted);
+		padding: 0 var(--size-1);
 	}
 
-	.field-group input {
-		font-size: var(--font-size-1);
-		color: var(--color-text-primary);
-		background-color: var(--color-surface);
-		border: 1px solid var(--color-border-soft);
-		border-radius: var(--radius-2);
-		padding: var(--size-2) var(--size-3);
-		width: 100%;
-		font-family: inherit;
+	.date-row,
+	.row-2 {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: var(--size-3);
 	}
 
-	.field-group input:focus {
-		outline: 2px solid var(--color-accent);
-		outline-offset: -1px;
-		border-color: var(--color-accent);
-	}
-
-	.form-actions {
-		display: flex;
-		align-items: center;
-		gap: var(--size-4);
-	}
-
-	.btn-save {
-		padding: var(--size-2) var(--size-5);
-		font-size: var(--font-size-1);
-		font-weight: 600;
-		color: #fff;
-		background-color: var(--color-accent);
-		border: none;
-		border-radius: var(--radius-2);
-		cursor: pointer;
-	}
-
-	.btn-save:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-	}
-
-	.save-feedback {
-		font-size: var(--font-size-1);
-	}
-
-	.save-feedback.saved {
-		color: var(--color-accent);
-	}
-
-	.save-feedback.error {
-		color: var(--color-error, #c0392b);
-	}
-
-	.not-authenticated {
-		font-size: var(--font-size-1);
-		color: var(--color-text-muted);
+	.row-3 {
+		display: grid;
+		grid-template-columns: 1fr 1fr 1fr;
+		gap: var(--size-3);
 	}
 </style>
