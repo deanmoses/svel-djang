@@ -5,8 +5,6 @@ from __future__ import annotations
 from typing import Optional
 
 from django.core.cache import cache
-from django.core.exceptions import ValidationError
-from django.db import IntegrityError
 from django.db.models import Count, F, Prefetch, Q
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
@@ -17,7 +15,7 @@ from ninja.pagination import PageNumberPagination, paginate
 from ninja.security import django_auth
 
 
-from ..cache import MANUFACTURERS_ALL_KEY, invalidate_all
+from ..cache import MANUFACTURERS_ALL_KEY
 from .constants import DEFAULT_PAGE_SIZE
 from .helpers import (
     _build_activity,
@@ -398,33 +396,17 @@ def get_manufacturer(request, slug: str):
 )
 def patch_manufacturer_claims(request, slug: str, data: ClaimPatchSchema):
     """Assert per-field claims from the authenticated user, then re-resolve."""
-    from apps.core.markdown_links import prepare_markdown_claim_value
-    from apps.provenance.models import Claim
+    from .edit_claims import execute_claims, validate_scalar_fields
 
     from ..models import Manufacturer
-    from apps.core.models import get_claim_fields
-
-    from ..resolve import resolve_entity
-
-    editable_fields = set(get_claim_fields(Manufacturer))
-    unknown = set(data.fields.keys()) - editable_fields
-    if unknown:
-        raise HttpError(422, f"Unknown or non-editable fields: {sorted(unknown)}")
 
     mfr = get_object_or_404(Manufacturer, slug=slug)
 
-    for field_name, value in data.fields.items():
-        try:
-            value = prepare_markdown_claim_value(field_name, value, Manufacturer)
-        except ValidationError as exc:
-            raise HttpError(422, "; ".join(exc.messages)) from exc
-        Claim.objects.assert_claim(mfr, field_name, value, user=request.user)
+    specs = validate_scalar_fields(Manufacturer, data.fields)
+    if not specs:
+        raise HttpError(422, "No changes provided.")
 
-    try:
-        resolve_entity(mfr)
-    except IntegrityError as exc:
-        raise HttpError(422, f"Unique constraint violation: {exc}") from exc
-    invalidate_all()
+    execute_claims(mfr, specs, user=request.user)
 
     mfr = get_object_or_404(_manufacturer_qs(), slug=mfr.slug)
     return _serialize_manufacturer_detail(mfr)

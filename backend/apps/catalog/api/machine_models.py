@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from typing import Optional
 
-from django.db import IntegrityError
 from django.db.models import F, Prefetch, Q
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
@@ -14,7 +13,7 @@ from ninja.errors import HttpError
 from ninja.pagination import PageNumberPagination, paginate
 from ninja.security import django_auth
 
-from ..cache import MODELS_ALL_KEY, invalidate_all
+from ..cache import MODELS_ALL_KEY
 from .constants import DEFAULT_PAGE_SIZE
 from .helpers import (
     _build_activity,
@@ -734,28 +733,20 @@ def get_model(request, slug: str):
 )
 def patch_model_claims(request, slug: str, data: ClaimPatchSchema):
     """Assert per-field claims from the authenticated user, then re-resolve the model."""
-    from apps.provenance.models import Claim
+    from .edit_claims import execute_claims, validate_scalar_fields
 
     from ..models import MachineModel
-    from apps.core.models import get_claim_fields
-
     from ..resolve import resolve_model
-
-    editable_fields = set(get_claim_fields(MachineModel))
-    unknown = set(data.fields.keys()) - editable_fields
-    if unknown:
-        raise HttpError(422, f"Unknown or non-editable fields: {sorted(unknown)}")
 
     pm = get_object_or_404(MachineModel, slug=slug)
 
-    for field_name, value in data.fields.items():
-        Claim.objects.assert_claim(pm, field_name, value, user=request.user)
+    specs = validate_scalar_fields(MachineModel, data.fields)
+    if not specs:
+        raise HttpError(422, "No changes provided.")
 
-    try:
-        resolve_model(pm)
-    except IntegrityError as exc:
-        raise HttpError(422, f"Unique constraint violation: {exc}") from exc
-    invalidate_all()
+    # MachineModel uses resolve_model (handles relationship claims + opdb_id
+    # conflicts) instead of the generic resolve_entity.
+    execute_claims(pm, specs, user=request.user, resolve_fn=resolve_model)
 
     pm = get_object_or_404(_model_detail_qs(), slug=slug)
     return _serialize_model_detail(pm)

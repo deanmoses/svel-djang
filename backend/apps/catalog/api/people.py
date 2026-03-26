@@ -5,8 +5,6 @@ from __future__ import annotations
 from typing import Optional
 
 from django.core.cache import cache
-from django.core.exceptions import ValidationError
-from django.db import IntegrityError
 from django.db.models import Count, F, Prefetch
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
@@ -16,7 +14,7 @@ from ninja.errors import HttpError
 from ninja.pagination import PageNumberPagination, paginate
 from ninja.security import django_auth
 
-from ..cache import PEOPLE_ALL_KEY, invalidate_all
+from ..cache import PEOPLE_ALL_KEY
 from .constants import DEFAULT_PAGE_SIZE
 from .helpers import (
     _build_activity,
@@ -213,33 +211,17 @@ def get_person(request, slug: str):
 )
 def patch_person_claims(request, slug: str, data: ClaimPatchSchema):
     """Assert per-field claims from the authenticated user, then re-resolve."""
-    from apps.core.markdown_links import prepare_markdown_claim_value
-    from apps.provenance.models import Claim
+    from .edit_claims import execute_claims, validate_scalar_fields
 
     from ..models import Person
-    from apps.core.models import get_claim_fields
-
-    from ..resolve import resolve_entity
-
-    editable_fields = set(get_claim_fields(Person))
-    unknown = set(data.fields.keys()) - editable_fields
-    if unknown:
-        raise HttpError(422, f"Unknown or non-editable fields: {sorted(unknown)}")
 
     person = get_object_or_404(Person, slug=slug)
 
-    for field_name, value in data.fields.items():
-        try:
-            value = prepare_markdown_claim_value(field_name, value, Person)
-        except ValidationError as exc:
-            raise HttpError(422, "; ".join(exc.messages)) from exc
-        Claim.objects.assert_claim(person, field_name, value, user=request.user)
+    specs = validate_scalar_fields(Person, data.fields)
+    if not specs:
+        raise HttpError(422, "No changes provided.")
 
-    try:
-        resolve_entity(person)
-    except IntegrityError as exc:
-        raise HttpError(422, f"Unique constraint violation: {exc}") from exc
-    invalidate_all()
+    execute_claims(person, specs, user=request.user)
 
     person = get_object_or_404(_person_qs(), slug=person.slug)
     return _serialize_person_detail(person)
