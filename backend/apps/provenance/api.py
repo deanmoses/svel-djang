@@ -50,7 +50,7 @@ review_router = Router(tags=["review", "private"])
 
 
 @sources_router.get("/", response=list[SourceSchema])
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def list_sources(request):
     from .models import Source
 
@@ -93,7 +93,7 @@ def _build_claim_review_context(claim) -> tuple[list[dict], str | None]:
 
 
 @review_router.get("/claims/", response=list[ReviewClaimSchema])
-@decorate_view(cache_control(public=True, max_age=60))
+@decorate_view(cache_control(no_cache=True))
 def list_review_claims(request):
     """Return all active claims flagged for review."""
     from .models import Claim

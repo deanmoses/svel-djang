@@ -62,7 +62,7 @@ systems_router = Router(tags=["systems"])
 
 
 @systems_router.get("/all/", response=list[SystemListSchema])
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def list_all_systems(request):
     """Return every system with machine count (no pagination)."""
     from ..models import System
@@ -92,7 +92,7 @@ def list_all_systems(request):
 
 
 @systems_router.get("/{slug}", response=SystemDetailSchema)
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def get_system(request, slug: str):
     from ..models import MachineModel, System
 

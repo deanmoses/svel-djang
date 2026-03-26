@@ -94,7 +94,7 @@ themes_router = Router(tags=["themes"])
 
 
 @themes_router.get("/", response=list[ThemeListSchema])
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def list_themes(request):
     from ..models import Theme
 
@@ -110,7 +110,7 @@ def list_themes(request):
 
 
 @themes_router.get("/{slug}", response=ThemeDetailSchema)
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def get_theme(request, slug: str):
     theme = get_object_or_404(_detail_qs(), slug=slug)
     return _serialize_detail(theme)

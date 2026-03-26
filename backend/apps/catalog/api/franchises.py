@@ -89,7 +89,7 @@ franchises_router = Router(tags=["franchises"])
 
 
 @franchises_router.get("/all/", response=list[FranchiseListSchema])
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def list_all_franchises(request):
     """Return every franchise with title count (no pagination)."""
     from ..models import Franchise
@@ -125,7 +125,7 @@ def _franchise_titles_qs():
 
 
 @franchises_router.get("/{slug}", response=FranchiseDetailSchema)
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def get_franchise(request, slug: str):
     from ..models import Franchise
 

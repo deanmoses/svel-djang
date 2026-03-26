@@ -88,7 +88,7 @@ gameplay_features_router = Router(tags=["gameplay-features"])
 
 
 @gameplay_features_router.get("/", response=list[GameplayFeatureListSchema])
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def list_gameplay_features(request):
     from ..models import GameplayFeature, MachineModel
 
@@ -138,7 +138,7 @@ def list_gameplay_features(request):
 
 
 @gameplay_features_router.get("/{slug}", response=GameplayFeatureDetailSchema)
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def get_gameplay_feature(request, slug: str):
     feature = get_object_or_404(_detail_qs(), slug=slug)
     return _serialize_detail(feature)

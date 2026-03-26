@@ -288,7 +288,7 @@ def list_manufacturers(request):
 
 
 @manufacturers_router.get("/all/", response=list[ManufacturerGridSchema])
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def list_all_manufacturers(request):
     """Return every manufacturer with model count and thumbnail (no pagination)."""
     result = cache.get(MANUFACTURERS_ALL_KEY)
@@ -382,7 +382,7 @@ def list_all_manufacturers(request):
 
 
 @manufacturers_router.get("/{slug}", response=ManufacturerDetailSchema)
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def get_manufacturer(request, slug: str):
     mfr = get_object_or_404(_manufacturer_qs(), slug=slug)
     return _serialize_manufacturer_detail(mfr)

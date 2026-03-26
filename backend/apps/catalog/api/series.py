@@ -93,7 +93,7 @@ series_router = Router(tags=["series"])
 
 
 @series_router.get("/", response=list[SeriesListSchema])
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def list_series(request):
     """Return all series with title count and thumbnail."""
     from ..models import MachineModel, Series
@@ -131,7 +131,7 @@ def list_series(request):
 
 
 @series_router.get("/{slug}", response=SeriesDetailSchema)
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def get_series(request, slug: str):
     from ..models import Credit, MachineModel, Series, Title
 

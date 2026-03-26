@@ -73,7 +73,7 @@ technology_generations_router = Router(tags=["technology-generations"])
 
 
 @technology_generations_router.get("/", response=list[TaxonomySchema])
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def list_technology_generations(request):
     from ..models import TechnologyGeneration
 
@@ -84,7 +84,7 @@ def list_technology_generations(request):
 
 
 @technology_generations_router.get("/{slug}", response=TaxonomySchema)
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def get_technology_generation(request, slug: str):
     from ..models import TechnologyGeneration
 
@@ -110,7 +110,7 @@ display_types_router = Router(tags=["display-types"])
 
 
 @display_types_router.get("/", response=list[TaxonomySchema])
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def list_display_types(request):
     from ..models import DisplayType
 
@@ -120,7 +120,7 @@ def list_display_types(request):
 
 
 @display_types_router.get("/{slug}", response=TaxonomySchema)
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def get_display_type(request, slug: str):
     from ..models import DisplayType
 
@@ -146,7 +146,7 @@ technology_subgenerations_router = Router(tags=["technology-subgenerations"])
 
 
 @technology_subgenerations_router.get("/", response=list[TaxonomySchema])
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def list_technology_subgenerations(request):
     from ..models import TechnologySubgeneration
 
@@ -157,7 +157,7 @@ def list_technology_subgenerations(request):
 
 
 @technology_subgenerations_router.get("/{slug}", response=TaxonomySchema)
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def get_technology_subgeneration(request, slug: str):
     from ..models import TechnologySubgeneration
 
@@ -183,7 +183,7 @@ display_subtypes_router = Router(tags=["display-subtypes"])
 
 
 @display_subtypes_router.get("/", response=list[TaxonomySchema])
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def list_display_subtypes(request):
     from ..models import DisplaySubtype
 
@@ -193,7 +193,7 @@ def list_display_subtypes(request):
 
 
 @display_subtypes_router.get("/{slug}", response=TaxonomySchema)
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def get_display_subtype(request, slug: str):
     from ..models import DisplaySubtype
 
@@ -219,7 +219,7 @@ cabinets_router = Router(tags=["cabinets"])
 
 
 @cabinets_router.get("/", response=list[TaxonomySchema])
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def list_cabinets(request):
     from ..models import Cabinet
 
@@ -227,7 +227,7 @@ def list_cabinets(request):
 
 
 @cabinets_router.get("/{slug}", response=TaxonomySchema)
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def get_cabinet(request, slug: str):
     from ..models import Cabinet
 
@@ -253,7 +253,7 @@ game_formats_router = Router(tags=["game-formats"])
 
 
 @game_formats_router.get("/", response=list[TaxonomySchema])
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def list_game_formats(request):
     from ..models import GameFormat
 
@@ -263,7 +263,7 @@ def list_game_formats(request):
 
 
 @game_formats_router.get("/{slug}", response=TaxonomySchema)
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def get_game_format(request, slug: str):
     from ..models import GameFormat
 
@@ -294,7 +294,7 @@ reward_types_router = Router(tags=["reward-types"])
 
 
 @reward_types_router.get("/", response=list[TaxonomySchema])
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def list_reward_types(request):
     from ..models import RewardType
 
@@ -305,7 +305,7 @@ def list_reward_types(request):
 
 
 @reward_types_router.get("/{slug}", response=RewardTypeDetailSchema)
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def get_reward_type(request, slug: str):
     from ..models import MachineModel, RewardType
     from .helpers import _serialize_title_machine
@@ -378,7 +378,7 @@ tags_router = Router(tags=["tags"])
 
 
 @tags_router.get("/", response=list[TaxonomySchema])
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def list_tags(request):
     from ..models import Tag
 
@@ -386,7 +386,7 @@ def list_tags(request):
 
 
 @tags_router.get("/{slug}", response=TaxonomySchema)
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def get_tag(request, slug: str):
     from ..models import Tag
 
@@ -410,7 +410,7 @@ credit_roles_router = Router(tags=["credit-roles"])
 
 
 @credit_roles_router.get("/", response=list[TaxonomySchema])
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def list_credit_roles(request):
     from ..models import CreditRole
 
@@ -420,7 +420,7 @@ def list_credit_roles(request):
 
 
 @credit_roles_router.get("/{slug}", response=TaxonomySchema)
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def get_credit_role(request, slug: str):
     from ..models import CreditRole
 

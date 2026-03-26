@@ -205,7 +205,7 @@ locations_router = Router(tags=["locations"])
 
 
 @locations_router.get("/", response=LocationIndexSchema)
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def list_locations(request):
     """Return all countries with their direct children and manufacturer counts."""
     nodes, children_index = _get_location_tree()
@@ -279,28 +279,28 @@ def _get_location_detail(location_path: str) -> dict:
 
 
 @locations_router.get("/{s1}", response=LocationDetailSchema)
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def get_location_1(request, s1: str):
     """Return detail for a single-segment location (e.g. 'usa')."""
     return _get_location_detail(s1)
 
 
 @locations_router.get("/{s1}/{s2}", response=LocationDetailSchema)
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def get_location_2(request, s1: str, s2: str):
     """Return detail for a two-segment location (e.g. 'usa/il')."""
     return _get_location_detail(f"{s1}/{s2}")
 
 
 @locations_router.get("/{s1}/{s2}/{s3}", response=LocationDetailSchema)
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def get_location_3(request, s1: str, s2: str, s3: str):
     """Return detail for a three-segment location (e.g. 'usa/il/chicago')."""
     return _get_location_detail(f"{s1}/{s2}/{s3}")
 
 
 @locations_router.get("/{s1}/{s2}/{s3}/{s4}", response=LocationDetailSchema)
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def get_location_4(request, s1: str, s2: str, s3: str, s4: str):
     """Return detail for a four-segment location (e.g. 'france/idf/essonne/marcoussis')."""
     return _get_location_detail(f"{s1}/{s2}/{s3}/{s4}")

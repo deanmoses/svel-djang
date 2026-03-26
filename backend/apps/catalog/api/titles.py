@@ -476,7 +476,7 @@ def list_titles(request, display: str = ""):
 
 
 @titles_router.get("/all/", response=list[TitleListSchema])
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def list_all_titles(request):
     """Return every title with minimal fields (no pagination)."""
     from django.core.cache import cache
@@ -507,7 +507,7 @@ def list_all_titles(request):
 
 
 @titles_router.get("/{slug}", response=TitleDetailSchema)
-@decorate_view(cache_control(public=True, max_age=300))
+@decorate_view(cache_control(no_cache=True))
 def get_title(request, slug: str):
     from ..models import Title
 
