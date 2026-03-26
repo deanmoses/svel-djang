@@ -1,8 +1,11 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
-	import { auth } from '$lib/auth.svelte';
 	import client from '$lib/api/client';
+	import EditFormShell from '$lib/components/form/EditFormShell.svelte';
+	import TextField from '$lib/components/form/TextField.svelte';
+	import TextAreaField from '$lib/components/form/TextAreaField.svelte';
+	import NumberField from '$lib/components/form/NumberField.svelte';
 
 	let { data } = $props();
 	let profile = $derived(data.profile);
@@ -61,136 +64,8 @@
 	}
 </script>
 
-{#if auth.isAuthenticated}
-	<section class="edit-form">
-		<h2>Edit</h2>
-		<form
-			onsubmit={(e) => {
-				e.preventDefault();
-				saveChanges();
-			}}
-		>
-			<div class="field-group">
-				<label for="ef-name">Name</label>
-				<input id="ef-name" type="text" bind:value={editFields.name} />
-			</div>
-
-			<div class="field-group">
-				<label for="ef-description">Description</label>
-				<textarea id="ef-description" rows="4" bind:value={editFields.description}></textarea>
-			</div>
-
-			<div class="field-group">
-				<label for="ef-display-order">Display Order</label>
-				<input id="ef-display-order" type="number" step="1" bind:value={editFields.display_order} />
-			</div>
-
-			<div class="form-actions">
-				<button type="submit" class="btn-save" disabled={saveStatus === 'saving'}>
-					{saveStatus === 'saving' ? 'Saving\u2026' : 'Save changes'}
-				</button>
-				{#if saveStatus === 'saved'}
-					<span class="save-feedback saved">Saved</span>
-				{/if}
-				{#if saveStatus === 'error'}
-					<span class="save-feedback error">{saveError}</span>
-				{/if}
-			</div>
-		</form>
-	</section>
-{:else}
-	<p class="not-authenticated">Sign in to edit this record.</p>
-{/if}
-
-<style>
-	h2 {
-		font-size: var(--font-size-3);
-		font-weight: 600;
-		color: var(--color-text-primary);
-		margin-bottom: var(--size-3);
-	}
-
-	.edit-form {
-		margin-bottom: var(--size-6);
-	}
-
-	form {
-		display: flex;
-		flex-direction: column;
-		gap: var(--size-4);
-	}
-
-	.field-group {
-		display: flex;
-		flex-direction: column;
-		gap: var(--size-1);
-	}
-
-	.field-group label {
-		font-size: var(--font-size-1);
-		font-weight: 500;
-		color: var(--color-text-muted);
-	}
-
-	.field-group input,
-	.field-group textarea {
-		font-size: var(--font-size-1);
-		color: var(--color-text-primary);
-		background-color: var(--color-surface);
-		border: 1px solid var(--color-border-soft);
-		border-radius: var(--radius-2);
-		padding: var(--size-2) var(--size-3);
-		width: 100%;
-		font-family: inherit;
-	}
-
-	.field-group input:focus,
-	.field-group textarea:focus {
-		outline: 2px solid var(--color-accent);
-		outline-offset: -1px;
-		border-color: var(--color-accent);
-	}
-
-	textarea {
-		resize: vertical;
-	}
-
-	.form-actions {
-		display: flex;
-		align-items: center;
-		gap: var(--size-4);
-	}
-
-	.btn-save {
-		padding: var(--size-2) var(--size-5);
-		font-size: var(--font-size-1);
-		font-weight: 600;
-		color: #fff;
-		background-color: var(--color-accent);
-		border: none;
-		border-radius: var(--radius-2);
-		cursor: pointer;
-	}
-
-	.btn-save:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-	}
-
-	.save-feedback {
-		font-size: var(--font-size-1);
-	}
-
-	.save-feedback.saved {
-		color: var(--color-accent);
-	}
-
-	.save-feedback.error {
-		color: var(--color-error, #c0392b);
-	}
-
-	.not-authenticated {
-		font-size: var(--font-size-1);
-		color: var(--color-text-muted);
-	}
-</style>
+<EditFormShell {saveStatus} {saveError} onsave={saveChanges}>
+	<TextField label="Name" bind:value={editFields.name} />
+	<TextAreaField label="Description" bind:value={editFields.description} />
+	<NumberField label="Display Order" bind:value={editFields.display_order} />
+</EditFormShell>
