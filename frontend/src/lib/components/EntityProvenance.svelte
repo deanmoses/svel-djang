@@ -75,6 +75,9 @@
 										{#if claim.is_winner}
 											<span class="badge-used">used</span>
 										{/if}
+										{#if claim.changeset_note}
+											<span class="changeset-note">{claim.changeset_note}</span>
+										{/if}
 									</span>
 								{/each}
 							</dd>
@@ -99,6 +102,9 @@
 									<span class="source-list">
 										{claims.map(claimAttribution).join(', ')}
 									</span>
+									{#if claims[0].changeset_note}
+										<span class="changeset-note">{claims[0].changeset_note}</span>
+									{/if}
 								</span>
 							</dd>
 						</div>
@@ -120,6 +126,9 @@
 								<span class="claim used">
 									<span class="source-badge">{claimAttribution(claims[0])}</span>
 									{formatValue(claims[0].value)}
+									{#if claims[0].changeset_note}
+										<span class="changeset-note">{claims[0].changeset_note}</span>
+									{/if}
 								</span>
 							</dd>
 						</div>
@@ -225,6 +234,13 @@
 		font-size: var(--font-size-00, 0.7rem);
 		font-weight: 600;
 		color: var(--color-accent);
+	}
+
+	.changeset-note {
+		width: 100%;
+		font-size: var(--font-size-00, 0.7rem);
+		font-style: italic;
+		color: var(--color-text-muted);
 	}
 
 	.source-list {
