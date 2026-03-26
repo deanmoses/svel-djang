@@ -1,6 +1,10 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
+	function slugifyLabel(label: string): string {
+		return label.toLowerCase().replace(/\s+/g, '-');
+	}
+
 	let {
 		label,
 		id = '',
@@ -13,7 +17,8 @@
 		children: Snippet<[string]>;
 	} = $props();
 
-	let inputId = $derived(id || `ef-${label.toLowerCase().replace(/\s+/g, '-')}`);
+	const uniqueSuffix = Math.random().toString(36).slice(2, 8);
+	let inputId = $derived.by(() => id || `ef-${slugifyLabel(label)}-${uniqueSuffix}`);
 </script>
 
 <div class="field-group">
