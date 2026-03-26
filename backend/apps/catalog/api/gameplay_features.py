@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
@@ -184,15 +185,18 @@ def patch_gameplay_feature_claims(
 
     from django.db import transaction
 
-    with transaction.atomic():
-        cs = ChangeSet.objects.create(user=request.user, note=data.note)
+    try:
+        with transaction.atomic():
+            cs = ChangeSet.objects.create(user=request.user, note=data.note)
 
-        for field_name, value in prepared.items():
-            Claim.objects.assert_claim(
-                feature, field_name, value, user=request.user, changeset=cs
-            )
+            for field_name, value in prepared.items():
+                Claim.objects.assert_claim(
+                    feature, field_name, value, user=request.user, changeset=cs
+                )
 
-        resolve_entity(feature)
+            resolve_entity(feature)
+    except IntegrityError as exc:
+        raise HttpError(422, f"Unique constraint violation: {exc}") from exc
 
     invalidate_all()
 

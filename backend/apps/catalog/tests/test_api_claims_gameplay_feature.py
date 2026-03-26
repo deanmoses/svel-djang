@@ -73,6 +73,13 @@ class TestPatchGameplayFeatureValidation:
         resp = _patch(client, "does-not-exist", {"fields": {"name": "X"}})
         assert resp.status_code == 404
 
+    def test_duplicate_name_returns_422(self, client, user, feature):
+        GameplayFeature.objects.create(name="Drop Targets", slug="drop-targets")
+        client.force_login(user)
+        resp = _patch(client, feature.slug, {"fields": {"name": "Drop Targets"}})
+        assert resp.status_code == 422
+        assert "unique" in resp.json()["detail"].lower()
+
     def test_invalid_markdown_link_returns_422(self, client, user, feature):
         client.force_login(user)
         resp = _patch(

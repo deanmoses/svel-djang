@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Optional
 
+from django.db import IntegrityError
 from django.db.models import F, Prefetch, Q
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
@@ -750,7 +751,10 @@ def patch_model_claims(request, slug: str, data: ClaimPatchSchema):
     for field_name, value in data.fields.items():
         Claim.objects.assert_claim(pm, field_name, value, user=request.user)
 
-    resolve_model(pm)
+    try:
+        resolve_model(pm)
+    except IntegrityError as exc:
+        raise HttpError(422, f"Unique constraint violation: {exc}") from exc
     invalidate_all()
 
     pm = get_object_or_404(_model_detail_qs(), slug=slug)

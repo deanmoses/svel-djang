@@ -6,6 +6,7 @@ from typing import Optional
 
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.db.models import Count, F, Prefetch, Q
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
@@ -419,7 +420,10 @@ def patch_manufacturer_claims(request, slug: str, data: ClaimPatchSchema):
             raise HttpError(422, "; ".join(exc.messages)) from exc
         Claim.objects.assert_claim(mfr, field_name, value, user=request.user)
 
-    resolve_entity(mfr)
+    try:
+        resolve_entity(mfr)
+    except IntegrityError as exc:
+        raise HttpError(422, f"Unique constraint violation: {exc}") from exc
     invalidate_all()
 
     mfr = get_object_or_404(_manufacturer_qs(), slug=mfr.slug)

@@ -6,6 +6,7 @@ from typing import Optional
 
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.db.models import Count, F, Prefetch
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
@@ -234,7 +235,10 @@ def patch_person_claims(request, slug: str, data: ClaimPatchSchema):
             raise HttpError(422, "; ".join(exc.messages)) from exc
         Claim.objects.assert_claim(person, field_name, value, user=request.user)
 
-    resolve_entity(person)
+    try:
+        resolve_entity(person)
+    except IntegrityError as exc:
+        raise HttpError(422, f"Unique constraint violation: {exc}") from exc
     invalidate_all()
 
     person = get_object_or_404(_person_qs(), slug=person.slug)

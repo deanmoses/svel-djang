@@ -69,6 +69,17 @@ class TestPatchManufacturerClaimsValidation:
         )
         assert resp.status_code == 404
 
+    def test_duplicate_name_returns_422(self, client, user, mfr):
+        Manufacturer.objects.create(name="Bally")
+        client.force_login(user)
+        resp = client.patch(
+            f"/api/manufacturers/{mfr.slug}/claims/",
+            data='{"fields": {"name": "Bally"}}',
+            content_type="application/json",
+        )
+        assert resp.status_code == 422
+        assert "unique" in resp.json()["detail"].lower()
+
     def test_invalid_markdown_link_returns_422(self, client, user, mfr):
         client.force_login(user)
         resp = client.patch(
