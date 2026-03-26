@@ -102,9 +102,6 @@
 									<span class="source-list">
 										{claims.map(claimAttribution).join(', ')}
 									</span>
-									{#if claims[0].changeset_note}
-										<span class="changeset-note">{claims[0].changeset_note}</span>
-									{/if}
 								</span>
 							</dd>
 						</div>

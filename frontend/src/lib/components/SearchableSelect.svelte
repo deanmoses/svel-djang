@@ -5,15 +5,21 @@
 		options,
 		selected = $bindable(null),
 		multi = false,
+		allowZeroCount = false,
 		placeholder = 'Search...',
 		label = ''
 	}: {
 		options: { slug: string; label: string; count: number }[];
 		selected?: string | string[] | null;
 		multi?: boolean;
+		allowZeroCount?: boolean;
 		placeholder?: string;
 		label?: string;
 	} = $props();
+
+	function isDisabled(opt: { count: number }): boolean {
+		return !allowZeroCount && opt.count === 0;
+	}
 
 	let query = $state('');
 	let open = $state(false);
@@ -100,7 +106,7 @@
 				e.preventDefault();
 				if (activeIndex >= 0 && activeIndex < filteredOptions.length) {
 					const opt = filteredOptions[activeIndex];
-					if (opt.count > 0) toggle(opt.slug);
+					if (!isDisabled(opt)) toggle(opt.slug);
 				}
 				break;
 			case 'Escape':
@@ -211,15 +217,15 @@
 					id={`${listboxId}-${i}`}
 					role="option"
 					aria-selected={isSelected(opt.slug)}
-					aria-disabled={opt.count === 0}
+					aria-disabled={isDisabled(opt)}
 					data-active={i === activeIndex}
 					class="option"
 					class:selected={isSelected(opt.slug)}
-					class:disabled={opt.count === 0}
+					class:disabled={isDisabled(opt)}
 					class:active={i === activeIndex}
 					onpointerdown={(e) => {
 						e.preventDefault();
-						if (opt.count > 0) toggle(opt.slug);
+						if (!isDisabled(opt)) toggle(opt.slug);
 					}}
 				>
 					{#if multi}
