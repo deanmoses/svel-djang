@@ -76,7 +76,6 @@
 		{#snippet main()}
 			{#if title.description?.html}
 				<section class="prose">
-					<h2>About</h2>
 					<Markdown html={title.description.html} />
 					<AttributionLine attribution={title.description.attribution} />
 				</section>

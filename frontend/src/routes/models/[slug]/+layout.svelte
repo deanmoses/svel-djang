@@ -71,10 +71,14 @@
 
 	<TwoColumnLayout>
 		{#snippet main()}
-			{#if model.title_description?.html && isOnlyModelInTitle}
+			{#if (model.title_description?.html && isOnlyModelInTitle) || model.description?.html}
 				<section class="prose">
-					<h2>About</h2>
-					<Markdown html={model.title_description.html} />
+					{#if model.title_description?.html && isOnlyModelInTitle}
+						<Markdown html={model.title_description.html} />
+					{/if}
+					{#if model.description?.html}
+						<Markdown html={model.description.html} />
+					{/if}
 				</section>
 			{/if}
 

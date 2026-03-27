@@ -105,6 +105,7 @@ class MachineModelDetailSchema(Schema):
     name: str
     slug: str
     manufacturer: Optional[Ref] = None
+    corporate_entity: Optional[Ref] = None
     year: Optional[int] = None
     month: Optional[int] = None
     technology_generation: Optional[Ref] = None
@@ -136,6 +137,7 @@ class MachineModelDetailSchema(Schema):
     game_format: Optional[Ref] = None
     display_subtype: Optional[Ref] = None
     gameplay_features: list[GameplayFeatureSchema] = []
+    tags: list[Ref] = []
     reward_types: list[RewardTypeSchema] = []
     franchise: Optional[FranchiseRefSchema] = None
     series: list[SeriesRefSchema] = []
@@ -351,6 +353,11 @@ def _serialize_model_detail(pm) -> dict:
         "slug": pm.slug,
         "description": description,
         "manufacturer": {"name": mfr.name, "slug": mfr.slug} if mfr else None,
+        "corporate_entity": (
+            {"name": pm.corporate_entity.name, "slug": pm.corporate_entity.slug}
+            if pm.corporate_entity
+            else None
+        ),
         "year": pm.year,
         "month": pm.month,
         "technology_generation": (
@@ -454,6 +461,7 @@ def _serialize_model_detail(pm) -> dict:
             }
             for t in pm.machinemodelgameplayfeature_set.all()
         ],
+        "tags": [{"name": t.name, "slug": t.slug} for t in pm.tags.all()],
         "reward_types": [
             {"name": rt.name, "slug": rt.slug} for rt in pm.reward_types.all()
         ],
@@ -505,6 +513,7 @@ def _model_detail_qs():
                 "gameplayfeature"
             ).order_by("gameplayfeature__name"),
         ),
+        "tags",
         "reward_types",
         "abbreviations",
         "title__series",
