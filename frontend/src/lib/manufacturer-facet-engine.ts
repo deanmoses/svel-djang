@@ -4,7 +4,7 @@
  */
 
 import type { FacetRef, FacetOption } from '$lib/facet-engine';
-import { normalizeText } from '$lib/util';
+import { normalizeText } from '$lib/utils';
 
 export type { FacetRef, FacetOption };
 

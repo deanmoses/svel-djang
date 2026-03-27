@@ -6,7 +6,7 @@
 	import ManufacturerCard from '$lib/components/cards/ManufacturerCard.svelte';
 	import PersonCard from '$lib/components/cards/PersonCard.svelte';
 	import TitleCard from '$lib/components/cards/TitleCard.svelte';
-	import { normalizeText } from '$lib/util';
+	import { normalizeText } from '$lib/utils';
 
 	const MIN_QUERY_LENGTH = 2;
 	const PREVIEW_SIZE = 5;

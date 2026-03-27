@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { normalizeText } from '$lib/util';
+	import { normalizeText } from '$lib/utils';
 
 	let {
 		options,

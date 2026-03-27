@@ -3,7 +3,7 @@
  * No Svelte imports — this module is framework-agnostic and testable.
  */
 
-import { normalizeText } from '$lib/util';
+import { normalizeText } from '$lib/utils';
 
 // ---------------------------------------------------------------------------
 // Types

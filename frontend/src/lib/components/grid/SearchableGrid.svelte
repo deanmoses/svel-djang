@@ -4,7 +4,7 @@
 	import CardGrid from './CardGrid.svelte';
 	import ClientFilteredGrid from './ClientFilteredGrid.svelte';
 	import SkeletonCard from '../cards/SkeletonCard.svelte';
-	import { normalizeText } from '$lib/util';
+	import { normalizeText } from '$lib/utils';
 
 	const SEARCH_THRESHOLD = 12;
 	const SKELETON_INDICES = Array.from({ length: 12 }, (_, i) => i);
