@@ -9,7 +9,6 @@ from apps.catalog.api.edit_claims import get_field_constraints, validate_scalar_
 from apps.catalog.models import CorporateEntity, MachineModel, Person, Title
 
 
-@pytest.mark.django_db
 class TestValidateScalarFields:
     def test_allows_clearing_nullable_and_blankable_fields(self):
         specs = validate_scalar_fields(
@@ -30,7 +29,6 @@ class TestValidateScalarFields:
             validate_scalar_fields(Title, {"name": None})
 
 
-@pytest.mark.django_db
 class TestValidateScalarFieldsNumericConstraints:
     """Validators defined on model fields are enforced at claim-assertion time."""
 
@@ -101,7 +99,6 @@ class TestGetFieldConstraints:
         assert "description" not in result
 
 
-@pytest.mark.django_db
 class TestFieldConstraintsEndpoint:
     def test_returns_machine_model_constraints(self, client):
         resp = client.get("/api/field-constraints/machine-model")

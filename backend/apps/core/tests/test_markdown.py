@@ -77,7 +77,6 @@ class TestRenderMarkdownHtml:
         assert "broken link" in result
 
 
-@pytest.mark.django_db
 class TestRenderMarkdownFields:
     def test_returns_html_for_markdown_fields(self):
         from apps.catalog.models import Manufacturer

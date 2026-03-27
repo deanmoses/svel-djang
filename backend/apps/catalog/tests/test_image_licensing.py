@@ -139,7 +139,6 @@ class TestImageLicenseDenormalization:
         assert pm.extra_data.get("opdb.images.__permissiveness_rank") is None
 
 
-@pytest.mark.django_db
 class TestExtractImageUrlsWithThreshold:
     @pytest.fixture(autouse=True)
     def _licensed_only_policy(self):
