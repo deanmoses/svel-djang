@@ -10,7 +10,12 @@
 	import TextAreaField from '$lib/components/form/TextAreaField.svelte';
 	import NumberField from '$lib/components/form/NumberField.svelte';
 	import MonthSelect from '$lib/components/form/MonthSelect.svelte';
-	import { buildModelPatchBody, modelToFormFields } from './model-edit';
+	import {
+		buildModelPatchBody,
+		modelToFormFields,
+		TAXONOMY_FK_FIELDS,
+		HIERARCHY_FK_FIELDS
+	} from './model-edit';
 
 	let { data } = $props();
 	let model = $derived(data.model);
@@ -189,69 +194,38 @@
 	<fieldset class="field-group">
 		<legend>Classification</legend>
 		<div class="classification-grid">
-			<SearchableSelect
-				label="Corporate entity"
-				options={editOptions.corporate_entities ?? []}
-				bind:selected={editFields.corporate_entity}
-				allowZeroCount
-				placeholder="Search corporate entities..."
-			/>
-			<SearchableSelect
-				label="Technology generation"
-				options={editOptions.technology_generations ?? []}
-				bind:selected={editFields.technology_generation}
-				allowZeroCount
-				placeholder="Search generations..."
-			/>
-			<SearchableSelect
-				label="Technology subgeneration"
-				options={editOptions.technology_subgenerations ?? []}
-				bind:selected={editFields.technology_subgeneration}
-				allowZeroCount
-				placeholder="Search subgenerations..."
-			/>
-			<SearchableSelect
-				label="Display type"
-				options={editOptions.display_types ?? []}
-				bind:selected={editFields.display_type}
-				allowZeroCount
-				placeholder="Search display types..."
-			/>
-			<SearchableSelect
-				label="Display subtype"
-				options={editOptions.display_subtypes ?? []}
-				bind:selected={editFields.display_subtype}
-				allowZeroCount
-				placeholder="Search display subtypes..."
-			/>
-			<SearchableSelect
-				label="Cabinet"
-				options={editOptions.cabinets ?? []}
-				bind:selected={editFields.cabinet}
-				allowZeroCount
-				placeholder="Search cabinets..."
-			/>
-			<SearchableSelect
-				label="Game format"
-				options={editOptions.game_formats ?? []}
-				bind:selected={editFields.game_format}
-				allowZeroCount
-				placeholder="Search game formats..."
-			/>
-			<SearchableSelect
-				label="System"
-				options={editOptions.systems ?? []}
-				bind:selected={editFields.system}
-				allowZeroCount
-				placeholder="Search systems..."
-			/>
+			{#each TAXONOMY_FK_FIELDS as fk (fk.field)}
+				<SearchableSelect
+					label={fk.label}
+					options={editOptions[fk.optionsKey] ?? []}
+					bind:selected={editFields[fk.field]}
+					allowZeroCount
+					placeholder="Search {fk.label.toLowerCase()}..."
+				/>
+			{/each}
+		</div>
+	</fieldset>
+
+	<!-- Hierarchy -->
+	<fieldset class="field-group">
+		<legend>Hierarchy</legend>
+		<div class="classification-grid">
+			{#each HIERARCHY_FK_FIELDS as fk (fk.field)}
+				<SearchableSelect
+					label={fk.label}
+					options={(editOptions[fk.optionsKey] ?? []).filter((o) => o.slug !== model.slug)}
+					bind:selected={editFields[fk.field]}
+					allowZeroCount
+					placeholder="Search models..."
+				/>
+			{/each}
 		</div>
 	</fieldset>
 
 	<!-- Specs -->
 	<div class="row-2">
 		<NumberField label="Players" bind:value={editFields.player_count} min={1} max={8} />
-		<NumberField label="Flippers" bind:value={editFields.flipper_count} min={0} max={10} />
+		<NumberField label="Flippers" bind:value={editFields.flipper_count} min={0} max={20} />
 	</div>
 	<NumberField label="Production quantity" bind:value={editFields.production_quantity} min={0} />
 

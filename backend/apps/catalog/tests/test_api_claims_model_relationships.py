@@ -503,3 +503,47 @@ class TestEditOptions:
         assert "pat-lawlor" in people_slugs
         role_slugs = {r["slug"] for r in data["credit_roles"]}
         assert "design" in role_slugs
+
+    def test_includes_models_with_year_in_label(self, client, pm):
+        resp = client.get("/api/models/edit-options/")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "models" in data
+        models = data["models"]
+        assert len(models) >= 1
+        match = next(m for m in models if m["slug"] == pm.slug)
+        assert match["label"] == "Medieval Madness (1997)"
+
+    def test_models_label_without_year(self, client, db):
+        MachineModel.objects.create(name="Unknown Game", slug="unknown-game")
+        resp = client.get("/api/models/edit-options/")
+        data = resp.json()
+        match = next(m for m in data["models"] if m["slug"] == "unknown-game")
+        assert match["label"] == "Unknown Game"
+
+
+@pytest.mark.django_db
+class TestHierarchyFKValidation:
+    def test_self_referential_variant_of_rejected(self, client, user, pm):
+        client.force_login(user)
+        resp = _patch(client, pm.slug, {"fields": {"variant_of": pm.slug}})
+        assert resp.status_code == 422
+
+    def test_self_referential_converted_from_rejected(self, client, user, pm):
+        client.force_login(user)
+        resp = _patch(client, pm.slug, {"fields": {"converted_from": pm.slug}})
+        assert resp.status_code == 422
+
+    def test_self_referential_remake_of_rejected(self, client, user, pm):
+        client.force_login(user)
+        resp = _patch(client, pm.slug, {"fields": {"remake_of": pm.slug}})
+        assert resp.status_code == 422
+
+    def test_valid_hierarchy_fk_succeeds(self, client, user, pm):
+        parent = MachineModel.objects.create(
+            name="Star Trek", slug="star-trek", year=1991
+        )
+        client.force_login(user)
+        resp = _patch(client, pm.slug, {"fields": {"variant_of": parent.slug}})
+        assert resp.status_code == 200
+        assert resp.json()["variant_of"]["slug"] == "star-trek"

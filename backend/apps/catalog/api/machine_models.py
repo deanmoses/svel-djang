@@ -744,6 +744,7 @@ def get_model_edit_options(request):
         DisplayType,
         GameFormat,
         GameplayFeature,
+        MachineModel,
         Person,
         RewardType,
         System,
@@ -777,6 +778,13 @@ def get_model_edit_options(request):
         "corporate_entities": _opts(CorporateEntity.objects.order_by("name")),
         "people": _opts(Person.objects.order_by("name")),
         "credit_roles": _opts(CreditRole.objects.order_by("display_order", "name")),
+        "models": [
+            {
+                "slug": obj.slug,
+                "label": f"{obj.name} ({obj.year})" if obj.year else obj.name,
+            }
+            for obj in MachineModel.objects.order_by("name")
+        ],
     }
 
 
@@ -785,6 +793,9 @@ def get_model_edit_options(request):
 def get_model(request, slug: str):
     pm = get_object_or_404(_model_detail_qs(), slug=slug)
     return _serialize_model_detail(pm)
+
+
+_SELF_REF_FIELDS = frozenset({"variant_of", "converted_from", "remake_of"})
 
 
 @models_router.patch(
@@ -821,6 +832,12 @@ def patch_model_claims(request, slug: str, data: ModelClaimPatchSchema):
     )
 
     specs = validate_scalar_fields(MachineModel, data.fields)
+
+    for field_name, value in data.fields.items():
+        if field_name in _SELF_REF_FIELDS and value == slug:
+            raise HttpError(
+                422, f"Field '{field_name}' cannot reference the model itself."
+            )
 
     if data.themes is not None:
         specs.extend(

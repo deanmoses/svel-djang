@@ -8,6 +8,37 @@
 import { diffScalarFields, slugSetChanged, stringSetChanged } from '$lib/edit-helpers';
 
 // ---------------------------------------------------------------------------
+// FK field config — drives both modelToFormFields and template loops
+// ---------------------------------------------------------------------------
+
+export const TAXONOMY_FK_FIELDS = [
+	{ field: 'corporate_entity', optionsKey: 'corporate_entities', label: 'Corporate entity' },
+	{
+		field: 'technology_generation',
+		optionsKey: 'technology_generations',
+		label: 'Technology generation'
+	},
+	{
+		field: 'technology_subgeneration',
+		optionsKey: 'technology_subgenerations',
+		label: 'Technology subgeneration'
+	},
+	{ field: 'display_type', optionsKey: 'display_types', label: 'Display type' },
+	{ field: 'display_subtype', optionsKey: 'display_subtypes', label: 'Display subtype' },
+	{ field: 'cabinet', optionsKey: 'cabinets', label: 'Cabinet' },
+	{ field: 'game_format', optionsKey: 'game_formats', label: 'Game format' },
+	{ field: 'system', optionsKey: 'systems', label: 'System' }
+] as const;
+
+export const HIERARCHY_FK_FIELDS = [
+	{ field: 'variant_of', optionsKey: 'models', label: 'Variant of' },
+	{ field: 'converted_from', optionsKey: 'models', label: 'Converted from' },
+	{ field: 'remake_of', optionsKey: 'models', label: 'Remake of' }
+] as const;
+
+const ALL_FK_FIELDS = [...TAXONOMY_FK_FIELDS, ...HIERARCHY_FK_FIELDS];
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -32,6 +63,9 @@ export type ModelEditView = {
 	cabinet?: { slug: string } | null;
 	game_format?: { slug: string } | null;
 	system?: { slug: string } | null;
+	variant_of?: { slug: string } | null;
+	converted_from?: { slug: string } | null;
+	remake_of?: { slug: string } | null;
 	themes: { slug: string }[];
 	tags?: { slug: string }[];
 	reward_types: { slug: string }[];
@@ -66,6 +100,9 @@ export type ModelFormFields = {
 	cabinet: string;
 	game_format: string;
 	system: string;
+	variant_of: string;
+	converted_from: string;
+	remake_of: string;
 };
 
 export type GameplayFeatureRow = {
@@ -105,7 +142,7 @@ export type ModelPatchBody = {
 // ---------------------------------------------------------------------------
 
 export function modelToFormFields(m: ModelEditView): ModelFormFields {
-	return {
+	const fields: Record<string, unknown> = {
 		name: m.name,
 		description: m.description?.text ?? '',
 		year: m.year ?? '',
@@ -117,16 +154,13 @@ export function modelToFormFields(m: ModelEditView): ModelFormFields {
 		opdb_id: m.opdb_id ?? '',
 		pinside_id: m.pinside_id ?? '',
 		ipdb_rating: m.ipdb_rating ?? '',
-		pinside_rating: m.pinside_rating ?? '',
-		corporate_entity: m.corporate_entity?.slug ?? '',
-		technology_generation: m.technology_generation?.slug ?? '',
-		technology_subgeneration: m.technology_subgeneration?.slug ?? '',
-		display_type: m.display_type?.slug ?? '',
-		display_subtype: m.display_subtype?.slug ?? '',
-		cabinet: m.cabinet?.slug ?? '',
-		game_format: m.game_format?.slug ?? '',
-		system: m.system?.slug ?? ''
+		pinside_rating: m.pinside_rating ?? ''
 	};
+	for (const fk of ALL_FK_FIELDS) {
+		const ref = m[fk.field as keyof ModelEditView] as { slug: string } | null | undefined;
+		fields[fk.field] = ref?.slug ?? '';
+	}
+	return fields as ModelFormFields;
 }
 
 // ---------------------------------------------------------------------------

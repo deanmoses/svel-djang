@@ -35,6 +35,9 @@ const baseModel: ModelEditView = {
 	cabinet: { slug: 'standard' },
 	game_format: { slug: 'standard' },
 	system: { slug: 'wpc-95' },
+	variant_of: { slug: 'medieval-madness-le' },
+	converted_from: null,
+	remake_of: null,
 	themes: [{ slug: 'medieval' }, { slug: 'fantasy' }],
 	tags: [{ slug: 'classic' }],
 	reward_types: [{ slug: 'multiball' }],
@@ -91,6 +94,13 @@ describe('modelToFormFields', () => {
 		expect(fields.year).toBe(1997);
 		expect(fields.corporate_entity).toBe('williams-1985');
 		expect(fields.system).toBe('wpc-95');
+	});
+
+	it('extracts hierarchy FK slugs', () => {
+		const fields = modelToFormFields(baseModel);
+		expect(fields.variant_of).toBe('medieval-madness-le');
+		expect(fields.converted_from).toBe('');
+		expect(fields.remake_of).toBe('');
 	});
 
 	it('converts null FKs to empty strings', () => {
@@ -163,6 +173,26 @@ describe('buildModelPatchBody — scalars', () => {
 		const state = stateFromModel(baseModel, { fields });
 		const body = buildModelPatchBody(state, baseModel)!;
 		expect(body.fields.corporate_entity).toBeNull();
+	});
+
+	it('detects changed hierarchy FK', () => {
+		const fields: ModelFormFields = {
+			...modelToFormFields(baseModel),
+			variant_of: 'some-other-model'
+		};
+		const state = stateFromModel(baseModel, { fields });
+		const body = buildModelPatchBody(state, baseModel)!;
+		expect(body.fields.variant_of).toBe('some-other-model');
+	});
+
+	it('sends null for cleared hierarchy FK', () => {
+		const fields: ModelFormFields = {
+			...modelToFormFields(baseModel),
+			variant_of: ''
+		};
+		const state = stateFromModel(baseModel, { fields });
+		const body = buildModelPatchBody(state, baseModel)!;
+		expect(body.fields.variant_of).toBeNull();
 	});
 
 	it('omits relationship fields when only scalars changed', () => {
