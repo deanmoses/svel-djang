@@ -41,6 +41,16 @@
 			}))
 		)
 	);
+	let creditKeyCounter = $state(0);
+	let editCredits = $state(
+		untrack(() =>
+			model.credits.map((c) => ({
+				key: creditKeyCounter++,
+				person_slug: c.person.slug,
+				role: c.role
+			}))
+		)
+	);
 	let editAbbreviations = $state<string[]>(untrack(() => [...model.abbreviations]));
 	let editNote = $state('');
 
@@ -80,6 +90,7 @@
 				tags: selectedTags,
 				rewardTypes: selectedRewardTypes,
 				gameplayFeatures: editGameplayFeatures,
+				credits: editCredits,
 				abbreviations: editAbbreviations,
 				note: editNote
 			},
@@ -106,6 +117,11 @@
 				slug: gf.slug,
 				count: gf.count ?? null
 			}));
+			editCredits = updated.credits.map((c) => ({
+				key: creditKeyCounter++,
+				person_slug: c.person.slug,
+				role: c.role
+			}));
 			editAbbreviations = [...updated.abbreviations];
 			editNote = '';
 			await invalidateAll();
@@ -128,6 +144,16 @@
 
 	function removeGameplayFeature(index: number) {
 		editGameplayFeatures = editGameplayFeatures.filter((_, i) => i !== index);
+	}
+
+	// --- Credit helpers ---
+
+	function addCredit() {
+		editCredits = [...editCredits, { key: creditKeyCounter++, person_slug: '', role: '' }];
+	}
+
+	function removeCredit(index: number) {
+		editCredits = editCredits.filter((_, i) => i !== index);
 	}
 </script>
 
@@ -285,6 +311,42 @@
 		</button>
 	</fieldset>
 
+	<!-- Credits -->
+	<fieldset class="field-group">
+		<legend>Credits</legend>
+		{#each editCredits as credit, i (credit.key)}
+			<div class="credit-row">
+				<div class="credit-person">
+					<SearchableSelect
+						label=""
+						options={editOptions.people ?? []}
+						bind:selected={editCredits[i].person_slug}
+						allowZeroCount
+						placeholder="Search people..."
+					/>
+				</div>
+				<div class="credit-role">
+					<SearchableSelect
+						label=""
+						options={editOptions.credit_roles ?? []}
+						bind:selected={editCredits[i].role}
+						allowZeroCount
+						placeholder="Role..."
+					/>
+				</div>
+				<button type="button" class="remove-btn" onclick={() => removeCredit(i)}> &times; </button>
+			</div>
+		{/each}
+		<button
+			type="button"
+			class="add-btn"
+			disabled={editCredits.some((c) => c.person_slug === '' || c.role === '')}
+			onclick={addCredit}
+		>
+			Add credit
+		</button>
+	</fieldset>
+
 	<!-- Reward Types -->
 	<div class="field-group">
 		<SearchableSelect
@@ -409,6 +471,19 @@
 		display: grid;
 		grid-template-columns: 1fr 1fr 1fr;
 		gap: var(--size-3);
+	}
+
+	/* Credit rows */
+	.credit-row {
+		display: grid;
+		grid-template-columns: 1fr auto auto;
+		gap: var(--size-2);
+		align-items: end;
+		margin-bottom: var(--size-2);
+	}
+
+	.credit-role {
+		width: 10rem;
 	}
 
 	/* Gameplay feature rows */

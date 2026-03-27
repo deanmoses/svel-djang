@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
 	buildModelPatchBody,
 	modelToFormFields,
+	type CreditRow,
 	type GameplayFeatureRow,
 	type ModelEditState,
 	type ModelEditView,
@@ -41,6 +42,20 @@ const baseModel: ModelEditView = {
 		{ slug: 'ramps', count: 3 },
 		{ slug: 'pop-bumpers', count: 2 }
 	],
+	credits: [
+		{
+			person: { name: 'Pat Lawlor', slug: 'pat-lawlor' },
+			role: 'design',
+			role_display: 'Design',
+			role_sort_order: 1
+		},
+		{
+			person: { name: 'Greg Freres', slug: 'greg-freres' },
+			role: 'art',
+			role_display: 'Art',
+			role_sort_order: 2
+		}
+	],
 	abbreviations: ['MM']
 };
 
@@ -53,6 +68,10 @@ function stateFromModel(model: ModelEditView, overrides?: Partial<ModelEditState
 		gameplayFeatures: model.gameplay_features.map((gf) => ({
 			slug: gf.slug,
 			count: gf.count ?? null
+		})),
+		credits: model.credits.map((c) => ({
+			person_slug: c.person.slug,
+			role: c.role
 		})),
 		abbreviations: [...model.abbreviations],
 		note: '',
@@ -154,6 +173,7 @@ describe('buildModelPatchBody — scalars', () => {
 		expect(body.tags).toBeNull();
 		expect(body.reward_types).toBeNull();
 		expect(body.gameplay_features).toBeNull();
+		expect(body.credits).toBeNull();
 		expect(body.abbreviations).toBeNull();
 	});
 });
@@ -268,6 +288,76 @@ describe('buildModelPatchBody — gameplay features', () => {
 });
 
 // ---------------------------------------------------------------------------
+// buildModelPatchBody — credits
+// ---------------------------------------------------------------------------
+
+describe('buildModelPatchBody — credits', () => {
+	it('detects added credit', () => {
+		const credits: CreditRow[] = [
+			{ person_slug: 'pat-lawlor', role: 'design' },
+			{ person_slug: 'greg-freres', role: 'art' },
+			{ person_slug: 'john-youssi', role: 'software' }
+		];
+		const state = stateFromModel(baseModel, { credits });
+		const body = buildModelPatchBody(state, baseModel)!;
+		expect(body.credits).toHaveLength(3);
+		expect(body.credits!.find((c) => c.person_slug === 'john-youssi')).toEqual({
+			person_slug: 'john-youssi',
+			role: 'software'
+		});
+	});
+
+	it('detects removed credit', () => {
+		const credits: CreditRow[] = [{ person_slug: 'pat-lawlor', role: 'design' }];
+		const state = stateFromModel(baseModel, { credits });
+		const body = buildModelPatchBody(state, baseModel)!;
+		expect(body.credits).toEqual([{ person_slug: 'pat-lawlor', role: 'design' }]);
+	});
+
+	it('filters out incomplete rows', () => {
+		const credits: CreditRow[] = [
+			{ person_slug: 'pat-lawlor', role: 'design' },
+			{ person_slug: '', role: 'art' },
+			{ person_slug: 'greg-freres', role: '' },
+			{ person_slug: 'john-youssi', role: 'software' }
+		];
+		const state = stateFromModel(baseModel, { credits });
+		const body = buildModelPatchBody(state, baseModel)!;
+		expect(body.credits!.every((c) => c.person_slug !== '' && c.role !== '')).toBe(true);
+		expect(body.credits).toHaveLength(2);
+	});
+
+	it('blank rows do not trigger a false change', () => {
+		const credits: CreditRow[] = [
+			{ person_slug: 'pat-lawlor', role: 'design' },
+			{ person_slug: '', role: '' },
+			{ person_slug: 'greg-freres', role: 'art' }
+		];
+		const state = stateFromModel(baseModel, { credits });
+		expect(buildModelPatchBody(state, baseModel)).toBeNull();
+	});
+
+	it('no change when credits match (ignoring order)', () => {
+		const credits: CreditRow[] = [
+			{ person_slug: 'greg-freres', role: 'art' },
+			{ person_slug: 'pat-lawlor', role: 'design' }
+		];
+		const state = stateFromModel(baseModel, { credits });
+		expect(buildModelPatchBody(state, baseModel)).toBeNull();
+	});
+
+	it('same person different roles counts as change', () => {
+		const credits: CreditRow[] = [
+			{ person_slug: 'pat-lawlor', role: 'design' },
+			{ person_slug: 'pat-lawlor', role: 'software' }
+		];
+		const state = stateFromModel(baseModel, { credits });
+		const body = buildModelPatchBody(state, baseModel)!;
+		expect(body.credits).toHaveLength(2);
+	});
+});
+
+// ---------------------------------------------------------------------------
 // buildModelPatchBody — abbreviations
 // ---------------------------------------------------------------------------
 
@@ -310,6 +400,7 @@ describe('buildModelPatchBody — mixed', () => {
 		expect(body.tags).toBeNull();
 		expect(body.reward_types).toBeNull();
 		expect(body.gameplay_features).toEqual([{ slug: 'ramps', count: 5 }]);
+		expect(body.credits).toBeNull();
 		expect(body.abbreviations).toEqual(['MM', 'MMR']);
 		expect(body.note).toBe('Big edit');
 	});

@@ -739,10 +739,12 @@ def get_model_edit_options(request):
     from ..models import (
         Cabinet,
         CorporateEntity,
+        CreditRole,
         DisplaySubtype,
         DisplayType,
         GameFormat,
         GameplayFeature,
+        Person,
         RewardType,
         System,
         Tag,
@@ -773,6 +775,8 @@ def get_model_edit_options(request):
         "game_formats": _opts(GameFormat.objects.order_by("display_order", "name")),
         "systems": _opts(System.objects.order_by("name")),
         "corporate_entities": _opts(CorporateEntity.objects.order_by("name")),
+        "people": _opts(Person.objects.order_by("name")),
+        "credit_roles": _opts(CreditRole.objects.order_by("display_order", "name")),
     }
 
 
@@ -794,6 +798,7 @@ def patch_model_claims(request, slug: str, data: ModelClaimPatchSchema):
     from .edit_claims import (
         execute_claims,
         plan_abbreviation_claims,
+        plan_credit_claims,
         plan_gameplay_feature_claims,
         plan_m2m_claims,
         validate_scalar_fields,
@@ -809,6 +814,8 @@ def patch_model_claims(request, slug: str, data: ModelClaimPatchSchema):
             "reward_types",
             "machinemodelgameplayfeature_set__gameplayfeature",
             "abbreviations",
+            "credits__person",
+            "credits__role",
         ),
         slug=slug,
     )
@@ -850,6 +857,8 @@ def patch_model_claims(request, slug: str, data: ModelClaimPatchSchema):
         )
     if data.gameplay_features is not None:
         specs.extend(plan_gameplay_feature_claims(pm, data.gameplay_features))
+    if data.credits is not None:
+        specs.extend(plan_credit_claims(pm, data.credits))
     if data.abbreviations is not None:
         specs.extend(plan_abbreviation_claims(pm, data.abbreviations))
 

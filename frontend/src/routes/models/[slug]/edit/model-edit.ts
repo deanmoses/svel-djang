@@ -36,6 +36,12 @@ export type ModelEditView = {
 	tags?: { slug: string }[];
 	reward_types: { slug: string }[];
 	gameplay_features: { slug: string; count?: number | null }[];
+	credits: {
+		person: { slug: string; name: string };
+		role: string;
+		role_display: string;
+		role_sort_order: number;
+	}[];
 	abbreviations: string[];
 };
 
@@ -67,12 +73,18 @@ export type GameplayFeatureRow = {
 	count: number | null;
 };
 
+export type CreditRow = {
+	person_slug: string;
+	role: string;
+};
+
 export type ModelEditState = {
 	fields: ModelFormFields;
 	themes: string[];
 	tags: string[];
 	rewardTypes: string[];
 	gameplayFeatures: GameplayFeatureRow[];
+	credits: CreditRow[];
 	abbreviations: string[];
 	note: string;
 };
@@ -83,6 +95,7 @@ export type ModelPatchBody = {
 	tags: string[] | null;
 	reward_types: string[] | null;
 	gameplay_features: { slug: string; count: number | null }[] | null;
+	credits: { person_slug: string; role: string }[] | null;
 	abbreviations: string[] | null;
 	note: string;
 };
@@ -132,6 +145,18 @@ function gameplayFeaturesChanged(
 	return JSON.stringify(orig) !== JSON.stringify(curr);
 }
 
+function creditsChanged(
+	current: CreditRow[],
+	original: { person: { slug: string }; role: string }[]
+): boolean {
+	const orig = original.map((c) => `${c.person.slug}:${c.role}`).sort();
+	const curr = current
+		.filter((c) => c.person_slug !== '' && c.role !== '')
+		.map((c) => `${c.person_slug}:${c.role}`)
+		.sort();
+	return JSON.stringify(orig) !== JSON.stringify(curr);
+}
+
 // ---------------------------------------------------------------------------
 // Build PATCH body
 // ---------------------------------------------------------------------------
@@ -147,9 +172,18 @@ export function buildModelPatchBody(
 	const hasTags = slugSetChanged(state.tags, model.tags ?? []);
 	const hasRewardTypes = slugSetChanged(state.rewardTypes, model.reward_types);
 	const hasFeatures = gameplayFeaturesChanged(state.gameplayFeatures, model.gameplay_features);
+	const hasCredits = creditsChanged(state.credits, model.credits);
 	const hasAbbrevs = stringSetChanged(state.abbreviations, model.abbreviations);
 
-	if (!hasFields && !hasThemes && !hasTags && !hasRewardTypes && !hasFeatures && !hasAbbrevs) {
+	if (
+		!hasFields &&
+		!hasThemes &&
+		!hasTags &&
+		!hasRewardTypes &&
+		!hasFeatures &&
+		!hasCredits &&
+		!hasAbbrevs
+	) {
 		return null;
 	}
 
@@ -162,6 +196,11 @@ export function buildModelPatchBody(
 			? state.gameplayFeatures
 					.filter((gf) => gf.slug !== '')
 					.map(({ slug, count }) => ({ slug, count }))
+			: null,
+		credits: hasCredits
+			? state.credits
+					.filter((c) => c.person_slug !== '' && c.role !== '')
+					.map(({ person_slug, role }) => ({ person_slug, role }))
 			: null,
 		abbreviations: hasAbbrevs ? state.abbreviations : null,
 		note: state.note.trim()

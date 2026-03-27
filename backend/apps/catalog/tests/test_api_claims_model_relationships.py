@@ -10,6 +10,7 @@ from django.contrib.auth import get_user_model
 from apps.catalog.models import (
     GameplayFeature,
     MachineModel,
+    Person,
     RewardType,
     Tag,
     Theme,
@@ -60,6 +61,15 @@ def gameplay_features(db):
         GameplayFeature.objects.create(name="Ramps", slug="ramps"),
         GameplayFeature.objects.create(name="Pop Bumpers", slug="pop-bumpers"),
         GameplayFeature.objects.create(name="Loops", slug="loops"),
+    ]
+
+
+@pytest.fixture
+def people(db):
+    return [
+        Person.objects.create(name="Pat Lawlor", slug="pat-lawlor"),
+        Person.objects.create(name="John Youssi", slug="john-youssi"),
+        Person.objects.create(name="Greg Freres", slug="greg-freres"),
     ]
 
 
@@ -303,7 +313,7 @@ class TestAbbreviations:
 @pytest.mark.django_db
 class TestCombinedEdits:
     def test_scalar_and_relationships_share_one_changeset(
-        self, client, user, pm, themes, gameplay_features
+        self, client, user, pm, themes, gameplay_features, people, credit_roles
     ):
         client.force_login(user)
         resp = _patch(
@@ -313,6 +323,7 @@ class TestCombinedEdits:
                 "fields": {"year": 1998},
                 "themes": ["medieval"],
                 "gameplay_features": [{"slug": "ramps", "count": 2}],
+                "credits": [{"person_slug": "pat-lawlor", "role": "design"}],
                 "abbreviations": ["MM"],
                 "note": "Full edit",
             },
@@ -326,9 +337,169 @@ class TestCombinedEdits:
         assert "year" in field_names
         assert "theme" in field_names
         assert "gameplay_feature" in field_names
+        assert "credit" in field_names
         assert "abbreviation" in field_names
 
     def test_no_changes_returns_422(self, client, user, pm):
         client.force_login(user)
         resp = _patch(client, pm.slug, {})
         assert resp.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# Credits
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+class TestCredits:
+    def test_add_credits(self, client, user, pm, people, credit_roles):
+        client.force_login(user)
+        resp = _patch(
+            client,
+            pm.slug,
+            {
+                "credits": [
+                    {"person_slug": "pat-lawlor", "role": "design"},
+                    {"person_slug": "greg-freres", "role": "art"},
+                ]
+            },
+        )
+        assert resp.status_code == 200
+        credits = resp.json()["credits"]
+        assert len(credits) == 2
+        persons = sorted(c["person"]["slug"] for c in credits)
+        assert persons == ["greg-freres", "pat-lawlor"]
+
+    def test_remove_credit(self, client, user, pm, people, credit_roles):
+        client.force_login(user)
+        _patch(
+            client,
+            pm.slug,
+            {
+                "credits": [
+                    {"person_slug": "pat-lawlor", "role": "design"},
+                    {"person_slug": "greg-freres", "role": "art"},
+                ]
+            },
+        )
+        resp = _patch(
+            client,
+            pm.slug,
+            {"credits": [{"person_slug": "pat-lawlor", "role": "design"}]},
+        )
+        assert resp.status_code == 200
+        assert len(resp.json()["credits"]) == 1
+
+    def test_replace_credits(self, client, user, pm, people, credit_roles):
+        client.force_login(user)
+        _patch(
+            client,
+            pm.slug,
+            {"credits": [{"person_slug": "pat-lawlor", "role": "design"}]},
+        )
+        resp = _patch(
+            client,
+            pm.slug,
+            {"credits": [{"person_slug": "john-youssi", "role": "software"}]},
+        )
+        assert resp.status_code == 200
+        credits = resp.json()["credits"]
+        assert len(credits) == 1
+        assert credits[0]["person"]["slug"] == "john-youssi"
+        assert credits[0]["role"] == "software"
+
+    def test_clear_credits(self, client, user, pm, people, credit_roles):
+        client.force_login(user)
+        _patch(
+            client,
+            pm.slug,
+            {"credits": [{"person_slug": "pat-lawlor", "role": "design"}]},
+        )
+        resp = _patch(client, pm.slug, {"credits": []})
+        assert resp.status_code == 200
+        assert resp.json()["credits"] == []
+
+    def test_duplicate_pair_returns_422(self, client, user, pm, people, credit_roles):
+        client.force_login(user)
+        resp = _patch(
+            client,
+            pm.slug,
+            {
+                "credits": [
+                    {"person_slug": "pat-lawlor", "role": "design"},
+                    {"person_slug": "pat-lawlor", "role": "design"},
+                ]
+            },
+        )
+        assert resp.status_code == 422
+
+    def test_unknown_person_returns_422(self, client, user, pm, credit_roles):
+        client.force_login(user)
+        resp = _patch(
+            client,
+            pm.slug,
+            {"credits": [{"person_slug": "nonexistent", "role": "design"}]},
+        )
+        assert resp.status_code == 422
+
+    def test_unknown_role_returns_422(self, client, user, pm, people):
+        client.force_login(user)
+        resp = _patch(
+            client,
+            pm.slug,
+            {"credits": [{"person_slug": "pat-lawlor", "role": "nonexistent"}]},
+        )
+        assert resp.status_code == 422
+
+    def test_null_leaves_unchanged(self, client, user, pm, people, credit_roles):
+        client.force_login(user)
+        _patch(
+            client,
+            pm.slug,
+            {"credits": [{"person_slug": "pat-lawlor", "role": "design"}]},
+        )
+        # PATCH with only a scalar field, credits=null (omitted)
+        resp = _patch(client, pm.slug, {"fields": {"year": 1998}})
+        assert resp.status_code == 200
+        assert len(resp.json()["credits"]) == 1
+
+    def test_same_person_different_roles_allowed(
+        self, client, user, pm, people, credit_roles
+    ):
+        client.force_login(user)
+        resp = _patch(
+            client,
+            pm.slug,
+            {
+                "credits": [
+                    {"person_slug": "pat-lawlor", "role": "design"},
+                    {"person_slug": "pat-lawlor", "role": "software"},
+                ]
+            },
+        )
+        assert resp.status_code == 200
+        assert len(resp.json()["credits"]) == 2
+
+
+# ---------------------------------------------------------------------------
+# Edit options
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+class TestEditOptions:
+    def test_includes_people_and_credit_roles(self, client, people, credit_roles):
+        resp = client.get("/api/models/edit-options/")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "people" in data
+        assert "credit_roles" in data
+        # Verify shape: each item has slug + label
+        assert all("slug" in p and "label" in p for p in data["people"])
+        assert all("slug" in r and "label" in r for r in data["credit_roles"])
+        # Verify content
+        people_slugs = {p["slug"] for p in data["people"]}
+        assert "pat-lawlor" in people_slugs
+        role_slugs = {r["slug"] for r in data["credit_roles"]}
+        assert "design" in role_slugs

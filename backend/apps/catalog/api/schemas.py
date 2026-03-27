@@ -48,12 +48,18 @@ class GameplayFeatureInput(Schema):
     count: int | None = None
 
 
+class CreditInput(Schema):
+    person_slug: str
+    role: str
+
+
 class ModelClaimPatchSchema(Schema):
     fields: dict[str, Any] = {}
     themes: list[str] | None = None
     tags: list[str] | None = None
     reward_types: list[str] | None = None
     gameplay_features: list[GameplayFeatureInput] | None = None
+    credits: list[CreditInput] | None = None
     abbreviations: list[str] | None = None
     note: str = ""
 
@@ -76,6 +82,8 @@ class ModelEditOptionsSchema(Schema):
     game_formats: list[EditOptionItem]
     systems: list[EditOptionItem]
     corporate_entities: list[EditOptionItem]
+    people: list[EditOptionItem]
+    credit_roles: list[EditOptionItem]
 
 
 class AttributionSchema(Schema):

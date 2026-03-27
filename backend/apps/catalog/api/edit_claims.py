@@ -339,6 +339,74 @@ def plan_abbreviation_claims(
     return specs
 
 
+def plan_credit_claims(
+    entity,
+    desired_credits: list,
+) -> list[ClaimSpec]:
+    """Validate and diff credits (person_slug + role) on a MachineModel.
+
+    Each entry has a ``person_slug`` and ``role`` (role slug).  Duplicate
+    (person_slug, role) pairs in the input are rejected.
+
+    Assumes ``entity`` has ``credits`` prefetched with
+    select_related("person", "role").
+
+    Raises HttpError 422 on invalid input.
+    """
+    from apps.catalog.claims import build_relationship_claim
+    from apps.catalog.models import CreditRole, Person
+
+    # Normalise input into a set of (person_slug, role_slug) and validate.
+    desired: set[tuple[str, str]] = set()
+    for credit in desired_credits:
+        pair = (credit.person_slug, credit.role)
+        if pair in desired:
+            raise HttpError(
+                422,
+                f"Duplicate credit: person={credit.person_slug!r}, role={credit.role!r}",
+            )
+        desired.add(pair)
+
+    if desired:
+        desired_person_slugs = {p for p, _ in desired}
+        existing_people = set(
+            Person.objects.filter(slug__in=desired_person_slugs).values_list(
+                "slug", flat=True
+            )
+        )
+        missing_people = desired_person_slugs - existing_people
+        if missing_people:
+            raise HttpError(422, f"Unknown person slugs: {sorted(missing_people)}")
+
+        desired_role_slugs = {r for _, r in desired}
+        existing_roles = set(
+            CreditRole.objects.filter(slug__in=desired_role_slugs).values_list(
+                "slug", flat=True
+            )
+        )
+        missing_roles = desired_role_slugs - existing_roles
+        if missing_roles:
+            raise HttpError(422, f"Unknown credit role slugs: {sorted(missing_roles)}")
+
+    # Current state from prefetched credits.
+    current: set[tuple[str, str]] = set()
+    for credit in entity.credits.all():
+        current.add((credit.person.slug, credit.role.slug))
+
+    specs: list[ClaimSpec] = []
+    for person_slug, role in desired - current:
+        claim_key, value = build_relationship_claim(
+            "credit", {"person_slug": person_slug, "role": role}
+        )
+        specs.append(ClaimSpec(field_name="credit", value=value, claim_key=claim_key))
+    for person_slug, role in current - desired:
+        claim_key, value = build_relationship_claim(
+            "credit", {"person_slug": person_slug, "role": role}, exists=False
+        )
+        specs.append(ClaimSpec(field_name="credit", value=value, claim_key=claim_key))
+    return specs
+
+
 def _normalize_abbreviations(values: list[str]) -> list[str]:
     """Strip, deduplicate, drop blanks, enforce max length."""
     normalized: list[str] = []
