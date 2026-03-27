@@ -6,6 +6,7 @@ import pytest
 from ninja.errors import HttpError
 
 from apps.catalog.api.edit_claims import (
+    _normalize_abbreviations,
     build_credit_claim_specs,
     build_gameplay_feature_claim_specs,
     build_m2m_claim_specs,
@@ -285,3 +286,12 @@ class TestBuildM2MClaimSpecs:
             slug_key="theme_slug",
         )
         assert specs == []
+
+
+class TestNormalizeAbbreviations:
+    def test_strips_blanks_and_deduplicates(self):
+        assert _normalize_abbreviations([" MM ", "", "MM", "mm"]) == ["MM", "mm"]
+
+    def test_rejects_too_long_values(self):
+        with pytest.raises(HttpError, match="50 characters or fewer"):
+            _normalize_abbreviations(["x" * 51])

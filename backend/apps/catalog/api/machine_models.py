@@ -812,7 +812,7 @@ def patch_model_claims(request, slug: str, data: ModelClaimPatchSchema):
         plan_credit_claims,
         plan_gameplay_feature_claims,
         plan_m2m_claims,
-        validate_scalar_fields,
+        plan_scalar_field_claims,
     )
 
     from ..models import MachineModel, RewardType, Tag, Theme
@@ -831,7 +831,7 @@ def patch_model_claims(request, slug: str, data: ModelClaimPatchSchema):
         slug=slug,
     )
 
-    specs = validate_scalar_fields(MachineModel, data.fields)
+    specs = plan_scalar_field_claims(MachineModel, data.fields) if data.fields else []
 
     for field_name, value in data.fields.items():
         if field_name in _SELF_REF_FIELDS and value == slug:

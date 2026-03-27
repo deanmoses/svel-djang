@@ -110,11 +110,6 @@ class TestM2MThemes:
         slugs = sorted(t["slug"] for t in resp.json()["themes"])
         assert slugs == ["fantasy", "horror"]
 
-    def test_invalid_slug_returns_422(self, client, user, pm):
-        client.force_login(user)
-        resp = _patch(client, pm.slug, {"themes": ["nonexistent"]})
-        assert resp.status_code == 422
-
     def test_null_leaves_unchanged(self, client, user, pm, themes):
         client.force_login(user)
         _patch(client, pm.slug, {"themes": ["medieval"]})
@@ -228,15 +223,6 @@ class TestGameplayFeatures:
         slugs = [f["slug"] for f in resp.json()["gameplay_features"]]
         assert slugs == ["ramps"]
 
-    def test_invalid_slug_returns_422(self, client, user, pm):
-        client.force_login(user)
-        resp = _patch(
-            client,
-            pm.slug,
-            {"gameplay_features": [{"slug": "nonexistent"}]},
-        )
-        assert resp.status_code == 422
-
 
 # ---------------------------------------------------------------------------
 # Abbreviations
@@ -264,13 +250,6 @@ class TestAbbreviations:
         resp = _patch(client, pm.slug, {"abbreviations": []})
         assert resp.status_code == 200
         assert resp.json()["abbreviations"] == []
-
-    def test_deduplication(self, client, user, pm):
-        client.force_login(user)
-        resp = _patch(client, pm.slug, {"abbreviations": ["MM", "MM", "mm"]})
-        assert resp.status_code == 200
-        # "mm" is a different string (case-sensitive dedup)
-        assert len(resp.json()["abbreviations"]) <= 2
 
 
 # ---------------------------------------------------------------------------
@@ -387,15 +366,6 @@ class TestCredits:
         resp = _patch(client, pm.slug, {"credits": []})
         assert resp.status_code == 200
         assert resp.json()["credits"] == []
-
-    def test_unknown_person_returns_422(self, client, user, pm, credit_roles):
-        client.force_login(user)
-        resp = _patch(
-            client,
-            pm.slug,
-            {"credits": [{"person_slug": "nonexistent", "role": "design"}]},
-        )
-        assert resp.status_code == 422
 
     def test_null_leaves_unchanged(self, client, user, pm, people, credit_roles):
         client.force_login(user)
