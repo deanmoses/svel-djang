@@ -357,6 +357,26 @@ class Claim(models.Model):
             ),
         ]
 
+    @classmethod
+    def for_object(
+        cls, obj, *, field_name: str, value, claim_key: str = "", **kwargs
+    ) -> "Claim":
+        """Construct an unsaved Claim for a model instance.
+
+        Derives content_type_id from obj automatically, so callers never need
+        to capture a ct_id variable. Returns an unsaved instance suitable for
+        passing to bulk_assert_claims().
+        """
+        ct_id = ContentType.objects.get_for_model(obj).pk
+        return cls(
+            content_type_id=ct_id,
+            object_id=obj.pk,
+            field_name=field_name,
+            claim_key=claim_key,
+            value=value,
+            **kwargs,
+        )
+
     def __str__(self) -> str:
         author = self.source.name if self.source_id else self.user.username
         return f"{author}: {self.subject}.{self.field_name}"

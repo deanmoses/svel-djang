@@ -1369,7 +1369,6 @@ class Command(BaseCommand):
             return
 
         ct_id = ContentType.objects.get_for_model(Title).pk
-        series_ct_id = ContentType.objects.get_for_model(Series).pk
 
         titles_by_opdb_id = {t.opdb_id: t for t in Title.objects.all()}
         titles_by_slug = {t.slug: t for t in Title.objects.all()}
@@ -1516,9 +1515,8 @@ class Command(BaseCommand):
                         "series_title", {"title_slug": effective_slug}
                     )
                     series_title_claims[series.pk].append(
-                        Claim(
-                            content_type_id=series_ct_id,
-                            object_id=series.pk,
+                        Claim.for_object(
+                            series,
                             field_name="series_title",
                             claim_key=claim_key,
                             value=value,
