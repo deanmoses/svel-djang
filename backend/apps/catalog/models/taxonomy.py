@@ -66,7 +66,6 @@ class TechnologySubgeneration(Linkable, TimeStampedModel):
     """
 
     link_url_pattern = "/technology-subgenerations/{slug}"
-    claims_exempt = frozenset({"technology_generation"})
 
     name = models.CharField(max_length=200, validators=[validate_no_mojibake])
     slug = models.SlugField(max_length=200, unique=True, blank=True)
@@ -128,7 +127,6 @@ class DisplaySubtype(Linkable, TimeStampedModel):
     """
 
     link_url_pattern = "/display-subtypes/{slug}"
-    claims_exempt = frozenset({"display_type"})
 
     name = models.CharField(max_length=200, validators=[validate_no_mojibake])
     slug = models.SlugField(max_length=200, unique=True, blank=True)

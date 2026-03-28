@@ -497,8 +497,6 @@ class Command(BaseCommand):
             if not data:
                 continue
 
-            ct = ContentType.objects.get_for_model(model_class)
-
             # Resolve parent FK lookup if needed.
             parent_lookup = {}
             if parent_config:
@@ -559,30 +557,26 @@ class Command(BaseCommand):
             pending_claims: list[Claim] = []
             for obj, entry in zip(objs, entries_used):
                 pending_claims.append(
-                    Claim(
-                        content_type_id=ct.pk,
-                        object_id=obj.pk,
-                        field_name="name",
-                        value=obj.name,
-                    )
+                    Claim.for_object(obj, field_name="name", value=obj.name)
                 )
                 if has_display_order:
                     pending_claims.append(
-                        Claim(
-                            content_type_id=ct.pk,
-                            object_id=obj.pk,
-                            field_name="display_order",
-                            value=obj.display_order,
+                        Claim.for_object(
+                            obj, field_name="display_order", value=obj.display_order
+                        )
+                    )
+                if parent_config:
+                    fk_field, _, json_fk_key = parent_config
+                    pending_claims.append(
+                        Claim.for_object(
+                            obj, field_name=fk_field, value=entry[json_fk_key]
                         )
                     )
                 description = entry.get("description", "")
                 if description:
                     pending_claims.append(
-                        Claim(
-                            content_type_id=ct.pk,
-                            object_id=obj.pk,
-                            field_name="description",
-                            value=description,
+                        Claim.for_object(
+                            obj, field_name="description", value=description
                         )
                     )
 
@@ -861,7 +855,6 @@ class Command(BaseCommand):
             return
 
         source = self.editorial_source
-        ct_id = ContentType.objects.get_for_model(Manufacturer).pk
         existing_slugs = set(Manufacturer.objects.values_list("slug", flat=True))
 
         objs = [
@@ -888,22 +881,20 @@ class Command(BaseCommand):
         pending_claims: list[Claim] = []
         for obj, entry in zip(objs, entries):
             pending_claims.append(
-                Claim(
-                    content_type_id=ct_id,
-                    object_id=obj.pk,
-                    field_name="name",
-                    value=obj.name,
-                )
+                Claim.for_object(obj, field_name="name", value=obj.name)
             )
+            if obj.opdb_manufacturer_id is not None:
+                pending_claims.append(
+                    Claim.for_object(
+                        obj,
+                        field_name="opdb_manufacturer_id",
+                        value=obj.opdb_manufacturer_id,
+                    )
+                )
             description = entry.get("description", "")
             if description:
                 pending_claims.append(
-                    Claim(
-                        content_type_id=ct_id,
-                        object_id=obj.pk,
-                        field_name="description",
-                        value=description,
-                    )
+                    Claim.for_object(obj, field_name="description", value=description)
                 )
 
         if pending_claims:
@@ -1003,30 +994,28 @@ class Command(BaseCommand):
         pending_claims: list[Claim] = []
         for obj in objs:
             pending_claims.append(
-                Claim(
-                    content_type_id=ct_id,
-                    object_id=obj.pk,
-                    field_name="name",
-                    value=obj.name,
+                Claim.for_object(obj, field_name="name", value=obj.name)
+            )
+            pending_claims.append(
+                Claim.for_object(
+                    obj, field_name="manufacturer", value=obj.manufacturer.slug
                 )
             )
+            if obj.ipdb_manufacturer_id is not None:
+                pending_claims.append(
+                    Claim.for_object(
+                        obj,
+                        field_name="ipdb_manufacturer_id",
+                        value=obj.ipdb_manufacturer_id,
+                    )
+                )
             if obj.year_start is not None:
                 pending_claims.append(
-                    Claim(
-                        content_type_id=ct_id,
-                        object_id=obj.pk,
-                        field_name="year_start",
-                        value=obj.year_start,
-                    )
+                    Claim.for_object(obj, field_name="year_start", value=obj.year_start)
                 )
             if obj.year_end is not None:
                 pending_claims.append(
-                    Claim(
-                        content_type_id=ct_id,
-                        object_id=obj.pk,
-                        field_name="year_end",
-                        value=obj.year_end,
-                    )
+                    Claim.for_object(obj, field_name="year_end", value=obj.year_end)
                 )
 
         if pending_claims:
@@ -1106,7 +1095,6 @@ class Command(BaseCommand):
         if not entries:
             return
 
-        ct_id = ContentType.objects.get_for_model(System).pk
         mfr_by_slug = {m.slug: m for m in Manufacturer.objects.all()}
         subgen_by_slug = {t.slug: t for t in TechnologySubgeneration.objects.all()}
         existing_slugs = set(System.objects.values_list("slug", flat=True))
@@ -1152,13 +1140,22 @@ class Command(BaseCommand):
                 value = entry.get(field, "")
                 if value:
                     pending_claims.append(
-                        Claim(
-                            content_type_id=ct_id,
-                            object_id=obj.pk,
-                            field_name=field,
-                            value=value,
-                        )
+                        Claim.for_object(obj, field_name=field, value=value)
                     )
+            mfr_slug = entry.get("manufacturer_slug")
+            if mfr_slug:
+                pending_claims.append(
+                    Claim.for_object(obj, field_name="manufacturer", value=mfr_slug)
+                )
+            subgen_slug = entry.get("technology_subgeneration_slug")
+            if subgen_slug:
+                pending_claims.append(
+                    Claim.for_object(
+                        obj,
+                        field_name="technology_subgeneration",
+                        value=subgen_slug,
+                    )
+                )
 
         if pending_claims:
             stats = self._assert_claims_split_descriptions(System, pending_claims)
@@ -1487,6 +1484,22 @@ class Command(BaseCommand):
         for title, entry in collected:
             # final_slug is the slug that now exists in the DB for this title.
             final_slug = safe_slugs.get(title.pk, title.slug)
+
+            opdb_id = entry.get("opdb_group_id")
+            if opdb_id:
+                touched_ids.add(title.pk)
+                pending_claims.append(
+                    Claim.for_object(title, field_name="opdb_id", value=opdb_id)
+                )
+
+            fandom_page_id = entry.get("fandom_page_id")
+            if fandom_page_id:
+                touched_ids.add(title.pk)
+                pending_claims.append(
+                    Claim.for_object(
+                        title, field_name="fandom_page_id", value=fandom_page_id
+                    )
+                )
 
             name = entry.get("name")
             if name:

@@ -196,6 +196,7 @@ def _collect_manufacturer_claims(
                 )
             )
 
+    add("wikidata_id", wm.qid)
     if wm.description:
         add("wikidata.description", wm.description)
     add("logo_url", wm.logo_url)

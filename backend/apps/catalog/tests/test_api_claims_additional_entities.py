@@ -25,7 +25,7 @@ from apps.catalog.models import (
     TechnologySubgeneration,
     Title,
 )
-from apps.provenance.models import ChangeSet
+from apps.provenance.models import ChangeSet, Claim, Source
 
 User = get_user_model()
 
@@ -320,8 +320,19 @@ class TestPatchSystemResponseShape:
     def test_patch_preserves_manufacturer_titles_and_siblings(
         self, client, user, manufacturer, williams_entity, solid_state
     ):
+        source = Source.objects.create(
+            name="Test", slug="test", source_type="editorial", priority=100
+        )
         system = System.objects.create(name="WPC-95", manufacturer=manufacturer)
         sibling = System.objects.create(name="System 11", manufacturer=manufacturer)
+        # Manufacturer is now claim-controlled on System — assert claims so
+        # resolution preserves the FK when description is PATCHed.
+        Claim.objects.assert_claim(
+            system, "manufacturer", manufacturer.slug, source=source
+        )
+        Claim.objects.assert_claim(
+            sibling, "manufacturer", manufacturer.slug, source=source
+        )
         title = Title.objects.create(name="Medieval Madness")
         MachineModel.objects.create(
             name="Medieval Madness",

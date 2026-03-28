@@ -514,6 +514,7 @@ class Command(BaseCommand):
 
         # --- Phase 2: Collect claims, credits, theme slugs, and feature slugs ---
         pending_claims: list[Claim] = []
+        pending_ce_claims: list[Claim] = []
         credit_queue: list[tuple[int, str, str]] = []
         theme_queue: list[tuple[int, list[str]]] = []  # (model_pk, [slugs])
         gameplay_feature_queue: list[tuple[int, list[tuple[str, int | None]]]] = []
@@ -528,6 +529,7 @@ class Command(BaseCommand):
                 was_created,
                 ct_id,
                 pending_claims,
+                pending_ce_claims,
                 credit_queue,
                 theme_queue,
                 gameplay_feature_queue,
@@ -553,6 +555,8 @@ class Command(BaseCommand):
             )
 
         # --- Bulk-assert all collected claims ---
+        if pending_ce_claims:
+            Claim.objects.bulk_assert_claims(source, pending_ce_claims)
         claim_stats = Claim.objects.bulk_assert_claims(source, pending_claims)
         self.stdout.write(
             f"  Claims: {claim_stats['unchanged']} unchanged, "
@@ -599,6 +603,7 @@ class Command(BaseCommand):
         was_created: bool,
         ct_id: int,
         pending_claims: list[Claim],
+        pending_ce_claims: list[Claim],
         credit_queue: list[tuple[int, str, str]],
         theme_queue: list[tuple[int, list[str]]],
         gameplay_feature_queue: list[tuple[int, list[tuple[str, int | None]]]],
@@ -675,11 +680,27 @@ class Command(BaseCommand):
             # Priority: match by IPDB manufacturer ID first, then by name.
             ce = ce_by_ipdb_id.get(mfr_id) or ce_by_name.get(company.lower())
             if ce:
+                # Ensure existing CE has a manufacturer claim (may have
+                # been created before claims were required on this field).
+                pending_ce_claims.append(
+                    Claim.for_object(
+                        ce,
+                        field_name="manufacturer",
+                        value=ce.manufacturer.slug,
+                    )
+                )
                 if ce.ipdb_manufacturer_id is None:
                     # CE matched by name but lacks IPDB ID — backfill it.
                     ce.ipdb_manufacturer_id = mfr_id
                     ce.save(update_fields=["ipdb_manufacturer_id"])
                     ce_by_ipdb_id[mfr_id] = ce
+                pending_ce_claims.append(
+                    Claim.for_object(
+                        ce,
+                        field_name="ipdb_manufacturer_id",
+                        value=ce.ipdb_manufacturer_id,
+                    )
+                )
             else:
                 # Parse years_active "YYYY-YYYY" into founded/dissolved.
                 year_start = None
@@ -719,6 +740,16 @@ class Command(BaseCommand):
                 )
                 ce_by_ipdb_id[mfr_id] = ce
                 ce_by_name[company.lower()] = ce
+                pending_ce_claims.append(
+                    Claim.for_object(ce, field_name="manufacturer", value=mfr.slug)
+                )
+                pending_ce_claims.append(
+                    Claim.for_object(
+                        ce,
+                        field_name="ipdb_manufacturer_id",
+                        value=mfr_id,
+                    )
+                )
 
             # --- Step 2: Derive manufacturer claim from the CE's manufacturer ---
             pending_claims.append(

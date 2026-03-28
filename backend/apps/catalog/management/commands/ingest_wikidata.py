@@ -243,6 +243,7 @@ def _collect_person_claims(
                 )
             )
 
+    add("wikidata_id", wp.qid)
     add("name", wp.name)
 
     if wp.description:

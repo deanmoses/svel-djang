@@ -270,6 +270,97 @@ class TestResolveBulkUniqueFieldSafety:
 
 
 @pytest.mark.django_db
+class TestPreserveNotNullFK:
+    """Non-nullable FK fields must not be reset when no claim exists."""
+
+    @pytest.fixture
+    def subgen_fields(self):
+        """Claim fields including technology_generation (NOT NULL FK).
+
+        Uses explicit field dict rather than get_claim_fields() so these
+        tests verify resolver behavior independent of claims_exempt state.
+        """
+        from apps.catalog.models.taxonomy import TechnologySubgeneration
+
+        fields = get_claim_fields(TechnologySubgeneration)
+        fields["technology_generation"] = "technology_generation"
+        return fields
+
+    def test_bulk_preserves_notnull_fk_without_claim(self, opdb, subgen_fields):
+        from apps.catalog.models.taxonomy import (
+            TechnologyGeneration,
+            TechnologySubgeneration,
+        )
+
+        gen = TechnologyGeneration.objects.create(
+            name="Solid State", slug="solid-state"
+        )
+        subgen = TechnologySubgeneration.objects.create(
+            name="Discrete Logic", slug="discrete-logic", technology_generation=gen
+        )
+
+        # Name claim but no technology_generation claim.
+        Claim.objects.assert_claim(subgen, "name", "Discrete Logic", source=opdb)
+
+        _resolve_bulk(
+            TechnologySubgeneration,
+            subgen_fields,
+            object_ids={subgen.pk},
+        )
+
+        subgen.refresh_from_db()
+        assert subgen.name == "Discrete Logic"
+        assert subgen.technology_generation == gen  # Preserved, not crashed.
+
+    def test_single_preserves_notnull_fk_without_claim(self, opdb, subgen_fields):
+        from apps.catalog.models.taxonomy import (
+            TechnologyGeneration,
+            TechnologySubgeneration,
+        )
+
+        gen = TechnologyGeneration.objects.create(
+            name="Solid State", slug="solid-state"
+        )
+        subgen = TechnologySubgeneration.objects.create(
+            name="Discrete Logic", slug="discrete-logic", technology_generation=gen
+        )
+
+        Claim.objects.assert_claim(subgen, "name", "Discrete Logic", source=opdb)
+
+        _resolve_single(subgen, subgen_fields)
+        subgen.save()
+
+        subgen.refresh_from_db()
+        assert subgen.technology_generation == gen  # Preserved.
+
+    def test_notnull_fk_overwritten_when_claim_exists(self, opdb, subgen_fields):
+        from apps.catalog.models.taxonomy import (
+            TechnologyGeneration,
+            TechnologySubgeneration,
+        )
+
+        gen1 = TechnologyGeneration.objects.create(
+            name="Solid State", slug="solid-state"
+        )
+        gen2 = TechnologyGeneration.objects.create(name="Electromechanical", slug="em")
+        subgen = TechnologySubgeneration.objects.create(
+            name="Discrete Logic", slug="discrete-logic", technology_generation=gen1
+        )
+
+        Claim.objects.assert_claim(subgen, "name", "Discrete Logic", source=opdb)
+        Claim.objects.assert_claim(subgen, "technology_generation", "em", source=opdb)
+
+        _resolve_bulk(
+            TechnologySubgeneration,
+            subgen_fields,
+            object_ids={subgen.pk},
+        )
+
+        subgen.refresh_from_db()
+        assert subgen.technology_generation == gen2  # Overwritten by claim.
+
+
+@pytest.mark.django_db
 class TestResolveBulkTaxonomy:
     def test_malformed_int_claim_uses_default(self, opdb):
         """Non-parseable integer on a non-null field should fall back to 0, not None."""

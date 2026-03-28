@@ -69,21 +69,22 @@ def _resolve_single(
         if claim.field_name not in winners:
             winners[claim.field_name] = claim
 
-    # Reset resolvable fields to defaults.  UNIQUE fields are preserved
-    # when no winning claim exists — see _resolve_bulk() for rationale.
-    field_defaults = get_field_defaults(type(obj), direct_fields)
-    unique_attrs: set[str] = set()
+    # Reset resolvable fields to defaults.  Some fields must keep their
+    # existing value when no winning claim exists — see _resolve_bulk().
+    model_class = type(obj)
+    field_defaults = get_field_defaults(model_class, direct_fields)
+    preserve_when_unclaimed: set[str] = set()
     for attr in direct_fields.values():
-        if type(obj)._meta.get_field(attr).unique:
-            unique_attrs.add(attr)
+        field = model_class._meta.get_field(attr)
+        if field.unique or (field.many_to_one and not field.null):
+            preserve_when_unclaimed.add(attr)
     winner_attrs = {direct_fields[fn] for fn in winners if fn in direct_fields}
     for attr, default in field_defaults.items():
-        if attr in unique_attrs and attr not in winner_attrs:
+        if attr in preserve_when_unclaimed and attr not in winner_attrs:
             continue
         setattr(obj, attr, default)
 
     # Apply winners.
-    model_class = type(obj)
     has_extra_data = hasattr(obj, "extra_data")
     extra_data: dict = {} if has_extra_data else None
     for field_name, claim in winners.items():
@@ -169,13 +170,15 @@ def _resolve_bulk(
     # 3. Compute field defaults once.
     field_defaults = get_field_defaults(model_class, direct_fields)
 
-    # Identify UNIQUE direct fields — these must NOT be reset to their
-    # default when no claim exists, or bulk_update will crash with a
-    # UNIQUE constraint violation when multiple objects share the default.
-    unique_attrs: set[str] = set()
+    # Fields whose computed default is invalid — preserve existing value
+    # when no winning claim exists rather than resetting.
+    #  • UNIQUE: shared default causes IntegrityError across objects
+    #  • Non-nullable FK: default "" is not a valid FK assignment
+    preserve_when_unclaimed: set[str] = set()
     for attr in direct_fields.values():
-        if model_class._meta.get_field(attr).unique:
-            unique_attrs.add(attr)
+        field = model_class._meta.get_field(attr)
+        if field.unique or (field.many_to_one and not field.null):
+            preserve_when_unclaimed.add(attr)
 
     # Identify FK fields and pre-build lookups.
     fk_info = build_fk_info(model_class, direct_fields)
@@ -188,11 +191,11 @@ def _resolve_bulk(
     for obj in all_objs:
         winners = claims_by_obj.get(obj.pk, {})
 
-        # Reset direct fields (skip UNIQUE fields — they keep their
-        # existing value unless a winning claim explicitly sets them).
+        # Reset direct fields — preserved fields keep their existing
+        # value unless a winning claim explicitly sets them.
         winner_attrs = {direct_fields[fn] for fn in winners if fn in direct_fields}
         for attr, default in field_defaults.items():
-            if attr in unique_attrs and attr not in winner_attrs:
+            if attr in preserve_when_unclaimed and attr not in winner_attrs:
                 continue
             setattr(obj, attr, default)
 

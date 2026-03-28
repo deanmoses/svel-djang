@@ -175,7 +175,11 @@ def get_field_defaults(
             defaults[attr] = (
                 field.default() if callable(field.default) else field.default
             )
-        elif field.null:
+        elif field.null or field.is_relation:
+            # null fields default to None.  FK fields also default to None
+            # as a safe transient value — Django's FK descriptor rejects ""
+            # on assignment.  For non-nullable FKs, preserve_when_unclaimed
+            # prevents this None from reaching the DB.
             defaults[attr] = None
         else:
             defaults[attr] = ""

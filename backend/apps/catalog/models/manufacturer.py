@@ -34,7 +34,6 @@ class Manufacturer(Linkable, TimeStampedModel):
     """
 
     link_url_pattern = "/manufacturers/{slug}"
-    claims_exempt = frozenset({"opdb_manufacturer_id", "wikidata_id"})
 
     name = models.CharField(
         max_length=200, unique=True, validators=[validate_no_mojibake]
@@ -100,7 +99,6 @@ class CorporateEntity(Linkable, TimeStampedModel):
     """
 
     link_url_pattern = "/corporate-entities/{slug}"
-    claims_exempt = frozenset({"manufacturer", "ipdb_manufacturer_id"})
 
     manufacturer = models.ForeignKey(
         Manufacturer,

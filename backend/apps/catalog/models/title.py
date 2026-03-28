@@ -22,14 +22,6 @@ class Title(Linkable, TimeStampedModel):
     """
 
     link_url_pattern = "/titles/{slug}"
-    claims_exempt = frozenset(
-        {
-            "opdb_id",
-            "fandom_page_id",
-            "needs_review",
-            "needs_review_notes",
-        }
-    )
 
     opdb_id = models.CharField(
         max_length=50,
