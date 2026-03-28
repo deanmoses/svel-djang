@@ -40,6 +40,8 @@ class ChangeSetAdmin(admin.ModelAdmin):
 
 @admin.register(Claim)
 class ClaimAdmin(admin.ModelAdmin):
+    """Read-only inspection view. Claims must not be created or edited in admin."""
+
     list_display = (
         "subject",
         "field_name",
@@ -59,19 +61,11 @@ class ClaimAdmin(admin.ModelAdmin):
             return s[:80] + "..."
         return s
 
-    def save_model(self, request, obj, form, change):
-        """Route creates through assert_claim to preserve the superseding invariant."""
-        if not change:
-            created = Claim.objects.assert_claim(
-                obj.subject,
-                obj.field_name,
-                obj.value,
-                obj.citation,
-                source=obj.source,
-                user=obj.user,
-                claim_key=obj.claim_key,
-                license=obj.license,
-            )
-            obj.pk = created.pk
-        else:
-            super().save_model(request, obj, form, change)
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

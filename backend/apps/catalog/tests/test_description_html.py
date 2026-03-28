@@ -77,29 +77,6 @@ class TestSystemDescriptionHtml:
 
 
 @pytest.mark.django_db
-class TestAdminMarkdownConversion:
-    def test_authoring_to_storage_on_claim(self):
-        """ProvenanceSaveMixin._to_claim_value converts [[type:slug]] to [[type:id:N]]."""
-        from apps.catalog.admin import ManufacturerAdmin
-
-        mfr = Manufacturer.objects.create(name="Williams", slug="williams")
-        admin_instance = ManufacturerAdmin(Manufacturer, None)
-        value = admin_instance._to_claim_value(
-            "description", "Made by [[manufacturer:williams]]."
-        )
-        assert f"[[manufacturer:id:{mfr.pk}]]" in value
-        assert "[[manufacturer:williams]]" not in value
-
-    def test_non_markdown_field_unchanged(self):
-        """Non-markdown fields pass through without conversion."""
-        from apps.catalog.admin import ManufacturerAdmin
-
-        admin_instance = ManufacturerAdmin(Manufacturer, None)
-        value = admin_instance._to_claim_value("name", "Williams")
-        assert value == "Williams"
-
-
-@pytest.mark.django_db
 class TestReferenceSync:
     def test_resolve_creates_references(self):
         """Resolving a manufacturer with links creates RecordReference rows."""

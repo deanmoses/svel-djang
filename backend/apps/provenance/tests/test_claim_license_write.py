@@ -1,4 +1,4 @@
-"""Tests for Claim.license write path — assert_claim, bulk_assert_claims, and admin."""
+"""Tests for Claim.license write path — assert_claim and bulk_assert_claims."""
 
 import pytest
 from django.contrib.contenttypes.models import ContentType
@@ -45,7 +45,6 @@ class TestAssertClaimLicense:
 class TestBulkAssertClaimsLicense:
     def test_license_change_detected(self, source, cc_by_sa, not_allowed):
         """Changing only the license on a claim should supersede the old one."""
-        from django.contrib.contenttypes.models import ContentType
 
         from apps.catalog.models import Manufacturer
 
@@ -86,7 +85,6 @@ class TestBulkAssertClaimsLicense:
 
     def test_same_license_unchanged(self, source, cc_by_sa):
         """Re-asserting the same value+license should be a no-op."""
-        from django.contrib.contenttypes.models import ContentType
 
         from apps.catalog.models import Manufacturer
 
@@ -113,85 +111,3 @@ class TestBulkAssertClaimsLicense:
         stats = Claim.objects.bulk_assert_claims(source, [claim2])
         assert stats["unchanged"] == 1
         assert stats["created"] == 0
-
-
-@pytest.mark.django_db
-class TestClaimAdminLicense:
-    def test_admin_save_model_preserves_license(self, source, cc_by_sa):
-        """Creating a claim via ClaimAdmin.save_model() should persist the license."""
-        from apps.catalog.models import Manufacturer
-        from apps.provenance.admin import ClaimAdmin
-
-        mfr = Manufacturer.objects.create(name="Test", slug="test")
-        ct = ContentType.objects.get_for_model(Manufacturer)
-
-        # Simulate what the admin does: build an unsaved Claim, call save_model.
-        obj = Claim(
-            content_type=ct,
-            object_id=mfr.pk,
-            field_name="description",
-            value="admin text",
-            citation="",
-            source=source,
-            license=cc_by_sa,
-        )
-        admin_instance = ClaimAdmin(Claim, None)
-        admin_instance.save_model(request=None, obj=obj, form=None, change=False)
-
-        # The obj.pk should now point to the created claim.
-        saved = Claim.objects.get(pk=obj.pk)
-        assert saved.license == cc_by_sa
-        assert saved.value == "admin text"
-
-    def test_admin_save_model_user_claim(self, cc_by_sa):
-        """Creating a user-authored claim via admin should work."""
-        from django.contrib.auth import get_user_model
-
-        from apps.catalog.models import Manufacturer
-        from apps.provenance.admin import ClaimAdmin
-
-        User = get_user_model()
-        user = User.objects.create_user(username="admin_user", password="test")
-        mfr = Manufacturer.objects.create(name="Test", slug="test")
-        ct = ContentType.objects.get_for_model(Manufacturer)
-
-        obj = Claim(
-            content_type=ct,
-            object_id=mfr.pk,
-            field_name="description",
-            value="user text",
-            citation="",
-            source=None,
-            user=user,
-            license=cc_by_sa,
-        )
-        admin_instance = ClaimAdmin(Claim, None)
-        admin_instance.save_model(request=None, obj=obj, form=None, change=False)
-
-        saved = Claim.objects.get(pk=obj.pk)
-        assert saved.user == user
-        assert saved.source is None
-        assert saved.license == cc_by_sa
-
-    def test_admin_save_model_preserves_claim_key(self, source):
-        """Creating a claim with an explicit claim_key via admin should preserve it."""
-        from apps.catalog.models import Manufacturer
-        from apps.provenance.admin import ClaimAdmin
-
-        mfr = Manufacturer.objects.create(name="Test", slug="test")
-        ct = ContentType.objects.get_for_model(Manufacturer)
-
-        obj = Claim(
-            content_type=ct,
-            object_id=mfr.pk,
-            field_name="credit",
-            claim_key="credit|person:pat-lawlor|role:design",
-            value={"person_slug": "pat-lawlor", "role": "design", "exists": True},
-            citation="",
-            source=source,
-        )
-        admin_instance = ClaimAdmin(Claim, None)
-        admin_instance.save_model(request=None, obj=obj, form=None, change=False)
-
-        saved = Claim.objects.get(pk=obj.pk)
-        assert saved.claim_key == "credit|person:pat-lawlor|role:design"
