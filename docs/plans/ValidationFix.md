@@ -1,4 +1,4 @@
-# ValidationFix3
+# ValidationFix
 
 ## Background
 
@@ -154,29 +154,35 @@ Replace direct writes such as:
 
 with `bulk_assert_claims()` calls using the correct source attribution.
 
-### A3. Bring remaining editorial relationships under claims
+### A3. Bring remaining editorial relationships under claims ✓
 
-The known case is `series.titles.add(*titles)` in `ingest_pinbase`, which writes series-title membership directly as a M2M operation with no claim. Which titles belong to a series is an editorial decision and must have an audit trail.
+The known case was `series.titles.add(*titles)` in `ingest_pinbase`, which wrote series-title membership directly as a M2M operation with no claim. This has been replaced with claims-based membership.
 
-The existing M2M claim infrastructure handles this with minimal new code. The changes required:
+**What was done:**
 
-1. **Add to `RELATIONSHIP_SCHEMAS`** in `claims.py`:
+1. Added `"series_title": {"title_slug": "title"}` to `RELATIONSHIP_SCHEMAS` in `claims.py`.
 
-   ```python
-   "series_title": {"title_slug": "title"},
-   ```
+2. Replaced `series.titles.add()` with `bulk_assert_claims()` calls using `sweep_field="series_title"` and an authoritative scope covering all series in the DB, so titles removed from a series are retracted on subsequent runs.
 
-2. **Replace `series.titles.add()`** with `bulk_assert_claims()` calls. The claim subject is the `Series` object, `field_name="series_title"`, value is `{"title_slug": slug, "exists": true}`. Use `sweep_field="series_title"` so that titles removed from a series in pindata are retracted.
+3. Added a standalone `resolve_all_series_titles()` in `resolve/_relationships.py` that resolves `series_title` claims into `Series.titles` through-table rows using a single query and a diff/apply approach. It was written as a standalone function rather than using `_resolve_machine_model_m2m()` because the claim lives on `Series`, not `MachineModel` — parameterising the generic helper would have added complexity for a single non-MachineModel use case.
 
-3. **Add a `M2MFieldSpec`** entry in `resolve/_relationships.py`:
+4. As part of this work, `_resolve_all_m2m()` was renamed to `_resolve_machine_model_m2m()` to make explicit that the generic helper is scoped to MachineModel relationships only.
 
-   ```python
-   "series_title": M2MFieldSpec("series_title", "title_slug", "titles", Title),
-   ```
+If WritePathMatrix identifies further direct M2M writes for editorial relationships, apply the same treatment using the standalone resolver pattern.
 
-4. **Add a resolver** `resolve_all_series_titles()` that calls `_resolve_all_m2m()` with the new spec, and wire it into the bulk resolve pipeline.
+### Implementation pitfalls for A1–A3
 
-If WritePathMatrix identifies further direct M2M writes for editorial relationships, apply the same treatment.
+Two bug classes emerged during A3 implementation that apply to all remaining Component A work.
+
+**Wrong content type.** Every `Claim` object must be created with the content type for the model that _owns_ the claim, not the model being iterated. When a single ingest method touches multiple model types (e.g. `_ingest_titles` creates claims on both `Title` and `Series`), each model needs its own `ct_id` captured separately. Reusing `ct_id` across model types produces claims attached to the wrong object silently — no error, wrong data.
+
+**Claims built against unstable identity values.** When a claim value references another object's slug (or any identity value that might change later in the same ingest pass), the claim must use the effective post-operation value, not the pre-operation value. In `_ingest_titles`, series-title claims were initially built using `title.slug` before the slug rename loop ran, producing claims that referenced a slug that no longer existed in the DB after the rename.
+
+The structural fix for `_ingest_titles` is a **two-pass refactor**: split the method into a collect phase (gather `(title, entry)` pairs, pending slug renames, pending fandom updates, series memberships) followed by the rename/transform phase, then an assert phase that builds all claims using stable post-rename slugs. This eliminates the need for the `pending_slugs.get(title.pk, title.slug)` workaround and makes the phase dependency explicit. The cost is low — the intermediate state is a list of `(title, entry)` pairs.
+
+Do this two-pass refactor as part of A1 when `_ingest_titles` is being modified to add new claim assertions for `fandom_page_id` and `opdb_id`. It is a net clarity improvement, not just a bug fix.
+
+The broader principle: **claims that reference another object's identity must be built after all identity updates in the same pass have been applied.**
 
 ### A4. Document acceptable bootstrap writes
 
