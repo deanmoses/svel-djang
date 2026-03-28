@@ -176,6 +176,21 @@ Two bug classes emerged during A3 implementation that apply to all remaining Com
 
 **Wrong content type.** Every `Claim` object must be created with the content type for the model that _owns_ the claim, not the model being iterated. When a single ingest method touches multiple model types (e.g. `_ingest_titles` creates claims on both `Title` and `Series`), each model needs its own `ct_id` captured separately. Reusing `ct_id` across model types produces claims attached to the wrong object silently — no error, wrong data.
 
+The structural fix is `Claim.for_object()` — a classmethod that derives the content type from the object itself, eliminating the `ct_id` variable and the footgun entirely:
+
+```python
+# Before
+ct_id = ContentType.objects.get_for_model(Series).pk
+Claim(content_type_id=ct_id, object_id=series.pk, field_name=..., value=...)
+
+# After
+Claim.for_object(series, field_name=..., value=...)
+```
+
+`ContentType.objects.get_for_model()` is cached by Django after the first call per model type, so there is no performance concern inside loops. The call-site form also reads more naturally — "a claim about this series" rather than "a claim with this content type ID and this object ID."
+
+Add `Claim.for_object()` early in A1 work, apply it to all new claim construction sites, and update existing sites opportunistically in the same files being touched. Do not leave two construction patterns in the codebase indefinitely.
+
 **Claims built against unstable identity values.** When a claim value references another object's slug (or any identity value that might change later in the same ingest pass), the claim must use the effective post-operation value, not the pre-operation value. In `_ingest_titles`, series-title claims were initially built using `title.slug` before the slug rename loop ran, producing claims that referenced a slug that no longer existed in the DB after the rename.
 
 The structural fix for `_ingest_titles` is a **two-pass refactor**: split the method into a collect phase (gather `(title, entry)` pairs, pending slug renames, pending fandom updates, series memberships) followed by the rename/transform phase, then an assert phase that builds all claims using stable post-rename slugs. This eliminates the need for the `pending_slugs.get(title.pk, title.slug)` workaround and makes the phase dependency explicit. The cost is low — the intermediate state is a list of `(title, entry)` pairs.
