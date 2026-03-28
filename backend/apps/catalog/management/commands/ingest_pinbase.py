@@ -55,6 +55,7 @@ from apps.catalog.resolve import (
     resolve_all_gameplay_features,
     resolve_all_location_aliases,
     resolve_all_reward_types,
+    resolve_all_series_titles,
     resolve_all_tags,
     resolve_all_themes,
     resolve_all_title_abbreviations,
@@ -1368,6 +1369,7 @@ class Command(BaseCommand):
             return
 
         ct_id = ContentType.objects.get_for_model(Title).pk
+        series_ct_id = ContentType.objects.get_for_model(Series).pk
 
         titles_by_opdb_id = {t.opdb_id: t for t in Title.objects.all()}
         titles_by_slug = {t.slug: t for t in Title.objects.all()}
@@ -1410,7 +1412,9 @@ class Command(BaseCommand):
         pending_claims: list[Claim] = []
         pending_slugs: dict[int, str] = {}
         pending_fandom_updates: list[Title] = []
-        series_memberships: dict[Series, list[Title]] = defaultdict(list)
+        series_title_claims: dict[int, list[Claim]] = defaultdict(
+            list
+        )  # series pk → claims
         touched_ids: set[int] = set()
 
         for entry in entries:
@@ -1497,14 +1501,29 @@ class Command(BaseCommand):
                     )
                 )
 
-            # Series membership (M2M, not claim-controlled).
+            # Series membership claims.
             series_slug = entry.get("series_slug")
             if series_slug:
                 series = series_by_slug.get(series_slug)
                 if series is None:
                     logger.warning("Series slug %r not found — skipping", series_slug)
                 else:
-                    series_memberships[series].append(title)
+                    # Use the post-rename slug if this title is being renamed
+                    # in the same run, so the claim value matches the slug that
+                    # will be in the DB when resolve_all_series_titles runs.
+                    effective_slug = pending_slugs.get(title.pk, title.slug)
+                    claim_key, value = build_relationship_claim(
+                        "series_title", {"title_slug": effective_slug}
+                    )
+                    series_title_claims[series.pk].append(
+                        Claim(
+                            content_type_id=series_ct_id,
+                            object_id=series.pk,
+                            field_name="series_title",
+                            claim_key=claim_key,
+                            value=value,
+                        )
+                    )
                     membership_set += 1
 
         # Assert claims.
@@ -1555,9 +1574,22 @@ class Command(BaseCommand):
         if pending_fandom_updates:
             Title.objects.bulk_update(pending_fandom_updates, ["fandom_page_id"])
 
-        # Batch M2M adds per series.
-        for series, titles in series_memberships.items():
-            series.titles.add(*titles)
+        # Assert series_title claims and resolve.
+        # Scope covers ALL series in the DB (series_by_slug is fetched from
+        # Series.objects.all()), not just those referenced in this file.  This
+        # is intentional: a series with no titles in the current export must
+        # still have its previous claims swept so stale memberships are retracted.
+        all_series_pks = {s.pk for s in series_by_slug.values()}
+        if all_series_pks:
+            all_series_claims = [c for cs in series_title_claims.values() for c in cs]
+            scope = make_authoritative_scope(Series, all_series_pks)
+            Claim.objects.bulk_assert_claims(
+                self.pinbase_source,
+                all_series_claims,
+                sweep_field="series_title",
+                authoritative_scope=scope,
+            )
+            resolve_all_series_titles(series_ids=all_series_pks)
 
         self.stdout.write(
             f"  Titles: {titles_created} created, {membership_set} series memberships, "

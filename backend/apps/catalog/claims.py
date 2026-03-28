@@ -39,6 +39,8 @@ RELATIONSHIP_SCHEMAS: dict[str, dict[str, str]] = {
     # Hierarchy parent namespaces — claim lives on the child object
     "theme_parent": {"parent_slug": "parent"},
     "gameplay_feature_parent": {"parent_slug": "parent"},
+    # Series membership — claim lives on the Series object
+    "series_title": {"title_slug": "title"},
 }
 
 RELATIONSHIP_NAMESPACES = frozenset(RELATIONSHIP_SCHEMAS)
