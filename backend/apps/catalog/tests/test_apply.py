@@ -14,7 +14,7 @@ from apps.catalog.ingestion.apply import (
     RunReport,
     apply_plan,
 )
-from apps.catalog.models import Manufacturer, Theme
+from apps.catalog.models import CorporateEntity, Manufacturer, Theme
 from apps.provenance.models import ChangeSet, Claim, IngestRun, Source
 
 pytestmark = pytest.mark.django_db
@@ -582,4 +582,222 @@ def test_both_handle_and_target_raises(test_source):
     )
 
     with pytest.raises(ValueError, match="both a handle.*and content_type_id"):
+        apply_plan(plan)
+
+
+# ── Test 16: handle_refs resolves FK dependencies ────────────────
+
+
+def test_handle_refs_resolves_fk(test_source):
+    """CorporateEntity with handle_ref to a planned Manufacturer."""
+    plan = IngestPlan(
+        source=test_source,
+        input_fingerprint="fp-1",
+        entities=[
+            PlannedEntityCreate(
+                model_class=Manufacturer,
+                kwargs={"name": "Williams", "slug": "williams"},
+                handle="mfr-williams",
+            ),
+            PlannedEntityCreate(
+                model_class=CorporateEntity,
+                kwargs={
+                    "name": "Williams Electronics",
+                    "slug": "williams-electronics",
+                },
+                handle="ce-williams",
+                handle_refs={"manufacturer_id": "mfr-williams"},
+            ),
+        ],
+        assertions=[
+            PlannedClaimAssert(
+                field_name="name", value="Williams", handle="mfr-williams"
+            ),
+            PlannedClaimAssert(
+                field_name="slug", value="williams", handle="mfr-williams"
+            ),
+            PlannedClaimAssert(
+                field_name="name",
+                value="Williams Electronics",
+                handle="ce-williams",
+            ),
+            PlannedClaimAssert(
+                field_name="slug",
+                value="williams-electronics",
+                handle="ce-williams",
+            ),
+            PlannedClaimAssert(
+                field_name="manufacturer",
+                value="williams",
+                handle="ce-williams",
+            ),
+        ],
+    )
+    report = apply_plan(plan)
+
+    assert report.records_created == 2
+    assert report.asserted == 5
+
+    mfr = Manufacturer.objects.get(slug="williams")
+    ce = CorporateEntity.objects.get(slug="williams-electronics")
+    assert ce.manufacturer_id == mfr.pk
+
+
+# ── Test 17: handle_refs forward reference raises ────────────────
+
+
+def test_handle_refs_forward_reference_raises(test_source):
+    """handle_ref pointing to a handle that appears later is rejected."""
+    plan = IngestPlan(
+        source=test_source,
+        input_fingerprint="fp-1",
+        entities=[
+            PlannedEntityCreate(
+                model_class=CorporateEntity,
+                kwargs={
+                    "name": "Williams Electronics",
+                    "slug": "williams-electronics",
+                },
+                handle="ce-williams",
+                handle_refs={"manufacturer_id": "mfr-williams"},
+            ),
+            PlannedEntityCreate(
+                model_class=Manufacturer,
+                kwargs={"name": "Williams", "slug": "williams"},
+                handle="mfr-williams",
+            ),
+        ],
+        assertions=[
+            PlannedClaimAssert(
+                field_name="name", value="Williams", handle="mfr-williams"
+            ),
+            PlannedClaimAssert(
+                field_name="slug", value="williams", handle="mfr-williams"
+            ),
+            PlannedClaimAssert(
+                field_name="name",
+                value="Williams Electronics",
+                handle="ce-williams",
+            ),
+            PlannedClaimAssert(
+                field_name="slug",
+                value="williams-electronics",
+                handle="ce-williams",
+            ),
+            PlannedClaimAssert(
+                field_name="manufacturer",
+                value="williams",
+                handle="ce-williams",
+            ),
+        ],
+    )
+
+    with pytest.raises(ValueError, match="has not been seen yet"):
+        apply_plan(plan)
+
+
+# ── Test 18: handle_refs conflict with kwargs raises ─────────────
+
+
+def test_handle_refs_kwarg_conflict_raises(test_source):
+    """Same field in both kwargs and handle_refs is rejected."""
+    plan = IngestPlan(
+        source=test_source,
+        input_fingerprint="fp-1",
+        entities=[
+            PlannedEntityCreate(
+                model_class=Manufacturer,
+                kwargs={"name": "Williams", "slug": "williams"},
+                handle="mfr-williams",
+            ),
+            PlannedEntityCreate(
+                model_class=CorporateEntity,
+                kwargs={
+                    "name": "Williams Electronics",
+                    "slug": "williams-electronics",
+                    "manufacturer_id": 999,
+                },
+                handle="ce-williams",
+                handle_refs={"manufacturer_id": "mfr-williams"},
+            ),
+        ],
+        assertions=[
+            PlannedClaimAssert(
+                field_name="name", value="Williams", handle="mfr-williams"
+            ),
+            PlannedClaimAssert(
+                field_name="slug", value="williams", handle="mfr-williams"
+            ),
+            PlannedClaimAssert(
+                field_name="name",
+                value="Williams Electronics",
+                handle="ce-williams",
+            ),
+            PlannedClaimAssert(
+                field_name="slug",
+                value="williams-electronics",
+                handle="ce-williams",
+            ),
+            PlannedClaimAssert(
+                field_name="manufacturer",
+                value="williams",
+                handle="ce-williams",
+            ),
+        ],
+    )
+
+    with pytest.raises(ValueError, match="both kwargs and handle_refs"):
+        apply_plan(plan)
+
+
+# ── Test 19: handle_refs FK without matching claim assertion ──────
+
+
+def test_handle_ref_without_claim_raises(test_source):
+    """handle_ref sets a claim-controlled FK but no assertion exists for it."""
+    plan = IngestPlan(
+        source=test_source,
+        input_fingerprint="fp-1",
+        entities=[
+            PlannedEntityCreate(
+                model_class=Manufacturer,
+                kwargs={"name": "Williams", "slug": "williams"},
+                handle="mfr-williams",
+            ),
+            PlannedEntityCreate(
+                model_class=CorporateEntity,
+                kwargs={
+                    "name": "Williams Electronics",
+                    "slug": "williams-electronics",
+                },
+                handle="ce-williams",
+                handle_refs={"manufacturer_id": "mfr-williams"},
+            ),
+        ],
+        assertions=[
+            PlannedClaimAssert(
+                field_name="name",
+                value="Williams",
+                handle="mfr-williams",
+            ),
+            PlannedClaimAssert(
+                field_name="slug",
+                value="williams",
+                handle="mfr-williams",
+            ),
+            PlannedClaimAssert(
+                field_name="name",
+                value="Williams Electronics",
+                handle="ce-williams",
+            ),
+            PlannedClaimAssert(
+                field_name="slug",
+                value="williams-electronics",
+                handle="ce-williams",
+            ),
+            # No manufacturer assertion for ce-williams — should fail.
+        ],
+    )
+
+    with pytest.raises(ValueError, match="manufacturer.*via handle_ref"):
         apply_plan(plan)

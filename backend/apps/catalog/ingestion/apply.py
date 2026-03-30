@@ -64,11 +64,19 @@ class PlannedEntityCreate:
     ``handle`` is a temporary identifier used by ``PlannedClaimAssert``
     to reference this entity before it has a PK.  Handles must be unique
     within a plan.
+
+    ``handle_refs`` maps kwarg names to handles of other planned entities.
+    After the referenced entity is created, the framework patches the
+    kwarg to the created entity's PK.  This solves cross-entity FK
+    dependencies (e.g. CorporateEntity needs ``manufacturer_id`` from a
+    planned Manufacturer).  Entities must appear in the list **after**
+    anything they reference — the adapter controls ordering.
     """
 
     model_class: type[models.Model]
     kwargs: dict[str, Any]
     handle: str
+    handle_refs: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -143,6 +151,7 @@ def apply_plan(plan: IngestPlan, *, dry_run: bool = False) -> RunReport:
     # ── Structural validation (before any DB writes) ──────────────
     _validate_entity_claim_consistency(plan)
     _validate_assertion_targets(plan)
+    _validate_handle_refs(plan)
 
     if dry_run:
         return _apply_dry_run(plan, report)
@@ -216,8 +225,9 @@ def apply_plan(plan: IngestPlan, *, dry_run: bool = False) -> RunReport:
 
 
 def _validate_entity_claim_consistency(plan: IngestPlan) -> None:
-    """Every claim-controlled kwarg in a PlannedEntityCreate must have a
-    matching PlannedClaimAssert targeting the same handle."""
+    """Every claim-controlled field populated by a PlannedEntityCreate
+    (via kwargs or handle_refs) must have a matching PlannedClaimAssert
+    targeting the same handle."""
     from apps.core.models import get_claim_fields
 
     asserted_by_handle: dict[str, set[str]] = defaultdict(set)
@@ -228,6 +238,8 @@ def _validate_entity_claim_consistency(plan: IngestPlan) -> None:
     for entity in plan.entities:
         claim_fields = get_claim_fields(entity.model_class)
         asserted = asserted_by_handle.get(entity.handle, set())
+
+        # Check kwargs (e.g. "name", "slug").
         for kwarg_name in entity.kwargs:
             if kwarg_name in claim_fields and kwarg_name not in asserted:
                 raise ValueError(
@@ -235,6 +247,55 @@ def _validate_entity_claim_consistency(plan: IngestPlan) -> None:
                     f"claim-controlled field {kwarg_name!r} but no matching "
                     f"PlannedClaimAssert exists for that handle and field."
                 )
+
+        # Check handle_refs (e.g. "manufacturer_id" → claim field "manufacturer").
+        # handle_refs keys use the column name (attname); claim fields use
+        # the Django field name.  Resolve via model _meta.
+        for ref_kwarg in entity.handle_refs:
+            field_name = _attname_to_field_name(entity.model_class, ref_kwarg)
+            if field_name in claim_fields and field_name not in asserted:
+                raise ValueError(
+                    f"PlannedEntityCreate(handle={entity.handle!r}) populates "
+                    f"claim-controlled field {field_name!r} (via handle_ref "
+                    f"{ref_kwarg!r}) but no matching PlannedClaimAssert "
+                    f"exists for that handle and field."
+                )
+
+
+def _attname_to_field_name(
+    model_class: type[models.Model],
+    attname: str,
+) -> str:
+    """Map a Django column name (attname) to the field name.
+
+    For FK fields, ``attname`` is e.g. ``manufacturer_id`` while the
+    field name is ``manufacturer``.  For non-FK fields they are the same.
+    """
+    for f in model_class._meta.get_fields():
+        if getattr(f, "attname", None) == attname:
+            return f.name
+    return attname
+
+
+def _validate_handle_refs(plan: IngestPlan) -> None:
+    """Every handle_ref must point to a handle that appears earlier in the list."""
+    seen: set[str] = set()
+    for entity in plan.entities:
+        for kwarg_name, ref_handle in entity.handle_refs.items():
+            if ref_handle not in seen:
+                raise ValueError(
+                    f"PlannedEntityCreate(handle={entity.handle!r}) has "
+                    f"handle_ref {kwarg_name!r} → {ref_handle!r} but that "
+                    f"handle has not been seen yet (it must appear earlier "
+                    f"in the entity list)"
+                )
+            if kwarg_name in entity.kwargs:
+                raise ValueError(
+                    f"PlannedEntityCreate(handle={entity.handle!r}) has "
+                    f"{kwarg_name!r} in both kwargs and handle_refs — "
+                    f"use one or the other"
+                )
+        seen.add(entity.handle)
 
 
 def _validate_assertion_targets(plan: IngestPlan) -> None:
@@ -338,21 +399,51 @@ def _create_entities(
 ) -> dict[str, tuple[int, int]]:
     """Bulk-create entities.  Returns ``{handle: (pk, content_type_id)}``.
 
+    Processes entities in list order, batching consecutive entries of the
+    same model class.  Between batches, ``handle_refs`` on upcoming
+    entities are resolved from already-created handles so FK dependencies
+    across model classes work correctly.
+
     Handle uniqueness is enforced by ``_validate_assertion_targets``.
+    Handle-ref validity is enforced by ``_validate_handle_refs``.
     """
     if not entities:
         return {}
 
     handle_map: dict[str, tuple[int, int]] = {}
 
-    by_model: dict[
-        type[models.Model], list[tuple[PlannedEntityCreate, models.Model]]
-    ] = defaultdict(list)
+    # Group consecutive entities of the same model class into batches.
+    # A batch is flushed when the model class changes OR when an entity's
+    # handle_refs reference a handle in the current pending batch (those
+    # PKs aren't available until the batch is bulk_created).
+    batches: list[list[PlannedEntityCreate]] = []
+    current_handles: set[str] = set()
     for entity in entities:
-        instance = entity.model_class(**entity.kwargs)
-        by_model[entity.model_class].append((entity, instance))
+        refs_current_batch = any(
+            h in current_handles for h in entity.handle_refs.values()
+        )
+        if batches and (
+            batches[-1][0].model_class is not entity.model_class or refs_current_batch
+        ):
+            current_handles = set()
+            batches.append([entity])
+        elif batches:
+            batches[-1].append(entity)
+        else:
+            batches.append([entity])
+        current_handles.add(entity.handle)
 
-    for model_class, pairs in by_model.items():
+    for batch in batches:
+        model_class = batch[0].model_class
+        pairs: list[tuple[PlannedEntityCreate, models.Model]] = []
+        for entity in batch:
+            # Resolve handle_refs into kwargs before instantiation.
+            resolved_kwargs = entity.kwargs.copy()
+            for kwarg_name, ref_handle in entity.handle_refs.items():
+                ref_pk, _ = handle_map[ref_handle]
+                resolved_kwargs[kwarg_name] = ref_pk
+            pairs.append((entity, model_class(**resolved_kwargs)))
+
         instances = [inst for _, inst in pairs]
         model_class.objects.bulk_create(instances)
         ct_id = ContentType.objects.get_for_model(model_class).pk
