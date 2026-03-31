@@ -471,24 +471,24 @@ All media UI is built as decomposed SvelteKit components with logic extracted to
 
 #### TypeScript Modules (logic, testable without DOM)
 
-- **`media-upload.ts`** — Upload state machine, file validation, API calls. Exports reactive state and action functions.
+- **`media-upload.ts`** — Upload state machine, file validation, API calls. Tracks multiple concurrent uploads (one per file), each with its own progress/success/error state. Exports reactive state and action functions.
 - **`media-api.ts`** — API client functions for media endpoints (upload, delete).
 
 Types for media API responses come from the existing OpenAPI-generated `schema.d.ts` via `make api-gen`.
 
 #### Svelte Components (thin UI wrappers)
 
-- **`MediaUploadButton.svelte`** — File picker trigger + drag-drop zone with category selection. Calls into `media-upload.ts`. Upload and attach happen in one request.
+- **`MediaUploadButton.svelte`** — File picker trigger (with `multiple` attribute) + drag-drop zone with category selection. Supports multi-file selection — each selected file becomes a separate parallel upload request. Calls into `media-upload.ts`. Upload and attach happen in one request per file.
 - **`MediaGrid.svelte`** — Grid of media items with delete and set-primary actions.
 - **`MediaCard.svelte`** — Single media item card (thumbnail, category badge, primary indicator).
 - **`HeroImage.svelte`** — Detail page hero image with owned-first/external-fallback logic.
 
 #### Interaction Flow (Image Upload)
 
-1. User selects category and clicks upload button (or drags file onto drop zone).
-2. `media-upload.ts` validates file client-side (type, size).
-3. `media-upload.ts` calls `POST /api/media/upload/` with the file, target entity, category, and primary flag.
-4. On success, `MediaGrid` updates to show the new attachment with its thumbnail.
+1. User selects category and clicks upload button (or drags files onto drop zone). Multi-file selection is supported.
+2. `media-upload.ts` validates each file client-side (type, size).
+3. `media-upload.ts` fires parallel `POST /api/media/upload/` requests — one per file. Each request carries one file plus the target entity, category, and primary flag. Each upload tracks its own progress, success, and error state independently.
+4. As each upload completes, `MediaGrid` updates to show the new attachment with its thumbnail.
 
 ## Testing Strategy
 
