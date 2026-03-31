@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "apps.core",
     "apps.catalog",
     "apps.provenance",
+    "apps.media",
     "constance",
     "constance.backends.database",
 ]

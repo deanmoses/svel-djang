@@ -263,7 +263,7 @@ class Claim(models.Model):
     objects = ClaimManager()
 
     content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
-    object_id = models.PositiveIntegerField()
+    object_id = models.PositiveBigIntegerField()
     subject = GenericForeignKey("content_type", "object_id")
 
     source = models.ForeignKey(

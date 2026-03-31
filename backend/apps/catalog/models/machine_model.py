@@ -10,6 +10,7 @@ from apps.core.models import (
     EntityStatusMixin,
     LinkableModel,
     MarkdownField,
+    MediaSupported,
     SluggedModel,
     TimeStampedModel,
     field_not_blank,
@@ -31,7 +32,9 @@ RATING_MIN, RATING_MAX = 0, 10
 EXTERNAL_ID_MIN = 1
 
 
-class MachineModel(EntityStatusMixin, SluggedModel, LinkableModel, TimeStampedModel):
+class MachineModel(
+    EntityStatusMixin, SluggedModel, LinkableModel, MediaSupported, TimeStampedModel
+):
     """A pinball machine title/design — the resolved/materialized view.
 
     Fields are derived from resolving claims. The resolution logic picks the
