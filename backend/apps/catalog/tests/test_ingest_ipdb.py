@@ -6,7 +6,7 @@ import pytest
 from django.core.management import call_command
 from django.core.management.base import CommandError
 
-from apps.catalog.management.commands.ingest_ipdb import _extract_ipdb_gameplay_features
+from apps.catalog.ingestion.ipdb.features import extract_ipdb_gameplay_features
 from apps.catalog.models import Credit, MachineModel, Person, System, SystemMpuString
 from apps.provenance.models import Source
 
@@ -165,7 +165,7 @@ class TestIngestIpdbUnknownMpu:
 
 
 # ---------------------------------------------------------------------------
-# Unit tests for _extract_ipdb_gameplay_features
+# Unit tests for extract_ipdb_gameplay_features
 #
 # All test inputs are complete, unmodified NotableFeatures strings taken
 # directly from the IPDB dataset (via pinexplore DuckDB explore.duckdb).
@@ -215,7 +215,7 @@ _FM = {
 
 
 class TestExtractIpdbGameplayFeatures:
-    """Unit tests for the _extract_ipdb_gameplay_features parsing pipeline.
+    """Unit tests for the extract_ipdb_gameplay_features parsing pipeline.
 
     Every raw string is a complete, verbatim IPDB NotableFeatures value.
 
@@ -226,15 +226,15 @@ class TestExtractIpdbGameplayFeatures:
     """
 
     def _slugs(self, raw: str) -> set[str]:
-        pairs, _ = _extract_ipdb_gameplay_features(raw, _FM)
+        pairs, _ = extract_ipdb_gameplay_features(raw, _FM)
         return {slug for slug, _count in pairs}
 
     def _counts(self, raw: str) -> dict[str, int | None]:
-        pairs, _ = _extract_ipdb_gameplay_features(raw, _FM)
+        pairs, _ = extract_ipdb_gameplay_features(raw, _FM)
         return {slug: count for slug, count in pairs}
 
     def _unmatched(self, raw: str) -> list[str]:
-        _, unmatched = _extract_ipdb_gameplay_features(raw, _FM)
+        _, unmatched = extract_ipdb_gameplay_features(raw, _FM)
         return unmatched
 
     def test_ipdb_876_two_features(self):
@@ -505,7 +505,7 @@ class TestExtractIpdbGameplayFeatures:
         # must appear only once in the output list.
         # IpdbId 876-style: "Kick-out hole" and a hypothetical plural back-to-back.
         raw = "Passive bumpers (12), Kick-out hole (1), Kick-out holes (1)."
-        pairs, _ = _extract_ipdb_gameplay_features(raw, _FM)
+        pairs, _ = extract_ipdb_gameplay_features(raw, _FM)
         slug_list = [slug for slug, _count in pairs]
         assert slug_list.count("kick-out-holes") == 1
 
