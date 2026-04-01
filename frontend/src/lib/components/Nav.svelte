@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
-	import { goto } from '$app/navigation';
 	import { faBars, faMagnifyingGlass, faXmark } from '@fortawesome/free-solid-svg-icons';
 	import FaIcon from './FaIcon.svelte';
 	import CoffeeStain from './effects/CoffeeStain.svelte';
@@ -29,7 +28,6 @@
 
 	async function handleLogout() {
 		await auth.logout();
-		await goto(resolveHref('/'));
 	}
 
 	const randInt = (max: number) => Math.floor(Math.random() * max);
@@ -92,7 +90,10 @@
 					<span class="auth-user">{auth.username}</span>
 					<button class="auth-link" onclick={handleLogout}>Sign out</button>
 				{:else}
-					<a href={resolveHref('/login')} class="auth-link">Sign in</a>
+					<a
+						href={resolveHref(`/login?next=${encodeURIComponent(page.url.pathname)}`)}
+						class="auth-link">Sign in</a
+					>
 				{/if}
 			{/if}
 
