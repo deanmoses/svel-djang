@@ -1,7 +1,7 @@
 import createClient from 'openapi-fetch';
 import type { paths } from './schema';
 
-function getCsrfToken(): string | undefined {
+export function getCsrfToken(): string | undefined {
 	const match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]*)/);
 	return match?.[1];
 }

@@ -38,6 +38,7 @@ ALLOWED_IMAGE_EXTENSIONS = {
     ".avif",  # Modern compression
     ".bmp",  # Legacy, converted to JPEG
 }
+# Keep in sync: frontend/src/lib/api/media-api.ts
 
 # Rendition dimensions (longest side).
 THUMB_MAX_DIMENSION = 400
@@ -48,6 +49,7 @@ MIN_IMAGE_DIMENSION = 2  # reject degenerate 0x0, 1x1
 MAX_IMAGE_DIMENSION = 20000  # prevent memory bombs during processing
 
 # Upload limits.
+# Keep in sync: frontend/src/lib/api/media-api.ts
 MAX_IMAGE_FILE_SIZE = 20 * 1024 * 1024  # 20 MB
 MAX_UPLOADS_PER_HOUR = 60
 
