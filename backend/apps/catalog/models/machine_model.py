@@ -256,6 +256,7 @@ class MachineModel(
 
     # Reverse access to provenance claims for this model.
     claims = GenericRelation("provenance.Claim")
+    entity_media = GenericRelation("media.EntityMedia")
 
     class Meta:
         ordering = ["name"]

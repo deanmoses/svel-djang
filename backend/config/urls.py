@@ -84,6 +84,12 @@ urlpatterns: list[URLPattern | URLResolver] = [
     path("api/", api.urls),
 ]
 
+# Serve uploaded media files during local development.
+if settings.DEBUG:
+    from django.conf.urls.static import static
+
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 # Catch-all: serve SvelteKit SPA for non-API/admin routes.
 # Only active when the frontend build directory exists (i.e., production
 # Docker build or after running `pnpm build` locally).

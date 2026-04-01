@@ -544,14 +544,21 @@ Storage infrastructure in `backend/apps/media/storage.py`, upload endpoint in `b
 - Primary enforcement: within each `(entity, category)` group, highest priority wins; ties broken by most recent `created_at` (last-upload-wins when all claims are same priority).
 - **Known race**: Concurrent uploads targeting the same `(entity, category)` with `is_primary=True` can both try to create a primary `EntityMedia` row. The second to commit hits the partial unique index and gets a 500. Narrow (requires two simultaneous primary uploads to the same slot), retryable, not worth fixing for the initial PR. If it becomes a real problem, add `SELECT FOR UPDATE` on the target entity's `EntityMedia` rows before resolving.
 
-### Phase 5: API Response Changes + Tests
+### Phase 5: API Response Changes + Tests — DONE
 
-- Uploaded-first fallback in entity detail/list APIs: if `EntityMedia` rows exist for the entity, use those (always displayed, no license gating). Fall back to third-party referenced media from `extra_data` only when no uploaded media exists for the needed slot. Third-party media continues through the existing Constance license threshold.
-- Rendition URLs in API responses.
-- Add local dev media serving: `static(MEDIA_URL, ...)` URL wiring so `FileSystemStorage` files are accessible during development.
-- Tests: uploaded-first fallback, external fallback with license filtering.
+Uploaded-first fallback in `thumbnail_url` / `hero_image_url`, local dev media serving, tests. Things later phases should know:
+
+- `thumbnail_url`, `hero_image_url`, and `image_attribution` use uploaded-first fallback. Detail response also includes `uploaded_media: list[{asset_uuid, category, is_primary, renditions: {thumb, display}}]` with all ready `EntityMedia` rows.
+- `_uploaded_image_urls()` in `catalog/api/helpers.py` picks backglass first, then any primary. Category priority is hardcoded, not configurable per entity type.
+- `_extract_image_urls()` and `_extract_image_attribution()` gained a `primary_media` keyword param (defaults to `None` for backward compatibility). Existing callers outside the two serializers are unaffected.
+- `MachineModel` now has `entity_media = GenericRelation("media.EntityMedia")`. Other entity types that gain media support will need the same GenericRelation.
+- The list queryset prefetches `entity_media` filtered to `is_primary=True, asset__status="ready"` with `to_attr="primary_media"`. The detail queryset prefetches all ready media (`to_attr="all_media"`) and derives `primary_media` in Python.
+- `MEDIA_URL = MEDIA_PUBLIC_BASE_URL` is set in settings. `static(MEDIA_URL, ...)` is wired in `urls.py` behind `DEBUG`.
+- Rendition URL construction only needs `asset.uuid` for thumb/display (fixed filenames). The original rendition URL is **not exposed** — it would require the stored filename, which is derived at upload time but not persisted on `MediaRendition`. If a download link is needed later, either add `stored_filename` to `MediaRendition` or reconstruct from `MediaAsset.original_filename` + `mime_type`.
 
 ### Phase 6: Frontend Components
+
+Run `make api-gen` to generate frontend types from the updated detail schema.
 
 - `MediaUploadButton.svelte`, `MediaGrid.svelte`, `MediaCard.svelte`, `HeroImage.svelte`.
 - `media-upload.ts`, `media-api.ts` TypeScript modules.

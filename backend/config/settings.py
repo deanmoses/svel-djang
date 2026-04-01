@@ -112,6 +112,7 @@ STORAGES = {
 
 # ── Media storage (S3-compatible file storage provider) ───────────
 MEDIA_PUBLIC_BASE_URL = os.environ.get("MEDIA_PUBLIC_BASE_URL", "/media/")
+MEDIA_URL = MEDIA_PUBLIC_BASE_URL
 
 if os.environ.get("MEDIA_STORAGE_BUCKET"):
     STORAGES["default"] = {
