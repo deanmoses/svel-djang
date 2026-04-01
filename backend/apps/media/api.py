@@ -9,6 +9,7 @@ from pathlib import PurePosixPath
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from ninja import File, Form, Router, Schema, UploadedFile
 from ninja.errors import HttpError
@@ -25,7 +26,7 @@ from apps.media.constants import (
     THUMB_MAX_DIMENSION,
     DISPLAY_MAX_DIMENSION,
 )
-from apps.media.models import MediaAsset, MediaRendition
+from apps.media.models import EntityMedia, MediaAsset, MediaRendition
 from apps.media.processing import (
     InvalidImageError,
     check_codec_support,
@@ -95,6 +96,12 @@ class UploadOut(Schema):
     height: int
     renditions: RenditionUrlsOut
     attachment: AttachmentMetaOut
+
+
+class MediaAssetRefIn(Schema):
+    entity_type: str
+    slug: str
+    asset_uuid: str
 
 
 def _resolve_entity(entity_type: str, slug: str):
@@ -311,3 +318,81 @@ def upload_media(
             is_primary=is_primary,
         ),
     )
+
+
+@media_router.post("/detach/", response={200: None}, auth=django_auth)
+def detach_media(request, body: MediaAssetRefIn):
+    """Detach a media asset from an entity by asserting an exists=False claim."""
+    ct, entity = _resolve_entity(body.entity_type, body.slug)
+
+    try:
+        asset = MediaAsset.objects.get(uuid=body.asset_uuid)
+    except MediaAsset.DoesNotExist, ValidationError:
+        raise HttpError(404, "Media asset not found.")
+
+    if not EntityMedia.objects.filter(
+        content_type=ct,
+        object_id=entity.pk,
+        asset=asset,
+    ).exists():
+        raise HttpError(404, "This asset is not attached to the specified entity.")
+
+    with transaction.atomic():
+        claim_key, claim_value = build_media_attachment_claim(
+            entity,
+            asset.pk,
+            exists=False,
+        )
+        Claim.objects.assert_claim(
+            entity,
+            "media_attachment",
+            claim_value,
+            user=request.user,
+            claim_key=claim_key,
+        )
+        resolve_media_attachments(
+            content_type_id=ct.id,
+            entity_ids={entity.pk},
+        )
+
+    return 200, None
+
+
+@media_router.post("/set-primary/", response={200: None}, auth=django_auth)
+def set_primary(request, body: MediaAssetRefIn):
+    """Set a media asset as primary for its category on an entity."""
+    ct, entity = _resolve_entity(body.entity_type, body.slug)
+
+    try:
+        asset = MediaAsset.objects.get(uuid=body.asset_uuid)
+    except MediaAsset.DoesNotExist, ValidationError:
+        raise HttpError(404, "Media asset not found.")
+
+    em = EntityMedia.objects.filter(
+        content_type=ct,
+        object_id=entity.pk,
+        asset=asset,
+    ).first()
+    if em is None:
+        raise HttpError(404, "This asset is not attached to the specified entity.")
+
+    with transaction.atomic():
+        claim_key, claim_value = build_media_attachment_claim(
+            entity,
+            asset.pk,
+            category=em.category,
+            is_primary=True,
+        )
+        Claim.objects.assert_claim(
+            entity,
+            "media_attachment",
+            claim_value,
+            user=request.user,
+            claim_key=claim_key,
+        )
+        resolve_media_attachments(
+            content_type_id=ct.id,
+            entity_ids={entity.pk},
+        )
+
+    return 200, None
