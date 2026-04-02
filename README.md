@@ -1,6 +1,6 @@
-# Pinball Database
+# Pinbase
 
-An interactive database of pinball machines.
+An interactive, collaborative database of pinball knowledge.
 
 ## Architecture
 
@@ -31,15 +31,17 @@ cd backend && uv run python manage.py createsuperuser
 
 ## Commands
 
-| Command           | What it does                                               |
-| ----------------- | ---------------------------------------------------------- |
-| `make bootstrap`  | Install all deps, run migrations, generate API types       |
-| `make dev`        | Start Django + SvelteKit dev servers                       |
-| `make test`       | Run backend (pytest) + frontend (vitest) tests             |
-| `make lint`       | Run ruff (backend) + eslint/prettier (frontend)            |
-| `make quality`    | Lint + type check (svelte-check)                           |
-| `make api-gen`    | Export OpenAPI schema and regenerate TypeScript types      |
-| `make agent-docs` | Regenerate CLAUDE.md and AGENTS.md from docs/AGENTS.src.md |
+| Command            | What it does                                               |
+| ------------------ | ---------------------------------------------------------- |
+| `make bootstrap`   | Install all deps, run migrations, generate API types       |
+| `make dev`         | Start Django + SvelteKit dev servers                       |
+| `make test`        | Run backend (pytest) + frontend (vitest) tests             |
+| `make lint`        | Run ruff (backend) + eslint/prettier (frontend)            |
+| `make quality`     | Lint + type check (svelte-check)                           |
+| `make api-gen`     | Export OpenAPI schema and regenerate TypeScript types      |
+| `make pull-ingest` | Download ingest source data                                |
+| `make ingest`      | Run the ingest pipeline                                    |
+| `make agent-docs`  | Regenerate CLAUDE.md and AGENTS.md from docs/AGENTS.src.md |
 
 ## Project Structure
 
@@ -47,9 +49,21 @@ cd backend && uv run python manage.py createsuperuser
 backend/          Django project (uv, pyproject.toml)
 frontend/         SvelteKit project (pnpm, package.json)
 scripts/          POSIX shell scripts for bootstrap, dev, test, lint
-docs/             Agent documentation source
+docs/             Product, architecture, development, and operations docs
 Makefile          Thin wrappers around scripts/
 ```
+
+## Further Reading
+
+- [docs/Overview.md](docs/Overview.md)
+- [docs/Architecture.md](docs/Architecture.md)
+- [docs/WebArchitecture.md](docs/WebArchitecture.md)
+- [docs/AppBoundaries.md](docs/AppBoundaries.md)
+- [docs/DomainModel.md](docs/DomainModel.md)
+- [docs/Provenance.md](docs/Provenance.md)
+- [docs/Ingest.md](docs/Ingest.md)
+- [docs/Development.md](docs/Development.md)
+- [docs/Hosting.md](docs/Hosting.md)
 
 ## Contributing
 
