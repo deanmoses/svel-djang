@@ -52,6 +52,14 @@ _CODEC_EXTENSIONS: dict[str, str] = {
 }
 
 
+def _delete_media_storage_after_commit(storage_keys: list[str]) -> None:
+    """Delete storage files after a successful DB commit."""
+    try:
+        delete_from_storage(storage_keys)
+    except Exception:
+        logger.exception("Storage cleanup failed for %d keys", len(storage_keys))
+
+
 def _check_rate_limit(user_id: int) -> None:
     """Best-effort per-user upload rate limiting via cache.
 
@@ -311,6 +319,11 @@ def detach_media(request, body: MediaAssetRefIn):
     ).exists():
         raise HttpError(404, "This asset is not attached to the specified entity.")
 
+    storage_keys = [
+        build_storage_key(asset.uuid, rendition_type)
+        for rendition_type, _label in MediaRendition.RenditionType.choices
+    ]
+
     with transaction.atomic():
         claim_key, claim_value = build_media_attachment_claim(
             entity,
@@ -328,6 +341,11 @@ def detach_media(request, body: MediaAssetRefIn):
             content_type_id=ct.id,
             entity_ids={entity.pk},
         )
+        asset.delete()
+        if storage_keys:
+            transaction.on_commit(
+                lambda keys=storage_keys: _delete_media_storage_after_commit(keys)
+            )
 
     return 200, None
 

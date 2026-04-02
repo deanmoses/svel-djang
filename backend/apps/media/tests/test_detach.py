@@ -10,7 +10,8 @@ from django.test import Client
 from apps.catalog.claims import build_media_attachment_claim
 from apps.catalog.models import MachineModel
 from apps.catalog.resolve import resolve_media_attachments
-from apps.media.models import EntityMedia, MediaAsset
+from apps.media.models import EntityMedia, MediaAsset, MediaRendition
+from apps.media.storage import build_storage_key
 from apps.provenance.models import Claim
 
 User = get_user_model()
@@ -45,6 +46,21 @@ def asset(db, user):
         height=600,
         uploaded_by=user,
     )
+
+
+@pytest.fixture
+def renditions(db, asset):
+    return [
+        MediaRendition.objects.create(
+            asset=asset,
+            rendition_type=rendition_type,
+            mime_type="image/webp" if rendition_type != "original" else "image/jpeg",
+            byte_size=512,
+            width=800,
+            height=600,
+        )
+        for rendition_type in ("original", "thumb", "display")
+    ]
 
 
 def _attach_via_claims(entity, asset, user, category="backglass", is_primary=True):
@@ -87,9 +103,13 @@ def anon_client():
 
 
 class TestDetachEndpoint:
-    def test_successful_detach(self, auth_client, machine_model, asset, attached):
-        """Detaching removes the EntityMedia row."""
+    def test_successful_detach(
+        self, auth_client, machine_model, asset, renditions, attached
+    ):
+        """Detaching removes the asset and all related rows."""
         assert EntityMedia.objects.filter(asset=asset).exists()
+        assert MediaAsset.objects.filter(pk=asset.pk).exists()
+        assert MediaRendition.objects.filter(asset=asset).count() == len(renditions)
 
         resp = auth_client.post(
             "/api/media/detach/",
@@ -103,8 +123,139 @@ class TestDetachEndpoint:
 
         assert resp.status_code == 200
         assert not EntityMedia.objects.filter(asset=asset).exists()
+        assert not MediaAsset.objects.filter(pk=asset.pk).exists()
+        assert not MediaRendition.objects.filter(asset_id=asset.pk).exists()
 
-    def test_detach_idempotent(self, auth_client, machine_model, asset, attached):
+    def test_detach_deletes_storage_files(
+        self,
+        auth_client,
+        machine_model,
+        asset,
+        renditions,
+        attached,
+        monkeypatch,
+        django_capture_on_commit_callbacks,
+    ):
+        deleted_keys = []
+
+        def fake_delete_from_storage(storage_keys):
+            deleted_keys.append(sorted(storage_keys))
+
+        monkeypatch.setattr(
+            "apps.media.api.delete_from_storage", fake_delete_from_storage
+        )
+
+        with django_capture_on_commit_callbacks(execute=True):
+            resp = auth_client.post(
+                "/api/media/detach/",
+                data={
+                    "entity_type": "machine-model",
+                    "slug": machine_model.slug,
+                    "asset_uuid": str(asset.uuid),
+                },
+                content_type="application/json",
+            )
+
+        assert resp.status_code == 200
+        assert deleted_keys == [
+            sorted(
+                build_storage_key(asset.uuid, rendition_type)
+                for rendition_type, _label in MediaRendition.RenditionType.choices
+            )
+        ]
+
+    def test_detach_storage_failure_does_not_rollback_db(
+        self,
+        auth_client,
+        machine_model,
+        asset,
+        renditions,
+        attached,
+        monkeypatch,
+        django_capture_on_commit_callbacks,
+    ):
+        delete_attempts = []
+
+        def raise_storage_failure(storage_keys):
+            delete_attempts.append(sorted(storage_keys))
+            raise RuntimeError("storage delete failed")
+
+        monkeypatch.setattr(
+            "apps.media.api.delete_from_storage",
+            raise_storage_failure,
+        )
+
+        with django_capture_on_commit_callbacks(execute=True):
+            resp = auth_client.post(
+                "/api/media/detach/",
+                data={
+                    "entity_type": "machine-model",
+                    "slug": machine_model.slug,
+                    "asset_uuid": str(asset.uuid),
+                },
+                content_type="application/json",
+            )
+
+        assert resp.status_code == 200
+        assert delete_attempts == [
+            sorted(
+                build_storage_key(asset.uuid, rendition_type)
+                for rendition_type, _label in MediaRendition.RenditionType.choices
+            )
+        ]
+        assert not EntityMedia.objects.filter(asset=asset).exists()
+        assert not MediaAsset.objects.filter(pk=asset.pk).exists()
+        assert not MediaRendition.objects.filter(asset_id=asset.pk).exists()
+
+    def test_detach_deletes_all_known_storage_keys_even_if_rows_are_missing(
+        self,
+        auth_client,
+        machine_model,
+        asset,
+        attached,
+        monkeypatch,
+        django_capture_on_commit_callbacks,
+    ):
+        MediaRendition.objects.create(
+            asset=asset,
+            rendition_type="original",
+            mime_type="image/jpeg",
+            byte_size=512,
+            width=800,
+            height=600,
+        )
+
+        deleted_keys = []
+
+        def fake_delete_from_storage(storage_keys):
+            deleted_keys.append(sorted(storage_keys))
+
+        monkeypatch.setattr(
+            "apps.media.api.delete_from_storage", fake_delete_from_storage
+        )
+
+        with django_capture_on_commit_callbacks(execute=True):
+            resp = auth_client.post(
+                "/api/media/detach/",
+                data={
+                    "entity_type": "machine-model",
+                    "slug": machine_model.slug,
+                    "asset_uuid": str(asset.uuid),
+                },
+                content_type="application/json",
+            )
+
+        assert resp.status_code == 200
+        assert deleted_keys == [
+            sorted(
+                build_storage_key(asset.uuid, rendition_type)
+                for rendition_type, _label in MediaRendition.RenditionType.choices
+            )
+        ]
+
+    def test_detach_idempotent(
+        self, auth_client, machine_model, asset, renditions, attached
+    ):
         """Second detach of same asset returns 404 (already detached)."""
         auth_client.post(
             "/api/media/detach/",
