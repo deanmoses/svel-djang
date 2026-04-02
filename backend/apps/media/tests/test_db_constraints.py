@@ -294,11 +294,19 @@ class TestEntityMediaConstraints:
         )
         assert em2.pk is not None
 
-    def test_duplicate_entity_asset_rejected(self, asset, content_type):
+    def test_duplicate_asset_same_entity_rejected(self, asset, content_type):
         EntityMedia.objects.create(asset=asset, content_type=content_type, object_id=1)
         with pytest.raises(IntegrityError):
             EntityMedia.objects.create(
                 asset=asset, content_type=content_type, object_id=1
+            )
+
+    def test_same_asset_different_entity_rejected(self, asset, content_type):
+        """Each asset belongs to exactly one entity."""
+        EntityMedia.objects.create(asset=asset, content_type=content_type, object_id=1)
+        with pytest.raises(IntegrityError):
+            EntityMedia.objects.create(
+                asset=asset, content_type=content_type, object_id=2
             )
 
     def test_two_primaries_same_category_rejected(self, user, content_type):

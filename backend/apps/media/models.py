@@ -235,10 +235,10 @@ class EntityMedia(TimeStampedModel):
             ),
         ]
         constraints = [
-            # --- one attachment per entity-asset pair ---
+            # --- each asset belongs to exactly one entity ---
             models.UniqueConstraint(
-                fields=["content_type", "object_id", "asset"],
-                name="media_entitymedia_unique_entity_asset",
+                fields=["asset"],
+                name="media_entitymedia_unique_asset",
             ),
             # --- at most one primary per entity per category (non-null) ---
             models.UniqueConstraint(
