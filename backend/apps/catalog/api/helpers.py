@@ -115,6 +115,41 @@ def _build_edit_history(entity) -> list[dict]:
     return result
 
 
+def _media_prefetch():
+    """Return a Prefetch for ready EntityMedia with assets."""
+    from apps.media.models import EntityMedia
+
+    return Prefetch(
+        "entity_media",
+        queryset=EntityMedia.objects.filter(
+            asset__status="ready",
+        ).select_related("asset"),
+        to_attr="all_media",
+    )
+
+
+def _serialize_uploaded_media(all_media) -> list[dict]:
+    """Serialize EntityMedia rows into the uploaded_media response list."""
+    from apps.media.storage import build_public_url, build_storage_key
+
+    return [
+        {
+            "asset_uuid": str(em.asset.uuid),
+            "category": em.category,
+            "is_primary": em.is_primary,
+            "renditions": {
+                "thumb": build_public_url(
+                    build_storage_key(em.asset.uuid, "thumb", "")
+                ),
+                "display": build_public_url(
+                    build_storage_key(em.asset.uuid, "display", "")
+                ),
+            },
+        }
+        for em in all_media
+    ]
+
+
 def _claims_prefetch(to_attr: str = "active_claims"):
     """Return a Prefetch for active claims with priority annotation."""
     from apps.provenance.models import Claim

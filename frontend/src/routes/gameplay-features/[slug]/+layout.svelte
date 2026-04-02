@@ -33,10 +33,14 @@
 		auth.load();
 	});
 
+	let isMedia = $derived(
+		page.url.pathname.endsWith('/media') || page.url.pathname.includes('/media/')
+	);
 	let isDetail = $derived(
 		!page.url.pathname.endsWith('/edit') &&
 			!page.url.pathname.endsWith('/activity') &&
-			!page.url.pathname.endsWith('/edit-history')
+			!page.url.pathname.endsWith('/edit-history') &&
+			!isMedia
 	);
 	let isEdit = $derived(page.url.pathname.endsWith('/edit'));
 	let isActivity = $derived(page.url.pathname.endsWith('/activity'));
@@ -67,6 +71,7 @@
 
 			<TabNav>
 				<Tab active={isDetail} href={resolve(`/gameplay-features/${slug}`)}>Machines</Tab>
+				<Tab active={isMedia} href={resolve(`/gameplay-features/${slug}/media`)}>Media</Tab>
 				{#if auth.isAuthenticated}
 					<Tab active={isEdit} href={resolve(`/gameplay-features/${slug}/edit`)}>Edit</Tab>
 				{/if}

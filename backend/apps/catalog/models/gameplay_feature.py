@@ -12,6 +12,7 @@ from apps.core.models import (
     EntityStatusMixin,
     LinkableModel,
     MarkdownField,
+    MediaSupported,
     SluggedModel,
     TimeStampedModel,
     field_not_blank,
@@ -23,12 +24,16 @@ from apps.core.validators import validate_no_mojibake
 __all__ = ["GameplayFeature", "GameplayFeatureAlias", "MachineModelGameplayFeature"]
 
 
-class GameplayFeature(EntityStatusMixin, SluggedModel, LinkableModel, TimeStampedModel):
+class GameplayFeature(
+    EntityStatusMixin, SluggedModel, LinkableModel, MediaSupported, TimeStampedModel
+):
     """A gameplay mechanism: Flippers, Pop Bumpers, Ramps, Multiball, etc.
 
     Supports a DAG hierarchy via the ``parents`` M2M (claim-controlled).
     The MachineModel-GameplayFeature relationship is materialized from claims.
     """
+
+    MEDIA_CATEGORIES = ["other"]
 
     link_url_pattern = "/gameplay-features/{slug}"
 
@@ -45,6 +50,7 @@ class GameplayFeature(EntityStatusMixin, SluggedModel, LinkableModel, TimeStampe
     )
 
     claims = GenericRelation("provenance.Claim")
+    entity_media = GenericRelation("media.EntityMedia")
 
     class Meta:
         ordering = ["name"]

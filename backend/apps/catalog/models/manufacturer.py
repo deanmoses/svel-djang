@@ -12,6 +12,7 @@ from apps.core.models import (
     EntityStatusMixin,
     LinkableModel,
     MarkdownField,
+    MediaSupported,
     SluggedModel,
     TimeStampedModel,
     field_not_blank,
@@ -32,13 +33,17 @@ YEAR_MIN, YEAR_MAX = 1800, 2100
 EXTERNAL_ID_MIN = 1
 
 
-class Manufacturer(EntityStatusMixin, SluggedModel, LinkableModel, TimeStampedModel):
+class Manufacturer(
+    EntityStatusMixin, SluggedModel, LinkableModel, MediaSupported, TimeStampedModel
+):
     """A pinball machine brand (user-facing grouping).
 
     Corporate incarnations are tracked separately in ManufacturerEntity.
     For example, "Gottlieb" is one Manufacturer with four ManufacturerEntity
     records spanning different ownership eras.
     """
+
+    MEDIA_CATEGORIES = ["logo", "other"]
 
     link_url_pattern = "/manufacturers/{slug}"
     link_sort_order = 30
@@ -76,6 +81,7 @@ class Manufacturer(EntityStatusMixin, SluggedModel, LinkableModel, TimeStampedMo
     extra_data = models.JSONField(default=dict, blank=True)
 
     claims = GenericRelation("provenance.Claim")
+    entity_media = GenericRelation("media.EntityMedia")
 
     class Meta:
         ordering = ["name"]

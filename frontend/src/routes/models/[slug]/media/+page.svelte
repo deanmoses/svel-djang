@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import { auth } from '$lib/auth.svelte';
-	import { detachMedia, setPrimary } from '$lib/api/media-api';
+	import { MEDIA_CATEGORIES, detachMedia, setPrimary } from '$lib/api/media-api';
 	import MediaGrid from '$lib/components/media/MediaGrid.svelte';
 	import LinkButton from '$lib/components/LinkButton.svelte';
 
@@ -42,6 +42,7 @@
 
 <MediaGrid
 	media={model.uploaded_media}
+	categories={[...MEDIA_CATEGORIES]}
 	canEdit={auth.isAuthenticated}
 	ondelete={handleDelete}
 	onsetprimary={handleSetPrimary}

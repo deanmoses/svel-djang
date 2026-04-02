@@ -21,6 +21,8 @@ from .helpers import (
     _build_rich_text,
     _claims_prefetch,
     _extract_image_urls,
+    _media_prefetch,
+    _serialize_uploaded_media,
 )
 from .schemas import (
     ChangeSetSchema,
@@ -28,6 +30,7 @@ from .schemas import (
     ClaimSchema,
     RelatedTitleSchema,
     RichTextSchema,
+    UploadedMediaSchema,
 )
 
 # ---------------------------------------------------------------------------
@@ -66,6 +69,7 @@ class PersonDetailSchema(Schema):
     nationality: str | None = None
     photo_url: str | None = None
     titles: list[PersonTitleSchema]
+    uploaded_media: list[UploadedMediaSchema] = []
     activity: list[ClaimSchema]
 
 
@@ -125,6 +129,9 @@ def _serialize_person_detail(person) -> dict:
         "nationality": person.nationality,
         "photo_url": person.photo_url,
         "titles": list(titles.values()),
+        "uploaded_media": _serialize_uploaded_media(
+            getattr(person, "all_media", None) or []
+        ),
         "activity": _build_activity(getattr(person, "active_claims", [])),
     }
 
@@ -142,6 +149,7 @@ def _person_qs():
             .order_by(F("model__year").desc(nulls_last=True), "model__name"),
         ),
         _claims_prefetch(),
+        _media_prefetch(),
     )
 
 

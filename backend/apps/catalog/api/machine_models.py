@@ -24,7 +24,9 @@ from .helpers import (
     _extract_image_urls,
     _extract_variant_features,
     _get_feature_descendant_slugs,
+    _media_prefetch,
     _serialize_title_machine,
+    _serialize_uploaded_media,
 )
 from .schemas import (
     AttributionSchema,
@@ -40,6 +42,7 @@ from .schemas import (
     SeriesRefSchema,
     ThemeSchema,
     TitleMachineSchema,
+    UploadedMediaSchema,
 )
 
 # ---------------------------------------------------------------------------
@@ -99,18 +102,6 @@ class ModelRefSchema(Schema):
     name: str
     slug: str
     year: Optional[int] = None
-
-
-class MediaRenditionsSchema(Schema):
-    thumb: str
-    display: str
-
-
-class UploadedMediaSchema(Schema):
-    asset_uuid: str
-    category: Optional[str] = None
-    is_primary: bool
-    renditions: MediaRenditionsSchema
 
 
 class MachineModelDetailSchema(Schema):
@@ -256,28 +247,6 @@ def _build_model_list_qs(
     qs = qs.order_by(*order_exprs, "name")
 
     return qs
-
-
-def _serialize_uploaded_media(all_media) -> list[dict]:
-    """Serialize EntityMedia rows into the uploaded_media response list."""
-    from apps.media.storage import build_public_url, build_storage_key
-
-    return [
-        {
-            "asset_uuid": str(em.asset.uuid),
-            "category": em.category,
-            "is_primary": em.is_primary,
-            "renditions": {
-                "thumb": build_public_url(
-                    build_storage_key(em.asset.uuid, "thumb", "")
-                ),
-                "display": build_public_url(
-                    build_storage_key(em.asset.uuid, "display", "")
-                ),
-            },
-        }
-        for em in all_media
-    ]
 
 
 def _serialize_model_list(pm) -> dict:
@@ -537,8 +506,6 @@ def _serialize_model_detail(pm) -> dict:
 
 def _model_detail_qs():
     """Return the queryset used for model detail / patch endpoints."""
-    from apps.media.models import EntityMedia
-
     from ..models import Credit, MachineModel, MachineModelGameplayFeature
 
     return (
@@ -592,13 +559,7 @@ def _model_detail_qs():
                 ),
             ),
             _claims_prefetch(),
-            Prefetch(
-                "entity_media",
-                queryset=EntityMedia.objects.filter(
-                    asset__status="ready",
-                ).select_related("asset"),
-                to_attr="all_media",
-            ),
+            _media_prefetch(),
         )
     )
 

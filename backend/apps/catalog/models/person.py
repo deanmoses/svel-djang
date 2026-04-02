@@ -12,6 +12,7 @@ from apps.core.models import (
     EntityStatusMixin,
     LinkableModel,
     MarkdownField,
+    MediaSupported,
     SluggedModel,
     TimeStampedModel,
     field_not_blank,
@@ -28,8 +29,12 @@ MONTH_MIN, MONTH_MAX = 1, 12
 DAY_MIN, DAY_MAX = 1, 31
 
 
-class Person(EntityStatusMixin, SluggedModel, LinkableModel, TimeStampedModel):
+class Person(
+    EntityStatusMixin, SluggedModel, LinkableModel, MediaSupported, TimeStampedModel
+):
     """A person involved in pinball machine design (designer, artist, etc.)."""
+
+    MEDIA_CATEGORIES = ["portrait", "other"]
 
     link_url_pattern = "/people/{slug}"
     link_sort_order = 40
@@ -100,6 +105,7 @@ class Person(EntityStatusMixin, SluggedModel, LinkableModel, TimeStampedModel):
     extra_data = models.JSONField(default=dict, blank=True)
 
     claims = GenericRelation("provenance.Claim")
+    entity_media = GenericRelation("media.EntityMedia")
 
     class Meta:
         ordering = ["name"]

@@ -15,10 +15,14 @@
 		auth.load();
 	});
 
+	let isMedia = $derived(
+		page.url.pathname.endsWith('/media') || page.url.pathname.includes('/media/')
+	);
 	let isDetail = $derived(
 		!page.url.pathname.endsWith('/edit') &&
 			!page.url.pathname.endsWith('/activity') &&
-			!page.url.pathname.endsWith('/edit-history')
+			!page.url.pathname.endsWith('/edit-history') &&
+			!isMedia
 	);
 	let isEdit = $derived(page.url.pathname.endsWith('/edit'));
 	let isActivity = $derived(page.url.pathname.endsWith('/activity'));
@@ -37,6 +41,7 @@
 
 	<TabNav>
 		<Tab active={isDetail} href={resolve(`/people/${slug}`)}>Titles</Tab>
+		<Tab active={isMedia} href={resolve(`/people/${slug}/media`)}>Media</Tab>
 		{#if auth.isAuthenticated}
 			<Tab active={isEdit} href={resolve(`/people/${slug}/edit`)}>Edit</Tab>
 		{/if}

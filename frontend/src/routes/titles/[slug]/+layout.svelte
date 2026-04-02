@@ -28,7 +28,9 @@
 		auth.load();
 	});
 
-	let isMedia = $derived(page.url.pathname.includes('/media'));
+	let isMedia = $derived(
+		page.url.pathname.endsWith('/media') || page.url.pathname.includes('/media/')
+	);
 	let isDetail = $derived(
 		!page.url.pathname.endsWith('/edit') &&
 			!page.url.pathname.endsWith('/activity') &&

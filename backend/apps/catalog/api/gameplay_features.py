@@ -21,13 +21,16 @@ from .helpers import (
     _build_edit_history,
     _build_rich_text,
     _claims_prefetch,
+    _media_prefetch,
+    _serialize_uploaded_media,
 )
 from .schemas import (
     ChangeSetSchema,
     ClaimSchema,
-    HierarchyClaimPatchSchema,
     GameplayFeatureSchema,
+    HierarchyClaimPatchSchema,
     RichTextSchema,
+    UploadedMediaSchema,
 )
 
 # ---------------------------------------------------------------------------
@@ -49,6 +52,7 @@ class GameplayFeatureDetailSchema(Schema):
     aliases: list[str] = []
     parents: list[GameplayFeatureSchema] = []
     children: list[GameplayFeatureSchema] = []
+    uploaded_media: list[UploadedMediaSchema] = []
     activity: list[ClaimSchema] = []
 
 
@@ -65,6 +69,7 @@ def _detail_qs():
         Prefetch("children", queryset=GameplayFeature.objects.active()),
         "aliases",
         _claims_prefetch(),
+        _media_prefetch(),
     )
 
 
@@ -80,6 +85,9 @@ def _serialize_detail(feature) -> dict:
         "children": [
             {"name": c.name, "slug": c.slug} for c in feature.children.order_by("name")
         ],
+        "uploaded_media": _serialize_uploaded_media(
+            getattr(feature, "all_media", None) or []
+        ),
         "activity": _build_activity(getattr(feature, "active_claims", [])),
     }
 

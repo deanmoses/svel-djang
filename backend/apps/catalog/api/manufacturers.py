@@ -25,7 +25,9 @@ from .helpers import (
     _claims_prefetch,
     _collect_titles,
     _extract_image_urls,
+    _media_prefetch,
     _serialize_locations,
+    _serialize_uploaded_media,
 )
 from .schemas import (
     ChangeSetSchema,
@@ -33,6 +35,7 @@ from .schemas import (
     ClaimSchema,
     RelatedTitleSchema,
     RichTextSchema,
+    UploadedMediaSchema,
 )
 from .titles import FacetRef, _dedup_facet_refs
 
@@ -106,6 +109,7 @@ class ManufacturerDetailSchema(Schema):
     titles: list[RelatedTitleSchema]
     systems: list[SystemSchema]
     persons: list[ManufacturerPersonSchema] = []
+    uploaded_media: list[UploadedMediaSchema] = []
     activity: list[ClaimSchema]
 
 
@@ -176,6 +180,9 @@ def _serialize_manufacturer_detail(mfr) -> dict:
         ),
         "systems": [{"name": s.name, "slug": s.slug} for s in mfr.systems.all()],
         "persons": persons,
+        "uploaded_media": _serialize_uploaded_media(
+            getattr(mfr, "all_media", None) or []
+        ),
         "activity": _build_activity(getattr(mfr, "active_claims", [])),
     }
 
@@ -209,6 +216,7 @@ def _manufacturer_qs():
         ),
         Prefetch("systems", queryset=System.objects.active().order_by("name")),
         _claims_prefetch(),
+        _media_prefetch(),
     )
 
 

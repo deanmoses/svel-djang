@@ -182,3 +182,15 @@ class ChangeSetSchema(Schema):
 class FranchiseRefSchema(Schema):
     name: str
     slug: str
+
+
+class MediaRenditionsSchema(Schema):
+    thumb: str
+    display: str
+
+
+class UploadedMediaSchema(Schema):
+    asset_uuid: str
+    category: Optional[str] = None
+    is_primary: bool
+    renditions: MediaRenditionsSchema

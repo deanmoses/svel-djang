@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { components } from '$lib/api/schema';
-	import { MEDIA_CATEGORIES } from '$lib/api/media-api';
 	import MediaCard from './MediaCard.svelte';
 	import MediaLightbox from './MediaLightbox.svelte';
 
@@ -10,11 +9,13 @@
 
 	let {
 		media,
+		categories = [],
 		canEdit = false,
 		ondelete,
 		onsetprimary
 	}: {
 		media: UploadedMedia[];
+		categories?: string[];
 		canEdit?: boolean;
 		ondelete?: (assetUuid: string) => void;
 		onsetprimary?: (assetUuid: string) => void;
@@ -82,7 +83,7 @@
 		>
 			All ({media.length})
 		</button>
-		{#each MEDIA_CATEGORIES as cat (cat)}
+		{#each categories as cat (cat)}
 			<button
 				class="filter-btn"
 				class:active={activeCategory === cat}

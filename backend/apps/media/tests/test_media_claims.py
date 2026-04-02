@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 
 from apps.catalog.claims import build_media_attachment_claim
-from apps.catalog.models import MachineModel, Manufacturer
+from apps.catalog.models import MachineModel
 from apps.media.models import EntityMedia, MediaAsset
 from apps.provenance.models import Claim, Source
 
@@ -117,10 +117,12 @@ class TestBuildMediaAttachmentClaim:
             )
 
     def test_non_media_supported_entity_raises(self, db, asset):
-        """Manufacturer does not inherit MediaSupported — rejected."""
-        mfr = Manufacturer.objects.create(name="Test Mfr", slug="test-mfr")
+        """Theme does not inherit MediaSupported — rejected."""
+        from apps.catalog.models import Theme
+
+        theme = Theme.objects.create(name="Test Theme", slug="test-theme")
         with pytest.raises(ValueError, match="does not support media"):
-            build_media_attachment_claim(mfr, asset.pk)
+            build_media_attachment_claim(theme, asset.pk)
 
     def test_retraction(self, machine_model, asset):
         claim_key, value = build_media_attachment_claim(
@@ -639,9 +641,10 @@ class TestResolverValidation:
 
     def test_non_media_supported_entity_skipped(self, db, asset, source):
         """Claim on a non-MediaSupported entity doesn't materialize."""
+        from apps.catalog.models import Theme
         from apps.provenance.models import make_claim_key
 
-        mfr = Manufacturer.objects.create(name="Test Mfr", slug="test-mfr")
+        theme = Theme.objects.create(name="Test Theme", slug="test-theme")
         claim_key = make_claim_key("media_attachment", media_asset=asset.pk)
         value = {
             "media_asset": asset.pk,
@@ -650,15 +653,15 @@ class TestResolverValidation:
             "exists": True,
         }
         Claim.objects.assert_claim(
-            mfr,
+            theme,
             "media_attachment",
             value,
             source=source,
             claim_key=claim_key,
         )
 
-        ct = ContentType.objects.get_for_model(Manufacturer)
+        ct = ContentType.objects.get_for_model(Theme)
         from apps.catalog.resolve import resolve_media_attachments
 
-        resolve_media_attachments(content_type_id=ct.id, entity_ids={mfr.pk})
+        resolve_media_attachments(content_type_id=ct.id, entity_ids={theme.pk})
         assert EntityMedia.objects.count() == 0
