@@ -31,6 +31,17 @@
     ]
   },
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/pre-commit-format.sh"
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "hooks": [

@@ -69,4 +69,4 @@ chore/ci-pipeline
 3. Summarize the changes in 1-2 sentences
 4. Create a test plan with verification steps
 5. Apply appropriate labels
-6. Once submitted, give the user a hyperlink to the PR like 'account/repo#N'
+6. Once submitted, give the user a CLICKABLE hyperlink to the PR

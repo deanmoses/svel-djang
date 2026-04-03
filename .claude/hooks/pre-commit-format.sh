@@ -23,6 +23,18 @@ if [ -n "$STAGED_BACKEND" ]; then
   done
 fi
 
+# --- Frontend: prettier --write ---
+STAGED_FRONTEND=$(git diff --cached --name-only -- frontend/)
+if [ -n "$STAGED_FRONTEND" ]; then
+  (cd frontend && pnpm prettier --write . 2>/dev/null)
+
+  echo "$STAGED_FRONTEND" | while IFS= read -r file; do
+    if [ -f "$file" ]; then
+      git add "$file"
+    fi
+  done
+fi
+
 # --- Markdown: prettier --write ---
 STAGED_MD=$(git diff --cached --name-only -- '*.md' | grep -v '^CLAUDE\.md$' | grep -v '^AGENTS\.md$')
 if [ -n "$STAGED_MD" ]; then

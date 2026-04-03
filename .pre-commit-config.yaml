@@ -32,7 +32,7 @@ repos:
       # Markdown — formatting + linting
       - id: prettier-markdown
         name: prettier (markdown)
-        entry: npx prettier@3.8.1 --check
+        entry: npx prettier@3.8.1 --write
         language: system
         types: [markdown]
         exclude: ^(CLAUDE|AGENTS)\.md$
