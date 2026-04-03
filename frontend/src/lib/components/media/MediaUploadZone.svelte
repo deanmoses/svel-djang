@@ -135,7 +135,9 @@
 				<li class="file-entry" class:error={entry.status === 'error'}>
 					<span class="file-name">{entry.file.name}</span>
 					<span class="file-status">
-						{#if entry.status === 'uploading'}
+						{#if entry.status === 'uploading' && entry.progress >= 100}
+							Processing...
+						{:else if entry.status === 'uploading'}
 							<span class="progress-bar">
 								<span class="progress-fill" style:width="{entry.progress}%"></span>
 							</span>
