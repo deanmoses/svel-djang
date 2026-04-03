@@ -109,36 +109,38 @@
 	</div>
 
 	<!-- Coffee stain overlays — three strips covering full width -->
-	<CoffeeStain
-		seed={stainSeed1}
-		frequency={0.03}
-		opacity={0.12}
-		blur={4}
-		threshold="0 0 0 0 0 0 0.5 0.7"
-		x="0%"
-		width="40%"
-	/>
-	<CoffeeStain
-		seed={stainSeed2}
-		frequency={0.04}
-		octaves={4}
-		opacity={0.08}
-		blur={5}
-		threshold="0 0 0 0 0 0 0 0.4"
-		color="rgb(100, 65, 20)"
-		x="30%"
-		width="40%"
-	/>
-	<CoffeeStain
-		seed={stainSeed3}
-		frequency={0.025}
-		opacity={0.1}
-		blur={3}
-		threshold="0 0 0 0 0 0.4 0.6 0.8"
-		color="rgb(130, 90, 35)"
-		x="60%"
-		width="40%"
-	/>
+	<div class="header-stains">
+		<CoffeeStain
+			seed={stainSeed1}
+			frequency={0.03}
+			opacity={0.12}
+			blur={4}
+			threshold="0 0 0 0 0 0 0.5 0.7"
+			x="0%"
+			width="40%"
+		/>
+		<CoffeeStain
+			seed={stainSeed2}
+			frequency={0.04}
+			octaves={4}
+			opacity={0.08}
+			blur={5}
+			threshold="0 0 0 0 0 0 0 0.4"
+			color="rgb(100, 65, 20)"
+			x="30%"
+			width="40%"
+		/>
+		<CoffeeStain
+			seed={stainSeed3}
+			frequency={0.025}
+			opacity={0.1}
+			blur={3}
+			threshold="0 0 0 0 0 0.4 0.6 0.8"
+			color="rgb(130, 90, 35)"
+			x="60%"
+			width="40%"
+		/>
+	</div>
 
 	<!-- Torn bottom edge -->
 	<div class="torn-edge" style:filter="url(#{tornId})"></div>
@@ -324,6 +326,19 @@
 
 		.site-nav.open {
 			display: flex;
+		}
+	}
+
+	.header-stains {
+		display: none;
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+	}
+
+	@media (prefers-color-scheme: light) {
+		.header-stains {
+			display: block;
 		}
 	}
 
