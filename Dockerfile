@@ -19,9 +19,15 @@ RUN pnpm build
 # ── Stage 2: Django application ────────────────────────────────────
 FROM python:3.14-slim AS base
 
-# Build deps + AVIF library so Pillow compiles with AVIF support
+# Build deps so Pillow compiles from source with AVIF support
+# (python:3.14-slim pre-built wheels lack AVIF codec)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    zlib1g-dev \
+    libjpeg62-turbo-dev \
+    libfreetype-dev \
+    liblcms2-dev \
+    libwebp-dev \
     libavif-dev \
     && rm -rf /var/lib/apt/lists/*
 
