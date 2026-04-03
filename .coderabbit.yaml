@@ -2,6 +2,8 @@
 # https://docs.coderabbit.ai/reference/configuration
 
 reviews:
+  auto_review:
+    enabled: false
   tools:
     languagetool:
       enabled: false
