@@ -37,12 +37,11 @@
 	async function processFiles(files: FileList) {
 		await manager.upload(files, entityType, slug, { category, isPrimary });
 
-		const hadSuccess = manager.files.some((f) => f.status === 'success');
 		const hadError = manager.files.some((f) => f.status === 'error');
 
-		if (hadSuccess) onuploaded();
-		if (hadSuccess && !hadError) {
+		if (!hadError) {
 			manager.reset();
+			onuploaded();
 		}
 	}
 
@@ -67,10 +66,6 @@
 		const files = e.dataTransfer?.files;
 		if (!files || files.length === 0) return;
 		await processFiles(files);
-	}
-
-	function clearErrors() {
-		manager.reset();
 	}
 </script>
 
@@ -126,9 +121,6 @@
 					Upload results
 				{/if}
 			</span>
-			{#if !manager.isUploading}
-				<button class="clear-btn" onclick={clearErrors}>Clear</button>
-			{/if}
 		</div>
 		<ul class="file-list">
 			{#each manager.files as entry, i (entry.file.name + entry.file.lastModified + i)}
@@ -153,6 +145,11 @@
 				</li>
 			{/each}
 		</ul>
+		{#if !manager.isUploading}
+			<div class="view-uploads">
+				<Button onclick={onuploaded}>View Uploads</Button>
+			</div>
+		{/if}
 	{/if}
 </div>
 
@@ -243,19 +240,6 @@
 		color: var(--color-text-muted);
 	}
 
-	.clear-btn {
-		background: none;
-		border: none;
-		color: var(--color-text-muted);
-		font-size: var(--font-size-0);
-		cursor: pointer;
-		padding: 0;
-	}
-
-	.clear-btn:hover {
-		color: var(--color-text);
-	}
-
 	.file-list {
 		list-style: none;
 		padding: 0;
@@ -308,5 +292,9 @@
 		height: 100%;
 		background: var(--color-accent);
 		transition: width 0.15s ease;
+	}
+
+	.view-uploads {
+		margin-top: var(--size-4);
 	}
 </style>
