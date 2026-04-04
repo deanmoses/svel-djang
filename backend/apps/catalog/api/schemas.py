@@ -173,7 +173,7 @@ class ChangeSetSchema(Schema):
     """A grouped edit session with per-field diffs."""
 
     id: int
-    user_display: str
+    user_display: Optional[str] = None
     note: str
     created_at: str
     changes: list[FieldChangeSchema]

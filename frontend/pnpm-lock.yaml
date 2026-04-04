@@ -17,6 +17,9 @@ importers:
       '@fortawesome/free-solid-svg-icons':
         specifier: ^7.2.0
         version: 7.2.0
+      diff:
+        specifier: ^8.0.4
+        version: 8.0.4
       open-props:
         specifier: ^1.7.23
         version: 1.7.23
@@ -740,6 +743,10 @@ packages:
 
   devalue@5.6.4:
     resolution: {integrity: sha512-Gp6rDldRsFh/7XuouDbxMH3Mx8GMCcgzIb1pDTvNyn8pZGQ22u+Wa+lGV9dQCltFQ7uVw0MhRyb8XDskNFOReA==}
+
+  diff@8.0.4:
+    resolution: {integrity: sha512-DPi0FmjiSU5EvQV0++GFDOJ9ASQUVFh5kD+OzOnYdi7n3Wpm9hWWGfB/O2blfHcMVTL5WkQXSnRiK9makhrcnw==}
+    engines: {node: '>=0.3.1'}
 
   es-module-lexer@2.0.0:
     resolution: {integrity: sha512-5POEcUuZybH7IdmGsD8wlf0AI55wMecM9rVBTI/qEAy2c1kTOm3DjFYjrBdI2K3BaJjJYfYFeRtM0t9ssnRuxw==}
@@ -1909,6 +1916,8 @@ snapshots:
   deepmerge@4.3.1: {}
 
   devalue@5.6.4: {}
+
+  diff@8.0.4: {}
 
   es-module-lexer@2.0.0: {}
 

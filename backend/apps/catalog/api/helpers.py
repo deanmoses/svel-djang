@@ -106,7 +106,7 @@ def _build_edit_history(entity) -> list[dict]:
         result.append(
             {
                 "id": cs.pk,
-                "user_display": cs.user.username if cs.user else "system",
+                "user_display": cs.user.username if cs.user else None,
                 "note": cs.note,
                 "created_at": cs.created_at.isoformat(),
                 "changes": changes,

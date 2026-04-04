@@ -1,9 +1,22 @@
 <script lang="ts">
 	import type { components } from '$lib/api/schema';
+	import InlineDiff from './InlineDiff.svelte';
+	import UserBadge from './UserBadge.svelte';
 
 	type ChangeSet = components['schemas']['ChangeSetSchema'];
+	type FieldChange = components['schemas']['FieldChangeSchema'];
 
 	let { changesets }: { changesets: ChangeSet[] } = $props();
+
+	function isDiffable(
+		change: FieldChange
+	): change is FieldChange & { old_value: string; new_value: string } {
+		return (
+			typeof change.old_value === 'string' &&
+			typeof change.new_value === 'string' &&
+			(change.old_value.length > 80 || change.new_value.length > 80)
+		);
+	}
 
 	function formatValue(v: unknown): string {
 		if (v === null || v === undefined || v === '') return '—';
@@ -30,7 +43,7 @@
 			{#each changesets as cs (cs.id)}
 				<li class="changeset">
 					<div class="changeset-header">
-						<span class="user-badge">@{cs.user_display}</span>
+						<UserBadge username={cs.user_display} />
 						<time datetime={cs.created_at}>{formatDate(cs.created_at)}</time>
 					</div>
 					{#if cs.note}
@@ -38,16 +51,25 @@
 					{/if}
 					<dl class="field-list">
 						{#each cs.changes as change (change.claim_key)}
-							<div class="field-row">
-								<dt>{change.field_name}</dt>
-								<dd>
-									{#if change.old_value !== null && change.old_value !== undefined}
-										<span class="old-value">{formatValue(change.old_value)}</span>
-										<span class="arrow">&rarr;</span>
-									{/if}
-									<span class="new-value">{formatValue(change.new_value)}</span>
-								</dd>
-							</div>
+							{#if isDiffable(change)}
+								<div class="field-row field-row-diff">
+									<dt>{change.field_name}</dt>
+									<dd>
+										<InlineDiff oldValue={change.old_value} newValue={change.new_value} />
+									</dd>
+								</div>
+							{:else}
+								<div class="field-row">
+									<dt>{change.field_name}</dt>
+									<dd>
+										{#if change.old_value !== null && change.old_value !== undefined}
+											<span class="old-value">{formatValue(change.old_value)}</span>
+											<span class="arrow">&rarr;</span>
+										{/if}
+										<span class="new-value">{formatValue(change.new_value)}</span>
+									</dd>
+								</div>
+							{/if}
 						{/each}
 					</dl>
 				</li>
@@ -86,19 +108,6 @@
 		align-items: center;
 		gap: var(--size-2);
 		margin-bottom: var(--size-2);
-	}
-
-	.user-badge {
-		display: inline-block;
-		padding: 1px var(--size-2);
-		font-size: var(--font-size-00, 0.7rem);
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		border-radius: var(--radius-1);
-		background-color: var(--color-surface);
-		border: 1px solid var(--color-border-soft);
-		color: var(--color-text-muted);
 	}
 
 	time {
@@ -144,6 +153,15 @@
 		gap: var(--size-1);
 		color: var(--color-text-primary);
 		word-break: break-word;
+	}
+
+	.field-row-diff {
+		flex-wrap: wrap;
+	}
+
+	.field-row-diff dd {
+		flex-basis: 100%;
+		display: block;
 	}
 
 	.old-value {

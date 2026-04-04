@@ -1,16 +1,22 @@
-"""Auth API endpoints: status, login (WorkOS redirect), callback, logout."""
+"""Auth & user API endpoints."""
 
 from __future__ import annotations
 
 import logging
 import secrets
+from collections import defaultdict
 from typing import Optional
 
 from django.conf import settings
 from django.contrib.auth import get_user_model, login, logout
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import Count, Max
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 from django.utils.http import url_has_allowed_host_and_scheme
 from ninja import Router, Schema
+
+from apps.provenance.models import ChangeSet, Claim
 
 from .models import UserProfile
 from .workos_client import get_workos_client
@@ -20,6 +26,7 @@ log = logging.getLogger(__name__)
 User = get_user_model()
 
 auth_router = Router(tags=["auth", "private"])
+users_router = Router(tags=["users"])
 
 
 # ── Schemas ──────────────────────────────────────────────────────────
@@ -174,3 +181,162 @@ def auth_logout(request):
     """End the current session."""
     logout(request)
     return {"is_authenticated": False}
+
+
+# ── User profile schemas ───────────────────────────────────────────
+
+
+class EntityContributionSchema(Schema):
+    entity_href: str
+    entity_name: str
+    entity_type_label: str
+    edit_count: int
+    last_edited_at: str
+
+
+class UserChangeSetSchema(Schema):
+    id: int
+    note: str
+    created_at: str
+    entity_href: str
+    entity_name: str
+    entity_type_label: str
+
+
+class UserProfileSchema(Schema):
+    username: str
+    member_since: str
+    edit_count: int
+    entities_edited: list[EntityContributionSchema]
+    recent_edits: list[UserChangeSetSchema]
+
+
+# ── User profile helpers ───────────────────────────────────────────
+
+
+def _resolve_entity_href(model_class, entity) -> str | None:
+    """Build the frontend URL for a catalog entity from its link_url_pattern."""
+    pattern = getattr(model_class, "link_url_pattern", None)
+    if not pattern or not hasattr(entity, "slug"):
+        return None
+    return pattern.format(slug=entity.slug)
+
+
+def _batch_resolve_entities(entity_rows):
+    """Resolve entity metadata from (content_type_id, object_id) pairs.
+
+    Returns a dict mapping (content_type_id, object_id) to
+    {"href": str, "name": str, "type_label": str}, skipping unresolvable
+    entities.
+    """
+    # Group by content_type_id, deduplicating object_ids
+    by_ct: dict[int, set[int]] = defaultdict(set)
+    for row in entity_rows:
+        by_ct[row["content_type_id"]].add(row["object_id"])
+
+    resolved: dict[tuple[int, int], dict] = {}
+    for ct_id, obj_ids in by_ct.items():
+        ct = ContentType.objects.get_for_id(ct_id)
+        model_class = ct.model_class()
+        if not model_class:
+            continue
+        entities = model_class.objects.in_bulk(list(obj_ids))
+        type_label = model_class._meta.verbose_name.title()
+        for obj_id, entity in entities.items():
+            href = _resolve_entity_href(model_class, entity)
+            if href is None:
+                continue
+            resolved[(ct_id, obj_id)] = {
+                "href": href,
+                "name": getattr(entity, "name", str(entity)),
+                "type_label": type_label,
+            }
+    return resolved
+
+
+# ── User profile endpoint ──────────────────────────────────────────
+
+
+@users_router.get("/{username}/", response={200: UserProfileSchema, 404: ErrorSchema})
+def user_profile(request, username: str):
+    """Public profile showing a user's contributions."""
+    user = get_object_or_404(User, username=username)
+
+    edit_count = ChangeSet.objects.filter(user=user).count()
+    member_since = user.profile.created_at.isoformat()
+
+    # Entities edited: distinct (content_type, object_id) from user's claims
+    entity_rows = list(
+        Claim.objects.filter(user=user, changeset__isnull=False)
+        .values("content_type_id", "object_id")
+        .annotate(
+            edit_count=Count("changeset", distinct=True),
+            last_edited_at=Max("changeset__created_at"),
+        )
+        .order_by("-last_edited_at")
+    )
+
+    resolved = _batch_resolve_entities(entity_rows)
+
+    entities_edited = []
+    for row in entity_rows:
+        meta = resolved.get((row["content_type_id"], row["object_id"]))
+        if not meta:
+            continue
+        entities_edited.append(
+            {
+                "entity_href": meta["href"],
+                "entity_name": meta["name"],
+                "entity_type_label": meta["type_label"],
+                "edit_count": row["edit_count"],
+                "last_edited_at": row["last_edited_at"].isoformat(),
+            }
+        )
+
+    # Recent edits: last 50 changesets with entity context
+    recent_changesets = (
+        ChangeSet.objects.filter(user=user)
+        .prefetch_related("claims")
+        .order_by("-created_at")[:50]
+    )
+
+    # Collect entity refs from changesets for batch resolution.
+    # Access the prefetch cache via .all() without slicing to avoid N+1.
+    cs_entity_refs: list[dict] = []
+    cs_first_claim: dict[int, tuple[int, int]] = {}
+    for cs in recent_changesets:
+        prefetched_claims = cs.claims.all()
+        if prefetched_claims:
+            c = prefetched_claims[0]
+            key = (c.content_type_id, c.object_id)
+            cs_first_claim[cs.pk] = key
+            cs_entity_refs.append({"content_type_id": key[0], "object_id": key[1]})
+
+    cs_resolved = _batch_resolve_entities(cs_entity_refs)
+
+    recent_edits = []
+    for cs in recent_changesets:
+        ref = cs_first_claim.get(cs.pk)
+        if not ref:
+            continue
+        meta = cs_resolved.get(ref)
+        if not meta:
+            continue
+        recent_edits.append(
+            {
+                "id": cs.pk,
+                "note": cs.note,
+                "created_at": cs.created_at.isoformat(),
+                "entity_href": meta["href"],
+                "entity_name": meta["name"],
+                "entity_type_label": meta["type_label"],
+            }
+        )
+
+    return {
+        "username": user.username,
+        "member_since": member_since,
+        "edit_count": edit_count,
+        "entities_edited": entities_edited,
+        "recent_edits": recent_edits,
+    }

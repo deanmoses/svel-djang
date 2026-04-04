@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { components } from '$lib/api/schema';
+	import UserBadge from './UserBadge.svelte';
 
 	type Claim = components['schemas']['ClaimSchema'];
 	type FieldGroup = { field: string; claims: Claim[] };
@@ -42,7 +43,11 @@
 </script>
 
 {#snippet claimDetail(claim: Claim)}
-	<span class="source-badge">{claimAttribution(claim)}</span>
+	{#if claim.user_display}
+		<UserBadge username={claim.user_display} />
+	{:else}
+		<span class="source-badge">{claim.source_name ?? 'Unknown'}</span>
+	{/if}
 	{formatValue(claim.value)}
 	{#if claim.is_winner}
 		<span class="badge-used">used</span>

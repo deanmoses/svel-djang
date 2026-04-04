@@ -2,7 +2,7 @@ from django.conf import settings
 from ninja import NinjaAPI, Schema
 from ninja.errors import HttpError
 
-from apps.accounts.api import auth_router
+from apps.accounts.api import auth_router, users_router
 from apps.catalog.api import (
     cabinets_router,
     corporate_entities_router,
@@ -72,6 +72,7 @@ def health(request):
 
 
 api.add_router("/auth/", auth_router)
+api.add_router("/users/", users_router)
 api.add_router("/corporate-entities/", corporate_entities_router)
 api.add_router("/display-types/", display_types_router)
 api.add_router("/technology-generations/", technology_generations_router)
