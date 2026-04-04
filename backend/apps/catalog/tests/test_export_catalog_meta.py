@@ -1,0 +1,63 @@
+"""Smoke test for the export_catalog_meta management command."""
+
+from __future__ import annotations
+
+import re
+
+import pytest
+from django.core.management import call_command
+
+
+@pytest.mark.django_db
+class TestExportCatalogMeta:
+    def test_output_contains_entity_types(self, tmp_path, settings):
+        settings.BASE_DIR = tmp_path / "backend"
+        (tmp_path / "frontend" / "src" / "lib" / "api").mkdir(parents=True)
+        call_command("export_catalog_meta")
+
+        output = (
+            tmp_path / "frontend" / "src" / "lib" / "api" / "catalog-meta.ts"
+        ).read_text()
+        assert "export const ENTITY_TYPES" in output
+        assert "export const MEDIA_CATEGORIES" in output
+
+    def test_known_models_present(self, tmp_path, settings):
+        settings.BASE_DIR = tmp_path / "backend"
+        (tmp_path / "frontend" / "src" / "lib" / "api").mkdir(parents=True)
+        call_command("export_catalog_meta")
+
+        output = (
+            tmp_path / "frontend" / "src" / "lib" / "api" / "catalog-meta.ts"
+        ).read_text()
+        for model in ("machinemodel", "title", "manufacturer", "person", "theme"):
+            assert f"value: '{model}'" in output, f"{model} missing from ENTITY_TYPES"
+
+    def test_media_categories_present(self, tmp_path, settings):
+        settings.BASE_DIR = tmp_path / "backend"
+        (tmp_path / "frontend" / "src" / "lib" / "api").mkdir(parents=True)
+        call_command("export_catalog_meta")
+
+        output = (
+            tmp_path / "frontend" / "src" / "lib" / "api" / "catalog-meta.ts"
+        ).read_text()
+        assert "machinemodel: [" in output
+        assert "'backglass'" in output
+        assert "manufacturer: [" in output
+        assert "'logo'" in output
+
+    def test_output_is_valid_typescript_shape(self, tmp_path, settings):
+        """Generated file ends with a newline and has no raw Python artifacts."""
+        settings.BASE_DIR = tmp_path / "backend"
+        (tmp_path / "frontend" / "src" / "lib" / "api").mkdir(parents=True)
+        call_command("export_catalog_meta")
+
+        output = (
+            tmp_path / "frontend" / "src" / "lib" / "api" / "catalog-meta.ts"
+        ).read_text()
+        assert output.endswith("\n")
+        assert "None" not in output
+        assert "True" not in output
+        assert "False" not in output
+        # Should have the as const assertions
+        assert re.search(r"ENTITY_TYPES.*as const", output, re.DOTALL)
+        assert re.search(r"MEDIA_CATEGORIES.*as const", output, re.DOTALL)

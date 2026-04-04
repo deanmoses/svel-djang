@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { auth } from '$lib/auth.svelte';
-	import { PERSON_MEDIA_CATEGORIES } from '$lib/api/media-api';
+	import { MEDIA_CATEGORIES } from '$lib/api/catalog-meta';
 	import MediaUploadZone from '$lib/components/media/MediaUploadZone.svelte';
 
 	let { data } = $props();
@@ -18,7 +18,7 @@
 	<MediaUploadZone
 		entityType="person"
 		slug={person.slug}
-		categories={[...PERSON_MEDIA_CATEGORIES]}
+		categories={[...MEDIA_CATEGORIES.person]}
 		onuploaded={handleUploaded}
 	/>
 {:else}

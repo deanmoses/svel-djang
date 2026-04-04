@@ -16,16 +16,14 @@ from .edit_claims import (
     plan_parent_claims,
     validate_scalar_fields,
 )
+from apps.provenance.helpers import build_sources, claims_prefetch
+
 from .helpers import (
-    _build_sources,
-    _build_edit_history,
     _build_rich_text,
-    _claims_prefetch,
     _media_prefetch,
     _serialize_uploaded_media,
 )
 from .schemas import (
-    ChangeSetSchema,
     ClaimSchema,
     GameplayFeatureSchema,
     HierarchyClaimPatchSchema,
@@ -68,7 +66,7 @@ def _detail_qs():
         Prefetch("parents", queryset=GameplayFeature.objects.active()),
         Prefetch("children", queryset=GameplayFeature.objects.active()),
         "aliases",
-        _claims_prefetch(),
+        claims_prefetch(),
         _media_prefetch(),
     )
 
@@ -88,7 +86,7 @@ def _serialize_detail(feature) -> dict:
         "uploaded_media": _serialize_uploaded_media(
             getattr(feature, "all_media", None) or []
         ),
-        "sources": _build_sources(getattr(feature, "active_claims", [])),
+        "sources": build_sources(getattr(feature, "active_claims", [])),
     }
 
 
@@ -213,13 +211,3 @@ def patch_gameplay_feature_claims(request, slug: str, data: HierarchyClaimPatchS
 
     feature = get_object_or_404(_detail_qs(), slug=feature.slug)
     return _serialize_detail(feature)
-
-
-@gameplay_features_router.get("/{slug}/edit-history/", response=list[ChangeSetSchema])
-@decorate_view(cache_control(no_cache=True))
-def get_gameplay_feature_edit_history(request, slug: str):
-    """Return changeset-grouped edit history with old/new diffs."""
-    from ..models import GameplayFeature
-
-    feature = get_object_or_404(GameplayFeature, slug=slug)
-    return _build_edit_history(feature)

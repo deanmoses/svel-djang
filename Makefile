@@ -21,6 +21,7 @@ agent-docs:
 
 api-gen:
 	cd backend && uv run python manage.py export_openapi_schema
+	cd backend && uv run python manage.py export_catalog_meta
 	cd frontend && pnpm api:gen
 
 ingest:

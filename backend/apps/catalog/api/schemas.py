@@ -160,25 +160,6 @@ class RewardTypeSchema(Schema):
     slug: str
 
 
-class FieldChangeSchema(Schema):
-    """A single field change within a ChangeSet (old → new)."""
-
-    field_name: str
-    claim_key: str
-    old_value: Optional[object] = None
-    new_value: object
-
-
-class ChangeSetSchema(Schema):
-    """A grouped edit session with per-field diffs."""
-
-    id: int
-    user_display: Optional[str] = None
-    note: str
-    created_at: str
-    changes: list[FieldChangeSchema]
-
-
 class FranchiseRefSchema(Schema):
     name: str
     slug: str

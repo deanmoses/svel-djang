@@ -15,17 +15,15 @@ from ninja.errors import HttpError
 from ninja.security import django_auth
 
 from .edit_claims import execute_claims, plan_alias_claims, validate_scalar_fields
+from apps.provenance.helpers import build_sources, claims_prefetch
+
 from .helpers import (
-    _build_sources,
-    _build_edit_history,
     _build_rich_text,
-    _claims_prefetch,
     _collect_titles,
     _serialize_locations,
 )
 from .manufacturers import CorporateEntityLocationSchema
 from .schemas import (
-    ChangeSetSchema,
     ClaimSchema,
     CorporateEntityClaimPatchSchema,
     RelatedTitleSchema,
@@ -91,7 +89,7 @@ def _detail_qs():
                 .select_related("technology_generation", "title")
                 .order_by(F("year").desc(nulls_last=True), "name"),
             ),
-            _claims_prefetch(),
+            claims_prefetch(),
         )
     )
 
@@ -109,7 +107,7 @@ def _serialize_detail(ce) -> dict:
         "aliases": [a.value for a in ce.aliases.all()],
         "locations": _serialize_locations(ce),
         "titles": _collect_titles(ce.models.all()),
-        "sources": _build_sources(getattr(ce, "active_claims", [])),
+        "sources": build_sources(getattr(ce, "active_claims", [])),
     }
 
 
@@ -206,13 +204,3 @@ def patch_corporate_entity_claims(
 
     ce = get_object_or_404(_detail_qs(), slug=ce.slug)
     return _serialize_detail(ce)
-
-
-@corporate_entities_router.get("/{slug}/edit-history/", response=list[ChangeSetSchema])
-@decorate_view(cache_control(no_cache=True))
-def get_corporate_entity_edit_history(request, slug: str):
-    """Return changeset-grouped edit history with old/new diffs."""
-    from ..models import CorporateEntity
-
-    ce = get_object_or_404(CorporateEntity, slug=slug)
-    return _build_edit_history(ce)

@@ -2,117 +2,7 @@
 
 from __future__ import annotations
 
-from django.db.models import Case, F, IntegerField, Prefetch, Value, When
-
-
-def _build_sources(active_claims) -> list[dict]:
-    """Serialize pre-fetched active claims into the sources list format.
-
-    Claims should be ordered by claim_key, -priority, -created_at. The first
-    claim seen per claim_key is marked as the winner.
-    """
-    winners: set[str] = set()
-    sources: list[dict] = []
-    for claim in active_claims:
-        is_winner = claim.claim_key not in winners
-        if is_winner:
-            winners.add(claim.claim_key)
-        sources.append(
-            {
-                "source_name": claim.source.name if claim.source else None,
-                "source_slug": claim.source.slug if claim.source else None,
-                "user_display": claim.user.username if claim.user else None,
-                "field_name": claim.field_name,
-                "value": claim.value,
-                "citation": claim.citation,
-                "created_at": claim.created_at.isoformat(),
-                "is_winner": is_winner,
-                "changeset_note": claim.changeset.note if claim.changeset else None,
-            }
-        )
-    sources.sort(key=lambda c: c["created_at"], reverse=True)
-    return sources
-
-
-def _build_edit_history(entity) -> list[dict]:
-    """Build changeset-grouped edit history with old→new diffs for an entity.
-
-    Returns a list of dicts matching ChangeSetSchema, newest first.
-    Uses two queries to avoid N+1: one for changesets with their claims,
-    one for all inactive user claims (to look up previous values).
-    """
-    from collections import defaultdict
-
-    from django.contrib.contenttypes.models import ContentType
-    from django.db.models import Prefetch as DjPrefetch
-
-    from apps.provenance.models import ChangeSet, Claim
-
-    ct = ContentType.objects.get_for_model(entity)
-
-    # 1. Fetch changesets that have claims for this entity.
-    changesets = (
-        ChangeSet.objects.filter(
-            claims__content_type=ct,
-            claims__object_id=entity.pk,
-        )
-        .distinct()
-        .select_related("user")
-        .prefetch_related(
-            DjPrefetch(
-                "claims",
-                queryset=Claim.objects.filter(
-                    content_type=ct, object_id=entity.pk
-                ).order_by("field_name"),
-            )
-        )
-        .order_by("-created_at")
-    )
-
-    # 2. Fetch ALL user claims for this entity (active + inactive) to build
-    #    a history chain for old-value lookups.
-    all_user_claims = list(
-        Claim.objects.filter(
-            content_type=ct,
-            object_id=entity.pk,
-            user__isnull=False,
-        ).order_by("claim_key", "user_id", "-created_at")
-    )
-
-    # Build lookup: (claim_key, user_id) → list of claims ordered newest-first.
-    history: dict[tuple[str, int], list] = defaultdict(list)
-    for c in all_user_claims:
-        history[(c.claim_key, c.user_id)].append(c)
-
-    # 3. Build response.
-    result: list[dict] = []
-    for cs in changesets:
-        changes: list[dict] = []
-        for claim in cs.claims.all():
-            chain = history.get((claim.claim_key, claim.user_id), [])
-            old_value = None
-            for i, c in enumerate(chain):
-                if c.pk == claim.pk and i + 1 < len(chain):
-                    old_value = chain[i + 1].value
-                    break
-            changes.append(
-                {
-                    "field_name": claim.field_name,
-                    "claim_key": claim.claim_key,
-                    "old_value": old_value,
-                    "new_value": claim.value,
-                }
-            )
-        result.append(
-            {
-                "id": cs.pk,
-                "user_display": cs.user.username if cs.user else None,
-                "note": cs.note,
-                "created_at": cs.created_at.isoformat(),
-                "changes": changes,
-            }
-        )
-    return result
+from django.db.models import Prefetch
 
 
 def _media_prefetch():
@@ -146,28 +36,6 @@ def _serialize_uploaded_media(all_media) -> list[dict]:
         }
         for em in all_media
     ]
-
-
-def _claims_prefetch(to_attr: str = "active_claims"):
-    """Return a Prefetch for active claims with priority annotation."""
-    from apps.provenance.models import Claim
-
-    return Prefetch(
-        "claims",
-        queryset=Claim.objects.filter(is_active=True)
-        .exclude(source__is_enabled=False)
-        .select_related("source", "user", "changeset")
-        .annotate(
-            effective_priority=Case(
-                When(source__isnull=False, then=F("source__priority")),
-                When(user__isnull=False, then=F("user__profile__priority")),
-                default=Value(0),
-                output_field=IntegerField(),
-            )
-        )
-        .order_by("claim_key", "-effective_priority", "-created_at"),
-        to_attr=to_attr,
-    )
 
 
 def _uploaded_image_urls(primary_media) -> tuple[str | None, str | None]:

@@ -181,8 +181,8 @@ class TestIsEnabledRelationshipResolution:
 @pytest.mark.django_db
 class TestIsEnabledSourcesPrefetch:
     def test_claims_prefetch_excludes_disabled_source(self, source_a, source_b):
-        """_claims_prefetch() should not include claims from disabled sources."""
-        from apps.catalog.api.helpers import _claims_prefetch
+        """claims_prefetch() should not include claims from disabled sources."""
+        from apps.provenance.helpers import claims_prefetch
 
         mfr = Manufacturer.objects.create(name="Test Mfr", slug="test-mfr")
         Claim.objects.assert_claim(mfr, "name", "From A", source=source_a)
@@ -191,7 +191,7 @@ class TestIsEnabledSourcesPrefetch:
         source_a.is_enabled = False
         source_a.save()
 
-        prefetched = Manufacturer.objects.prefetch_related(_claims_prefetch()).get(
+        prefetched = Manufacturer.objects.prefetch_related(claims_prefetch()).get(
             pk=mfr.pk
         )
 

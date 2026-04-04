@@ -20,17 +20,15 @@ from .edit_claims import (
     execute_claims,
     plan_abbreviation_claims,
 )
+from apps.provenance.helpers import build_sources, claims_prefetch
+
 from .helpers import (
-    _build_sources,
-    _build_edit_history,
     _build_rich_text,
-    _claims_prefetch,
     _extract_image_urls,
     _serialize_title_machine,
 )
 from .machine_models import CreditSchema, MachineModelDetailSchema
 from .schemas import (
-    ChangeSetSchema,
     ClaimSchema,
     GameplayFeatureSchema,
     RichTextSchema,
@@ -432,7 +430,7 @@ def _serialize_title_detail(title) -> dict:
         "credits": credits,
         "agreed_specs": agreed_specs,
         "model_detail": model_detail,
-        "sources": _build_sources(getattr(title, "active_claims", [])),
+        "sources": build_sources(getattr(title, "active_claims", [])),
     }
 
 
@@ -480,7 +478,7 @@ def _detail_qs():
             _title_models_prefetch(),
             "series",
             "abbreviations",
-            _claims_prefetch(),
+            claims_prefetch(),
         )
     )
 
@@ -595,13 +593,3 @@ def patch_title_claims(request, slug: str, data: TitleClaimPatchSchema):
 
     title = get_object_or_404(_detail_qs(), slug=title.slug)
     return _serialize_title_detail(title)
-
-
-@titles_router.get("/{slug}/edit-history/", response=list[ChangeSetSchema])
-@decorate_view(cache_control(no_cache=True))
-def get_title_edit_history(request, slug: str):
-    """Return changeset-grouped edit history with old/new diffs."""
-    from ..models import Title
-
-    title = get_object_or_404(Title, slug=slug)
-    return _build_edit_history(title)

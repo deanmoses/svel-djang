@@ -15,11 +15,10 @@ from ninja.security import django_auth
 
 from ..cache import MODELS_ALL_KEY
 from .constants import DEFAULT_PAGE_SIZE
+from apps.provenance.helpers import build_sources, claims_prefetch
+
 from .helpers import (
-    _build_sources,
-    _build_edit_history,
     _build_rich_text,
-    _claims_prefetch,
     _extract_image_attribution,
     _extract_image_urls,
     _extract_variant_features,
@@ -30,7 +29,6 @@ from .helpers import (
 )
 from .schemas import (
     AttributionSchema,
-    ChangeSetSchema,
     ClaimSchema,
     FranchiseRefSchema,
     GameplayFeatureSchema,
@@ -320,7 +318,7 @@ def _serialize_model_detail(pm) -> dict:
             )
             .order_by("claim_key", "-effective_priority", "-created_at")
         )
-    sources = _build_sources(active_claims)
+    sources = build_sources(active_claims)
 
     all_media = getattr(pm, "all_media", None) or []
     primary_media = [em for em in all_media if em.is_primary]
@@ -558,7 +556,7 @@ def _model_detail_qs():
                     "person", "role"
                 ),
             ),
-            _claims_prefetch(),
+            claims_prefetch(),
             _media_prefetch(),
         )
     )
@@ -931,13 +929,3 @@ def patch_model_claims(request, slug: str, data: ModelClaimPatchSchema):
 
     pm = get_object_or_404(_model_detail_qs(), slug=pm.slug)
     return _serialize_model_detail(pm)
-
-
-@models_router.get("/{slug}/edit-history/", response=list[ChangeSetSchema])
-@decorate_view(cache_control(no_cache=True))
-def get_model_edit_history(request, slug: str):
-    """Return changeset-grouped edit history with old/new diffs."""
-    from ..models import MachineModel
-
-    pm = get_object_or_404(MachineModel, slug=slug)
-    return _build_edit_history(pm)

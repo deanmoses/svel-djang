@@ -10,14 +10,6 @@ import { getCsrfToken } from './client';
 
 export type UploadResult = components['schemas']['UploadOut'];
 
-export const MEDIA_CATEGORIES = ['backglass', 'playfield', 'cabinet', 'other'] as const;
-export type MediaCategory = (typeof MEDIA_CATEGORIES)[number];
-
-/** Per-entity-type category lists, kept in sync with backend MEDIA_CATEGORIES. */
-export const MANUFACTURER_MEDIA_CATEGORIES = ['logo', 'other'] as const;
-export const PERSON_MEDIA_CATEGORIES = ['portrait', 'other'] as const;
-export const GAMEPLAY_FEATURE_MEDIA_CATEGORIES = ['other'] as const;
-
 // Keep in sync: backend/apps/media/constants.py
 export const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
 export const IMAGE_ACCEPT = 'image/*,.heic,.heif,.avif';

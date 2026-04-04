@@ -2,27 +2,11 @@
 	import type { components } from '$lib/api/schema';
 	import InlineDiff from './InlineDiff.svelte';
 	import UserBadge from './UserBadge.svelte';
+	import { isDiffable, formatValue } from './change-display';
 
 	type ChangeSet = components['schemas']['ChangeSetSchema'];
-	type FieldChange = components['schemas']['FieldChangeSchema'];
 
 	let { changesets }: { changesets: ChangeSet[] } = $props();
-
-	function isDiffable(
-		change: FieldChange
-	): change is FieldChange & { old_value: string; new_value: string } {
-		return (
-			typeof change.old_value === 'string' &&
-			typeof change.new_value === 'string' &&
-			(change.old_value.length > 80 || change.new_value.length > 80)
-		);
-	}
-
-	function formatValue(v: unknown): string {
-		if (v === null || v === undefined || v === '') return '—';
-		const s = typeof v === 'string' ? v : JSON.stringify(v);
-		return s.length > 120 ? s.slice(0, 120) + '...' : s;
-	}
 
 	function formatDate(iso: string): string {
 		const d = new Date(iso);

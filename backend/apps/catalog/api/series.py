@@ -14,15 +14,14 @@ from ninja.decorators import decorate_view
 from ninja.security import django_auth
 
 from .edit_claims import execute_claims
+from apps.provenance.helpers import build_sources, claims_prefetch
+
 from .helpers import (
-    _build_sources,
-    _build_edit_history,
     _build_rich_text,
-    _claims_prefetch,
     _extract_image_urls,
 )
 from .machine_models import CreditSchema
-from .schemas import ChangeSetSchema, ClaimPatchSchema, ClaimSchema, RichTextSchema
+from .schemas import ClaimPatchSchema, ClaimSchema, RichTextSchema
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -124,7 +123,7 @@ def _series_detail_qs():
     return Series.objects.active().prefetch_related(
         Prefetch("titles", queryset=_series_titles_qs()),
         Prefetch("credits", queryset=_series_credits_qs()),
-        _claims_prefetch(),
+        claims_prefetch(),
     )
 
 
@@ -145,7 +144,7 @@ def _serialize_series_detail(series) -> dict:
             }
             for c in series.credits.all()
         ],
-        "sources": _build_sources(getattr(series, "active_claims", [])),
+        "sources": build_sources(getattr(series, "active_claims", [])),
     }
 
 
@@ -221,13 +220,3 @@ def patch_series_claims(request, slug: str, data: ClaimPatchSchema):
 
     series = get_object_or_404(_series_detail_qs(), slug=series.slug)
     return _serialize_series_detail(series)
-
-
-@series_router.get("/{slug}/edit-history/", response=list[ChangeSetSchema])
-@decorate_view(cache_control(no_cache=True))
-def get_series_edit_history(request, slug: str):
-    """Return changeset-grouped edit history with old/new diffs."""
-    from ..models import Series
-
-    series_obj = get_object_or_404(Series, slug=slug)
-    return _build_edit_history(series_obj)

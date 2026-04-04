@@ -14,15 +14,13 @@ from ninja.decorators import decorate_view
 from ninja.security import django_auth
 
 from .edit_claims import execute_claims
+from apps.provenance.helpers import build_sources, claims_prefetch
+
 from .helpers import (
-    _build_sources,
-    _build_edit_history,
     _build_rich_text,
-    _claims_prefetch,
     _extract_image_urls,
 )
 from .schemas import (
-    ChangeSetSchema,
     ClaimPatchSchema,
     ClaimSchema,
     Ref,
@@ -69,7 +67,7 @@ def _system_detail_qs():
         System.objects.active()
         .select_related("manufacturer")
         .prefetch_related(
-            _claims_prefetch(),
+            claims_prefetch(),
             Prefetch(
                 "machine_models",
                 queryset=MachineModel.objects.active()
@@ -131,7 +129,7 @@ def _serialize_system_detail(system) -> dict:
         ),
         "titles": list(titles.values()),
         "sibling_systems": sibling_systems,
-        "sources": _build_sources(getattr(system, "active_claims", [])),
+        "sources": build_sources(getattr(system, "active_claims", [])),
     }
 
 
@@ -197,13 +195,3 @@ def patch_system_claims(request, slug: str, data: ClaimPatchSchema):
 
     system = get_object_or_404(_system_detail_qs(), slug=system.slug)
     return _serialize_system_detail(system)
-
-
-@systems_router.get("/{slug}/edit-history/", response=list[ChangeSetSchema])
-@decorate_view(cache_control(no_cache=True))
-def get_system_edit_history(request, slug: str):
-    """Return changeset-grouped edit history with old/new diffs."""
-    from ..models import System
-
-    system = get_object_or_404(System, slug=slug)
-    return _build_edit_history(system)

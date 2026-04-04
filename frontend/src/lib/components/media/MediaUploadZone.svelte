@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { IMAGE_ACCEPT, MEDIA_CATEGORIES } from '$lib/api/media-api';
+	import { MEDIA_CATEGORIES } from '$lib/api/catalog-meta';
+	import { IMAGE_ACCEPT } from '$lib/api/media-api';
 	import { createUploadManager } from '$lib/media-upload.svelte';
 	import Button from '$lib/components/Button.svelte';
 
 	let {
 		entityType,
 		slug,
-		categories = [...MEDIA_CATEGORIES] as string[],
+		categories = [...MEDIA_CATEGORIES.machinemodel] as string[],
 		onuploaded
 	}: {
 		entityType: string;

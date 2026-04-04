@@ -18,11 +18,10 @@ from apps.core.models import active_status_q
 
 from ..cache import MANUFACTURERS_ALL_KEY
 from .constants import DEFAULT_PAGE_SIZE
+from apps.provenance.helpers import build_sources, claims_prefetch
+
 from .helpers import (
-    _build_sources,
-    _build_edit_history,
     _build_rich_text,
-    _claims_prefetch,
     _collect_titles,
     _extract_image_urls,
     _media_prefetch,
@@ -30,7 +29,6 @@ from .helpers import (
     _serialize_uploaded_media,
 )
 from .schemas import (
-    ChangeSetSchema,
     ClaimPatchSchema,
     ClaimSchema,
     RelatedTitleSchema,
@@ -183,7 +181,7 @@ def _serialize_manufacturer_detail(mfr) -> dict:
         "uploaded_media": _serialize_uploaded_media(
             getattr(mfr, "all_media", None) or []
         ),
-        "sources": _build_sources(getattr(mfr, "active_claims", [])),
+        "sources": build_sources(getattr(mfr, "active_claims", [])),
     }
 
 
@@ -215,7 +213,7 @@ def _manufacturer_qs():
             .order_by("year_start"),
         ),
         Prefetch("systems", queryset=System.objects.active().order_by("name")),
-        _claims_prefetch(),
+        claims_prefetch(),
         _media_prefetch(),
     )
 
@@ -385,13 +383,3 @@ def patch_manufacturer_claims(request, slug: str, data: ClaimPatchSchema):
 
     mfr = get_object_or_404(_manufacturer_qs(), slug=mfr.slug)
     return _serialize_manufacturer_detail(mfr)
-
-
-@manufacturers_router.get("/{slug}/edit-history/", response=list[ChangeSetSchema])
-@decorate_view(cache_control(no_cache=True))
-def get_manufacturer_edit_history(request, slug: str):
-    """Return changeset-grouped edit history with old/new diffs."""
-    from ..models import Manufacturer
-
-    mfr = get_object_or_404(Manufacturer, slug=slug)
-    return _build_edit_history(mfr)

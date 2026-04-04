@@ -27,7 +27,12 @@ from apps.catalog.api import (
 )
 from apps.core.api import link_types_router
 from apps.media.api import media_router
-from apps.provenance.api import review_router, sources_router
+from apps.provenance.api import (
+    edit_history_router,
+    recent_changes_router,
+    review_router,
+    sources_router,
+)
 
 api = NinjaAPI(
     title="Pinbase API",
@@ -95,6 +100,8 @@ api.add_router("/tags/", tags_router)
 api.add_router("/technology-subgenerations/", technology_subgenerations_router)
 api.add_router("/link-types/", link_types_router)
 api.add_router("/sources/", sources_router)
+api.add_router("/edit-history/", edit_history_router)
+api.add_router("/recent-changes/", recent_changes_router)
 api.add_router("/review/", review_router)
 api.add_router("/media/", media_router)
 

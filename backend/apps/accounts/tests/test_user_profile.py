@@ -197,7 +197,7 @@ class TestUserProfileWithEdits:
 
 @pytest.mark.django_db
 class TestEditHistoryUserDisplayNull:
-    """Verify that _build_edit_history returns null for non-user changesets."""
+    """Verify that build_edit_history returns null for non-user changesets."""
 
     def test_ingest_changeset_has_null_user_display(self, client, db):
         from apps.provenance.models import ChangeSet, IngestRun
@@ -223,7 +223,7 @@ class TestEditHistoryUserDisplayNull:
             changeset=user_cs,
         )
 
-        resp = client.get(f"/api/models/{pm.slug}/edit-history/")
+        resp = client.get(f"/api/edit-history/machinemodel/{pm.slug}/")
         data = resp.json()
         # Find entries by user_display to avoid ordering assumptions
         user_entries = [e for e in data if e["user_display"] == "tester"]

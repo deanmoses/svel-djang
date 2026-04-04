@@ -19,7 +19,8 @@ node_modules/
 frontend/build/
 frontend/.svelte-kit/
 
-# Generated API types
+# Generated API types (schema.d.ts is types-only, safe to regenerate;
+# catalog-meta.ts exports runtime values and must be committed)
 frontend/src/lib/api/schema.d.ts
 
 # Generated OpenAPI schema file

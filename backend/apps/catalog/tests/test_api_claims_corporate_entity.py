@@ -280,7 +280,7 @@ class TestPatchCorporateEntityAliases:
 @pytest.mark.django_db
 class TestCorporateEntityEditHistory:
     def test_edit_history_empty(self, client, entity):
-        resp = client.get(f"/api/corporate-entities/{entity.slug}/edit-history/")
+        resp = client.get(f"/api/edit-history/corporateentity/{entity.slug}/")
         assert resp.status_code == 200
         assert resp.json() == []
 
@@ -289,7 +289,7 @@ class TestCorporateEntityEditHistory:
         _patch(
             client, entity.slug, {"fields": {"description": "Updated"}, "note": "Fix"}
         )
-        resp = client.get(f"/api/corporate-entities/{entity.slug}/edit-history/")
+        resp = client.get(f"/api/edit-history/corporateentity/{entity.slug}/")
         assert resp.status_code == 200
         data = resp.json()
         assert len(data) == 1

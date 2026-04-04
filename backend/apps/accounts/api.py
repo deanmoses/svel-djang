@@ -4,18 +4,17 @@ from __future__ import annotations
 
 import logging
 import secrets
-from collections import defaultdict
 from typing import Optional
 
 from django.conf import settings
 from django.contrib.auth import get_user_model, login, logout
-from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count, Max
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.http import url_has_allowed_host_and_scheme
 from ninja import Router, Schema
 
+from apps.provenance.entity_resolution import batch_resolve_entities
 from apps.provenance.models import ChangeSet, Claim
 
 from .models import UserProfile
@@ -211,49 +210,6 @@ class UserProfileSchema(Schema):
     recent_edits: list[UserChangeSetSchema]
 
 
-# ── User profile helpers ───────────────────────────────────────────
-
-
-def _resolve_entity_href(model_class, entity) -> str | None:
-    """Build the frontend URL for a catalog entity from its link_url_pattern."""
-    pattern = getattr(model_class, "link_url_pattern", None)
-    if not pattern or not hasattr(entity, "slug"):
-        return None
-    return pattern.format(slug=entity.slug)
-
-
-def _batch_resolve_entities(entity_rows):
-    """Resolve entity metadata from (content_type_id, object_id) pairs.
-
-    Returns a dict mapping (content_type_id, object_id) to
-    {"href": str, "name": str, "type_label": str}, skipping unresolvable
-    entities.
-    """
-    # Group by content_type_id, deduplicating object_ids
-    by_ct: dict[int, set[int]] = defaultdict(set)
-    for row in entity_rows:
-        by_ct[row["content_type_id"]].add(row["object_id"])
-
-    resolved: dict[tuple[int, int], dict] = {}
-    for ct_id, obj_ids in by_ct.items():
-        ct = ContentType.objects.get_for_id(ct_id)
-        model_class = ct.model_class()
-        if not model_class:
-            continue
-        entities = model_class.objects.in_bulk(list(obj_ids))
-        type_label = model_class._meta.verbose_name.title()
-        for obj_id, entity in entities.items():
-            href = _resolve_entity_href(model_class, entity)
-            if href is None:
-                continue
-            resolved[(ct_id, obj_id)] = {
-                "href": href,
-                "name": getattr(entity, "name", str(entity)),
-                "type_label": type_label,
-            }
-    return resolved
-
-
 # ── User profile endpoint ──────────────────────────────────────────
 
 
@@ -276,7 +232,7 @@ def user_profile(request, username: str):
         .order_by("-last_edited_at")
     )
 
-    resolved = _batch_resolve_entities(entity_rows)
+    resolved = batch_resolve_entities(entity_rows)
 
     entities_edited = []
     for row in entity_rows:
@@ -312,7 +268,7 @@ def user_profile(request, username: str):
             cs_first_claim[cs.pk] = key
             cs_entity_refs.append({"content_type_id": key[0], "object_id": key[1]})
 
-    cs_resolved = _batch_resolve_entities(cs_entity_refs)
+    cs_resolved = batch_resolve_entities(cs_entity_refs)
 
     recent_edits = []
     for cs in recent_changesets:

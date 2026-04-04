@@ -13,7 +13,8 @@
 	const navItems = [
 		{ href: '/titles' as const, label: 'Titles' },
 		{ href: '/manufacturers' as const, label: 'Manufacturers' },
-		{ href: '/people' as const, label: 'People' }
+		{ href: '/people' as const, label: 'People' },
+		{ href: '/recent-changes' as const, label: 'Recent Changes' }
 	];
 
 	function isActive(href: string) {

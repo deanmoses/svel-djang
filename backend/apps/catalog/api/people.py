@@ -15,17 +15,15 @@ from ninja.security import django_auth
 
 from ..cache import PEOPLE_ALL_KEY
 from .constants import DEFAULT_PAGE_SIZE
+from apps.provenance.helpers import build_sources, claims_prefetch
+
 from .helpers import (
-    _build_sources,
-    _build_edit_history,
     _build_rich_text,
-    _claims_prefetch,
     _extract_image_urls,
     _media_prefetch,
     _serialize_uploaded_media,
 )
 from .schemas import (
-    ChangeSetSchema,
     ClaimPatchSchema,
     ClaimSchema,
     RelatedTitleSchema,
@@ -132,7 +130,7 @@ def _serialize_person_detail(person) -> dict:
         "uploaded_media": _serialize_uploaded_media(
             getattr(person, "all_media", None) or []
         ),
-        "sources": _build_sources(getattr(person, "active_claims", [])),
+        "sources": build_sources(getattr(person, "active_claims", [])),
     }
 
 
@@ -148,7 +146,7 @@ def _person_qs():
             )
             .order_by(F("model__year").desc(nulls_last=True), "model__name"),
         ),
-        _claims_prefetch(),
+        claims_prefetch(),
         _media_prefetch(),
     )
 
@@ -239,13 +237,3 @@ def patch_person_claims(request, slug: str, data: ClaimPatchSchema):
 
     person = get_object_or_404(_person_qs(), slug=person.slug)
     return _serialize_person_detail(person)
-
-
-@people_router.get("/{slug}/edit-history/", response=list[ChangeSetSchema])
-@decorate_view(cache_control(no_cache=True))
-def get_person_edit_history(request, slug: str):
-    """Return changeset-grouped edit history with old/new diffs."""
-    from ..models import Person
-
-    person = get_object_or_404(Person, slug=slug)
-    return _build_edit_history(person)

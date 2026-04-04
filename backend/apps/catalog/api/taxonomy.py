@@ -10,7 +10,9 @@ from ninja.decorators import decorate_view
 from ninja.security import django_auth
 
 from .edit_claims import execute_claims, plan_scalar_field_claims
-from .helpers import _build_rich_text, _build_sources, _claims_prefetch
+from apps.provenance.helpers import build_sources, claims_prefetch
+
+from .helpers import _build_rich_text
 from .schemas import ClaimPatchSchema, ClaimSchema, RichTextSchema, TitleMachineSchema
 
 
@@ -27,12 +29,12 @@ def _serialize_taxonomy(obj) -> dict:
         "description": _build_rich_text(
             obj, "description", getattr(obj, "active_claims", [])
         ),
-        "sources": _build_sources(getattr(obj, "active_claims", [])),
+        "sources": build_sources(getattr(obj, "active_claims", [])),
     }
 
 
 def _taxonomy_detail_qs(model_class):
-    return model_class.objects.active().prefetch_related(_claims_prefetch())
+    return model_class.objects.active().prefetch_related(claims_prefetch())
 
 
 def _patch_taxonomy(request, model_class, slug, data):
@@ -297,7 +299,7 @@ def _reward_type_detail_qs():
     from ..models import MachineModel, RewardType
 
     return RewardType.objects.active().prefetch_related(
-        _claims_prefetch(),
+        claims_prefetch(),
         Prefetch(
             "machine_models",
             queryset=MachineModel.objects.active()

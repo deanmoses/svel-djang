@@ -14,14 +14,13 @@ from ninja.decorators import decorate_view
 from ninja.security import django_auth
 
 from .edit_claims import execute_claims
+from apps.provenance.helpers import build_sources, claims_prefetch
+
 from .helpers import (
-    _build_sources,
-    _build_edit_history,
     _build_rich_text,
-    _claims_prefetch,
     _extract_image_urls,
 )
-from .schemas import ChangeSetSchema, ClaimPatchSchema, ClaimSchema, RichTextSchema
+from .schemas import ClaimPatchSchema, ClaimSchema, RichTextSchema
 
 
 # ---------------------------------------------------------------------------
@@ -143,7 +142,7 @@ def get_franchise(request, slug: str):
 
     franchise = get_object_or_404(
         Franchise.objects.active().prefetch_related(
-            Prefetch("titles", queryset=_franchise_titles_qs()), _claims_prefetch()
+            Prefetch("titles", queryset=_franchise_titles_qs()), claims_prefetch()
         ),
         slug=slug,
     )
@@ -154,7 +153,7 @@ def get_franchise(request, slug: str):
             franchise, "description", getattr(franchise, "active_claims", [])
         ),
         "titles": [_serialize_title_list(t) for t in franchise.titles.all()],
-        "sources": _build_sources(getattr(franchise, "active_claims", [])),
+        "sources": build_sources(getattr(franchise, "active_claims", [])),
     }
 
 
@@ -176,7 +175,7 @@ def patch_franchise_claims(request, slug: str, data: ClaimPatchSchema):
 
     franchise = get_object_or_404(
         Franchise.objects.active().prefetch_related(
-            Prefetch("titles", queryset=_franchise_titles_qs()), _claims_prefetch()
+            Prefetch("titles", queryset=_franchise_titles_qs()), claims_prefetch()
         ),
         slug=franchise.slug,
     )
@@ -187,15 +186,5 @@ def patch_franchise_claims(request, slug: str, data: ClaimPatchSchema):
             franchise, "description", getattr(franchise, "active_claims", [])
         ),
         "titles": [_serialize_title_list(t) for t in franchise.titles.all()],
-        "sources": _build_sources(getattr(franchise, "active_claims", [])),
+        "sources": build_sources(getattr(franchise, "active_claims", [])),
     }
-
-
-@franchises_router.get("/{slug}/edit-history/", response=list[ChangeSetSchema])
-@decorate_view(cache_control(no_cache=True))
-def get_franchise_edit_history(request, slug: str):
-    """Return changeset-grouped edit history with old/new diffs."""
-    from ..models import Franchise
-
-    franchise = get_object_or_404(Franchise, slug=slug)
-    return _build_edit_history(franchise)

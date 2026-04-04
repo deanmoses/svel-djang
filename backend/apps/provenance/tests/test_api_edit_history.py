@@ -1,4 +1,4 @@
-"""Tests for GET /api/models/{slug}/edit-history/ endpoint."""
+"""Tests for GET /api/edit-history/{entity_type}/{slug}/ endpoint."""
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -12,6 +12,14 @@ User = get_user_model()
 @pytest.fixture
 def user(db):
     return User.objects.create_user(username="editor")
+
+
+@pytest.fixture
+def _bootstrap_source(db):
+    """Low-priority source for seeding name claims."""
+    return Source.objects.create(
+        name="Bootstrap", slug="bootstrap", source_type="editorial", priority=1
+    )
 
 
 @pytest.fixture
@@ -31,18 +39,18 @@ def pm(db, _bootstrap_source):
 @pytest.mark.django_db
 class TestEditHistoryEmpty:
     def test_no_changesets_returns_empty_list(self, client, pm):
-        resp = client.get(f"/api/models/{pm.slug}/edit-history/")
+        resp = client.get(f"/api/edit-history/machinemodel/{pm.slug}/")
         assert resp.status_code == 200
         assert resp.json() == []
 
     def test_nonexistent_slug_returns_404(self, client):
-        resp = client.get("/api/models/does-not-exist/edit-history/")
+        resp = client.get("/api/edit-history/machinemodel/does-not-exist/")
         assert resp.status_code == 404
 
     def test_source_claims_not_included(self, client, pm, source):
         """Source-attributed claims (no changeset) should not appear."""
         Claim.objects.assert_claim(pm, "year", 1998, source=source)
-        resp = client.get(f"/api/models/{pm.slug}/edit-history/")
+        resp = client.get(f"/api/edit-history/machinemodel/{pm.slug}/")
         assert resp.status_code == 200
         assert resp.json() == []
 
@@ -58,7 +66,7 @@ class TestEditHistoryBasic:
             content_type="application/json",
         )
 
-        resp = client.get(f"/api/models/{pm.slug}/edit-history/")
+        resp = client.get(f"/api/edit-history/machinemodel/{pm.slug}/")
         assert resp.status_code == 200
         data = resp.json()
         assert len(data) == 1
@@ -86,7 +94,7 @@ class TestEditHistoryBasic:
             content_type="application/json",
         )
 
-        resp = client.get(f"/api/models/{pm.slug}/edit-history/")
+        resp = client.get(f"/api/edit-history/machinemodel/{pm.slug}/")
         data = resp.json()
         assert len(data) == 2
 
@@ -112,7 +120,7 @@ class TestEditHistoryMultipleFields:
             content_type="application/json",
         )
 
-        resp = client.get(f"/api/models/{pm.slug}/edit-history/")
+        resp = client.get(f"/api/edit-history/machinemodel/{pm.slug}/")
         data = resp.json()
         assert len(data) == 1
 
@@ -139,7 +147,7 @@ class TestEditHistoryMultiUser:
             content_type="application/json",
         )
 
-        resp = client.get(f"/api/models/{pm.slug}/edit-history/")
+        resp = client.get(f"/api/edit-history/machinemodel/{pm.slug}/")
         data = resp.json()
         assert len(data) == 2
 
@@ -170,9 +178,21 @@ class TestEditHistoryOrdering:
             content_type="application/json",
         )
 
-        resp = client.get(f"/api/models/{pm.slug}/edit-history/")
+        resp = client.get(f"/api/edit-history/machinemodel/{pm.slug}/")
         data = resp.json()
         assert len(data) == 2
         # Newest changeset (player_count) first
         assert data[0]["changes"][0]["field_name"] == "player_count"
         assert data[1]["changes"][0]["field_name"] == "year"
+
+
+@pytest.mark.django_db
+class TestEditHistoryEntityTypeGuard:
+    def test_unknown_entity_type_returns_404(self, client):
+        resp = client.get("/api/edit-history/nonexistent/some-slug/")
+        assert resp.status_code == 404
+
+    def test_non_linkable_entity_type_returns_404(self, client):
+        """Models without link_url_pattern (e.g. Location) should be rejected."""
+        resp = client.get("/api/edit-history/location/some-slug/")
+        assert resp.status_code == 404
