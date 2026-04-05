@@ -174,7 +174,12 @@ def list_people(request):
 @people_router.get("/all/", response=list[PersonGridSchema])
 @decorate_view(cache_control(no_cache=True))
 def list_all_people(request):
-    """Return every person with credit count and thumbnail (no pagination)."""
+    """Return every person with credit count and thumbnail.
+
+    Uses a bulk query to find the newest credited model per person for
+    thumbnails, instead of prefetching all credits and iterating in Python.
+    See ``list_all_titles`` for the full explanation of this pattern.
+    """
     from apps.core.licensing import get_minimum_display_rank
 
     result = cache.get(PEOPLE_ALL_KEY)

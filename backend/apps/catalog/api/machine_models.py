@@ -699,7 +699,13 @@ def list_recent_models(request):
 @models_router.get("/all/", response=list[MachineModelGridSchema])
 @decorate_view(cache_control(no_cache=True))
 def list_all_models(request):
-    """Return every model (including variants) with minimal fields (no pagination)."""
+    """Return every model (including variants) for client-side search/grid.
+
+    Performance-critical: serializes ~7k models with search_text built from
+    M2M relations.  Uses ``values_list`` to avoid ORM object hydration and
+    bulk through-table queries for M2M data.  See ``list_all_titles`` for
+    the full explanation of this pattern.
+    """
     from collections import defaultdict
 
     from django.core.cache import cache
@@ -720,7 +726,22 @@ def list_all_models(request):
 
     min_rank = get_minimum_display_rank()
 
-    # --- Main query: values_list avoids ORM object hydration for 6.8k rows ---
+    # Column indices for the values_list below.
+    M_ID = 0
+    M_NAME = 1
+    M_SLUG = 2
+    M_YEAR = 3
+    M_EXTRA_DATA = 4
+    M_MFR_ID = 5
+    M_MFR_NAME = 6
+    M_TECH_GEN_NAME = 7
+    M_DISPLAY_TYPE_NAME = 8
+    M_DISPLAY_SUBTYPE_NAME = 9
+    M_TITLE_SLUG = 10
+    M_SYSTEM_NAME = 11
+    M_CABINET_NAME = 12
+    M_GAME_FORMAT_NAME = 13
+
     rows = list(
         MachineModel.objects.active()
         .values_list(
@@ -741,7 +762,7 @@ def list_all_models(request):
         )
         .order_by("name")
     )
-    model_ids = {r[0] for r in rows}
+    model_ids = {r[M_ID] for r in rows}
 
     # --- Bulk M2M queries for search_text ---
     model_themes: dict[int, list[str]] = defaultdict(list)
@@ -813,23 +834,26 @@ def list_all_models(request):
                 mfr_search_parts[mfr_id].append(n)
 
     # --- Assembly ---
-    # Row indices: 0=id, 1=name, 2=slug, 3=year, 4=extra_data,
-    # 5=mfr_id, 6=mfr_name, 7=tech_gen_name, 8=display_type_name,
-    # 9=display_subtype_name, 10=title_slug, 11=system_name,
-    # 12=cabinet_name, 13=game_format_name
     result = []
     for r in rows:
-        mid = r[0]
-        extra_data = r[4]
+        mid = r[M_ID]
+        extra_data = r[M_EXTRA_DATA]
         thumbnail_url, _ = _extract_image_urls(extra_data or {}, min_rank=min_rank)
 
         # Build search_text from bulk maps
         parts: list[str] = []
-        mfr_id, mfr_name = r[5], r[6]
+        mfr_id, mfr_name = r[M_MFR_ID], r[M_MFR_NAME]
         if mfr_name:
             parts.append(mfr_name)
             parts.extend(mfr_search_parts.get(mfr_id, []))
-        for name in (r[11], r[7], r[8], r[9], r[12], r[13]):
+        for name in (
+            r[M_SYSTEM_NAME],
+            r[M_TECH_GEN_NAME],
+            r[M_DISPLAY_TYPE_NAME],
+            r[M_DISPLAY_SUBTYPE_NAME],
+            r[M_CABINET_NAME],
+            r[M_GAME_FORMAT_NAME],
+        ):
             if name:
                 parts.append(name)
         parts.extend(model_themes.get(mid, []))
@@ -840,15 +864,15 @@ def list_all_models(request):
 
         result.append(
             {
-                "name": r[1],
-                "slug": r[2],
-                "year": r[3],
+                "name": r[M_NAME],
+                "slug": r[M_SLUG],
+                "year": r[M_YEAR],
                 "manufacturer_name": mfr_name,
-                "technology_generation_name": r[7],
+                "technology_generation_name": r[M_TECH_GEN_NAME],
                 "thumbnail_url": thumbnail_url,
                 "abbreviations": model_abbrevs.get(mid, []),
                 "search_text": " | ".join(parts) if parts else None,
-                "title_slug": r[10],
+                "title_slug": r[M_TITLE_SLUG],
             }
         )
     cache.set(MODELS_ALL_KEY, result, timeout=None)

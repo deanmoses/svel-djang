@@ -262,7 +262,12 @@ def list_manufacturers(request):
 @manufacturers_router.get("/all/", response=list[ManufacturerGridSchema])
 @decorate_view(cache_control(no_cache=True))
 def list_all_manufacturers(request):
-    """Return every manufacturer with model count and thumbnail (no pagination)."""
+    """Return every manufacturer with facet data for client-side filtering.
+
+    Performance-critical: uses bulk queries and lookup maps instead of
+    deep prefetch + Python iteration.  See ``list_all_titles`` for the
+    full explanation of this pattern.
+    """
     from collections import defaultdict
 
     from apps.core.licensing import get_minimum_display_rank
