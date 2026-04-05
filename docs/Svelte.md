@@ -26,7 +26,7 @@ This usually means:
 For these routes, prefer:
 
 - `+page.server.ts` for route data loading
-- one page-oriented backend endpoint
+- one page-oriented backend endpoint, usually under `/api/pages/...`
 - `+page.svelte` that renders the returned data directly
 
 The page should receive a page model and render it. It should not orchestrate multiple backend calls unless there is a strong reason.
@@ -71,21 +71,42 @@ For public SSR pages, `+page.server.ts` or `+layout.server.ts` should be the def
 
 Server-side Svelte routes should call Django APIs through the typed client, not through ad hoc fetch helpers.
 
-Pattern:
+Use `createServerClient` from `$lib/api/server`:
 
-- if `INTERNAL_API_BASE_URL` is set, use `createApiClient(fetch, INTERNAL_API_BASE_URL)`
-- otherwise, use the current request origin as the base URL, for example `createApiClient(fetch, url.origin)`
-- in local development, this keeps SSR on the same Vite-proxied path the browser uses
-- in production, `INTERNAL_API_BASE_URL` should point at Django's internal address, currently `http://127.0.0.1:8000`
-- call one backend endpoint that already matches the page's needs
+```ts
+import { createServerClient } from "$lib/api/server";
+
+export const load: PageServerLoad = async ({ fetch, url, params }) => {
+  const client = createServerClient(fetch, url);
+  const { data, response } = await client.GET("/api/pages/title/{slug}", {
+    params: { path: { slug: params.slug } },
+  });
+  // ...
+};
+```
+
+`createServerClient` resolves `INTERNAL_API_BASE_URL` (direct-to-Django in production) with a fallback to the request origin (Vite proxy in dev). Every SSR load function should use this helper instead of constructing the client manually.
 
 This keeps:
 
 - OpenAPI-generated types in use
 - request logic consistent between routes
 - backend/frontend contracts explicit
+- base URL resolution in one place
 
 The goal is not for SvelteKit SSR to reach into Django internals. The boundary stays at the HTTP API.
+
+## SSR Inheritance In Child Routes
+
+When a parent `+layout.server.ts` enables SSR, all child routes inherit it. This is fine for public content children (detail, sources, edit-history), but breaks interactive children that import the browser API client or read auth state at render time.
+
+When converting a route subtree to SSR, audit every child route and add `export const ssr = false` in a `+page.ts` file for any child that:
+
+- imports the browser `client` default export directly
+- reads `auth.isAuthenticated` or other browser-only state at render time
+- is an authenticated editing or upload surface
+
+This is easy to miss because the children worked fine when the parent had `ssr = false` — the breakage only surfaces after the parent switches to SSR.
 
 ## What To Avoid
 

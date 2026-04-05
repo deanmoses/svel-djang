@@ -61,15 +61,15 @@ This is acceptable for the current bootstrap phase because it is simple and fail
 
 ### Route handling examples
 
-| Request                       | Handled by                           |
-| ----------------------------- | ------------------------------------ |
-| `GET /api/models/`            | Django Ninja                         |
-| `GET /admin/`                 | Django Admin                         |
-| `GET /__health`               | Caddy → SvelteKit readiness endpoint |
-| `GET /hello`                  | Caddy → SvelteKit SSR                |
-| `GET /_app/immutable/app.js`  | Caddy → SvelteKit SSR                |
-| `GET /manufacturers/williams` | Caddy → SvelteKit SSR                |
-| `GET /`                       | Caddy → SvelteKit SSR                |
+| Request                        | Handled by                           |
+| ------------------------------ | ------------------------------------ |
+| `GET /api/models/`             | Django Ninja                         |
+| `GET /admin/`                  | Django Admin                         |
+| `GET /__health`                | Caddy → SvelteKit readiness endpoint |
+| `GET /titles/medieval-madness` | Caddy → SvelteKit SSR                |
+| `GET /_app/immutable/app.js`   | Caddy → SvelteKit SSR                |
+| `GET /manufacturers/williams`  | Caddy → SvelteKit SSR                |
+| `GET /`                        | Caddy → SvelteKit SSR                |
 
 ## Setup
 

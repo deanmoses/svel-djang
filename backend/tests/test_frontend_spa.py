@@ -49,5 +49,5 @@ def test_admin_no_trailing_slash_not_intercepted():
 def test_frontend_route_not_served_by_django():
     """Frontend routes are handled by SvelteKit/Proxy, not Django."""
     client = Client()
-    response = client.get("/hello")
+    response = client.get("/titles/medieval-madness")
     assert response.status_code == 404

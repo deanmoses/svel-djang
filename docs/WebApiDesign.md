@@ -54,6 +54,28 @@ A good page-oriented endpoint:
 
 The response is a **page model**, not a raw dump of the underlying database model.
 
+## Namespace Convention
+
+Page-oriented endpoints should usually live under a distinct namespace:
+
+- reusable resource endpoints stay under `/api/...`
+- page-shaped view-model endpoints should usually live under `/api/pages/...`
+
+Examples:
+
+- `/api/titles/{slug}` for the canonical title resource
+- `/api/pages/title/{slug}` for the title detail page model
+- `/api/pages/home` for the homepage payload
+
+This is not about following a universal industry standard. It is about keeping two different API types clearly separated:
+
+- resource APIs expose reusable domain data
+- page APIs expose route-shaped payloads optimized for one page
+
+Avoid mixing page-specific view models into the general resource namespace unless there is a strong reason.
+
+Page-oriented endpoints should usually also be tagged `tags=["private"]` in Django Ninja so they do not appear in the public API docs. They are internal website endpoints, not part of the public reusable API surface.
+
 ## What To Avoid
 
 Avoid this pattern:
@@ -84,8 +106,9 @@ Avoid:
 Prefer:
 
 1. fetch one `title page` endpoint from `+page.server.ts` or `+layout.server.ts`
-2. return a response that already contains the title, the related models the page needs, and any display-ready related data
-3. render that page model directly
+2. place that endpoint under `/api/pages/...`, for example `/api/pages/title/{slug}`
+3. return a response that already contains the title, the related models the page needs, and any display-ready related data
+4. render that page model directly
 
 The backend should own the page composition rules. Svelte should render the resulting page model.
 
@@ -119,16 +142,9 @@ Be skeptical of SSR routes that call multiple backend endpoints from `load()`. T
 
 ## How Server-Side Routes Should Call Django
 
-Server-side Svelte routes should call Django through the typed API client, not through ad hoc fetch wrappers or direct backend internals.
+Server-side Svelte routes should call Django through `createServerClient` from `$lib/api/server`, not through ad hoc fetch wrappers or direct backend internals.
 
-Use this pattern:
-
-- `+page.server.ts` or `+layout.server.ts` owns the load path
-- if `INTERNAL_API_BASE_URL` is set, create the client with that base URL
-- otherwise, use the current request origin as the base URL, such as `url.origin`
-- in local development, this keeps SSR on the same Vite-proxied origin the browser uses
-- in production, prefer `INTERNAL_API_BASE_URL=http://127.0.0.1:8000` in the current container topology so SSR talks directly to Django instead of going back through the public origin
-- issue one request to the backend endpoint that matches the page model
+`createServerClient(fetch, url)` resolves `INTERNAL_API_BASE_URL` (direct-to-Django in production) with a fallback to the request origin (Vite proxy in dev). See `docs/Svelte.md` for the full pattern.
 
 This keeps the boundary clean:
 

@@ -24,7 +24,7 @@ from apps.catalog.api import (
     themes_router,
     titles_router,
 )
-from apps.core.api import hello_router, link_types_router
+from apps.core.api import link_types_router
 from apps.media.api import media_router
 from apps.provenance.api import (
     edit_history_router,
@@ -94,7 +94,6 @@ api.add_router("/locations/", locations_router)
 api.add_router("/reward-types/", reward_types_router)
 api.add_router("/tags/", tags_router)
 api.add_router("/technology-subgenerations/", technology_subgenerations_router)
-api.add_router("/hello/", hello_router)
 api.add_router("/link-types/", link_types_router)
 api.add_router("/sources/", sources_router)
 api.add_router("/edit-history/", edit_history_router)

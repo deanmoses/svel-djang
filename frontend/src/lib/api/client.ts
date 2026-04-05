@@ -45,6 +45,10 @@ function getBrowserClient() {
 	return browserClient;
 }
 
+// SSR-safe: importing this module does NOT trigger getBrowserClient().
+// The Proxy defers the browser check to property-access time (client.GET(...)),
+// which only happens in event handlers and $effect — never during server render.
+// Do not replace this Proxy with a direct createApiClient() call at module scope.
 const client = new Proxy({} as ReturnType<typeof createApiClient>, {
 	get(_target, prop, receiver) {
 		return Reflect.get(getBrowserClient(), prop, receiver);
