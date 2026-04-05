@@ -38,7 +38,17 @@ class LinkTargetsResponseSchema(Schema):
 # Router
 # ---------------------------------------------------------------------------
 
+hello_router = Router(tags=["private"])
 link_types_router = Router(tags=["private"])
+
+
+class HelloWorldSchema(Schema):
+    message: str
+
+
+@hello_router.get("/", response=HelloWorldSchema)
+def hello_world(request):
+    return {"message": "Hello world from Django"}
 
 
 @link_types_router.get("/", response=list[LinkTypeSchema])

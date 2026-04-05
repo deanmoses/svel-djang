@@ -62,7 +62,7 @@ If you think a field genuinely needs an exception, **stop and ask the user first
 
 ## Project Overview
 
-Django + SvelteKit monorepo. Django owns the data model, APIs (Django Ninja), and admin UI. SvelteKit handles the user-facing frontend with static adapter (CSR for authenticated pages, prerendered for public pages).
+Django + SvelteKit monorepo. Django owns the data model, APIs (Django Ninja), and admin UI. SvelteKit handles the user-facing frontend with Node SSR for public pages and CSR for authenticated app pages.
 
 Catalog data and the DuckDB exploration database live in separate repos:
 
@@ -75,10 +75,10 @@ See [DomainModel.md](DomainModel.md) for the catalog entity hierarchy (Title →
 
 **Key architectural decisions:**
 
-- Session-based auth via same-origin proxy (no JWT, no CORS)
+- Session-based auth via same-origin proxy/reverse proxy (no JWT, no CORS)
 - Auth gating in the SPA is UX-only; the backend is the source of truth for access control
 - OpenAPI types generated from Django Ninja schema (not committed, derived from backend)
-- Single domain: `/api/` and `/admin/` route to Django, everything else to SvelteKit
+- Single domain: `/api/`, `/admin/`, `/media/`, and `/static/` route to Django, everything else to SvelteKit
 
 ## Requirements
 
@@ -133,7 +133,8 @@ docs/             Documentation source files
 - Backend dependencies managed with `uv`, frontend with `pnpm`
 - API types are generated from the Django Ninja OpenAPI schema — run `make api-gen` after changing API endpoints
 - CSRF: Django sets `csrftoken` cookie; the frontend `client.ts` reads it and sends `X-CSRFToken` on mutating requests
-- Vite dev server proxies `/api/` and `/admin/` to Django at `127.0.0.1:8000`
+- Vite dev server proxies `/api/`, `/admin/`, `/media/`, and `/static/` to Django at `127.0.0.1:8000`
+- For SSR route conventions, see [Svelte.md](Svelte.md). For page-oriented API design, see [WebApiDesign.md](WebApiDesign.md)
 
 ### Frontend URLs and `resolve()`
 
@@ -204,7 +205,7 @@ Pre-commit hooks auto-regenerate `CLAUDE.md` and `AGENTS.md` when `docs/AGENTS.s
 
 ## Deployment
 
-Single Railway service: Django/Gunicorn serves both the API and the static SvelteKit frontend (no Node.js at runtime). Multi-stage Dockerfile builds the frontend with Node/pnpm, then copies output into the Python image. WhiteNoise serves static assets; a Django catch-all view serves prerendered pages or falls back to `index.html` for SPA routing. See [docs/Hosting.md](Hosting.md) for setup and troubleshooting.
+Single Railway service: Caddy fronts SvelteKit Node SSR and Django/Gunicorn inside one container. Multi-stage Dockerfile builds the frontend with Node/pnpm, then copies the SSR runtime into the Python image. WhiteNoise still serves Django static assets, while Caddy routes frontend requests to SvelteKit and `/api/`/`/admin/` to Django. See [docs/Hosting.md](Hosting.md) for setup and troubleshooting.
 
 ## Testing
 
