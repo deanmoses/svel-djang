@@ -1,0 +1,102 @@
+# Svelte
+
+This document defines how to think about and develop SvelteKit pages in Pinbase.
+
+## Authoring Conventions
+
+You MUST use Svelte 5 runes mode. Use modern Svelte 5 patterns, not legacy Svelte 4 syntax:
+
+- `export let` -> `$props()`
+- `$:` -> `$derived` / `$effect`
+- `on:click` -> `onclick`
+- `<slot>` -> `{@render children()}`
+
+Keep component styles scoped by default. Avoid `:global` unless there is a clear reason. You MUST obtain explicit user approval to get an exception to use `:global`.
+
+## Choosing A Rendering Strategy
+
+How to choose which rendering mode:
+
+- **Server-Side Rendering (SSR)** for any page that needs to be indexed by search engines.
+- **Prerendered static shell plus client fetch** as the default for pages that do not need to be indexed by search engines. Why? Because this is usually perceived by the user as more performant than pure CSR.
+- **Pure Client-Side Rendering (CSR)** only for pages that cannot practically use a prerendered shell.
+
+In this repo, that usually means:
+
+- **SSR**:
+  - public detail pages such as title, model, manufacturer, and similar entity detail routes. These need to be in search engines.
+  - public read-only child pages when they add meaningful content that needs to be in search engines, such as `sources` or `edit-history`
+  - public media/gallery pages when they have content that needs to be in search engines, not editing surfaces
+- **Prerendered static shell plus client fetch**:
+  - home page, search, recent activity, and large browse/index pages
+  - pages where the content changes often and does not need to be indexed from the initial HTML
+  - aggregate pages where fast shell delivery is more valuable than server-rendering the full dataset
+  - most non-SEO pages when the route can be prerendered and the shell is generic
+- **CSR-only**:
+  - routes that cannot be enumerated at build time and do not need SSR
+  - routes where prerendering is not practical because the shell itself depends on request-time state
+  - dynamic edit, upload, review, and similar app surfaces that must support arbitrary new slugs without a rebuild
+
+**Prerender caveat:** A prerendered shell must not read request-time state (like `window.location.search`) at module scope or during initial render — that code runs at build time when no request exists. Defer URL-dependent state initialization to `onMount` or a `browser` guard so the shell can prerender as a generic page and hydrate with the real URL on the client.
+
+## Route Files
+
+Use route files by responsibility:
+
+- `+page.server.ts` for server-side page loading
+- `+layout.server.ts` for shared server-side loading across a route subtree
+- `+page.ts` only when the route logic truly needs universal load behavior
+- `+page.svelte` and `+layout.svelte` for rendering
+
+For public SSR pages, `+page.server.ts` or `+layout.server.ts` should be the default choice.
+
+## Implementing SSR Routes
+
+For SSR routes, prefer:
+
+- `+page.server.ts` or `+layout.server.ts` for route data loading
+- one page-oriented backend endpoint, usually under `/api/pages/...`
+- `+page.svelte` that renders the returned data directly
+
+The page should receive a page model and render it. It should not orchestrate multiple backend calls unless there is a strong reason.
+
+### Calling Django From Server-Side Routes
+
+Server-side Svelte routes should call Django APIs through the typed client, not through ad hoc fetch helpers.
+
+Use `createServerClient` from `$lib/api/server`:
+
+```ts
+import { createServerClient } from "$lib/api/server";
+
+export const load: PageServerLoad = async ({ fetch, url, params }) => {
+  const client = createServerClient(fetch, url);
+  const { data, response } = await client.GET("/api/pages/title/{slug}", {
+    params: { path: { slug: params.slug } },
+  });
+  // ...
+};
+```
+
+`createServerClient` resolves `INTERNAL_API_BASE_URL` (direct-to-Django in production) with a fallback to the request origin (Vite proxy in dev). Every SSR load function should use this helper instead of constructing the client manually.
+
+This keeps:
+
+- OpenAPI-generated types in use
+- request logic consistent between routes
+- backend/frontend contracts explicit
+- base URL resolution in one place
+
+The goal is not for SvelteKit SSR to reach into Django internals. The boundary stays at the HTTP API.
+
+### SSR Inheritance In Child Routes
+
+When a parent `+layout.server.ts` enables SSR, all child routes inherit it. This is fine for public content children (detail, sources, edit-history), but breaks interactive children that import the browser API client or read auth state at render time.
+
+When converting a route subtree to SSR, audit every child route and add `export const ssr = false` in a `+page.ts` file for any child that:
+
+- imports the browser `client` default export directly
+- reads `auth.isAuthenticated` or other browser-only state at render time
+- is an authenticated editing or upload surface
+
+This is easy to miss because the children worked fine when the parent had `ssr = false` — the breakage only surfaces after the parent switches to SSR.

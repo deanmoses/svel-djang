@@ -253,7 +253,7 @@ class TestModelDetailApiResponse:
     def test_detail_uses_uploaded_media(self, client, machine_model, asset, ct_mm):
         _attach(ct_mm, machine_model, asset, category="backglass")
 
-        resp = client.get(f"/api/models/{machine_model.slug}")
+        resp = client.get(f"/api/pages/model/{machine_model.slug}")
 
         assert resp.status_code == 200
         data = resp.json()
@@ -278,7 +278,7 @@ class TestModelDetailApiResponse:
         )
         _attach(ct_mm, machine_model, second, category="playfield", is_primary=False)
 
-        resp = client.get(f"/api/models/{machine_model.slug}")
+        resp = client.get(f"/api/pages/model/{machine_model.slug}")
 
         assert resp.status_code == 200
         data = resp.json()
@@ -297,7 +297,7 @@ class TestModelDetailApiResponse:
             assert item["uploaded_by_username"] == user.username
 
     def test_detail_uploaded_media_empty(self, client, machine_model):
-        resp = client.get(f"/api/models/{machine_model.slug}")
+        resp = client.get(f"/api/pages/model/{machine_model.slug}")
 
         assert resp.status_code == 200
         assert resp.json()["uploaded_media"] == []
@@ -306,7 +306,7 @@ class TestModelDetailApiResponse:
         machine_model.extra_data = OPDB_EXTRA_DATA
         machine_model.save(update_fields=["extra_data"])
 
-        resp = client.get(f"/api/models/{machine_model.slug}")
+        resp = client.get(f"/api/pages/model/{machine_model.slug}")
 
         assert resp.status_code == 200
         data = resp.json()

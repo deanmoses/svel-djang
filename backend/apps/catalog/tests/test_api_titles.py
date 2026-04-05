@@ -65,7 +65,7 @@ class TestTitlesAPI:
         assert data["items"][0]["thumbnail_url"] is None
 
     def test_get_title_detail(self, client, title_with_machines):
-        resp = client.get(f"/api/titles/{title_with_machines.slug}")
+        resp = client.get(f"/api/pages/title/{title_with_machines.slug}")
         assert resp.status_code == 200
         data = resp.json()
         assert data["name"] == "Medieval Madness"
@@ -80,7 +80,7 @@ class TestTitlesAPI:
             title=title_with_machines,
             variant_of=parent,
         )
-        resp = client.get(f"/api/titles/{title_with_machines.slug}")
+        resp = client.get(f"/api/pages/title/{title_with_machines.slug}")
         data = resp.json()
         assert len(data["machines"]) == 2
         names = [m["name"] for m in data["machines"]]
@@ -99,11 +99,11 @@ class TestTitlesAPI:
         assert data["items"][0]["machine_count"] == 2
 
     def test_get_title_404(self, client, db):
-        resp = client.get("/api/titles/nonexistent")
+        resp = client.get("/api/pages/title/nonexistent")
         assert resp.status_code == 404
 
     def test_get_title_detail_includes_sources(self, client, title):
-        resp = client.get(f"/api/titles/{title.slug}")
+        resp = client.get(f"/api/pages/title/{title.slug}")
         assert resp.status_code == 200
         assert "sources" in resp.json()
 

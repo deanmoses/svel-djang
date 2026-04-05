@@ -296,3 +296,9 @@ def user_profile(request, username: str):
         "entities_edited": entities_edited,
         "recent_edits": recent_edits,
     }
+
+
+routers = [
+    ("/auth/", auth_router),
+    ("/users/", users_router),
+]

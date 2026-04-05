@@ -9,6 +9,10 @@ It does not try to restate every project rule. Instead, it points to the more sp
 - [../README.md](../README.md) for setup, commands, and local development
 - [Architecture.md](Architecture.md) for the top-level system map
 - [WebArchitecture.md](WebArchitecture.md) for the Django + SvelteKit web stack
+- [Svelte.md](Svelte.md) for route-level rendering choices and SvelteKit page conventions
+- [WebApiDesign.md](WebApiDesign.md) for frontend/backend API design rules for pages and SSR
+- [SSRConversion.md](SSRConversion.md) for the step-by-step workflow for converting an existing route subtree from CSR to SSR
+- [Reviewing.md](Reviewing.md) for repo-specific review checks, especially for AI reviewers
 - [AppBoundaries.md](AppBoundaries.md) for backend app dependency rules
 - [DomainModel.md](DomainModel.md) for the business/domain model of pinball
 
@@ -30,8 +34,10 @@ For testing expectations and strategy, read:
 
 When working in these areas, use the focused reference docs:
 
+- [Svelte.md](Svelte.md) for route-level SSR/CSR choices and page-loading conventions
 - [Provenance.md](Provenance.md) for claims, resolution, and audit model
 - [Ingest.md](Ingest.md) for ingest architecture and source flow
+- [WebApiDesign.md](WebApiDesign.md) for page-oriented API design and SSR-friendly endpoint shaping
 - [Hosting.md](Hosting.md) for deployment and runtime operations
 
 When a stable media reference doc exists, add it here as well.

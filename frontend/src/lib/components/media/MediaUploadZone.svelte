@@ -262,7 +262,7 @@
 	}
 
 	.file-entry.error {
-		color: var(--color-error, #c53030);
+		color: var(--color-error);
 	}
 
 	.file-name {

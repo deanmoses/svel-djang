@@ -86,7 +86,7 @@
 	}
 
 	.status.error {
-		color: var(--color-error, #c0392b);
+		color: var(--color-error);
 		text-align: center;
 		padding: var(--size-8) 0;
 	}

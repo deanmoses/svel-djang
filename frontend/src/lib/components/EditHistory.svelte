@@ -381,8 +381,8 @@
 	}
 
 	.btn-revert:hover {
-		border-color: var(--color-danger, #c00);
-		color: var(--color-danger, #c00);
+		border-color: var(--color-danger);
+		color: var(--color-danger);
 	}
 
 	.btn-revert-dim {
@@ -413,9 +413,9 @@
 	.btn-revert-submit {
 		font-size: var(--font-size-00, 0.75rem);
 		padding: 0.25em 0.75em;
-		border: 1px solid var(--color-danger, #c00);
+		border: 1px solid var(--color-danger);
 		border-radius: var(--radius-1);
-		background: var(--color-danger, #c00);
+		background: var(--color-danger);
 		color: white;
 		cursor: pointer;
 	}
@@ -437,7 +437,7 @@
 
 	.revert-error {
 		font-size: var(--font-size-00, 0.75rem);
-		color: var(--color-danger, #c00);
+		color: var(--color-danger);
 		margin: 0;
 	}
 
@@ -450,7 +450,7 @@
 		font-size: var(--font-size-00, 0.75rem);
 		padding: 0.1em 0.4em;
 		border-radius: var(--radius-1);
-		background: var(--color-danger, #c00);
+		background: var(--color-danger);
 		color: white;
 		font-weight: 500;
 		text-transform: uppercase;

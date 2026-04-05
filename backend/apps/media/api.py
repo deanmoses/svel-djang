@@ -388,3 +388,8 @@ def set_primary(request, body: MediaAssetRefIn):
         )
 
     return Status(200, None)
+
+
+routers = [
+    ("/media/", media_router),
+]

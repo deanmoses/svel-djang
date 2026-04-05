@@ -826,13 +826,6 @@ def get_model_edit_options(request):
     }
 
 
-@models_router.get("/{slug}", response=MachineModelDetailSchema)
-@decorate_view(cache_control(no_cache=True))
-def get_model(request, slug: str):
-    pm = get_object_or_404(_model_detail_qs(), slug=slug)
-    return _serialize_model_detail(pm)
-
-
 _SELF_REF_FIELDS = frozenset({"variant_of", "converted_from", "remake_of"})
 
 

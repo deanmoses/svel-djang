@@ -131,8 +131,8 @@ class TestPatchManufacturerClaimsPersistence:
 
         mfr.refresh_from_db()
         assert mfr.slug == "williams-electronics"
-        assert client.get(f"/api/manufacturers/{mfr.slug}").status_code == 200
-        assert client.get("/api/manufacturers/williams").status_code == 404
+        assert client.get(f"/api/pages/manufacturer/{mfr.slug}").status_code == 200
+        assert client.get("/api/pages/manufacturer/williams").status_code == 404
 
     def test_duplicate_slug_returns_422(self, client, user, mfr):
         Manufacturer.objects.create(name="Bally", slug="bally")

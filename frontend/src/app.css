@@ -41,6 +41,7 @@ html {
 	/* Semantic */
 	--color-success: #16a34a;
 	--color-error: #dc2626;
+	--color-danger: var(--color-error);
 	--color-warning: #b45309;
 	--color-link: #2563eb;
 
@@ -79,6 +80,7 @@ html {
 		/* Semantic */
 		--color-success: #2ea043;
 		--color-error: #f85149;
+		--color-danger: var(--color-error);
 		--color-warning: #fbbf24;
 		--color-link: #4daafc;
 
@@ -115,6 +117,66 @@ a:hover {
 
 :where(li, dd, figcaption) {
 	max-inline-size: none;
+}
+
+/* ========================================
+   FORM ELEMENTS
+   Whitelist of text-like input types only.
+   ======================================== */
+:where(
+	input:not([type]),
+	input[type='text'],
+	input[type='search'],
+	input[type='email'],
+	input[type='url'],
+	input[type='password'],
+	input[type='number'],
+	input[type='tel'],
+	textarea
+) {
+	width: 100%;
+	padding: var(--size-2) var(--size-3);
+	font-size: var(--font-size-1);
+	font-family: inherit;
+	background-color: var(--color-input-bg);
+	color: var(--color-text-primary);
+	border: 1px solid var(--color-input-border);
+	border-radius: var(--radius-2);
+}
+
+:where(textarea) {
+	resize: vertical;
+}
+
+:where(select) {
+	padding: var(--size-2) var(--size-3);
+	font-size: var(--font-size-1);
+	font-family: inherit;
+	background-color: var(--color-input-bg);
+	color: var(--color-text-primary);
+	border: 1px solid var(--color-input-border);
+	border-radius: var(--radius-2);
+}
+
+:where(
+	input:not([type]),
+	input[type='text'],
+	input[type='search'],
+	input[type='email'],
+	input[type='url'],
+	input[type='password'],
+	input[type='number'],
+	input[type='tel'],
+	textarea,
+	select
+):focus {
+	outline: none;
+	border-color: var(--color-input-focus);
+	box-shadow: 0 0 0 3px var(--color-input-focus-ring);
+}
+
+:where(input, textarea)::placeholder {
+	color: var(--color-text-muted);
 }
 
 /* ========================================

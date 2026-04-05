@@ -144,7 +144,7 @@
 	}
 
 	.action-btn--danger:hover {
-		color: var(--color-error, #c53030);
-		border-color: var(--color-error, #c53030);
+		color: var(--color-error);
+		border-color: var(--color-error);
 	}
 </style>

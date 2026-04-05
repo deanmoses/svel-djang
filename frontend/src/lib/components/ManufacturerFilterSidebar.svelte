@@ -1,6 +1,7 @@
 <script lang="ts">
 	import ChipGroup from './ChipGroup.svelte';
 	import SearchableSelect from './SearchableSelect.svelte';
+	import YearRangeInput from './YearRangeInput.svelte';
 	import { buildFacetRefOptions } from '$lib/facet-engine';
 	import {
 		computeMfrFacetCounts,
@@ -68,31 +69,9 @@
 		/>
 	</div>
 
-	<div class="filter-section year-range">
+	<div class="filter-section">
 		<span class="filter-label">Year</span>
-		<div class="year-inputs">
-			<input
-				type="number"
-				placeholder="From"
-				aria-label="Year from"
-				value={filters.yearMin ?? ''}
-				onchange={(e) => {
-					const v = e.currentTarget.value;
-					filters.yearMin = v ? Number(v) : null;
-				}}
-			/>
-			<span class="year-sep">&ndash;</span>
-			<input
-				type="number"
-				placeholder="To"
-				aria-label="Year to"
-				value={filters.yearMax ?? ''}
-				onchange={(e) => {
-					const v = e.currentTarget.value;
-					filters.yearMax = v ? Number(v) : null;
-				}}
-			/>
-		</div>
+		<YearRangeInput bind:min={filters.yearMin} bind:max={filters.yearMax} />
 	</div>
 
 	<div class="filter-section">
@@ -153,33 +132,6 @@
 
 	.filter-label {
 		font-size: var(--font-size-0);
-		color: var(--color-text-muted);
-	}
-
-	.year-inputs {
-		display: flex;
-		align-items: center;
-		gap: var(--size-2);
-	}
-
-	.year-inputs input {
-		width: 5.5rem;
-		padding: var(--size-2) var(--size-2);
-		font-size: var(--font-size-1);
-		font-family: var(--font-body);
-		background-color: var(--color-input-bg);
-		color: var(--color-text-primary);
-		border: 1px solid var(--color-input-border);
-		border-radius: var(--radius-2);
-	}
-
-	.year-inputs input:focus {
-		outline: none;
-		border-color: var(--color-input-focus);
-		box-shadow: 0 0 0 3px var(--color-input-focus-ring);
-	}
-
-	.year-sep {
 		color: var(--color-text-muted);
 	}
 </style>

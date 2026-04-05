@@ -42,7 +42,7 @@ MIDDLEWARE = [
     "django.middleware.gzip.GZipMiddleware",
     "django.middleware.http.ConditionalGetMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    "config.middleware.SvelteKitWhiteNoiseMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -140,28 +140,6 @@ else:
 DATA_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024  # 25 MB
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-# ── Frontend static build (SvelteKit) ──────────────────────────────
-# In Docker: /app/frontend_build (copied from multi-stage build)
-# In local dev: ../frontend/build (if it exists; optional for dev)
-FRONTEND_BUILD_DIR = BASE_DIR / "frontend_build"
-if not FRONTEND_BUILD_DIR.is_dir():
-    _local_build = BASE_DIR.parent / "frontend" / "build"
-    if _local_build.is_dir():
-        FRONTEND_BUILD_DIR = _local_build
-
-# Serve SvelteKit build assets at the URL root via WhiteNoise middleware.
-# Only files that physically exist are served; all other requests fall
-# through to Django URL routing (API, admin, and catch-all).
-if FRONTEND_BUILD_DIR.is_dir():
-    WHITENOISE_ROOT = FRONTEND_BUILD_DIR
-elif not DEBUG:
-    from django.core.exceptions import ImproperlyConfigured
-
-    raise ImproperlyConfigured(
-        f"Frontend build directory not found at {FRONTEND_BUILD_DIR}. "
-        "Run the Docker build or `cd frontend && pnpm build`."
-    )
 
 LOGGING = {
     "version": 1,

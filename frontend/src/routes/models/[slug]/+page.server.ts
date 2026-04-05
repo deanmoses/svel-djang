@@ -1,7 +1,7 @@
 import { redirect } from '@sveltejs/kit';
-import type { PageLoad } from './$types';
+import type { PageServerLoad } from './$types';
 
-export const load: PageLoad = async ({ parent }) => {
+export const load: PageServerLoad = async ({ parent }) => {
 	const { model } = await parent();
 
 	// Single-model titles with no variants: redirect to the canonical title page.

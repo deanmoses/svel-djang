@@ -55,7 +55,7 @@
 	}
 
 	.error {
-		color: var(--color-error, #c53030);
+		color: var(--color-error);
 		font-size: var(--font-size-1);
 		margin-bottom: var(--size-3);
 	}

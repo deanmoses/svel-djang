@@ -25,7 +25,7 @@ class TestManufacturersAPI:
         )
         machine_model.title = title
         machine_model.save()
-        resp = client.get(f"/api/manufacturers/{manufacturer.slug}")
+        resp = client.get(f"/api/pages/manufacturer/{manufacturer.slug}")
         assert resp.status_code == 200
         data = resp.json()
         assert data["name"] == "Williams"
@@ -56,7 +56,7 @@ class TestManufacturersAPI:
             year_start=1985,
             year_end=1999,
         )
-        resp = client.get(f"/api/manufacturers/{manufacturer.slug}")
+        resp = client.get(f"/api/pages/manufacturer/{manufacturer.slug}")
         entities = resp.json()["entities"]
         assert [e["name"] for e in entities] == [
             "Williams Early",
@@ -127,7 +127,7 @@ class TestManufacturersAPI:
             title=t_new,
             year=2020,
         )
-        resp = client.get(f"/api/manufacturers/{manufacturer.slug}")
+        resp = client.get(f"/api/pages/manufacturer/{manufacturer.slug}")
         years = [t["year"] for t in resp.json()["titles"]]
         assert years == [2020, 1995, 1960]
 
@@ -168,7 +168,7 @@ class TestManufacturersAPI:
             year=2020,
             title=t2,
         )
-        resp = client.get(f"/api/manufacturers/{manufacturer.slug}")
+        resp = client.get(f"/api/pages/manufacturer/{manufacturer.slug}")
         data = resp.json()
         names = [t["name"] for t in data["titles"]]
         assert names[-1] == "No Year Title"

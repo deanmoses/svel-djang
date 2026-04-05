@@ -1,0 +1,43 @@
+#!/usr/bin/env sh
+set -eu
+cd "$(dirname "$0")/.."
+
+PORT="${PORT:-8080}"
+NODE_PORT="${NODE_PORT:-3000}"
+DJANGO_PORT="${DJANGO_PORT:-8000}"
+
+cleanup() {
+	kill "${CADDY_PID:-0}" "${NODE_PID:-0}" "${DJANGO_PID:-0}" 2>/dev/null || true
+}
+
+trap cleanup EXIT INT TERM
+
+.venv/bin/gunicorn config.wsgi:application --bind 127.0.0.1:"${DJANGO_PORT}" --workers 2 &
+DJANGO_PID=$!
+
+cd frontend_runtime
+HOST=127.0.0.1 PORT="${NODE_PORT}" node build/index.js &
+NODE_PID=$!
+cd ..
+
+PORT="${PORT}" NODE_PORT="${NODE_PORT}" DJANGO_PORT="${DJANGO_PORT}" \
+	caddy run --config /app/Caddyfile --adapter caddyfile &
+CADDY_PID=$!
+
+while kill -0 "${CADDY_PID}" 2>/dev/null && \
+	kill -0 "${NODE_PID}" 2>/dev/null && \
+	kill -0 "${DJANGO_PID}" 2>/dev/null; do
+	sleep 1
+done
+
+STATUS=1
+for pid in "${CADDY_PID}" "${NODE_PID}" "${DJANGO_PID}"; do
+	if ! kill -0 "${pid}" 2>/dev/null; then
+		wait "${pid}" || STATUS=$?
+		break
+	fi
+done
+
+cleanup
+wait || true
+exit "${STATUS}"

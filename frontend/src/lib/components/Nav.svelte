@@ -83,7 +83,7 @@
 				class:active={isActive('/search')}
 				aria-label="Search"
 			>
-				<FaIcon icon={faMagnifyingGlass} />
+				<FaIcon icon={faMagnifyingGlass} size="1.1rem" />
 			</a>
 
 			{#if auth.loaded}
@@ -104,7 +104,7 @@
 				aria-label="Toggle navigation"
 				aria-expanded={mobileNavOpen}
 			>
-				<FaIcon icon={toggleIcon} />
+				<FaIcon icon={toggleIcon} size="1.25rem" />
 			</button>
 		</div>
 	</div>
@@ -267,11 +267,6 @@
 		color: var(--color-accent);
 	}
 
-	.search-link :global(svg) {
-		width: 1.1rem;
-		height: 1.1rem;
-	}
-
 	.auth-user {
 		font-size: var(--font-size-2);
 		color: var(--header-ink-muted);
@@ -306,11 +301,6 @@
 		color: var(--header-ink);
 		cursor: pointer;
 		padding: var(--size-1);
-	}
-
-	.mobile-toggle :global(svg) {
-		width: 1.25rem;
-		height: 1.25rem;
 	}
 
 	@media (max-width: 640px) {

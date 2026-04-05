@@ -22,6 +22,7 @@ agent-docs:
 api-gen:
 	cd backend && uv run python manage.py export_openapi_schema
 	cd backend && uv run python manage.py export_catalog_meta
+	cd frontend && pnpm exec prettier --write src/lib/api/catalog-meta.ts
 	cd frontend && pnpm api:gen
 
 ingest:

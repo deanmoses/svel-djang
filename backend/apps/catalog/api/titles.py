@@ -546,13 +546,6 @@ def list_all_titles(request):
     return result
 
 
-@titles_router.get("/{slug}", response=TitleDetailSchema)
-@decorate_view(cache_control(no_cache=True))
-def get_title(request, slug: str):
-    title = get_object_or_404(_detail_qs(), slug=slug)
-    return _serialize_title_detail(title)
-
-
 @titles_router.patch(
     "/{slug}/claims/",
     auth=django_auth,

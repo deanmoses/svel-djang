@@ -1,10 +1,10 @@
 # Web Architecture
 
-This document describes how Pinbase's web application is split between Django and SvelteKit, how browser requests flow through the stack, and why the system uses a same-origin model.
+This document describes how Pinbase's web application behaves at runtime: how browser requests flow through the stack, how same-origin is preserved, and how SSR and CSR are split between routes.
 
-For the top-level system map, see [Architecture.md](Architecture.md). For deployment details, see [Hosting.md](Hosting.md).
+For the top-level system map, see [Architecture.md](Architecture.md). For deployment and operator details, see [Hosting.md](Hosting.md).
 
-## Responsibilities
+## Web Split
 
 ### Django backend
 
@@ -15,7 +15,7 @@ Django is the source of truth for:
 - ingest from external and editorial sources
 - authentication and authorization
 - admin and operational tooling
-- the API contract exported to the frontend
+- the API exported to the frontend
 
 ### SvelteKit frontend
 
@@ -24,9 +24,10 @@ SvelteKit is responsible for:
 - the public-facing browsing experience
 - authenticated user-facing application flows
 - consuming the Django API
-- rendering prerendered public pages and CSR application pages
+- rendering server-side HTML for public pages
+- rendering CSR-only application pages where interactivity or auth-gated UX is the priority
 
-The frontend does not own business truth. It presents and edits data through the backend.
+The frontend does not own business truth. It renders and edits data through Django.
 
 ## Same-Origin Model
 
@@ -43,61 +44,54 @@ This keeps authentication and CSRF simple:
 
 ## Development
 
-In local development, the browser talks to the SvelteKit dev server, which proxies `/api/` and `/admin/` to Django.
+In local development, the browser talks to the SvelteKit dev server. Vite handles frontend routes and proxies backend paths to Django.
 
 ```text
 Browser
   -> SvelteKit dev server
-     -> /api/*, /admin/* proxied to Django
+     -> /api/*, /admin/*, /media/*, /static/* proxied to Django
      -> frontend routes handled by SvelteKit
 ```
 
-This preserves the same-origin mental model during development even though two processes are running.
+Public routes can still be server-rendered in development because SvelteKit's dev server supports SSR directly. This preserves the same-origin mental model even though two processes are running.
 
 ## Production
 
-In production, one Django service handles:
+In production, one Railway service handles:
 
 - `/api/` via Django Ninja
 - `/admin/` via Django admin
-- static frontend assets
-- prerendered HTML or the SPA shell for frontend routes
+- `/media/` via Django storage/media handling
+- `/static/` via Django/WhiteNoise
+- frontend routes via SvelteKit Node SSR
 
 At a high level:
 
 ```text
 Browser
-  -> Django/Gunicorn
-     -> /api/* handled by Django Ninja
+  -> Caddy
+     -> /api/* handled by Django/Gunicorn
      -> /admin/* handled by Django admin
-     -> static assets served from the built frontend output
-     -> frontend routes served as prerendered HTML or SPA shell
+     -> /media/* handled by Django/media storage
+     -> /static/* handled by Django/WhiteNoise
+     -> frontend routes handled by SvelteKit Node SSR
 ```
 
 See [Hosting.md](Hosting.md) for the production serving details.
 
-## API Contract
+## Rendering Model
 
-The backend API is the contract between Django and the frontend.
+Pinbase uses both SSR and CSR, but not for the same kinds of routes.
 
-- Django Ninja exposes the API schema.
-- TypeScript types are generated from the OpenAPI output.
-- The generated types are derived artifacts, not the source of truth.
+- Public content-heavy routes should usually render meaningful HTML on the server.
+- Internal or highly interactive application routes may deliberately opt out with `ssr = false`.
+- The decision is per route, not all-or-nothing for the whole frontend.
 
-This keeps the frontend strongly typed without making TypeScript definitions a separate hand-maintained interface.
-
-## Runtime Model
-
-Pinbase intentionally avoids a separate frontend runtime in production.
-
-- Node.js is used during frontend development and build time.
-- Node.js does not run in production to serve the site.
-- Django remains the single production runtime for API, admin, and frontend delivery.
-
-This keeps the deployed system simpler to operate and keeps auth and request handling centered in one place.
+See [Svelte.md](Svelte.md) for route-level guidance and [WebApiDesign.md](WebApiDesign.md) for page-oriented API design.
 
 ## Read Next
 
 - [Architecture.md](Architecture.md)
-- [AppBoundaries.md](AppBoundaries.md)
+- [Svelte.md](Svelte.md)
+- [WebApiDesign.md](WebApiDesign.md)
 - [Hosting.md](Hosting.md)

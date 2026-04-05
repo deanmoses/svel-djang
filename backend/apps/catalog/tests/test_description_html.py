@@ -35,7 +35,7 @@ class TestManufacturerDescriptionHtml:
     def test_detail_includes_description_html(
         self, client, manufacturer_with_description
     ):
-        resp = client.get("/api/manufacturers/williams")
+        resp = client.get("/api/pages/manufacturer/williams")
         assert resp.status_code == 200
         data = resp.json()
         assert "html" in data["description"]
@@ -43,7 +43,7 @@ class TestManufacturerDescriptionHtml:
 
     def test_empty_description_returns_empty_html(self, client, db):
         Manufacturer.objects.create(name="Stern", slug="stern")
-        resp = client.get("/api/manufacturers/stern")
+        resp = client.get("/api/pages/manufacturer/stern")
         data = resp.json()
         assert data["description"]["html"] == ""
 
@@ -102,7 +102,7 @@ class TestDescriptionAuthoringFormat:
         Manufacturer.objects.create(
             name="Stern", slug="stern", description="Modern manufacturer."
         )
-        resp = client.get("/api/manufacturers/stern")
+        resp = client.get("/api/pages/manufacturer/stern")
         data = resp.json()
         assert data["description"]["text"] == "Modern manufacturer."
 
@@ -113,7 +113,7 @@ class TestDescriptionAuthoringFormat:
             slug="stern",
             description="See [[manufacturer:id:99999]].",
         )
-        resp = client.get("/api/manufacturers/stern")
+        resp = client.get("/api/pages/manufacturer/stern")
         data = resp.json()
         # Broken link stays in storage format since there's no slug to convert to
         assert "[[manufacturer:id:99999]]" in data["description"]["text"]

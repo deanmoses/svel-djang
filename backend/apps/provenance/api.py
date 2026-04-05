@@ -1,7 +1,7 @@
 """API endpoints for the provenance app.
 
 Routers: sources, review, recent_changes, edit_history.
-Wired into the main NinjaAPI instance in config/api.py.
+Auto-discovered via the ``routers`` list convention in config/api.py.
 """
 
 from __future__ import annotations
@@ -489,3 +489,11 @@ def revert_claim(request, entity_type: str, slug: str, data: RevertClaimSchema):
     except RevertError as exc:
         return Status(exc.status_code, {"detail": str(exc)})
     return {"ok": True}
+
+
+routers = [
+    ("/sources/", sources_router),
+    ("/edit-history/", edit_history_router),
+    ("/recent-changes/", recent_changes_router),
+    ("/review/", review_router),
+]

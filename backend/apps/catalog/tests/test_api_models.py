@@ -112,7 +112,7 @@ class TestModelsAPI:
             machine_model, "year", 1997, "IPDB entry", source=source
         )
 
-        resp = client.get(f"/api/models/{machine_model.slug}")
+        resp = client.get(f"/api/pages/model/{machine_model.slug}")
         assert resp.status_code == 200
         data = resp.json()
         assert data["name"] == "Medieval Madness"
@@ -129,13 +129,13 @@ class TestModelsAPI:
             slug="with-image",
             extra_data={"opdb.images": SAMPLE_IMAGES},
         )
-        resp = client.get(f"/api/models/{pm.slug}")
+        resp = client.get(f"/api/pages/model/{pm.slug}")
         data = resp.json()
         assert data["thumbnail_url"] == "https://img.opdb.org/md.jpg"
         assert data["hero_image_url"] == "https://img.opdb.org/lg.jpg"
 
     def test_get_model_detail_no_images(self, client, machine_model):
-        resp = client.get(f"/api/models/{machine_model.slug}")
+        resp = client.get(f"/api/pages/model/{machine_model.slug}")
         data = resp.json()
         assert data["thumbnail_url"] is None
         assert data["hero_image_url"] is None
@@ -146,7 +146,7 @@ class TestModelsAPI:
             slug="with-features",
             extra_data={"opdb.variant_features": ["Castle attack", "Gold trim"]},
         )
-        resp = client.get(f"/api/models/{pm.slug}")
+        resp = client.get(f"/api/pages/model/{pm.slug}")
         data = resp.json()
         assert data["variant_features"] == ["Castle attack", "Gold trim"]
 
@@ -157,7 +157,7 @@ class TestModelsAPI:
             variant_of=machine_model,
             extra_data={"opdb.variant_features": ["Gold trim"]},
         )
-        resp = client.get(f"/api/models/{machine_model.slug}")
+        resp = client.get(f"/api/pages/model/{machine_model.slug}")
         data = resp.json()
         assert len(data["variants"]) == 1
         assert data["variants"][0]["name"] == "Medieval Madness (LE)"
@@ -169,13 +169,13 @@ class TestModelsAPI:
         )
         machine_model.title = title
         machine_model.save()
-        resp = client.get(f"/api/models/{machine_model.slug}")
+        resp = client.get(f"/api/pages/model/{machine_model.slug}")
         data = resp.json()
         assert data["title"]["name"] == "Medieval Madness"
         assert data["title"]["slug"] == title.slug
 
     def test_get_model_detail_no_title(self, client, machine_model):
-        resp = client.get(f"/api/models/{machine_model.slug}")
+        resp = client.get(f"/api/pages/model/{machine_model.slug}")
         data = resp.json()
         assert data["title"] is None
 
@@ -189,7 +189,7 @@ class TestModelsAPI:
             slug="dark-rider",
             converted_from=source,
         )
-        resp = client.get(f"/api/models/{conv.slug}")
+        resp = client.get(f"/api/pages/model/{conv.slug}")
         data = resp.json()
         assert data["converted_from"]["name"] == "Star Trek"
         assert data["converted_from"]["slug"] == "star-trek"
@@ -205,7 +205,7 @@ class TestModelsAPI:
             slug="dark-rider",
             converted_from=source,
         )
-        resp = client.get(f"/api/models/{source.slug}")
+        resp = client.get(f"/api/pages/model/{source.slug}")
         data = resp.json()
         assert len(data["conversions"]) == 1
         assert data["conversions"][0]["name"] == "Dark Rider"
@@ -251,5 +251,5 @@ class TestModelsAPI:
         assert "Star Trek" in names
 
     def test_get_model_404(self, client, db):
-        resp = client.get("/api/models/nonexistent")
+        resp = client.get("/api/pages/model/nonexistent")
         assert resp.status_code == 404

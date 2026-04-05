@@ -121,6 +121,6 @@
 	}
 
 	.status.error {
-		color: var(--color-error, #c0392b);
+		color: var(--color-error);
 	}
 </style>

@@ -356,13 +356,6 @@ def list_all_manufacturers(request):
     return result
 
 
-@manufacturers_router.get("/{slug}", response=ManufacturerDetailSchema)
-@decorate_view(cache_control(no_cache=True))
-def get_manufacturer(request, slug: str):
-    mfr = get_object_or_404(_manufacturer_qs(), slug=slug)
-    return _serialize_manufacturer_detail(mfr)
-
-
 @manufacturers_router.patch(
     "/{slug}/claims/",
     auth=django_auth,

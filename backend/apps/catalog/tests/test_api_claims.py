@@ -128,8 +128,8 @@ class TestPatchClaimsPersistence:
 
         pm.refresh_from_db()
         assert pm.slug == "medieval-madness-remastered"
-        assert client.get(f"/api/models/{pm.slug}").status_code == 200
-        assert client.get("/api/models/medieval-madness").status_code == 404
+        assert client.get(f"/api/pages/model/{pm.slug}").status_code == 200
+        assert client.get("/api/pages/model/medieval-madness").status_code == 404
 
     def test_duplicate_slug_returns_422(self, client, user, pm):
         MachineModel.objects.create(name="Other Game", slug="other-game")

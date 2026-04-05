@@ -7,9 +7,10 @@ An interactive, collaborative database of pinball knowledge.
 Django + SvelteKit monorepo. Django owns the data model, APIs, and admin UI. SvelteKit handles the user-facing frontend.
 
 - **Backend**: Django + Django Ninja API at `/api/`, admin at `/admin/`
-- **Frontend**: SvelteKit with static adapter (CSR for authenticated pages, prerendered for public)
+- **Frontend**: SvelteKit with Node SSR for public routes and CSR-only authenticated app routes
 - **Auth**: Session-based, same-origin (no JWT, no CORS)
-- **Dev proxy**: SvelteKit proxies `/api/` and `/admin/` to Django — single origin in dev and prod
+- **Dev proxy**: Vite proxies `/api/`, `/admin/`, `/media/`, and `/static/` to Django
+- **Production routing**: Caddy fronts SvelteKit SSR and Django inside one Railway service
 
 ## Quickstart
 

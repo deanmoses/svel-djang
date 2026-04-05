@@ -556,13 +556,13 @@
 
 	.retraction-label {
 		font-weight: 600;
-		color: var(--color-danger, #c53030);
+		color: var(--color-danger);
 		font-size: var(--font-size-00, 0.7rem);
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
 		padding: 1px var(--size-2);
 		border-radius: var(--radius-1);
-		background-color: color-mix(in srgb, var(--color-danger, #c53030) 10%, transparent);
+		background-color: color-mix(in srgb, var(--color-danger) 10%, transparent);
 	}
 
 	/* Status messages */
@@ -573,7 +573,7 @@
 	}
 
 	.status-message.error {
-		color: var(--color-danger, #c53030);
+		color: var(--color-danger);
 	}
 
 	.no-changes {

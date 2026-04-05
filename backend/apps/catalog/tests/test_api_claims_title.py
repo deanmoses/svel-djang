@@ -129,8 +129,8 @@ class TestPatchTitleClaims:
 
         title.refresh_from_db()
         assert title.slug == "medieval-madness-remastered"
-        assert client.get(f"/api/titles/{title.slug}").status_code == 200
-        assert client.get("/api/titles/medieval-madness").status_code == 404
+        assert client.get(f"/api/pages/title/{title.slug}").status_code == 200
+        assert client.get("/api/pages/title/medieval-madness").status_code == 404
 
     def test_duplicate_slug_returns_422(self, client, user, title):
         Title.objects.create(name="Attack from Mars", slug="attack-from-mars")
