@@ -56,7 +56,7 @@ class TestManufacturerDescriptionHtml:
             manufacturer=williams,
             description=f"Made by [[manufacturer:id:{williams.pk}]].",
         )
-        resp = client.get("/api/systems/wpc-95")
+        resp = client.get("/api/pages/system/wpc-95")
         data = resp.json()
         assert "/manufacturers/williams" in data["description"]["html"]
         assert "Williams" in data["description"]["html"]
@@ -64,14 +64,14 @@ class TestManufacturerDescriptionHtml:
 
 class TestSystemDescriptionHtml:
     def test_detail_includes_description_html(self, client, system_with_description):
-        resp = client.get("/api/systems/wpc-95")
+        resp = client.get("/api/pages/system/wpc-95")
         assert resp.status_code == 200
         data = resp.json()
         assert "html" in data["description"]
         assert data["description"]["html"] != ""
 
     def test_raw_description_also_present(self, client, system_with_description):
-        resp = client.get("/api/systems/wpc-95")
+        resp = client.get("/api/pages/system/wpc-95")
         data = resp.json()
         assert data["description"]["text"] == "The final WPC generation."
 
@@ -89,7 +89,7 @@ class TestDescriptionAuthoringFormat:
             manufacturer=williams,
             description=f"Made by [[manufacturer:id:{williams.pk}]].",
         )
-        resp = client.get("/api/systems/wpc-95")
+        resp = client.get("/api/pages/system/wpc-95")
         data = resp.json()
         # text field should have authoring format (slug-based)
         assert "[[manufacturer:williams]]" in data["description"]["text"]

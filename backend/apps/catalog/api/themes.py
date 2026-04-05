@@ -119,13 +119,6 @@ def list_themes(request):
     ]
 
 
-@themes_router.get("/{slug}", response=ThemeDetailSchema)
-@decorate_view(cache_control(no_cache=True))
-def get_theme(request, slug: str):
-    theme = get_object_or_404(_detail_qs(), slug=slug)
-    return _serialize_detail(theme)
-
-
 @themes_router.patch(
     "/{slug}/claims/",
     auth=django_auth,

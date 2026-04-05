@@ -230,6 +230,7 @@ SLUG_EDIT_CASES = [
         _create_franchise,
         _create_conflicting_franchise,
         "star-trek-remastered",
+        "/api/pages/franchise/{slug}",
         id="franchise",
     ),
     pytest.param(
@@ -237,6 +238,7 @@ SLUG_EDIT_CASES = [
         _create_series,
         _create_conflicting_series,
         "eight-ball-classics",
+        "/api/pages/series/{slug}",
         id="series",
     ),
 ]
@@ -322,10 +324,18 @@ class TestAdditionalPatchClaimEndpoints:
         assert changeset.claims.count() == 1
 
     @pytest.mark.parametrize(
-        ("path_template", "factory", "_conflict_factory", "new_slug"), SLUG_EDIT_CASES
+        ("path_template", "factory", "_conflict_factory", "new_slug", "page_template"),
+        SLUG_EDIT_CASES,
     )
     def test_slug_can_be_changed(
-        self, client, user, path_template, factory, _conflict_factory, new_slug
+        self,
+        client,
+        user,
+        path_template,
+        factory,
+        _conflict_factory,
+        new_slug,
+        page_template,
     ):
         entity = factory()
         old_slug = entity.slug
@@ -342,16 +352,22 @@ class TestAdditionalPatchClaimEndpoints:
 
         entity.refresh_from_db()
         assert entity.slug == new_slug
-        detail_path = path_template.replace("/claims/", "").format(slug=new_slug)
-        old_detail_path = path_template.replace("/claims/", "").format(slug=old_slug)
-        assert client.get(detail_path).status_code == 200
-        assert client.get(old_detail_path).status_code == 404
+        assert client.get(page_template.format(slug=new_slug)).status_code == 200
+        assert client.get(page_template.format(slug=old_slug)).status_code == 404
 
     @pytest.mark.parametrize(
-        ("path_template", "factory", "conflict_factory", "_new_slug"), SLUG_EDIT_CASES
+        ("path_template", "factory", "conflict_factory", "_new_slug", "_page_template"),
+        SLUG_EDIT_CASES,
     )
     def test_duplicate_slug_returns_422(
-        self, client, user, path_template, factory, conflict_factory, _new_slug
+        self,
+        client,
+        user,
+        path_template,
+        factory,
+        conflict_factory,
+        _new_slug,
+        _page_template,
     ):
         entity = factory()
         conflict = conflict_factory()

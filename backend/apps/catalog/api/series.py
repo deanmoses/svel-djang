@@ -198,13 +198,6 @@ def list_series(request):
     return result
 
 
-@series_router.get("/{slug}", response=SeriesDetailSchema)
-@decorate_view(cache_control(no_cache=True))
-def get_series(request, slug: str):
-    series = get_object_or_404(_series_detail_qs(), slug=slug)
-    return _serialize_series_detail(series)
-
-
 @series_router.patch(
     "/{slug}/claims/", auth=django_auth, response=SeriesDetailSchema, tags=["private"]
 )

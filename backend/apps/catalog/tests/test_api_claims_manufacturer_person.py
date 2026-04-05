@@ -266,8 +266,8 @@ class TestPatchPersonClaimsPersistence:
 
         person.refresh_from_db()
         assert person.slug == "pat-lawlor-jr"
-        assert client.get(f"/api/people/{person.slug}").status_code == 200
-        assert client.get("/api/people/pat-lawlor").status_code == 404
+        assert client.get(f"/api/pages/person/{person.slug}").status_code == 200
+        assert client.get("/api/pages/person/pat-lawlor").status_code == 404
 
     def test_duplicate_slug_returns_422(self, client, user, person):
         Person.objects.create(name="John Youssi", slug="john-youssi")

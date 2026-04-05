@@ -1,0 +1,67 @@
+import { describe, expect, it, vi } from 'vitest';
+import { render } from 'svelte/server';
+import Page from './+page.svelte';
+import { load } from './+layout.server';
+
+const MOCK_DATA = {
+	name: 'Eight Ball',
+	slug: 'eight-ball',
+	description: { text: '', html: '', attribution: null },
+	titles: [
+		{
+			name: 'Eight Ball Deluxe',
+			slug: 'eight-ball-deluxe',
+			abbreviations: [],
+			machine_count: 1,
+			year: 1981,
+			manufacturer_name: 'Bally',
+			thumbnail_url: null
+		}
+	],
+	credits: [],
+	sources: []
+};
+
+describe('series detail SSR route', () => {
+	it('loads from the page endpoint', async () => {
+		const fetch = vi.fn().mockResolvedValue(
+			new Response(JSON.stringify(MOCK_DATA), {
+				status: 200,
+				headers: { 'Content-Type': 'application/json' }
+			})
+		);
+
+		const result = await load({
+			fetch,
+			url: new URL('http://localhost:5173/series/eight-ball'),
+			params: { slug: 'eight-ball' }
+		} as unknown as Parameters<typeof load>[0]);
+
+		expect(result).toEqual({ series: MOCK_DATA });
+		const request = fetch.mock.calls[0]?.[0];
+		expect(request).toBeInstanceOf(Request);
+		expect(request.url).toBe('http://localhost:5173/api/pages/series/eight-ball');
+	});
+
+	it('throws 404 when not found', async () => {
+		const fetch = vi.fn().mockResolvedValue(new Response('Not found', { status: 404 }));
+
+		await expect(
+			load({
+				fetch,
+				url: new URL('http://localhost:5173/series/nonexistent'),
+				params: { slug: 'nonexistent' }
+			} as unknown as Parameters<typeof load>[0])
+		).rejects.toMatchObject({ status: 404 });
+	});
+
+	it('renders meaningful content into initial HTML', () => {
+		const { body } = render(Page, {
+			props: {
+				data: { series: MOCK_DATA }
+			}
+		});
+
+		expect(body).toContain('Eight Ball Deluxe');
+	});
+});

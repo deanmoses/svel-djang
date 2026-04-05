@@ -25,7 +25,7 @@ class TestPeopleAPI:
         machine_model.save()
         role = CreditRole.objects.get(slug="design")
         Credit.objects.create(model=machine_model, person=person, role=role)
-        resp = client.get(f"/api/people/{person.slug}")
+        resp = client.get(f"/api/pages/person/{person.slug}")
         assert resp.status_code == 200
         data = resp.json()
         assert data["name"] == "Pat Lawlor"
@@ -54,6 +54,6 @@ class TestPeopleAPI:
         )
         for m in (old, new, no_year):
             Credit.objects.create(model=m, person=person, role=role)
-        resp = client.get(f"/api/people/{person.slug}")
+        resp = client.get(f"/api/pages/person/{person.slug}")
         names = [t["name"] for t in resp.json()["titles"]]
         assert names == ["New Title", "Old Title", "No Year Title"]

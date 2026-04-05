@@ -213,13 +213,6 @@ def list_all_people(request):
     return result
 
 
-@people_router.get("/{slug}", response=PersonDetailSchema)
-@decorate_view(cache_control(no_cache=True))
-def get_person(request, slug: str):
-    person = get_object_or_404(_person_qs(), slug=slug)
-    return _serialize_person_detail(person)
-
-
 @people_router.patch(
     "/{slug}/claims/", auth=django_auth, response=PersonDetailSchema, tags=["private"]
 )

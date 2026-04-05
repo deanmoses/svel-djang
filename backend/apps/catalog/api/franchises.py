@@ -135,17 +135,15 @@ def _franchise_titles_qs():
     )
 
 
-@franchises_router.get("/{slug}", response=FranchiseDetailSchema)
-@decorate_view(cache_control(no_cache=True))
-def get_franchise(request, slug: str):
+def _franchise_detail_qs():
     from ..models import Franchise
 
-    franchise = get_object_or_404(
-        Franchise.objects.active().prefetch_related(
-            Prefetch("titles", queryset=_franchise_titles_qs()), claims_prefetch()
-        ),
-        slug=slug,
+    return Franchise.objects.active().prefetch_related(
+        Prefetch("titles", queryset=_franchise_titles_qs()), claims_prefetch()
     )
+
+
+def _serialize_franchise_detail(franchise) -> dict:
     return {
         "name": franchise.name,
         "slug": franchise.slug,
@@ -173,18 +171,5 @@ def patch_franchise_claims(request, slug: str, data: ClaimPatchSchema):
 
     execute_claims(franchise, specs, user=request.user)
 
-    franchise = get_object_or_404(
-        Franchise.objects.active().prefetch_related(
-            Prefetch("titles", queryset=_franchise_titles_qs()), claims_prefetch()
-        ),
-        slug=franchise.slug,
-    )
-    return {
-        "name": franchise.name,
-        "slug": franchise.slug,
-        "description": _build_rich_text(
-            franchise, "description", getattr(franchise, "active_claims", [])
-        ),
-        "titles": [_serialize_title_list(t) for t in franchise.titles.all()],
-        "sources": build_sources(getattr(franchise, "active_claims", [])),
-    }
+    franchise = get_object_or_404(_franchise_detail_qs(), slug=franchise.slug)
+    return _serialize_franchise_detail(franchise)

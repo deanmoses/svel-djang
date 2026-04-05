@@ -46,7 +46,7 @@ class TestSystemsAPI:
         return system
 
     def test_get_system_detail(self, client, system_with_machines):
-        resp = client.get("/api/systems/wpc-95")
+        resp = client.get("/api/pages/system/wpc-95")
         assert resp.status_code == 200
         data = resp.json()
         assert data["name"] == "Williams WPC-95"
@@ -65,11 +65,11 @@ class TestSystemsAPI:
             system=system_with_machines,
             title=t3,
         )
-        resp = client.get("/api/systems/wpc-95")
+        resp = client.get("/api/pages/system/wpc-95")
         data = resp.json()
         years = [t["year"] for t in data["titles"] if t["year"]]
         assert years == sorted(years, reverse=True)
 
     def test_get_system_404(self, client, db):
-        resp = client.get("/api/systems/nonexistent")
+        resp = client.get("/api/pages/system/nonexistent")
         assert resp.status_code == 404

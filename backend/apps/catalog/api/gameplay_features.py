@@ -152,13 +152,6 @@ def list_gameplay_features(request):
     return result
 
 
-@gameplay_features_router.get("/{slug}", response=GameplayFeatureDetailSchema)
-@decorate_view(cache_control(no_cache=True))
-def get_gameplay_feature(request, slug: str):
-    feature = get_object_or_404(_detail_qs(), slug=slug)
-    return _serialize_detail(feature)
-
-
 @gameplay_features_router.patch(
     "/{slug}/claims/",
     auth=django_auth,

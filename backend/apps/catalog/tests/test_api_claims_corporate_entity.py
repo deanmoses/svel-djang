@@ -119,7 +119,7 @@ class TestListCorporateEntities:
 @pytest.mark.django_db
 class TestGetCorporateEntity:
     def test_detail_returns_entity(self, client, entity):
-        resp = client.get(f"/api/corporate-entities/{entity.slug}")
+        resp = client.get(f"/api/pages/corporate-entity/{entity.slug}")
         assert resp.status_code == 200
         data = resp.json()
         assert data["name"] == "D. Gottlieb & Company"
@@ -129,7 +129,7 @@ class TestGetCorporateEntity:
 
     def test_detail_includes_aliases(self, client, entity):
         entity.aliases.create(value="Gottlieb Co")
-        resp = client.get(f"/api/corporate-entities/{entity.slug}")
+        resp = client.get(f"/api/pages/corporate-entity/{entity.slug}")
         assert "Gottlieb Co" in resp.json()["aliases"]
 
     def test_detail_includes_titles(self, client, entity):
@@ -141,13 +141,13 @@ class TestGetCorporateEntity:
             title=title,
             year=1957,
         )
-        resp = client.get(f"/api/corporate-entities/{entity.slug}")
+        resp = client.get(f"/api/pages/corporate-entity/{entity.slug}")
         titles = resp.json()["titles"]
         assert len(titles) == 1
         assert titles[0]["name"] == "Ace High"
 
     def test_404_for_unknown_slug(self, client, db):
-        resp = client.get("/api/corporate-entities/nonexistent")
+        resp = client.get("/api/pages/corporate-entity/nonexistent")
         assert resp.status_code == 404
 
 
@@ -180,9 +180,12 @@ class TestPatchCorporateEntityScalars:
 
         entity.refresh_from_db()
         assert entity.slug == "gottlieb-company"
-        assert client.get(f"/api/corporate-entities/{entity.slug}").status_code == 200
         assert (
-            client.get("/api/corporate-entities/d-gottlieb-company").status_code == 404
+            client.get(f"/api/pages/corporate-entity/{entity.slug}").status_code == 200
+        )
+        assert (
+            client.get("/api/pages/corporate-entity/d-gottlieb-company").status_code
+            == 404
         )
 
     def test_duplicate_slug_returns_422(self, client, user, entity, other_entity):

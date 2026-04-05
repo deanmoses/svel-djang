@@ -159,13 +159,6 @@ def list_corporate_entities(request):
     ]
 
 
-@corporate_entities_router.get("/{slug}", response=CorporateEntityDetailSchema)
-@decorate_view(cache_control(no_cache=True))
-def get_corporate_entity(request, slug: str):
-    ce = get_object_or_404(_detail_qs(), slug=slug)
-    return _serialize_detail(ce)
-
-
 @corporate_entities_router.patch(
     "/{slug}/claims/",
     auth=django_auth,

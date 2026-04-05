@@ -173,13 +173,6 @@ def list_all_systems(request):
     ]
 
 
-@systems_router.get("/{slug}", response=SystemDetailSchema)
-@decorate_view(cache_control(no_cache=True))
-def get_system(request, slug: str):
-    system = get_object_or_404(_system_detail_qs(), slug=slug)
-    return _serialize_system_detail(system)
-
-
 @systems_router.patch(
     "/{slug}/claims/", auth=django_auth, response=SystemDetailSchema, tags=["private"]
 )
