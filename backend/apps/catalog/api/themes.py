@@ -76,6 +76,9 @@ def _detail_qs():
 
 
 def _serialize_detail(theme) -> dict:
+    from apps.core.licensing import get_minimum_display_rank
+
+    min_rank = get_minimum_display_rank()
     return {
         "name": theme.name,
         "slug": theme.slug,
@@ -87,7 +90,10 @@ def _serialize_detail(theme) -> dict:
         "children": [
             {"name": t.name, "slug": t.slug} for t in theme.children.order_by("name")
         ],
-        "machines": [_serialize_title_machine(pm) for pm in theme.machine_models.all()],
+        "machines": [
+            _serialize_title_machine(pm, min_rank=min_rank)
+            for pm in theme.machine_models.all()
+        ],
         "sources": build_sources(getattr(theme, "active_claims", [])),
     }
 

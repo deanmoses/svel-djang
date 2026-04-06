@@ -82,13 +82,18 @@ def _system_detail_qs():
 def _serialize_system_detail(system) -> dict:
     from ..models import System
 
+    from apps.core.licensing import get_minimum_display_rank
+
+    min_rank = get_minimum_display_rank()
     titles: dict[str, dict] = {}
     for m in system.machine_models.all():
         if m.title is None:
             continue
         key = m.title.slug
         if key not in titles:
-            thumbnail_url = _extract_image_urls(m.extra_data or {})[0]
+            thumbnail_url = _extract_image_urls(m.extra_data or {}, min_rank=min_rank)[
+                0
+            ]
             titles[key] = {
                 "name": m.title.name,
                 "slug": m.title.slug,
@@ -101,7 +106,9 @@ def _serialize_system_detail(system) -> dict:
                 "thumbnail_url": thumbnail_url,
             }
         elif titles[key]["thumbnail_url"] is None:
-            thumbnail_url = _extract_image_urls(m.extra_data or {})[0]
+            thumbnail_url = _extract_image_urls(m.extra_data or {}, min_rank=min_rank)[
+                0
+            ]
             if thumbnail_url:
                 titles[key]["thumbnail_url"] = thumbnail_url
 

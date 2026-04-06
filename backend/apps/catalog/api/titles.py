@@ -357,8 +357,11 @@ def _compute_agreed_specs(models) -> dict:
 
 
 def _serialize_title_detail(title) -> dict:
+    from apps.core.licensing import get_minimum_display_rank
+
+    min_rank = get_minimum_display_rank()
     model_objs = list(title.machine_models.all())
-    machines = [_serialize_title_machine(pm) for pm in model_objs]
+    machines = [_serialize_title_machine(pm, min_rank=min_rank) for pm in model_objs]
     series = [
         {"name": s.name, "slug": s.slug}
         for s in getattr(title, "series_list", None) or title.series.all()
@@ -368,7 +371,9 @@ def _serialize_title_detail(title) -> dict:
     # Hero image from the earliest model.
     hero_image_url = None
     if model_objs:
-        _, hero_image_url = _extract_image_urls(model_objs[0].extra_data or {})
+        _, hero_image_url = _extract_image_urls(
+            model_objs[0].extra_data or {}, min_rank=min_rank
+        )
 
     # Credits that appear on every model (intersection, not union).
     credit_sets = []
@@ -511,7 +516,10 @@ def list_titles(request, display: str = ""):
         .prefetch_related(_title_models_prefetch(), "series", "abbreviations")
         .order_by("name")
     )
-    return [_serialize_title_list(t) for t in qs]
+    from apps.core.licensing import get_minimum_display_rank
+
+    min_rank = get_minimum_display_rank()
+    return [_serialize_title_list(t, min_rank=min_rank) for t in qs]
 
 
 @titles_router.get("/all/", response=list[TitleListSchema])

@@ -188,6 +188,9 @@ def _get_manufacturers_for_pks(pks):
         .order_by("-model_count", "name")
     )
 
+    from apps.core.licensing import get_minimum_display_rank
+
+    min_rank = get_minimum_display_rank()
     result = []
     for mfr in qs:
         thumb = None
@@ -196,7 +199,7 @@ def _get_manufacturers_for_pks(pks):
                 break
             for model in entity.models.all():
                 if model.extra_data:
-                    thumb, _ = _extract_image_urls(model.extra_data)
+                    thumb, _ = _extract_image_urls(model.extra_data, min_rank=min_rank)
                     if thumb:
                         break
         result.append(

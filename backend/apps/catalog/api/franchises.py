@@ -57,13 +57,15 @@ class FranchiseDetailSchema(Schema):
 # ---------------------------------------------------------------------------
 
 
-def _serialize_title_list(title) -> dict:
+def _serialize_title_list(title, *, min_rank: int | None = None) -> dict:
     thumbnail_url = None
     manufacturer_name = None
     year = None
     machines = list(title.machine_models.all())
     if machines:
-        thumbnail_url, _ = _extract_image_urls(machines[0].extra_data or {})
+        thumbnail_url, _ = _extract_image_urls(
+            machines[0].extra_data or {}, min_rank=min_rank
+        )
         first = machines[0]
         manufacturer_name = (
             first.corporate_entity.manufacturer.name
@@ -144,13 +146,18 @@ def _franchise_detail_qs():
 
 
 def _serialize_franchise_detail(franchise) -> dict:
+    from apps.core.licensing import get_minimum_display_rank
+
+    min_rank = get_minimum_display_rank()
     return {
         "name": franchise.name,
         "slug": franchise.slug,
         "description": _build_rich_text(
             franchise, "description", getattr(franchise, "active_claims", [])
         ),
-        "titles": [_serialize_title_list(t) for t in franchise.titles.all()],
+        "titles": [
+            _serialize_title_list(t, min_rank=min_rank) for t in franchise.titles.all()
+        ],
         "sources": build_sources(getattr(franchise, "active_claims", [])),
     }
 

@@ -82,6 +82,9 @@ def _serialize_person_detail(person) -> dict:
     (select_related model, model__title, model__manufacturer) and claims
     (to_attr="active_claims").
     """
+    from apps.core.licensing import get_minimum_display_rank
+
+    min_rank = get_minimum_display_rank()
     titles: dict[str, dict] = {}
     for c in person.credits.all():
         if c.model is None or c.model.title is None:
@@ -89,7 +92,9 @@ def _serialize_person_detail(person) -> dict:
         title = c.model.title
         key = title.slug
         if key not in titles:
-            thumbnail_url = _extract_image_urls(c.model.extra_data or {})[0]
+            thumbnail_url = _extract_image_urls(
+                c.model.extra_data or {}, min_rank=min_rank
+            )[0]
             titles[key] = {
                 "name": title.name,
                 "slug": title.slug,
@@ -104,7 +109,9 @@ def _serialize_person_detail(person) -> dict:
                 "roles": [],
             }
         elif titles[key]["thumbnail_url"] is None:
-            thumbnail_url = _extract_image_urls(c.model.extra_data or {})[0]
+            thumbnail_url = _extract_image_urls(
+                c.model.extra_data or {}, min_rank=min_rank
+            )[0]
             if thumbnail_url:
                 titles[key]["thumbnail_url"] = thumbnail_url
         role_display = c.role.name

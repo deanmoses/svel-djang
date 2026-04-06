@@ -60,14 +60,16 @@ class SeriesDetailSchema(Schema):
 # ---------------------------------------------------------------------------
 
 
-def _serialize_title_list(title) -> dict:
+def _serialize_title_list(title, *, min_rank: int | None = None) -> dict:
     """Serialize a Title for use in series listing context."""
     thumbnail_url = None
     manufacturer_name = None
     year = None
     machines = list(title.machine_models.all())
     if machines:
-        thumbnail_url, _ = _extract_image_urls(machines[0].extra_data or {})
+        thumbnail_url, _ = _extract_image_urls(
+            machines[0].extra_data or {}, min_rank=min_rank
+        )
         first = machines[0]
         manufacturer_name = (
             first.corporate_entity.manufacturer.name
@@ -128,13 +130,18 @@ def _series_detail_qs():
 
 
 def _serialize_series_detail(series) -> dict:
+    from apps.core.licensing import get_minimum_display_rank
+
+    min_rank = get_minimum_display_rank()
     return {
         "name": series.name,
         "slug": series.slug,
         "description": _build_rich_text(
             series, "description", getattr(series, "active_claims", [])
         ),
-        "titles": [_serialize_title_list(t) for t in series.titles.all()],
+        "titles": [
+            _serialize_title_list(t, min_rank=min_rank) for t in series.titles.all()
+        ],
         "credits": [
             {
                 "person": {"name": c.person.name, "slug": c.person.slug},
@@ -175,12 +182,15 @@ def list_series(request):
             )
         )
     )
+    from apps.core.licensing import get_minimum_display_rank
+
+    min_rank = get_minimum_display_rank()
     result = []
     for s in qs:
         thumb = None
         for title in s.titles.all():
             for pm in title.machine_models.all():
-                t, _ = _extract_image_urls(pm.extra_data or {})
+                t, _ = _extract_image_urls(pm.extra_data or {}, min_rank=min_rank)
                 if t:
                     thumb = t
                     break

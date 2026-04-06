@@ -251,11 +251,17 @@ def _reward_type_detail_qs():
 
 
 def _serialize_reward_type_detail(rt) -> dict:
+    from apps.core.licensing import get_minimum_display_rank
+
     from .helpers import _serialize_title_machine
 
+    min_rank = get_minimum_display_rank()
     return {
         **_serialize_taxonomy(rt),
-        "machines": [_serialize_title_machine(pm) for pm in rt.machine_models.all()],
+        "machines": [
+            _serialize_title_machine(pm, min_rank=min_rank)
+            for pm in rt.machine_models.all()
+        ],
     }
 
 

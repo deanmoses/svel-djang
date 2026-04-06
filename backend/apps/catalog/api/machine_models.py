@@ -247,9 +247,11 @@ def _build_model_list_qs(
     return qs
 
 
-def _serialize_model_list(pm) -> dict:
+def _serialize_model_list(pm, *, min_rank: int | None = None) -> dict:
     primary_media = getattr(pm, "primary_media", None)
-    thumbnail_url, _ = _extract_image_urls(pm.extra_data or {}, primary_media)
+    thumbnail_url, _ = _extract_image_urls(
+        pm.extra_data or {}, primary_media, min_rank=min_rank
+    )
     mfr = (
         pm.corporate_entity.manufacturer
         if pm.corporate_entity and pm.corporate_entity.manufacturer
@@ -292,6 +294,10 @@ def _serialize_model_detail(pm) -> dict:
     """
     from django.db.models import Case, F, IntegerField, Value, When
 
+    from apps.core.licensing import get_minimum_display_rank
+
+    min_rank = get_minimum_display_rank()
+
     credits = [
         {
             "person": {"name": c.person.name, "slug": c.person.slug},
@@ -323,7 +329,7 @@ def _serialize_model_detail(pm) -> dict:
     all_media = getattr(pm, "all_media", None) or []
     primary_media = [em for em in all_media if em.is_primary]
     thumbnail_url, hero_image_url = _extract_image_urls(
-        pm.extra_data or {}, primary_media or None
+        pm.extra_data or {}, primary_media or None, min_rank=min_rank
     )
     image_attribution = _extract_image_attribution(
         pm.extra_data or {}, primary_media or None
@@ -495,7 +501,7 @@ def _serialize_model_detail(pm) -> dict:
             for s in (pm.title.series.all() if pm.title else [])
         ],
         "title_models": [
-            _serialize_title_machine(sibling)
+            _serialize_title_machine(sibling, min_rank=min_rank)
             for sibling in (pm.title.machine_models.all() if pm.title else [])
             if sibling.variant_of_id is None
         ],
@@ -604,7 +610,10 @@ def list_models(
         person=person,
         ordering=ordering,
     )
-    return [_serialize_model_list(pm) for pm in qs]
+    from apps.core.licensing import get_minimum_display_rank
+
+    min_rank = get_minimum_display_rank()
+    return [_serialize_model_list(pm, min_rank=min_rank) for pm in qs]
 
 
 def _build_search_text(pm) -> str:
@@ -670,6 +679,9 @@ def list_recent_models(request):
             "-updated_at",
         )
     )
+    from apps.core.licensing import get_minimum_display_rank
+
+    min_rank = get_minimum_display_rank()
     results = []
     seen_titles: set[int | None] = set()
     for m in qs:
@@ -677,7 +689,7 @@ def list_recent_models(request):
         if title_id in seen_titles:
             continue
         seen_titles.add(title_id)
-        thumbnail_url, _ = _extract_image_urls(m.extra_data or {})
+        thumbnail_url, _ = _extract_image_urls(m.extra_data or {}, min_rank=min_rank)
         results.append(
             {
                 "name": m.name,

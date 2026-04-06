@@ -217,13 +217,18 @@ def _build_rich_text(obj, field_name: str, active_claims=None) -> dict:
 
 def _collect_titles(models, *, include_manufacturer: bool = False) -> list[dict]:
     """Group models by title into a deduplicated title list."""
+    from apps.core.licensing import get_minimum_display_rank
+
+    min_rank = get_minimum_display_rank()
     titles: dict[str, dict] = {}
     for m in models:
         if m.title is None:
             continue
         key = m.title.slug
         if key not in titles:
-            thumbnail_url = _extract_image_urls(m.extra_data or {})[0]
+            thumbnail_url = _extract_image_urls(m.extra_data or {}, min_rank=min_rank)[
+                0
+            ]
             entry: dict = {
                 "name": m.title.name,
                 "slug": m.title.slug,
@@ -238,7 +243,9 @@ def _collect_titles(models, *, include_manufacturer: bool = False) -> list[dict]
                 )
             titles[key] = entry
         elif titles[key]["thumbnail_url"] is None:
-            thumbnail_url = _extract_image_urls(m.extra_data or {})[0]
+            thumbnail_url = _extract_image_urls(m.extra_data or {}, min_rank=min_rank)[
+                0
+            ]
             if thumbnail_url:
                 titles[key]["thumbnail_url"] = thumbnail_url
     return sorted(titles.values(), key=lambda t: (t["year"] is None, -(t["year"] or 0)))
@@ -307,9 +314,14 @@ def _get_feature_descendant_slugs(slug: str) -> set[str]:
     return result
 
 
-def _serialize_title_machine(pm) -> dict:
+def _serialize_title_machine(pm, *, min_rank: int | None = None) -> dict:
     """Serialize a MachineModel for use in title/theme/system machine lists."""
-    thumbnail_url, _ = _extract_image_urls(pm.extra_data or {})
+    if min_rank is None:
+        from apps.core.licensing import get_minimum_display_rank
+
+        min_rank = get_minimum_display_rank()
+
+    thumbnail_url, _ = _extract_image_urls(pm.extra_data or {}, min_rank=min_rank)
 
     # Include variants only when prefetched to avoid N+1 queries.
     variant_qs = (
@@ -322,7 +334,9 @@ def _serialize_title_machine(pm) -> dict:
             "name": v.name,
             "slug": v.slug,
             "year": v.year,
-            "thumbnail_url": _extract_image_urls(v.extra_data or {})[0],
+            "thumbnail_url": _extract_image_urls(v.extra_data or {}, min_rank=min_rank)[
+                0
+            ],
         }
         for v in variant_qs
     ]
