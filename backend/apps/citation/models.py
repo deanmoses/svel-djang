@@ -1,0 +1,195 @@
+"""Citation source models: works and evidence objects that can be cited."""
+
+from __future__ import annotations
+
+from django.conf import settings
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
+
+from apps.core.models import TimeStampedModel, field_not_blank, nullable_id_not_empty
+from apps.core.validators import validate_no_mojibake
+
+__all__ = ["CitationSource", "CitationSourceLink"]
+
+YEAR_MIN, YEAR_MAX = 1800, 2100
+MONTH_MIN, MONTH_MAX = 1, 12
+DAY_MIN, DAY_MAX = 1, 31
+
+
+class CitationSource(TimeStampedModel):
+    """A work or evidence object that can be cited: book, flyer, web page, etc.
+
+    NOT claims-controlled — edited directly through admin or future UI.
+    Hierarchy via self-referential parent FK enables grouping (e.g., article
+    within magazine issue, edition within book).
+    """
+
+    class SourceType(models.TextChoices):
+        BOOK = "book", "Book"
+        WEB = "web", "Web"
+
+    name = models.CharField(max_length=500, validators=[validate_no_mojibake])
+    source_type = models.CharField(max_length=20, choices=SourceType.choices)
+    author = models.CharField(
+        max_length=300, blank=True, validators=[validate_no_mojibake]
+    )
+    publisher = models.CharField(
+        max_length=300, blank=True, validators=[validate_no_mojibake]
+    )
+    year = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(YEAR_MIN), MaxValueValidator(YEAR_MAX)],
+    )
+    month = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(MONTH_MIN), MaxValueValidator(MONTH_MAX)],
+    )
+    day = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(DAY_MIN), MaxValueValidator(DAY_MAX)],
+    )
+    date_note = models.CharField(
+        max_length=200, blank=True, validators=[validate_no_mojibake]
+    )
+    isbn = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True,
+        unique=True,
+        validators=[validate_no_mojibake],
+    )
+    parent = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="children",
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+    description = models.TextField(
+        blank=True, default="", db_default="", validators=[validate_no_mojibake]
+    )
+
+    class Meta:
+        ordering = ["name"]
+        constraints = [
+            field_not_blank("name"),
+            field_not_blank("source_type"),
+            # Belt-and-suspenders: source_type must be a valid enum value
+            models.CheckConstraint(
+                condition=models.Q(source_type__in=["book", "web"]),
+                name="citation_citationsource_source_type_valid",
+            ),
+            # Prevent self-referencing
+            models.CheckConstraint(
+                condition=models.Q(parent__isnull=True)
+                | ~models.Q(parent=models.F("pk")),
+                name="citation_citationsource_parent_not_self",
+                violation_error_message="A citation source cannot be its own parent.",
+                violation_error_code="cross_field",
+            ),
+            # Year range
+            models.CheckConstraint(
+                condition=models.Q(year__isnull=True)
+                | models.Q(year__gte=YEAR_MIN, year__lte=YEAR_MAX),
+                name="citation_citationsource_year_range",
+            ),
+            # Month range
+            models.CheckConstraint(
+                condition=models.Q(month__isnull=True)
+                | models.Q(month__gte=MONTH_MIN, month__lte=MONTH_MAX),
+                name="citation_citationsource_month_range",
+            ),
+            # Day range
+            models.CheckConstraint(
+                condition=models.Q(day__isnull=True)
+                | models.Q(day__gte=DAY_MIN, day__lte=DAY_MAX),
+                name="citation_citationsource_day_range",
+            ),
+            # Date component chains: month requires year, day requires month
+            models.CheckConstraint(
+                condition=models.Q(month__isnull=True) | models.Q(year__isnull=False),
+                name="citation_citationsource_month_requires_year",
+                violation_error_message="month requires year.",
+                violation_error_code="cross_field",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(day__isnull=True) | models.Q(month__isnull=False),
+                name="citation_citationsource_day_requires_month",
+                violation_error_message="day requires month.",
+                violation_error_code="cross_field",
+            ),
+            # ISBN: nullable unique, prevent empty string
+            nullable_id_not_empty("isbn"),
+        ]
+
+    def __str__(self) -> str:
+        if self.author and self.year:
+            return f"{self.name} ({self.author}, {self.year})"
+        if self.year:
+            return f"{self.name} ({self.year})"
+        return self.name
+
+
+class CitationSourceLink(TimeStampedModel):
+    """A URL where a reader can inspect a CitationSource.
+
+    Wholly owned by its parent CitationSource — CASCADE on delete.
+    A source may have zero, one, or many links (e.g., archive.org
+    scan, publisher page, Google Books preview).
+    """
+
+    citation_source = models.ForeignKey(
+        CitationSource,
+        on_delete=models.CASCADE,
+        related_name="links",
+    )
+    url = models.URLField(max_length=2000)
+    label = models.CharField(
+        max_length=200, blank=True, validators=[validate_no_mojibake]
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+
+    class Meta:
+        ordering = ["citation_source", "label"]
+        constraints = [
+            field_not_blank("url"),
+            models.UniqueConstraint(
+                fields=["citation_source", "url"],
+                name="citation_citationsourcelink_unique_source_url",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        if self.label:
+            return f"{self.label} ({self.url})"
+        return self.url

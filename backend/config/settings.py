@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.core",
     "apps.catalog",
+    "apps.citation",
     "apps.provenance",
     "apps.media",
     "constance",

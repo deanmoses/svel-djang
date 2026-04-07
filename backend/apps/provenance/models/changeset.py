@@ -46,6 +46,12 @@ class ChangeSet(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(
+                fields=["user", "-created_at"],
+                name="provenance_cs_user_created",
+            ),
+        ]
         constraints = [
             models.CheckConstraint(
                 condition=(

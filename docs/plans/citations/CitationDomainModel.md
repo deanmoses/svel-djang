@@ -2,13 +2,13 @@
 
 Pinbase should distinguish between three different things:
 
-1. **Citation source**
+1. **Citation Source**
    The work or evidence object being cited: a book, manual, web page, video, image, observation record, museum document, interview, etc.
 
-2. **Citation instance**
+2. **Citation Instance**
    A specific use of that source for a specific Pinbase claim or text position, including any locator such as page number, timestamp, or URL fragment.
 
-3. **Access link**
+3. **Citation Source Link**
    A way for the reader to inspect the source: canonical URL, archive URL, museum-hosted scan, repository page, uploaded asset, and so on.
 
 These should not be collapsed into one record.
@@ -25,25 +25,25 @@ If Pinbase does collapse them, it will have trouble representing cases like:
 ### A Book
 
 - Work: _The Encyclopedia of Pinball_
-- Citation source A: 1996 hardcover edition
-- Citation source B: revised hardcover edition
-- Citation source C: revised paperback edition
-- Citation source D: revised Kindle edition
-- Citation source E: revised Kindle edition, French translation
+- Citation Source A: 1996 hardcover edition
+- Citation Source B: revised hardcover edition
+- Citation Source C: revised paperback edition
+- Citation Source D: revised Kindle edition
+- Citation Source E: revised Kindle edition, French translation
 
 Then citation instances point into those sources:
 
-- Citation instance 1: page 30 in citation source A
-- Citation instance 2: page 83 in citation source B
-- Citation instance 3: page 77 in citation source C
-- Citation instance 4: location 109 in citation source D
-- Citation instance 5: location 194 in citation source E
+- Citation Instance 1: page 30 in citation source A
+- Citation Instance 2: page 83 in citation source B
+- Citation Instance 3: page 77 in citation source C
+- Citation Instance 4: location 109 in citation source D
+- Citation Instance 5: location 194 in citation source E
 
-And access links are just ways to inspect a given source:
+And citation source links are just ways to inspect a given source:
 
-- Access link A1: archive.org scan of citation source A
-- Access link B1: museum-hosted scan of citation source B
-- Access link D1: Kindle Store page for citation source D
+- Citation Source Link A1: archive.org scan of citation source A
+- Citation Source Link B1: museum-hosted scan of citation source B
+- Citation Source Link D1: Kindle Store page for citation source D
 
 #### Self-Referential Source Hierarchy
 
@@ -74,17 +74,17 @@ The Encyclopedia of Pinball
          └── Edition 2 Kindle version, French translation
 ```
 
-Citation instances point to whichever level the editor knows:
+Citation Instances point to whichever level the editor knows:
 
-- Citation instance 1: page 30 in "1996 hardcover edition"
-- Citation instance 2: location 194 in "French translation"
-- Citation instance 3: page 42 in "The Encyclopedia of Pinball" (editor doesn't know which edition)
+- Citation Instance 1: page 30 in "1996 hardcover edition"
+- Citation Instance 2: location 194 in "French translation"
+- Citation Instance 3: page 42 in "The Encyclopedia of Pinball" (editor doesn't know which edition)
 
-Access links attach to the appropriate level:
+Citation Source Links attach to the appropriate level:
 
-- Access link: archive.org scan → attached to "1996 hardcover edition"
-- Access link: Kindle Store page → attached to "revised Kindle edition"
-- Access link: publisher's landing page → attached to "The Encyclopedia of Pinball" (the root, because it covers all editions)
+- Citation Source Link: archive.org scan → attached to "1996 hardcover edition"
+- Citation Source Link: Kindle Store page → attached to "revised Kindle edition"
+- Citation Source Link: publisher's landing page → attached to "The Encyclopedia of Pinball" (the root, because it covers all editions)
 
 ##### Simple sources
 
@@ -116,19 +116,19 @@ Model:
 
 - Root source: `Play Meter`
 - Child source: `1978 August 15 - Vol 4 Num 15`
-- Citation source: `Roger C. Sharpe review article covering Fair Fight and Hit the Deck`
+- Citation Source: `Roger C. Sharpe review article covering Fair Fight and Hit the Deck`
 - Type: `magazine article`
 - Publication: `Play Meter`
 - Author: `Roger C. Sharpe`
 - Published: `1978-08-15`
 
-Access links:
+Citation Source Links:
 
 - International Arcade Museum Library page 35
 - International Arcade Museum Library page 36
 - later, potentially, a full-issue PDF or another archive copy
 
-Citation instances:
+Citation Instances:
 
 - Claim: Sharpe described Recel's `Fair Fight` as notable for allowing multiple extra balls in a multi-player game
   - source: `Roger C. Sharpe review article covering Fair Fight and Hit the Deck`
@@ -142,7 +142,7 @@ The important point is that:
 - the article or column is the citation source
 - the issue is a useful parent source for grouping and bibliographic context
 - page numbers and section names belong on the citation instance
-- page scans or issue PDFs are access links, not separate citation sources
+- page scans or issue PDFs are Citation Source Links, not separate citation sources
 
 ### A Website
 
@@ -151,18 +151,18 @@ Example: Pinball Magazine's web article [Report: EAG Expo 2025](https://www.pinb
 Model:
 
 - Root source: `Pinball Magazine`
-- Citation source: `Report: EAG Expo 2025`
+- Citation Source: `Report: EAG Expo 2025`
 - Type: `magazine article`
 - Publication: `Pinball Magazine`
 - Author: `Jonathan Joosten`
 - Published: `2025-01-17`
 
-Access links:
+Citation Source Links:
 
 - the Pinball Magazine article URL
 - later, potentially, an archived snapshot URL
 
-Citation instances:
+Citation Instances:
 
 - Claim: EAG Expo is the first coin-op industry tradeshow of the year in London
   - source: `Report: EAG Expo 2025`
@@ -179,7 +179,7 @@ The important point is that:
 - the article is the citation source, not just the magazine as a whole
 - the publication can still exist as a parent source for grouping
 - paragraph references or section headings are the locator on the citation instance
-- the live URL and any archive copy are access links, not separate citation sources
+- the live URL and any archive copy are Citation Source Links, not separate citation sources
 
 ### An Interview
 
@@ -191,19 +191,19 @@ Example: Williams _Medieval Madness_ flyer. The [IPDB Medieval Madness page](htt
 
 Model:
 
-- Citation source: `Williams Medieval Madness manufacturer flyer`
+- Citation Source: `Williams Medieval Madness manufacturer flyer`
 - Type: `flyer / document`
 - Publisher / creator: `Williams`
 - Year: `1997`
 - Language: `English`
 
-Access links:
+Citation Source Links:
 
 - IPDB flyer front image
 - IPDB flyer back image
 - later, potentially, a museum-hosted reference scan PDF of the same flyer
 
-Citation instances:
+Citation Instances:
 
 - Claim: marketing slogan or sales copy from the front
   - source: `Williams Medieval Madness manufacturer flyer`
@@ -219,7 +219,7 @@ The important point is that:
 
 - the flyer is the citation source
 - `front`, `back`, and `specifications` are locators on citation instances
-- front and back scans are access links, not separate citation sources, unless they turn out to be materially different flyer versions
+- front and back scans are Citation Source Links, not separate citation sources, unless they turn out to be materially different flyer versions
 
 ### A Pinball Machine Manual
 
@@ -254,14 +254,14 @@ That means:
 - the root source groups the documentation set
 - the individual manuals are the citation sources contributors usually cite
 
-Citation instances then point to the specific manual actually consulted:
+Citation Instances then point to the specific manual actually consulted:
 
-- Citation instance 1: setup instruction from `Operator's Handbook (January 1991)`, locator `page 12`
-- Citation instance 2: coil or switch detail from `Operations Manual (January 1992)`, locator `section 3`
-- Citation instance 3: wiring detail from `WPC Schematic Manual (January 1992)`, locator `page 4-22`
-- Citation instance 4: translated player instruction from `Instructions Manual, French`, locator `page 2`
+- Citation Instance 1: setup instruction from `Operator's Handbook (January 1991)`, locator `page 12`
+- Citation Instance 2: coil or switch detail from `Operations Manual (January 1992)`, locator `section 3`
+- Citation Instance 3: wiring detail from `WPC Schematic Manual (January 1992)`, locator `page 4-22`
+- Citation Instance 4: translated player instruction from `Instructions Manual, French`, locator `page 2`
 
-Access links are just ways to inspect those sources:
+Citation Source Links are just ways to inspect those sources:
 
 - IPDB PDF for `Operations Manual (January 1992)`
 - later, a museum-hosted higher-quality scan of that same manual
@@ -270,7 +270,7 @@ Access links are just ways to inspect those sources:
 The important point is that:
 
 - different manuals for the same machine are usually different citation sources, not just locators within one source
-- a better scan of the same manual is usually a new access link, not a new citation source
+- a better scan of the same manual is usually a new Citation Source Link, not a new citation source
 - page numbers, section references, and schematic-sheet references belong on the citation instance
 
 ## Field Analysis
@@ -389,7 +389,7 @@ Two levels: publication → article. No issue-level grouping needed — web arti
 Observations:
 
 - **No new fields needed.** A web article uses title, type, author, date, year, and parent — all fields we already have from books and magazines.
-- **URL is not a source field — it's an access link.** The article _is_ the source; the URL is how you get to it. If the site goes down and an archive.org copy exists, the source is unchanged — only the access links change.
+- **URL is not a source field — it's a Citation Source Link.** The article _is_ the source; the URL is how you get to it. If the site goes down and an archive.org copy exists, the source is unchanged — only the Citation Source Links change.
 - **The type could be `website` or `magazine`.** Pinball Magazine publishes both print and web. The type on the source distinguishes the form. A print issue and a web article from the same publication are siblings with different types under the same root.
 
 ### Magazine article: Roger C. Sharpe in _Play Meter_

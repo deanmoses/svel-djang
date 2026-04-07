@@ -20,6 +20,8 @@ from apps.catalog.models import person as person_mod
 from apps.catalog.models import title as title_mod
 from apps.catalog.models import gameplay_feature as gf_mod
 from apps.catalog.models.gameplay_feature import MachineModelGameplayFeature
+from apps.citation.models import CitationSource
+from apps.citation import models as citation_mod
 
 # (model_class, field_name, module, min_const_name, max_const_name_or_None)
 RANGE_FIELDS = [
@@ -43,6 +45,9 @@ RANGE_FIELDS = [
     (Manufacturer, "opdb_manufacturer_id", mfr_mod, "EXTERNAL_ID_MIN", None),
     (Title, "fandom_page_id", title_mod, "EXTERNAL_ID_MIN", None),
     (MachineModelGameplayFeature, "count", gf_mod, "COUNT_MIN", None),
+    (CitationSource, "year", citation_mod, "YEAR_MIN", "YEAR_MAX"),
+    (CitationSource, "month", citation_mod, "MONTH_MIN", "MONTH_MAX"),
+    (CitationSource, "day", citation_mod, "DAY_MIN", "DAY_MAX"),
 ]
 
 
@@ -80,7 +85,12 @@ def test_validator_limits_match_constants(
 
 def test_year_constants_consistent_across_modules():
     """All modules that define YEAR_MIN/YEAR_MAX must agree on the values."""
-    modules = {"machine_model": mm_mod, "person": person_mod, "manufacturer": mfr_mod}
+    modules = {
+        "machine_model": mm_mod,
+        "person": person_mod,
+        "manufacturer": mfr_mod,
+        "citation": citation_mod,
+    }
     mins = {name: mod.YEAR_MIN for name, mod in modules.items()}
     maxs = {name: mod.YEAR_MAX for name, mod in modules.items()}
     assert len(set(mins.values())) == 1, f"YEAR_MIN values differ: {mins}"

@@ -30,7 +30,7 @@ Citations are **point markers** — footnotes inserted at a position in the text
 
 - **Citation Source** — the work or evidence object being cited (a book, flyer, web page, etc.)
 - **Citation Instance** — a specific use of a Citation Source at a specific point in the text, with a locator
-- **Access Link** — a URL where the reader can inspect a Citation Source
+- **Citation Source Link** — a URL where the reader can inspect a Citation Source
 
 ```text
 Markdown text
@@ -49,7 +49,7 @@ Markdown text
          └── (type-specific fields)
               ▲
               |
-Access Link
+Citation Source Link
 ├── FK → Citation Source 789
 ├── url: "https://archive.org/..."
 └── label: "archive.org scan"
@@ -139,9 +139,9 @@ Inheritance would add a level of conceptual complexity that make the system hard
 
 The create-child UI can pre-fill fields from the parent as a convenience, but the data model treats each record as self-contained.
 
-### Access Link
+### Citation Source Link
 
-A way for the reader to inspect a Citation Source: a canonical URL, archive URL, museum-hosted scan, Kindle Store page, etc. Access Link has three fields: FK to Citation Source, url, and label (display text like "archive.org scan" or "IPDB PDF"). These can be enriched later if the system needs to distinguish between link kinds or detect broken links.
+A way for the reader to inspect a Citation Source: a canonical URL, archive URL, museum-hosted scan, Kindle Store page, etc. Citation Source Link has three fields: FK to Citation Source, url, and label (display text like "archive.org scan" or "IPDB PDF"). These can be enriched later if the system needs to distinguish between link kinds or detect broken links.
 
 ### Citation Instance
 
@@ -277,7 +277,7 @@ This is intentionally permissive. More governance will be added post v1. The v1 
 
 ### Citation is its own Django app
 
-The citation source system -- Citation Source and Access Link -- lives in a standalone `citation` app, separate from both `catalog` and `provenance`. Citation Instance lives in `provenance` because it's coupled with claims.
+The citation source system -- Citation Source and Citation Source Link -- lives in a standalone `citation` app, separate from both `catalog` and `provenance`. Citation Instance lives in `provenance` because it's coupled with claims.
 
 - `catalog` and `citation` don't know about each other.
 - `provenance` knows about `citation`, but `citation` does not know about `provenance`.
