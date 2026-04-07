@@ -327,6 +327,22 @@ The citation API introduced `_clean_and_save()` — a helper that calls `full_cl
 
 The `validate_no_mojibake` validators on model fields only fire via `full_clean()`. The claims system writes through `Claim.objects.assert_claim()` → `validate_claim_value()`, which does not call `full_clean()` on the target model. This means mojibake could theoretically slip through claim-controlled text fields. Worth investigating whether the claims validation path should run mojibake checks on string values.
 
+### Investigate auto-`full_clean()` on `TimeStampedModel.save()`
+
+Django's `create()` and `save()` skip `full_clean()` by default — Python-level validators (`validate_no_mojibake`, `URLField` format, `MinValueValidator`, etc.) only fire if `full_clean()` is explicitly called. CHECK constraints catch some of this at the DB level, but validators like `validate_no_mojibake` have no DB equivalent.
+
+This is a pit-of-failure API: the wrong thing (`create()` without validation) is the easy thing, and the right thing (instantiate → `full_clean()` → `save()`) requires the caller to remember every time. During the citation seeding work, an AI agent made the same mistake three times in one planning session — first using `create()` without `full_clean()`, then calling `full_clean()` after `create()` (which already wrote the invalid row), and finally getting the order right only after explicit review. If an agent iterating on a plan with a human reviewer makes this mistake systematically, contributors writing management commands or API endpoints will too.
+
+A potential fix: override `save()` on `TimeStampedModel` to call `self.full_clean()` automatically, so every model in the project validates on every save by default. This would make the citation API's `_clean_and_save()` helper unnecessary and close the mojibake gap in the claims path (see above).
+
+**Needs investigation before adopting:**
+
+- Django deliberately doesn't do this — there may be good reasons (performance, circular save issues, `QuerySet.update()` semantics). Research why Django made this choice.
+- Could surface latent validation failures in existing code paths that currently skip validation.
+- `bulk_create()` / `bulk_update()` don't call `save()`, so they'd still skip validation — but that's an explicit opt-in to raw performance, which is acceptable.
+- The CLAUDE.md currently says "full_clean() is optional; CHECK constraints are not" — that guidance would need updating.
+- Run the full test suite after the change to see what breaks.
+
 ### Recently used sources in autocomplete
 
 The Contributor UX section describes "Recently used Citation Sources surfaced first" as part of the autocomplete experience. This is deferred — the v1 search endpoint returns results ordered by name only. Adding recently-used ranking requires tracking per-user citation activity and merging it into the search results.
