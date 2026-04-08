@@ -24,15 +24,16 @@ describe('MediaLightbox', () => {
 		expect(document.body.style.overflow).toBe('');
 	});
 
-	it('closes on Escape and on backdrop click', async () => {
+	it('exposes dialog semantics and closes on Escape and backdrop dismiss', async () => {
 		const user = userEvent.setup();
-		const { onclose, container } = renderLightbox();
+		const { onclose } = renderLightbox();
+
+		expect(screen.getByRole('dialog', { name: /media viewer/i })).toBeInTheDocument();
 
 		await user.keyboard('{Escape}');
 		expect(onclose).toHaveBeenCalledTimes(1);
 
-		const backdrop = container.querySelector('.lightbox-backdrop') as HTMLElement;
-		await user.click(backdrop);
+		await user.click(screen.getByRole('button', { name: /dismiss media viewer/i }));
 		expect(onclose).toHaveBeenCalledTimes(2);
 	});
 
