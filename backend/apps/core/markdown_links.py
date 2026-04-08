@@ -61,6 +61,16 @@ class LinkType:
     get_url: Callable[[Any], str] | None = None  # override for irregular URL
     get_label: Callable[[Any], str] | None = None  # override for irregular label
     select_related: tuple[str, ...] = ()
+    prefetch_related: tuple[str, ...] = ()
+    # Optional custom renderer: (obj_or_None, 1-based_index, base_url, plain_text) -> str
+    # When set, _render_by_id() uses this instead of _format_link(). Indices are
+    # assigned by unique ID in order of first appearance (duplicate markers share
+    # the same index).
+    format_link: Callable[[Any, int, str, bool], str] | None = None
+    # Optional metadata collector: (obj, 1-based_index) -> dict
+    # Called once per unique resolved object when metadata_out is provided.
+    # The returned dicts are appended to the metadata_out list.
+    collect_metadata: Callable[[Any, int], dict] | None = None
 
     # --- Authoring format (slug-based types only) ---
     # Custom lookup for authoring format: (model_class, raw_values) -> {key: obj}
@@ -83,6 +93,12 @@ class LinkType:
 
     # --- Display order in type picker (lower = higher in list) ---
     sort_order: int = 100
+
+    # --- Autocomplete flow ---
+    # "standard" = generic search via /api/link-types/targets/
+    # "custom" = frontend handles the flow (e.g., citation multi-step)
+    AUTOCOMPLETE_FLOWS = ("standard", "custom")
+    autocomplete_flow: str = "standard"
 
     def get_model(self) -> type[Any]:
         """Resolve the model class lazily via Django's app registry."""
@@ -116,6 +132,11 @@ def register(link_type: LinkType) -> None:
     """Register a link type. Called from each app's AppConfig.ready()."""
     if link_type.name in _registry:
         raise ValueError(f"Link type '{link_type.name}' is already registered")
+    if link_type.autocomplete_flow not in LinkType.AUTOCOMPLETE_FLOWS:
+        raise ValueError(
+            f"Link type '{link_type.name}': autocomplete_flow must be one of "
+            f"{LinkType.AUTOCOMPLETE_FLOWS}, got {link_type.autocomplete_flow!r}"
+        )
     _registry[link_type.name] = link_type
     # Compile regex patterns eagerly
     name = re.escape(link_type.name)
@@ -149,11 +170,19 @@ def get_enabled_link_types() -> list[LinkType]:
 def get_autocomplete_types() -> list[dict[str, str]]:
     """Return enabled link types that support autocomplete, for the type picker API."""
     types = [
-        lt for lt in _registry.values() if lt.is_enabled() and lt.autocomplete_serialize
+        lt
+        for lt in _registry.values()
+        if lt.is_enabled()
+        and (lt.autocomplete_serialize or lt.autocomplete_flow == "custom")
     ]
     types.sort(key=lambda lt: lt.sort_order)
     return [
-        {"name": lt.name, "label": lt.label, "description": lt.description}
+        {
+            "name": lt.name,
+            "label": lt.label,
+            "description": lt.description,
+            "flow": lt.autocomplete_flow,
+        }
         for lt in types
     ]
 
@@ -173,7 +202,12 @@ def get_patterns(link_type: LinkType) -> dict[str, re.Pattern[str]]:
 # ---------------------------------------------------------------------------
 
 
-def render_all_links(text: str, base_url: str = "", plain_text: bool = False) -> str:
+def render_all_links(
+    text: str,
+    base_url: str = "",
+    plain_text: bool = False,
+    metadata_out: list[dict] | None = None,
+) -> str:
     """Convert all [[type:ref]] links in text to markdown links.
 
     Handles both storage format (primary path) and authoring format
@@ -188,14 +222,21 @@ def render_all_links(text: str, base_url: str = "", plain_text: bool = False) ->
         plain_text: When ``True``, render just the label with no link
             syntax.  Useful for short preview snippets where markdown
             links would be truncated.
+        metadata_out: When provided, link types with a ``collect_metadata``
+            callback append structured dicts to this list (one per unique
+            resolved object).
     """
     for lt in get_enabled_link_types():
         pats = get_patterns(lt)
         if lt.slug_field is not None:
-            text = _render_by_id(text, lt, pats["storage"], base_url, plain_text)
+            text = _render_by_id(
+                text, lt, pats["storage"], base_url, plain_text, metadata_out
+            )
             text = _render_by_slug(text, lt, pats["authoring"], base_url, plain_text)
         else:
-            text = _render_by_id(text, lt, pats["id"], base_url, plain_text)
+            text = _render_by_id(
+                text, lt, pats["id"], base_url, plain_text, metadata_out
+            )
     return text
 
 
@@ -218,6 +259,7 @@ def _render_by_id(
     pattern: re.Pattern[str],
     base_url: str = "",
     plain_text: bool = False,
+    metadata_out: list[dict] | None = None,
 ) -> str:
     """Render [[type:id:N]] or [[type:N]] links by batch PK lookup."""
     matches = list(pattern.finditer(text))
@@ -229,13 +271,34 @@ def _render_by_id(
     qs = model.objects.filter(pk__in=ids)
     if lt.select_related:
         qs = qs.select_related(*lt.select_related)
+    if lt.prefetch_related:
+        qs = qs.prefetch_related(*lt.prefetch_related)
     by_id = {obj.pk: obj for obj in qs}
+
+    # Build unique-ID → index mapping in order of first appearance
+    # (for format_link renderers that need sequential numbering).
+    index_by_id: dict[int, int] = {}
+    if lt.format_link:
+        for match in matches:
+            obj_id = int(match.group(1))
+            if obj_id not in index_by_id:
+                index_by_id[obj_id] = len(index_by_id) + 1
+
+    # Collect metadata for each unique resolved object (if requested).
+    if metadata_out is not None and lt.collect_metadata:
+        for obj_id, index in index_by_id.items():
+            obj = by_id.get(obj_id)
+            if obj is not None:
+                metadata_out.append(lt.collect_metadata(obj, index))
 
     result = text
     for match in reversed(matches):
         obj_id = int(match.group(1))
         obj = by_id.get(obj_id)
-        replacement = _format_link(lt, obj, base_url, plain_text)
+        if lt.format_link:
+            replacement = lt.format_link(obj, index_by_id[obj_id], base_url, plain_text)
+        else:
+            replacement = _format_link(lt, obj, base_url, plain_text)
         result = result[: match.start()] + replacement + result[match.end() :]
     return result
 

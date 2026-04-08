@@ -150,16 +150,18 @@
 		return () => document.removeEventListener('pointerdown', onPointerDown);
 	});
 
+	const inputId = `searchable-select-${Math.random().toString(36).slice(2, 8)}`;
 	const listboxId = `listbox-${Math.random().toString(36).slice(2, 8)}`;
 </script>
 
 <div class="searchable-select">
 	{#if label}
-		<span class="filter-label">{label}</span>
+		<label class="filter-label" for={inputId}>{label}</label>
 	{/if}
 
 	<div class="input-wrap">
 		<input
+			id={inputId}
 			bind:this={inputEl}
 			type="text"
 			role="combobox"

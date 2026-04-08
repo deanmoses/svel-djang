@@ -8,6 +8,7 @@ from pathlib import PurePosixPath
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
+from apps.core.entity_types import resolve_entity_type
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from ninja import File, Form, Router, Schema, Status, UploadedFile
@@ -115,12 +116,12 @@ def _resolve_entity(entity_type: str, slug: str):
     """Resolve entity_type + slug to (ContentType, entity instance).
 
     Derives the model name by stripping hyphens from entity_type
-    (e.g. "machine-model" -> "machinemodel"), matching ContentType.model.
+    (e.g. "corporate-entity" -> "corporateentity"), matching ContentType.model.
     No registry needed — any model that inherits MediaSupported is valid.
 
     Returns (content_type, entity) or raises HttpError.
     """
-    model_name = entity_type.replace("-", "")
+    model_name = resolve_entity_type(entity_type)
     try:
         ct = ContentType.objects.get(model=model_name)
     except ContentType.DoesNotExist:

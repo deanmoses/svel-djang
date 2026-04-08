@@ -10,7 +10,7 @@ export const ENTITY_TYPES = [
 	{ value: 'franchise', label: 'Franchise' },
 	{ value: 'gameformat', label: 'Game Format' },
 	{ value: 'gameplayfeature', label: 'Gameplay Feature' },
-	{ value: 'machinemodel', label: 'Machine Model' },
+	{ value: 'model', label: 'Model' },
 	{ value: 'manufacturer', label: 'Manufacturer' },
 	{ value: 'person', label: 'Person' },
 	{ value: 'rewardtype', label: 'Reward Type' },
@@ -27,7 +27,7 @@ export type EntityTypeValue = (typeof ENTITY_TYPES)[number]['value'];
 
 export const MEDIA_CATEGORIES = {
 	gameplayfeature: ['other'],
-	machinemodel: ['backglass', 'playfield', 'cabinet', 'other'],
 	manufacturer: ['logo', 'other'],
+	model: ['backglass', 'playfield', 'cabinet', 'other'],
 	person: ['portrait', 'other']
 } as const;

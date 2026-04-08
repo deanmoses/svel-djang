@@ -17,11 +17,14 @@ from typing import Optional
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from apps.core.entity_types import resolve_entity_type
 from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
 from ninja.responses import Status
 
+from .evidence import build_cited_changesets
+from .helpers import claims_prefetch
 from .schemas import FieldChangeSchema, RetractionSchema
 
 
@@ -58,6 +61,29 @@ class ChangeSetDetailSchema(Schema):
     retractions: list[RetractionSchema]
 
 
+class EvidenceLinkSchema(Schema):
+    url: str
+    label: str
+
+
+class CitedChangeSetCitationSchema(Schema):
+    source_name: str
+    source_type: str
+    author: str
+    year: Optional[int] = None
+    locator: str
+    links: list[EvidenceLinkSchema] = []
+
+
+class CitedChangeSetSchema(Schema):
+    id: int
+    user_display: Optional[str] = None
+    note: str
+    created_at: str
+    fields: list[str]
+    citations: list[CitedChangeSetCitationSchema]
+
+
 def _parse_aware_datetime(value: str) -> datetime | None:
     """Parse an ISO datetime string, ensuring timezone awareness."""
     from django.utils import timezone as tz
@@ -72,6 +98,25 @@ def _parse_aware_datetime(value: str) -> datetime | None:
 
 
 pages_router = Router(tags=["private"])
+
+
+@pages_router.get(
+    "/evidence/{entity_type}/{slug}/",
+    response={200: list[CitedChangeSetSchema], 404: dict},
+)
+def cited_edit_evidence(request, entity_type: str, slug: str):
+    """Return active cited user edits for the requested entity."""
+    model_name = resolve_entity_type(entity_type)
+    try:
+        ct = ContentType.objects.get(app_label="catalog", model=model_name)
+    except ContentType.DoesNotExist:
+        return Status(404, {"detail": "Unknown entity type."})
+
+    model_class = ct.model_class()
+    entity = get_object_or_404(
+        model_class.objects.active().prefetch_related(claims_prefetch()), slug=slug
+    )
+    return build_cited_changesets(getattr(entity, "active_claims", []))
 
 
 @pages_router.get("/changes/", response=ChangesListSchema)
@@ -119,7 +164,9 @@ def list_changes(
 
     if entity_type:
         try:
-            ct = ContentType.objects.get(app_label="catalog", model=entity_type)
+            ct = ContentType.objects.get(
+                app_label="catalog", model=resolve_entity_type(entity_type)
+            )
         except ContentType.DoesNotExist:
             return {"items": [], "next_cursor": None}
         qs = qs.filter(

@@ -10,6 +10,8 @@ from django.db import models
 from django.db.models.functions import Now
 from django.db.models.signals import post_delete
 
+from django.utils.text import slugify
+
 from .validators import validate_no_mojibake as _validate_no_mojibake
 
 
@@ -120,8 +122,6 @@ def unique_slug(obj, source: str, fallback: str = "item") -> str:
     Appends a counter suffix (-2, -3, …) until the slug is unique within
     the model's table.
     """
-    from django.utils.text import slugify
-
     base = slugify(source) or fallback
     slug = base
     counter = 2

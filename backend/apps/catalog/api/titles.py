@@ -19,24 +19,42 @@ from .constants import DEFAULT_PAGE_SIZE
 from .edit_claims import (
     execute_claims,
     plan_abbreviation_claims,
+    plan_scalar_field_claims,
 )
 from apps.provenance.helpers import build_sources, claims_prefetch
 
 from .helpers import (
     _build_rich_text,
     _extract_image_urls,
+    _intersect_facet_sets,
+    _serialize_credit,
     _serialize_title_machine,
 )
 from .machine_models import CreditSchema, MachineModelDetailSchema
 from .schemas import (
     ClaimSchema,
+    EditCitationInput,
     GameplayFeatureSchema,
     RichTextSchema,
     SeriesRefSchema,
     ThemeSchema,
     TitleMachineSchema,
 )
+import re
+from collections import defaultdict
+
+from django.db.models import Min, OuterRef, Subquery
+
+from apps.core.licensing import get_minimum_display_rank
+
 from ..cache import TITLES_ALL_KEY, get_cached_response, set_cached_response
+from ..models import (
+    Credit,
+    MachineModel,
+    MachineModelGameplayFeature,
+    Title,
+    TitleAbbreviation,
+)
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -116,6 +134,7 @@ class TitleClaimPatchSchema(Schema):
     fields: dict[str, Any] = {}
     abbreviations: list[str] | None = None
     note: str = ""
+    citation: EditCitationInput | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -224,13 +243,9 @@ def _serialize_title_list(title, *, min_rank: int | None = None) -> dict:
 
 def _build_review_links(title) -> list[dict]:
     """Build external/internal review links for a needs_review title."""
-    from ..models import Title
-
     links: list[dict] = []
 
     # Related titles by name match (only OPDB-backed ones).
-    import re
-
     base_name = re.sub(r"\s*\([^)]*\)\s*$", "", title.name).strip()
     related = (
         Title.objects.active()
@@ -274,13 +289,17 @@ def _compute_agreed_specs(models) -> dict:
 
     specs: dict = {}
 
-    tg = _agreed_value(models, lambda m: _fk_pair(m, "technology_generation"))
-    if tg:
-        specs["technology_generation"] = {"name": tg[0], "slug": tg[1]}
-
-    dt = _agreed_value(models, lambda m: _fk_pair(m, "display_type"))
-    if dt:
-        specs["display_type"] = {"name": dt[0], "slug": dt[1]}
+    for key, attr in (
+        ("technology_generation", "technology_generation"),
+        ("display_type", "display_type"),
+        ("system", "system"),
+        ("cabinet", "cabinet"),
+        ("game_format", "game_format"),
+        ("display_subtype", "display_subtype"),
+    ):
+        val = _agreed_value(models, lambda m, a=attr: _fk_pair(m, a))
+        if val:
+            specs[key] = {"name": val[0], "slug": val[1]}
 
     pc = _agreed_value(models, lambda m: m.player_count)
     if pc is not None:
@@ -289,22 +308,6 @@ def _compute_agreed_specs(models) -> dict:
     fc = _agreed_value(models, lambda m: m.flipper_count)
     if fc is not None:
         specs["flipper_count"] = fc
-
-    sys = _agreed_value(models, lambda m: _fk_pair(m, "system"))
-    if sys:
-        specs["system"] = {"name": sys[0], "slug": sys[1]}
-
-    cab = _agreed_value(models, lambda m: _fk_pair(m, "cabinet"))
-    if cab:
-        specs["cabinet"] = {"name": cab[0], "slug": cab[1]}
-
-    gf = _agreed_value(models, lambda m: _fk_pair(m, "game_format"))
-    if gf:
-        specs["game_format"] = {"name": gf[0], "slug": gf[1]}
-
-    dst = _agreed_value(models, lambda m: _fk_pair(m, "display_subtype"))
-    if dst:
-        specs["display_subtype"] = {"name": dst[0], "slug": dst[1]}
 
     pq = _agreed_value(models, lambda m: m.production_quantity or None)
     if pq:
@@ -319,8 +322,7 @@ def _compute_agreed_specs(models) -> dict:
     ):
         specs["themes"] = [{"name": n, "slug": s} for s, n in sorted(theme_sets[0])]
 
-    # Gameplay features: intersection across all models.
-    # Build {slug: (name, count)} per model from prefetched through-model rows.
+    # Gameplay features: intersection across all models (with count agreement).
     gf_maps: list[dict[str, tuple[str, int | None]]] = []
     for m in models:
         gf_map: dict[str, tuple[str, int | None]] = {}
@@ -329,7 +331,6 @@ def _compute_agreed_specs(models) -> dict:
         gf_maps.append(gf_map)
 
     if gf_maps and all(gf_maps):
-        # Intersect on slug; include count only when all models agree.
         common_slugs = set(gf_maps[0])
         for gf_map in gf_maps[1:]:
             common_slugs &= set(gf_map)
@@ -343,22 +344,14 @@ def _compute_agreed_specs(models) -> dict:
             specs["gameplay_features"] = result
 
     # Reward types: intersection across all models.
-    rt_sets = [
-        frozenset((rt.slug, rt.name) for rt in m.reward_types.all()) for m in models
-    ]
-    if rt_sets and all(rt_sets):
-        common = rt_sets[0]
-        for s in rt_sets[1:]:
-            common &= s
-        if common:
-            specs["reward_types"] = [{"slug": s, "name": n} for s, n in sorted(common)]
+    rt = _intersect_facet_sets(models, "reward_types")
+    if rt:
+        specs["reward_types"] = rt
 
     return specs
 
 
 def _serialize_title_detail(title) -> dict:
-    from apps.core.licensing import get_minimum_display_rank
-
     min_rank = get_minimum_display_rank()
     model_objs = list(title.machine_models.all())
     machines = [_serialize_title_machine(pm, min_rank=min_rank) for pm in model_objs]
@@ -383,22 +376,13 @@ def _serialize_title_detail(title) -> dict:
         for c in pm.credits.all():
             key = (c.person.slug, c.role.slug)
             model_keys.add(key)
-            credit_data.setdefault(
-                key,
-                {
-                    "person": {"name": c.person.name, "slug": c.person.slug},
-                    "role": c.role.slug,
-                    "role_display": c.role.name,
-                    "role_sort_order": c.role.display_order,
-                },
-            )
+            credit_data.setdefault(key, _serialize_credit(c))
         credit_sets.append(model_keys)
 
     if credit_sets:
         common_keys = credit_sets[0]
         for s in credit_sets[1:]:
             common_keys &= s
-        # Preserve insertion order from credit_data (first model's ordering).
         credits = [v for k, v in credit_data.items() if k in common_keys]
     else:
         credits = []
@@ -409,7 +393,7 @@ def _serialize_title_detail(title) -> dict:
     # For single-model titles with no variants, include full model detail inline.
     model_detail = None
     if len(machines) == 1 and not machines[0].get("variants"):
-        from .machine_models import _model_detail_qs, _serialize_model_detail
+        from .machine_models import _model_detail_qs, _serialize_model_detail  # noqa: E402 — avoid circular at module level
 
         pm = _model_detail_qs().get(slug=machines[0]["slug"])
         model_detail = _serialize_model_detail(pm)
@@ -442,8 +426,6 @@ def _serialize_title_detail(title) -> dict:
 
 
 def _title_models_prefetch():
-    from ..models import MachineModel, MachineModelGameplayFeature
-
     return Prefetch(
         "machine_models",
         queryset=MachineModel.objects.active()
@@ -476,8 +458,6 @@ def _title_models_prefetch():
 
 
 def _detail_qs():
-    from ..models import Title
-
     return (
         Title.objects.active()
         .select_related("franchise")
@@ -500,8 +480,6 @@ titles_router = Router(tags=["titles"])
 @titles_router.get("/", response=list[TitleListSchema])
 @paginate(PageNumberPagination, page_size=DEFAULT_PAGE_SIZE)
 def list_titles(request, display: str = ""):
-    from ..models import Title
-
     qs = Title.objects.active().annotate(
         machine_count=Count(
             "machine_models",
@@ -516,8 +494,6 @@ def list_titles(request, display: str = ""):
         .prefetch_related(_title_models_prefetch(), "series", "abbreviations")
         .order_by("name")
     )
-    from apps.core.licensing import get_minimum_display_rank
-
     min_rank = get_minimum_display_rank()
     return [_serialize_title_list(t, min_rank=min_rank) for t in qs]
 
@@ -543,17 +519,9 @@ def list_all_titles(request):
     This reduces cold-cache rebuild from ~3.5s to ~0.5s locally
     (~30s to ~5s on production hardware).
     """
-    from collections import defaultdict
-
-    from django.db.models import Min, Subquery, OuterRef
-
-    from ..models import Credit, MachineModel, Title, TitleAbbreviation
-
     response = get_cached_response(TITLES_ALL_KEY)
     if response is not None:
         return response
-
-    from apps.core.licensing import get_minimum_display_rank
 
     # Cached once for the entire rebuild — avoids ~6k Constance DB lookups.
     min_rank = get_minimum_display_rank()
@@ -790,9 +758,6 @@ def list_all_titles(request):
 )
 def patch_title_claims(request, slug: str, data: TitleClaimPatchSchema):
     """Assert title-owned claims and return the refreshed title detail."""
-    from ..models import Title
-    from .edit_claims import plan_scalar_field_claims
-
     if not data.fields and data.abbreviations is None:
         raise HttpError(422, "No changes provided.")
 
@@ -811,7 +776,13 @@ def patch_title_claims(request, slug: str, data: TitleClaimPatchSchema):
     if not specs:
         raise HttpError(422, "No changes provided.")
 
-    execute_claims(title, specs, user=request.user, note=data.note)
+    execute_claims(
+        title,
+        specs,
+        user=request.user,
+        note=data.note,
+        citation=data.citation,
+    )
 
     title = get_object_or_404(_detail_qs(), slug=title.slug)
     return _serialize_title_detail(title)

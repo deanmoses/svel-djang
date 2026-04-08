@@ -48,6 +48,18 @@ class TestListLinkTypes:
         assert names.index("title") < names.index("tag")
         assert names.index("manufacturer") < names.index("cabinet")
 
+    def test_cite_type_in_picker_with_custom_flow(self, api):
+        resp = api.get("/api/link-types/")
+        types_by_name = {t["name"]: t for t in resp.json()}
+        assert "cite" in types_by_name
+        assert types_by_name["cite"]["flow"] == "custom"
+        assert types_by_name["cite"]["label"] == "Citation"
+
+    def test_all_types_include_flow_field(self, api):
+        resp = api.get("/api/link-types/")
+        for t in resp.json():
+            assert "flow" in t, f"Missing 'flow' field on link type {t['name']}"
+
 
 @pytest.mark.django_db
 class TestSearchLinkTargets:

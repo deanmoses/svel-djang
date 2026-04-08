@@ -54,7 +54,7 @@ describe('titleToFormState', () => {
 });
 
 describe('buildTitlePatchBody', () => {
-	it('builds the expected PATCH payload for fields, abbreviations, and note', () => {
+	it('builds the expected PATCH payload for fields and abbreviations', () => {
 		const body = buildTitlePatchBody(
 			{
 				slug: 'medieval-madness-remastered',
@@ -63,8 +63,7 @@ describe('buildTitlePatchBody', () => {
 				franchiseSlug: '',
 				abbreviationsText: 'MM, MMR'
 			},
-			multiModelTitle,
-			'Grouped title edit'
+			multiModelTitle
 		);
 
 		expect(body).toEqual({
@@ -74,13 +73,12 @@ describe('buildTitlePatchBody', () => {
 				description: 'Updated title copy',
 				franchise: null
 			},
-			abbreviations: ['MM', 'MMR'],
-			note: 'Grouped title edit'
+			abbreviations: ['MM', 'MMR']
 		});
 	});
 
 	it('returns null when nothing changed', () => {
-		expect(buildTitlePatchBody(titleToFormState(multiModelTitle), multiModelTitle, '')).toBeNull();
+		expect(buildTitlePatchBody(titleToFormState(multiModelTitle), multiModelTitle)).toBeNull();
 	});
 });
 

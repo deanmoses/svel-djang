@@ -36,6 +36,21 @@ from .schemas import (
 )
 from .titles import FacetRef, _dedup_facet_refs
 
+from collections import defaultdict
+
+from apps.core.licensing import get_minimum_display_rank
+
+from ..models import (
+    CorporateEntity,
+    CorporateEntityAlias,
+    CorporateEntityLocation,
+    Credit,
+    MachineModel,
+    Manufacturer,
+    System,
+)
+from .edit_claims import execute_claims, plan_scalar_field_claims
+
 # ---------------------------------------------------------------------------
 # Schemas
 # ---------------------------------------------------------------------------
@@ -185,10 +200,6 @@ def _serialize_manufacturer_detail(mfr) -> dict:
 
 
 def _manufacturer_qs():
-    from ..models import CorporateEntity, MachineModel, Manufacturer, System
-
-    from ..models import CorporateEntityLocation
-
     return Manufacturer.objects.active().prefetch_related(
         Prefetch(
             "entities",
@@ -243,8 +254,6 @@ manufacturers_router = Router(tags=["manufacturers"])
 @manufacturers_router.get("/", response=list[ManufacturerSchema])
 @paginate(PageNumberPagination, page_size=DEFAULT_PAGE_SIZE)
 def list_manufacturers(request):
-    from ..models import Manufacturer
-
     return list(
         Manufacturer.objects.active()
         .annotate(
@@ -267,24 +276,11 @@ def list_all_manufacturers(request):
     deep prefetch + Python iteration.  See ``list_all_titles`` for the
     full explanation of this pattern.
     """
-    from collections import defaultdict
-
-    from apps.core.licensing import get_minimum_display_rank
-
     response = get_cached_response(MANUFACTURERS_ALL_KEY)
     if response is not None:
         return response
 
     min_rank = get_minimum_display_rank()
-
-    from ..models import (
-        CorporateEntity,
-        CorporateEntityAlias,
-        CorporateEntityLocation,
-        Credit,
-        MachineModel,
-        Manufacturer,
-    )
 
     # --- Main query with annotations ---
     manufacturers = list(
@@ -472,15 +468,13 @@ def list_all_manufacturers(request):
 )
 def patch_manufacturer_claims(request, slug: str, data: ClaimPatchSchema):
     """Assert per-field claims from the authenticated user, then re-resolve."""
-    from .edit_claims import execute_claims, plan_scalar_field_claims
-
-    from ..models import Manufacturer
-
     mfr = get_object_or_404(Manufacturer.objects.active(), slug=slug)
 
     specs = plan_scalar_field_claims(Manufacturer, data.fields, entity=mfr)
 
-    execute_claims(mfr, specs, user=request.user)
+    execute_claims(
+        mfr, specs, user=request.user, note=data.note, citation=data.citation
+    )
 
     mfr = get_object_or_404(_manufacturer_qs(), slug=mfr.slug)
     return _serialize_manufacturer_detail(mfr)

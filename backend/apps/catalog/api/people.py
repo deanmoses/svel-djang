@@ -30,6 +30,11 @@ from .schemas import (
     UploadedMediaSchema,
 )
 
+from apps.core.licensing import get_minimum_display_rank
+
+from ..models import Credit, MachineModel, Person
+from .edit_claims import execute_claims, plan_scalar_field_claims
+
 # ---------------------------------------------------------------------------
 # Schemas
 # ---------------------------------------------------------------------------
@@ -82,8 +87,6 @@ def _serialize_person_detail(person) -> dict:
     (select_related model, model__title, model__manufacturer) and claims
     (to_attr="active_claims").
     """
-    from apps.core.licensing import get_minimum_display_rank
-
     min_rank = get_minimum_display_rank()
     titles: dict[str, dict] = {}
     for c in person.credits.all():
@@ -141,8 +144,6 @@ def _serialize_person_detail(person) -> dict:
 
 
 def _person_qs():
-    from ..models import Credit, Person
-
     return Person.objects.active().prefetch_related(
         Prefetch(
             "credits",
@@ -167,8 +168,6 @@ people_router = Router(tags=["people"])
 @people_router.get("/", response=list[PersonSchema])
 @paginate(PageNumberPagination, page_size=DEFAULT_PAGE_SIZE)
 def list_people(request):
-    from ..models import Person
-
     return list(
         Person.objects.active()
         .annotate(credit_count=Count("credits"))
@@ -186,15 +185,11 @@ def list_all_people(request):
     thumbnails, instead of prefetching all credits and iterating in Python.
     See ``list_all_titles`` for the full explanation of this pattern.
     """
-    from apps.core.licensing import get_minimum_display_rank
-
     response = get_cached_response(PEOPLE_ALL_KEY)
     if response is not None:
         return response
 
     min_rank = get_minimum_display_rank()
-
-    from ..models import Credit, MachineModel, Person
 
     people = list(
         Person.objects.active()
@@ -246,15 +241,13 @@ def list_all_people(request):
 )
 def patch_person_claims(request, slug: str, data: ClaimPatchSchema):
     """Assert per-field claims from the authenticated user, then re-resolve."""
-    from .edit_claims import execute_claims, plan_scalar_field_claims
-
-    from ..models import Person
-
     person = get_object_or_404(Person.objects.active(), slug=slug)
 
     specs = plan_scalar_field_claims(Person, data.fields, entity=person)
 
-    execute_claims(person, specs, user=request.user)
+    execute_claims(
+        person, specs, user=request.user, note=data.note, citation=data.citation
+    )
 
     person = get_object_or_404(_person_qs(), slug=person.slug)
     return _serialize_person_detail(person)

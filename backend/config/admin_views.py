@@ -17,7 +17,7 @@ _RESOLVE_OPTIONS = [
     ("themes", "Themes", "~600 entities, < 1s"),
     ("gameplay-features", "Gameplay Features", "~170 entities, < 1s"),
     ("titles", "Titles", "~6,000 entities, ~3s"),
-    ("models", "Machine Models + relationships", "~7,000 entities, ~20s"),
+    ("models", "Models + relationships", "~7,000 entities, ~20s"),
     ("all", "Everything", "All of the above in dependency order, ~25s"),
 ]
 

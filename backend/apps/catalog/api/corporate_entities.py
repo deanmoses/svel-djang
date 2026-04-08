@@ -30,6 +30,8 @@ from .schemas import (
     RichTextSchema,
 )
 
+from ..models import CorporateEntity, CorporateEntityLocation, MachineModel
+
 # ---------------------------------------------------------------------------
 # Schemas
 # ---------------------------------------------------------------------------
@@ -69,8 +71,6 @@ class CorporateEntityDetailSchema(Schema):
 
 
 def _detail_qs():
-    from ..models import CorporateEntity, CorporateEntityLocation, MachineModel
-
     return (
         CorporateEntity.objects.active()
         .select_related("manufacturer")
@@ -121,8 +121,6 @@ corporate_entities_router = Router(tags=["corporate-entities"])
 @corporate_entities_router.get("/", response=list[CorporateEntityListSchema])
 @decorate_view(cache_control(no_cache=True))
 def list_corporate_entities(request):
-    from ..models import CorporateEntity, CorporateEntityLocation
-
     qs = (
         CorporateEntity.objects.active()
         .select_related("manufacturer")
@@ -169,8 +167,6 @@ def patch_corporate_entity_claims(
     request, slug: str, data: CorporateEntityClaimPatchSchema
 ):
     """Assert per-field claims from the authenticated user, then re-resolve."""
-    from ..models import CorporateEntity
-
     if not data.fields and data.aliases is None:
         raise HttpError(422, "No changes provided.")
 
@@ -190,7 +186,7 @@ def patch_corporate_entity_claims(
     if not specs:
         raise HttpError(422, "No changes provided.")
 
-    execute_claims(ce, specs, user=request.user, note=data.note)
+    execute_claims(ce, specs, user=request.user, note=data.note, citation=data.citation)
 
     ce = get_object_or_404(_detail_qs(), slug=ce.slug)
     return _serialize_detail(ce)

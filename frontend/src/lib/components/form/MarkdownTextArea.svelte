@@ -1,8 +1,8 @@
 <script lang="ts">
 	import FieldGroup from './FieldGroup.svelte';
-	import { fetchLinkTypes, searchLinkTargets } from '$lib/api/link-types';
-	import type { LinkType, LinkTarget } from '$lib/api/link-types';
-	import { detectTrigger, formatLinkText, spliceLink } from './wikilink-helpers';
+	import WikilinkAutocomplete from './WikilinkAutocomplete.svelte';
+	import { fetchLinkTypes } from '$lib/api/link-types';
+	import { detectTrigger, spliceLink } from './wikilink-helpers';
 	import {
 		toggleMarker,
 		wrapSelection,
@@ -13,6 +13,9 @@
 		applyResult
 	} from './markdown-shortcuts';
 	import type { EditResult } from './markdown-shortcuts';
+
+	// Prefetch link types on mount so the cache is warm by the time user types [[
+	fetchLinkTypes();
 
 	let {
 		label,
@@ -33,29 +36,14 @@
 	let textareaEl: HTMLTextAreaElement | undefined = $state();
 	let wrapperEl: HTMLDivElement | undefined = $state();
 	let mirrorEl: HTMLDivElement | undefined = $state();
+	let autocompleteEl: HTMLDivElement | undefined = $state();
+	let autocompleteRef: WikilinkAutocomplete | undefined = $state();
 
 	// Dropdown state
 	let open = $state(false);
-	let stage = $state<'type' | 'search'>('type');
 	let triggerStart = $state(-1);
 	let dropdownLeft = $state(0);
 	let dropdownTop = $state(0);
-
-	// Type picker
-	let linkTypes = $state<LinkType[]>([]);
-	let typeIndex = $state(-1);
-
-	// Search
-	let selectedType = $state<LinkType | null>(null);
-	let searchQuery = $state('');
-	let searchResults = $state<LinkTarget[]>([]);
-	let searchIndex = $state(-1);
-	let searchInputEl: HTMLInputElement | undefined = $state();
-	let debounceTimer: ReturnType<typeof setTimeout> | undefined;
-	let searchGeneration = 0;
-
-	// Prefetch link types on mount so they're cached by the time user types [[
-	fetchLinkTypes();
 
 	// -----------------------------------------------------------------------
 	// Cursor position via mirror div
@@ -108,60 +96,24 @@
 		const pos = detectTrigger(textareaEl.value, textareaEl.selectionStart);
 		if (pos >= 0) {
 			triggerStart = pos;
-			openTypePicker();
+			openDropdown();
 		}
 	}
 
 	// -----------------------------------------------------------------------
-	// Type picker stage
+	// Dropdown management
 	// -----------------------------------------------------------------------
 
-	async function openTypePicker() {
+	function openDropdown() {
 		const pos = getCursorPosition();
 		dropdownLeft = pos.left;
 		dropdownTop = pos.top;
-
-		linkTypes = await fetchLinkTypes();
-		typeIndex = 0;
-		stage = 'type';
 		open = true;
 	}
 
-	function selectType(lt: LinkType) {
-		selectedType = lt;
-		searchQuery = '';
-		searchResults = [];
-		searchIndex = -1;
-		stage = 'search';
-
-		requestAnimationFrame(() => searchInputEl?.focus());
-		doSearch('');
-	}
-
-	// -----------------------------------------------------------------------
-	// Search stage
-	// -----------------------------------------------------------------------
-
-	function handleSearchInput(e: Event) {
-		searchQuery = (e.currentTarget as HTMLInputElement).value;
-		searchIndex = -1;
-		clearTimeout(debounceTimer);
-		// Immediate fetch for empty query (showing all results), debounced otherwise
-		const delay = searchQuery ? 200 : 0;
-		debounceTimer = setTimeout(() => doSearch(searchQuery), delay);
-	}
-
-	async function doSearch(q: string) {
-		if (!selectedType) return;
-		const gen = ++searchGeneration;
-		const response = await searchLinkTargets(selectedType.name, q);
-		if (gen !== searchGeneration) return;
-		searchResults = response.results;
-	}
-
-	function selectResult(target: LinkTarget) {
-		if (!textareaEl || !selectedType || triggerStart < 0) return;
-		insertWikilink(formatLinkText(selectedType.name, target.ref));
+	function closeDropdown() {
+		open = false;
+		triggerStart = -1;
 	}
 
 	// -----------------------------------------------------------------------
@@ -171,8 +123,8 @@
 	function insertWikilink(linkText: string) {
 		if (!textareaEl) return;
 
-		const replaceEnd = textareaEl.selectionStart;
 		textareaEl.focus();
+		const replaceEnd = textareaEl.selectionStart;
 		textareaEl.setSelectionRange(triggerStart, replaceEnd);
 
 		if (!document.execCommand('insertText', false, linkText)) {
@@ -203,11 +155,10 @@
 		if (e.isComposing) return;
 
 		// Wikilink dropdown keyboard nav takes priority when open
-		if (open && stage === 'type') {
-			handleTypeKeydown(e);
+		if (open) {
+			autocompleteRef?.handleExternalKeydown(e);
 			return;
 		}
-		if (open) return;
 
 		if (!textareaEl) return;
 		const { value: v, selectionStart: s, selectionEnd: end } = textareaEl;
@@ -270,22 +221,6 @@
 		}
 	}
 
-	// -----------------------------------------------------------------------
-	// Dropdown management
-	// -----------------------------------------------------------------------
-
-	function closeDropdown() {
-		open = false;
-		stage = 'type';
-		selectedType = null;
-		searchQuery = '';
-		searchResults = [];
-		typeIndex = -1;
-		searchIndex = -1;
-		triggerStart = -1;
-		clearTimeout(debounceTimer);
-	}
-
 	// Click outside to close
 	$effect(() => {
 		if (!open) return;
@@ -294,8 +229,8 @@
 				closeDropdown();
 			}
 		}
-		document.addEventListener('pointerdown', onPointerDown);
-		return () => document.removeEventListener('pointerdown', onPointerDown);
+		document.addEventListener('pointerdown', onPointerDown, true);
+		return () => document.removeEventListener('pointerdown', onPointerDown, true);
 	});
 
 	// Clicking the textarea itself closes the dropdown
@@ -303,120 +238,26 @@
 		if (open) closeDropdown();
 	}
 
-	// Close on blur, with delay to allow focus to move between textarea and search input
+	// Close on blur, with delay to allow focus to settle between elements
 	const BLUR_DELAY_MS = 150;
 
 	function handleTextareaBlur() {
-		if (!open || stage !== 'type') return;
-		setTimeout(() => {
-			if (!searchInputEl?.matches(':focus')) {
-				closeDropdown();
-			}
-		}, BLUR_DELAY_MS);
-	}
-
-	function handleSearchBlur() {
 		if (!open) return;
 		setTimeout(() => {
-			if (!textareaEl?.matches(':focus') && !searchInputEl?.matches(':focus')) {
+			if (!autocompleteEl?.contains(document.activeElement)) {
 				closeDropdown();
 			}
 		}, BLUR_DELAY_MS);
 	}
 
-	// -----------------------------------------------------------------------
-	// Dropdown keyboard navigation
-	// -----------------------------------------------------------------------
-
-	function handleTypeKeydown(e: KeyboardEvent) {
-		switch (e.key) {
-			case 'ArrowDown':
-				e.preventDefault();
-				typeIndex = Math.min(typeIndex + 1, linkTypes.length - 1);
-				break;
-			case 'ArrowUp':
-				e.preventDefault();
-				typeIndex = Math.max(typeIndex - 1, 0);
-				break;
-			case 'Enter':
-			case 'ArrowRight':
-				e.preventDefault();
-				if (typeIndex >= 0 && typeIndex < linkTypes.length) {
-					selectType(linkTypes[typeIndex]);
-				}
-				break;
-			case 'Escape':
-				e.preventDefault();
+	function handleAutocompleteFocusout() {
+		if (!open) return;
+		setTimeout(() => {
+			const active = document.activeElement;
+			if (active !== textareaEl && !autocompleteEl?.contains(active)) {
 				closeDropdown();
-				textareaEl?.focus();
-				break;
-			case 'Backspace':
-			case 'ArrowLeft':
-				// Browser will delete a [ / move cursor — close since trigger is being left
-				closeDropdown();
-				break;
-		}
-	}
-
-	function handleSearchKeydown(e: KeyboardEvent) {
-		switch (e.key) {
-			case 'ArrowDown':
-				e.preventDefault();
-				searchIndex = Math.min(searchIndex + 1, searchResults.length - 1);
-				scrollActiveIntoView();
-				break;
-			case 'ArrowUp':
-				e.preventDefault();
-				searchIndex = Math.max(searchIndex - 1, 0);
-				scrollActiveIntoView();
-				break;
-			case 'Enter':
-				e.preventDefault();
-				if (searchIndex >= 0 && searchIndex < searchResults.length) {
-					selectResult(searchResults[searchIndex]);
-				}
-				break;
-			case 'Escape':
-				e.preventDefault();
-				closeDropdown();
-				textareaEl?.focus();
-				break;
-			case 'Backspace':
-				if (!searchQuery) {
-					e.preventDefault();
-					goBackToTypePicker();
-				}
-				break;
-			case 'ArrowLeft':
-				if (searchInputEl && searchInputEl.selectionStart === 0) {
-					e.preventDefault();
-					goBackToTypePicker();
-				}
-				break;
-		}
-	}
-
-	function goBackToTypePicker() {
-		stage = 'type';
-		selectedType = null;
-		searchQuery = '';
-		searchResults = [];
-		searchIndex = -1;
-		typeIndex = 0;
-		clearTimeout(debounceTimer);
-		requestAnimationFrame(() => {
-			textareaEl?.focus();
-			// Restore cursor to right after [[
-			if (textareaEl && triggerStart >= 0) {
-				textareaEl.setSelectionRange(triggerStart + 2, triggerStart + 2);
 			}
-		});
-	}
-
-	function scrollActiveIntoView() {
-		requestAnimationFrame(() => {
-			wrapperEl?.querySelector('[data-active="true"]')?.scrollIntoView({ block: 'nearest' });
-		});
+		}, BLUR_DELAY_MS);
 	}
 </script>
 
@@ -443,77 +284,22 @@
 	{#if open}
 		<div
 			class="link-dropdown"
-			role="listbox"
+			role="presentation"
 			style:left="{dropdownLeft}px"
 			style:top="{dropdownTop}px"
+			bind:this={autocompleteEl}
+			onmousedown={(e) => e.preventDefault()}
+			onfocusout={handleAutocompleteFocusout}
 		>
-			{#if stage === 'type'}
-				<div class="dropdown-header">Insert link</div>
-				{#each linkTypes as lt, i (lt.name)}
-					<div
-						role="option"
-						tabindex="-1"
-						aria-selected={i === typeIndex}
-						data-active={i === typeIndex}
-						class="dropdown-item"
-						class:active={i === typeIndex}
-						onpointerdown={(e) => {
-							e.preventDefault();
-							selectType(lt);
-						}}
-					>
-						<span class="item-label">{lt.label}</span>
-						<span class="item-desc">{lt.description}</span>
-					</div>
-				{/each}
-			{:else}
-				<div class="dropdown-header">
-					<button
-						class="back-btn"
-						onpointerdown={(e) => {
-							e.preventDefault();
-							goBackToTypePicker();
-						}}
-					>
-						&larr;
-					</button>
-					{selectedType?.label}
-				</div>
-				<div class="search-wrap">
-					<input
-						bind:this={searchInputEl}
-						type="text"
-						class="search-input"
-						placeholder="Search {selectedType?.label ?? ''}..."
-						value={searchQuery}
-						oninput={handleSearchInput}
-						onkeydown={handleSearchKeydown}
-						onblur={handleSearchBlur}
-					/>
-				</div>
-				<div class="results-list">
-					{#each searchResults as target, i (target.ref)}
-						<div
-							role="option"
-							tabindex="-1"
-							aria-selected={i === searchIndex}
-							data-active={i === searchIndex}
-							class="dropdown-item"
-							class:active={i === searchIndex}
-							onpointerdown={(e) => {
-								e.preventDefault();
-								selectResult(target);
-							}}
-						>
-							<span class="item-label">{target.label}</span>
-						</div>
-					{:else}
-						<div class="no-results">
-							{searchQuery ? 'No matches' : 'Type to search...'}
-						</div>
-					{/each}
-				</div>
-			{/if}
+			<WikilinkAutocomplete
+				bind:this={autocompleteRef}
+				oncomplete={(linkText) => insertWikilink(linkText)}
+				oncancel={() => {
+					closeDropdown();
+					textareaEl?.focus();
+				}}
+				onfocusreturn={() => textareaEl?.focus()}
+			/>
 		</div>
 	{/if}
 </div>
@@ -549,92 +335,5 @@
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-2);
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-	}
-
-	.dropdown-header {
-		display: flex;
-		align-items: center;
-		gap: var(--size-2);
-		padding: var(--size-2) var(--size-3);
-		font-size: var(--font-size-0);
-		font-weight: 600;
-		color: var(--color-text-muted);
-		border-bottom: 1px solid var(--color-border);
-	}
-
-	.back-btn {
-		background: none;
-		border: none;
-		color: var(--color-text-muted);
-		cursor: pointer;
-		padding: 0;
-		font-size: var(--font-size-1);
-		line-height: 1;
-	}
-
-	.back-btn:hover {
-		color: var(--color-text-primary);
-	}
-
-	.dropdown-item {
-		display: flex;
-		align-items: baseline;
-		gap: var(--size-2);
-		padding: var(--size-2) var(--size-3);
-		cursor: pointer;
-		font-size: var(--font-size-1);
-	}
-
-	.dropdown-item:hover,
-	.dropdown-item.active {
-		background-color: var(--color-input-focus-ring);
-	}
-
-	.item-label {
-		flex-shrink: 0;
-	}
-
-	.item-desc {
-		color: var(--color-text-muted);
-		font-size: var(--font-size-0);
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	/* ----- Search ----- */
-
-	.search-wrap {
-		padding: var(--size-2) var(--size-3);
-		border-bottom: 1px solid var(--color-border);
-	}
-
-	.search-input {
-		width: 100%;
-		padding: var(--size-1) var(--size-2);
-		font-size: var(--font-size-1);
-		font-family: inherit;
-		background-color: var(--color-input-bg);
-		color: var(--color-text-primary);
-		border: 1px solid var(--color-input-border);
-		border-radius: var(--radius-2);
-	}
-
-	.search-input:focus {
-		outline: none;
-		border-color: var(--color-input-focus);
-		box-shadow: 0 0 0 2px var(--color-input-focus-ring);
-	}
-
-	.results-list {
-		max-height: 14rem;
-		overflow-y: auto;
-	}
-
-	.no-results {
-		padding: var(--size-3);
-		color: var(--color-text-muted);
-		text-align: center;
-		font-size: var(--font-size-1);
 	}
 </style>

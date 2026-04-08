@@ -7,7 +7,7 @@
 	let {
 		entityType,
 		slug,
-		categories = [...MEDIA_CATEGORIES.machinemodel] as string[],
+		categories = [...MEDIA_CATEGORIES.model] as string[],
 		onuploaded
 	}: {
 		entityType: string;

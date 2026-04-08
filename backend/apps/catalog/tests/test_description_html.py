@@ -120,6 +120,59 @@ class TestDescriptionAuthoringFormat:
 
 
 @pytest.mark.django_db
+class TestDescriptionCitations:
+    """API responses include inline citation metadata alongside rendered HTML."""
+
+    def test_citations_present_in_response(self, client, db):
+        from apps.citation.models import CitationSource, CitationSourceLink
+        from apps.provenance.models import CitationInstance
+
+        src = CitationSource.objects.create(
+            name="The Complete Pinball Book",
+            source_type="book",
+            author="Marco Rossignoli",
+            year=2002,
+        )
+        CitationSourceLink.objects.create(
+            citation_source=src,
+            url="https://example.com/book",
+            label="Publisher",
+            link_type="publisher",
+        )
+        ci = CitationInstance.objects.create(citation_source=src, locator="p. 150")
+
+        Manufacturer.objects.create(
+            name="Williams",
+            slug="williams",
+            description=f"Founded in 1943.[[cite:{ci.pk}]]",
+        )
+        resp = client.get("/api/pages/manufacturer/williams")
+        assert resp.status_code == 200
+        data = resp.json()
+
+        citations = data["description"]["citations"]
+        assert len(citations) == 1
+        cite = citations[0]
+        assert cite["id"] == ci.pk
+        assert cite["index"] == 1
+        assert cite["source_name"] == "The Complete Pinball Book"
+        assert cite["source_type"] == "book"
+        assert cite["author"] == "Marco Rossignoli"
+        assert cite["year"] == 2002
+        assert cite["locator"] == "p. 150"
+        assert len(cite["links"]) == 1
+        assert cite["links"][0]["url"] == "https://example.com/book"
+
+    def test_empty_citations_when_no_citations(self, client, db):
+        Manufacturer.objects.create(
+            name="Stern", slug="stern", description="Modern manufacturer."
+        )
+        resp = client.get("/api/pages/manufacturer/stern")
+        data = resp.json()
+        assert data["description"]["citations"] == []
+
+
+@pytest.mark.django_db
 class TestReferenceSync:
     def test_resolve_creates_references(self):
         """Resolving a manufacturer with links creates RecordReference rows."""

@@ -93,7 +93,7 @@ def _post_upload(client, machine_model, file=None, **extra):
         file = _create_test_image()
     data = {
         "file": file,
-        "entity_type": "machine-model",
+        "entity_type": "model",
         "slug": machine_model.slug,
         "category": "backglass",
         "is_primary": "true",
@@ -187,7 +187,7 @@ class TestUploadHappyPath:
         body = resp.json()
 
         attachment = body["attachment"]
-        assert attachment["entity_type"] == "machine-model"
+        assert attachment["entity_type"] == "model"
         assert attachment["slug"] == "test-machine"
         assert attachment["category"] == "backglass"
         assert attachment["is_primary"] is True
@@ -229,7 +229,7 @@ class TestUploadHappyPath:
 class TestUploadValidation:
     def test_no_file(self, client, machine_model):
         data = {
-            "entity_type": "machine-model",
+            "entity_type": "model",
             "slug": machine_model.slug,
         }
         resp = client.post(UPLOAD_URL, data)
@@ -324,7 +324,7 @@ class TestUploadAuth:
         file = _create_test_image()
         data = {
             "file": file,
-            "entity_type": "machine-model",
+            "entity_type": "model",
             "slug": machine_model.slug,
         }
         resp = anon_client.post(UPLOAD_URL, data)

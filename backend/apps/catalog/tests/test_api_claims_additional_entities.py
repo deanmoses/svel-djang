@@ -26,7 +26,8 @@ from apps.catalog.models import (
     TechnologySubgeneration,
     Title,
 )
-from apps.provenance.models import ChangeSet, Claim, Source
+from apps.citation.models import CitationSource
+from apps.provenance.models import ChangeSet, CitationInstance, Claim, Source
 
 User = get_user_model()
 
@@ -34,6 +35,16 @@ User = get_user_model()
 @pytest.fixture
 def user(db):
     return User.objects.create_user(username="editor")
+
+
+@pytest.fixture
+def citation_source(db):
+    return CitationSource.objects.create(
+        name="Replay Flyer",
+        source_type="book",
+        author="Staff",
+        year=1980,
+    )
 
 
 def _patch(client, path: str, body: dict):
@@ -528,6 +539,45 @@ class TestPatchRewardTypeResponseShape:
                 "variants": [],
             }
         ]
+
+    def test_patch_can_copy_edit_citation_to_reward_type_claim(
+        self, client, user, citation_source
+    ):
+        reward_type = RewardType.objects.create(name="Replay", slug="replay")
+        template_claim = Claim.objects.assert_claim(
+            reward_type,
+            field_name="description",
+            value="Template citation",
+            user=user,
+            changeset=ChangeSet.objects.create(user=user, note="seed"),
+        )
+        template_citation = CitationInstance.objects.create(
+            claim=template_claim,
+            citation_source=citation_source,
+            locator="p. 2",
+        )
+
+        client.force_login(user)
+        resp = _patch(
+            client,
+            f"/api/reward-types/{reward_type.slug}/claims/",
+            {
+                "fields": {"description": "Updated reward type copy"},
+                "citation": {"citation_instance_id": template_citation.pk},
+            },
+        )
+
+        assert resp.status_code == 200
+
+        created_claim = reward_type.claims.get(
+            user=user,
+            field_name="description",
+            value="Updated reward type copy",
+            is_active=True,
+        )
+        copied = created_claim.citation_instances.get()
+        assert copied.citation_source == citation_source
+        assert copied.locator == "p. 2"
 
 
 UNIQUE_NAME_CASES = [

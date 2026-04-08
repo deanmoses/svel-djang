@@ -9,6 +9,7 @@ export type LinkType = {
 	name: string;
 	label: string;
 	description: string;
+	flow: 'standard' | 'custom';
 };
 
 export type LinkTarget = {

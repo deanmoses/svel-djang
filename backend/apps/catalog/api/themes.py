@@ -30,6 +30,10 @@ from .schemas import (
     TitleMachineSchema,
 )
 
+from apps.core.licensing import get_minimum_display_rank
+
+from ..models import MachineModel, Theme
+
 # ---------------------------------------------------------------------------
 # Schemas
 # ---------------------------------------------------------------------------
@@ -58,8 +62,6 @@ class ThemeDetailSchema(Schema):
 
 
 def _detail_qs():
-    from ..models import MachineModel, Theme
-
     return Theme.objects.active().prefetch_related(
         Prefetch("parents", queryset=Theme.objects.active()),
         Prefetch("children", queryset=Theme.objects.active()),
@@ -76,8 +78,6 @@ def _detail_qs():
 
 
 def _serialize_detail(theme) -> dict:
-    from apps.core.licensing import get_minimum_display_rank
-
     min_rank = get_minimum_display_rank()
     return {
         "name": theme.name,
@@ -108,8 +108,6 @@ themes_router = Router(tags=["themes"])
 @themes_router.get("/", response=list[ThemeListSchema])
 @decorate_view(cache_control(no_cache=True))
 def list_themes(request):
-    from ..models import Theme
-
     themes = (
         Theme.objects.active()
         .prefetch_related(Prefetch("parents", queryset=Theme.objects.active()))
@@ -133,8 +131,6 @@ def list_themes(request):
 )
 def patch_theme_claims(request, slug: str, data: HierarchyClaimPatchSchema):
     """Assert per-field claims from the authenticated user, then re-resolve."""
-    from ..models import Theme
-
     if not data.fields and data.parents is None and data.aliases is None:
         raise HttpError(422, "No changes provided.")
 
@@ -164,7 +160,9 @@ def patch_theme_claims(request, slug: str, data: HierarchyClaimPatchSchema):
     if not specs:
         raise HttpError(422, "No changes provided.")
 
-    execute_claims(theme, specs, user=request.user, note=data.note)
+    execute_claims(
+        theme, specs, user=request.user, note=data.note, citation=data.citation
+    )
 
     theme = get_object_or_404(_detail_qs(), slug=theme.slug)
     return _serialize_detail(theme)

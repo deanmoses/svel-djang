@@ -2,6 +2,11 @@
 	import { untrack } from 'svelte';
 	import { goto, invalidateAll } from '$app/navigation';
 	import client from '$lib/api/client';
+	import {
+		shouldShowMixedEditCitationWarning,
+		type EditCitationSelection,
+		withEditMetadata
+	} from '$lib/edit-citation';
 	import { getEditRedirectHref } from '$lib/edit-routes';
 	import EditFormShell from '$lib/components/form/EditFormShell.svelte';
 	import TagInput from '$lib/components/form/TagInput.svelte';
@@ -20,6 +25,13 @@
 	let editFields = $state(untrack(() => corporateEntityToFormFields(data.corporateEntity)));
 	let editAliases = $state<string[]>(untrack(() => [...(data.corporateEntity.aliases ?? [])]));
 	let editNote = $state('');
+	let editCitation = $state<EditCitationSelection | null>(null);
+	let pendingBody = $derived(
+		buildCorporateEntityPatchBody({ fields: editFields, aliases: editAliases }, ce)
+	);
+	let showMixedEditWarning = $derived(
+		shouldShowMixedEditCitationWarning(pendingBody, editCitation)
+	);
 
 	let constraints = $state<FieldConstraints>({});
 
@@ -33,11 +45,9 @@
 	let saveError = $state('');
 
 	async function saveChanges() {
-		const body = buildCorporateEntityPatchBody(
-			{ fields: editFields, aliases: editAliases, note: editNote },
-			ce
-		);
-		if (!body) return;
+		const rawBody = pendingBody;
+		if (!rawBody) return;
+		const body = withEditMetadata(rawBody, editNote, editCitation);
 
 		saveStatus = 'saving';
 		saveError = '';
@@ -52,6 +62,7 @@
 			editFields = corporateEntityToFormFields(updated);
 			editAliases = [...(updated.aliases ?? [])];
 			editNote = '';
+			editCitation = null;
 			if (redirectHref) {
 				await goto(redirectHref, { replaceState: true });
 				return;
@@ -66,7 +77,14 @@
 	}
 </script>
 
-<EditFormShell {saveStatus} {saveError} onsave={saveChanges}>
+<EditFormShell
+	{saveStatus}
+	{saveError}
+	onsave={saveChanges}
+	bind:note={editNote}
+	bind:citation={editCitation}
+	{showMixedEditWarning}
+>
 	<TextField label="Name" bind:value={editFields.name} />
 	<TextField label="Slug" bind:value={editFields.slug} />
 	<MarkdownTextArea label="Description" bind:value={editFields.description} rows={6} />
@@ -91,13 +109,6 @@
 		label="Aliases"
 		bind:tags={editAliases}
 		placeholder="Type an alias and press Enter"
-		optional
-	/>
-
-	<TextField
-		label="Edit note"
-		bind:value={editNote}
-		placeholder="Why are you making this change?"
 		optional
 	/>
 </EditFormShell>

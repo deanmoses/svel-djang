@@ -195,6 +195,7 @@ make lint         # Lint and format check
 - Internet is disabled during task execution — all dependencies must be installed during setup
 - Tests use SQLite in-memory by default
 - Use the `gh` CLI for GitHub operations
+- For multi-session Codex worktree setup only, see [docs/CodexWorktrees.md](docs/CodexWorktrees.md)
 
 END_AGENTS
 

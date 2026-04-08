@@ -29,8 +29,8 @@ class TestExportCatalogMeta:
         output = (
             tmp_path / "frontend" / "src" / "lib" / "api" / "catalog-meta.ts"
         ).read_text()
-        for model in ("machinemodel", "title", "manufacturer", "person", "theme"):
-            assert f"value: '{model}'" in output, f"{model} missing from ENTITY_TYPES"
+        for name in ("model", "title", "manufacturer", "person", "theme"):
+            assert f"value: '{name}'" in output, f"{name} missing from ENTITY_TYPES"
 
     def test_media_categories_present(self, tmp_path, settings):
         settings.BASE_DIR = tmp_path / "backend"
@@ -40,7 +40,7 @@ class TestExportCatalogMeta:
         output = (
             tmp_path / "frontend" / "src" / "lib" / "api" / "catalog-meta.ts"
         ).read_text()
-        assert "machinemodel: [" in output
+        assert "model: [" in output
         assert "'backglass'" in output
         assert "manufacturer: [" in output
         assert "'logo'" in output

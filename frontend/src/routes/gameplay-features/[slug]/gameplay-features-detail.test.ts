@@ -4,7 +4,7 @@ import { load } from './+layout.server';
 const MOCK_DATA = {
 	name: 'Multiball',
 	slug: 'multiball',
-	description: { text: '', html: '', attribution: null },
+	description: { text: '', html: '', citations: [], attribution: null },
 	display_order: 0,
 	parents: [],
 	machines: [],

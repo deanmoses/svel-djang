@@ -2,6 +2,11 @@
 	import { untrack } from 'svelte';
 	import { goto, invalidateAll } from '$app/navigation';
 	import client from '$lib/api/client';
+	import {
+		shouldShowMixedEditCitationWarning,
+		type EditCitationSelection,
+		withEditMetadata
+	} from '$lib/edit-citation';
 	import { getEditRedirectHref } from '$lib/edit-routes';
 	import EditFormShell from '$lib/components/form/EditFormShell.svelte';
 	import TextField from '$lib/components/form/TextField.svelte';
@@ -16,6 +21,12 @@
 
 	// untrack: intentional one-time capture; re-synced explicitly after save
 	let editFields = $state(untrack(() => personToFormFields(data.person)));
+	let editNote = $state('');
+	let editCitation = $state<EditCitationSelection | null>(null);
+	let pendingBody = $derived(buildPersonPatchBody(editFields, person));
+	let showMixedEditWarning = $derived(
+		shouldShowMixedEditCitationWarning(pendingBody, editCitation)
+	);
 
 	let constraints = $state<FieldConstraints>({});
 
@@ -29,8 +40,9 @@
 	let saveError = $state('');
 
 	async function saveChanges() {
-		const body = buildPersonPatchBody(editFields, person);
-		if (!body) return;
+		const rawBody = pendingBody;
+		if (!rawBody) return;
+		const body = withEditMetadata(rawBody, editNote, editCitation);
 
 		saveStatus = 'saving';
 		saveError = '';
@@ -43,6 +55,8 @@
 		if (updated) {
 			const redirectHref = getEditRedirectHref('people', person.slug, updated.slug);
 			editFields = personToFormFields(updated);
+			editNote = '';
+			editCitation = null;
 			if (redirectHref) {
 				await goto(redirectHref, { replaceState: true });
 				return;
@@ -57,7 +71,14 @@
 	}
 </script>
 
-<EditFormShell {saveStatus} {saveError} onsave={saveChanges}>
+<EditFormShell
+	{saveStatus}
+	{saveError}
+	onsave={saveChanges}
+	bind:note={editNote}
+	bind:citation={editCitation}
+	{showMixedEditWarning}
+>
 	<TextField label="Name" bind:value={editFields.name} />
 	<TextField label="Slug" bind:value={editFields.slug} />
 	<TextField label="Nationality" bind:value={editFields.nationality} />

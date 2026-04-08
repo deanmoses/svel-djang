@@ -15,6 +15,7 @@ from apps.catalog.models import (
     Tag,
     Theme,
 )
+from apps.citation.models import CitationSource
 from apps.provenance.models import ChangeSet, Claim
 
 User = get_user_model()
@@ -75,6 +76,11 @@ def people(db):
         Person.objects.create(name="John Youssi", slug="john-youssi"),
         Person.objects.create(name="Greg Freres", slug="greg-freres"),
     ]
+
+
+@pytest.fixture
+def citation_source(db):
+    return CitationSource.objects.create(name="Williams Flyer", source_type="web")
 
 
 def _patch(client, slug, body):
@@ -290,6 +296,53 @@ class TestCombinedEdits:
         assert "gameplay_feature" in field_names
         assert "credit" in field_names
         assert "abbreviation" in field_names
+
+    def test_citation_is_copied_to_each_created_claim(
+        self,
+        client,
+        user,
+        pm,
+        themes,
+        gameplay_features,
+        people,
+        credit_roles,
+        citation_source,
+    ):
+        seed_claim = Claim.objects.assert_claim(
+            pm,
+            "description",
+            "Template citation seed",
+            user=user,
+            changeset=ChangeSet.objects.create(user=user, note="seed"),
+        )
+        template_instance = citation_source.instances.create(
+            claim=seed_claim,
+            locator="p. 3",
+        )
+
+        client.force_login(user)
+        resp = _patch(
+            client,
+            pm.slug,
+            {
+                "fields": {"year": 1998},
+                "themes": ["medieval"],
+                "gameplay_features": [{"slug": "ramps", "count": 2}],
+                "credits": [{"person_slug": "pat-lawlor", "role": "design"}],
+                "abbreviations": ["MM"],
+                "citation": {"citation_instance_id": template_instance.pk},
+            },
+        )
+        assert resp.status_code == 200, resp.json()
+
+        changeset = ChangeSet.objects.exclude(pk=seed_claim.changeset_id).get()
+        claims = list(changeset.claims.order_by("pk"))
+        assert claims
+        for claim in claims:
+            claim_citations = list(claim.citation_instances.all())
+            assert len(claim_citations) == 1
+            assert claim_citations[0].citation_source_id == citation_source.pk
+            assert claim_citations[0].locator == "p. 3"
 
     def test_no_changes_returns_422(self, client, user, pm):
         client.force_login(user)

@@ -41,5 +41,9 @@
   "files.trimFinalNewlines": true,
   "python-envs.pythonProjects": [],
 
-  "json.schemas": []
+  "json.schemas": [],
+
+  "files.associations": {
+    ".worktreeinclude": "gitignore"
+  }
 }

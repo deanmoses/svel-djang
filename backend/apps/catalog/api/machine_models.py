@@ -15,6 +15,14 @@ from ninja.security import django_auth
 
 from ..cache import MODELS_ALL_KEY, get_cached_response, set_cached_response
 from .constants import DEFAULT_PAGE_SIZE
+from .edit_claims import (
+    execute_claims,
+    plan_abbreviation_claims,
+    plan_credit_claims,
+    plan_gameplay_feature_claims,
+    plan_m2m_claims,
+    plan_scalar_field_claims,
+)
 from apps.provenance.helpers import build_sources, claims_prefetch
 
 from .helpers import (
@@ -24,6 +32,7 @@ from .helpers import (
     _extract_variant_features,
     _get_feature_descendant_slugs,
     _media_prefetch,
+    _serialize_credit,
     _serialize_title_machine,
     _serialize_uploaded_media,
 )
@@ -41,6 +50,36 @@ from .schemas import (
     ThemeSchema,
     TitleMachineSchema,
     UploadedMediaSchema,
+)
+
+from collections import defaultdict
+
+from django.db.models import Case, IntegerField, Value, When
+
+from apps.core.licensing import get_minimum_display_rank
+from apps.media.models import EntityMedia
+
+from ..models import (
+    Cabinet,
+    CorporateEntity,
+    CorporateEntityAlias,
+    CorporateEntityLocation,
+    Credit,
+    CreditRole,
+    DisplaySubtype,
+    DisplayType,
+    GameFormat,
+    GameplayFeature,
+    MachineModel,
+    MachineModelGameplayFeature,
+    ModelAbbreviation,
+    Person,
+    RewardType,
+    System,
+    Tag,
+    TechnologyGeneration,
+    TechnologySubgeneration,
+    Theme,
 )
 
 # ---------------------------------------------------------------------------
@@ -173,10 +212,6 @@ def _build_model_list_qs(
     person: str = "",
     ordering: str = "-year",
 ):
-    from ..models import MachineModel
-
-    from apps.media.models import EntityMedia
-
     qs = (
         MachineModel.objects.active()
         .select_related(
@@ -292,21 +327,9 @@ def _serialize_model_detail(pm) -> dict:
     Expects *pm* to have been fetched with prefetch_related for credits
     (with select_related("person")) and claims (to_attr="active_claims").
     """
-    from django.db.models import Case, F, IntegerField, Value, When
-
-    from apps.core.licensing import get_minimum_display_rank
-
     min_rank = get_minimum_display_rank()
 
-    credits = [
-        {
-            "person": {"name": c.person.name, "slug": c.person.slug},
-            "role": c.role.slug,
-            "role_display": c.role.name,
-            "role_sort_order": c.role.display_order,
-        }
-        for c in pm.credits.all()
-    ]
+    credits = [_serialize_credit(c) for c in pm.credits.all()]
 
     active_claims = getattr(pm, "active_claims", None)
     if active_claims is None:
@@ -362,16 +385,16 @@ def _serialize_model_detail(pm) -> dict:
             if sib.pk != pm.pk
         ]
 
-    mfr = (
-        pm.corporate_entity.manufacturer
-        if pm.corporate_entity and pm.corporate_entity.manufacturer
-        else None
-    )
-
     # Resolve technology subgeneration: direct on model, or inherited from system.
     subgen = pm.technology_subgeneration or (
         pm.system.technology_subgeneration
         if pm.system and pm.system.technology_subgeneration
+        else None
+    )
+
+    mfr = (
+        pm.corporate_entity.manufacturer
+        if pm.corporate_entity and pm.corporate_entity.manufacturer
         else None
     )
 
@@ -510,8 +533,6 @@ def _serialize_model_detail(pm) -> dict:
 
 def _model_detail_qs():
     """Return the queryset used for model detail / patch endpoints."""
-    from ..models import Credit, MachineModel, MachineModelGameplayFeature
-
     return (
         MachineModel.objects.active()
         .select_related(
@@ -610,8 +631,6 @@ def list_models(
         person=person,
         ordering=ordering,
     )
-    from apps.core.licensing import get_minimum_display_rank
-
     min_rank = get_minimum_display_rank()
     return [_serialize_model_list(pm, min_rank=min_rank) for pm in qs]
 
@@ -667,8 +686,6 @@ class ModelRecentSchema(Schema):
 @decorate_view(cache_control(no_cache=True))
 def list_recent_models(request):
     """Return the 3 newest non-variant models, one per title."""
-    from ..models import MachineModel
-
     qs = (
         MachineModel.objects.active()
         .filter(Q(variant_of__isnull=True) | Q(converted_from__isnull=False))
@@ -679,8 +696,6 @@ def list_recent_models(request):
             "-updated_at",
         )[:20]  # generous LIMIT — we only need 3 unique titles
     )
-    from apps.core.licensing import get_minimum_display_rank
-
     min_rank = get_minimum_display_rank()
     results = []
     seen_titles: set[int | None] = set()
@@ -718,18 +733,6 @@ def list_all_models(request):
     bulk through-table queries for M2M data.  See ``list_all_titles`` for
     the full explanation of this pattern.
     """
-    from collections import defaultdict
-
-    from ..models import (
-        Credit,
-        CorporateEntity,
-        CorporateEntityLocation,
-        MachineModel,
-        ModelAbbreviation,
-    )
-
-    from apps.core.licensing import get_minimum_display_rank
-
     response = get_cached_response(MODELS_ALL_KEY)
     if response is not None:
         return response
@@ -817,8 +820,6 @@ def list_all_models(request):
             mfr_search_parts[mfr_id].append(ename)
 
     # Entity aliases
-    from ..models import CorporateEntityAlias
-
     for mfr_id, aval in CorporateEntityAlias.objects.filter(
         corporate_entity__manufacturer__isnull=False
     ).values_list("corporate_entity__manufacturer_id", "value"):
@@ -892,23 +893,6 @@ def list_all_models(request):
 @decorate_view(cache_control(no_cache=True))
 def get_model_edit_options(request):
     """Return all dropdown options for the MachineModel edit form."""
-    from ..models import (
-        Cabinet,
-        CorporateEntity,
-        CreditRole,
-        DisplaySubtype,
-        DisplayType,
-        GameFormat,
-        GameplayFeature,
-        MachineModel,
-        Person,
-        RewardType,
-        System,
-        Tag,
-        TechnologyGeneration,
-        TechnologySubgeneration,
-        Theme,
-    )
 
     def _opts(qs):
         return [{"slug": obj.slug, "label": obj.name} for obj in qs]
@@ -963,17 +947,6 @@ _SELF_REF_FIELDS = frozenset({"variant_of", "converted_from", "remake_of"})
 )
 def patch_model_claims(request, slug: str, data: ModelClaimPatchSchema):
     """Assert per-field claims from the authenticated user, then re-resolve the model."""
-    from .edit_claims import (
-        execute_claims,
-        plan_abbreviation_claims,
-        plan_credit_claims,
-        plan_gameplay_feature_claims,
-        plan_m2m_claims,
-        plan_scalar_field_claims,
-    )
-
-    from ..models import MachineModel, RewardType, Tag, Theme
-
     pm = get_object_or_404(
         MachineModel.objects.active().prefetch_related(
             "themes",
@@ -1039,7 +1012,7 @@ def patch_model_claims(request, slug: str, data: ModelClaimPatchSchema):
     if not specs:
         raise HttpError(422, "No changes provided.")
 
-    execute_claims(pm, specs, user=request.user, note=data.note)
+    execute_claims(pm, specs, user=request.user, note=data.note, citation=data.citation)
 
     pm = get_object_or_404(_model_detail_qs(), slug=pm.slug)
     return _serialize_model_detail(pm)

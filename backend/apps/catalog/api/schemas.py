@@ -26,8 +26,14 @@ class ClaimSchema(Schema):
     changeset_note: Optional[str] = None
 
 
+class EditCitationInput(Schema):
+    citation_instance_id: int
+
+
 class ClaimPatchSchema(Schema):
     fields: dict[str, Any]
+    note: str = ""
+    citation: EditCitationInput | None = None
 
 
 class HierarchyClaimPatchSchema(Schema):
@@ -35,12 +41,14 @@ class HierarchyClaimPatchSchema(Schema):
     parents: list[str] | None = None
     aliases: list[str] | None = None
     note: str = ""
+    citation: EditCitationInput | None = None
 
 
 class CorporateEntityClaimPatchSchema(Schema):
     fields: dict[str, Any] = {}
     aliases: list[str] | None = None
     note: str = ""
+    citation: EditCitationInput | None = None
 
 
 class GameplayFeatureInput(Schema):
@@ -62,6 +70,7 @@ class ModelClaimPatchSchema(Schema):
     credits: list[CreditInput] | None = None
     abbreviations: list[str] | None = None
     note: str = ""
+    citation: EditCitationInput | None = None
 
 
 class EditOptionItem(Schema):
@@ -100,11 +109,32 @@ class AttributionSchema(Schema):
     attribution_text: Optional[str] = None
 
 
+class InlineCitationLinkSchema(Schema):
+    """A link attached to a citation source."""
+
+    url: str
+    label: str
+
+
+class InlineCitationSchema(Schema):
+    """Metadata for an inline citation in rendered markdown."""
+
+    id: int
+    index: int
+    source_name: str
+    source_type: str
+    author: str
+    year: Optional[int] = None
+    locator: str
+    links: list[InlineCitationLinkSchema] = []
+
+
 class RichTextSchema(Schema):
-    """A text field bundled with its rendered HTML and attribution."""
+    """A text field bundled with its rendered HTML, citations, and attribution."""
 
     text: str = ""
     html: str = ""
+    citations: list[InlineCitationSchema] = []
     attribution: Optional[AttributionSchema] = None
 
 

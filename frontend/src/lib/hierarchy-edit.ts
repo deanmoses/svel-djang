@@ -2,7 +2,7 @@
  * Shared pure helpers for hierarchical entity editing (Theme, GameplayFeature).
  *
  * These entities share the same edit shape: scalar fields (name, description),
- * parent slugs, aliases, and an edit note — mapped to HierarchyClaimPatchSchema.
+ * parent slugs and aliases — mapped to HierarchyClaimPatchSchema.
  */
 
 import { diffScalarFields, slugSetChanged, stringSetChanged } from '$lib/edit-helpers';
@@ -27,14 +27,12 @@ export type HierarchyEditState = {
 	fields: HierarchyFormFields;
 	parents: string[];
 	aliases: string[];
-	note: string;
 };
 
 export type HierarchyPatchBody = {
 	fields: Record<string, unknown>;
 	parents: string[] | null;
 	aliases: string[] | null;
-	note: string;
 };
 
 // ---------------------------------------------------------------------------
@@ -69,7 +67,6 @@ export function buildHierarchyPatchBody(
 	return {
 		fields: hasFields ? fields : {},
 		parents: hasParents ? state.parents : null,
-		aliases: hasAliases ? state.aliases : null,
-		note: state.note.trim()
+		aliases: hasAliases ? state.aliases : null
 	};
 }

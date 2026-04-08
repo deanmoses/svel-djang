@@ -31,6 +31,8 @@ from .schemas import (
     UploadedMediaSchema,
 )
 
+from ..models import GameplayFeature, MachineModel
+
 # ---------------------------------------------------------------------------
 # Schemas
 # ---------------------------------------------------------------------------
@@ -60,8 +62,6 @@ class GameplayFeatureDetailSchema(Schema):
 
 
 def _detail_qs():
-    from ..models import GameplayFeature
-
     return GameplayFeature.objects.active().prefetch_related(
         Prefetch("parents", queryset=GameplayFeature.objects.active()),
         Prefetch("children", queryset=GameplayFeature.objects.active()),
@@ -100,8 +100,6 @@ gameplay_features_router = Router(tags=["gameplay-features"])
 @gameplay_features_router.get("/", response=list[GameplayFeatureListSchema])
 @decorate_view(cache_control(no_cache=True))
 def list_gameplay_features(request):
-    from ..models import GameplayFeature, MachineModel
-
     features = list(
         GameplayFeature.objects.active()
         .prefetch_related(
@@ -160,8 +158,6 @@ def list_gameplay_features(request):
 )
 def patch_gameplay_feature_claims(request, slug: str, data: HierarchyClaimPatchSchema):
     """Assert per-field claims from the authenticated user, then re-resolve."""
-    from ..models import GameplayFeature
-
     if not data.fields and data.parents is None and data.aliases is None:
         raise HttpError(422, "No changes provided.")
 
@@ -191,7 +187,13 @@ def patch_gameplay_feature_claims(request, slug: str, data: HierarchyClaimPatchS
     if not specs:
         raise HttpError(422, "No changes provided.")
 
-    execute_claims(feature, specs, user=request.user, note=data.note)
+    execute_claims(
+        feature,
+        specs,
+        user=request.user,
+        note=data.note,
+        citation=data.citation,
+    )
 
     feature = get_object_or_404(_detail_qs(), slug=feature.slug)
     return _serialize_detail(feature)

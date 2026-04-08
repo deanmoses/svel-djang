@@ -11,10 +11,20 @@ from ninja import Router, Schema
 from ninja.decorators import decorate_view
 from ninja.errors import HttpError
 
+from django.db.models import Count, F, Prefetch
+
 from apps.core.models import active_status_q
+from apps.core.licensing import get_minimum_display_rank
 
 from ..cache import LOCATIONS_TREE_KEY
-from .helpers import _extract_image_urls
+from ..models import (
+    CorporateEntity,
+    CorporateEntityLocation,
+    Location,
+    MachineModel,
+    Manufacturer,
+)
+from .helpers import _first_thumbnail
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -83,8 +93,6 @@ def _get_location_tree():
     result = cache.get(LOCATIONS_TREE_KEY)
     if result is not None:
         return result
-
-    from ..models import CorporateEntityLocation, Location
 
     # Load all locations with parent chains (up to 4 levels deep).
     all_locs = list(
@@ -157,10 +165,6 @@ def _ancestors_of(path: str, nodes: dict) -> list[dict]:
 
 def _get_manufacturers_for_pks(pks):
     """Return serialized manufacturer list for a set of PKs."""
-    from django.db.models import Count, F, Prefetch, Q
-
-    from ..models import CorporateEntity, MachineModel, Manufacturer
-
     qs = (
         Manufacturer.objects.active()
         .filter(pk__in=pks)
@@ -188,29 +192,16 @@ def _get_manufacturers_for_pks(pks):
         .order_by("-model_count", "name")
     )
 
-    from apps.core.licensing import get_minimum_display_rank
-
     min_rank = get_minimum_display_rank()
-    result = []
-    for mfr in qs:
-        thumb = None
-        for entity in mfr.entities.all():
-            if thumb:
-                break
-            for model in entity.models.all():
-                if model.extra_data:
-                    thumb, _ = _extract_image_urls(model.extra_data, min_rank=min_rank)
-                    if thumb:
-                        break
-        result.append(
-            {
-                "name": mfr.name,
-                "slug": mfr.slug,
-                "model_count": mfr.model_count,
-                "thumbnail_url": thumb,
-            }
-        )
-    return result
+    return [
+        {
+            "name": mfr.name,
+            "slug": mfr.slug,
+            "model_count": mfr.model_count,
+            "thumbnail_url": _first_thumbnail(mfr.entities.all(), min_rank=min_rank),
+        }
+        for mfr in qs
+    ]
 
 
 # ---------------------------------------------------------------------------

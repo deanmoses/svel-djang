@@ -1,6 +1,13 @@
 from django.contrib import admin
 
-from .models import ChangeSet, Claim, IngestRun, Source, SourceFieldLicense
+from .models import (
+    ChangeSet,
+    CitationInstance,
+    Claim,
+    IngestRun,
+    Source,
+    SourceFieldLicense,
+)
 
 
 class SourceFieldLicenseInline(admin.TabularInline):
@@ -92,6 +99,30 @@ class ClaimAdmin(admin.ModelAdmin):
         if len(s) > 80:
             return s[:80] + "..."
         return s
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(CitationInstance)
+class CitationInstanceAdmin(admin.ModelAdmin):
+    """Read-only inspection view. CitationInstances are immutable."""
+
+    list_display = ("citation_source", "claim", "locator_truncated", "created_at")
+    list_select_related = ("citation_source", "claim")
+    readonly_fields = ("citation_source", "claim", "locator", "created_at")
+
+    @admin.display(description="Locator")
+    def locator_truncated(self, obj):
+        if len(obj.locator) > 60:
+            return obj.locator[:60] + "..."
+        return obj.locator
 
     def has_add_permission(self, request):
         return False

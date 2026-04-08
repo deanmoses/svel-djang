@@ -2,6 +2,11 @@
 	import { untrack } from 'svelte';
 	import { goto, invalidateAll } from '$app/navigation';
 	import client from '$lib/api/client';
+	import {
+		shouldShowMixedEditCitationWarning,
+		type EditCitationSelection,
+		withEditMetadata
+	} from '$lib/edit-citation';
 	import { diffScalarFields } from '$lib/edit-helpers';
 	import { getEditRedirectHref } from '$lib/edit-routes';
 	import EditFormShell from '$lib/components/form/EditFormShell.svelte';
@@ -21,6 +26,15 @@
 
 	// untrack: intentional one-time capture; re-synced explicitly after save
 	let editFields = $state(untrack(() => toFormFields(data.series)));
+	let editNote = $state('');
+	let editCitation = $state<EditCitationSelection | null>(null);
+	let pendingBody = $derived.by(() => {
+		const fields = getChangedFields();
+		return Object.keys(fields).length > 0 ? { fields } : null;
+	});
+	let showMixedEditWarning = $derived(
+		shouldShowMixedEditCitationWarning(pendingBody, editCitation)
+	);
 
 	let saveStatus = $state<'idle' | 'saving' | 'saved' | 'error'>('idle');
 	let saveError = $state('');
@@ -30,20 +44,22 @@
 	}
 
 	async function saveChanges() {
-		const fields = getChangedFields();
-		if (Object.keys(fields).length === 0) return;
+		const rawBody = pendingBody;
+		if (!rawBody) return;
 
 		saveStatus = 'saving';
 		saveError = '';
 
 		const { data: updated, error } = await client.PATCH('/api/series/{slug}/claims/', {
 			params: { path: { slug: series.slug } },
-			body: { fields }
+			body: withEditMetadata(rawBody, editNote, editCitation)
 		});
 
 		if (updated) {
 			const redirectHref = getEditRedirectHref('series', series.slug, updated.slug);
 			editFields = toFormFields(updated);
+			editNote = '';
+			editCitation = null;
 			if (redirectHref) {
 				await goto(redirectHref, { replaceState: true });
 				return;
@@ -58,7 +74,14 @@
 	}
 </script>
 
-<EditFormShell {saveStatus} {saveError} onsave={saveChanges}>
+<EditFormShell
+	{saveStatus}
+	{saveError}
+	onsave={saveChanges}
+	bind:note={editNote}
+	bind:citation={editCitation}
+	{showMixedEditWarning}
+>
 	<TextField label="Name" bind:value={editFields.name} />
 	<TextField label="Slug" bind:value={editFields.slug} />
 	<MarkdownTextArea label="Description" bind:value={editFields.description} />

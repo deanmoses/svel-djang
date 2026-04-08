@@ -20,7 +20,6 @@ function stateFromEntity(overrides?: Partial<CorporateEntityEditState>): Corpora
 	return {
 		fields: corporateEntityToFormFields(baseEntity),
 		aliases: [...(baseEntity.aliases ?? [])],
-		note: '',
 		...overrides
 	};
 }
@@ -49,12 +48,6 @@ describe('buildCorporateEntityPatchBody', () => {
 		expect(buildCorporateEntityPatchBody(stateFromEntity(), baseEntity)).toBeNull();
 	});
 
-	it('returns null when only the note changed', () => {
-		expect(
-			buildCorporateEntityPatchBody(stateFromEntity({ note: 'Context only' }), baseEntity)
-		).toBeNull();
-	});
-
 	it('builds a payload for scalar and alias changes', () => {
 		const fields: CorporateEntityFormFields = {
 			...corporateEntityToFormFields(baseEntity),
@@ -65,15 +58,13 @@ describe('buildCorporateEntityPatchBody', () => {
 			buildCorporateEntityPatchBody(
 				stateFromEntity({
 					fields,
-					aliases: ['WMS Games'],
-					note: '  grouped edit  '
+					aliases: ['WMS Games']
 				}),
 				baseEntity
 			)
 		).toEqual({
 			fields: { year_end: 2000 },
-			aliases: ['WMS Games'],
-			note: 'grouped edit'
+			aliases: ['WMS Games']
 		});
 	});
 
@@ -85,8 +76,7 @@ describe('buildCorporateEntityPatchBody', () => {
 
 		expect(buildCorporateEntityPatchBody(stateFromEntity({ fields }), baseEntity)).toEqual({
 			fields: { slug: 'williams-games' },
-			aliases: null,
-			note: ''
+			aliases: null
 		});
 	});
 
@@ -98,8 +88,7 @@ describe('buildCorporateEntityPatchBody', () => {
 
 		expect(buildCorporateEntityPatchBody(stateFromEntity({ fields }), baseEntity)).toEqual({
 			fields: { year_end: null },
-			aliases: null,
-			note: ''
+			aliases: null
 		});
 	});
 

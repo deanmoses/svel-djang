@@ -13,7 +13,7 @@ from ninja import Router, Schema
 from ninja.decorators import decorate_view
 from ninja.security import django_auth
 
-from .edit_claims import execute_claims
+from .edit_claims import execute_claims, plan_scalar_field_claims
 from apps.provenance.helpers import build_sources, claims_prefetch
 
 from .helpers import (
@@ -27,6 +27,10 @@ from .schemas import (
     RelatedTitleSchema,
     RichTextSchema,
 )
+
+from apps.core.licensing import get_minimum_display_rank
+
+from ..models import MachineModel, System
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -61,8 +65,6 @@ class SystemDetailSchema(Schema):
 
 
 def _system_detail_qs():
-    from ..models import MachineModel, System
-
     return (
         System.objects.active()
         .select_related("manufacturer")
@@ -80,10 +82,6 @@ def _system_detail_qs():
 
 
 def _serialize_system_detail(system) -> dict:
-    from ..models import System
-
-    from apps.core.licensing import get_minimum_display_rank
-
     min_rank = get_minimum_display_rank()
     titles: dict[str, dict] = {}
     for m in system.machine_models.all():
@@ -94,15 +92,16 @@ def _serialize_system_detail(system) -> dict:
             thumbnail_url = _extract_image_urls(m.extra_data or {}, min_rank=min_rank)[
                 0
             ]
+            mfr = (
+                m.corporate_entity.manufacturer
+                if m.corporate_entity and m.corporate_entity.manufacturer
+                else None
+            )
             titles[key] = {
                 "name": m.title.name,
                 "slug": m.title.slug,
                 "year": m.year,
-                "manufacturer_name": (
-                    m.corporate_entity.manufacturer.name
-                    if m.corporate_entity and m.corporate_entity.manufacturer
-                    else None
-                ),
+                "manufacturer_name": mfr.name if mfr else None,
                 "thumbnail_url": thumbnail_url,
             }
         elif titles[key]["thumbnail_url"] is None:
@@ -151,8 +150,6 @@ systems_router = Router(tags=["systems"])
 @decorate_view(cache_control(no_cache=True))
 def list_all_systems(request):
     """Return every system with machine count (no pagination)."""
-    from ..models import System
-
     qs = (
         System.objects.active()
         .select_related("manufacturer")
@@ -185,13 +182,12 @@ def list_all_systems(request):
 )
 def patch_system_claims(request, slug: str, data: ClaimPatchSchema):
     """Assert per-field claims from the authenticated user, then re-resolve."""
-    from ..models import System
-    from .edit_claims import plan_scalar_field_claims
-
     system = get_object_or_404(System.objects.active(), slug=slug)
     specs = plan_scalar_field_claims(System, data.fields, entity=system)
 
-    execute_claims(system, specs, user=request.user)
+    execute_claims(
+        system, specs, user=request.user, note=data.note, citation=data.citation
+    )
 
     system = get_object_or_404(_system_detail_qs(), slug=system.slug)
     return _serialize_system_detail(system)

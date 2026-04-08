@@ -6,7 +6,7 @@ import { load } from './+layout.server';
 const MOCK_MANUFACTURER = {
 	name: 'Williams',
 	slug: 'williams',
-	description: { text: '', html: '', attribution: null },
+	description: { text: '', html: '', citations: [], attribution: null },
 	year_start: 1985,
 	year_end: 1999,
 	country: null,

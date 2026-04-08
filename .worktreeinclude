@@ -1,0 +1,7 @@
+# Gitignored files to copy into new Claude Code worktrees.
+# Uses .gitignore pattern syntax — only files matched here AND
+# also gitignored will be copied.
+
+.env
+.env.local
+.env.*.local

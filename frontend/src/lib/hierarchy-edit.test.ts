@@ -22,7 +22,6 @@ function stateFromEntity(
 		fields: hierarchyToFormFields(entity),
 		parents: (entity.parents ?? []).map((p) => p.slug),
 		aliases: [...(entity.aliases ?? [])],
-		note: '',
 		...overrides
 	};
 }
@@ -43,11 +42,6 @@ describe('hierarchyToFormFields', () => {
 describe('buildHierarchyPatchBody — no-op', () => {
 	it('returns null when nothing changed', () => {
 		expect(buildHierarchyPatchBody(stateFromEntity(baseEntity), baseEntity)).toBeNull();
-	});
-
-	it('returns null when only note is set', () => {
-		const state = stateFromEntity(baseEntity, { note: 'Just a note' });
-		expect(buildHierarchyPatchBody(state, baseEntity)).toBeNull();
 	});
 });
 
@@ -118,13 +112,11 @@ describe('buildHierarchyPatchBody — mixed', () => {
 		const state = stateFromEntity(baseEntity, {
 			fields,
 			parents: ['outdoor'],
-			aliases: ['Athletics'],
-			note: 'Cleanup'
+			aliases: ['Athletics']
 		});
 		const body = buildHierarchyPatchBody(state, baseEntity)!;
 		expect(body.fields).toEqual({ description: 'New desc' });
 		expect(body.parents).toEqual(['outdoor']);
 		expect(body.aliases).toEqual(['Athletics']);
-		expect(body.note).toBe('Cleanup');
 	});
 });

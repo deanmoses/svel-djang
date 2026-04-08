@@ -39,18 +39,18 @@ def pm(db, _bootstrap_source):
 @pytest.mark.django_db
 class TestEditHistoryEmpty:
     def test_no_changesets_returns_empty_list(self, client, pm):
-        resp = client.get(f"/api/edit-history/machinemodel/{pm.slug}/")
+        resp = client.get(f"/api/edit-history/model/{pm.slug}/")
         assert resp.status_code == 200
         assert resp.json() == []
 
     def test_nonexistent_slug_returns_404(self, client):
-        resp = client.get("/api/edit-history/machinemodel/does-not-exist/")
+        resp = client.get("/api/edit-history/model/does-not-exist/")
         assert resp.status_code == 404
 
     def test_source_claims_not_included(self, client, pm, source):
         """Source-attributed claims (no changeset) should not appear."""
         Claim.objects.assert_claim(pm, "year", 1998, source=source)
-        resp = client.get(f"/api/edit-history/machinemodel/{pm.slug}/")
+        resp = client.get(f"/api/edit-history/model/{pm.slug}/")
         assert resp.status_code == 200
         assert resp.json() == []
 
@@ -66,7 +66,7 @@ class TestEditHistoryBasic:
             content_type="application/json",
         )
 
-        resp = client.get(f"/api/edit-history/machinemodel/{pm.slug}/")
+        resp = client.get(f"/api/edit-history/model/{pm.slug}/")
         assert resp.status_code == 200
         data = resp.json()
         assert len(data) == 1
@@ -94,7 +94,7 @@ class TestEditHistoryBasic:
             content_type="application/json",
         )
 
-        resp = client.get(f"/api/edit-history/machinemodel/{pm.slug}/")
+        resp = client.get(f"/api/edit-history/model/{pm.slug}/")
         data = resp.json()
         assert len(data) == 2
 
@@ -120,7 +120,7 @@ class TestEditHistoryMultipleFields:
             content_type="application/json",
         )
 
-        resp = client.get(f"/api/edit-history/machinemodel/{pm.slug}/")
+        resp = client.get(f"/api/edit-history/model/{pm.slug}/")
         data = resp.json()
         assert len(data) == 1
 
@@ -147,7 +147,7 @@ class TestEditHistoryMultiUser:
             content_type="application/json",
         )
 
-        resp = client.get(f"/api/edit-history/machinemodel/{pm.slug}/")
+        resp = client.get(f"/api/edit-history/model/{pm.slug}/")
         data = resp.json()
         assert len(data) == 2
 
@@ -178,7 +178,7 @@ class TestEditHistoryOrdering:
             content_type="application/json",
         )
 
-        resp = client.get(f"/api/edit-history/machinemodel/{pm.slug}/")
+        resp = client.get(f"/api/edit-history/model/{pm.slug}/")
         data = resp.json()
         assert len(data) == 2
         # Newest changeset (player_count) first

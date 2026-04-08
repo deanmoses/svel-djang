@@ -6,7 +6,7 @@ import { load } from './+layout.server';
 const MOCK_DATA = {
 	name: 'WPC-95',
 	slug: 'wpc-95',
-	description: { text: '', html: '', attribution: null },
+	description: { text: '', html: '', citations: [], attribution: null },
 	manufacturer: { name: 'Williams', slug: 'williams' },
 	titles: [
 		{

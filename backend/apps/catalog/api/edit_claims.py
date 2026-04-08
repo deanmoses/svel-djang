@@ -9,8 +9,18 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError, transaction
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import IntegrityError, models as db_models, transaction
 from ninja.errors import HttpError
+
+from apps.catalog.claims import build_relationship_claim
+from apps.catalog.models import CreditRole, GameplayFeature, Person
+from apps.core.models import get_claim_fields
+from apps.provenance.models import ChangeSet, CitationInstance, Claim
+from apps.provenance.validation import validate_claim_value
+
+from ..resolve import resolve_after_mutation
+from .schemas import EditCitationInput
 
 
 @dataclass(frozen=True)
@@ -45,11 +55,6 @@ def get_field_constraints(model_class) -> dict[str, dict]:
     Only fields with at least one validator-derived constraint are included.
     Step is derived from ``DecimalField.decimal_places``.
     """
-    from django.core.validators import MaxValueValidator, MinValueValidator
-    from django.db import models as db_models
-
-    from apps.core.models import get_claim_fields
-
     numeric_types = (
         db_models.IntegerField,
         db_models.SmallIntegerField,
@@ -98,9 +103,6 @@ def validate_scalar_fields(
 
     Raises HttpError 422 on unknown fields or invalid markdown.
     """
-    from apps.core.models import get_claim_fields
-    from apps.provenance.validation import validate_claim_value
-
     editable = set(get_claim_fields(model_class))
     unknown = set(fields.keys()) - editable
     if unknown:
@@ -144,8 +146,6 @@ def plan_parent_claims(
 
     Raises HttpError 422 on invalid slugs, self-links, or cycles.
     """
-    from apps.catalog.claims import build_relationship_claim
-
     if entity.slug in desired_slugs:
         raise HttpError(422, f"A {model_class.__name__} cannot be its own parent.")
 
@@ -218,8 +218,6 @@ def plan_alias_claims(
 
     Returns specs for adds, removes, and display-case updates.
     """
-    from apps.catalog.claims import build_relationship_claim
-
     # Normalise: strip, deduplicate by lowercase key, drop blanks.
     # Last-write-wins for display case when duplicates differ only in case.
     desired: dict[str, str] = {}  # lowercase → display string
@@ -299,8 +297,6 @@ def build_m2m_claim_specs(
     claim_field_name: str,
 ) -> list[ClaimSpec]:
     """Build diff-based ClaimSpecs for simple PK-set M2M relationships."""
-    from apps.catalog.claims import build_relationship_claim
-
     specs: list[ClaimSpec] = []
     for pk in desired - current:
         claim_key, value = build_relationship_claim(
@@ -351,8 +347,6 @@ def build_gameplay_feature_claim_specs(
     desired: dict[int, int | None],
 ) -> list[ClaimSpec]:
     """Build diff-based ClaimSpecs for gameplay feature relationship changes."""
-    from apps.catalog.claims import build_relationship_claim
-
     specs: list[ClaimSpec] = []
     for pk, count in desired.items():
         if pk not in current or current[pk] != count:
@@ -395,8 +389,6 @@ def plan_gameplay_feature_claims(
 
     Raises HttpError 422 on invalid input.
     """
-    from apps.catalog.models import GameplayFeature
-
     raw_desired = [(feat.slug, feat.count) for feat in desired_features]
     if raw_desired:
         existing = set(
@@ -439,8 +431,6 @@ def plan_abbreviation_claims(
 
     Shared by MachineModel and Title.
     """
-    from apps.catalog.claims import build_relationship_claim
-
     desired = set(_normalize_abbreviations(desired_values))
     current = set(entity.abbreviations.values_list("value", flat=True))
     specs: list[ClaimSpec] = []
@@ -477,8 +467,6 @@ def plan_credit_claims(
 
     Raises HttpError 422 on invalid input.
     """
-    from apps.catalog.models import CreditRole, Person
-
     raw_desired = [(credit.person_slug, credit.role) for credit in desired_credits]
 
     if raw_desired:
@@ -567,8 +555,6 @@ def build_credit_claim_specs(
     desired: set[tuple[int, int]],
 ) -> list[ClaimSpec]:
     """Build diff-based ClaimSpecs for credit relationship changes."""
-    from apps.catalog.claims import build_relationship_claim
-
     specs: list[ClaimSpec] = []
     for person_pk, role_pk in desired - current:
         claim_key, value = build_relationship_claim(
@@ -606,6 +592,7 @@ def execute_claims(
     *,
     user,
     note: str = "",
+    citation: EditCitationInput | None = None,
 ) -> None:
     """Create a ChangeSet + claims atomically, resolve, and invalidate cache.
 
@@ -615,22 +602,38 @@ def execute_claims(
 
     Raises HttpError 422 on IntegrityError (unique constraint violations).
     """
-    from apps.provenance.models import ChangeSet, Claim
-
-    from ..resolve import resolve_after_mutation
-
     try:
         with transaction.atomic():
             cs = ChangeSet.objects.create(user=user, note=note)
+            created_claims = []
             for spec in specs:
-                Claim.objects.assert_claim(
-                    entity,
-                    spec.field_name,
-                    spec.value,
-                    user=user,
-                    claim_key=spec.claim_key,
-                    changeset=cs,
+                created_claims.append(
+                    Claim.objects.assert_claim(
+                        entity,
+                        spec.field_name,
+                        spec.value,
+                        user=user,
+                        claim_key=spec.claim_key,
+                        changeset=cs,
+                    )
                 )
+            if citation is not None:
+                try:
+                    template = CitationInstance.objects.select_related(
+                        "citation_source"
+                    ).get(pk=citation.citation_instance_id)
+                except CitationInstance.DoesNotExist as exc:
+                    raise HttpError(422, "Unknown citation instance.") from exc
+
+                for claim in created_claims:
+                    instance = CitationInstance(
+                        citation_source=template.citation_source,
+                        claim=claim,
+                        locator=template.locator,
+                    )
+                    instance.full_clean()
+                    instance.save()
+
             field_names = list({s.field_name for s in specs})
             resolve_after_mutation(entity, field_names=field_names)
     except ValidationError as exc:

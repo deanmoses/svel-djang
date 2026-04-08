@@ -127,7 +127,7 @@ class TestChangesList:
         item = data["items"][0]
         assert item["user_display"] == "editor"
         assert item["entity_name"] == "Medieval Madness"
-        assert item["entity_type_label"] == "Machine Model"
+        assert item["entity_type_label"] == "Model"
         assert item["changes_count"] >= 1
         assert item["is_ingest"] is False
 

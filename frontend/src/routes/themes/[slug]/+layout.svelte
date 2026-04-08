@@ -42,7 +42,7 @@
 		{#snippet main()}
 			{#if theme.description?.html}
 				<div class="description">
-					<Markdown html={theme.description.html} />
+					<Markdown html={theme.description.html} citations={theme.description.citations} />
 					<AttributionLine attribution={theme.description.attribution} />
 				</div>
 			{/if}

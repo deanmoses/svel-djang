@@ -78,7 +78,6 @@ function stateFromModel(model: ModelEditView, overrides?: Partial<ModelEditState
 			role: c.role
 		})),
 		abbreviations: [...model.abbreviations],
-		note: '',
 		...overrides
 	};
 }
@@ -129,11 +128,6 @@ describe('modelToFormFields', () => {
 describe('buildModelPatchBody — no-op', () => {
 	it('returns null when nothing changed', () => {
 		const state = stateFromModel(baseModel);
-		expect(buildModelPatchBody(state, baseModel)).toBeNull();
-	});
-
-	it('returns null when note is set but nothing else changed', () => {
-		const state = stateFromModel(baseModel, { note: 'Just a note' });
 		expect(buildModelPatchBody(state, baseModel)).toBeNull();
 	});
 });
@@ -428,8 +422,7 @@ describe('buildModelPatchBody — mixed', () => {
 			fields,
 			themes: ['medieval'],
 			gameplayFeatures: [{ slug: 'ramps', count: 5 }],
-			abbreviations: ['MM', 'MMR'],
-			note: 'Big edit'
+			abbreviations: ['MM', 'MMR']
 		});
 		const body = buildModelPatchBody(state, baseModel)!;
 		expect(body.fields).toEqual({ year: 1998 });
@@ -439,6 +432,5 @@ describe('buildModelPatchBody — mixed', () => {
 		expect(body.gameplay_features).toEqual([{ slug: 'ramps', count: 5 }]);
 		expect(body.credits).toBeNull();
 		expect(body.abbreviations).toEqual(['MM', 'MMR']);
-		expect(body.note).toBe('Big edit');
 	});
 });

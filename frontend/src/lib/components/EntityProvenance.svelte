@@ -1,36 +1,53 @@
 <script lang="ts">
+	import client from '$lib/api/client';
 	import type { components } from '$lib/api/schema';
 	import UserBadge from './UserBadge.svelte';
+	import SmartDate from './SmartDate.svelte';
+	import { groupSourcesByField } from './entity-provenance';
 
 	type Claim = components['schemas']['ClaimSchema'];
-	type FieldGroup = { field: string; claims: Claim[] };
+	type CitedChangeSet = components['schemas']['CitedChangeSetSchema'];
 
-	let { sources }: { sources: Claim[] } = $props();
+	let {
+		sources,
+		entityType = '',
+		entitySlug = ''
+	}: {
+		sources: Claim[];
+		entityType?: string;
+		entitySlug?: string;
+	} = $props();
 
-	let sourceGroups = $derived.by(() => {
-		const byField: Record<string, Claim[]> = {};
-		for (const claim of sources) {
-			(byField[claim.field_name] ??= []).push(claim);
+	let citedChangesets = $state<CitedChangeSet[]>([]);
+
+	$effect(() => {
+		if (!entityType || !entitySlug) {
+			citedChangesets = [];
+			return;
 		}
 
-		const conflicts: FieldGroup[] = [];
-		const agreed: FieldGroup[] = [];
-		const single: FieldGroup[] = [];
+		let stale = false;
+		client
+			.GET('/api/pages/evidence/{entity_type}/{slug}/', {
+				params: { path: { entity_type: entityType, slug: entitySlug } }
+			})
+			.then(({ data }) => {
+				if (!stale) {
+					citedChangesets = data ?? [];
+				}
+			})
+			.catch(() => {
+				if (!stale) {
+					citedChangesets = [];
+				}
+			});
 
-		for (const [field, claims] of Object.entries(byField)) {
-			const group = { field, claims };
-			if (claims.length === 1) {
-				single.push(group);
-			} else {
-				const values = claims.map((c) => JSON.stringify(c.value));
-				const allSame = values.every((v) => v === values[0]);
-				if (allSame) agreed.push(group);
-				else conflicts.push(group);
-			}
-		}
-
-		return { conflicts, agreed, single };
+		return () => {
+			stale = true;
+		};
 	});
+
+	let sourceGroups = $derived(groupSourcesByField(sources));
 
 	function claimAttribution(claim: Claim): string {
 		return claim.source_name ?? (claim.user_display ? `@${claim.user_display}` : 'Unknown');
@@ -53,7 +70,7 @@
 		<span class="badge-used">used</span>
 	{/if}
 	{#if claim.changeset_note}
-		<span class="changeset-note">{claim.changeset_note}</span>
+		<span class="claim-note">{claim.changeset_note}</span>
 	{/if}
 {/snippet}
 
@@ -67,6 +84,50 @@
 		)
 	]}
 	<section class="sources">
+		{#if citedChangesets.length > 0}
+			<section class="evidence">
+				<h2>Evidence</h2>
+				<ol class="changeset-list">
+					{#each citedChangesets as changeset (changeset.id)}
+						<li class="changeset-card">
+							<div class="changeset-header">
+								{#if changeset.user_display}
+									<UserBadge username={changeset.user_display} />
+								{:else}
+									<span class="source-badge">Unknown</span>
+								{/if}
+								<span class="timestamp"><SmartDate iso={changeset.created_at} /></span>
+							</div>
+							{#if changeset.note}
+								<p class="evidence-note">{changeset.note}</p>
+							{/if}
+							<p class="changeset-fields">Applies to: {changeset.fields.join(', ')}</p>
+							{#each changeset.citations as citation, i (i)}
+								<div class="evidence-citation">
+									<div class="source-name">{citation.source_name}</div>
+									{#if citation.author || citation.year}
+										<div class="meta">
+											{[citation.author, citation.year].filter(Boolean).join(', ')}
+										</div>
+									{/if}
+									{#if citation.locator}
+										<div class="locator">{citation.locator}</div>
+									{/if}
+									{#if citation.links.length > 0}
+										<div class="links">
+											{#each citation.links as link (link.url)}
+												<a href={link.url} target="_blank" rel="noopener">{link.label}</a>
+											{/each}
+										</div>
+									{/if}
+								</div>
+							{/each}
+						</li>
+					{/each}
+				</ol>
+			</section>
+		{/if}
+
 		<h2>Sources</h2>
 		<p class="sources-summary">
 			{contributorNames.join(' and ')} contributed to this record.
@@ -157,6 +218,45 @@
 		margin-bottom: var(--size-4);
 	}
 
+	.evidence {
+		margin-bottom: var(--size-5);
+	}
+
+	.changeset-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: var(--size-3);
+	}
+
+	.changeset-card {
+		border: 1px solid var(--color-border-soft);
+		border-radius: var(--radius-2);
+		padding: var(--size-3);
+		background: var(--color-surface);
+	}
+
+	.changeset-header {
+		display: flex;
+		align-items: center;
+		gap: var(--size-2);
+		margin-bottom: var(--size-2);
+	}
+
+	.timestamp {
+		font-size: var(--font-size-0);
+		color: var(--color-text-muted);
+	}
+
+	.evidence-note {
+		margin: 0 0 var(--size-2);
+		font-size: var(--font-size-00, 0.7rem);
+		font-style: italic;
+		color: var(--color-text-muted);
+	}
+
 	.sources-group {
 		margin-bottom: var(--size-4);
 	}
@@ -238,11 +338,34 @@
 		color: var(--color-accent);
 	}
 
-	.changeset-note {
+	.claim-note {
 		width: 100%;
 		font-size: var(--font-size-00, 0.7rem);
 		font-style: italic;
 		color: var(--color-text-muted);
+	}
+
+	.changeset-fields {
+		margin: 0 0 var(--size-2);
+		font-size: var(--font-size-0);
+		color: var(--color-text-muted);
+	}
+
+	.evidence-citation {
+		display: flex;
+		flex-direction: column;
+		gap: var(--size-1);
+		padding-top: var(--size-2);
+	}
+
+	.links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--size-2);
+	}
+
+	.links a {
+		font-size: var(--font-size-0);
 	}
 
 	.source-list {

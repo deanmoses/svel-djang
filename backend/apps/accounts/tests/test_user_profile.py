@@ -93,7 +93,7 @@ class TestUserProfileWithEdits:
         entity = data["entities_edited"][0]
         assert entity["entity_href"] == "/models/medieval-madness"
         assert entity["entity_name"] == "Medieval Madness"
-        assert entity["entity_type_label"] == "Machine Model"
+        assert entity["entity_type_label"] == "Model"
         assert entity["edit_count"] == 1
 
         assert len(data["recent_edits"]) == 1
@@ -175,7 +175,7 @@ class TestUserProfileWithEdits:
         assert data["edit_count"] == 2
         assert len(data["entities_edited"]) == 2
         entity_types = {e["entity_type_label"] for e in data["entities_edited"]}
-        assert "Machine Model" in entity_types
+        assert "Model" in entity_types
         assert "Manufacturer" in entity_types
 
     def test_other_users_edits_not_included(self, client, user, model_a, db):

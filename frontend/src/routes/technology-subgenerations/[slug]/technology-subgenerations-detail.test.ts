@@ -5,7 +5,7 @@ const MOCK_DATA = {
 	name: 'Early SS',
 	slug: 'early-ss',
 	display_order: 0,
-	description: { text: '', html: '', attribution: null },
+	description: { text: '', html: '', citations: [], attribution: null },
 	sources: []
 };
 

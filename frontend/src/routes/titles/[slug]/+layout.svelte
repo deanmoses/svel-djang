@@ -80,7 +80,7 @@
 		{#snippet main()}
 			{#if title.description?.html}
 				<section class="prose">
-					<Markdown html={title.description.html} />
+					<Markdown html={title.description.html} citations={title.description.citations} />
 					<AttributionLine attribution={title.description.attribution} />
 				</section>
 			{/if}

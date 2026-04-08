@@ -13,14 +13,18 @@ from ninja import Router, Schema
 from ninja.decorators import decorate_view
 from ninja.security import django_auth
 
-from .edit_claims import execute_claims
+from .edit_claims import execute_claims, plan_scalar_field_claims
 from apps.provenance.helpers import build_sources, claims_prefetch
 
 from .helpers import (
     _build_rich_text,
-    _extract_image_urls,
+    _serialize_title_ref,
 )
 from .schemas import ClaimPatchSchema, ClaimSchema, RichTextSchema
+
+from apps.core.licensing import get_minimum_display_rank
+
+from ..models import Franchise, MachineModel, Title
 
 
 # ---------------------------------------------------------------------------
@@ -53,38 +57,6 @@ class FranchiseDetailSchema(Schema):
 
 
 # ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-
-def _serialize_title_list(title, *, min_rank: int | None = None) -> dict:
-    thumbnail_url = None
-    manufacturer_name = None
-    year = None
-    machines = list(title.machine_models.all())
-    if machines:
-        thumbnail_url, _ = _extract_image_urls(
-            machines[0].extra_data or {}, min_rank=min_rank
-        )
-        first = machines[0]
-        manufacturer_name = (
-            first.corporate_entity.manufacturer.name
-            if first.corporate_entity and first.corporate_entity.manufacturer
-            else None
-        )
-        year = first.year
-    return {
-        "name": title.name,
-        "slug": title.slug,
-        "abbreviations": [a.value for a in title.abbreviations.all()],
-        "machine_count": title.machine_count,
-        "manufacturer_name": manufacturer_name,
-        "year": year,
-        "thumbnail_url": thumbnail_url,
-    }
-
-
-# ---------------------------------------------------------------------------
 # Router
 # ---------------------------------------------------------------------------
 
@@ -95,8 +67,6 @@ franchises_router = Router(tags=["franchises"])
 @decorate_view(cache_control(no_cache=True))
 def list_all_franchises(request):
     """Return every franchise with title count (no pagination)."""
-    from ..models import Franchise
-
     qs = (
         Franchise.objects.active()
         .annotate(title_count=Count("titles", filter=active_status_q("titles")))
@@ -113,8 +83,6 @@ def list_all_franchises(request):
 
 
 def _franchise_titles_qs():
-    from ..models import MachineModel, Title
-
     return (
         Title.objects.active()
         .annotate(
@@ -138,16 +106,12 @@ def _franchise_titles_qs():
 
 
 def _franchise_detail_qs():
-    from ..models import Franchise
-
     return Franchise.objects.active().prefetch_related(
         Prefetch("titles", queryset=_franchise_titles_qs()), claims_prefetch()
     )
 
 
 def _serialize_franchise_detail(franchise) -> dict:
-    from apps.core.licensing import get_minimum_display_rank
-
     min_rank = get_minimum_display_rank()
     return {
         "name": franchise.name,
@@ -156,7 +120,7 @@ def _serialize_franchise_detail(franchise) -> dict:
             franchise, "description", getattr(franchise, "active_claims", [])
         ),
         "titles": [
-            _serialize_title_list(t, min_rank=min_rank) for t in franchise.titles.all()
+            _serialize_title_ref(t, min_rank=min_rank) for t in franchise.titles.all()
         ],
         "sources": build_sources(getattr(franchise, "active_claims", [])),
     }
@@ -170,13 +134,12 @@ def _serialize_franchise_detail(franchise) -> dict:
 )
 def patch_franchise_claims(request, slug: str, data: ClaimPatchSchema):
     """Assert per-field claims from the authenticated user, then re-resolve."""
-    from ..models import Franchise
-    from .edit_claims import plan_scalar_field_claims
-
     franchise = get_object_or_404(Franchise.objects.active(), slug=slug)
     specs = plan_scalar_field_claims(Franchise, data.fields, entity=franchise)
 
-    execute_claims(franchise, specs, user=request.user)
+    execute_claims(
+        franchise, specs, user=request.user, note=data.note, citation=data.citation
+    )
 
     franchise = get_object_or_404(_franchise_detail_qs(), slug=franchise.slug)
     return _serialize_franchise_detail(franchise)

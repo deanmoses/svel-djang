@@ -4,7 +4,7 @@
 	import SmartDate from '$lib/components/SmartDate.svelte';
 
 	let { data } = $props();
-	let { profile } = data;
+	let profile = $derived(data.profile);
 </script>
 
 <svelte:head>

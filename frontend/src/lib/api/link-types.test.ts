@@ -2,8 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fetchLinkTypes, searchLinkTargets, _resetCache } from './link-types';
 
 const MOCK_TYPES = [
-	{ name: 'title', label: 'Title', description: 'Link to a title' },
-	{ name: 'manufacturer', label: 'Manufacturer', description: 'Link to a manufacturer' }
+	{ name: 'title', label: 'Title', description: 'Link to a title', flow: 'standard' as const },
+	{
+		name: 'manufacturer',
+		label: 'Manufacturer',
+		description: 'Link to a manufacturer',
+		flow: 'standard' as const
+	}
 ];
 
 const MOCK_TARGETS = {

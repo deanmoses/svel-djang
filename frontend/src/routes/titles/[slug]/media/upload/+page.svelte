@@ -14,7 +14,7 @@
 
 {#if auth.isAuthenticated && md}
 	<h2 class="heading">Upload Media</h2>
-	<MediaUploadZone entityType="machinemodel" slug={md.slug} onuploaded={handleUploaded} />
+	<MediaUploadZone entityType="model" slug={md.slug} onuploaded={handleUploaded} />
 {:else}
 	<p class="login-prompt">Log in to upload media.</p>
 {/if}

@@ -1,6 +1,9 @@
 # Testing
 
-This document describes the project's testing expectations and strategy.
+This document describes the project's testing expectations and strategy. For guidance specific to Django and Svelte, see:
+
+- [TestingBackend.md](TestingBackend.md) — Django/pytest patterns
+- [TestingFrontend.md](TestingFrontend.md) — Vitest tiers, DOM test patterns, jsdom setup
 
 ## Running Tests
 
@@ -49,47 +52,3 @@ When fixing a bug, follow this order:
 4. Run the test again and confirm it passes.
 
 Do NOT fix the bug first and backfill the test later.
-
-### Backend Testing
-
-Backend tests should generally cover:
-
-- model behavior and DB constraints
-- claim/provenance behavior
-- ingest behavior
-- API behavior
-- management command behavior where it matters
-
-When testing DB constraints, prefer direct ORM writes that hit the database constraint path rather than relying on `full_clean()`. See [DataModeling.md](DataModeling.md).
-
-### Frontend Testing
-
-Frontend tests should generally cover:
-
-- TypeScript module logic
-- component behavior where UI wiring matters
-- data-shape expectations against the API contract where appropriate
-
-Prefer testing logic in small TypeScript units where possible rather than over-relying on broad UI tests.
-
-### Documentation and Tests
-
-When a doc describes a strict engineering rule that affects implementation behavior, make sure the code and tests reflect it. Documentation alone is not enforcement.
-
-Relevant supporting docs:
-
-- [Development.md](Development.md)
-- [DataModeling.md](DataModeling.md)
-- [Architecture.md](Architecture.md)
-- [AppBoundaries.md](AppBoundaries.md)
-
-## To Expand
-
-This doc is intentionally a skeleton. It will likely grow sections for:
-
-- concrete command examples
-- test layout by area
-- fixtures and helper conventions
-- frontend testing patterns
-- integration vs unit guidance
-- coverage expectations, if the project wants them

@@ -9,7 +9,7 @@ from apps.provenance.models import ChangeSet, Claim, Source
 
 User = get_user_model()
 
-REVERT_URL = "/api/edit-history/machinemodel/{slug}/revert/"
+REVERT_URL = "/api/edit-history/model/{slug}/revert/"
 
 
 @pytest.fixture
@@ -353,7 +353,7 @@ class TestRevertInHistory:
         client.force_login(user)
         _revert(client, pm.slug, claim.pk, "Reverting year")
 
-        resp = client.get(f"/api/edit-history/machinemodel/{pm.slug}/")
+        resp = client.get(f"/api/edit-history/model/{pm.slug}/")
         data = resp.json()
 
         # Should have 2 changesets: the revert and the original edit
@@ -376,7 +376,7 @@ class TestEditHistoryClaimMetadata:
         """Edit history includes claim_id, claim_user_id, is_active, is_winning."""
         _make_user_edit(client, user, pm, {"year": 2005})
 
-        resp = client.get(f"/api/edit-history/machinemodel/{pm.slug}/")
+        resp = client.get(f"/api/edit-history/model/{pm.slug}/")
         data = resp.json()
         change = data[0]["changes"][0]
 
@@ -393,7 +393,7 @@ class TestEditHistoryClaimMetadata:
         client.force_login(user)
         _revert(client, pm.slug, claim.pk, "Undo")
 
-        resp = client.get(f"/api/edit-history/machinemodel/{pm.slug}/")
+        resp = client.get(f"/api/edit-history/model/{pm.slug}/")
         data = resp.json()
 
         # Find the original edit changeset (the one with a year change, not the revert)

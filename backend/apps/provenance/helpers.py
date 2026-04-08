@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from django.db.models import Case, F, IntegerField, Prefetch, Value, When
 
-from .models import Claim
+from .models import CitationInstance, Claim
 
 
 def claims_prefetch(to_attr: str = "active_claims"):
@@ -14,6 +14,15 @@ def claims_prefetch(to_attr: str = "active_claims"):
         queryset=Claim.objects.filter(is_active=True)
         .exclude(source__is_enabled=False)
         .select_related("source", "user", "changeset")
+        .prefetch_related(
+            Prefetch(
+                "citation_instances",
+                queryset=CitationInstance.objects.select_related(
+                    "citation_source"
+                ).prefetch_related("citation_source__links"),
+                to_attr="prefetched_citation_instances",
+            )
+        )
         .annotate(
             effective_priority=Case(
                 When(source__isnull=False, then=F("source__priority")),

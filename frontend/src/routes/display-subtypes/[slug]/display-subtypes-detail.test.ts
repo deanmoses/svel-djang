@@ -5,7 +5,7 @@ const MOCK_DATA = {
 	name: '128x32',
 	slug: '128x32',
 	display_order: 0,
-	description: { text: '', html: '', attribution: null },
+	description: { text: '', html: '', citations: [], attribution: null },
 	sources: []
 };
 

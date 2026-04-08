@@ -35,10 +35,6 @@
 		else if (e.key === 'ArrowRight') next();
 	}
 
-	function handleBackdropClick(e: MouseEvent) {
-		if (e.target === e.currentTarget) onclose();
-	}
-
 	// Lock body scroll while lightbox is open
 	$effect(() => {
 		const prev = document.body.style.overflow;
@@ -51,9 +47,11 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-<div class="lightbox-backdrop" onclick={handleBackdropClick}>
-	<div class="lightbox-content">
+<div class="lightbox-backdrop">
+	<button type="button" class="backdrop-dismiss" aria-label="Dismiss media viewer" onclick={onclose}
+	></button>
+
+	<div class="lightbox-content" role="dialog" aria-modal="true" aria-label="Media viewer">
 		<button class="close-btn" onclick={onclose} aria-label="Close">&times;</button>
 
 		{#if item}
@@ -95,8 +93,18 @@
 		justify-content: center;
 	}
 
+	.backdrop-dismiss {
+		position: absolute;
+		inset: 0;
+		border: 0;
+		padding: 0;
+		background: transparent;
+		cursor: pointer;
+	}
+
 	.lightbox-content {
 		position: relative;
+		z-index: 1;
 		max-width: 90vw;
 		max-height: 90vh;
 		display: flex;

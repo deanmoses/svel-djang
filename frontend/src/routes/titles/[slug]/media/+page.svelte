@@ -14,7 +14,7 @@
 		if (!md) return;
 		actionError = '';
 		try {
-			await detachMedia('machinemodel', md.slug, assetUuid);
+			await detachMedia('model', md.slug, assetUuid);
 			await invalidateAll();
 		} catch (err) {
 			actionError = err instanceof Error ? err.message : 'Failed to remove image.';
@@ -25,7 +25,7 @@
 		if (!md) return;
 		actionError = '';
 		try {
-			await setPrimary('machinemodel', md.slug, assetUuid);
+			await setPrimary('model', md.slug, assetUuid);
 			await invalidateAll();
 		} catch (err) {
 			actionError = err instanceof Error ? err.message : 'Failed to set primary image.';
@@ -46,7 +46,7 @@
 
 	<MediaGrid
 		media={md.uploaded_media}
-		categories={[...MEDIA_CATEGORIES.machinemodel]}
+		categories={[...MEDIA_CATEGORIES.model]}
 		canEdit={auth.isAuthenticated}
 		ondelete={handleDelete}
 		onsetprimary={handleSetPrimary}

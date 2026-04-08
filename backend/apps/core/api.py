@@ -23,6 +23,7 @@ class LinkTypeSchema(Schema):
     name: str
     label: str
     description: str
+    flow: str
 
 
 class LinkTargetSchema(Schema):

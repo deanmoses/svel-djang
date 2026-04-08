@@ -7,7 +7,7 @@ const MOCK_TITLE = {
 	name: 'Medieval Madness',
 	slug: 'medieval-madness',
 	abbreviations: [],
-	description: { text: '', html: '', attribution: null },
+	description: { text: '', html: '', citations: [], attribution: null },
 	needs_review: false,
 	needs_review_notes: '',
 	review_links: [],

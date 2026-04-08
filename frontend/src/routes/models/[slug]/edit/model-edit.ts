@@ -125,7 +125,6 @@ export type ModelEditState = {
 	gameplayFeatures: GameplayFeatureRow[];
 	credits: CreditRow[];
 	abbreviations: string[];
-	note: string;
 };
 
 export type ModelPatchBody = {
@@ -136,7 +135,6 @@ export type ModelPatchBody = {
 	gameplay_features: { slug: string; count: number | null }[] | null;
 	credits: { person_slug: string; role: string }[] | null;
 	abbreviations: string[] | null;
-	note: string;
 };
 
 // ---------------------------------------------------------------------------
@@ -239,7 +237,6 @@ export function buildModelPatchBody(
 					.filter((c) => c.person_slug !== '' && c.role !== '')
 					.map(({ person_slug, role }) => ({ person_slug, role }))
 			: null,
-		abbreviations: hasAbbrevs ? state.abbreviations : null,
-		note: state.note.trim()
+		abbreviations: hasAbbrevs ? state.abbreviations : null
 	};
 }

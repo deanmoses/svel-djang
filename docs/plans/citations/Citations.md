@@ -18,7 +18,7 @@ However, we're loath to follow the Wikipedia model because the bureaucracy aroun
   - [CitationsChallenges.md](CitationsChallenges.md): product constraints and failure modes
   - [CitationSharing.md](CitationSharing.md): shared versus independent citation records
   - [CitationGranularity.md](CitationGranularity.md): points versus ranges vs sections
-  - [CitationDomainModel.md](CitationDomainModel.md): source vs instance vs access link
+  - [CitationDomainModel.md](CitationDomainModel.md): source vs instance vs citation source link
   - [CitationSourceTypes.md](CitationSourceTypes.md): how to think about different types of Citation Sources
   - [CitationSourceSeeding.md](CitationSourceSeeding.md): pre-populating the system with relevant Citation Sources
 - Design

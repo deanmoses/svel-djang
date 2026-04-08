@@ -27,14 +27,12 @@ describe('model edit-history SSR route', () => {
 
 		expect(result).toEqual({
 			changesets: MOCK_CHANGESETS,
-			entityType: 'machinemodel',
+			entityType: 'model',
 			slug: 'medieval-madness'
 		});
 		const request = fetch.mock.calls[0]?.[0];
 		expect(request).toBeInstanceOf(Request);
-		expect(request.url).toBe(
-			'http://localhost:5173/api/edit-history/machinemodel/medieval-madness/'
-		);
+		expect(request.url).toBe('http://localhost:5173/api/edit-history/model/medieval-madness/');
 	});
 
 	it('throws on backend failure', async () => {

@@ -25,7 +25,6 @@ export type TitleEditFormState = {
 type TitlePatchBody = {
 	fields: Record<string, unknown>;
 	abbreviations: string[] | null;
-	note: string;
 };
 
 function normalizeAbbreviations(values: string[]): string[] {
@@ -84,8 +83,7 @@ function abbreviationsChanged(form: TitleEditFormState, title: TitleEditView): b
 
 export function buildTitlePatchBody(
 	form: TitleEditFormState,
-	title: TitleEditView,
-	note: string
+	title: TitleEditView
 ): TitlePatchBody | null {
 	const fields = buildChangedTitleFields(form, title);
 	const hasFields = Object.keys(fields).length > 0;
@@ -95,8 +93,7 @@ export function buildTitlePatchBody(
 
 	return {
 		fields,
-		abbreviations: hasAbbreviations ? parseAbbreviations(form.abbreviationsText) : null,
-		note: note.trim()
+		abbreviations: hasAbbreviations ? parseAbbreviations(form.abbreviationsText) : null
 	};
 }
 

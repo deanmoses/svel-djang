@@ -43,6 +43,7 @@ class MachineModel(
 
     MEDIA_CATEGORIES = ["backglass", "playfield", "cabinet", "other"]
 
+    api_type_key = "model"
     link_url_pattern = "/models/{slug}"
     link_sort_order = 20
 
@@ -259,6 +260,8 @@ class MachineModel(
     entity_media = GenericRelation("media.EntityMedia")
 
     class Meta:
+        verbose_name = "model"
+        verbose_name_plural = "models"
         ordering = ["name"]
         constraints = [
             slug_not_blank(),

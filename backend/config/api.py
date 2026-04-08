@@ -1,6 +1,7 @@
 import importlib
 
 from django.apps import apps
+from django.db import connection
 from ninja import NinjaAPI, Schema
 from ninja.errors import HttpError
 
@@ -24,8 +25,6 @@ class StatsSchema(Schema):
 
 @api.get("/stats", response=StatsSchema, tags=["private"])
 def stats(request):
-    from django.db import connection
-
     with connection.cursor() as cursor:
         cursor.execute(
             """
@@ -47,8 +46,6 @@ def stats(request):
 
 @api.get("/health", tags=["private"])
 def health(request):
-    from django.db import connection
-
     with connection.cursor() as cursor:
         cursor.execute("SELECT 1")
     return {"status": "ok"}
@@ -82,7 +79,7 @@ _discover_routers()
 # ---------------------------------------------------------------------------
 
 _ENTITY_MODEL_MAP = {
-    "machine-model": "MachineModel",
+    "model": "MachineModel",
     "person": "Person",
     "corporate-entity": "CorporateEntity",
     "manufacturer": "Manufacturer",
@@ -93,7 +90,7 @@ _ENTITY_MODEL_MAP = {
 def get_field_constraints(request, entity_type: str):
     """Return numeric field constraints derived from model validators."""
     from apps.catalog import models as catalog_models
-    from apps.catalog.api.edit_claims import get_field_constraints as _get
+    from apps.catalog.api.edit_claims import get_field_constraints as _get  # noqa: E402 — deferred to avoid early app import
 
     class_name = _ENTITY_MODEL_MAP.get(entity_type)
     if not class_name:

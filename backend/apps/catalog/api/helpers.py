@@ -4,11 +4,104 @@ from __future__ import annotations
 
 from django.db.models import Prefetch
 
+from apps.core.licensing import (
+    UNKNOWN_LICENSE_RANK,
+    build_source_field_license_map,
+    get_minimum_display_rank,
+    resolve_effective_license,
+)
+from apps.core.markdown import render_markdown_fields
+from apps.core.markdown_links import convert_storage_to_authoring
+from apps.media.models import EntityMedia
+from apps.media.storage import build_public_url, build_storage_key
+
+from ..models import GameplayFeature
+
+
+# ---------------------------------------------------------------------------
+# Generic serialization helpers
+# ---------------------------------------------------------------------------
+
+
+def _serialize_credit(credit) -> dict:
+    """Serialize a Credit row into the standard CreditSchema-shaped dict."""
+    return {
+        "person": {"name": credit.person.name, "slug": credit.person.slug},
+        "role": credit.role.slug,
+        "role_display": credit.role.name,
+        "role_sort_order": credit.role.display_order,
+    }
+
+
+def _first_thumbnail(entities_with_models, *, min_rank: int) -> str | None:
+    """Return the first non-None thumbnail URL from nested entity→model prefetches."""
+    for entity in entities_with_models:
+        for model in entity.models.all():
+            if model.extra_data:
+                thumb, _ = _extract_image_urls(model.extra_data, min_rank=min_rank)
+                if thumb:
+                    return thumb
+    return None
+
+
+def _intersect_facet_sets(models, relation_name: str) -> list[dict]:
+    """Return the intersection of a slug/name M2M across all *models*.
+
+    Each model's related set is collected as ``frozenset((slug, name))``.
+    Only slugs present on **every** model are included.
+    Returns ``[]`` when any model has an empty set or models disagree.
+    """
+    sets = [
+        frozenset((obj.slug, obj.name) for obj in getattr(m, relation_name).all())
+        for m in models
+    ]
+    if not sets or not all(sets):
+        return []
+    common = sets[0]
+    for s in sets[1:]:
+        common &= s
+    return [{"slug": s, "name": n} for s, n in sorted(common)] if common else []
+
+
+def _serialize_title_ref(title, *, min_rank: int | None = None) -> dict:
+    """Serialize a Title for use in franchise/series listing context.
+
+    Expects *title* to have prefetched ``machine_models`` (with
+    corporate_entity__manufacturer) and ``abbreviations``, plus an
+    annotated ``machine_count``.
+    """
+    thumbnail_url = None
+    manufacturer_name = None
+    year = None
+    first = next(iter(title.machine_models.all()), None)
+    if first is not None:
+        thumbnail_url, _ = _extract_image_urls(
+            first.extra_data or {}, min_rank=min_rank
+        )
+        manufacturer_name = (
+            first.corporate_entity.manufacturer.name
+            if first.corporate_entity and first.corporate_entity.manufacturer
+            else None
+        )
+        year = first.year
+    return {
+        "name": title.name,
+        "slug": title.slug,
+        "abbreviations": [a.value for a in title.abbreviations.all()],
+        "machine_count": title.machine_count,
+        "manufacturer_name": manufacturer_name,
+        "year": year,
+        "thumbnail_url": thumbnail_url,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Media helpers
+# ---------------------------------------------------------------------------
+
 
 def _media_prefetch():
     """Return a Prefetch for ready EntityMedia with assets."""
-    from apps.media.models import EntityMedia
-
     return Prefetch(
         "entity_media",
         queryset=EntityMedia.objects.filter(
@@ -20,8 +113,6 @@ def _media_prefetch():
 
 def _serialize_uploaded_media(all_media) -> list[dict]:
     """Serialize EntityMedia rows into the uploaded_media response list."""
-    from apps.media.storage import build_public_url, build_storage_key
-
     return [
         {
             "asset_uuid": str(em.asset.uuid),
@@ -47,8 +138,6 @@ def _uploaded_image_urls(primary_media) -> tuple[str | None, str | None]:
     Prefers ``backglass`` category, then falls back to any primary.
     Returns ``(None, None)`` when no uploaded media is available.
     """
-    from apps.media.storage import build_public_url, build_storage_key
-
     if not primary_media:
         return None, None
 
@@ -86,8 +175,6 @@ def _extract_image_urls(
     thumb, hero = _uploaded_image_urls(primary_media)
     if thumb or hero:
         return thumb, hero
-
-    from apps.core.licensing import UNKNOWN_LICENSE_RANK, get_minimum_display_rank
 
     if min_rank is None:
         min_rank = get_minimum_display_rank()
@@ -137,8 +224,6 @@ def _extract_image_attribution(extra_data: dict, primary_media=None) -> dict | N
     if primary_media:
         return None
 
-    from apps.core.licensing import UNKNOWN_LICENSE_RANK, get_minimum_display_rank
-
     min_rank = get_minimum_display_rank()
 
     for key in ("opdb.images", "ipdb.image_urls", "image_urls"):
@@ -162,11 +247,6 @@ def _extract_description_attribution(active_claims) -> dict | None:
     Expects active_claims to be ordered by claim_key, -priority, -created_at
     (the standard prefetch ordering).
     """
-    from apps.core.licensing import (
-        build_source_field_license_map,
-        resolve_effective_license,
-    )
-
     sfl_map = None
     for claim in active_claims:
         if claim.field_name == "description":
@@ -196,13 +276,11 @@ def _build_rich_text(obj, field_name: str, active_claims=None) -> dict:
     so edit forms show human-readable link references.  The ``html`` value
     is rendered from the storage format and is display-ready.
     """
-    from apps.core.markdown import render_markdown_fields
-    from apps.core.markdown_links import convert_storage_to_authoring
-
     raw_text = getattr(obj, field_name, "") or ""
     text = convert_storage_to_authoring(raw_text) if raw_text else raw_text
     html_fields = render_markdown_fields(obj)
     html = html_fields.get(f"{field_name}_html", "")
+    citations = html_fields.get(f"{field_name}_citations", [])
 
     attribution = None
     if active_claims is not None:
@@ -211,14 +289,13 @@ def _build_rich_text(obj, field_name: str, active_claims=None) -> dict:
     return {
         "text": text,
         "html": html,
+        "citations": citations,
         "attribution": attribution,
     }
 
 
 def _collect_titles(models, *, include_manufacturer: bool = False) -> list[dict]:
     """Group models by title into a deduplicated title list."""
-    from apps.core.licensing import get_minimum_display_rank
-
     min_rank = get_minimum_display_rank()
     titles: dict[str, dict] = {}
     for m in models:
@@ -236,11 +313,12 @@ def _collect_titles(models, *, include_manufacturer: bool = False) -> list[dict]
                 "thumbnail_url": thumbnail_url,
             }
             if include_manufacturer:
-                entry["manufacturer_name"] = (
-                    m.corporate_entity.manufacturer.name
+                mfr = (
+                    m.corporate_entity.manufacturer
                     if m.corporate_entity and m.corporate_entity.manufacturer
                     else None
                 )
+                entry["manufacturer_name"] = mfr.name if mfr else None
             titles[key] = entry
         elif titles[key]["thumbnail_url"] is None:
             thumbnail_url = _extract_image_urls(m.extra_data or {}, min_rank=min_rank)[
@@ -295,8 +373,6 @@ def _get_feature_descendant_slugs(slug: str) -> set[str]:
     then runs entirely in Python.  For a leaf feature this returns {slug}.
     For an unknown slug it still returns {slug} (the filter just won't match).
     """
-    from ..models import GameplayFeature
-
     features = list(
         GameplayFeature.objects.prefetch_related("children").only("pk", "slug")
     )
@@ -317,8 +393,6 @@ def _get_feature_descendant_slugs(slug: str) -> set[str]:
 def _serialize_title_machine(pm, *, min_rank: int | None = None) -> dict:
     """Serialize a MachineModel for use in title/theme/system machine lists."""
     if min_rank is None:
-        from apps.core.licensing import get_minimum_display_rank
-
         min_rank = get_minimum_display_rank()
 
     thumbnail_url, _ = _extract_image_urls(pm.extra_data or {}, min_rank=min_rank)

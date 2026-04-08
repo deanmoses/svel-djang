@@ -1,16 +1,25 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { auth } from '$lib/auth.svelte';
+	import type { EditCitationSelection } from '$lib/edit-citation';
+	import EditCitationField from './EditCitationField.svelte';
+	import TextField from './TextField.svelte';
 
 	let {
 		saveStatus,
 		saveError = '',
 		onsave,
+		note = $bindable(''),
+		citation = $bindable<EditCitationSelection | null>(null),
+		showMixedEditWarning = false,
 		children
 	}: {
 		saveStatus: 'idle' | 'saving' | 'saved' | 'error';
 		saveError?: string;
 		onsave: () => void;
+		note?: string;
+		citation?: EditCitationSelection | null;
+		showMixedEditWarning?: boolean;
 		children: Snippet;
 	} = $props();
 </script>
@@ -25,6 +34,14 @@
 			}}
 		>
 			{@render children()}
+
+			<TextField
+				label="Edit note"
+				bind:value={note}
+				placeholder="Why are you making this change?"
+				optional
+			/>
+			<EditCitationField bind:citation {showMixedEditWarning} />
 
 			<div class="form-actions">
 				<button type="submit" class="btn-save" disabled={saveStatus === 'saving'}>

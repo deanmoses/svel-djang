@@ -11,6 +11,7 @@ from apps.catalog.claims import build_relationship_claim
 from apps.catalog.models import Franchise, Title
 from apps.catalog.resolve import resolve_all_entities
 from apps.catalog.resolve._relationships import resolve_all_title_abbreviations
+from apps.citation.models import CitationSource
 from apps.provenance.models import ChangeSet, Claim, Source
 
 User = get_user_model()
@@ -45,6 +46,11 @@ def source(db):
     return Source.objects.create(
         name="IPDB", slug="ipdb", source_type="database", priority=10
     )
+
+
+@pytest.fixture
+def citation_source(db):
+    return CitationSource.objects.create(name="Williams Flyer", source_type="web")
 
 
 def _patch(client, slug: str, body: dict):
@@ -244,3 +250,57 @@ class TestPatchTitleClaims:
             claim["changeset_note"] == "Editorial cleanup"
             for claim in resp.json()["sources"]
         )
+
+    def test_scalar_edit_with_citation_clones_to_created_claim(
+        self, client, user, title, citation_source
+    ):
+        client.force_login(user)
+        template_claim = Claim.objects.assert_claim(
+            title,
+            "description",
+            "Template citation seed",
+            user=user,
+            changeset=ChangeSet.objects.create(user=user, note="seed"),
+        )
+        template_instance = citation_source.instances.create(
+            claim=template_claim,
+            locator="p. 2",
+        )
+
+        resp = _patch(
+            client,
+            title.slug,
+            {
+                "fields": {"description": "Updated"},
+                "citation": {"citation_instance_id": template_instance.pk},
+            },
+        )
+
+        assert resp.status_code == 200, resp.json()
+        changeset = ChangeSet.objects.exclude(pk=template_claim.changeset_id).get()
+        created_claim = changeset.claims.get(field_name="description")
+        claim_citations = list(created_claim.citation_instances.all())
+        assert len(claim_citations) == 1
+        assert claim_citations[0].claim_id == created_claim.pk
+        assert claim_citations[0].citation_source_id == citation_source.pk
+        assert claim_citations[0].locator == "p. 2"
+
+    def test_invalid_citation_rolls_back_changeset_and_claims(
+        self, client, user, title
+    ):
+        client.force_login(user)
+
+        resp = _patch(
+            client,
+            title.slug,
+            {
+                "fields": {"description": "Updated"},
+                "citation": {"citation_instance_id": 999999},
+            },
+        )
+
+        assert resp.status_code == 422
+        assert ChangeSet.objects.count() == 0
+        assert not Claim.objects.filter(
+            user=user, field_name="description", value="Updated"
+        ).exists()

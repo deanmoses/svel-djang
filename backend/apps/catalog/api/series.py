@@ -13,15 +13,21 @@ from ninja import Router, Schema
 from ninja.decorators import decorate_view
 from ninja.security import django_auth
 
-from .edit_claims import execute_claims
+from .edit_claims import execute_claims, plan_scalar_field_claims
 from apps.provenance.helpers import build_sources, claims_prefetch
 
 from .helpers import (
     _build_rich_text,
     _extract_image_urls,
+    _serialize_credit,
+    _serialize_title_ref,
 )
 from .machine_models import CreditSchema
 from .schemas import ClaimPatchSchema, ClaimSchema, RichTextSchema
+
+from apps.core.licensing import get_minimum_display_rank
+
+from ..models import Credit, MachineModel, Series, Title
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -60,37 +66,7 @@ class SeriesDetailSchema(Schema):
 # ---------------------------------------------------------------------------
 
 
-def _serialize_title_list(title, *, min_rank: int | None = None) -> dict:
-    """Serialize a Title for use in series listing context."""
-    thumbnail_url = None
-    manufacturer_name = None
-    year = None
-    machines = list(title.machine_models.all())
-    if machines:
-        thumbnail_url, _ = _extract_image_urls(
-            machines[0].extra_data or {}, min_rank=min_rank
-        )
-        first = machines[0]
-        manufacturer_name = (
-            first.corporate_entity.manufacturer.name
-            if first.corporate_entity and first.corporate_entity.manufacturer
-            else None
-        )
-        year = first.year
-    return {
-        "name": title.name,
-        "slug": title.slug,
-        "abbreviations": [a.value for a in title.abbreviations.all()],
-        "machine_count": title.machine_count,
-        "manufacturer_name": manufacturer_name,
-        "year": year,
-        "thumbnail_url": thumbnail_url,
-    }
-
-
 def _series_titles_qs():
-    from ..models import MachineModel, Title
-
     return (
         Title.objects.active()
         .annotate(
@@ -114,14 +90,10 @@ def _series_titles_qs():
 
 
 def _series_credits_qs():
-    from ..models import Credit
-
     return Credit.objects.filter(series__isnull=False).select_related("person", "role")
 
 
 def _series_detail_qs():
-    from ..models import Series
-
     return Series.objects.active().prefetch_related(
         Prefetch("titles", queryset=_series_titles_qs()),
         Prefetch("credits", queryset=_series_credits_qs()),
@@ -130,8 +102,6 @@ def _series_detail_qs():
 
 
 def _serialize_series_detail(series) -> dict:
-    from apps.core.licensing import get_minimum_display_rank
-
     min_rank = get_minimum_display_rank()
     return {
         "name": series.name,
@@ -140,17 +110,9 @@ def _serialize_series_detail(series) -> dict:
             series, "description", getattr(series, "active_claims", [])
         ),
         "titles": [
-            _serialize_title_list(t, min_rank=min_rank) for t in series.titles.all()
+            _serialize_title_ref(t, min_rank=min_rank) for t in series.titles.all()
         ],
-        "credits": [
-            {
-                "person": {"name": c.person.name, "slug": c.person.slug},
-                "role": c.role.slug,
-                "role_display": c.role.name,
-                "role_sort_order": c.role.display_order,
-            }
-            for c in series.credits.all()
-        ],
+        "credits": [_serialize_credit(c) for c in series.credits.all()],
         "sources": build_sources(getattr(series, "active_claims", [])),
     }
 
@@ -166,8 +128,6 @@ series_router = Router(tags=["series"])
 @decorate_view(cache_control(no_cache=True))
 def list_series(request):
     """Return all series with title count and thumbnail."""
-    from ..models import MachineModel, Series
-
     qs = (
         Series.objects.active()
         .annotate(title_count=Count("titles", filter=active_status_q("titles")))
@@ -182,8 +142,6 @@ def list_series(request):
             )
         )
     )
-    from apps.core.licensing import get_minimum_display_rank
-
     min_rank = get_minimum_display_rank()
     result = []
     for s in qs:
@@ -213,13 +171,12 @@ def list_series(request):
 )
 def patch_series_claims(request, slug: str, data: ClaimPatchSchema):
     """Assert per-field claims from the authenticated user, then re-resolve."""
-    from ..models import Series
-    from .edit_claims import plan_scalar_field_claims
-
     series = get_object_or_404(Series.objects.active(), slug=slug)
     specs = plan_scalar_field_claims(Series, data.fields, entity=series)
 
-    execute_claims(series, specs, user=request.user)
+    execute_claims(
+        series, specs, user=request.user, note=data.note, citation=data.citation
+    )
 
     series = get_object_or_404(_series_detail_qs(), slug=series.slug)
     return _serialize_series_detail(series)

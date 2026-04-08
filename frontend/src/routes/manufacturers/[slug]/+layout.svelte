@@ -67,7 +67,7 @@
 		{#snippet main()}
 			{#if mfr.description?.html}
 				<div class="description">
-					<Markdown html={mfr.description.html} />
+					<Markdown html={mfr.description.html} citations={mfr.description.citations} />
 					<AttributionLine attribution={mfr.description.attribution} />
 				</div>
 			{/if}

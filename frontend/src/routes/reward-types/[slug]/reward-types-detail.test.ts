@@ -5,7 +5,7 @@ const MOCK_DATA = {
 	name: 'Extra Ball',
 	slug: 'extra-ball',
 	display_order: 0,
-	description: { text: '', html: '', attribution: null },
+	description: { text: '', html: '', citations: [], attribution: null },
 	machines: [],
 	sources: []
 };

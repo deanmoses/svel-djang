@@ -67,6 +67,16 @@ from .themes import (
 )
 from .titles import TitleDetailSchema, _detail_qs, _serialize_title_detail
 
+from apps.catalog.models import (
+    Cabinet,
+    DisplaySubtype,
+    DisplayType,
+    GameFormat,
+    Tag,
+    TechnologyGeneration,
+    TechnologySubgeneration,
+)
+
 pages_router = Router(tags=["private"])
 
 
@@ -147,15 +157,11 @@ def system_detail_page(request, slug: str):
 
 @pages_router.get("/tag/{slug}", response=TaxonomySchema)
 def tag_detail_page(request, slug: str):
-    from apps.catalog.models import Tag
-
     return _serialize_taxonomy(get_object_or_404(_taxonomy_detail_qs(Tag), slug=slug))
 
 
 @pages_router.get("/cabinet/{slug}", response=TaxonomySchema)
 def cabinet_detail_page(request, slug: str):
-    from apps.catalog.models import Cabinet
-
     return _serialize_taxonomy(
         get_object_or_404(_taxonomy_detail_qs(Cabinet), slug=slug)
     )
@@ -163,8 +169,6 @@ def cabinet_detail_page(request, slug: str):
 
 @pages_router.get("/display-type/{slug}", response=TaxonomySchema)
 def display_type_detail_page(request, slug: str):
-    from apps.catalog.models import DisplayType
-
     return _serialize_taxonomy(
         get_object_or_404(_taxonomy_detail_qs(DisplayType), slug=slug)
     )
@@ -172,8 +176,6 @@ def display_type_detail_page(request, slug: str):
 
 @pages_router.get("/display-subtype/{slug}", response=TaxonomySchema)
 def display_subtype_detail_page(request, slug: str):
-    from apps.catalog.models import DisplaySubtype
-
     return _serialize_taxonomy(
         get_object_or_404(_taxonomy_detail_qs(DisplaySubtype), slug=slug)
     )
@@ -181,8 +183,6 @@ def display_subtype_detail_page(request, slug: str):
 
 @pages_router.get("/game-format/{slug}", response=TaxonomySchema)
 def game_format_detail_page(request, slug: str):
-    from apps.catalog.models import GameFormat
-
     return _serialize_taxonomy(
         get_object_or_404(_taxonomy_detail_qs(GameFormat), slug=slug)
     )
@@ -190,8 +190,6 @@ def game_format_detail_page(request, slug: str):
 
 @pages_router.get("/technology-generation/{slug}", response=TaxonomySchema)
 def technology_generation_detail_page(request, slug: str):
-    from apps.catalog.models import TechnologyGeneration
-
     return _serialize_taxonomy(
         get_object_or_404(_taxonomy_detail_qs(TechnologyGeneration), slug=slug)
     )
@@ -199,8 +197,6 @@ def technology_generation_detail_page(request, slug: str):
 
 @pages_router.get("/technology-subgeneration/{slug}", response=TaxonomySchema)
 def technology_subgeneration_detail_page(request, slug: str):
-    from apps.catalog.models import TechnologySubgeneration
-
     return _serialize_taxonomy(
         get_object_or_404(_taxonomy_detail_qs(TechnologySubgeneration), slug=slug)
     )

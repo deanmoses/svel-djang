@@ -20,13 +20,11 @@ export type CorporateEntityFormFields = {
 export type CorporateEntityEditState = {
 	fields: CorporateEntityFormFields;
 	aliases: string[];
-	note: string;
 };
 
 type CorporateEntityPatchBody = {
 	fields: Record<string, unknown>;
 	aliases: string[] | null;
-	note: string;
 };
 
 export function corporateEntityToFormFields(
@@ -53,7 +51,6 @@ export function buildCorporateEntityPatchBody(
 
 	return {
 		fields,
-		aliases: hasAliases ? state.aliases : null,
-		note: state.note.trim()
+		aliases: hasAliases ? state.aliases : null
 	};
 }

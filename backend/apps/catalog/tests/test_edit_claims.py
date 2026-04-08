@@ -123,7 +123,7 @@ class TestGetFieldConstraints:
 
 class TestFieldConstraintsEndpoint:
     def test_returns_machine_model_constraints(self, client):
-        resp = client.get("/api/field-constraints/machine-model")
+        resp = client.get("/api/field-constraints/model")
         assert resp.status_code == 200
         data = resp.json()
         assert data["year"] == {"min": 1800, "max": 2100, "step": 1}

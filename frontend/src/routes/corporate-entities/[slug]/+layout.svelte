@@ -52,7 +52,7 @@
 		{#snippet main()}
 			{#if ce.description?.html}
 				<div class="description">
-					<Markdown html={ce.description.html} />
+					<Markdown html={ce.description.html} citations={ce.description.citations} />
 					<AttributionLine attribution={ce.description.attribution} />
 				</div>
 			{/if}

@@ -15,7 +15,7 @@
 <article>
 	<PageHeader title={profile.name}>
 		{#if profile.description?.html}
-			<Markdown html={profile.description.html} />
+			<Markdown html={profile.description.html} citations={profile.description.citations} />
 			<AttributionLine attribution={profile.description.attribution} />
 		{/if}
 	</PageHeader>

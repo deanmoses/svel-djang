@@ -3,6 +3,11 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import { resolveHref } from '$lib/utils';
 	import client from '$lib/api/client';
+	import {
+		shouldShowMixedEditCitationWarning,
+		type EditCitationSelection,
+		withEditMetadata
+	} from '$lib/edit-citation';
 	import { getEditRedirectHref } from '$lib/edit-routes';
 	import SearchableSelect from '$lib/components/SearchableSelect.svelte';
 	import EditFormShell from '$lib/components/form/EditFormShell.svelte';
@@ -18,6 +23,13 @@
 	let editFields = $state(untrack(() => titleToFormState(data.title)));
 	let selectedFranchise = $state<string | null>(untrack(() => data.title.franchise?.slug ?? null));
 	let editNote = $state('');
+	let editCitation = $state<EditCitationSelection | null>(null);
+	let pendingBody = $derived(
+		buildTitlePatchBody({ ...editFields, franchiseSlug: selectedFranchise ?? '' }, title)
+	);
+	let showMixedEditWarning = $derived(
+		shouldShowMixedEditCitationWarning(pendingBody, editCitation)
+	);
 
 	let franchiseOptions = $state<{ slug: string; label: string; count: number }[]>([]);
 
@@ -37,12 +49,9 @@
 	let saveError = $state('');
 
 	async function saveChanges() {
-		const body = buildTitlePatchBody(
-			{ ...editFields, franchiseSlug: selectedFranchise ?? '' },
-			title,
-			editNote
-		);
-		if (!body) return;
+		const rawBody = pendingBody;
+		if (!rawBody) return;
+		const body = withEditMetadata(rawBody, editNote, editCitation);
 
 		saveStatus = 'saving';
 		saveError = '';
@@ -57,6 +66,7 @@
 			editFields = titleToFormState(updated);
 			selectedFranchise = updated.franchise?.slug ?? null;
 			editNote = '';
+			editCitation = null;
 			if (redirectHref) {
 				await goto(redirectHref, { replaceState: true });
 				return;
@@ -71,7 +81,14 @@
 	}
 </script>
 
-<EditFormShell {saveStatus} {saveError} onsave={saveChanges}>
+<EditFormShell
+	{saveStatus}
+	{saveError}
+	onsave={saveChanges}
+	bind:note={editNote}
+	bind:citation={editCitation}
+	{showMixedEditWarning}
+>
 	{#if boundary.singleModelActions}
 		<section class="merged-note">
 			<h3>Merged Single-Model View</h3>
@@ -128,13 +145,6 @@
 
 	<TextAreaField label="Abbreviations" bind:value={editFields.abbreviationsText} rows={3} />
 	<p class="field-help">Separate abbreviations with commas or new lines.</p>
-
-	<TextField
-		label="Edit note"
-		bind:value={editNote}
-		placeholder="Why are you making this change?"
-		optional
-	/>
 </EditFormShell>
 
 <style>

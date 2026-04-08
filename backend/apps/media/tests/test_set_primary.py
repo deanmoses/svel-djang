@@ -91,7 +91,7 @@ class TestSetPrimaryEndpoint:
         resp = auth_client.post(
             "/api/media/set-primary/",
             data={
-                "entity_type": "machine-model",
+                "entity_type": "model",
                 "slug": machine_model.slug,
                 "asset_uuid": str(asset.uuid),
             },
@@ -116,7 +116,7 @@ class TestSetPrimaryEndpoint:
         resp = auth_client.post(
             "/api/media/set-primary/",
             data={
-                "entity_type": "machine-model",
+                "entity_type": "model",
                 "slug": machine_model.slug,
                 "asset_uuid": str(asset_b.uuid),
             },
@@ -146,7 +146,7 @@ class TestSetPrimaryEndpoint:
         resp = auth_client.post(
             "/api/media/set-primary/",
             data={
-                "entity_type": "machine-model",
+                "entity_type": "model",
                 "slug": machine_model.slug,
                 "asset_uuid": str(new_bg.uuid),
             },
@@ -167,7 +167,7 @@ class TestSetPrimaryEndpoint:
         resp = auth_client.post(
             "/api/media/set-primary/",
             data={
-                "entity_type": "machine-model",
+                "entity_type": "model",
                 "slug": machine_model.slug,
                 "asset_uuid": str(asset.uuid),
             },
@@ -186,7 +186,7 @@ class TestSetPrimaryEndpoint:
         resp = anon_client.post(
             "/api/media/set-primary/",
             data={
-                "entity_type": "machine-model",
+                "entity_type": "model",
                 "slug": machine_model.slug,
                 "asset_uuid": str(asset.uuid),
             },
@@ -205,7 +205,7 @@ class TestSetPrimaryEndpoint:
         resp = auth_client.post(
             "/api/media/set-primary/",
             data={
-                "entity_type": "machine-model",
+                "entity_type": "model",
                 "slug": machine_model.slug,
                 "asset_uuid": str(asset.uuid),
             },
@@ -218,7 +218,7 @@ class TestSetPrimaryEndpoint:
         resp = auth_client.post(
             "/api/media/set-primary/",
             data={
-                "entity_type": "machine-model",
+                "entity_type": "model",
                 "slug": machine_model.slug,
                 "asset_uuid": "00000000-0000-0000-0000-000000000000",
             },
@@ -231,7 +231,7 @@ class TestSetPrimaryEndpoint:
         resp = auth_client.post(
             "/api/media/set-primary/",
             data={
-                "entity_type": "machine-model",
+                "entity_type": "model",
                 "slug": machine_model.slug,
                 "asset_uuid": "not-a-uuid",
             },

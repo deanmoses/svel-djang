@@ -41,6 +41,10 @@ describe('formatLinkText', () => {
 			'[[machinemodel:medieval-madness]]'
 		);
 	});
+
+	it('formats a citation link with numeric ID', () => {
+		expect(formatLinkText('cite', '42')).toBe('[[cite:42]]');
+	});
 });
 
 describe('spliceLink', () => {

@@ -3,6 +3,11 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import { resolveHref } from '$lib/utils';
 	import client from '$lib/api/client';
+	import {
+		shouldShowMixedEditCitationWarning,
+		type EditCitationSelection,
+		withEditMetadata
+	} from '$lib/edit-citation';
 	import { getEditRedirectHref } from '$lib/edit-routes';
 	import EditFormShell from '$lib/components/form/EditFormShell.svelte';
 	import SearchableSelect from '$lib/components/SearchableSelect.svelte';
@@ -60,6 +65,24 @@
 	);
 	let editAbbreviations = $state<string[]>(untrack(() => [...model.abbreviations]));
 	let editNote = $state('');
+	let editCitation = $state<EditCitationSelection | null>(null);
+	let pendingBody = $derived(
+		buildModelPatchBody(
+			{
+				fields: editFields,
+				themes: selectedThemes,
+				tags: selectedTags,
+				rewardTypes: selectedRewardTypes,
+				gameplayFeatures: editGameplayFeatures,
+				credits: editCredits,
+				abbreviations: editAbbreviations
+			},
+			model
+		)
+	);
+	let showMixedEditWarning = $derived(
+		shouldShowMixedEditCitationWarning(pendingBody, editCitation)
+	);
 
 	// --- Edit options (single batch fetch) ---
 
@@ -70,7 +93,7 @@
 	let constraints = $state<FieldConstraints>({});
 
 	$effect(() => {
-		fetchFieldConstraints('machine-model').then((c) => {
+		fetchFieldConstraints('model').then((c) => {
 			constraints = c;
 		});
 	});
@@ -97,21 +120,9 @@
 	let saveError = $state('');
 
 	async function saveChanges() {
-		const body = buildModelPatchBody(
-			{
-				fields: editFields,
-				themes: selectedThemes,
-				tags: selectedTags,
-				rewardTypes: selectedRewardTypes,
-				gameplayFeatures: editGameplayFeatures,
-				credits: editCredits,
-				abbreviations: editAbbreviations,
-				note: editNote
-			},
-			model
-		);
-
-		if (!body) return;
+		const rawBody = pendingBody;
+		if (!rawBody) return;
+		const body = withEditMetadata(rawBody, editNote, editCitation);
 
 		saveStatus = 'saving';
 		saveError = '';
@@ -139,6 +150,7 @@
 			}));
 			editAbbreviations = [...updated.abbreviations];
 			editNote = '';
+			editCitation = null;
 			if (redirectHref) {
 				await goto(redirectHref, { replaceState: true });
 				return;
@@ -176,7 +188,14 @@
 	}
 </script>
 
-<EditFormShell {saveStatus} {saveError} onsave={saveChanges}>
+<EditFormShell
+	{saveStatus}
+	{saveError}
+	onsave={saveChanges}
+	bind:note={editNote}
+	bind:citation={editCitation}
+	{showMixedEditWarning}
+>
 	{#if model.title && model.title_models.length <= 1}
 		<section class="merged-note">
 			<h3>Merged Single-Model View</h3>
@@ -410,14 +429,6 @@
 			/>
 		</div>
 	</fieldset>
-
-	<!-- Edit note -->
-	<TextField
-		label="Edit note"
-		bind:value={editNote}
-		placeholder="Why are you making this change?"
-		optional
-	/>
 </EditFormShell>
 
 <style>
