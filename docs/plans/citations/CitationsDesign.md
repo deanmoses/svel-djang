@@ -429,4 +429,15 @@ This would require the markdown rendering pipeline to return structured citation
 
 ### Svelte component tests
 
-The frontend has unit tests for pure helper functions (wikilink-helpers, markdown-shortcuts) but no component-level tests for interactive UI like the wikilink autocomplete dropdown, citation autocomplete, or edit forms. These components have complex keyboard navigation, multi-stage flows, focus management, and API interactions that are only verified manually today. Setting up `@testing-library/svelte` (or equivalent) and writing component tests for MarkdownTextArea, WikilinkAutocomplete, and CitationAutocomplete would catch regressions that helper-only tests miss — especially around blur/focus behavior and stage transitions.
+WikilinkAutocomplete and MarkdownTextArea now have DOM tests (`@testing-library/svelte` + jsdom) covering keyboard navigation, back-navigation, focus management, link insertion, debounce, ARIA attributes, and close behavior. See `docs/Testing.md` for established patterns.
+
+**Remaining test targets:**
+
+- **CitationAutocomplete** — the three-stage citation flow (search → create → locator) has no DOM tests. It uses the same `DropdownItem`/`DropdownSearchInput` components but has its own keyboard handling and stage transitions.
+- **Edit forms** — claim editing forms have complex validation and submission flows that are only verified manually.
+
+### Type-picker `aria-activedescendant` gap
+
+The search stage has full ARIA combobox wiring (`role="combobox"`, `aria-activedescendant`, `aria-controls`), but the type-picker stage does not. During type picking, focus stays on the textarea and keyboard events are forwarded via `handleExternalKeydown`. The textarea has no `aria-activedescendant` pointing to the highlighted type-picker option, so screen readers don't announce which option is selected during keyboard navigation.
+
+Fixing this requires cross-component coordination: WikilinkAutocomplete would need to expose the active type-picker option's ID, and MarkdownTextArea would need to set `aria-activedescendant` on the textarea when the dropdown is open in type-picker stage. This is the same general pattern as the search stage, but spanning two components instead of being self-contained.
