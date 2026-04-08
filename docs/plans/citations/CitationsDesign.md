@@ -343,23 +343,6 @@ A potential fix: override `save()` on `TimeStampedModel` to call `self.full_clea
 - The CLAUDE.md currently says "full_clean() is optional; CHECK constraints are not" — that guidance would need updating.
 - Run the full test suite after the change to see what breaks.
 
-### References section rendering
-
-The inline citation markers render as superscript footnote numbers (`<sup>[1]</sup>`), but there's no References section at the bottom of the article yet. This section should collect all CitationInstances in the document, join to CitationSource for metadata, and render a formatted bibliography. Clicking a superscript number scrolls to the reference; clicking the back-arrow scrolls back to the text.
-
-### CitationSourceLink `link_type` field
-
-CitationSourceLink currently has `url` + `label` with no structured way to distinguish a canonical URL from an archive.org snapshot from a Google Books preview. The original design anticipated this: "These can be enriched later if the system needs to distinguish between link kinds or detect broken links."
-
-A `link_type` TextChoices field (e.g. `canonical`, `archive`, `preview`, `scan`) would let the system:
-
-- Render links differently (archive links get a clock icon, previews get a book icon)
-- Know which link to pair with a CitationInstance locator (see the CitationInstance → CitationSourceLink FK follow-up above)
-- Support pre-emptive archiving (see below) by distinguishing machine-created archive snapshots from human-curated links
-- Detect and flag broken links by type (a dead canonical URL is more urgent than a dead archive link)
-
-This is a prerequisite for pre-emptive archiving and would also improve the CitationInstance → CitationSourceLink FK decision.
-
 ### Pre-emptive archiving via Wayback Machine
 
 Wikipedia encourages [pre-emptive archiving](https://en.wikipedia.org/wiki/Wikipedia:Citing_sources/Further_considerations#Pre-emptive_archiving) of cited URLs because web sources aren't forever. The Wayback Machine has an API (`https://web.archive.org/save/{url}`) that snapshots a page on demand. A background job could:
@@ -419,13 +402,13 @@ cachedTypes = data ?? [];
 
 The module-level cache and `searchLinkTargets` function stay, they just use `client.GET` internally. Tests in `link-types.test.ts` would need to mock `client` instead of `globalThis.fetch`.
 
-### Inline citation data in page API responses
+### Batch endpoint deprecation
 
-The tooltip's batch endpoint (`GET /api/citation-instances/batch/?ids=...`) exists because of a limitation in how data flows through the rendering pipeline. When `render_all_links` processes `[[cite:N]]` markers, it loads the full CitationInstance + CitationSource objects to resolve them — then discards everything except the PK into a `data-cite-id` attribute. The frontend then makes a separate API call to get back the same data that was already in hand during rendering.
+The batch endpoint (`GET /api/citation-instances/batch/?ids=...`) is now only used by `MarkdownTextArea` for edit preview — all page renders use inline citation data from the page API. If edit preview is ever reworked to use a server-side preview endpoint (which would go through the same render pipeline), the batch endpoint becomes dead code and can be removed.
 
-If the page serializers included citation metadata alongside the rendered HTML — e.g., `description_citations: [{id, source_name, author, year, locator, links}]` — the tooltip component could read from props instead of fetching. This would eliminate the batch endpoint, the loading delay, and one network round-trip per page.
+### Scalar citation references
 
-This would require the markdown rendering pipeline to return structured citation data alongside the HTML string, and the page serializers to pass it through. The `render_all_links` function already has the resolved objects; it would need to collect and return them as a side channel.
+The references section currently only includes inline `[[cite:N]]` markers from rendered markdown. Scalar field citations (e.g., "year claimed by source X") are not shown. When scalar citations are surfaced on reader-facing pages, they'll need either: (a) to feed into the existing per-field references section, or (b) a page-level aggregation that merges citations from all fields and scalar claims into a single bibliography. The inline numbering (`index`) is assigned during markdown rendering, so scalar citations would need a separate numbering scheme or a two-pass approach. This is a design decision for that future work.
 
 ### Svelte component tests
 
@@ -433,7 +416,6 @@ WikilinkAutocomplete and MarkdownTextArea now have DOM tests (`@testing-library/
 
 **Remaining test targets:**
 
-- **CitationAutocomplete** — the three-stage citation flow (search → create → locator) has no DOM tests. It uses the same `DropdownItem`/`DropdownSearchInput` components but has its own keyboard handling and stage transitions.
 - **Edit forms** — claim editing forms have complex validation and submission flows that are only verified manually.
 
 ### Type-picker `aria-activedescendant` gap

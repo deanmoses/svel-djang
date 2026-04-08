@@ -6,7 +6,7 @@ import { load } from './+layout.server';
 const MOCK_DATA = {
 	name: 'Star Trek',
 	slug: 'star-trek',
-	description: { text: '', html: '', attribution: null },
+	description: { text: '', html: '', citations: [], attribution: null },
 	titles: [
 		{
 			name: 'Star Trek TNG',

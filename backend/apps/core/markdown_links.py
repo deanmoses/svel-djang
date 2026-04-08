@@ -61,11 +61,16 @@ class LinkType:
     get_url: Callable[[Any], str] | None = None  # override for irregular URL
     get_label: Callable[[Any], str] | None = None  # override for irregular label
     select_related: tuple[str, ...] = ()
+    prefetch_related: tuple[str, ...] = ()
     # Optional custom renderer: (obj_or_None, 1-based_index, base_url, plain_text) -> str
     # When set, _render_by_id() uses this instead of _format_link(). Indices are
     # assigned by unique ID in order of first appearance (duplicate markers share
     # the same index).
     format_link: Callable[[Any, int, str, bool], str] | None = None
+    # Optional metadata collector: (obj, 1-based_index) -> dict
+    # Called once per unique resolved object when metadata_out is provided.
+    # The returned dicts are appended to the metadata_out list.
+    collect_metadata: Callable[[Any, int], dict] | None = None
 
     # --- Authoring format (slug-based types only) ---
     # Custom lookup for authoring format: (model_class, raw_values) -> {key: obj}
@@ -197,7 +202,12 @@ def get_patterns(link_type: LinkType) -> dict[str, re.Pattern[str]]:
 # ---------------------------------------------------------------------------
 
 
-def render_all_links(text: str, base_url: str = "", plain_text: bool = False) -> str:
+def render_all_links(
+    text: str,
+    base_url: str = "",
+    plain_text: bool = False,
+    metadata_out: list[dict] | None = None,
+) -> str:
     """Convert all [[type:ref]] links in text to markdown links.
 
     Handles both storage format (primary path) and authoring format
@@ -212,14 +222,21 @@ def render_all_links(text: str, base_url: str = "", plain_text: bool = False) ->
         plain_text: When ``True``, render just the label with no link
             syntax.  Useful for short preview snippets where markdown
             links would be truncated.
+        metadata_out: When provided, link types with a ``collect_metadata``
+            callback append structured dicts to this list (one per unique
+            resolved object).
     """
     for lt in get_enabled_link_types():
         pats = get_patterns(lt)
         if lt.slug_field is not None:
-            text = _render_by_id(text, lt, pats["storage"], base_url, plain_text)
+            text = _render_by_id(
+                text, lt, pats["storage"], base_url, plain_text, metadata_out
+            )
             text = _render_by_slug(text, lt, pats["authoring"], base_url, plain_text)
         else:
-            text = _render_by_id(text, lt, pats["id"], base_url, plain_text)
+            text = _render_by_id(
+                text, lt, pats["id"], base_url, plain_text, metadata_out
+            )
     return text
 
 
@@ -242,6 +259,7 @@ def _render_by_id(
     pattern: re.Pattern[str],
     base_url: str = "",
     plain_text: bool = False,
+    metadata_out: list[dict] | None = None,
 ) -> str:
     """Render [[type:id:N]] or [[type:N]] links by batch PK lookup."""
     matches = list(pattern.finditer(text))
@@ -253,6 +271,8 @@ def _render_by_id(
     qs = model.objects.filter(pk__in=ids)
     if lt.select_related:
         qs = qs.select_related(*lt.select_related)
+    if lt.prefetch_related:
+        qs = qs.prefetch_related(*lt.prefetch_related)
     by_id = {obj.pk: obj for obj in qs}
 
     # Build unique-ID → index mapping in order of first appearance
@@ -263,6 +283,13 @@ def _render_by_id(
             obj_id = int(match.group(1))
             if obj_id not in index_by_id:
                 index_by_id[obj_id] = len(index_by_id) + 1
+
+    # Collect metadata for each unique resolved object (if requested).
+    if metadata_out is not None and lt.collect_metadata:
+        for obj_id, index in index_by_id.items():
+            obj = by_id.get(obj_id)
+            if obj is not None:
+                metadata_out.append(lt.collect_metadata(obj, index))
 
     result = text
     for match in reversed(matches):

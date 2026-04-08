@@ -280,6 +280,7 @@ def _build_rich_text(obj, field_name: str, active_claims=None) -> dict:
     text = convert_storage_to_authoring(raw_text) if raw_text else raw_text
     html_fields = render_markdown_fields(obj)
     html = html_fields.get(f"{field_name}_html", "")
+    citations = html_fields.get(f"{field_name}_citations", [])
 
     attribution = None
     if active_claims is not None:
@@ -288,6 +289,7 @@ def _build_rich_text(obj, field_name: str, active_claims=None) -> dict:
     return {
         "text": text,
         "html": html,
+        "citations": citations,
         "attribution": attribution,
     }
 

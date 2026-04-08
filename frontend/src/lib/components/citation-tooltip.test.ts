@@ -165,6 +165,29 @@ describe('reduceTooltip', () => {
 		});
 	});
 
+	describe('navigate', () => {
+		it('dismisses tooltip and signals navigation', () => {
+			const result = reduceTooltip(showing(1), { type: 'navigate', id: 1 });
+			expect(result.activeId).toBeNull();
+			expect(result.pinned).toBe(false);
+			expect(result.navigate).toBe(true);
+		});
+
+		it('dismisses pinned tooltip', () => {
+			const result = reduceTooltip(pinned(1), { type: 'navigate', id: 1 });
+			expect(result.activeId).toBeNull();
+			expect(result.pinned).toBe(false);
+			expect(result.navigate).toBe(true);
+		});
+
+		it('works from initial state', () => {
+			const result = reduceTooltip(initial, { type: 'navigate', id: 1 });
+			expect(result.activeId).toBeNull();
+			expect(result.pinned).toBe(false);
+			expect(result.navigate).toBe(true);
+		});
+	});
+
 	describe('tooltip-mouseenter', () => {
 		it('cancels pending hide', () => {
 			const result = reduceTooltip(showing(1), { type: 'tooltip-mouseenter' });

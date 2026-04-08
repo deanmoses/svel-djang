@@ -6,13 +6,34 @@
 		computePosition,
 		reduceTooltip,
 		type CitationInfo,
+		type InlineCitation,
 		type TooltipState
 	} from './citation-tooltip';
+	import { buildCitationMap } from './citation-refs';
 
-	let { container, htmlSignal }: { container: HTMLDivElement | undefined; htmlSignal: string } =
-		$props();
+	let {
+		container,
+		htmlSignal,
+		citations = undefined,
+		onNavigate = undefined
+	}: {
+		container: HTMLDivElement | undefined;
+		htmlSignal: string;
+		citations?: InlineCitation[];
+		onNavigate?: (index: number) => void;
+	} = $props();
 
 	let citationData = new SvelteMap<number, CitationInfo>();
+
+	// Populate from prop data when available
+	$effect(() => {
+		if (citations) {
+			const map = buildCitationMap(citations);
+			for (const [id, info] of map) {
+				citationData.set(id, info);
+			}
+		}
+	});
 	let tipState: TooltipState = $state({ activeId: null, pinned: false });
 	let above = $state(true);
 	let tooltipEl: HTMLDivElement | undefined = $state();
@@ -48,6 +69,7 @@
 				hideTimer = null;
 			}, HIDE_DELAY);
 		}
+		return result;
 	}
 
 	async function updatePosition(anchor: HTMLElement) {
@@ -119,26 +141,28 @@
 		const sups = container.querySelectorAll<HTMLElement>('sup[data-cite-id]');
 		if (sups.length === 0) return;
 
-		// Collect IDs and fetch missing data
-		const idsToFetch: number[] = [];
-		for (const sup of sups) {
-			const id = Number(sup.dataset.citeId);
-			if (!isNaN(id) && !citationData.has(id)) {
-				idsToFetch.push(id);
+		// Collect IDs and fetch missing data (skip if populated from props)
+		if (!citations) {
+			const idsToFetch: number[] = [];
+			for (const sup of sups) {
+				const id = Number(sup.dataset.citeId);
+				if (!isNaN(id) && !citationData.has(id)) {
+					idsToFetch.push(id);
+				}
 			}
-		}
-		if (idsToFetch.length > 0) {
-			const uniqueIds = [...new Set(idsToFetch)];
-			client
-				.GET('/api/citation-instances/batch/', {
-					params: { query: { ids: uniqueIds.join(',') } }
-				})
-				.then(({ data }) => {
-					if (!data) return;
-					for (const item of data) {
-						citationData.set(item.id, item as CitationInfo);
-					}
-				});
+			if (idsToFetch.length > 0) {
+				const uniqueIds = [...new Set(idsToFetch)];
+				client
+					.GET('/api/citation-instances/batch/', {
+						params: { query: { ids: uniqueIds.join(',') } }
+					})
+					.then(({ data }) => {
+						if (!data) return;
+						for (const item of data) {
+							citationData.set(item.id, item as CitationInfo);
+						}
+					});
+			}
 		}
 
 		// Attach event listeners
@@ -153,10 +177,26 @@
 				dispatch({ type: 'mouseenter', id });
 			};
 			const onMouseleave = () => dispatch({ type: 'mouseleave', id });
+			const navigateToRef = () => {
+				const cite = citations?.find((c) => c.id === id);
+				if (cite && onNavigate) {
+					dispatch({ type: 'navigate', id });
+					onNavigate(cite.index);
+				} else {
+					dispatch({ type: 'click', id });
+				}
+			};
 			const onClick = (e: Event) => {
 				e.preventDefault();
 				currentAnchor = sup;
-				dispatch({ type: 'click', id });
+				const pointerType = (e as PointerEvent).pointerType;
+				if (pointerType === 'touch' || !onNavigate) {
+					// Touch: pin tooltip (no hover available)
+					// No onNavigate: fall back to existing pin behavior
+					dispatch({ type: 'click', id });
+				} else {
+					navigateToRef();
+				}
 			};
 			const onFocus = () => {
 				currentAnchor = sup;
@@ -167,7 +207,7 @@
 				if (e.key === 'Enter' || e.key === ' ') {
 					e.preventDefault();
 					currentAnchor = sup;
-					dispatch({ type: 'click', id });
+					navigateToRef();
 				} else if (e.key === 'Escape') {
 					dispatch({ type: 'escape' });
 				}

@@ -1,63 +1,102 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import CitationTooltip from './CitationTooltip.svelte';
+	import ReferencesSection from './ReferencesSection.svelte';
+	import type { InlineCitation } from './citation-tooltip';
+	import { findRefEntry, findFirstInlineMarker, scrollToAndHighlight } from './citation-refs';
 
-	let { html }: { html: string } = $props();
+	let {
+		html,
+		citations = undefined
+	}: {
+		html: string;
+		citations?: InlineCitation[];
+	} = $props();
+
 	let container: HTMLDivElement | undefined = $state();
+	let refsSection: HTMLElement | undefined = $state();
+	let refsOpen = $state(false);
+
+	async function scrollToRef(index: number) {
+		refsOpen = true;
+		await tick();
+		if (refsSection) {
+			const entry = findRefEntry(refsSection, index);
+			if (entry) scrollToAndHighlight(entry);
+		}
+	}
+
+	function scrollToInlineMarker(index: number) {
+		if (container) {
+			const marker = findFirstInlineMarker(container, index);
+			if (marker) scrollToAndHighlight(marker);
+		}
+	}
 </script>
 
 <!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized server-side by nh3 -->
-<div bind:this={container}>{@html html}</div>
-<CitationTooltip {container} htmlSignal={html} />
+<div class="content" bind:this={container}>{@html html}</div>
+<CitationTooltip
+	{container}
+	htmlSignal={html}
+	{citations}
+	onNavigate={citations && citations.length > 0 ? scrollToRef : undefined}
+/>
+{#if citations && citations.length > 0}
+	<div bind:this={refsSection}>
+		<ReferencesSection {citations} bind:open={refsOpen} onBackLink={scrollToInlineMarker} />
+	</div>
+{/if}
 
 <style>
-	div {
+	.content {
 		font-size: var(--font-size-2);
 		color: var(--color-text-primary);
 		line-height: var(--font-lineheight-3);
 	}
 
 	/* Block elements injected by {@html} — need :global since Svelte
-	   can't see them at compile time. Scoped to this component's div
-	   so they don't leak. */
-	div :global(p) {
+	   can't see them at compile time. Scoped to .content so they don't
+	   leak into the references section wrapper. */
+	.content :global(p) {
 		margin-bottom: var(--size-3);
 	}
 
-	div :global(p:last-child) {
+	.content :global(p:last-child) {
 		margin-bottom: 0;
 	}
 
-	div :global(a) {
+	.content :global(a) {
 		color: var(--color-link);
 		text-decoration: none;
 	}
 
-	div :global(a:hover) {
+	.content :global(a:hover) {
 		text-decoration: underline;
 	}
 
-	div :global(strong) {
+	.content :global(strong) {
 		font-weight: 700;
 	}
 
-	div :global(ul),
-	div :global(ol) {
+	.content :global(ul),
+	.content :global(ol) {
 		padding-left: var(--size-5);
 		margin-bottom: var(--size-3);
 	}
 
-	div :global(li) {
+	.content :global(li) {
 		margin-bottom: var(--size-1);
 	}
 
-	div :global(blockquote) {
+	.content :global(blockquote) {
 		border-left: 3px solid var(--color-border);
 		padding-left: var(--size-4);
 		color: var(--color-text-muted);
 		margin: 0 0 var(--size-3);
 	}
 
-	div :global(code) {
+	.content :global(code) {
 		font-family: var(--font-mono);
 		font-size: 0.9em;
 		background: var(--color-surface);
@@ -65,7 +104,7 @@
 		border-radius: var(--radius-1);
 	}
 
-	div :global(pre) {
+	.content :global(pre) {
 		background: var(--color-surface);
 		padding: var(--size-3);
 		border-radius: var(--radius-2);
@@ -73,61 +112,67 @@
 		margin-bottom: var(--size-3);
 	}
 
-	div :global(pre code) {
+	.content :global(pre code) {
 		background: none;
 		padding: 0;
 	}
 
-	div :global(hr) {
+	.content :global(hr) {
 		border: none;
 		border-top: 1px solid var(--color-border-soft);
 		margin: var(--size-4) 0;
 	}
 
-	div :global(table) {
+	.content :global(table) {
 		border-collapse: collapse;
 		margin-bottom: var(--size-3);
 		width: 100%;
 	}
 
-	div :global(th),
-	div :global(td) {
+	.content :global(th),
+	.content :global(td) {
 		border: 1px solid var(--color-border-soft);
 		padding: var(--size-1) var(--size-2);
 		text-align: left;
 	}
 
-	div :global(th) {
+	.content :global(th) {
 		font-weight: 600;
 	}
 
-	div :global(h1),
-	div :global(h2),
-	div :global(h3),
-	div :global(h4),
-	div :global(h5),
-	div :global(h6) {
+	.content :global(h1),
+	.content :global(h2),
+	.content :global(h3),
+	.content :global(h4),
+	.content :global(h5),
+	.content :global(h6) {
 		font-weight: 600;
 		color: var(--color-text-primary);
 		margin-bottom: var(--size-2);
 	}
 
-	div :global(.task-list-item) {
+	.content :global(.task-list-item) {
 		list-style: none;
 	}
 
-	div :global(.task-list-item input[type='checkbox']) {
+	.content :global(.task-list-item input[type='checkbox']) {
 		margin-right: var(--size-1);
 	}
 
-	div :global(sup[data-cite-id]) {
+	.content :global(sup[data-cite-id]) {
 		cursor: pointer;
 		color: var(--color-link);
 	}
 
-	div :global(sup[data-cite-id]:hover),
-	div :global(sup[data-cite-id]:focus-visible) {
+	.content :global(sup[data-cite-id]:hover),
+	.content :global(sup[data-cite-id]:focus-visible) {
 		text-decoration: underline;
 		outline: none;
+	}
+
+	.content :global(.cite-highlight),
+	:global(.cite-highlight) {
+		background-color: var(--color-highlight, #fff3cd);
+		transition: background-color 1.5s ease-out;
 	}
 </style>

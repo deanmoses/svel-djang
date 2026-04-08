@@ -62,7 +62,7 @@ ALLOWED_ATTRIBUTES = {
     "pre": {"class"},
     "th": {"align"},
     "td": {"align"},
-    "sup": {"data-cite-id", "tabindex", "role"},
+    "sup": {"data-cite-id", "data-cite-index", "tabindex", "role"},
 }
 
 # Regex for task list items: matches <li> followed by optional <p>, then [ ], [  ], [], [x], or [X]
@@ -129,13 +129,15 @@ def fenced_code_ranges(content: str) -> list[tuple[int, int]]:
     ]
 
 
-def render_markdown_html(text: str) -> str:
+def render_markdown_html(text: str, metadata_out: list[dict] | None = None) -> str:
     """Convert markdown text to sanitized HTML.
 
     Full pipeline: wiki links -> markdown (with linkify) -> nh3 -> checkboxes.
 
     Args:
         text: Raw markdown text (may contain ``[[type:ref]]`` links).
+        metadata_out: When provided, passed to ``render_all_links`` so
+            link types with ``collect_metadata`` can append structured data.
 
     Returns:
         Sanitized HTML ``SafeString``, safe for direct use in templates.
@@ -145,7 +147,7 @@ def render_markdown_html(text: str) -> str:
     # Convert [[type:ref]] links to markdown links (before markdown processing)
     from apps.core.markdown_links import render_all_links
 
-    text = render_all_links(text)
+    text = render_all_links(text, metadata_out=metadata_out)
     # Convert markdown to HTML (bare URLs are auto-linked during parsing)
     html = _md.render(text)
     # Sanitize to prevent XSS
@@ -154,7 +156,7 @@ def render_markdown_html(text: str) -> str:
     return mark_safe(_convert_task_list_items(safe_html))  # noqa: S308 — HTML sanitized by nh3
 
 
-def render_markdown_fields(obj) -> dict[str, str]:
+def render_markdown_fields(obj) -> dict[str, str | list[dict]]:
     """Return ``{field}_html`` rendered values for all MarkdownField instances on *obj*.
 
     Designed for use with ``**`` spread in API serialization dicts::
@@ -167,7 +169,12 @@ def render_markdown_fields(obj) -> dict[str, str]:
     """
     from apps.core.models import get_markdown_fields
 
-    return {
-        f"{field}_html": render_markdown_html(getattr(obj, field, ""))
-        for field in get_markdown_fields(type(obj))
-    }
+    result = {}
+    for field in get_markdown_fields(type(obj)):
+        citations: list[dict] = []
+        result[f"{field}_html"] = render_markdown_html(
+            getattr(obj, field, ""), metadata_out=citations
+        )
+        if citations:
+            result[f"{field}_citations"] = citations
+    return result

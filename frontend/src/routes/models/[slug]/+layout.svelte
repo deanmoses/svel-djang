@@ -78,10 +78,13 @@
 			{#if (model.title_description?.html && isOnlyModelInTitle) || model.description?.html}
 				<section class="prose">
 					{#if model.title_description?.html && isOnlyModelInTitle}
-						<Markdown html={model.title_description.html} />
+						<Markdown
+							html={model.title_description.html}
+							citations={model.title_description.citations}
+						/>
 					{/if}
 					{#if model.description?.html}
-						<Markdown html={model.description.html} />
+						<Markdown html={model.description.html} citations={model.description.citations} />
 					{/if}
 				</section>
 			{/if}

@@ -5,7 +5,7 @@ const MOCK_DATA = {
 	name: 'Single Player',
 	slug: 'single-player',
 	display_order: 0,
-	description: { text: '', html: '', attribution: null },
+	description: { text: '', html: '', citations: [], attribution: null },
 	sources: []
 };
 

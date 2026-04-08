@@ -6,7 +6,7 @@ import { load } from './+layout.server';
 const MOCK_DATA = {
 	name: 'Pat Lawlor',
 	slug: 'pat-lawlor',
-	description: { text: '', html: '', attribution: null },
+	description: { text: '', html: '', citations: [], attribution: null },
 	birth_year: null,
 	birth_month: null,
 	birth_day: null,

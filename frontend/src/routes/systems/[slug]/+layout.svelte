@@ -46,7 +46,7 @@
 		{#snippet main()}
 			{#if system.description?.html}
 				<div class="description">
-					<Markdown html={system.description.html} />
+					<Markdown html={system.description.html} citations={system.description.citations} />
 					<AttributionLine attribution={system.description.attribution} />
 				</div>
 			{/if}

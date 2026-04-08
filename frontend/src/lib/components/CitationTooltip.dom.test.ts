@@ -81,8 +81,10 @@ afterEach(() => {
 	vi.restoreAllMocks();
 });
 
-function renderTooltip(html: string) {
-	return render(CitationTooltipFixture, { html, htmlSignal: html });
+import type { InlineCitation } from './citation-tooltip';
+
+function renderTooltip(html: string, citations?: InlineCitation[]) {
+	return render(CitationTooltipFixture, { html, htmlSignal: html, citations });
 }
 
 function getCitation(id: string) {
@@ -182,6 +184,45 @@ describe('CitationTooltip', () => {
 		await vi.waitFor(() => {
 			expect(tooltip.style.left).toBe('182px');
 			expect(tooltip.style.top).toBe('194px');
+		});
+	});
+
+	describe('citations prop (no-fetch)', () => {
+		const propCitations: InlineCitation[] = [
+			{
+				id: 1,
+				index: 1,
+				source_name: 'Prop Book',
+				source_type: 'book',
+				author: 'Prop Author',
+				year: 2020,
+				locator: 'ch. 1',
+				links: []
+			}
+		];
+
+		it('uses prop data and does not fetch', async () => {
+			renderTooltip('<p>Cited <sup data-cite-id="1" tabindex="0">[1]</sup>.</p>', propCitations);
+			// Give it time to potentially fetch
+			await vi.advanceTimersByTimeAsync(100);
+			expect(GET).not.toHaveBeenCalled();
+
+			// Tooltip should still work from prop data
+			await fireEvent.mouseEnter(getCitation('1'));
+			const tooltip = await screen.findByRole('tooltip');
+			expect(tooltip).toHaveTextContent('Prop Book');
+			expect(tooltip).toHaveTextContent('Prop Author, 2020');
+		});
+	});
+
+	describe('fallback fetch (no citations prop)', () => {
+		it('fetches from batch endpoint when no citations prop', async () => {
+			renderTooltip('<p>Cited <sup data-cite-id="1" tabindex="0">[1]</sup>.</p>');
+			await vi.waitFor(() => {
+				expect(GET).toHaveBeenCalledWith('/api/citation-instances/batch/', {
+					params: { query: { ids: '1' } }
+				});
+			});
 		});
 	});
 });

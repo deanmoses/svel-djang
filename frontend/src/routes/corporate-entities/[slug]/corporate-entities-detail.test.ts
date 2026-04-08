@@ -6,7 +6,7 @@ import { load } from './+layout.server';
 const MOCK_DATA = {
 	name: 'Williams Electronics',
 	slug: 'williams-electronics',
-	description: { text: '', html: '', attribution: null },
+	description: { text: '', html: '', citations: [], attribution: null },
 	manufacturer: { name: 'Williams', slug: 'williams' },
 	year_start: 1985,
 	year_end: 1999,

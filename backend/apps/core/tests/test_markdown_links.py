@@ -41,8 +41,24 @@ def citation_source(db):
     from apps.citation.models import CitationSource
 
     return CitationSource.objects.create(
-        name="The Encyclopedia of Pinball", source_type="book"
+        name="The Encyclopedia of Pinball",
+        source_type="book",
+        author="Jeff Lawton",
+        year=2001,
     )
+
+
+@pytest.fixture
+def citation_source_with_links(citation_source):
+    from apps.citation.models import CitationSourceLink
+
+    CitationSourceLink.objects.create(
+        citation_source=citation_source,
+        url="https://example.com/archive",
+        label="Archive scan",
+        link_type="archive",
+    )
+    return citation_source
 
 
 @pytest.fixture
@@ -201,7 +217,8 @@ class TestCitationLinkType:
         result = render_all_links(text)
         pk = citation_instance.pk
         assert (
-            f'<sup data-cite-id="{pk}" tabindex="0" role="button">[1]</sup>' in result
+            f'<sup data-cite-id="{pk}" data-cite-index="1"'
+            f' tabindex="0" role="button">[1]</sup>' in result
         )
         assert "[[cite:" not in result
 
@@ -217,12 +234,12 @@ class TestCitationLinkType:
         text = f"First fact.[[cite:{ci1.pk}]] Second fact.[[cite:{ci2.pk}]]"
         result = render_all_links(text)
         assert (
-            f'<sup data-cite-id="{ci1.pk}" tabindex="0" role="button">[1]</sup>'
-            in result
+            f'<sup data-cite-id="{ci1.pk}" data-cite-index="1"'
+            f' tabindex="0" role="button">[1]</sup>' in result
         )
         assert (
-            f'<sup data-cite-id="{ci2.pk}" tabindex="0" role="button">[2]</sup>'
-            in result
+            f'<sup data-cite-id="{ci2.pk}" data-cite-index="2"'
+            f' tabindex="0" role="button">[2]</sup>' in result
         )
 
     def test_duplicate_citation_same_number(self, citation_instance):
@@ -257,8 +274,8 @@ class TestCitationLinkType:
         result = render_all_links(text)
         assert "[Williams](/manufacturers/williams)" in result
         assert (
-            f'<sup data-cite-id="{citation_instance.pk}" tabindex="0" role="button">[1]</sup>'
-            in result
+            f'<sup data-cite-id="{citation_instance.pk}" data-cite-index="1"'
+            f' tabindex="0" role="button">[1]</sup>' in result
         )
 
     def test_sync_references_for_citations(self, citation_instance, system):
@@ -274,6 +291,72 @@ class TestCitationLinkType:
         html = render_markdown_html(text)
         pk = citation_instance.pk
         assert f'data-cite-id="{pk}"' in html
+        assert 'data-cite-index="1"' in html
         assert 'tabindex="0"' in html
         assert 'role="button"' in html
         assert "[1]" in html
+
+
+class TestMetadataCollection:
+    """Tests for render_all_links metadata_out collection."""
+
+    def test_collects_citation_metadata(self, citation_source_with_links):
+        from apps.provenance.models import CitationInstance
+
+        ci = CitationInstance.objects.create(
+            citation_source=citation_source_with_links, locator="p. 42"
+        )
+        text = f"Cited.[[cite:{ci.pk}]]"
+        metadata: list[dict] = []
+        render_all_links(text, metadata_out=metadata)
+        assert len(metadata) == 1
+        entry = metadata[0]
+        assert entry["id"] == ci.pk
+        assert entry["index"] == 1
+        assert entry["source_name"] == "The Encyclopedia of Pinball"
+        assert entry["source_type"] == "book"
+        assert entry["author"] == "Jeff Lawton"
+        assert entry["year"] == 2001
+        assert entry["locator"] == "p. 42"
+        assert len(entry["links"]) == 1
+        assert entry["links"][0]["url"] == "https://example.com/archive"
+        assert entry["links"][0]["label"] == "Archive scan"
+
+    def test_metadata_deduplicated_by_pk(self, citation_instance):
+        pk = citation_instance.pk
+        text = f"First.[[cite:{pk}]] Second.[[cite:{pk}]]"
+        metadata: list[dict] = []
+        render_all_links(text, metadata_out=metadata)
+        assert len(metadata) == 1
+        assert metadata[0]["id"] == pk
+
+    def test_metadata_ordered_by_first_appearance(self, citation_source):
+        from apps.provenance.models import CitationInstance
+
+        ci1 = CitationInstance.objects.create(
+            citation_source=citation_source, locator="p. 10"
+        )
+        ci2 = CitationInstance.objects.create(
+            citation_source=citation_source, locator="p. 20"
+        )
+        text = f"First.[[cite:{ci1.pk}]] Second.[[cite:{ci2.pk}]]"
+        metadata: list[dict] = []
+        render_all_links(text, metadata_out=metadata)
+        assert len(metadata) == 2
+        assert metadata[0]["index"] == 1
+        assert metadata[0]["id"] == ci1.pk
+        assert metadata[1]["index"] == 2
+        assert metadata[1]["id"] == ci2.pk
+
+    def test_no_metadata_when_none(self, citation_instance):
+        """metadata_out=None (default) doesn't break anything."""
+        text = f"Cited.[[cite:{citation_instance.pk}]]"
+        result = render_all_links(text)
+        assert "data-cite-id" in result
+
+    def test_no_metadata_for_entity_links(self, manufacturer):
+        """Only link types with collect_metadata produce metadata."""
+        text = f"See [[manufacturer:id:{manufacturer.pk}]]"
+        metadata: list[dict] = []
+        render_all_links(text, metadata_out=metadata)
+        assert len(metadata) == 0

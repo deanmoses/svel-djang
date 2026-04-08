@@ -64,7 +64,7 @@
 
 {#if person.description?.html}
 	<section class="bio">
-		<Markdown html={person.description.html} />
+		<Markdown html={person.description.html} citations={person.description.citations} />
 		<AttributionLine attribution={person.description.attribution} />
 	</section>
 {/if}

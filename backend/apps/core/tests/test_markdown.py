@@ -76,6 +76,26 @@ class TestRenderMarkdownHtml:
         result = render_markdown_html("See [[manufacturer:id:99999]]")
         assert "broken link" in result
 
+    @pytest.mark.django_db
+    def test_metadata_out_collects_citations(self):
+        from apps.citation.models import CitationSource
+        from apps.provenance.models import CitationInstance
+
+        src = CitationSource.objects.create(
+            name="Source Book", source_type="book", author="A. Author"
+        )
+        ci = CitationInstance.objects.create(citation_source=src, locator="ch. 3")
+        metadata: list[dict] = []
+        html = render_markdown_html(f"Fact.[[cite:{ci.pk}]]", metadata_out=metadata)
+        assert "data-cite-id" in html
+        assert len(metadata) == 1
+        assert metadata[0]["source_name"] == "Source Book"
+
+    def test_metadata_out_default_none(self):
+        """metadata_out defaults to None; existing callers unaffected."""
+        result = render_markdown_html("plain text")
+        assert "plain text" in result
+
 
 class TestRenderMarkdownFields:
     def test_returns_html_for_markdown_fields(self):
@@ -109,3 +129,27 @@ class TestRenderMarkdownFields:
         )
         result = render_markdown_fields(loc)
         assert result == {}
+
+    @pytest.mark.django_db
+    def test_citations_key_included(self):
+        from apps.catalog.models import Manufacturer
+        from apps.citation.models import CitationSource
+        from apps.provenance.models import CitationInstance
+
+        src = CitationSource.objects.create(name="Book", source_type="book")
+        ci = CitationInstance.objects.create(citation_source=src, locator="p. 1")
+        mfr = Manufacturer(
+            name="Test", slug="test", description=f"Info.[[cite:{ci.pk}]]"
+        )
+        result = render_markdown_fields(mfr)
+        assert "description_html" in result
+        assert "description_citations" in result
+        assert len(result["description_citations"]) == 1
+        assert result["description_citations"][0]["id"] == ci.pk
+
+    def test_no_citations_key_when_empty(self):
+        from apps.catalog.models import Manufacturer
+
+        mfr = Manufacturer(name="Test", slug="test", description="No citations here")
+        result = render_markdown_fields(mfr)
+        assert "description_citations" not in result

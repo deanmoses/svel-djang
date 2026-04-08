@@ -6,14 +6,23 @@
 
 // ── Types ───────────────────────────────────────────────────────
 
+/** Citation data for tooltip display. Shared by both the batch endpoint
+ *  and the page API — the tooltip only needs these fields. */
 export interface CitationInfo {
 	id: number;
 	source_name: string;
 	source_type: string;
 	author: string;
-	year: number | null;
+	year?: number | null;
 	locator: string;
 	links: Array<{ url: string; label: string }>;
+}
+
+/** Citation data from the page API, which includes the display index
+ *  (position in the rendered text). Used for the references section
+ *  and scroll navigation. */
+export interface InlineCitation extends CitationInfo {
+	index: number;
 }
 
 // ── Positioning ─────────────────────────────────────────────────
@@ -54,6 +63,7 @@ export type TooltipAction =
 	| { type: 'mouseenter'; id: number }
 	| { type: 'mouseleave'; id: number }
 	| { type: 'click'; id: number }
+	| { type: 'navigate'; id: number }
 	| { type: 'focus'; id: number }
 	| { type: 'blur'; id: number }
 	| { type: 'escape' }
@@ -69,6 +79,7 @@ export type TooltipState = {
 export type TooltipEffect = {
 	scheduleHide?: boolean;
 	cancelHide?: boolean;
+	navigate?: boolean;
 };
 
 export function reduceTooltip(
@@ -95,6 +106,9 @@ export function reduceTooltip(
 				return { activeId: null, pinned: false };
 			}
 			return { activeId: action.id, pinned: true, cancelHide: true };
+
+		case 'navigate':
+			return { activeId: null, pinned: false, navigate: true };
 
 		case 'escape':
 			return { activeId: null, pinned: false };

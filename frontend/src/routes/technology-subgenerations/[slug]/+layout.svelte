@@ -36,7 +36,7 @@
 
 	{#if profile.description?.html}
 		<div class="description">
-			<Markdown html={profile.description.html} />
+			<Markdown html={profile.description.html} citations={profile.description.citations} />
 			<AttributionLine attribution={profile.description.attribution} />
 		</div>
 	{/if}
