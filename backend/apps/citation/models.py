@@ -156,11 +156,19 @@ class CitationSourceLink(TimeStampedModel):
     scan, publisher page, Google Books preview).
     """
 
+    class LinkType(models.TextChoices):
+        HOMEPAGE = "homepage", "Homepage"
+        CATALOG = "catalog", "Catalog"
+        PUBLISHER = "publisher", "Publisher"
+        REFERENCE = "reference", "Reference"
+        ARCHIVE = "archive", "Archive"
+
     citation_source = models.ForeignKey(
         CitationSource,
         on_delete=models.CASCADE,
         related_name="links",
     )
+    link_type = models.CharField(max_length=20, choices=LinkType.choices)
     url = models.URLField(max_length=2000)
     label = models.CharField(
         max_length=200, blank=True, validators=[validate_no_mojibake]
@@ -181,9 +189,22 @@ class CitationSourceLink(TimeStampedModel):
     )
 
     class Meta:
-        ordering = ["citation_source", "label"]
+        ordering = ["citation_source", "link_type", "label"]
         constraints = [
             field_not_blank("url"),
+            field_not_blank("link_type"),
+            models.CheckConstraint(
+                condition=models.Q(
+                    link_type__in=[
+                        "homepage",
+                        "catalog",
+                        "publisher",
+                        "reference",
+                        "archive",
+                    ]
+                ),
+                name="citation_citationsourcelink_link_type_valid",
+            ),
             models.UniqueConstraint(
                 fields=["citation_source", "url"],
                 name="citation_citationsourcelink_unique_source_url",

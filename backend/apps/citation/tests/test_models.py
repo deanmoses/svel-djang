@@ -70,6 +70,7 @@ class TestCitationSourceLinkStr:
     def test_without_label(self, citation_source):
         link = CitationSourceLink.objects.create(
             citation_source=citation_source,
+            link_type="homepage",
             url="https://example.com",
         )
         assert str(link) == "https://example.com"

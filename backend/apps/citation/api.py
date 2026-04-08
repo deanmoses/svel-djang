@@ -69,6 +69,7 @@ class CitationSourceCreateSchema(Schema):
     # Optional: atomically create a CitationSourceLink alongside the source.
     url: Optional[str] = None
     link_label: str = ""
+    link_type: str = "homepage"
 
     @field_validator("isbn", mode="before")
     @classmethod
@@ -115,6 +116,7 @@ class CitationSourceChildSchema(Schema):
 
 class CitationSourceLinkSchema(Schema):
     id: int
+    link_type: str
     url: str
     label: str
 
@@ -139,11 +141,13 @@ class CitationSourceDetailSchema(Schema):
 
 
 class CitationSourceLinkCreateSchema(Schema):
+    link_type: str
     url: str
     label: str = ""
 
 
 class CitationSourceLinkUpdateSchema(Schema):
+    link_type: Optional[str] = None
     url: Optional[str] = None
     label: Optional[str] = None
 
@@ -195,10 +199,6 @@ def _detail_qs():
     )
 
 
-def _serialize_link(link) -> dict:
-    return {"id": link.pk, "url": link.url, "label": link.label}
-
-
 def _serialize_detail(source) -> dict:
     parent = None
     if source.parent_id is not None:
@@ -216,7 +216,10 @@ def _serialize_detail(source) -> dict:
         "isbn": source.isbn,
         "description": source.description,
         "parent": parent,
-        "links": [_serialize_link(link) for link in source.links.all()],
+        "links": [
+            CitationSourceLinkSchema.from_orm(link).model_dump()
+            for link in source.links.all()
+        ],
         "children": [
             {"id": child.pk, "name": child.name, "source_type": child.source_type}
             for child in source.children.all()
@@ -293,6 +296,7 @@ def create_citation_source(request, data: CitationSourceCreateSchema):
         if data.url:
             link = CitationSourceLink(
                 citation_source=source,
+                link_type=data.link_type,
                 url=data.url,
                 label=data.link_label,
                 created_by=request.user,
@@ -358,6 +362,7 @@ def create_citation_source_link(
     source = get_object_or_404(CitationSource, pk=source_id)
     link = CitationSourceLink(
         citation_source=source,
+        link_type=data.link_type,
         url=data.url,
         label=data.label,
         created_by=request.user,
@@ -365,7 +370,7 @@ def create_citation_source_link(
     )
     _clean_and_save(link, integrity_msg="This URL is already linked to this source.")
 
-    return Status(201, _serialize_link(link))
+    return Status(201, link)
 
 
 @citation_sources_router.patch(
@@ -394,4 +399,4 @@ def update_citation_source_link(
         integrity_msg="This URL is already linked to this source.",
     )
 
-    return _serialize_link(link)
+    return link

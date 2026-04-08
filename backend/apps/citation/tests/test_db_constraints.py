@@ -192,6 +192,7 @@ class TestCitationSourceLinkConstraints:
     def test_valid_link(self, citation_source):
         link = CitationSourceLink.objects.create(
             citation_source=citation_source,
+            link_type="homepage",
             url="https://example.com",
         )
         assert link.pk is not None
@@ -199,6 +200,7 @@ class TestCitationSourceLinkConstraints:
     def test_valid_link_with_label(self, citation_source):
         link = CitationSourceLink.objects.create(
             citation_source=citation_source,
+            link_type="homepage",
             url="https://example.com",
             label="Example",
         )
@@ -208,28 +210,60 @@ class TestCitationSourceLinkConstraints:
         with pytest.raises(IntegrityError):
             CitationSourceLink.objects.create(
                 citation_source=citation_source,
+                link_type="homepage",
                 url="",
             )
 
     def test_duplicate_url_same_source_rejected(self, citation_source):
         CitationSourceLink.objects.create(
             citation_source=citation_source,
+            link_type="homepage",
             url="https://example.com",
         )
         with pytest.raises(IntegrityError):
             CitationSourceLink.objects.create(
                 citation_source=citation_source,
+                link_type="homepage",
                 url="https://example.com",
             )
 
     def test_duplicate_url_different_source_accepted(self, citation_source):
         CitationSourceLink.objects.create(
             citation_source=citation_source,
+            link_type="homepage",
             url="https://example.com",
         )
         other = CitationSource.objects.create(name="Other", source_type="web")
         link = CitationSourceLink.objects.create(
             citation_source=other,
+            link_type="homepage",
             url="https://example.com",
         )
         assert link.pk is not None
+
+    @pytest.mark.parametrize(
+        "link_type", ["homepage", "catalog", "publisher", "reference", "archive"]
+    )
+    def test_valid_link_types_accepted(self, citation_source, link_type):
+        link = CitationSourceLink.objects.create(
+            citation_source=citation_source,
+            link_type=link_type,
+            url=f"https://example.com/{link_type}",
+        )
+        assert link.pk is not None
+
+    def test_invalid_link_type_rejected(self, citation_source):
+        with pytest.raises(IntegrityError):
+            CitationSourceLink.objects.create(
+                citation_source=citation_source,
+                link_type="bogus",
+                url="https://example.com",
+            )
+
+    def test_empty_link_type_rejected(self, citation_source):
+        with pytest.raises(IntegrityError):
+            CitationSourceLink.objects.create(
+                citation_source=citation_source,
+                link_type="",
+                url="https://example.com",
+            )

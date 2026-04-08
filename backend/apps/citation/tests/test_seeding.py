@@ -57,7 +57,11 @@ _WITH_LINKS = [
         "source_type": "web",
         "description": "A test website.",
         "links": [
-            {"url": "https://example.com/", "label": "Homepage"},
+            {
+                "url": "https://example.com/",
+                "label": "Homepage",
+                "link_type": "homepage",
+            },
         ],
     },
 ]
@@ -156,9 +160,10 @@ class TestSeedCreatesLinks:
         link = links.first()
         assert link.url == "https://example.com/"
         assert link.label == "Homepage"
+        assert link.link_type == "homepage"
 
 
-class TestSeedUpdatesLinkLabel:
+class TestSeedUpdatesLinkFields:
     def test_corrects_mutated_label(self, db):
         from apps.citation.seeding import ensure_citation_sources
 
@@ -171,6 +176,19 @@ class TestSeedUpdatesLinkLabel:
 
         link = CitationSourceLink.objects.get(url="https://example.com/")
         assert link.label == "Homepage"
+
+    def test_corrects_mutated_link_type(self, db):
+        from apps.citation.seeding import ensure_citation_sources
+
+        ensure_citation_sources(sources=_WITH_LINKS)
+        CitationSourceLink.objects.filter(url="https://example.com/").update(
+            link_type="archive"
+        )
+
+        ensure_citation_sources(sources=_WITH_LINKS)
+
+        link = CitationSourceLink.objects.get(url="https://example.com/")
+        assert link.link_type == "homepage"
 
 
 class TestSeedHierarchy:

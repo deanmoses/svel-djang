@@ -9,7 +9,9 @@ WEBSITE_SOURCES: list[dict] = [
             "and historical data. Primary reference for machine "
             "identification and production details."
         ),
-        "links": [{"url": "https://www.ipdb.org/", "label": "IPDB"}],
+        "links": [
+            {"url": "https://www.ipdb.org/", "label": "IPDB", "link_type": "homepage"}
+        ],
     },
     {
         "name": "Online Pinball Database (OPDB)",
@@ -18,7 +20,9 @@ WEBSITE_SOURCES: list[dict] = [
             "Machine-readable pinball database with structured data on "
             "titles, manufacturers, and features."
         ),
-        "links": [{"url": "https://opdb.org/", "label": "OPDB"}],
+        "links": [
+            {"url": "https://opdb.org/", "label": "OPDB", "link_type": "homepage"}
+        ],
     },
     {
         "name": "Pinside",
@@ -27,7 +31,9 @@ WEBSITE_SOURCES: list[dict] = [
             "Pinball community forum and database with market prices, "
             "reviews, and collector discussions."
         ),
-        "links": [{"url": "https://pinside.com/", "label": "Pinside"}],
+        "links": [
+            {"url": "https://pinside.com/", "label": "Pinside", "link_type": "homepage"}
+        ],
     },
     {
         "name": "PinWiki",
@@ -36,7 +42,13 @@ WEBSITE_SOURCES: list[dict] = [
             "Community-edited wiki focused on pinball machine repair, "
             "maintenance, and technical documentation."
         ),
-        "links": [{"url": "https://www.pinwiki.com/", "label": "PinWiki"}],
+        "links": [
+            {
+                "url": "https://www.pinwiki.com/",
+                "label": "PinWiki",
+                "link_type": "homepage",
+            }
+        ],
     },
     {
         "name": "Kineticist",
@@ -45,7 +57,11 @@ WEBSITE_SOURCES: list[dict] = [
             "Pinball news and media site. Absorbed This Week in Pinball (TWiP) in 2022."
         ),
         "links": [
-            {"url": "https://www.kineticist.com/", "label": "Kineticist"},
+            {
+                "url": "https://www.kineticist.com/",
+                "label": "Kineticist",
+                "link_type": "homepage",
+            },
         ],
     },
     {
@@ -56,7 +72,11 @@ WEBSITE_SOURCES: list[dict] = [
             "industry coverage. Active since late 1999."
         ),
         "links": [
-            {"url": "https://www.pinballnews.com/", "label": "Pinball News"},
+            {
+                "url": "https://www.pinballnews.com/",
+                "label": "Pinball News",
+                "link_type": "homepage",
+            },
         ],
     },
     {
@@ -64,7 +84,11 @@ WEBSITE_SOURCES: list[dict] = [
         "source_type": "web",
         "description": "Weekly pinball news roundup. Now part of Kineticist.",
         "links": [
-            {"url": "https://twip.kineticist.com/", "label": "TWiP"},
+            {
+                "url": "https://twip.kineticist.com/",
+                "label": "TWiP",
+                "link_type": "homepage",
+            },
         ],
     },
     {
@@ -72,7 +96,11 @@ WEBSITE_SOURCES: list[dict] = [
         "source_type": "web",
         "description": ("Official site of the largest current pinball manufacturer."),
         "links": [
-            {"url": "https://www.sternpinball.com/", "label": "Stern Pinball"},
+            {
+                "url": "https://www.sternpinball.com/",
+                "label": "Stern Pinball",
+                "link_type": "homepage",
+            },
         ],
     },
     {
@@ -85,6 +113,7 @@ WEBSITE_SOURCES: list[dict] = [
             {
                 "url": "https://www.jerseyjackpinball.com/",
                 "label": "Jersey Jack Pinball",
+                "link_type": "homepage",
             },
         ],
     },
@@ -99,6 +128,7 @@ WEBSITE_SOURCES: list[dict] = [
             {
                 "url": "https://www.american-pinball.com/",
                 "label": "American Pinball",
+                "link_type": "homepage",
             },
         ],
     },
@@ -112,6 +142,7 @@ WEBSITE_SOURCES: list[dict] = [
             {
                 "url": "https://www.spookypinball.com/",
                 "label": "Spooky Pinball",
+                "link_type": "homepage",
             },
         ],
     },
@@ -123,7 +154,11 @@ WEBSITE_SOURCES: list[dict] = [
             "platform. Began as PinballControllers.com in 2009."
         ),
         "links": [
-            {"url": "https://www.multimorphic.com/", "label": "Multimorphic"},
+            {
+                "url": "https://www.multimorphic.com/",
+                "label": "Multimorphic",
+                "link_type": "homepage",
+            },
         ],
     },
     {
@@ -136,6 +171,7 @@ WEBSITE_SOURCES: list[dict] = [
             {
                 "url": "https://www.pinballbrothers.com/",
                 "label": "Pinball Brothers",
+                "link_type": "homepage",
             },
         ],
     },
@@ -150,6 +186,7 @@ WEBSITE_SOURCES: list[dict] = [
             {
                 "url": "https://www.chicago-gaming.com/",
                 "label": "Chicago Gaming Company",
+                "link_type": "homepage",
             },
         ],
     },

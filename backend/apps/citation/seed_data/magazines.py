@@ -22,6 +22,7 @@ MAGAZINE_SOURCES: list[dict] = [
             {
                 "url": "https://en.wikipedia.org/wiki/PinGame_Journal",
                 "label": "Wikipedia",
+                "link_type": "reference",
             },
         ],
     },
@@ -40,6 +41,7 @@ MAGAZINE_SOURCES: list[dict] = [
             {
                 "url": "https://www.pinball-magazine.com/",
                 "label": "Pinball Magazine",
+                "link_type": "homepage",
             },
         ],
     },
@@ -67,6 +69,7 @@ MAGAZINE_SOURCES: list[dict] = [
             {
                 "url": "https://en.wikipedia.org/wiki/Play_Meter",
                 "label": "Wikipedia",
+                "link_type": "reference",
             },
         ],
     },
@@ -84,6 +87,7 @@ MAGAZINE_SOURCES: list[dict] = [
             {
                 "url": "https://www.replaymag.com/",
                 "label": "RePlay Magazine",
+                "link_type": "homepage",
             },
         ],
     },
@@ -101,6 +105,7 @@ MAGAZINE_SOURCES: list[dict] = [
             {
                 "url": "https://en.wikipedia.org/wiki/Gameroom_magazine",
                 "label": "Wikipedia",
+                "link_type": "reference",
             },
         ],
     },
@@ -118,6 +123,7 @@ MAGAZINE_SOURCES: list[dict] = [
             {
                 "url": "https://library.arcade-museum.com/magazine/coin-slot",
                 "label": "Arcade Museum library",
+                "link_type": "reference",
             },
         ],
     },
@@ -133,6 +139,7 @@ MAGAZINE_SOURCES: list[dict] = [
             {
                 "url": "https://library.arcade-museum.com/magazine/canadian-coin-box",
                 "label": "Arcade Museum library",
+                "link_type": "reference",
             },
         ],
     },
@@ -145,6 +152,7 @@ MAGAZINE_SOURCES: list[dict] = [
             {
                 "url": "https://library.arcade-museum.com/magazine/coin-op-newsletter",
                 "label": "Arcade Museum library",
+                "link_type": "reference",
             },
         ],
     },
@@ -157,6 +165,7 @@ MAGAZINE_SOURCES: list[dict] = [
             {
                 "url": "https://library.arcade-museum.com/magazine/pinball-trader",
                 "label": "Arcade Museum library",
+                "link_type": "reference",
             },
         ],
     },

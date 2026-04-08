@@ -111,13 +111,14 @@ class TestCitationSourceLinkInlineAttribution:
         FormSet = inlineformset_factory(
             CitationSource,
             CitationSourceLink,
-            fields=("url", "label"),
+            fields=("link_type", "url", "label"),
             extra=1,
             can_delete=True,
         )
         data = {
             "links-TOTAL_FORMS": "1",
             "links-INITIAL_FORMS": "0",
+            "links-0-link_type": "homepage",
             "links-0-url": "https://example.com",
             "links-0-label": "Example",
         }
@@ -139,6 +140,7 @@ class TestCitationSourceLinkInlineAttribution:
 
         link = CitationSourceLink.objects.create(
             citation_source=citation_source,
+            link_type="homepage",
             url="https://example.com",
             label="Old Label",
         )
@@ -147,7 +149,7 @@ class TestCitationSourceLinkInlineAttribution:
         FormSet = inlineformset_factory(
             CitationSource,
             CitationSourceLink,
-            fields=("url", "label"),
+            fields=("link_type", "url", "label"),
             extra=0,
             can_delete=True,
         )
@@ -155,6 +157,7 @@ class TestCitationSourceLinkInlineAttribution:
             "links-TOTAL_FORMS": "1",
             "links-INITIAL_FORMS": "1",
             "links-0-id": str(link.pk),
+            "links-0-link_type": "homepage",
             "links-0-url": "https://example.com",
             "links-0-label": "New Label",
         }

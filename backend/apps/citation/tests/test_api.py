@@ -538,7 +538,7 @@ class TestCreateCitationSourceLink:
         resp = _post(
             client,
             f"/api/citation-sources/{citation_source.pk}/links/",
-            {"url": "https://example.com"},
+            {"link_type": "homepage", "url": "https://example.com"},
         )
         assert resp.status_code in (401, 403)
 
@@ -547,10 +547,11 @@ class TestCreateCitationSourceLink:
         resp = _post(
             client,
             f"/api/citation-sources/{citation_source.pk}/links/",
-            {"url": "https://example.com", "label": "Example"},
+            {"link_type": "catalog", "url": "https://example.com", "label": "Example"},
         )
         assert resp.status_code == 201
         data = resp.json()
+        assert data["link_type"] == "catalog"
         assert data["url"] == "https://example.com"
         assert data["label"] == "Example"
 
@@ -559,7 +560,7 @@ class TestCreateCitationSourceLink:
         _post(
             client,
             f"/api/citation-sources/{citation_source.pk}/links/",
-            {"url": "https://example.com"},
+            {"link_type": "homepage", "url": "https://example.com"},
         )
         link = CitationSourceLink.objects.get(citation_source=citation_source)
         assert link.created_by == user
@@ -572,7 +573,7 @@ class TestCreateCitationSourceLink:
         resp = _post(
             client,
             f"/api/citation-sources/{citation_source.pk}/links/",
-            {"url": citation_source_link.url},
+            {"link_type": "homepage", "url": citation_source_link.url},
         )
         assert resp.status_code == 422
 
@@ -581,7 +582,7 @@ class TestCreateCitationSourceLink:
         resp = _post(
             client,
             "/api/citation-sources/99999/links/",
-            {"url": "https://example.com"},
+            {"link_type": "homepage", "url": "https://example.com"},
         )
         assert resp.status_code == 404
 
@@ -590,7 +591,7 @@ class TestCreateCitationSourceLink:
         resp = _post(
             client,
             f"/api/citation-sources/{citation_source.pk}/links/",
-            {"url": "not-a-url"},
+            {"link_type": "homepage", "url": "not-a-url"},
         )
         assert resp.status_code == 422
 
@@ -667,6 +668,7 @@ class TestUpdateCitationSourceLink:
     ):
         CitationSourceLink.objects.create(
             citation_source=citation_source,
+            link_type="homepage",
             url="https://other.com",
             label="other",
         )

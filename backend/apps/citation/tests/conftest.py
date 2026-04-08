@@ -58,6 +58,7 @@ def citation_source_link(db, citation_source):
     """CitationSourceLink on citation_source."""
     return CitationSourceLink.objects.create(
         citation_source=citation_source,
+        link_type="homepage",
         url="https://archive.org/details/encyclopedia-of-pinball",
         label="archive.org scan",
     )

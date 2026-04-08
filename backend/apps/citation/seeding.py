@@ -102,17 +102,27 @@ def _seed_nodes(
         for link_data in links:
             url = link_data["url"]
             label = link_data.get("label", "")
+            link_type = link_data["link_type"]
             existing = CitationSourceLink.objects.filter(
                 citation_source=obj, url=url
             ).first()
             if existing is None:
-                link_obj = CitationSourceLink(citation_source=obj, url=url, label=label)
+                link_obj = CitationSourceLink(
+                    citation_source=obj, url=url, label=label, link_type=link_type
+                )
                 link_obj.full_clean()
                 link_obj.save()
-            elif existing.label != label:
-                existing.label = label
-                existing.full_clean()
-                existing.save(update_fields=["label", "updated_at"])
+            else:
+                link_changes = {}
+                if existing.label != label:
+                    link_changes["label"] = label
+                if existing.link_type != link_type:
+                    link_changes["link_type"] = link_type
+                if link_changes:
+                    for k, v in link_changes.items():
+                        setattr(existing, k, v)
+                    existing.full_clean()
+                    existing.save(update_fields=[*link_changes.keys(), "updated_at"])
 
         # -- Recurse into children --
         _seed_nodes(children, parent=obj, counts=counts)
