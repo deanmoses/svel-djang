@@ -96,8 +96,10 @@ async function searchCitation(
 	});
 }
 
-async function selectFirstCitationResult(user: ReturnType<typeof userEvent.setup>) {
-	await user.click(screen.getByText(new RegExp(MOCK_SOURCES[0].name)));
+async function selectFirstCitationResult() {
+	// DropdownItem uses onpointerdown (not onclick), so fire pointerDown directly
+	// to avoid flaky timing with userEvent.click in jsdom.
+	fireEvent.pointerDown(screen.getByText(new RegExp(MOCK_SOURCES[0].name)));
 
 	return (await screen.findByRole('textbox', {
 		name: /citation locator/i
@@ -126,7 +128,7 @@ describe('MarkdownTextArea citation integration', () => {
 
 		const searchInput = await enterCitationFlow(textarea, 'See ', ' after');
 		await searchCitation(user, searchInput);
-		const locatorInput = await selectFirstCitationResult(user);
+		const locatorInput = await selectFirstCitationResult();
 
 		locatorInput.focus();
 		await user.keyboard('p. 42');
@@ -158,7 +160,7 @@ describe('MarkdownTextArea citation integration', () => {
 
 		const searchInput = await enterCitationFlow(textarea, 'Ref ');
 		await searchCitation(user, searchInput);
-		await selectFirstCitationResult(user);
+		await selectFirstCitationResult();
 
 		mockPOST.mockResolvedValueOnce({ data: CREATED_INSTANCE });
 		fireEvent.pointerDown(screen.getByRole('button', { name: 'Skip' }));
