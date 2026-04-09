@@ -10,6 +10,7 @@ from typing import Optional
 
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
+from django.db.models import Exists, OuterRef
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from ninja import Router, Schema
@@ -52,6 +53,11 @@ class CitationSourceSearchSchema(Schema):
     publisher: str
     year: Optional[int] = None
     isbn: Optional[str] = None
+    parent_id: Optional[int] = None
+    has_children: bool = False
+    is_abstract: bool = False
+    skip_locator: bool = False
+    child_input_mode: Optional[str] = None
 
 
 class CitationSourceCreateSchema(Schema):
@@ -112,6 +118,9 @@ class CitationSourceChildSchema(Schema):
     id: int
     name: str
     source_type: str
+    year: Optional[int] = None
+    isbn: Optional[str] = None
+    skip_locator: bool = False
 
 
 class CitationSourceLinkSchema(Schema):
@@ -133,6 +142,7 @@ class CitationSourceDetailSchema(Schema):
     date_note: str
     isbn: Optional[str] = None
     description: str
+    skip_locator: bool = False
     parent: Optional[CitationSourceParentSchema] = None
     links: list[CitationSourceLinkSchema] = []
     children: list[CitationSourceChildSchema] = []
@@ -160,6 +170,23 @@ class CitationSourceLinkUpdateSchema(Schema):
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+
+def _skip_locator(source_type, parent_id):
+    """Web children skip the locator stage (their URL is the locator)."""
+    return source_type == "web" and parent_id is not None
+
+
+def _is_abstract(source_type, parent_id, has_children):
+    """Source is abstract if it has children or is a root web/magazine source."""
+    return has_children or (parent_id is None and source_type in ("web", "magazine"))
+
+
+def _child_input_mode(source_type, parent_id, has_children):
+    """How the frontend should identify a child: search, enter ID, or N/A."""
+    if not _is_abstract(source_type, parent_id, has_children):
+        return None
+    return "enter_identifier" if source_type == "web" else "search_children"
 
 
 def _clean_and_save(instance, update_fields=None, *, integrity_msg=""):
@@ -215,13 +242,21 @@ def _serialize_detail(source) -> dict:
         "date_note": source.date_note,
         "isbn": source.isbn,
         "description": source.description,
+        "skip_locator": _skip_locator(source.source_type, source.parent_id),
         "parent": parent,
         "links": [
             CitationSourceLinkSchema.from_orm(link).model_dump()
             for link in source.links.all()
         ],
         "children": [
-            {"id": child.pk, "name": child.name, "source_type": child.source_type}
+            {
+                "id": child.pk,
+                "name": child.name,
+                "source_type": child.source_type,
+                "year": child.year,
+                "isbn": child.isbn,
+                "skip_locator": _skip_locator(child.source_type, child.parent_id),
+            }
             for child in source.children.all()
         ],
         "created_at": source.created_at.isoformat(),
@@ -240,16 +275,24 @@ def _serialize_detail(source) -> dict:
     auth=django_auth,
 )
 def search_citation_sources(request, q: str = ""):
-    """Typeahead search across name, author, publisher, isbn."""
+    """Typeahead search across name, author, publisher, isbn, and linked URLs."""
     q = q.strip()
     if not q:
         return []
-    qs = CitationSource.objects.filter(
-        Q(name__icontains=q)
-        | Q(author__icontains=q)
-        | Q(publisher__icontains=q)
-        | Q(isbn__icontains=q)
-    ).order_by("name")[:20]
+    qs = (
+        CitationSource.objects.filter(
+            Q(name__icontains=q)
+            | Q(author__icontains=q)
+            | Q(publisher__icontains=q)
+            | Q(isbn__icontains=q)
+            | Q(links__url__icontains=q)
+        )
+        .annotate(
+            has_children=Exists(CitationSource.objects.filter(parent=OuterRef("pk")))
+        )
+        .distinct()
+        .order_by("name")[:20]
+    )
     return [
         {
             "id": s.pk,
@@ -259,6 +302,13 @@ def search_citation_sources(request, q: str = ""):
             "publisher": s.publisher,
             "year": s.year,
             "isbn": s.isbn,
+            "parent_id": s.parent_id,
+            "has_children": s.has_children,
+            "is_abstract": _is_abstract(s.source_type, s.parent_id, s.has_children),
+            "skip_locator": _skip_locator(s.source_type, s.parent_id),
+            "child_input_mode": _child_input_mode(
+                s.source_type, s.parent_id, s.has_children
+            ),
         }
         for s in qs
     ]

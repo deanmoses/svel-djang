@@ -67,6 +67,16 @@ class TestSearchCitationSources:
         assert resp.status_code == 200
         assert len(resp.json()) == 1
 
+    def test_search_by_linked_url(
+        self, client, user, citation_source, citation_source_link
+    ):
+        client.force_login(user)
+        resp = client.get("/api/citation-sources/search/?q=archive.org")
+        assert resp.status_code == 200
+        results = resp.json()
+        assert len(results) == 1
+        assert results[0]["id"] == citation_source.pk
+
     def test_search_case_insensitive(self, client, user, citation_source):
         client.force_login(user)
         resp = client.get("/api/citation-sources/search/?q=encyclopedia")
@@ -93,7 +103,79 @@ class TestSearchCitationSources:
             "publisher",
             "year",
             "isbn",
+            "parent_id",
+            "has_children",
+            "is_abstract",
+            "skip_locator",
+            "child_input_mode",
         }
+
+
+class TestSearchComputedFields:
+    """Tests for is_abstract, skip_locator, and child_input_mode on search results."""
+
+    def test_root_book_no_children(self, client, user, db):
+        """A standalone book: not abstract, needs locator, no child mode."""
+        CitationSource.objects.create(name="Solo Book", source_type="book")
+        client.force_login(user)
+        resp = client.get("/api/citation-sources/search/?q=Solo Book")
+        data = resp.json()[0]
+        assert data["is_abstract"] is False
+        assert data["skip_locator"] is False
+        assert data["child_input_mode"] is None
+
+    def test_root_book_with_children(self, client, user, db):
+        """A book with editions: abstract, search_children mode."""
+        parent = CitationSource.objects.create(name="Big Book", source_type="book")
+        CitationSource.objects.create(
+            name="Big Book Ed. 1", source_type="book", parent=parent
+        )
+        client.force_login(user)
+        resp = client.get("/api/citation-sources/search/?q=Big Book")
+        # Find the parent in results
+        results = {r["id"]: r for r in resp.json()}
+        data = results[parent.pk]
+        assert data["is_abstract"] is True
+        assert data["skip_locator"] is False
+        assert data["child_input_mode"] == "search_children"
+
+    def test_root_web_source(self, client, user, db):
+        """A root web source (e.g. IPDB): abstract, enter_identifier mode."""
+        CitationSource.objects.create(
+            name="Internet Pinball Database", source_type="web"
+        )
+        client.force_login(user)
+        resp = client.get("/api/citation-sources/search/?q=Internet Pinball")
+        data = resp.json()[0]
+        assert data["is_abstract"] is True
+        assert data["skip_locator"] is False
+        assert data["child_input_mode"] == "enter_identifier"
+
+    def test_child_web_source(self, client, user, db):
+        """A child web source (e.g. IPDB machine page): skip locator."""
+        parent = CitationSource.objects.create(
+            name="Internet Pinball Database", source_type="web"
+        )
+        child = CitationSource.objects.create(
+            name="IPDB Machine 4836", source_type="web", parent=parent
+        )
+        client.force_login(user)
+        resp = client.get("/api/citation-sources/search/?q=IPDB Machine")
+        results = {r["id"]: r for r in resp.json()}
+        data = results[child.pk]
+        assert data["is_abstract"] is False
+        assert data["skip_locator"] is True
+        assert data["child_input_mode"] is None
+
+    def test_root_magazine(self, client, user, db):
+        """A root magazine: abstract, search_children mode."""
+        CitationSource.objects.create(name="Pinball Magazine", source_type="magazine")
+        client.force_login(user)
+        resp = client.get("/api/citation-sources/search/?q=Pinball Magazine")
+        data = resp.json()[0]
+        assert data["is_abstract"] is True
+        assert data["skip_locator"] is False
+        assert data["child_input_mode"] == "search_children"
 
 
 # ---------------------------------------------------------------------------
@@ -388,6 +470,40 @@ class TestGetCitationSourceDetail:
         client.force_login(user)
         resp = client.get("/api/citation-sources/99999/")
         assert resp.status_code == 404
+
+    def test_detail_includes_skip_locator(self, client, user, db):
+        """Detail response includes skip_locator field."""
+        parent = CitationSource.objects.create(
+            name="Internet Pinball Database", source_type="web"
+        )
+        child = CitationSource.objects.create(
+            name="IPDB Machine 1000", source_type="web", parent=parent
+        )
+        client.force_login(user)
+        resp = client.get(f"/api/citation-sources/{child.pk}/")
+        assert resp.status_code == 200
+        assert resp.json()["skip_locator"] is True
+
+    def test_detail_skip_locator_false_for_book(self, client, user, citation_source):
+        """Detail response: skip_locator is false for non-web sources."""
+        client.force_login(user)
+        resp = client.get(f"/api/citation-sources/{citation_source.pk}/")
+        assert resp.status_code == 200
+        assert resp.json()["skip_locator"] is False
+
+    def test_detail_children_include_skip_locator(self, client, user, db):
+        """Children in detail response include skip_locator."""
+        parent = CitationSource.objects.create(
+            name="Internet Pinball Database", source_type="web"
+        )
+        CitationSource.objects.create(
+            name="IPDB Machine 2000", source_type="web", parent=parent
+        )
+        client.force_login(user)
+        resp = client.get(f"/api/citation-sources/{parent.pk}/")
+        data = resp.json()
+        assert len(data["children"]) == 1
+        assert data["children"][0]["skip_locator"] is True
 
 
 # ---------------------------------------------------------------------------
