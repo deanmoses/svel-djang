@@ -92,14 +92,16 @@ async function searchCitation(
 	await user.keyboard(query);
 
 	await vi.waitFor(() => {
-		expect(screen.getByText(new RegExp(MOCK_SOURCES[0].name))).toBeInTheDocument();
+		expect(
+			screen.getByRole('option', { name: new RegExp(MOCK_SOURCES[0].name) })
+		).toBeInTheDocument();
 	});
 }
 
 async function selectFirstCitationResult() {
 	// DropdownItem uses onpointerdown (not onclick), so fire pointerDown directly
 	// to avoid flaky timing with userEvent.click in jsdom.
-	fireEvent.pointerDown(screen.getByText(new RegExp(MOCK_SOURCES[0].name)));
+	fireEvent.pointerDown(screen.getByRole('option', { name: new RegExp(MOCK_SOURCES[0].name) }));
 
 	return (await screen.findByRole('textbox', {
 		name: /citation locator/i
