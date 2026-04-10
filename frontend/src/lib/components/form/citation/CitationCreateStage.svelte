@@ -1,0 +1,212 @@
+<script lang="ts">
+	import client from '$lib/api/client';
+	import type { ParentContext } from './citation-types';
+	import DropdownHeader from '../DropdownHeader.svelte';
+
+	type SourceType = 'book' | 'magazine' | 'web';
+
+	let {
+		parentContext,
+		prefillName,
+		oncreated,
+		oncancel,
+		onback
+	}: {
+		parentContext: ParentContext | null;
+		prefillName: string;
+		oncreated: (result: { sourceId: number; sourceName: string; skipLocator: boolean }) => void;
+		oncancel: () => void;
+		onback: () => void;
+	} = $props();
+
+	// These props are intentionally captured once at mount — the orchestrator
+	// creates a fresh component for each stage transition, so they won't change.
+	// svelte-ignore state_referenced_locally
+	let name = $state(prefillName);
+	// svelte-ignore state_referenced_locally
+	let sourceType = $state<SourceType>(
+		parentContext ? (parentContext.source_type as SourceType) : 'book'
+	);
+	// svelte-ignore state_referenced_locally
+	let author = $state(parentContext?.author ?? '');
+	let url = $state('');
+	let error = $state('');
+	let submitting = $state(false);
+	let nameInputEl: HTMLInputElement | undefined = $state();
+
+	let showTypePicker = $derived(!parentContext);
+	let showUrlField = $derived(sourceType === 'web');
+	let showAuthorField = $derived(sourceType === 'book' || sourceType === 'magazine');
+
+	$effect(() => {
+		requestAnimationFrame(() => nameInputEl?.focus());
+	});
+
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape') {
+			e.preventDefault();
+			oncancel();
+		}
+	}
+
+	async function submit() {
+		if (!name.trim()) {
+			error = 'Name is required.';
+			return;
+		}
+		if (sourceType === 'web' && !url.trim()) {
+			error = 'URL is required for web sources.';
+			return;
+		}
+
+		submitting = true;
+		error = '';
+
+		const { data, error: apiError } = await client.POST('/api/citation-sources/', {
+			body: {
+				name,
+				source_type: sourceType,
+				author: showAuthorField ? author : '',
+				publisher: '',
+				date_note: '',
+				description: '',
+				parent_id: parentContext?.id ?? null,
+				url: showUrlField && url.trim() ? url : null,
+				link_label: '',
+				link_type: 'homepage'
+			}
+		});
+		submitting = false;
+
+		if (apiError) {
+			error = typeof apiError === 'string' ? apiError : 'Failed to create source.';
+			return;
+		}
+
+		oncreated({
+			sourceId: data.id,
+			sourceName: data.name,
+			skipLocator: data.skip_locator
+		});
+	}
+</script>
+
+<DropdownHeader {onback}>New source</DropdownHeader>
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+<form
+	class="create-form"
+	onsubmit={(e) => {
+		e.preventDefault();
+		submit();
+	}}
+	onkeydown={handleKeydown}
+>
+	{#if showTypePicker}
+		<div class="type-chips">
+			{#each ['book', 'magazine', 'web'] as t (t)}
+				<button
+					type="button"
+					class="type-chip"
+					class:selected={sourceType === t}
+					onpointerdown={(e) => {
+						e.preventDefault();
+						sourceType = t as SourceType;
+					}}
+				>
+					{t}
+				</button>
+			{/each}
+		</div>
+	{/if}
+	<input
+		bind:this={nameInputEl}
+		type="text"
+		placeholder="Name"
+		bind:value={name}
+		autocomplete="off"
+		data-1p-ignore
+		data-lpignore="true"
+	/>
+	{#if showAuthorField}
+		<input
+			type="text"
+			placeholder="Author (optional)"
+			bind:value={author}
+			autocomplete="off"
+			data-1p-ignore
+			data-lpignore="true"
+		/>
+	{/if}
+	{#if showUrlField}
+		<input
+			type="url"
+			placeholder="URL"
+			bind:value={url}
+			autocomplete="off"
+			data-1p-ignore
+			data-lpignore="true"
+		/>
+	{/if}
+	{#if error}
+		<div class="form-error">{error}</div>
+	{/if}
+	<button type="submit" class="submit-btn" disabled={submitting}>
+		{submitting ? 'Creating\u2026' : 'Create & cite'}
+	</button>
+</form>
+
+<style>
+	.create-form {
+		padding: var(--size-2) var(--size-3);
+		display: flex;
+		flex-direction: column;
+		gap: var(--size-2);
+	}
+
+	.type-chips {
+		display: flex;
+		gap: var(--size-1);
+	}
+
+	.type-chip {
+		padding: var(--size-1) var(--size-2);
+		font-size: var(--font-size-0);
+		font-family: inherit;
+		border: 1px solid var(--color-input-border);
+		border-radius: var(--radius-2);
+		background-color: var(--color-input-bg);
+		color: var(--color-text-primary);
+		cursor: pointer;
+		text-transform: capitalize;
+	}
+
+	.type-chip.selected {
+		background-color: var(--color-input-focus-ring);
+		border-color: var(--color-input-focus);
+	}
+
+	.form-error {
+		color: var(--color-danger, #c00);
+		font-size: var(--font-size-0);
+	}
+
+	.submit-btn {
+		padding: var(--size-1) var(--size-2);
+		font-size: var(--font-size-1);
+		font-family: inherit;
+		border: 1px solid var(--color-input-border);
+		border-radius: var(--radius-2);
+		background-color: var(--color-input-focus-ring);
+		color: var(--color-text-primary);
+		cursor: pointer;
+	}
+
+	.submit-btn:hover:not(:disabled) {
+		border-color: var(--color-input-focus);
+	}
+
+	.submit-btn:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+</style>
