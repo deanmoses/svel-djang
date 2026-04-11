@@ -21,7 +21,7 @@
 
 	function closeDrawer() {
 		open = false;
-		requestAnimationFrame(() => toggleEl?.focus());
+		toggleEl?.focus();
 	}
 
 	$effect(() => {

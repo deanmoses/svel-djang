@@ -4,6 +4,7 @@ WEBSITE_SOURCES: list[dict] = [
     {
         "name": "Internet Pinball Database (IPDB)",
         "source_type": "web",
+        "identifier_key": "ipdb",
         "description": (
             "Comprehensive database of pinball machines with specs, photos, "
             "and historical data. Primary reference for machine "
@@ -16,6 +17,7 @@ WEBSITE_SOURCES: list[dict] = [
     {
         "name": "Online Pinball Database (OPDB)",
         "source_type": "web",
+        "identifier_key": "opdb",
         "description": (
             "Machine-readable pinball database with structured data on "
             "titles, manufacturers, and features."

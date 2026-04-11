@@ -31,7 +31,7 @@ pnpm test:dom:watch   # DOM tests in watch mode
 
 ## Creating a DOM Test
 
-Name the file `*.dom.test.ts` next to the component. The `.dom.` suffix routes it to the jsdom project automatically. Use `@testing-library/svelte` for rendering and queries, `userEvent` for interactions. See `wikilink-autocomplete.dom.test.ts` for the canonical example of mocking standalone API functions, and `citation-autocomplete.dom.test.ts` for mocking the openapi-fetch typed client.
+Name the file `*.dom.test.ts` next to the component. The `.dom.` suffix routes it to the jsdom project automatically. Use `@testing-library/svelte` for rendering and queries, `userEvent` for interactions. See `wikilink-autocomplete.dom.test.ts` for the canonical example of mocking standalone API functions, and `markdown-textarea-citation.dom.test.ts` for mocking the openapi-fetch typed client.
 
 **Gotcha:** when calling exported component methods directly (e.g. `handleExternalKeydown`), wrap in `flushSync` from `svelte` — DOM updates from direct method calls are not automatically flushed.
 
@@ -67,7 +67,7 @@ Import the data directly (non-hoisted) for use in test assertions.
 
 ### Mock reset between tests
 
-Use `mockReset().mockResolvedValue(...)` in `afterEach`, not `mockClear()`. `mockClear` only clears call history — `mockResolvedValueOnce` overrides persist across tests unless the implementation is explicitly reset.
+Use `mockReset().mockResolvedValue(...)` in `beforeEach`, not `mockClear()`. `mockClear` only clears call history — `mockResolvedValueOnce` overrides persist across tests unless the implementation is explicitly reset. Prefer `beforeEach` over `afterEach` — it guarantees the first test in a suite has defaults configured, regardless of whether the `vi.mock` factory provides them.
 
 ### Layered flow helpers
 
@@ -112,10 +112,10 @@ vi.mock("$lib/api/client", () => ({
 }));
 ```
 
-Set default responses in `afterEach` with `mockReset()`:
+Set default responses in `beforeEach` with `mockReset()`:
 
 ```typescript
-afterEach(() => {
+beforeEach(() => {
   mockGET.mockReset().mockResolvedValue({ data: DEFAULT_DATA });
   mockPOST.mockReset();
 });
@@ -128,7 +128,23 @@ mockPOST.mockResolvedValueOnce({ data: { id: 42 } });
 await user.keyboard("{Enter}"); // triggers the POST
 ```
 
-See `citation-autocomplete.dom.test.ts` for the canonical example.
+When a test flow hits multiple `GET` endpoints (search, detail, children), use `mockImplementation` with URL dispatch instead of chaining `mockResolvedValueOnce` calls. The URL is the first argument to `client.GET`:
+
+```typescript
+mockGET.mockImplementation((url: string) => {
+  if (url === "/api/citation-sources/search/") {
+    return Promise.resolve({ data: SEARCH_RESULTS });
+  }
+  if (url === "/api/citation-sources/{source_id}/") {
+    return Promise.resolve({ data: DETAIL_RESPONSE });
+  }
+  return Promise.resolve({ data: [] });
+});
+```
+
+This is clearer than sequential `mockResolvedValueOnce` when the call order depends on async timing or user interaction paths.
+
+See `markdown-textarea-citation.dom.test.ts` for the canonical example.
 
 ### `onpointerdown` handlers and `fireEvent.pointerDown`
 

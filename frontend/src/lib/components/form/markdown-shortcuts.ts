@@ -281,6 +281,79 @@ export function listEnter(value: string, start: number, end: number): EditResult
 }
 
 // ---------------------------------------------------------------------------
+// List toggle (toolbar buttons)
+// ---------------------------------------------------------------------------
+
+export function toggleList(
+	value: string,
+	start: number,
+	end: number,
+	ordered: boolean
+): EditResult {
+	// Find the full block of selected lines
+	const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+	let lineEnd = value.indexOf('\n', end);
+	if (lineEnd === -1) lineEnd = value.length;
+
+	const block = value.substring(lineStart, lineEnd);
+	const lines = block.split('\n');
+
+	// Check if ALL lines already have the target prefix
+	const bulletRe = /^[-*+] /;
+	const orderedRe = /^\d+\. /;
+	const targetRe = ordered ? orderedRe : bulletRe;
+
+	const singleLine = lines.length === 1;
+	const allHaveTarget = lines.every((l) => targetRe.test(l) || (!singleLine && !l.trim()));
+
+	let totalDelta = 0;
+	let firstLineDelta = 0;
+	let contentLineIndex = 0;
+
+	const newLines = lines.map((line, i) => {
+		if (!singleLine && !line.trim()) return line; // leave interior blank lines alone
+
+		if (allHaveTarget) {
+			// Remove the prefix
+			const match = line.match(targetRe);
+			if (match) {
+				const removed = match[0].length;
+				if (i === 0) firstLineDelta = -removed;
+				totalDelta -= removed;
+				return line.substring(removed);
+			}
+			return line;
+		}
+
+		// Strip any existing list prefix first, then add the target
+		let stripped = line;
+		const existingBullet = line.match(bulletRe);
+		const existingOrdered = line.match(orderedRe);
+		if (existingBullet) {
+			stripped = line.substring(existingBullet[0].length);
+		} else if (existingOrdered) {
+			stripped = line.substring(existingOrdered[0].length);
+		}
+
+		contentLineIndex++;
+		const prefix = ordered ? `${contentLineIndex}. ` : '- ';
+		const result = prefix + stripped;
+		const delta = result.length - line.length;
+		if (i === 0) firstLineDelta = delta;
+		totalDelta += delta;
+		return result;
+	});
+
+	return {
+		replaceStart: lineStart,
+		replaceEnd: lineEnd,
+		replacement: newLines.join('\n'),
+		selectionStart: Math.max(lineStart, start + firstLineDelta),
+		selectionEnd: end + totalDelta
+	};
+}
+
+// ---------------------------------------------------------------------------
 // Apply result to textarea (undo-safe)
 // ---------------------------------------------------------------------------
 

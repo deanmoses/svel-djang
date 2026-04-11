@@ -22,8 +22,9 @@ When a change adds modules, imports, or new backend entrypoints, check [AppBound
 
 In particular:
 
-- `core` should not depend on `catalog`, `provenance`, or `media`
+- `core` should not depend on `catalog`, `citation`, `provenance`, or `media`
 - `catalog`, `provenance`, and `media` must not depend on each other (peer isolation)
+- `provenance` depends on `citation` but `citation` does not depend on `provenance`
 - new APIs for catalog entities usually belong in `apps.catalog`
 - cross-app coupling should be treated as an architecture issue, not a convenience refactor
 

@@ -278,4 +278,31 @@ describe('MarkdownTextArea', () => {
 			expect(screen.queryByText('Insert link')).not.toBeInTheDocument();
 		});
 	});
+
+	it('cleans up deferred focus and blur timers on unmount', async () => {
+		vi.useFakeTimers();
+		try {
+			const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+			const rendered = renderTextArea();
+			const textarea = screen.getByRole('textbox', { name: /description/i }) as HTMLTextAreaElement;
+
+			typeWikilinkTrigger(textarea);
+			await waitForDropdown();
+
+			sendTextareaKeydown(textarea, 'Enter');
+			await vi.advanceTimersByTimeAsync(0);
+			await vi.waitFor(() => {
+				expect(screen.getByRole('combobox', { name: /search title/i })).toBeInTheDocument();
+			});
+
+			const searchInput = screen.getByRole('combobox', { name: /search title/i });
+			await user.click(searchInput);
+
+			rendered.unmount();
+
+			expect(vi.getTimerCount()).toBe(0);
+		} finally {
+			vi.useRealTimers();
+		}
+	});
 });

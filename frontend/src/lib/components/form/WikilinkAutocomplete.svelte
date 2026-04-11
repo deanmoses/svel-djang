@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { onDestroy, tick } from 'svelte';
+	import { onDestroy } from 'svelte';
 	import { fetchLinkTypes, searchLinkTargets } from '$lib/api/link-types';
 	import type { LinkType, LinkTarget } from '$lib/api/link-types';
 	import { formatLinkText } from './wikilink-helpers';
 	import { createDebouncedSearch } from './search-helpers';
-	import CitationAutocomplete from './CitationAutocomplete.svelte';
+	import CitationAutocomplete from './citation/CitationAutocomplete.svelte';
 	import DropdownHeader from './DropdownHeader.svelte';
 	import DropdownItem from './DropdownItem.svelte';
 	import DropdownSearchInput from './DropdownSearchInput.svelte';
@@ -12,18 +12,21 @@
 	let {
 		oncomplete,
 		oncancel,
-		onfocusreturn
+		onfocusreturn,
+		initialType
 	}: {
 		oncomplete: (linkText: string) => void;
 		oncancel: () => void;
 		onfocusreturn?: () => void;
+		/** When set, skip the type picker and jump directly to this link type. */
+		initialType?: string;
 	} = $props();
 
 	// -----------------------------------------------------------------------
 	// State
 	// -----------------------------------------------------------------------
 
-	let stage = $state<'type' | 'search' | 'cite'>('type');
+	let stage = $state<'type' | 'search' | 'cite'>(initialType === 'cite' ? 'cite' : 'type');
 
 	// Type picker
 	let linkTypes = $state<LinkType[]>([]);
@@ -51,11 +54,27 @@
 
 	onDestroy(() => debouncedSearch?.cancel());
 
+	$effect(() => {
+		if (stage === 'search' && searchInputEl) {
+			searchInputEl.focus();
+		}
+	});
+
+	$effect(() => {
+		if (stage !== 'search' || searchIndex < 0) return;
+		const el = searchInputEl?.closest('.wikilink-autocomplete');
+		el?.querySelector('[data-active="true"]')?.scrollIntoView({ block: 'nearest' });
+	});
+
 	// Eagerly prefetch link types so they're ready before the user types [[.
 	// Cached at module level, so this is a no-op after first call.
 	fetchLinkTypes()
 		.then((types) => {
 			linkTypes = types;
+			if (initialType) {
+				const match = types.find((t) => t.name === initialType);
+				if (match) selectType(match);
+			}
 		})
 		.catch(() => {
 			// Degraded state: type picker will be empty
@@ -88,7 +107,6 @@
 				}
 			);
 			stage = 'search';
-			tick().then(() => searchInputEl?.focus());
 			debouncedSearch.search('');
 		}
 	}
@@ -108,7 +126,12 @@
 		oncomplete(formatLinkText(selectedType.name, target.ref));
 	}
 
-	function goBackToTypePicker() {
+	function goBack() {
+		if (initialType) {
+			// Arrived via toolbar — no type picker to go back to, just close
+			oncancel();
+			return;
+		}
 		debouncedSearch?.cancel();
 		debouncedSearch = null;
 		stage = 'type';
@@ -158,12 +181,10 @@
 			case 'ArrowDown':
 				e.preventDefault();
 				searchIndex = Math.min(searchIndex + 1, searchResults.length - 1);
-				scrollActiveIntoView();
 				break;
 			case 'ArrowUp':
 				e.preventDefault();
 				searchIndex = Math.max(searchIndex - 1, -1);
-				scrollActiveIntoView();
 				break;
 			case 'Enter':
 				e.preventDefault();
@@ -179,23 +200,16 @@
 			case 'Backspace':
 				if (!searchQuery) {
 					e.preventDefault();
-					goBackToTypePicker();
+					goBack();
 				}
 				break;
 			case 'ArrowLeft':
 				if (searchInputEl && searchInputEl.selectionStart === 0) {
 					e.preventDefault();
-					goBackToTypePicker();
+					goBack();
 				}
 				break;
 		}
-	}
-
-	function scrollActiveIntoView() {
-		tick().then(() => {
-			const el = searchInputEl?.closest('.wikilink-autocomplete');
-			el?.querySelector('[data-active="true"]')?.scrollIntoView({ block: 'nearest' });
-		});
 	}
 
 	// -----------------------------------------------------------------------
@@ -223,7 +237,7 @@
 			</DropdownItem>
 		{/each}
 	{:else if stage === 'search'}
-		<DropdownHeader onback={goBackToTypePicker}>{selectedType?.label}</DropdownHeader>
+		<DropdownHeader onback={goBack}>{selectedType?.label}</DropdownHeader>
 		<DropdownSearchInput
 			placeholder="Search {selectedType?.label ?? ''}..."
 			value={searchQuery}
@@ -251,7 +265,7 @@
 		<CitationAutocomplete
 			oncomplete={(linkText) => oncomplete(linkText)}
 			oncancel={() => oncancel()}
-			onback={() => goBackToTypePicker()}
+			onback={() => goBack()}
 		/>
 	{/if}
 </div>

@@ -51,6 +51,30 @@ class TestCitationSourceType:
 
 
 # ---------------------------------------------------------------------------
+# CitationSource: identifier_key enum
+# ---------------------------------------------------------------------------
+
+
+class TestCitationSourceIdentifierKey:
+    def test_invalid_identifier_key_rejected(self, db):
+        with pytest.raises(IntegrityError):
+            CitationSource.objects.create(
+                name="Test", source_type="web", identifier_key="bogus"
+            )
+
+    def test_empty_identifier_key_accepted(self, db):
+        cs = CitationSource.objects.create(name="Test", source_type="web")
+        assert cs.identifier_key == ""
+
+    @pytest.mark.parametrize("key", ["ipdb", "opdb"])
+    def test_valid_identifier_key_accepted(self, db, key):
+        cs = CitationSource.objects.create(
+            name="Test", source_type="web", identifier_key=key
+        )
+        assert cs.identifier_key == key
+
+
+# ---------------------------------------------------------------------------
 # CitationSource: self-reference
 # ---------------------------------------------------------------------------
 

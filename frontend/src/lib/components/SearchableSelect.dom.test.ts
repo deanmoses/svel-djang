@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import SearchableSelect from './SearchableSelect.svelte';
 
 const OPTIONS = [
@@ -148,5 +148,22 @@ describe('SearchableSelect', () => {
 		expect(screen.getByRole('listbox')).toBeInTheDocument();
 		expect(getCombobox()).toHaveValue('wil');
 		expect(screen.queryByRole('button', { name: /clear selection/i })).not.toBeInTheDocument();
+	});
+
+	it('does not leave queued scroll work behind after keyboard navigation unmounts', async () => {
+		vi.useFakeTimers();
+		try {
+			const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+			const rendered = renderSingle();
+
+			await user.click(getCombobox());
+			await user.keyboard('{ArrowDown}');
+
+			rendered.unmount();
+
+			expect(vi.getTimerCount()).toBe(0);
+		} finally {
+			vi.useRealTimers();
+		}
 	});
 });

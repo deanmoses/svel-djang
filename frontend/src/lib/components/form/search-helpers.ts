@@ -54,7 +54,7 @@ export function createDebouncedSearch<T>(
 export function formatCitationResult(source: {
 	name: string;
 	author: string;
-	year: number | null;
+	year?: number | null;
 }): string {
 	const detail: string[] = [];
 	if (source.author) detail.push(source.author);

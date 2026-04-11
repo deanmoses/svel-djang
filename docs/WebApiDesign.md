@@ -1,8 +1,20 @@
 # Web API Design
 
-This document defines how the frontend and backend should shape APIs for the web application.
+This document defines how backend APIs should be designed for the web application, and how the frontend should consume them.
 
 It is not a system-architecture document. It is a development rule for how SvelteKit pages should obtain data from Django.
+
+## Two API types
+
+The backend serves two distinct kinds of endpoints for different purposes:
+
+| API type     | Path             | Purpose                                   |
+| ------------ | ---------------- | ----------------------------------------- |
+| Resource API | `/api/...`       | Reusable domain data and write operations |
+| Page API     | `/api/pages/...` | One route's rendering payload             |
+
+- **Resource APIs** under `/api/...` expose reusable domain data: CRUD operations, autocomplete, lookups, edit forms, and bulk exports.
+- **Page APIs** under `/api/pages/...` expose route-shaped payloads optimized for one page. A page endpoint returns a **page model**: exactly the data one specific page needs to render.
 
 ## Core Rule
 

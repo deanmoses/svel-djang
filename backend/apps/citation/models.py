@@ -87,6 +87,25 @@ class CitationSource(TimeStampedModel):
         blank=True, default="", db_default="", validators=[validate_no_mojibake]
     )
 
+    class IdentifierKey(models.TextChoices):
+        IPDB = "ipdb", "IPDB"
+        OPDB = "opdb", "OPDB"
+
+    identifier_key = models.CharField(
+        max_length=50,
+        blank=True,
+        default="",
+        db_default="",
+        choices=IdentifierKey.choices,
+        help_text=(
+            "Identifies which URL/ID parsing convention applies to this source's "
+            "children (e.g. 'ipdb' → numeric machine IDs, 'opdb' → slug IDs). "
+            "Stopgap: will be subsumed by the extractor registry when the "
+            "extraction layer is built. See docs/plans/citations/"
+            "CitationsDesign.md."
+        ),
+    )
+
     class Meta:
         ordering = ["name"]
         constraints = [
@@ -138,6 +157,11 @@ class CitationSource(TimeStampedModel):
             ),
             # ISBN: nullable unique, prevent empty string
             nullable_id_not_empty("isbn"),
+            # identifier_key must be blank or a valid enum value
+            models.CheckConstraint(
+                condition=models.Q(identifier_key__in=["", "ipdb", "opdb"]),
+                name="citation_citationsource_identifier_key_valid",
+            ),
         ]
 
     def __str__(self) -> str:

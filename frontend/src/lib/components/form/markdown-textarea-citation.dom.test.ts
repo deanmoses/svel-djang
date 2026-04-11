@@ -1,8 +1,16 @@
-import { render, screen, fireEvent } from '@testing-library/svelte';
+import { render, screen, fireEvent, cleanup } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import MarkdownTextArea from './MarkdownTextArea.svelte';
-import { MOCK_SOURCES, CREATED_INSTANCE } from './citation-fixtures';
+import {
+	MOCK_SOURCES,
+	CREATED_INSTANCE,
+	ABSTRACT_BOOK_SOURCE,
+	IPDB_SOURCE,
+	IPDB_CHILD,
+	BOOK_CHILDREN,
+	BOOK_DETAIL_RESPONSE
+} from './citation/citation-fixtures';
 
 vi.mock('$lib/api/link-types', async () => {
 	const f = await import('./link-types-fixtures');
@@ -113,11 +121,98 @@ function expectDropdownClosed() {
 	expect(screen.queryByRole('combobox', { name: /search sources/i })).not.toBeInTheDocument();
 }
 
+/**
+ * Navigate from the textarea into the book identify-by-search stage:
+ * trigger [[ → type picker → Citation → search "pinball" → select abstract book → children load.
+ */
+async function enterBookIdentifyStage(
+	user: ReturnType<typeof userEvent.setup>,
+	textarea: HTMLTextAreaElement
+) {
+	mockGET.mockImplementation((url: string) => {
+		if (url === '/api/citation-sources/search/') {
+			return Promise.resolve({ data: [ABSTRACT_BOOK_SOURCE] });
+		}
+		if (url === '/api/citation-sources/{source_id}/') {
+			return Promise.resolve({ data: BOOK_DETAIL_RESPONSE });
+		}
+		return Promise.resolve({ data: [] });
+	});
+
+	const searchInput = await enterCitationFlow(textarea);
+	searchInput.focus();
+	await user.keyboard('pinball');
+
+	await vi.waitFor(() => {
+		expect(
+			screen.getByRole('option', { name: new RegExp(ABSTRACT_BOOK_SOURCE.name) })
+		).toBeInTheDocument();
+	});
+
+	fireEvent.pointerDown(
+		screen.getByRole('option', { name: new RegExp(ABSTRACT_BOOK_SOURCE.name) })
+	);
+
+	// Wait for identify stage with children loaded
+	await vi.waitFor(
+		() => {
+			expect(screen.getByText(ABSTRACT_BOOK_SOURCE.name)).toBeInTheDocument();
+			expect(
+				screen.getByRole('option', { name: new RegExp(BOOK_CHILDREN[0].name) })
+			).toBeInTheDocument();
+		},
+		{ timeout: 2000 }
+	);
+}
+
+/**
+ * Navigate from the textarea into the IPDB identify-by-input stage and type an ID:
+ * trigger [[ → type picker → Citation → search "IPDB" → select IPDB source → type identifier.
+ */
+async function enterIpdbIdentifyStage(
+	user: ReturnType<typeof userEvent.setup>,
+	textarea: HTMLTextAreaElement,
+	childrenResponse: (typeof IPDB_CHILD)[],
+	identifier: string
+) {
+	mockGET.mockImplementation((url: string) => {
+		if (url === '/api/citation-sources/search/') {
+			return Promise.resolve({ data: [IPDB_SOURCE] });
+		}
+		if (url === '/api/citation-sources/{source_id}/children/') {
+			return Promise.resolve({ data: childrenResponse });
+		}
+		return Promise.resolve({ data: [] });
+	});
+
+	const searchInput = await enterCitationFlow(textarea);
+	searchInput.focus();
+	await user.keyboard('IPDB');
+
+	await vi.waitFor(() => {
+		expect(screen.getByRole('option', { name: new RegExp(IPDB_SOURCE.name) })).toBeInTheDocument();
+	});
+
+	fireEvent.pointerDown(screen.getByRole('option', { name: new RegExp(IPDB_SOURCE.name) }));
+
+	await vi.waitFor(() => {
+		expect(screen.getByRole('textbox', { name: /enter identifier/i })).toBeInTheDocument();
+	});
+
+	const idInput = screen.getByRole('textbox', { name: /enter identifier/i });
+	idInput.focus();
+	await user.keyboard(identifier);
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
 describe('MarkdownTextArea citation integration', () => {
+	afterEach(() => {
+		cleanup();
+	});
+
 	beforeEach(() => {
 		mockGET.mockReset().mockResolvedValue({ data: MOCK_SOURCES });
 		mockPOST.mockReset();
@@ -181,6 +276,25 @@ describe('MarkdownTextArea citation integration', () => {
 		});
 	});
 
+	it('allows text selection in dropdown inputs (mousedown is not prevented)', async () => {
+		renderTextArea();
+		const textarea = screen.getByRole('textbox', { name: /description/i }) as HTMLTextAreaElement;
+		const searchInput = await enterCitationFlow(textarea);
+
+		// Mousedown on an input inside the dropdown should NOT be prevented
+		// (allows click-to-place-cursor and click-drag-to-select-text)
+		const inputEvent = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+		searchInput.dispatchEvent(inputEvent);
+		expect(inputEvent.defaultPrevented).toBe(false);
+
+		// Mousedown on a non-input element should still be prevented
+		// (keeps focus on textarea, prevents blur)
+		const header = document.querySelector('.dropdown-header')!;
+		const headerEvent = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+		header.dispatchEvent(headerEvent);
+		expect(headerEvent.defaultPrevented).toBe(true);
+	});
+
 	it('returns to the type picker and resumes textarea keyboard handling after citation back-navigation', async () => {
 		renderTextArea();
 		const textarea = screen.getByRole('textbox', { name: /description/i }) as HTMLTextAreaElement;
@@ -201,5 +315,172 @@ describe('MarkdownTextArea citation integration', () => {
 		await vi.waitFor(() => {
 			expect(screen.queryByText('Insert link')).not.toBeInTheDocument();
 		});
+	});
+
+	it('selects a book child from the identify stage and shows the locator', async () => {
+		const user = userEvent.setup();
+		renderTextArea();
+		const textarea = screen.getByRole('textbox', { name: /description/i }) as HTMLTextAreaElement;
+
+		await enterBookIdentifyStage(user, textarea);
+
+		// Should show children as selectable options
+		expect(
+			screen.getByRole('option', { name: new RegExp(BOOK_CHILDREN[0].name) })
+		).toBeInTheDocument();
+
+		// Select the first child edition
+		fireEvent.pointerDown(screen.getByRole('option', { name: new RegExp(BOOK_CHILDREN[0].name) }));
+
+		// Should transition to locator stage with the child's name in the header
+		await vi.waitFor(() => {
+			expect(screen.getByRole('textbox', { name: /citation locator/i })).toBeInTheDocument();
+			expect(screen.getByText(`Citing: ${BOOK_CHILDREN[0].name}`)).toBeInTheDocument();
+		});
+	});
+
+	it('IPDB source with skip_locator bypasses locator stage', async () => {
+		const user = userEvent.setup();
+		renderTextArea();
+		const textarea = screen.getByRole('textbox', { name: /description/i }) as HTMLTextAreaElement;
+
+		await enterIpdbIdentifyStage(user, textarea, [IPDB_CHILD], '4836');
+
+		await vi.waitFor(() => {
+			expect(screen.getByRole('button', { name: 'Cite' })).toBeInTheDocument();
+		});
+
+		mockPOST.mockResolvedValueOnce({ data: CREATED_INSTANCE });
+		fireEvent.pointerDown(screen.getByRole('button', { name: 'Cite' }));
+
+		// skip_locator=true — citation inserted directly, no locator stage
+		await vi.waitFor(() => {
+			expect(textarea).toHaveValue(`[[cite:${CREATED_INSTANCE.id}]]`);
+		});
+		expect(screen.queryByRole('textbox', { name: /citation locator/i })).not.toBeInTheDocument();
+		expectDropdownClosed();
+	});
+
+	it('auto-completes citation when recognized IPDB URL is pasted', async () => {
+		const user = userEvent.setup();
+		renderTextArea();
+		const textarea = screen.getByRole('textbox', { name: /description/i }) as HTMLTextAreaElement;
+
+		// Mock: searching "IPDB" returns the abstract parent; children endpoint
+		// returns the existing child matching the URL's machine ID.
+		mockGET.mockImplementation((url: string) => {
+			if (url === '/api/citation-sources/search/') {
+				return Promise.resolve({ data: [IPDB_SOURCE] });
+			}
+			if (url === '/api/citation-sources/{source_id}/children/') {
+				return Promise.resolve({ data: [IPDB_CHILD] });
+			}
+			return Promise.resolve({ data: [] });
+		});
+		mockPOST.mockResolvedValueOnce({ data: CREATED_INSTANCE });
+
+		// Enter citation flow and paste the IPDB URL
+		const searchInput = await enterCitationFlow(textarea);
+		searchInput.focus();
+		await user.keyboard('https://www.ipdb.org/machine.cgi?id=4836');
+
+		// The recognized item should appear
+		await vi.waitFor(() => {
+			expect(screen.getByRole('option', { name: /IPDB Machine 4836/ })).toBeInTheDocument();
+		});
+
+		// Click the recognized item — should fully resolve and insert citation
+		fireEvent.pointerDown(screen.getByRole('option', { name: /IPDB Machine 4836/ }));
+
+		// Citation should be inserted directly — no identify stage, no manual clicks
+		await vi.waitFor(() => {
+			expect(textarea).toHaveValue(`[[cite:${CREATED_INSTANCE.id}]]`);
+		});
+
+		expectDropdownClosed();
+		expect(mockPOST).toHaveBeenCalledWith('/api/citation-instances/', {
+			body: {
+				citation_source_id: IPDB_CHILD.id,
+				locator: ''
+			}
+		});
+	});
+
+	it('wires aria-activedescendant on the citation search combobox', async () => {
+		const user = userEvent.setup();
+		renderTextArea();
+		const textarea = screen.getByRole('textbox', { name: /description/i }) as HTMLTextAreaElement;
+
+		const searchInput = await enterCitationFlow(textarea);
+		await searchCitation(user, searchInput);
+
+		// Combobox should control a listbox
+		const listboxId = searchInput.getAttribute('aria-controls');
+		expect(listboxId).toBeTruthy();
+		expect(document.getElementById(listboxId!)).toHaveAttribute('role', 'listbox');
+
+		// No active descendant initially
+		expect(searchInput).not.toHaveAttribute('aria-activedescendant');
+
+		// ArrowDown highlights first result — read its id from the DOM
+		fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+		const options = screen.getAllByRole('option');
+		expect(searchInput.getAttribute('aria-activedescendant')).toBe(options[0].id);
+
+		// ArrowDown highlights second result
+		fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+		expect(searchInput.getAttribute('aria-activedescendant')).toBe(options[1].id);
+	});
+
+	it('wires aria-activedescendant on the identify-by-search combobox', async () => {
+		const user = userEvent.setup();
+		renderTextArea();
+		const textarea = screen.getByRole('textbox', { name: /description/i }) as HTMLTextAreaElement;
+
+		await enterBookIdentifyStage(user, textarea);
+
+		const searchInput = screen.getByRole('combobox', {
+			name: /filter editions/i
+		}) as HTMLInputElement;
+
+		// Combobox should control a listbox
+		const listboxId = searchInput.getAttribute('aria-controls');
+		expect(listboxId).toBeTruthy();
+		expect(document.getElementById(listboxId!)).toHaveAttribute('role', 'listbox');
+
+		// No active descendant initially
+		expect(searchInput).not.toHaveAttribute('aria-activedescendant');
+
+		// ArrowDown highlights first child edition
+		searchInput.focus();
+		fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+		const options = screen.getAllByRole('option');
+		expect(searchInput.getAttribute('aria-activedescendant')).toBe(options[0].id);
+
+		// ArrowDown highlights second child edition
+		fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+		expect(searchInput.getAttribute('aria-activedescendant')).toBe(options[1].id);
+	});
+
+	it('does not let keydown events bubble out of the citation dropdown', async () => {
+		renderTextArea();
+		const textarea = screen.getByRole('textbox', { name: /description/i }) as HTMLTextAreaElement;
+
+		const searchInput = await enterCitationFlow(textarea);
+
+		const outerListener = vi.fn();
+		document.addEventListener('keydown', outerListener);
+
+		try {
+			fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+			fireEvent.keyDown(searchInput, { key: 'ArrowUp' });
+			fireEvent.keyDown(searchInput, { key: 'Enter' });
+
+			// The outer listener should NOT see these events — they are stopped
+			// by the orchestrator's onkeydown stopPropagation
+			expect(outerListener).not.toHaveBeenCalled();
+		} finally {
+			document.removeEventListener('keydown', outerListener);
+		}
 	});
 });

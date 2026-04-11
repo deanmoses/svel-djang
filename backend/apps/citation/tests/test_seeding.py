@@ -285,6 +285,11 @@ class TestSeedRealData:
         assert play_meter.source_type == "magazine"
         assert play_meter.year == 1974
 
+        # Spot-check: identifier_key set on IPDB and OPDB
+        assert ipdb.identifier_key == "ipdb"
+        opdb = CitationSource.objects.get(name="Online Pinball Database (OPDB)")
+        assert opdb.identifier_key == "opdb"
+
 
 class TestManagementCommand:
     def test_command_output(self, db):

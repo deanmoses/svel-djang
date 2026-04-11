@@ -5,7 +5,8 @@ import {
 	insertLink,
 	pasteLink,
 	indentLines,
-	listEnter
+	listEnter,
+	toggleList
 } from './markdown-shortcuts';
 
 describe('toggleMarker (bold/italic)', () => {
@@ -199,5 +200,89 @@ describe('listEnter', () => {
 		const r = listEnter('first line\n- list item\nthird line', 22, 22);
 		expect(r).not.toBeNull();
 		expect(r!.replacement).toBe('\n- ');
+	});
+});
+
+describe('toggleList', () => {
+	describe('bullet list', () => {
+		it('adds bullet prefix to a plain line', () => {
+			const r = toggleList('hello', 0, 5, false);
+			expect(r.replacement).toBe('- hello');
+		});
+
+		it('adds bullet prefix to multiple lines', () => {
+			const r = toggleList('alpha\nbeta\ngamma', 0, 16, false);
+			expect(r.replacement).toBe('- alpha\n- beta\n- gamma');
+		});
+
+		it('removes bullet prefix when all lines are bulleted', () => {
+			const r = toggleList('- alpha\n- beta', 0, 14, false);
+			expect(r.replacement).toBe('alpha\nbeta');
+		});
+
+		it('leaves blank lines alone when adding', () => {
+			const r = toggleList('alpha\n\nbeta', 0, 11, false);
+			expect(r.replacement).toBe('- alpha\n\n- beta');
+		});
+
+		it('leaves blank lines alone when removing', () => {
+			const r = toggleList('- alpha\n\n- beta', 0, 15, false);
+			expect(r.replacement).toBe('alpha\n\nbeta');
+		});
+
+		it('replaces ordered prefix with bullet', () => {
+			const r = toggleList('1. first\n2. second', 0, 18, false);
+			expect(r.replacement).toBe('- first\n- second');
+		});
+
+		it('handles cursor on a single line within multiline text', () => {
+			const r = toggleList('above\nhello\nbelow', 6, 11, false);
+			expect(r.replacement).toBe('- hello');
+			expect(r.replaceStart).toBe(6);
+			expect(r.replaceEnd).toBe(11);
+		});
+	});
+
+	describe('ordered list', () => {
+		it('adds numbered prefix to a plain line', () => {
+			const r = toggleList('hello', 0, 5, true);
+			expect(r.replacement).toBe('1. hello');
+		});
+
+		it('adds numbered prefix to multiple lines', () => {
+			const r = toggleList('alpha\nbeta\ngamma', 0, 16, true);
+			expect(r.replacement).toBe('1. alpha\n2. beta\n3. gamma');
+		});
+
+		it('removes numbered prefix when all lines are numbered', () => {
+			const r = toggleList('1. alpha\n2. beta', 0, 16, true);
+			expect(r.replacement).toBe('alpha\nbeta');
+		});
+
+		it('replaces bullet prefix with numbers', () => {
+			const r = toggleList('- first\n- second', 0, 16, true);
+			expect(r.replacement).toBe('1. first\n2. second');
+		});
+
+		it('numbers correctly across blank lines', () => {
+			const r = toggleList('alpha\n\nbeta', 0, 11, true);
+			expect(r.replacement).toBe('1. alpha\n\n2. beta');
+		});
+	});
+
+	describe('selection tracking', () => {
+		it('adjusts selection when adding prefix', () => {
+			const r = toggleList('hello', 2, 5, false);
+			// "- " added (2 chars), cursor moves right
+			expect(r.selectionStart).toBe(4);
+			expect(r.selectionEnd).toBe(7);
+		});
+
+		it('adjusts selection when removing prefix', () => {
+			const r = toggleList('- hello', 4, 7, false);
+			// "- " removed (2 chars), cursor moves left
+			expect(r.selectionStart).toBe(2);
+			expect(r.selectionEnd).toBe(5);
+		});
 	});
 });

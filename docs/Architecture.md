@@ -36,10 +36,11 @@ See [WebArchitecture.md](WebArchitecture.md) for request flow, same-origin behav
 Within Django, responsibilities are split across a few explicit backend apps:
 
 - `core` shared foundation layer.
+- `accounts` auth/account-specific behavior.
 - `catalog` the pinball business/domain model.
+- `citation` citation-source metadata and evidence records.
 - `provenance` the claims and audit machinery.
 - `media` photo and video upload and hosting infrastructure.
-- `accounts` auth/account-specific behavior.
 
 See [AppBoundaries.md](AppBoundaries.md) for dependency rules and boundary guidance.
 

@@ -42,6 +42,11 @@
 		});
 	});
 
+	$effect(() => {
+		if (!open || activeIndex < 0 || !listEl) return;
+		listEl.querySelector('[data-active="true"]')?.scrollIntoView({ block: 'nearest' });
+	});
+
 	function isSelected(slug: string): boolean {
 		if (multi && Array.isArray(selected)) {
 			return selected.includes(slug);
@@ -95,12 +100,10 @@
 			case 'ArrowDown':
 				e.preventDefault();
 				activeIndex = Math.min(activeIndex + 1, filteredOptions.length - 1);
-				scrollActiveIntoView();
 				break;
 			case 'ArrowUp':
 				e.preventDefault();
 				activeIndex = Math.max(activeIndex - 1, 0);
-				scrollActiveIntoView();
 				break;
 			case 'Enter':
 				e.preventDefault();
@@ -116,13 +119,6 @@
 				inputEl?.blur();
 				break;
 		}
-	}
-
-	function scrollActiveIntoView() {
-		requestAnimationFrame(() => {
-			const active = listEl?.querySelector('[data-active="true"]');
-			active?.scrollIntoView({ block: 'nearest' });
-		});
 	}
 
 	function handleFocus() {

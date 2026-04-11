@@ -40,6 +40,7 @@ _SOURCE_FIELDS = frozenset(
         "date_note",
         "isbn",
         "description",
+        "identifier_key",
     }
 )
 

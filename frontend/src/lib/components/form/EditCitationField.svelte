@@ -2,7 +2,7 @@
 	import client from '$lib/api/client';
 	import { type EditCitationSelection } from '$lib/edit-citation';
 	import FieldGroup from './FieldGroup.svelte';
-	import CitationAutocomplete from './CitationAutocomplete.svelte';
+	import CitationAutocomplete from './citation/CitationAutocomplete.svelte';
 
 	let {
 		citation = $bindable<EditCitationSelection | null>(null),

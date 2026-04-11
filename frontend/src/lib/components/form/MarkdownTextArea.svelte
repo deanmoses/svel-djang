@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import FieldGroup from './FieldGroup.svelte';
 	import WikilinkAutocomplete from './WikilinkAutocomplete.svelte';
 	import { fetchLinkTypes } from '$lib/api/link-types';
@@ -10,9 +11,11 @@
 		pasteLink,
 		indentLines,
 		listEnter,
+		toggleList,
 		applyResult
 	} from './markdown-shortcuts';
 	import type { EditResult } from './markdown-shortcuts';
+	import MarkdownToolbar from './MarkdownToolbar.svelte';
 
 	// Prefetch link types on mount so the cache is warm by the time user types [[
 	fetchLinkTypes();
@@ -42,8 +45,11 @@
 	// Dropdown state
 	let open = $state(false);
 	let triggerStart = $state(-1);
+	let initialType: string | undefined = $state();
 	let dropdownLeft = $state(0);
 	let dropdownTop = $state(0);
+	let textareaBlurTimeout: ReturnType<typeof setTimeout> | undefined;
+	let autocompleteBlurTimeout: ReturnType<typeof setTimeout> | undefined;
 
 	// -----------------------------------------------------------------------
 	// Cursor position via mirror div
@@ -105,6 +111,7 @@
 	// -----------------------------------------------------------------------
 
 	function openDropdown() {
+		clearBlurTimeouts();
 		const pos = getCursorPosition();
 		dropdownLeft = pos.left;
 		dropdownTop = pos.top;
@@ -112,8 +119,25 @@
 	}
 
 	function closeDropdown() {
+		clearBlurTimeouts();
 		open = false;
 		triggerStart = -1;
+		initialType = undefined;
+	}
+
+	/** Open the link/citation picker from the toolbar (no [[ trigger needed). */
+	function openLinkPicker(mode?: string) {
+		if (!textareaEl) return;
+		triggerStart = textareaEl.selectionStart;
+		initialType = mode;
+		openDropdown();
+	}
+
+	function clearBlurTimeouts() {
+		clearTimeout(textareaBlurTimeout);
+		clearTimeout(autocompleteBlurTimeout);
+		textareaBlurTimeout = undefined;
+		autocompleteBlurTimeout = undefined;
 	}
 
 	// -----------------------------------------------------------------------
@@ -243,7 +267,9 @@
 
 	function handleTextareaBlur() {
 		if (!open) return;
-		setTimeout(() => {
+		clearTimeout(textareaBlurTimeout);
+		textareaBlurTimeout = setTimeout(() => {
+			textareaBlurTimeout = undefined;
 			if (!autocompleteEl?.contains(document.activeElement)) {
 				closeDropdown();
 			}
@@ -252,18 +278,52 @@
 
 	function handleAutocompleteFocusout() {
 		if (!open) return;
-		setTimeout(() => {
+		clearTimeout(autocompleteBlurTimeout);
+		autocompleteBlurTimeout = setTimeout(() => {
+			autocompleteBlurTimeout = undefined;
 			const active = document.activeElement;
 			if (active !== textareaEl && !autocompleteEl?.contains(active)) {
 				closeDropdown();
 			}
 		}, BLUR_DELAY_MS);
 	}
+
+	onDestroy(() => {
+		clearBlurTimeouts();
+	});
 </script>
 
 <div class="markdown-textarea" bind:this={wrapperEl}>
 	<FieldGroup {label} {id}>
 		{#snippet children(inputId)}
+			<MarkdownToolbar
+				onbold={() => {
+					if (!textareaEl) return;
+					applyAndSync(
+						toggleMarker(textareaEl.value, textareaEl.selectionStart, textareaEl.selectionEnd, '**')
+					);
+				}}
+				onitalic={() => {
+					if (!textareaEl) return;
+					applyAndSync(
+						toggleMarker(textareaEl.value, textareaEl.selectionStart, textareaEl.selectionEnd, '*')
+					);
+				}}
+				onlink={() => openLinkPicker()}
+				onbulletlist={() => {
+					if (!textareaEl) return;
+					applyAndSync(
+						toggleList(textareaEl.value, textareaEl.selectionStart, textareaEl.selectionEnd, false)
+					);
+				}}
+				onnumberedlist={() => {
+					if (!textareaEl) return;
+					applyAndSync(
+						toggleList(textareaEl.value, textareaEl.selectionStart, textareaEl.selectionEnd, true)
+					);
+				}}
+				oncitation={() => openLinkPicker('cite')}
+			/>
 			<textarea
 				bind:this={textareaEl}
 				id={inputId}
@@ -288,11 +348,14 @@
 			style:left="{dropdownLeft}px"
 			style:top="{dropdownTop}px"
 			bind:this={autocompleteEl}
-			onmousedown={(e) => e.preventDefault()}
+			onmousedown={(e) => {
+				if (!(e.target instanceof HTMLInputElement)) e.preventDefault();
+			}}
 			onfocusout={handleAutocompleteFocusout}
 		>
 			<WikilinkAutocomplete
 				bind:this={autocompleteRef}
+				{initialType}
 				oncomplete={(linkText) => insertWikilink(linkText)}
 				oncancel={() => {
 					closeDropdown();
@@ -307,6 +370,11 @@
 <style>
 	.markdown-textarea {
 		position: relative;
+	}
+
+	.markdown-textarea textarea {
+		border-top-left-radius: 0;
+		border-top-right-radius: 0;
 	}
 
 	/* ----- Mirror (hidden, for cursor measurement) ----- */
@@ -328,6 +396,7 @@
 	.link-dropdown {
 		position: absolute;
 		z-index: 10;
+		min-width: 16rem;
 		max-width: 24rem;
 		max-height: 20rem;
 		overflow-y: auto;
