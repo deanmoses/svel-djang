@@ -70,8 +70,8 @@
 	// Stage callbacks
 	// -------------------------------------------------------------------
 
-	function handleSourceSelected(source: CitationSourceResult) {
-		dispatch({ type: 'source_selected', source });
+	function handleSourceSelected(source: CitationSourceResult, prefillIdentifier?: string) {
+		dispatch({ type: 'source_selected', source, prefillIdentifier });
 	}
 
 	function handleSourceIdentified(child: {
@@ -96,7 +96,7 @@
 
 	function handleLocatorSubmit(locator: string) {
 		if (isSubmitting) return;
-		flow.draft.locator = locator;
+		flow = transition(flow, { type: 'locator_submitted', locator });
 		submit(flow.draft);
 	}
 

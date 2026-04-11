@@ -2,7 +2,8 @@
 	import client from '$lib/api/client';
 	import {
 		parseIdentifierInput,
-		buildChildUrl,
+		findMatchingChild,
+		createChildSource,
 		type ParentContext,
 		type ChildSource
 	} from './citation-types';
@@ -93,18 +94,11 @@
 
 	let matchedChild = $derived.by(() => {
 		if (!parsedId) return null;
-		return (
-			children.find((c) => {
-				for (const url of c.urls) {
-					const parsed = parseIdentifierInput(
-						parentContext.source_type,
-						parentContext.identifier_key,
-						url
-					);
-					if (parsed === parsedId) return true;
-				}
-				return false;
-			}) ?? null
+		return findMatchingChild(
+			children,
+			parentContext.source_type,
+			parentContext.identifier_key,
+			parsedId
 		);
 	});
 
@@ -131,32 +125,18 @@
 		submitting = true;
 		error = '';
 
-		const childUrl = buildChildUrl(parentContext.identifier_key, parsedId);
-		const { data, error: apiError } = await client.POST('/api/citation-sources/', {
-			body: {
-				name: `${parentContext.name} #${parsedId}`,
-				source_type: parentContext.source_type,
-				author: '',
-				publisher: '',
-				date_note: '',
-				description: '',
-				parent_id: parentContext.id,
-				url: childUrl,
-				link_label: '',
-				link_type: 'homepage'
-			}
-		});
+		const result = await createChildSource(client, parentContext, parsedId);
 		submitting = false;
 
-		if (apiError) {
-			error = typeof apiError === 'string' ? apiError : 'Failed to create source.';
+		if (!result.ok) {
+			error = result.error;
 			return;
 		}
 
 		onsourceidentified({
-			sourceId: data.id,
-			sourceName: data.name,
-			skipLocator: data.skip_locator
+			sourceId: result.data.id,
+			sourceName: result.data.name,
+			skipLocator: result.data.skip_locator
 		});
 	}
 

@@ -4,12 +4,14 @@ import {
 	detectSourceFromUrl,
 	parseIdentifierInput,
 	buildChildUrl,
+	findMatchingChild,
 	isDraftSubmittable,
 	emptyDraft,
 	transition,
 	type CitationSourceResult,
 	type CiteState,
 	type CitationInstanceDraft,
+	type ChildSource,
 	type ParentContext
 } from './citation-types';
 
@@ -554,5 +556,139 @@ describe('transition', () => {
 			const next = transition(state, { type: 'source_create_started', prefillName: 'X' });
 			expect(next).toBe(state);
 		});
+	});
+
+	describe('source_selected with prefillIdentifier', () => {
+		it('abstract source with prefillIdentifier → identify stage carries it through', () => {
+			const source = makeSource({
+				id: 10,
+				name: 'IPDB',
+				is_abstract: true,
+				child_input_mode: 'enter_identifier',
+				identifier_key: 'ipdb'
+			});
+			const state = searchState();
+			const next = transition(state, {
+				type: 'source_selected',
+				source,
+				prefillIdentifier: '4836'
+			});
+
+			expect(next.stage).toBe('identify');
+			if (next.stage === 'identify') {
+				expect(next.prefillIdentifier).toBe('4836');
+			}
+		});
+
+		it('abstract source without prefillIdentifier → identify stage with undefined', () => {
+			const source = makeSource({
+				id: 10,
+				name: 'IPDB',
+				is_abstract: true,
+				child_input_mode: 'enter_identifier'
+			});
+			const state = searchState();
+			const next = transition(state, { type: 'source_selected', source });
+
+			expect(next.stage).toBe('identify');
+			if (next.stage === 'identify') {
+				expect(next.prefillIdentifier).toBeUndefined();
+			}
+		});
+	});
+
+	describe('locator_submitted', () => {
+		it('from locator → same stage with draft.locator updated', () => {
+			const state: CiteState = {
+				stage: 'locator',
+				draft: { sourceId: 5, sourceName: 'X', locator: '', skipLocator: false }
+			};
+			const next = transition(state, { type: 'locator_submitted', locator: 'p. 42' });
+
+			expect(next.stage).toBe('locator');
+			expect(next.draft.locator).toBe('p. 42');
+			expect(next.draft.sourceId).toBe(5);
+		});
+
+		it('from locator with empty locator → works (skip path)', () => {
+			const state: CiteState = {
+				stage: 'locator',
+				draft: { sourceId: 5, sourceName: 'X', locator: '', skipLocator: false }
+			};
+			const next = transition(state, { type: 'locator_submitted', locator: '' });
+
+			expect(next.stage).toBe('locator');
+			expect(next.draft.locator).toBe('');
+		});
+
+		it('from search → no-op', () => {
+			const state = searchState();
+			const next = transition(state, { type: 'locator_submitted', locator: 'p. 1' });
+			expect(next).toBe(state);
+		});
+
+		it('from identify → no-op', () => {
+			const state = identifyState();
+			const next = transition(state, { type: 'locator_submitted', locator: 'p. 1' });
+			expect(next).toBe(state);
+		});
+	});
+});
+
+// ---------------------------------------------------------------------------
+// findMatchingChild
+// ---------------------------------------------------------------------------
+
+describe('findMatchingChild', () => {
+	function makeChild(overrides: Partial<ChildSource> = {}): ChildSource {
+		return {
+			id: 1,
+			name: 'Child',
+			source_type: 'web',
+			skip_locator: true,
+			urls: [],
+			...overrides
+		};
+	}
+
+	it('returns matching child when a URL parses to the target ID', () => {
+		const child = makeChild({
+			id: 11,
+			name: 'IPDB #4836',
+			urls: ['https://www.ipdb.org/machine.cgi?id=4836']
+		});
+		const result = findMatchingChild([child], 'web', 'ipdb', '4836');
+		expect(result).toBe(child);
+	});
+
+	it('returns null when no children match', () => {
+		const child = makeChild({
+			urls: ['https://www.ipdb.org/machine.cgi?id=9999']
+		});
+		const result = findMatchingChild([child], 'web', 'ipdb', '4836');
+		expect(result).toBeNull();
+	});
+
+	it('returns null on empty array', () => {
+		expect(findMatchingChild([], 'web', 'ipdb', '4836')).toBeNull();
+	});
+
+	it('returns first match when multiple children match', () => {
+		const first = makeChild({
+			id: 11,
+			urls: ['https://www.ipdb.org/machine.cgi?id=4836']
+		});
+		const second = makeChild({
+			id: 12,
+			urls: ['https://www.ipdb.org/machine.cgi?id=4836']
+		});
+		expect(findMatchingChild([first, second], 'web', 'ipdb', '4836')).toBe(first);
+	});
+
+	it('matches against multiple URLs on a single child', () => {
+		const child = makeChild({
+			urls: ['https://example.com', 'https://www.ipdb.org/machine.cgi?id=4836']
+		});
+		expect(findMatchingChild([child], 'web', 'ipdb', '4836')).toBe(child);
 	});
 });

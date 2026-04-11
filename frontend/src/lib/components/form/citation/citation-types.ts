@@ -1,4 +1,5 @@
 import type { components } from '$lib/api/schema';
+import type { createApiClient } from '$lib/api/client';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -54,13 +55,15 @@ export type CiteState =
 /** Inputs to the state machine, dispatched by stage components via the orchestrator. */
 export type CiteAction =
 	/** User picked a source from search results. Abstract → identify; concrete → locator. */
-	| { type: 'source_selected'; source: CitationSourceResult }
+	| { type: 'source_selected'; source: CitationSourceResult; prefillIdentifier?: string }
 	/** The exact citable CitationSource is known (via URL recognition, child selection, etc.). → locator. */
 	| { type: 'source_identified'; sourceId: number; sourceName: string; skipLocator: boolean }
 	/** User wants to create a new CitationSource. → create. */
 	| { type: 'source_create_started'; prefillName: string }
 	/** New CitationSource was created via API. → locator. */
-	| { type: 'source_created'; sourceId: number; sourceName: string; skipLocator: boolean };
+	| { type: 'source_created'; sourceId: number; sourceName: string; skipLocator: boolean }
+	/** User submitted or skipped the locator. */
+	| { type: 'locator_submitted'; locator: string };
 
 // ---------------------------------------------------------------------------
 // Pure functions
@@ -181,6 +184,55 @@ export function buildChildUrl(identifierKey: string | null, parsedId: string): s
 	return scheme ? scheme.buildUrl(parsedId) : null;
 }
 
+/** Find a child source whose URL matches the given identifier. */
+export function findMatchingChild(
+	children: ChildSource[],
+	sourceType: string,
+	identifierKey: string | null,
+	targetId: string
+): ChildSource | null {
+	return (
+		children.find((c) => {
+			for (const url of c.urls) {
+				const parsed = parseIdentifierInput(sourceType, identifierKey, url);
+				if (parsed === targetId) return true;
+			}
+			return false;
+		}) ?? null
+	);
+}
+
+export type CreateChildResult =
+	| { ok: true; data: { id: number; name: string; skip_locator: boolean } }
+	| { ok: false; error: string };
+
+/** Create a child citation source under a parent. */
+export async function createChildSource(
+	apiClient: ReturnType<typeof createApiClient>,
+	parent: ParentContext,
+	parsedId: string
+): Promise<CreateChildResult> {
+	const childUrl = buildChildUrl(parent.identifier_key, parsedId);
+	const { data, error } = await apiClient.POST('/api/citation-sources/', {
+		body: {
+			name: `${parent.name} #${parsedId}`,
+			source_type: parent.source_type,
+			author: '',
+			publisher: '',
+			date_note: '',
+			description: '',
+			parent_id: parent.id,
+			url: childUrl,
+			link_label: '',
+			link_type: 'homepage'
+		}
+	});
+	if (error) {
+		return { ok: false, error: typeof error === 'string' ? error : 'Failed to create source.' };
+	}
+	return { ok: true, data: { id: data.id, name: data.name, skip_locator: data.skip_locator } };
+}
+
 export function isDraftSubmittable(draft: CitationInstanceDraft): boolean {
 	return draft.sourceId !== null && (draft.locator.length > 0 || draft.skipLocator);
 }
@@ -193,7 +245,7 @@ export function emptyDraft(): CitationInstanceDraft {
 // State machine
 // ---------------------------------------------------------------------------
 
-function parentContextFromSource(source: CitationSourceResult): ParentContext {
+export function parentContextFromSource(source: CitationSourceResult): ParentContext {
 	return {
 		id: source.id,
 		name: source.name,
@@ -214,7 +266,8 @@ export function transition(state: CiteState, action: CiteAction): CiteState {
 				return {
 					stage: 'identify',
 					draft: { ...draft, skipLocator: action.source.skip_locator },
-					parent: parentContextFromSource(action.source)
+					parent: parentContextFromSource(action.source),
+					prefillIdentifier: action.prefillIdentifier
 				};
 			}
 			return {
@@ -256,6 +309,14 @@ export function transition(state: CiteState, action: CiteAction): CiteState {
 					sourceName: action.sourceName,
 					skipLocator: action.skipLocator
 				}
+			};
+		}
+
+		case 'locator_submitted': {
+			if (state.stage !== 'locator') return state;
+			return {
+				...state,
+				draft: { ...state.draft, locator: action.locator }
 			};
 		}
 	}

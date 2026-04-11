@@ -4,8 +4,9 @@
 	import {
 		suppressChildResults,
 		detectSourceFromUrl,
-		parseIdentifierInput,
-		buildChildUrl,
+		findMatchingChild,
+		createChildSource,
+		parentContextFromSource,
 		type CitationSourceResult,
 		type ChildSource
 	} from './citation-types';
@@ -20,7 +21,7 @@
 		oncancel,
 		onback
 	}: {
-		onsourceselected: (source: CitationSourceResult) => void;
+		onsourceselected: (source: CitationSourceResult, prefillIdentifier?: string) => void;
 		onsourceidentified: (child: {
 			sourceId: number;
 			sourceName: string;
@@ -150,17 +151,12 @@
 
 			if (!childrenError && childrenData) {
 				const children = childrenData as ChildSource[];
-				const match = children.find((c) => {
-					for (const url of c.urls) {
-						const parsed = parseIdentifierInput(
-							parent.source_type,
-							parent.identifier_key || null,
-							url
-						);
-						if (parsed === machineId) return true;
-					}
-					return false;
-				});
+				const match = findMatchingChild(
+					children,
+					parent.source_type,
+					parent.identifier_key || null,
+					machineId
+				);
 
 				if (match) {
 					// Step 3: Existing child found
@@ -175,35 +171,22 @@
 			}
 
 			// Step 4: No existing child — create one
-			const childUrl = buildChildUrl(parent.identifier_key || null, machineId);
-			const { data: created, error: createError } = await client.POST('/api/citation-sources/', {
-				body: {
-					name: `${parent.name} #${machineId}`,
-					source_type: parent.source_type,
-					author: '',
-					publisher: '',
-					date_note: '',
-					description: '',
-					parent_id: parent.id,
-					url: childUrl,
-					link_label: '',
-					link_type: 'homepage'
-				}
-			});
+			const parentCtx = parentContextFromSource(parent);
+			const result = await createChildSource(client, parentCtx, machineId);
 			if (gen !== resolveGeneration) return;
 
-			if (createError) {
-				// Fall back to identify stage
+			if (!result.ok) {
+				// Fall back to identify stage with identifier pre-filled
 				resolving = false;
-				onsourceselected(parent);
+				onsourceselected(parent, machineId);
 				return;
 			}
 
 			resolving = false;
 			onsourceidentified({
-				sourceId: created.id,
-				sourceName: created.name,
-				skipLocator: created.skip_locator
+				sourceId: result.data.id,
+				sourceName: result.data.name,
+				skipLocator: result.data.skip_locator
 			});
 		} catch (err) {
 			if (gen === resolveGeneration) {
