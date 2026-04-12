@@ -38,7 +38,7 @@
 	let searchResults = $state<LinkTarget[]>([]);
 	let searchIndex = $state(-1);
 	let searchInputEl: HTMLInputElement | undefined = $state();
-	let debouncedSearch: ReturnType<typeof createDebouncedSearch<LinkTarget>> | null = null;
+	let debouncedSearch: ReturnType<typeof createDebouncedSearch<LinkTarget[]>> | null = null;
 
 	// ARIA — per-instance IDs for combobox pattern
 	const uid = Math.random().toString(36).slice(2, 8);
@@ -93,7 +93,7 @@
 			searchResults = [];
 			searchIndex = -1;
 			// Create a fresh debounced search bound to this type
-			debouncedSearch = createDebouncedSearch<LinkTarget>(
+			debouncedSearch = createDebouncedSearch<LinkTarget[]>(
 				async (q: string) => {
 					try {
 						const response = await searchLinkTargets(lt.name, q);

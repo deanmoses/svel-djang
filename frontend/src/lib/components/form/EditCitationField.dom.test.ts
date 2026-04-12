@@ -28,17 +28,20 @@ describe('EditCitationField', () => {
 		GET.mockImplementation(async (path: string) => {
 			if (path === '/api/citation-sources/search/') {
 				return {
-					data: [
-						{
-							id: 7,
-							name: 'Williams Flyer',
-							source_type: 'web',
-							author: '',
-							publisher: '',
-							year: 1993,
-							isbn: null
-						}
-					]
+					data: {
+						results: [
+							{
+								id: 7,
+								name: 'Williams Flyer',
+								source_type: 'web',
+								author: '',
+								publisher: '',
+								year: 1993,
+								isbn: null
+							}
+						],
+						recognition: null
+					}
 				};
 			}
 			if (path === '/api/citation-instances/batch/') {
@@ -106,17 +109,20 @@ describe('EditCitationField', () => {
 		GET.mockImplementation(async (path: string) => {
 			if (path === '/api/citation-sources/search/') {
 				return {
-					data: [
-						{
-							id: 7,
-							name: 'Williams Flyer',
-							source_type: 'web',
-							author: '',
-							publisher: '',
-							year: 1993,
-							isbn: null
-						}
-					]
+					data: {
+						results: [
+							{
+								id: 7,
+								name: 'Williams Flyer',
+								source_type: 'web',
+								author: '',
+								publisher: '',
+								year: 1993,
+								isbn: null
+							}
+						],
+						recognition: null
+					}
 				};
 			}
 			throw new Error('network failed');

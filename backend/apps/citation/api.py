@@ -19,6 +19,7 @@ from ninja.responses import Status
 from ninja.security import django_auth
 from pydantic import field_validator
 
+from .extractors import EXTRACTORS, recognize_url
 from .models import CitationSource, CitationSourceLink
 
 # ---------------------------------------------------------------------------
@@ -57,8 +58,24 @@ class CitationSourceSearchSchema(Schema):
     has_children: bool = False
     is_abstract: bool = False
     skip_locator: bool = False
-    child_input_mode: Optional[str] = None
     identifier_key: str = ""
+
+
+class RecognitionChildSchema(Schema):
+    id: int
+    name: str
+    skip_locator: bool = False
+
+
+class RecognitionSchema(Schema):
+    parent: CitationSourceParentSchema
+    child: Optional[RecognitionChildSchema] = None
+    identifier: Optional[str] = None
+
+
+class SearchResponse(Schema):
+    results: list[CitationSourceSearchSchema]
+    recognition: Optional[RecognitionSchema] = None
 
 
 class CitationSourceCreateSchema(Schema):
@@ -73,6 +90,7 @@ class CitationSourceCreateSchema(Schema):
     isbn: Optional[str] = None
     description: str = ""
     parent_id: Optional[int] = None
+    identifier: str = ""
     # Optional: atomically create a CitationSourceLink alongside the source.
     url: Optional[str] = None
     link_label: str = ""
@@ -185,13 +203,6 @@ def _is_abstract(source_type, parent_id, has_children):
     return has_children or (parent_id is None and source_type in ("web", "magazine"))
 
 
-def _child_input_mode(source_type, parent_id, has_children):
-    """How the frontend should identify a child: search, enter ID, or N/A."""
-    if not _is_abstract(source_type, parent_id, has_children):
-        return None
-    return "enter_identifier" if source_type == "web" else "search_children"
-
-
 def _clean_and_save(instance, update_fields=None, *, integrity_msg=""):
     """Validate model then save.
 
@@ -274,31 +285,81 @@ def _serialize_detail(source) -> dict:
 # ---------------------------------------------------------------------------
 
 
+def _is_url(q: str) -> bool:
+    return q.startswith("http://") or q.startswith("https://")
+
+
+def _normalize_isbn(raw: str) -> str | None:
+    """Strip hyphens/spaces and return a 10- or 13-digit ISBN, or None."""
+    stripped = raw.replace("-", "").replace(" ", "").upper()
+    if len(stripped) == 13 and stripped.isdigit():
+        return stripped
+    if len(stripped) == 10 and stripped[:9].isdigit() and stripped[9] in "0123456789X":
+        return stripped
+    return None
+
+
+def _build_recognition(rec) -> dict:
+    """Serialize an extractors.Recognition into the API response shape."""
+    result: dict = {
+        "parent": {"id": rec.parent_id, "name": rec.parent_name},
+        "child": None,
+        "identifier": rec.identifier,
+    }
+    if rec.child_id is not None:
+        result["child"] = {
+            "id": rec.child_id,
+            "name": rec.child_name,
+            "skip_locator": rec.child_skip_locator,
+        }
+    return result
+
+
 @citation_sources_router.get(
     "/search/",
-    response=list[CitationSourceSearchSchema],
+    response=SearchResponse,
     auth=django_auth,
 )
 def search_citation_sources(request, q: str = ""):
-    """Typeahead search across name, author, publisher, isbn, and linked URLs."""
+    """Typeahead search with URL/ISBN recognition.
+
+    Returns search results plus optional recognition metadata when the
+    input is a recognized URL or ISBN.
+    """
     q = q.strip()
     if not q:
-        return []
+        return {"results": [], "recognition": None}
+
+    # --- Recognition (URL or ISBN) -----------------------------------------
+    recognition = None
+    if _is_url(q):
+        rec = recognize_url(q)
+        if rec is not None:
+            recognition = _build_recognition(rec)
+
+    # --- Text search -------------------------------------------------------
+    text_filter = (
+        Q(name__icontains=q)
+        | Q(author__icontains=q)
+        | Q(publisher__icontains=q)
+        | Q(isbn__icontains=q)
+        | Q(links__url__icontains=q)
+    )
+    # For ISBN-shaped input, also do exact match on normalized ISBN.
+    if not _is_url(q):
+        normalized_isbn = _normalize_isbn(q)
+        if normalized_isbn:
+            text_filter = text_filter | Q(isbn=normalized_isbn)
+
     qs = (
-        CitationSource.objects.filter(
-            Q(name__icontains=q)
-            | Q(author__icontains=q)
-            | Q(publisher__icontains=q)
-            | Q(isbn__icontains=q)
-            | Q(links__url__icontains=q)
-        )
+        CitationSource.objects.filter(text_filter)
         .annotate(
             has_children=Exists(CitationSource.objects.filter(parent=OuterRef("pk")))
         )
         .distinct()
         .order_by("name")[:20]
     )
-    return [
+    results = [
         {
             "id": s.pk,
             "name": s.name,
@@ -311,13 +372,11 @@ def search_citation_sources(request, q: str = ""):
             "has_children": s.has_children,
             "is_abstract": _is_abstract(s.source_type, s.parent_id, s.has_children),
             "skip_locator": _skip_locator(s.source_type, s.parent_id),
-            "child_input_mode": _child_input_mode(
-                s.source_type, s.parent_id, s.has_children
-            ),
             "identifier_key": s.identifier_key,
         }
         for s in qs
     ]
+    return {"results": results, "recognition": recognition}
 
 
 @citation_sources_router.post(
@@ -331,9 +390,29 @@ def create_citation_source(request, data: CitationSourceCreateSchema):
     if data.parent_id is not None:
         parent = get_object_or_404(CitationSource, pk=data.parent_id)
 
+    # When an identifier is provided and the parent has an extractor,
+    # validate, normalize, and auto-build the child name and canonical URL.
+    name = data.name
+    url = data.url
+    identifier = data.identifier
+    if identifier and parent and parent.identifier_key:
+        extractor = EXTRACTORS.get(parent.identifier_key)
+        if extractor:
+            normalized = extractor.normalize(identifier)
+            if normalized is None:
+                raise HttpError(
+                    422,
+                    f"Invalid identifier for {extractor.source_name}: {identifier!r}",
+                )
+            identifier = normalized
+            if not name or name == data.identifier:
+                name = f"{parent.name} #{identifier}"
+            if not url:
+                url = extractor.build_url(identifier)
+
     with transaction.atomic():
         source = CitationSource(
-            name=data.name,
+            name=name,
             source_type=data.source_type,
             author=data.author,
             publisher=data.publisher,
@@ -343,17 +422,21 @@ def create_citation_source(request, data: CitationSourceCreateSchema):
             date_note=data.date_note,
             isbn=data.isbn,
             description=data.description,
+            identifier=identifier,
             parent=parent,
             created_by=request.user,
             updated_by=request.user,
         )
-        _clean_and_save(source, integrity_msg="A source with this ISBN already exists.")
+        _clean_and_save(
+            source,
+            integrity_msg="A source with this ISBN or identifier already exists.",
+        )
 
-        if data.url:
+        if url:
             link = CitationSourceLink(
                 citation_source=source,
-                link_type=data.link_type,
-                url=data.url,
+                link_type=data.link_type or "homepage",
+                url=url,
                 label=data.link_label,
                 created_by=request.user,
                 updated_by=request.user,
@@ -370,14 +453,19 @@ def create_citation_source(request, data: CitationSourceCreateSchema):
     auth=django_auth,
 )
 def list_citation_source_children(request, source_id: int, q: str = ""):
-    """Filtered children of a source, searched by name or linked URL."""
+    """Filtered children of a source, searched by name, URL, identifier, or ISBN."""
     parent = get_object_or_404(CitationSource, pk=source_id)
     q = q.strip()
     if not q:
         return []
     children = (
         CitationSource.objects.filter(parent=parent)
-        .filter(Q(name__icontains=q) | Q(links__url__icontains=q))
+        .filter(
+            Q(name__icontains=q)
+            | Q(links__url__icontains=q)
+            | Q(identifier__icontains=q)
+            | Q(isbn__icontains=q)
+        )
         .prefetch_related("links")
         .distinct()
         .order_by("name")[:20]

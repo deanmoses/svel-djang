@@ -291,3 +291,108 @@ class TestCitationSourceLinkConstraints:
                 link_type="",
                 url="https://example.com",
             )
+
+
+# ---------------------------------------------------------------------------
+# CitationSource: identifier constraints
+# ---------------------------------------------------------------------------
+
+
+class TestIdentifierConstraints:
+    """Tests for identifier/identifier_key CHECK and UNIQUE constraints."""
+
+    def test_identifier_requires_parent(self, db):
+        """Root sources cannot have a non-empty identifier."""
+        with pytest.raises(IntegrityError):
+            CitationSource.objects.create(
+                name="Orphan", source_type="web", identifier="4443"
+            )
+
+    def test_identifier_on_child_accepted(self, db):
+        """Child sources can have an identifier."""
+        parent = CitationSource.objects.create(
+            name="IPDB", source_type="web", identifier_key="ipdb"
+        )
+        child = CitationSource.objects.create(
+            name="IPDB #4443", source_type="web", parent=parent, identifier="4443"
+        )
+        assert child.pk is not None
+
+    def test_identifier_key_requires_root(self, db):
+        """Child sources cannot have identifier_key."""
+        parent = CitationSource.objects.create(
+            name="IPDB", source_type="web", identifier_key="ipdb"
+        )
+        with pytest.raises(IntegrityError):
+            CitationSource.objects.create(
+                name="Bad Child",
+                source_type="web",
+                parent=parent,
+                identifier_key="opdb",
+            )
+
+    def test_identifier_key_requires_web(self, db):
+        """Non-web sources cannot have identifier_key."""
+        with pytest.raises(IntegrityError):
+            CitationSource.objects.create(
+                name="Bad Book", source_type="book", identifier_key="ipdb"
+            )
+
+    def test_identifier_key_and_identifier_mutually_exclusive(self, db):
+        """A source cannot be both a scheme-holder and value-holder."""
+        parent = CitationSource.objects.create(
+            name="IPDB", source_type="web", identifier_key="ipdb"
+        )
+        # Try via raw SQL to bypass ORM checks
+        with pytest.raises(IntegrityError):
+            _raw_update(
+                CitationSource,
+                parent.pk,
+                identifier_key="ipdb",
+                identifier="4443",
+            )
+
+    def test_unique_child_identifier(self, db):
+        """Two children of the same parent cannot share an identifier."""
+        parent = CitationSource.objects.create(
+            name="IPDB", source_type="web", identifier_key="ipdb"
+        )
+        CitationSource.objects.create(
+            name="IPDB #4443", source_type="web", parent=parent, identifier="4443"
+        )
+        with pytest.raises(IntegrityError):
+            CitationSource.objects.create(
+                name="IPDB #4443 dup",
+                source_type="web",
+                parent=parent,
+                identifier="4443",
+            )
+
+    def test_same_identifier_different_parents_accepted(self, db):
+        """Different parents can have children with the same identifier."""
+        ipdb = CitationSource.objects.create(
+            name="IPDB", source_type="web", identifier_key="ipdb"
+        )
+        opdb = CitationSource.objects.create(
+            name="OPDB", source_type="web", identifier_key="opdb"
+        )
+        c1 = CitationSource.objects.create(
+            name="IPDB #100", source_type="web", parent=ipdb, identifier="100"
+        )
+        c2 = CitationSource.objects.create(
+            name="OPDB #100", source_type="web", parent=opdb, identifier="100"
+        )
+        assert c1.pk is not None
+        assert c2.pk is not None
+
+    def test_empty_identifier_not_unique_constrained(self, db):
+        """Multiple children with empty identifier are allowed (no constraint fires)."""
+        parent = CitationSource.objects.create(name="Jersey Jack", source_type="web")
+        c1 = CitationSource.objects.create(
+            name="Page 1", source_type="web", parent=parent
+        )
+        c2 = CitationSource.objects.create(
+            name="Page 2", source_type="web", parent=parent
+        )
+        assert c1.pk is not None
+        assert c2.pk is not None

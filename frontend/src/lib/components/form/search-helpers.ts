@@ -14,8 +14,8 @@
  * result is silently discarded.
  */
 export function createDebouncedSearch<T>(
-	fetchFn: (query: string) => Promise<T[]>,
-	onResults: (results: T[]) => void,
+	fetchFn: (query: string) => Promise<T>,
+	onResults: (results: T) => void,
 	delay: number = 200
 ) {
 	let generation = 0;

@@ -100,9 +100,19 @@ class CitationSource(TimeStampedModel):
         help_text=(
             "Identifies which URL/ID parsing convention applies to this source's "
             "children (e.g. 'ipdb' → numeric machine IDs, 'opdb' → slug IDs). "
-            "Stopgap: will be subsumed by the extractor registry when the "
-            "extraction layer is built. See docs/plans/citations/"
-            "CitationsDesign.md."
+            "Lives on root sources only; children carry `identifier` instead."
+        ),
+    )
+
+    identifier = models.CharField(
+        max_length=200,
+        blank=True,
+        default="",
+        db_default="",
+        help_text=(
+            "Structured identifier for this child source within its parent's "
+            "scheme (e.g. '4443' for IPDB machine 4443). Empty for root sources "
+            "and children without structured identifiers."
         ),
     )
 
@@ -161,6 +171,34 @@ class CitationSource(TimeStampedModel):
             models.CheckConstraint(
                 condition=models.Q(identifier_key__in=["", "ipdb", "opdb"]),
                 name="citation_citationsource_identifier_key_valid",
+            ),
+            # identifier_key lives on roots only
+            models.CheckConstraint(
+                condition=models.Q(identifier_key="") | models.Q(parent__isnull=True),
+                name="citation_citationsource_identifier_key_requires_root",
+            ),
+            # identifier_key is for web sources only
+            models.CheckConstraint(
+                condition=models.Q(identifier_key="") | models.Q(source_type="web"),
+                name="citation_citationsource_identifier_key_requires_web",
+            ),
+            # identifier lives on children only
+            models.CheckConstraint(
+                condition=models.Q(identifier="") | models.Q(parent__isnull=False),
+                name="citation_citationsource_identifier_requires_parent",
+            ),
+            # A source is a scheme-holder OR a value-holder, never both
+            models.CheckConstraint(
+                condition=~(
+                    models.Q(identifier__gt="") & models.Q(identifier_key__gt="")
+                ),
+                name="citation_citationsource_identifier_key_or_identifier",
+            ),
+            # No duplicate children with the same identifier under one parent
+            models.UniqueConstraint(
+                fields=["parent", "identifier"],
+                condition=models.Q(identifier__gt=""),
+                name="citation_citationsource_unique_child_identifier",
             ),
         ]
 

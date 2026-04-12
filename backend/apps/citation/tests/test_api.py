@@ -29,23 +29,25 @@ class TestSearchCitationSources:
         resp = client.get("/api/citation-sources/search/?q=test")
         assert resp.status_code in (401, 403)
 
-    def test_empty_q_returns_empty_list(self, client, user):
+    def test_empty_q_returns_empty_results(self, client, user):
         client.force_login(user)
         resp = client.get("/api/citation-sources/search/?q=")
         assert resp.status_code == 200
-        assert resp.json() == []
+        data = resp.json()
+        assert data == {"results": [], "recognition": None}
 
-    def test_whitespace_q_returns_empty_list(self, client, user):
+    def test_whitespace_q_returns_empty_results(self, client, user):
         client.force_login(user)
         resp = client.get("/api/citation-sources/search/?q=   ")
         assert resp.status_code == 200
-        assert resp.json() == []
+        data = resp.json()
+        assert data == {"results": [], "recognition": None}
 
     def test_search_by_name(self, client, user, citation_source):
         client.force_login(user)
         resp = client.get("/api/citation-sources/search/?q=Encyclopedia")
         assert resp.status_code == 200
-        results = resp.json()
+        results = resp.json()["results"]
         assert len(results) == 1
         assert results[0]["name"] == citation_source.name
 
@@ -53,19 +55,19 @@ class TestSearchCitationSources:
         client.force_login(user)
         resp = client.get("/api/citation-sources/search/?q=Bueschel")
         assert resp.status_code == 200
-        assert len(resp.json()) == 1
+        assert len(resp.json()["results"]) == 1
 
     def test_search_by_publisher(self, client, user, citation_source_full):
         client.force_login(user)
         resp = client.get("/api/citation-sources/search/?q=Silverball")
         assert resp.status_code == 200
-        assert len(resp.json()) == 1
+        assert len(resp.json()["results"]) == 1
 
     def test_search_by_isbn(self, client, user, citation_source_full):
         client.force_login(user)
         resp = client.get("/api/citation-sources/search/?q=0964359219")
         assert resp.status_code == 200
-        assert len(resp.json()) == 1
+        assert len(resp.json()["results"]) == 1
 
     def test_search_by_linked_url(
         self, client, user, citation_source, citation_source_link
@@ -73,7 +75,7 @@ class TestSearchCitationSources:
         client.force_login(user)
         resp = client.get("/api/citation-sources/search/?q=archive.org")
         assert resp.status_code == 200
-        results = resp.json()
+        results = resp.json()["results"]
         assert len(results) == 1
         assert results[0]["id"] == citation_source.pk
 
@@ -81,7 +83,7 @@ class TestSearchCitationSources:
         client.force_login(user)
         resp = client.get("/api/citation-sources/search/?q=encyclopedia")
         assert resp.status_code == 200
-        assert len(resp.json()) == 1
+        assert len(resp.json()["results"]) == 1
 
     def test_search_max_20_results(self, client, user, db):
         for i in range(25):
@@ -89,13 +91,15 @@ class TestSearchCitationSources:
         client.force_login(user)
         resp = client.get("/api/citation-sources/search/?q=Test Source")
         assert resp.status_code == 200
-        assert len(resp.json()) <= 20
+        assert len(resp.json()["results"]) <= 20
 
     def test_search_response_shape(self, client, user, citation_source_full):
         client.force_login(user)
         resp = client.get("/api/citation-sources/search/?q=Encyclopedia")
-        data = resp.json()[0]
-        assert set(data.keys()) == {
+        data = resp.json()
+        assert set(data.keys()) == {"results", "recognition"}
+        result = data["results"][0]
+        assert set(result.keys()) == {
             "id",
             "name",
             "source_type",
@@ -107,7 +111,6 @@ class TestSearchCitationSources:
             "has_children",
             "is_abstract",
             "skip_locator",
-            "child_input_mode",
             "identifier_key",
         }
 
@@ -121,7 +124,7 @@ class TestSearchCitationSources:
         client.force_login(user)
         resp = client.get("/api/citation-sources/search/?q=Internet Pinball")
         assert resp.status_code == 200
-        data = resp.json()[0]
+        data = resp.json()["results"][0]
         assert data["identifier_key"] == "ipdb"
 
     def test_search_returns_empty_identifier_key(self, client, user, citation_source):
@@ -129,49 +132,203 @@ class TestSearchCitationSources:
         client.force_login(user)
         resp = client.get("/api/citation-sources/search/?q=Encyclopedia")
         assert resp.status_code == 200
-        data = resp.json()[0]
+        data = resp.json()["results"][0]
         assert data["identifier_key"] == ""
 
 
+class TestSearchRecognition:
+    """Tests for URL and ISBN recognition in search."""
+
+    def test_ipdb_url_recognized_with_existing_child(self, client, user, db):
+        """Pasting an IPDB URL finds the parent and existing child."""
+        parent = CitationSource.objects.create(
+            name="IPDB", source_type="web", identifier_key="ipdb"
+        )
+        child = CitationSource.objects.create(
+            name="IPDB #4443",
+            source_type="web",
+            parent=parent,
+            identifier="4443",
+        )
+        CitationSourceLink.objects.create(
+            citation_source=child,
+            link_type="homepage",
+            url="https://www.ipdb.org/machine.cgi?id=4443",
+        )
+        client.force_login(user)
+        resp = client.get(
+            "/api/citation-sources/search/?q=https://www.ipdb.org/machine.cgi?id=4443"
+        )
+        data = resp.json()
+        rec = data["recognition"]
+        assert rec is not None
+        assert rec["parent"]["id"] == parent.pk
+        assert rec["child"]["id"] == child.pk
+        assert rec["child"]["skip_locator"] is True
+        assert rec["identifier"] == "4443"
+
+    def test_ipdb_url_recognized_no_child(self, client, user, db):
+        """Pasting an IPDB URL for a non-existent child returns parent + identifier."""
+        CitationSource.objects.create(
+            name="IPDB", source_type="web", identifier_key="ipdb"
+        )
+        client.force_login(user)
+        resp = client.get(
+            "/api/citation-sources/search/?q=https://www.ipdb.org/machine.cgi?id=9999"
+        )
+        data = resp.json()
+        rec = data["recognition"]
+        assert rec is not None
+        assert rec["parent"]["name"] == "IPDB"
+        assert rec["child"] is None
+        assert rec["identifier"] == "9999"
+
+    def test_domain_match_jjp_url(self, client, user, db):
+        """Pasting a JJP URL domain-matches to the Jersey Jack parent."""
+        jjp = CitationSource.objects.create(
+            name="Jersey Jack Pinball", source_type="web"
+        )
+        CitationSourceLink.objects.create(
+            citation_source=jjp,
+            link_type="homepage",
+            url="https://www.jerseyjackpinball.com/",
+        )
+        client.force_login(user)
+        resp = client.get(
+            "/api/citation-sources/search/"
+            "?q=https://jerseyjackpinball.com/products/elton-john"
+        )
+        data = resp.json()
+        rec = data["recognition"]
+        assert rec is not None
+        assert rec["parent"]["id"] == jjp.pk
+        assert rec["child"] is None
+        assert rec["identifier"] is None
+
+    def test_full_url_matches_existing_child_link(self, client, user, db):
+        """Re-pasting a URL that matches an existing child's link returns it."""
+        parent = CitationSource.objects.create(
+            name="Jersey Jack Pinball", source_type="web"
+        )
+        CitationSourceLink.objects.create(
+            citation_source=parent,
+            link_type="homepage",
+            url="https://www.jerseyjackpinball.com/",
+        )
+        child = CitationSource.objects.create(
+            name="Elton John Pinball", source_type="web", parent=parent
+        )
+        url = "https://jerseyjackpinball.com/products/elton-john"
+        CitationSourceLink.objects.create(
+            citation_source=child, link_type="homepage", url=url
+        )
+        client.force_login(user)
+        resp = client.get(f"/api/citation-sources/search/?q={url}")
+        data = resp.json()
+        rec = data["recognition"]
+        assert rec is not None
+        assert rec["child"]["id"] == child.pk
+
+    def test_unknown_url_no_recognition(self, client, user, db):
+        """Pasting an unknown URL yields no recognition."""
+        client.force_login(user)
+        resp = client.get(
+            "/api/citation-sources/search/?q=https://unknown-site.com/page"
+        )
+        data = resp.json()
+        assert data["recognition"] is None
+
+    def test_plain_text_no_recognition(self, client, user, citation_source):
+        """Plain text searches return no recognition."""
+        client.force_login(user)
+        resp = client.get("/api/citation-sources/search/?q=Encyclopedia")
+        data = resp.json()
+        assert data["recognition"] is None
+        assert len(data["results"]) >= 1
+
+    def test_subdomain_not_confused(self, client, user, db):
+        """twip.kineticist.com should not match kineticist.com."""
+        kineticist = CitationSource.objects.create(name="Kineticist", source_type="web")
+        CitationSourceLink.objects.create(
+            citation_source=kineticist,
+            link_type="homepage",
+            url="https://www.kineticist.com/",
+        )
+        twip = CitationSource.objects.create(name="TWiP", source_type="web")
+        CitationSourceLink.objects.create(
+            citation_source=twip,
+            link_type="homepage",
+            url="https://twip.kineticist.com/",
+        )
+        client.force_login(user)
+        resp = client.get(
+            "/api/citation-sources/search/?q=https://twip.kineticist.com/some-article"
+        )
+        rec = resp.json()["recognition"]
+        assert rec is not None
+        assert rec["parent"]["id"] == twip.pk
+
+    def test_non_homepage_links_not_matched(self, client, user, db):
+        """Domain matching only uses homepage links, not reference links."""
+        source = CitationSource.objects.create(name="Some Source", source_type="web")
+        CitationSourceLink.objects.create(
+            citation_source=source,
+            link_type="reference",
+            url="https://en.wikipedia.org/wiki/Pinball",
+        )
+        client.force_login(user)
+        resp = client.get(
+            "/api/citation-sources/search/?q=https://en.wikipedia.org/wiki/Something"
+        )
+        assert resp.json()["recognition"] is None
+
+
 class TestSearchComputedFields:
-    """Tests for is_abstract, skip_locator, and child_input_mode on search results."""
+    """Tests for is_abstract and skip_locator on search results."""
 
     def test_root_book_no_children(self, client, user, db):
-        """A standalone book: not abstract, needs locator, no child mode."""
+        """A standalone book: not abstract, needs locator."""
         CitationSource.objects.create(name="Solo Book", source_type="book")
         client.force_login(user)
         resp = client.get("/api/citation-sources/search/?q=Solo Book")
-        data = resp.json()[0]
+        data = resp.json()["results"][0]
         assert data["is_abstract"] is False
         assert data["skip_locator"] is False
-        assert data["child_input_mode"] is None
 
     def test_root_book_with_children(self, client, user, db):
-        """A book with editions: abstract, search_children mode."""
+        """A book with editions: abstract."""
         parent = CitationSource.objects.create(name="Big Book", source_type="book")
         CitationSource.objects.create(
             name="Big Book Ed. 1", source_type="book", parent=parent
         )
         client.force_login(user)
         resp = client.get("/api/citation-sources/search/?q=Big Book")
-        # Find the parent in results
-        results = {r["id"]: r for r in resp.json()}
+        results = {r["id"]: r for r in resp.json()["results"]}
         data = results[parent.pk]
         assert data["is_abstract"] is True
         assert data["skip_locator"] is False
-        assert data["child_input_mode"] == "search_children"
 
     def test_root_web_source(self, client, user, db):
-        """A root web source (e.g. IPDB): abstract, enter_identifier mode."""
+        """A root web source (e.g. IPDB): abstract."""
         CitationSource.objects.create(
-            name="Internet Pinball Database", source_type="web"
+            name="Internet Pinball Database",
+            source_type="web",
+            identifier_key="ipdb",
         )
         client.force_login(user)
         resp = client.get("/api/citation-sources/search/?q=Internet Pinball")
-        data = resp.json()[0]
+        data = resp.json()["results"][0]
         assert data["is_abstract"] is True
         assert data["skip_locator"] is False
-        assert data["child_input_mode"] == "enter_identifier"
+
+    def test_root_web_source_without_identifier_key(self, client, user, db):
+        """A root web source without an identifier scheme: abstract."""
+        CitationSource.objects.create(name="Jersey Jack Pinball", source_type="web")
+        client.force_login(user)
+        resp = client.get("/api/citation-sources/search/?q=Jersey Jack")
+        data = resp.json()["results"][0]
+        assert data["is_abstract"] is True
+        assert data["skip_locator"] is False
 
     def test_child_web_source(self, client, user, db):
         """A child web source (e.g. IPDB machine page): skip locator."""
@@ -183,21 +340,19 @@ class TestSearchComputedFields:
         )
         client.force_login(user)
         resp = client.get("/api/citation-sources/search/?q=IPDB Machine")
-        results = {r["id"]: r for r in resp.json()}
+        results = {r["id"]: r for r in resp.json()["results"]}
         data = results[child.pk]
         assert data["is_abstract"] is False
         assert data["skip_locator"] is True
-        assert data["child_input_mode"] is None
 
     def test_root_magazine(self, client, user, db):
-        """A root magazine: abstract, search_children mode."""
+        """A root magazine: abstract."""
         CitationSource.objects.create(name="Pinball Magazine", source_type="magazine")
         client.force_login(user)
         resp = client.get("/api/citation-sources/search/?q=Pinball Magazine")
-        data = resp.json()[0]
+        data = resp.json()["results"][0]
         assert data["is_abstract"] is True
         assert data["skip_locator"] is False
-        assert data["child_input_mode"] == "search_children"
 
 
 # ---------------------------------------------------------------------------
@@ -451,6 +606,90 @@ class TestCreateCitationSourceWithLink:
         assert resp.status_code == 201
         link = CitationSourceLink.objects.get(citation_source_id=resp.json()["id"])
         assert link.created_by == user
+
+
+class TestCreateCitationSourceWithIdentifier:
+    """Creating children with identifier: validation, normalization, auto-naming."""
+
+    def test_bare_id_creates_child_with_canonical_url(self, client, user, db):
+        """A valid bare identifier auto-builds name and canonical URL."""
+        parent = CitationSource.objects.create(
+            name="IPDB", source_type="web", identifier_key="ipdb"
+        )
+        client.force_login(user)
+        resp = _post(
+            client,
+            "/api/citation-sources/",
+            {
+                "name": "4443",
+                "source_type": "web",
+                "parent_id": parent.pk,
+                "identifier": "4443",
+            },
+        )
+        assert resp.status_code == 201
+        data = resp.json()
+        assert data["name"] == "IPDB #4443"
+        assert len(data["links"]) == 1
+        assert data["links"][0]["url"] == "https://www.ipdb.org/machine.cgi?id=4443"
+
+    def test_pasted_url_normalized_to_bare_id(self, client, user, db):
+        """A full IPDB URL as identifier is normalized to the bare ID."""
+        parent = CitationSource.objects.create(
+            name="IPDB", source_type="web", identifier_key="ipdb"
+        )
+        client.force_login(user)
+        resp = _post(
+            client,
+            "/api/citation-sources/",
+            {
+                "name": "",
+                "source_type": "web",
+                "parent_id": parent.pk,
+                "identifier": "https://www.ipdb.org/machine.cgi?id=4443",
+            },
+        )
+        assert resp.status_code == 201
+        data = resp.json()
+        assert data["name"] == "IPDB #4443"
+        child = CitationSource.objects.get(pk=data["id"])
+        assert child.identifier == "4443"
+
+    def test_invalid_identifier_returns_422(self, client, user, db):
+        """An identifier that doesn't match the extractor's format is rejected."""
+        parent = CitationSource.objects.create(
+            name="IPDB", source_type="web", identifier_key="ipdb"
+        )
+        client.force_login(user)
+        resp = _post(
+            client,
+            "/api/citation-sources/",
+            {
+                "name": "Bad",
+                "source_type": "web",
+                "parent_id": parent.pk,
+                "identifier": "abc",
+            },
+        )
+        assert resp.status_code == 422
+
+    def test_random_url_as_identifier_returns_422(self, client, user, db):
+        """A non-IPDB URL passed as identifier is rejected."""
+        parent = CitationSource.objects.create(
+            name="IPDB", source_type="web", identifier_key="ipdb"
+        )
+        client.force_login(user)
+        resp = _post(
+            client,
+            "/api/citation-sources/",
+            {
+                "name": "Bad",
+                "source_type": "web",
+                "parent_id": parent.pk,
+                "identifier": "https://example.com/page",
+            },
+        )
+        assert resp.status_code == 422
 
 
 # ---------------------------------------------------------------------------

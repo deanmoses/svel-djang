@@ -131,7 +131,7 @@ async function enterBookIdentifyStage(
 ) {
 	mockGET.mockImplementation((url: string) => {
 		if (url === '/api/citation-sources/search/') {
-			return Promise.resolve({ data: [ABSTRACT_BOOK_SOURCE] });
+			return Promise.resolve({ data: { results: [ABSTRACT_BOOK_SOURCE], recognition: null } });
 		}
 		if (url === '/api/citation-sources/{source_id}/') {
 			return Promise.resolve({ data: BOOK_DETAIL_RESPONSE });
@@ -166,18 +166,41 @@ async function enterBookIdentifyStage(
 }
 
 /**
- * Navigate from the textarea into the IPDB identify-by-input stage and type an ID:
- * trigger [[ → type picker → Citation → search "IPDB" → select IPDB source → type identifier.
+ * Navigate from the textarea into the IPDB identify-by-search stage:
+ * trigger [[ → type picker → Citation → search "IPDB" → select IPDB source → children load.
  */
 async function enterIpdbIdentifyStage(
 	user: ReturnType<typeof userEvent.setup>,
 	textarea: HTMLTextAreaElement,
-	childrenResponse: (typeof IPDB_CHILD)[],
-	identifier: string
+	childrenResponse: (typeof IPDB_CHILD)[]
 ) {
+	const IPDB_DETAIL = {
+		id: IPDB_SOURCE.id,
+		name: IPDB_SOURCE.name,
+		source_type: 'web',
+		author: '',
+		publisher: '',
+		year: null,
+		month: null,
+		day: null,
+		date_note: '',
+		isbn: null,
+		description: '',
+		identifier_key: 'ipdb',
+		skip_locator: false,
+		parent: null,
+		links: [],
+		children: childrenResponse,
+		created_at: '2024-01-01T00:00:00Z',
+		updated_at: '2024-01-01T00:00:00Z'
+	};
+
 	mockGET.mockImplementation((url: string) => {
 		if (url === '/api/citation-sources/search/') {
-			return Promise.resolve({ data: [IPDB_SOURCE] });
+			return Promise.resolve({ data: { results: [IPDB_SOURCE], recognition: null } });
+		}
+		if (url === '/api/citation-sources/{source_id}/') {
+			return Promise.resolve({ data: IPDB_DETAIL });
 		}
 		if (url === '/api/citation-sources/{source_id}/children/') {
 			return Promise.resolve({ data: childrenResponse });
@@ -195,13 +218,18 @@ async function enterIpdbIdentifyStage(
 
 	fireEvent.pointerDown(screen.getByRole('option', { name: new RegExp(IPDB_SOURCE.name) }));
 
-	await vi.waitFor(() => {
-		expect(screen.getByRole('textbox', { name: /enter identifier/i })).toBeInTheDocument();
-	});
-
-	const idInput = screen.getByRole('textbox', { name: /enter identifier/i });
-	idInput.focus();
-	await user.keyboard(identifier);
+	// Wait for identify stage (search_children) to load
+	if (childrenResponse.length > 0) {
+		await vi.waitFor(() => {
+			expect(
+				screen.getByRole('option', { name: new RegExp(childrenResponse[0].name) })
+			).toBeInTheDocument();
+		});
+	} else {
+		await vi.waitFor(() => {
+			expect(screen.getByRole('combobox', { name: /search pages/i })).toBeInTheDocument();
+		});
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -214,7 +242,7 @@ describe('MarkdownTextArea citation integration', () => {
 	});
 
 	beforeEach(() => {
-		mockGET.mockReset().mockResolvedValue({ data: MOCK_SOURCES });
+		mockGET.mockReset().mockResolvedValue({ data: { results: MOCK_SOURCES, recognition: null } });
 		mockPOST.mockReset();
 	});
 
@@ -344,14 +372,12 @@ describe('MarkdownTextArea citation integration', () => {
 		renderTextArea();
 		const textarea = screen.getByRole('textbox', { name: /description/i }) as HTMLTextAreaElement;
 
-		await enterIpdbIdentifyStage(user, textarea, [IPDB_CHILD], '4836');
-
-		await vi.waitFor(() => {
-			expect(screen.getByRole('button', { name: 'Cite' })).toBeInTheDocument();
-		});
+		await enterIpdbIdentifyStage(user, textarea, [IPDB_CHILD]);
 
 		mockPOST.mockResolvedValueOnce({ data: CREATED_INSTANCE });
-		fireEvent.pointerDown(screen.getByRole('button', { name: 'Cite' }));
+
+		// Select the child from the identify stage list
+		fireEvent.pointerDown(screen.getByRole('option', { name: new RegExp(IPDB_CHILD.name) }));
 
 		// skip_locator=true — citation inserted directly, no locator stage
 		await vi.waitFor(() => {
@@ -366,14 +392,19 @@ describe('MarkdownTextArea citation integration', () => {
 		renderTextArea();
 		const textarea = screen.getByRole('textbox', { name: /description/i }) as HTMLTextAreaElement;
 
-		// Mock: searching "IPDB" returns the abstract parent; children endpoint
-		// returns the existing child matching the URL's machine ID.
+		// Mock: search returns recognition with existing child
 		mockGET.mockImplementation((url: string) => {
 			if (url === '/api/citation-sources/search/') {
-				return Promise.resolve({ data: [IPDB_SOURCE] });
-			}
-			if (url === '/api/citation-sources/{source_id}/children/') {
-				return Promise.resolve({ data: [IPDB_CHILD] });
+				return Promise.resolve({
+					data: {
+						results: [IPDB_SOURCE],
+						recognition: {
+							parent: { id: IPDB_SOURCE.id, name: IPDB_SOURCE.name },
+							child: { id: IPDB_CHILD.id, name: IPDB_CHILD.name, skip_locator: true },
+							identifier: '4836'
+						}
+					}
+				});
 			}
 			return Promise.resolve({ data: [] });
 		});
@@ -384,13 +415,14 @@ describe('MarkdownTextArea citation integration', () => {
 		searchInput.focus();
 		await user.keyboard('https://www.ipdb.org/machine.cgi?id=4836');
 
-		// The recognized item should appear
+		// The recognized child should appear with a Cite button
 		await vi.waitFor(() => {
-			expect(screen.getByRole('option', { name: /IPDB Machine 4836/ })).toBeInTheDocument();
+			expect(screen.getByText(IPDB_CHILD.name)).toBeInTheDocument();
+			expect(screen.getByRole('button', { name: 'Cite' })).toBeInTheDocument();
 		});
 
-		// Click the recognized item — should fully resolve and insert citation
-		fireEvent.pointerDown(screen.getByRole('option', { name: /IPDB Machine 4836/ }));
+		// Click the Cite button — should auto-complete citation
+		fireEvent.pointerDown(screen.getByRole('button', { name: 'Cite' }));
 
 		// Citation should be inserted directly — no identify stage, no manual clicks
 		await vi.waitFor(() => {

@@ -4,13 +4,14 @@ This document describes the planned automatic source-draft flow for citations. I
 
 ## Status
 
-Pinbase has some stopgap pieces today:
+Pinbase has a backend recognition layer (built April 2026) that handles:
 
-- client-side recognition of certain URL and identifier patterns
-- seeded source families such as books and major websites
-- guided child-source flows for known source families
+- **Extractor registry** (`backend/apps/citation/extractors.py`): URL pattern matching and identifier validation for IPDB, OPDB, and future schemes. Keyed by `CitationSource.identifier_key`.
+- **Search recognition**: the `/api/citation-sources/search/` endpoint recognizes pasted URLs (extractor match, full URL child-link match, domain matching against homepage links) and returns structured recognition metadata alongside search results.
+- **Identifier-based child creation**: the create endpoint validates identifiers through extractors, auto-builds canonical URLs and child names.
+- **DB-level deduplication**: `CitationSource.identifier` field with `UNIQUE(parent, identifier)` constraint prevents duplicate children.
 
-What is not implemented yet is the fuller backend extraction layer that can take pasted evidence, call external services or site-specific extractors, and return a proposed `CitationSource` draft for confirmation.
+What is not implemented yet is the **extraction layer for external metadata lookups** — calling external services (ISBN APIs, DOI resolvers, page metadata scrapers) and returning proposed `CitationSource` drafts for confirmation.
 
 ## Goal
 
@@ -92,14 +93,14 @@ The extractor set should stay pragmatic and incremental. It does not need a gran
 
 ## First Useful Cases
 
-The first high-value extraction targets are:
+The first high-value extraction targets, with current status:
 
-- ISBN lookup for books
-- DOI lookup for publications
-- IPDB URL recognition
-- generic URL fallback
-
-These cover the most obvious evidence-like inputs contributors are likely to paste.
+- **IPDB/OPDB URL recognition** — implemented via extractor registry
+- **Domain-based source matching** — implemented via homepage link matching
+- **Full URL child-link matching** — implemented for re-citation of known pages
+- ISBN lookup for books — not yet implemented (ISBN text search exists, but no external metadata lookup)
+- DOI lookup for publications — not yet implemented
+- generic URL metadata fallback — not yet implemented
 
 ## Failure Behavior
 

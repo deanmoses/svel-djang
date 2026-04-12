@@ -1,6 +1,7 @@
 <script lang="ts">
 	import client from '$lib/api/client';
-	import { parseIdentifierInput, type ParentContext, type ChildSource } from './citation-types';
+	import { createDebouncedSearch } from '../search-helpers';
+	import { createChildByIdentifier, type ParentContext, type ChildSource } from './citation-types';
 	import DropdownHeader from '../DropdownHeader.svelte';
 	import DropdownItem from '../DropdownItem.svelte';
 	import DropdownSearchInput from '../DropdownSearchInput.svelte';
@@ -29,11 +30,31 @@
 
 	let filterQuery = $state('');
 	let children = $state<ChildSource[]>([]);
+	let allChildren = $state<ChildSource[]>([]);
 	let loading = $state(true);
 	let loadError = $state(false);
 	let activeIndex = $state(-1);
 	let searchInputEl: HTMLInputElement | undefined = $state();
 	let resultsListEl: HTMLDivElement | undefined = $state();
+	let creatingIdentifier = $state(false);
+	let createError = $state('');
+
+	let isWeb = $derived(parentContext.source_type === 'web');
+	let placeholder = $derived(isWeb ? 'Search pages...' : 'Filter editions...');
+	let emptyMessage = $derived(
+		isWeb ? 'No pages yet — type to create one' : 'No editions yet — type to create one'
+	);
+
+	// For parents with identifier_key, the filter input doubles as identifier
+	// entry. When the input doesn't match any existing children, offer a
+	// direct "Create & cite" that posts with the identifier.
+	let canQuickCreate = $derived(
+		!loading &&
+			!loadError &&
+			filterQuery.trim().length > 0 &&
+			children.length === 0 &&
+			!!parentContext.identifier_key
+	);
 
 	// ARIA — per-instance IDs for combobox pattern
 	const uid = Math.random().toString(36).slice(2, 8);
@@ -43,7 +64,7 @@
 	}
 
 	// -----------------------------------------------------------------------
-	// Fetch children on mount
+	// Fetch all children on mount (for initial display)
 	// -----------------------------------------------------------------------
 
 	$effect(() => {
@@ -73,72 +94,49 @@
 			return;
 		}
 		// Sort newest-first by year (nulls at end)
-		children = [...(data.children as ChildSource[])].sort((a, b) => {
+		allChildren = [...(data.children as ChildSource[])].sort((a, b) => {
 			if (a.year == null && b.year == null) return 0;
 			if (a.year == null) return 1;
 			if (b.year == null) return -1;
 			return b.year - a.year;
 		});
+		children = allChildren;
 		loading = false;
 	}
 
 	// -----------------------------------------------------------------------
-	// Filtering and identifier matching
+	// Debounced server-side child search
 	// -----------------------------------------------------------------------
 
-	let parsedIdentifier = $derived(
-		parseIdentifierInput(parentContext.source_type, parentContext.identifier_key, filterQuery)
+	const debouncedChildSearch = createDebouncedSearch<ChildSource[]>(
+		async (q: string) => {
+			if (!q.trim()) return allChildren;
+			const { data } = await client.GET('/api/citation-sources/{source_id}/children/', {
+				params: { path: { source_id: parentContext.id }, query: { q } }
+			});
+			return (data as ChildSource[] | undefined) ?? [];
+		},
+		(results) => {
+			children = results;
+		},
+		150
 	);
-
-	let identifierMatch = $derived.by(() => {
-		if (!parsedIdentifier) return null;
-		return (
-			children.find((c) => {
-				// Match by ISBN
-				if (c.isbn) {
-					const normalizedIsbn = c.isbn.replace(/[-\s]/g, '').toUpperCase();
-					if (normalizedIsbn === parsedIdentifier) return true;
-				}
-				// Match by URL
-				for (const url of c.urls) {
-					const parsed = parseIdentifierInput(
-						parentContext.source_type,
-						parentContext.identifier_key,
-						url
-					);
-					if (parsed === parsedIdentifier) return true;
-				}
-				return false;
-			}) ?? null
-		);
-	});
-
-	let filteredChildren = $derived.by(() => {
-		if (!filterQuery.trim()) return children;
-		// If we found an identifier match, show just that child
-		if (identifierMatch) return [identifierMatch];
-		// Otherwise text-filter across name, year, isbn
-		const q = filterQuery.toLowerCase();
-		return children.filter((c) => {
-			if (c.name.toLowerCase().includes(q)) return true;
-			if (c.year != null && String(c.year).includes(q)) return true;
-			if (c.isbn && c.isbn.toLowerCase().includes(q)) return true;
-			return false;
-		});
-	});
 
 	// -----------------------------------------------------------------------
 	// Item index math
 	// -----------------------------------------------------------------------
 
-	let showCreateNew = $derived(!loading && !loadError && filterQuery.trim().length > 0);
-	let createNewIndex = $derived(filteredChildren.length);
+	let showCreateNew = $derived(
+		!loading && !loadError && filterQuery.trim().length > 0 && (!canQuickCreate || createError)
+	);
+	let quickCreateIndex = $derived(children.length);
+	let createNewIndex = $derived(children.length + (canQuickCreate ? 1 : 0));
 	let totalItems = $derived(
-		loading || loadError ? 0 : filteredChildren.length + (showCreateNew ? 1 : 0)
+		loading || loadError ? 0 : children.length + (canQuickCreate ? 1 : 0) + (showCreateNew ? 1 : 0)
 	);
 	let activeDescendant = $derived(
 		activeIndex >= 0 && activeIndex < totalItems
-			? itemId(filteredChildren[activeIndex]?.id ?? `create-${createNewIndex}`)
+			? itemId(children[activeIndex]?.id ?? `create-${createNewIndex}`)
 			: undefined
 	);
 
@@ -147,6 +145,7 @@
 	// -----------------------------------------------------------------------
 
 	function selectChild(child: ChildSource) {
+		debouncedChildSearch.cancel();
 		onsourceidentified({
 			sourceId: child.id,
 			sourceName: child.name,
@@ -155,7 +154,32 @@
 	}
 
 	function startCreate() {
+		debouncedChildSearch.cancel();
 		onsourcecreatestarted(filterQuery);
+	}
+
+	async function quickCreateByIdentifier() {
+		if (creatingIdentifier || !filterQuery.trim()) return;
+		debouncedChildSearch.cancel();
+		creatingIdentifier = true;
+		createError = '';
+		const result = await createChildByIdentifier(
+			client,
+			parentContext.id,
+			parentContext.name,
+			parentContext.source_type,
+			filterQuery.trim()
+		);
+		if (!result.ok) {
+			creatingIdentifier = false;
+			createError = result.error;
+			return;
+		}
+		onsourceidentified({
+			sourceId: result.sourceId,
+			sourceName: result.sourceName,
+			skipLocator: result.skipLocator
+		});
 	}
 
 	// -----------------------------------------------------------------------
@@ -165,6 +189,9 @@
 	function handleSearchInput(e: Event) {
 		filterQuery = (e.currentTarget as HTMLInputElement).value;
 		activeIndex = -1;
+		createError = '';
+		creatingIdentifier = false;
+		debouncedChildSearch.search(filterQuery);
 	}
 
 	// -----------------------------------------------------------------------
@@ -184,8 +211,10 @@
 			case 'Enter':
 				e.preventDefault();
 				if (activeIndex < 0) break;
-				if (activeIndex < createNewIndex) {
-					selectChild(filteredChildren[activeIndex]);
+				if (activeIndex < children.length) {
+					selectChild(children[activeIndex]);
+				} else if (canQuickCreate && activeIndex === quickCreateIndex) {
+					quickCreateByIdentifier();
 				} else if (showCreateNew && activeIndex === createNewIndex) {
 					startCreate();
 				}
@@ -212,7 +241,7 @@
 
 <DropdownHeader {onback}>{parentContext.name}</DropdownHeader>
 <DropdownSearchInput
-	placeholder="Filter editions..."
+	{placeholder}
 	value={filterQuery}
 	oninput={handleSearchInput}
 	onkeydown={handleKeydown}
@@ -224,9 +253,11 @@
 	{#if loading}
 		<div class="status-msg">Loading…</div>
 	{:else if loadError}
-		<div class="status-msg status-error">Failed to load editions.</div>
+		<div class="status-msg status-error">
+			{isWeb ? 'Failed to load pages.' : 'Failed to load editions.'}
+		</div>
 	{:else}
-		{#each filteredChildren as child, i (child.id)}
+		{#each children as child, i (child.id)}
 			<DropdownItem
 				id={itemId(child.id)}
 				active={i === activeIndex}
@@ -234,11 +265,22 @@
 				onhover={() => (activeIndex = i)}
 			>
 				<span class="item-label">{child.name}{child.year != null ? ` — ${child.year}` : ''}</span>
-				{#if identifierMatch?.id === child.id}
-					<span class="item-desc">Match</span>
-				{/if}
 			</DropdownItem>
 		{/each}
+		{#if canQuickCreate && !createError}
+			<DropdownItem
+				id={itemId(`quick-create-${quickCreateIndex}`)}
+				active={activeIndex === quickCreateIndex}
+				onselect={quickCreateByIdentifier}
+				onhover={() => (activeIndex = quickCreateIndex)}
+			>
+				<span class="item-label">{parentContext.name} #{filterQuery.trim()}</span>
+				<span class="item-desc">{creatingIdentifier ? 'Creating…' : 'Create & cite'}</span>
+			</DropdownItem>
+		{/if}
+		{#if createError}
+			<div class="status-msg status-error">{createError}</div>
+		{/if}
 		{#if showCreateNew}
 			<DropdownItem
 				id={itemId(`create-${createNewIndex}`)}
@@ -249,9 +291,9 @@
 				<span class="item-label create-new">+ Create "{filterQuery}"</span>
 			</DropdownItem>
 		{/if}
-		{#if !filteredChildren.length && !filterQuery.trim()}
-			<div class="status-msg">No editions yet — type to create one</div>
-		{:else if !filteredChildren.length && filterQuery.trim()}
+		{#if !children.length && !filterQuery.trim()}
+			<div class="status-msg">{emptyMessage}</div>
+		{:else if !children.length && filterQuery.trim() && !canQuickCreate}
 			<div class="status-msg">No matches</div>
 		{/if}
 	{/if}

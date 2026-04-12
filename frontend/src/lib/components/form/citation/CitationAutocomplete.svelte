@@ -11,7 +11,6 @@
 	} from './citation-types';
 	import CitationSearchStage from './CitationSearchStage.svelte';
 	import CitationIdentifyBySearchStage from './CitationIdentifyBySearchStage.svelte';
-	import CitationIdentifyByInputStage from './CitationIdentifyByInputStage.svelte';
 	import CitationCreateStage from './CitationCreateStage.svelte';
 	import CitationLocatorStage from './CitationLocatorStage.svelte';
 
@@ -70,8 +69,8 @@
 	// Stage callbacks
 	// -------------------------------------------------------------------
 
-	function handleSourceSelected(source: CitationSourceResult, prefillIdentifier?: string) {
-		dispatch({ type: 'source_selected', source, prefillIdentifier });
+	function handleSourceSelected(source: CitationSourceResult) {
+		dispatch({ type: 'source_selected', source });
 	}
 
 	function handleSourceIdentified(child: {
@@ -125,23 +124,13 @@
 			onback={handleBack}
 		/>
 	{:else if flow.stage === 'identify'}
-		{#if flow.parent.child_input_mode === 'enter_identifier'}
-			<CitationIdentifyByInputStage
-				parentContext={flow.parent}
-				prefillIdentifier={flow.prefillIdentifier}
-				onsourceidentified={handleSourceIdentified}
-				{oncancel}
-				onback={goBackToSearch}
-			/>
-		{:else}
-			<CitationIdentifyBySearchStage
-				parentContext={flow.parent}
-				onsourceidentified={handleSourceIdentified}
-				onsourcecreatestarted={handleSourceCreateStarted}
-				{oncancel}
-				onback={goBackToSearch}
-			/>
-		{/if}
+		<CitationIdentifyBySearchStage
+			parentContext={flow.parent}
+			onsourceidentified={handleSourceIdentified}
+			onsourcecreatestarted={handleSourceCreateStarted}
+			{oncancel}
+			onback={goBackToSearch}
+		/>
 	{:else if flow.stage === 'create'}
 		<CitationCreateStage
 			parentContext={flow.parent}

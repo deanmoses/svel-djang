@@ -20,7 +20,6 @@ export const MOCK_SOURCES = [
 		has_children: false,
 		is_abstract: false,
 		skip_locator: false,
-		child_input_mode: null,
 		identifier_key: ''
 	},
 	{
@@ -35,7 +34,6 @@ export const MOCK_SOURCES = [
 		has_children: false,
 		is_abstract: false,
 		skip_locator: false,
-		child_input_mode: null,
 		identifier_key: ''
 	}
 ];
@@ -53,7 +51,6 @@ export const ABSTRACT_BOOK_SOURCE = {
 	has_children: true,
 	is_abstract: true,
 	skip_locator: false,
-	child_input_mode: 'search_children',
 	identifier_key: ''
 };
 
@@ -70,8 +67,23 @@ export const IPDB_SOURCE = {
 	has_children: true,
 	is_abstract: true,
 	skip_locator: false,
-	child_input_mode: 'enter_identifier',
 	identifier_key: 'ipdb'
+};
+
+/** Abstract web parent recognized by homepage-domain match. */
+export const JJP_SOURCE = {
+	id: 30,
+	name: 'Jersey Jack Pinball',
+	source_type: 'web',
+	author: '',
+	publisher: '',
+	year: null,
+	isbn: null,
+	parent_id: null,
+	has_children: true,
+	is_abstract: true,
+	skip_locator: false,
+	identifier_key: ''
 };
 
 // ---------------------------------------------------------------------------
@@ -132,6 +144,48 @@ export const BOOK_DETAIL_RESPONSE = {
 	parent: null,
 	links: [],
 	children: BOOK_CHILDREN,
+	created_at: '2024-01-01T00:00:00Z',
+	updated_at: '2024-01-01T00:00:00Z'
+};
+
+export const IPDB_DETAIL_RESPONSE = {
+	id: IPDB_SOURCE.id,
+	name: IPDB_SOURCE.name,
+	source_type: 'web',
+	author: '',
+	publisher: '',
+	year: null,
+	month: null,
+	day: null,
+	date_note: '',
+	isbn: null,
+	description: '',
+	identifier_key: 'ipdb',
+	skip_locator: false,
+	parent: null,
+	links: [],
+	children: [],
+	created_at: '2024-01-01T00:00:00Z',
+	updated_at: '2024-01-01T00:00:00Z'
+};
+
+export const JJP_DETAIL_RESPONSE = {
+	id: JJP_SOURCE.id,
+	name: JJP_SOURCE.name,
+	source_type: 'web',
+	author: '',
+	publisher: '',
+	year: null,
+	month: null,
+	day: null,
+	date_note: '',
+	isbn: null,
+	description: '',
+	identifier_key: '',
+	skip_locator: false,
+	parent: null,
+	links: [{ id: 301, link_type: 'homepage', url: 'https://jerseyjackpinball.com/', label: '' }],
+	children: [],
 	created_at: '2024-01-01T00:00:00Z',
 	updated_at: '2024-01-01T00:00:00Z'
 };

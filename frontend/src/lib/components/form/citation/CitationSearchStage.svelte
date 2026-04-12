@@ -3,12 +3,10 @@
 	import { createDebouncedSearch, formatCitationResult } from '../search-helpers';
 	import {
 		suppressChildResults,
-		detectSourceFromUrl,
-		findMatchingChild,
-		createChildSource,
-		parentContextFromSource,
+		createChildByIdentifier,
 		type CitationSourceResult,
-		type ChildSource
+		type RecognitionResult,
+		type SearchResponse
 	} from './citation-types';
 	import DropdownHeader from '../DropdownHeader.svelte';
 	import DropdownItem from '../DropdownItem.svelte';
@@ -21,7 +19,7 @@
 		oncancel,
 		onback
 	}: {
-		onsourceselected: (source: CitationSourceResult, prefillIdentifier?: string) => void;
+		onsourceselected: (source: CitationSourceResult) => void;
 		onsourceidentified: (child: {
 			sourceId: number;
 			sourceName: string;
@@ -38,12 +36,12 @@
 
 	let searchQuery = $state('');
 	let searchResults = $state<CitationSourceResult[]>([]);
+	let recognition = $state<RecognitionResult | null>(null);
 	let activeIndex = $state(-1);
 	let searchInputEl: HTMLInputElement | undefined = $state();
 	let resultsListEl: HTMLDivElement | undefined = $state();
-	let resolving = $state(false);
-	let resolveError = $state(false);
-	let resolveGeneration = 0;
+	let creating = $state(false);
+	let createError = $state('');
 
 	// ARIA — per-instance IDs for combobox pattern
 	const uid = Math.random().toString(36).slice(2, 8);
@@ -53,25 +51,26 @@
 	}
 
 	// -----------------------------------------------------------------------
-	// URL detection (synchronous, runs on every input change)
+	// Debounced search (backend handles recognition)
 	// -----------------------------------------------------------------------
 
-	let detected = $derived(detectSourceFromUrl(searchQuery));
+	const emptyResponse: SearchResponse = { results: [], recognition: null };
 
-	// -----------------------------------------------------------------------
-	// Debounced search
-	// -----------------------------------------------------------------------
-
-	const debouncedSearch = createDebouncedSearch<CitationSourceResult>(
+	const debouncedSearch = createDebouncedSearch<SearchResponse>(
 		async (q: string) => {
-			if (!q.trim()) return [];
+			if (!q.trim()) return emptyResponse;
 			const { data } = await client.GET('/api/citation-sources/search/', {
 				params: { query: { q } }
 			});
-			return (data ?? []) as CitationSourceResult[];
+			return (data as SearchResponse | undefined) ?? emptyResponse;
 		},
-		(results) => {
-			searchResults = suppressChildResults(results);
+		(response) => {
+			recognition = response.recognition ?? null;
+			const recognizedChildId = recognition?.child?.id;
+			const filtered = recognizedChildId
+				? response.results.filter((r) => r.id !== recognizedChildId)
+				: response.results;
+			searchResults = suppressChildResults(filtered);
 		},
 		100
 	);
@@ -79,25 +78,57 @@
 	function handleSearchInput(e: Event) {
 		searchQuery = (e.currentTarget as HTMLInputElement).value;
 		activeIndex = -1;
-		if (resolving || resolveError) {
-			resolving = false;
-			resolveError = false;
-			resolveGeneration++;
-		}
+		creating = false;
+		createError = '';
 		debouncedSearch.search(searchQuery);
 	}
+
+	// -----------------------------------------------------------------------
+	// Recognition-derived items
+	// -----------------------------------------------------------------------
+
+	// Recognition can produce a top item: exact child match, or identifier-based "Create & cite"
+	let recognitionItem = $derived.by(() => {
+		if (!recognition) return null;
+		if (recognition.child) {
+			return {
+				type: 'exact_match' as const,
+				label: recognition.child.name,
+				id: recognition.child.id,
+				skipLocator: recognition.child.skip_locator
+			};
+		}
+		if (recognition.identifier) {
+			return {
+				type: 'create_identified' as const,
+				label: `${recognition.parent.name} #${recognition.identifier}`,
+				parentId: recognition.parent.id,
+				identifier: recognition.identifier
+			};
+		}
+		// Domain-only match — create child with the pasted URL
+		return {
+			type: 'create_by_url' as const,
+			label: searchQuery.trim(),
+			parentId: recognition.parent.id,
+			parentName: recognition.parent.name
+		};
+	});
 
 	// -----------------------------------------------------------------------
 	// Item index math
 	// -----------------------------------------------------------------------
 
-	let showCreateNew = $derived(searchQuery.trim().length > 0);
-	let resultsStartIndex = $derived(detected ? 1 : 0);
+	let hasRecognitionItem = $derived(recognitionItem !== null);
+	let showCreateNew = $derived(searchQuery.trim().length > 0 && !recognition);
+	let resultsStartIndex = $derived(hasRecognitionItem ? 1 : 0);
 	let createNewIndex = $derived(resultsStartIndex + searchResults.length);
-	let totalItems = $derived((detected ? 1 : 0) + searchResults.length + (showCreateNew ? 1 : 0));
+	let totalItems = $derived(
+		(hasRecognitionItem ? 1 : 0) + searchResults.length + (showCreateNew ? 1 : 0)
+	);
 	let activeDescendant = $derived.by(() => {
 		if (activeIndex < 0 || activeIndex >= totalItems) return undefined;
-		if (detected && activeIndex === 0) return itemId(`detected-${detected.machineId}`);
+		if (hasRecognitionItem && activeIndex === 0) return itemId('recognition');
 		if (activeIndex >= resultsStartIndex && activeIndex < createNewIndex)
 			return itemId(searchResults[activeIndex - resultsStartIndex].id);
 		if (activeIndex === createNewIndex) return itemId('create');
@@ -124,92 +155,70 @@
 		onsourceselected(source);
 	}
 
-	/**
-	 * Fully resolve a recognized URL to a citable source.
-	 *
-	 * 1. Find the abstract parent (e.g. "IPDB") by searching for the source name.
-	 * 2. Look up existing children matching the extracted identifier.
-	 * 3. If a child exists, dispatch source_identified directly.
-	 * 4. If not, create the child source, then dispatch source_identified.
-	 * 5. On failure, fall back to source_selected (lands on the identify stage).
-	 */
-	async function resolveRecognizedUrl() {
-		if (!detected || resolving) return;
+	async function handleRecognitionSelect() {
+		if (!recognitionItem) return;
 		debouncedSearch.cancel();
-		resolving = true;
-		const gen = ++resolveGeneration;
-		const { sourceName, machineId } = detected;
 
-		try {
-			// Step 1: Find abstract parent
-			const { data: searchData } = await client.GET('/api/citation-sources/search/', {
-				params: { query: { q: sourceName } }
-			});
-			if (gen !== resolveGeneration) return;
-
-			const results = (searchData ?? []) as CitationSourceResult[];
-			const parent = results.find((r) => r.is_abstract);
-
-			if (!parent) {
-				resolving = false;
-				resolveError = true;
-				console.warn(`Citation search: no abstract parent found for "${sourceName}"`);
-				return;
-			}
-
-			// Step 2: Look up existing children
-			const { data: childrenData, error: childrenError } = await client.GET(
-				'/api/citation-sources/{source_id}/children/',
-				{ params: { path: { source_id: parent.id }, query: { q: machineId } } }
-			);
-			if (gen !== resolveGeneration) return;
-
-			if (!childrenError && childrenData) {
-				const children = childrenData as ChildSource[];
-				const match = findMatchingChild(
-					children,
-					parent.source_type,
-					parent.identifier_key || null,
-					machineId
-				);
-
-				if (match) {
-					// Step 3: Existing child found
-					resolving = false;
-					onsourceidentified({
-						sourceId: match.id,
-						sourceName: match.name,
-						skipLocator: match.skip_locator
-					});
-					return;
-				}
-			}
-
-			// Step 4: No existing child — create one
-			const parentCtx = parentContextFromSource(parent);
-			const result = await createChildSource(client, parentCtx, machineId);
-			if (gen !== resolveGeneration) return;
-
-			if (!result.ok) {
-				// Fall back to identify stage with identifier pre-filled
-				resolving = false;
-				onsourceselected(parent, machineId);
-				return;
-			}
-
-			resolving = false;
+		if (recognitionItem.type === 'exact_match') {
 			onsourceidentified({
-				sourceId: result.data.id,
-				sourceName: result.data.name,
-				skipLocator: result.data.skip_locator
+				sourceId: recognitionItem.id,
+				sourceName: recognitionItem.label,
+				skipLocator: recognitionItem.skipLocator
 			});
-		} catch (err) {
-			if (gen === resolveGeneration) {
-				resolving = false;
-				resolveError = true;
-				console.warn('Citation search: failed to resolve recognized URL', err);
-			}
+			return;
 		}
+
+		if (creating) return;
+		creating = true;
+		createError = '';
+
+		if (recognitionItem.type === 'create_identified') {
+			const result = await createChildByIdentifier(
+				client,
+				recognitionItem.parentId,
+				recognition!.parent.name,
+				'web',
+				recognitionItem.identifier
+			);
+			if (!result.ok) {
+				creating = false;
+				createError = result.error;
+				return;
+			}
+			onsourceidentified({
+				sourceId: result.sourceId,
+				sourceName: result.sourceName,
+				skipLocator: result.skipLocator
+			});
+			return;
+		}
+
+		// create_by_url: create a child under the domain-matched parent
+		const { data, error } = await client.POST('/api/citation-sources/', {
+			body: {
+				name: recognitionItem.label,
+				source_type: 'web',
+				author: '',
+				publisher: '',
+				date_note: '',
+				description: '',
+				parent_id: recognitionItem.parentId,
+				identifier: '',
+				url: recognitionItem.label,
+				link_label: '',
+				link_type: 'homepage'
+			}
+		});
+		if (error) {
+			creating = false;
+			createError = typeof error === 'string' ? error : 'Failed to create source.';
+			return;
+		}
+		onsourceidentified({
+			sourceId: data.id,
+			sourceName: data.name,
+			skipLocator: data.skip_locator
+		});
 	}
 
 	function startCreate() {
@@ -234,8 +243,8 @@
 			case 'Enter':
 				e.preventDefault();
 				if (activeIndex < 0) break;
-				if (detected && activeIndex === 0) {
-					resolveRecognizedUrl();
+				if (hasRecognitionItem && activeIndex === 0) {
+					handleRecognitionSelect();
 				} else if (activeIndex >= resultsStartIndex && activeIndex < createNewIndex) {
 					selectSource(searchResults[activeIndex - resultsStartIndex]);
 				} else if (showCreateNew && activeIndex === createNewIndex) {
@@ -273,20 +282,29 @@
 	{listboxId}
 />
 <div class="results-list" role="listbox" id={listboxId} bind:this={resultsListEl}>
-	{#if detected}
-		<DropdownItem
-			id={itemId(`detected-${detected.machineId}`)}
-			active={activeIndex === 0}
-			onselect={resolveRecognizedUrl}
-			onhover={() => (activeIndex = 0)}
-		>
-			<span class="item-label">{detected.sourceName} Machine {detected.machineId}</span>
-			{#if resolving}
-				<span class="item-desc">Loading…</span>
-			{:else if resolveError}
-				<span class="item-desc item-error">Not found</span>
-			{/if}
-		</DropdownItem>
+	{#if recognitionItem}
+		<div class="recognition-block" id={itemId('recognition')}>
+			<div class="recognition-label">{recognitionItem.label}</div>
+			<button
+				class="recognition-btn"
+				disabled={creating}
+				onpointerdown={(e) => {
+					e.preventDefault();
+					handleRecognitionSelect();
+				}}
+			>
+				{#if recognitionItem.type === 'exact_match'}
+					Cite
+				{:else if creating}
+					Creating…
+				{:else}
+					Create & cite
+				{/if}
+			</button>
+		</div>
+	{/if}
+	{#if createError}
+		<div class="create-error">{createError}</div>
 	{/if}
 	{#each searchResults as source, i (source.id)}
 		<DropdownItem
@@ -309,9 +327,9 @@
 			<span class="item-label create-new">+ Create "{searchQuery}"</span>
 		</DropdownItem>
 	{/if}
-	{#if !detected && !searchResults.length && !searchQuery.trim()}
+	{#if !recognition && !searchResults.length && !searchQuery.trim()}
 		<div class="no-results">Type to search sources…</div>
-	{:else if !detected && !searchResults.length && searchQuery.trim()}
+	{:else if !recognition && !searchResults.length && searchQuery.trim()}
 		<div class="no-results">No matches</div>
 	{/if}
 </div>
@@ -330,10 +348,6 @@
 		flex-shrink: 0;
 	}
 
-	.item-error {
-		color: var(--color-danger, #c00);
-	}
-
 	.create-new {
 		color: var(--color-text-muted);
 		font-style: italic;
@@ -342,6 +356,45 @@
 	.results-list {
 		max-height: 14rem;
 		overflow-y: auto;
+	}
+
+	.recognition-block {
+		padding: var(--size-2) var(--size-3);
+		display: flex;
+		flex-direction: column;
+		gap: var(--size-2);
+	}
+
+	.recognition-label {
+		font-size: var(--font-size-1);
+	}
+
+	.recognition-btn {
+		padding: var(--size-1) var(--size-2);
+		font-size: var(--font-size-1);
+		font-family: inherit;
+		border: 1px solid var(--color-input-border);
+		border-radius: var(--radius-2);
+		background-color: var(--color-input-focus-ring);
+		color: var(--color-text-primary);
+		cursor: pointer;
+		align-self: flex-start;
+	}
+
+	.recognition-btn:hover:not(:disabled) {
+		border-color: var(--color-input-focus);
+	}
+
+	.recognition-btn:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+
+	.create-error {
+		padding: var(--size-2) var(--size-3);
+		color: var(--color-danger, #c00);
+		font-size: var(--font-size-0);
+		text-align: center;
 	}
 
 	.no-results {

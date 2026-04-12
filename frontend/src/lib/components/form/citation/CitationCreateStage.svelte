@@ -77,6 +77,7 @@
 				date_note: '',
 				description: '',
 				parent_id: parentContext?.id ?? null,
+				identifier: '',
 				url: showUrlField && url.trim() ? url : null,
 				link_label: '',
 				link_type: 'homepage'

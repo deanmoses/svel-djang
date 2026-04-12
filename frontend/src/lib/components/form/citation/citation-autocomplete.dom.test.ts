@@ -9,6 +9,8 @@ import {
 	ABSTRACT_BOOK_SOURCE,
 	IPDB_SOURCE,
 	IPDB_CHILD,
+	IPDB_DETAIL_RESPONSE,
+	JJP_SOURCE,
 	BOOK_CHILDREN,
 	BOOK_DETAIL_RESPONSE,
 	CREATED_SOURCE
@@ -41,6 +43,11 @@ function getSearchInput() {
 	return screen.getByRole('combobox', { name: /search sources/i }) as HTMLInputElement;
 }
 
+/** Default search mock: returns MOCK_SOURCES wrapped in SearchResponse. */
+function mockSearchReturning(results: typeof MOCK_SOURCES, recognition: unknown = null) {
+	return Promise.resolve({ data: { results, recognition } });
+}
+
 async function searchAndWaitFor(
 	user: ReturnType<typeof userEvent.setup>,
 	query: string,
@@ -67,8 +74,7 @@ async function selectSource(source: { name: string }) {
  */
 async function enterBookIdentifyStage(user: ReturnType<typeof userEvent.setup>) {
 	mockGET.mockImplementation((url: string) => {
-		if (url === '/api/citation-sources/search/')
-			return Promise.resolve({ data: [ABSTRACT_BOOK_SOURCE] });
+		if (url === '/api/citation-sources/search/') return mockSearchReturning([ABSTRACT_BOOK_SOURCE]);
 		if (url === '/api/citation-sources/{source_id}/')
 			return Promise.resolve({ data: BOOK_DETAIL_RESPONSE });
 		return Promise.resolve({ data: [] });
@@ -82,33 +88,6 @@ async function enterBookIdentifyStage(user: ReturnType<typeof userEvent.setup>) 
 			screen.getByRole('option', { name: new RegExp(BOOK_CHILDREN[0].name) })
 		).toBeInTheDocument();
 	});
-}
-
-/**
- * Navigate from search to the IPDB identify-by-input stage and type an ID.
- */
-async function enterIpdbIdentifyStage(
-	user: ReturnType<typeof userEvent.setup>,
-	childrenResponse: (typeof IPDB_CHILD)[],
-	identifier: string
-) {
-	mockGET.mockImplementation((url: string) => {
-		if (url === '/api/citation-sources/search/') return Promise.resolve({ data: [IPDB_SOURCE] });
-		if (url === '/api/citation-sources/{source_id}/children/')
-			return Promise.resolve({ data: childrenResponse });
-		return Promise.resolve({ data: [] });
-	});
-
-	await searchAndWaitFor(user, 'IPDB', IPDB_SOURCE);
-	await selectSource(IPDB_SOURCE);
-
-	await vi.waitFor(() => {
-		expect(screen.getByRole('textbox', { name: /enter identifier/i })).toBeInTheDocument();
-	});
-
-	const idInput = screen.getByRole('textbox', { name: /enter identifier/i });
-	idInput.focus();
-	await user.keyboard(identifier);
 }
 
 /**
@@ -141,7 +120,10 @@ async function enterLocatorStage(user: ReturnType<typeof userEvent.setup>) {
 
 describe('CitationAutocomplete (component-level)', () => {
 	beforeEach(() => {
-		mockGET.mockReset().mockResolvedValue({ data: MOCK_SOURCES });
+		mockGET.mockReset().mockImplementation((url: string) => {
+			if (url === '/api/citation-sources/search/') return mockSearchReturning(MOCK_SOURCES);
+			return Promise.resolve({ data: [] });
+		});
 		mockPOST.mockReset();
 	});
 
@@ -208,53 +190,6 @@ describe('CitationAutocomplete (component-level)', () => {
 
 			await vi.waitFor(() => {
 				expect(screen.getByText('Failed to create citation.')).toBeInTheDocument();
-			});
-		});
-
-		it('shows lookup failure in ByInput stage', async () => {
-			const user = userEvent.setup();
-			renderAutocomplete();
-
-			mockGET.mockImplementation((url: string) => {
-				if (url === '/api/citation-sources/search/')
-					return Promise.resolve({ data: [IPDB_SOURCE] });
-				if (url === '/api/citation-sources/{source_id}/children/')
-					return Promise.reject(new Error('Network error'));
-				return Promise.resolve({ data: [] });
-			});
-
-			await searchAndWaitFor(user, 'IPDB', IPDB_SOURCE);
-			await selectSource(IPDB_SOURCE);
-
-			await vi.waitFor(() => {
-				expect(screen.getByRole('textbox', { name: /enter identifier/i })).toBeInTheDocument();
-			});
-
-			const idInput = screen.getByRole('textbox', { name: /enter identifier/i });
-			idInput.focus();
-			await user.keyboard('4836');
-
-			await vi.waitFor(() => {
-				expect(screen.getByText(/lookup failed/i)).toBeInTheDocument();
-			});
-		});
-
-		it('shows error when ByInput create POST fails', async () => {
-			const user = userEvent.setup();
-			renderAutocomplete();
-
-			await enterIpdbIdentifyStage(user, [], '9999');
-
-			await vi.waitFor(() => {
-				expect(screen.getByRole('button', { name: 'Create & cite' })).toBeInTheDocument();
-			});
-
-			// Non-string error triggers the generic "Failed to create source." message
-			mockPOST.mockResolvedValueOnce({ error: { detail: 'Server error' } });
-			fireEvent.pointerDown(screen.getByRole('button', { name: 'Create & cite' }));
-
-			await vi.waitFor(() => {
-				expect(screen.getByText('Failed to create source.')).toBeInTheDocument();
 			});
 		});
 	});
@@ -402,77 +337,26 @@ describe('CitationAutocomplete (component-level)', () => {
 	});
 
 	// -----------------------------------------------------------------------
-	// IPDB flows (migrated from integration tests)
+	// Recognition flows (backend-driven)
 	// -----------------------------------------------------------------------
 
-	describe('IPDB identify-by-input flow', () => {
-		it('cites an existing IPDB child, skipping locator', async () => {
+	describe('recognition flows', () => {
+		it('shows exact match when recognition returns existing child', async () => {
 			const user = userEvent.setup();
 			const { oncomplete } = renderAutocomplete();
 
-			await enterIpdbIdentifyStage(user, [IPDB_CHILD], '4836');
-
-			await vi.waitFor(() => {
-				expect(screen.getByText(IPDB_CHILD.name)).toBeInTheDocument();
-				expect(screen.getByRole('button', { name: 'Cite' })).toBeInTheDocument();
-			});
-
-			mockPOST.mockResolvedValueOnce({ data: CREATED_INSTANCE });
-			fireEvent.pointerDown(screen.getByRole('button', { name: 'Cite' }));
-
-			await vi.waitFor(() => {
-				expect(oncomplete).toHaveBeenCalledWith(`[[cite:${CREATED_INSTANCE.id}]]`);
-			});
-
-			expect(mockPOST).toHaveBeenCalledWith('/api/citation-instances/', {
-				body: { citation_source_id: IPDB_CHILD.id, locator: '' }
-			});
-		});
-
-		it('creates a new IPDB child and cites it when no match exists', async () => {
-			const user = userEvent.setup();
-			const { oncomplete } = renderAutocomplete();
-
-			await enterIpdbIdentifyStage(user, [], '9999');
-
-			await vi.waitFor(() => {
-				expect(screen.getByText(/will create child source/)).toBeInTheDocument();
-				expect(screen.getByRole('button', { name: 'Create & cite' })).toBeInTheDocument();
-			});
-
-			mockPOST
-				.mockResolvedValueOnce({ data: CREATED_IPDB_CHILD })
-				.mockResolvedValueOnce({ data: CREATED_INSTANCE });
-			fireEvent.pointerDown(screen.getByRole('button', { name: 'Create & cite' }));
-
-			await vi.waitFor(() => {
-				expect(oncomplete).toHaveBeenCalledWith(`[[cite:${CREATED_INSTANCE.id}]]`);
-			});
-
-			expect(mockPOST).toHaveBeenCalledWith('/api/citation-sources/', {
-				body: expect.objectContaining({
-					parent_id: IPDB_SOURCE.id,
-					url: 'https://www.ipdb.org/machine.cgi?id=9999'
-				})
-			});
-			expect(mockPOST).toHaveBeenCalledWith('/api/citation-instances/', {
-				body: { citation_source_id: CREATED_IPDB_CHILD.id, locator: '' }
-			});
-		});
-
-		it('auto-completes when IPDB URL is pasted and child exists', async () => {
-			const user = userEvent.setup();
-			const { oncomplete } = renderAutocomplete();
-
-			mockGET.mockImplementation((url: string, opts?: { params?: { query?: { q?: string } } }) => {
+			mockGET.mockImplementation((url: string) => {
 				if (url === '/api/citation-sources/search/') {
-					const q = opts?.params?.query?.q ?? '';
-					if (q === 'IPDB' || q.includes('ipdb.org'))
-						return Promise.resolve({ data: [IPDB_SOURCE] });
-					return Promise.resolve({ data: [] });
+					return mockSearchReturning([IPDB_SOURCE], {
+						parent: { id: IPDB_SOURCE.id, name: IPDB_SOURCE.name },
+						child: {
+							id: IPDB_CHILD.id,
+							name: IPDB_CHILD.name,
+							skip_locator: true
+						},
+						identifier: '4836'
+					});
 				}
-				if (url === '/api/citation-sources/{source_id}/children/')
-					return Promise.resolve({ data: [IPDB_CHILD] });
 				return Promise.resolve({ data: [] });
 			});
 			mockPOST.mockResolvedValueOnce({ data: CREATED_INSTANCE });
@@ -482,19 +366,283 @@ describe('CitationAutocomplete (component-level)', () => {
 			await user.keyboard('https://www.ipdb.org/machine.cgi?id=4836');
 
 			await vi.waitFor(() => {
-				expect(screen.getByRole('option', { name: /IPDB Machine 4836/ })).toBeInTheDocument();
+				expect(screen.getByText(IPDB_CHILD.name)).toBeInTheDocument();
+				expect(screen.getByRole('button', { name: 'Cite' })).toBeInTheDocument();
 			});
 
-			fireEvent.pointerDown(screen.getByRole('option', { name: /IPDB Machine 4836/ }));
+			// Click the Cite button
+			fireEvent.pointerDown(screen.getByRole('button', { name: 'Cite' }));
 
-			// Should auto-complete through identify stage to citation
+			// Should auto-complete (skip_locator=true for web children)
+			await vi.waitFor(() => {
+				expect(oncomplete).toHaveBeenCalledWith(`[[cite:${CREATED_INSTANCE.id}]]`);
+			});
+		});
+
+		it('creates child when recognition returns identifier but no child', async () => {
+			const user = userEvent.setup();
+			const { oncomplete } = renderAutocomplete();
+
+			mockGET.mockImplementation((url: string) => {
+				if (url === '/api/citation-sources/search/') {
+					return mockSearchReturning([IPDB_SOURCE], {
+						parent: { id: IPDB_SOURCE.id, name: IPDB_SOURCE.name },
+						child: null,
+						identifier: '9999'
+					});
+				}
+				return Promise.resolve({ data: [] });
+			});
+			mockPOST
+				.mockResolvedValueOnce({ data: CREATED_IPDB_CHILD })
+				.mockResolvedValueOnce({ data: CREATED_INSTANCE });
+
+			const input = getSearchInput();
+			input.focus();
+			await user.keyboard('https://www.ipdb.org/machine.cgi?id=9999');
+
+			await vi.waitFor(() => {
+				expect(screen.getByText(/Internet Pinball Database #9999/)).toBeInTheDocument();
+				expect(screen.getByRole('button', { name: /Create & cite/ })).toBeInTheDocument();
+			});
+
+			// Click the "Create & cite" button
+			fireEvent.pointerDown(screen.getByRole('button', { name: /Create & cite/ }));
+
 			await vi.waitFor(() => {
 				expect(oncomplete).toHaveBeenCalledWith(`[[cite:${CREATED_INSTANCE.id}]]`);
 			});
 
-			expect(mockPOST).toHaveBeenCalledWith('/api/citation-instances/', {
-				body: { citation_source_id: IPDB_CHILD.id, locator: '' }
+			expect(mockPOST).toHaveBeenCalledWith('/api/citation-sources/', {
+				body: expect.objectContaining({
+					parent_id: IPDB_SOURCE.id,
+					identifier: '9999'
+				})
 			});
+		});
+
+		it('creates child source when domain-recognized URL is pasted', async () => {
+			const user = userEvent.setup();
+			const { oncomplete } = renderAutocomplete();
+
+			const recognizedUrl = 'https://jerseyjackpinball.com/products/elton-john';
+
+			mockGET.mockImplementation((url: string) => {
+				if (url === '/api/citation-sources/search/') {
+					return mockSearchReturning([], {
+						parent: { id: JJP_SOURCE.id, name: JJP_SOURCE.name },
+						child: null,
+						identifier: null
+					});
+				}
+				return Promise.resolve({ data: [] });
+			});
+
+			const input = getSearchInput();
+			input.focus();
+			await user.keyboard(recognizedUrl);
+
+			await vi.waitFor(() => {
+				expect(screen.getByText(recognizedUrl)).toBeInTheDocument();
+				expect(screen.getByRole('button', { name: /Create & cite/ })).toBeInTheDocument();
+			});
+
+			mockPOST
+				.mockResolvedValueOnce({
+					data: { id: 31, name: recognizedUrl, skip_locator: true }
+				})
+				.mockResolvedValueOnce({ data: CREATED_INSTANCE });
+
+			fireEvent.pointerDown(screen.getByRole('button', { name: /Create & cite/ }));
+
+			await vi.waitFor(() => {
+				expect(oncomplete).toHaveBeenCalledWith(`[[cite:${CREATED_INSTANCE.id}]]`);
+			});
+
+			expect(mockPOST).toHaveBeenCalledWith('/api/citation-sources/', {
+				body: expect.objectContaining({
+					parent_id: JJP_SOURCE.id,
+					url: recognizedUrl
+				})
+			});
+		});
+	});
+
+	// -----------------------------------------------------------------------
+	// Identify stage: quick create and error handling
+	// -----------------------------------------------------------------------
+
+	describe('identify stage quick create', () => {
+		/**
+		 * Navigate from search to the IPDB identify stage:
+		 * search "IPDB" → select abstract parent → children load (empty).
+		 */
+		async function enterIpdbIdentifyStage(user: ReturnType<typeof userEvent.setup>) {
+			mockGET.mockImplementation((url: string) => {
+				if (url === '/api/citation-sources/search/') return mockSearchReturning([IPDB_SOURCE]);
+				if (url === '/api/citation-sources/{source_id}/')
+					return Promise.resolve({ data: IPDB_DETAIL_RESPONSE });
+				if (url === '/api/citation-sources/{source_id}/children/')
+					return Promise.resolve({ data: [] });
+				return Promise.resolve({ data: [] });
+			});
+
+			await searchAndWaitFor(user, 'IPDB', IPDB_SOURCE);
+			await selectSource(IPDB_SOURCE);
+
+			await vi.waitFor(() => {
+				expect(screen.getByRole('combobox', { name: /search pages/i })).toBeInTheDocument();
+			});
+
+			return screen.getByRole('combobox', { name: /search pages/i }) as HTMLInputElement;
+		}
+
+		it('offers quick create for valid identifier under identifier-backed parent', async () => {
+			const user = userEvent.setup();
+			renderAutocomplete();
+
+			const filterInput = await enterIpdbIdentifyStage(user);
+			filterInput.focus();
+			await user.keyboard('4443');
+
+			await vi.waitFor(() => {
+				expect(
+					screen.getByRole('option', { name: /Internet Pinball Database #4443/ })
+				).toBeInTheDocument();
+				expect(screen.getByText('Create & cite')).toBeInTheDocument();
+			});
+
+			// No generic create should appear alongside quick create
+			expect(screen.queryByRole('option', { name: /\+ Create/ })).not.toBeInTheDocument();
+		});
+
+		it('quick create with valid identifier succeeds and completes citation', async () => {
+			const user = userEvent.setup();
+			const { oncomplete } = renderAutocomplete();
+
+			const filterInput = await enterIpdbIdentifyStage(user);
+			filterInput.focus();
+			await user.keyboard('4443');
+
+			await vi.waitFor(() => {
+				expect(
+					screen.getByRole('option', { name: /Internet Pinball Database #4443/ })
+				).toBeInTheDocument();
+			});
+
+			mockPOST
+				.mockResolvedValueOnce({ data: CREATED_IPDB_CHILD })
+				.mockResolvedValueOnce({ data: CREATED_INSTANCE });
+
+			fireEvent.pointerDown(
+				screen.getByRole('option', { name: /Internet Pinball Database #4443/ })
+			);
+
+			await vi.waitFor(() => {
+				expect(oncomplete).toHaveBeenCalledWith(`[[cite:${CREATED_INSTANCE.id}]]`);
+			});
+
+			expect(mockPOST).toHaveBeenCalledWith('/api/citation-sources/', {
+				body: expect.objectContaining({
+					parent_id: IPDB_SOURCE.id,
+					identifier: '4443'
+				})
+			});
+		});
+
+		it('shows error and generic create fallback when quick create is rejected', async () => {
+			const user = userEvent.setup();
+			renderAutocomplete();
+
+			const filterInput = await enterIpdbIdentifyStage(user);
+			filterInput.focus();
+			await user.keyboard('abc');
+
+			await vi.waitFor(() => {
+				expect(
+					screen.getByRole('option', { name: /Internet Pinball Database #abc/ })
+				).toBeInTheDocument();
+			});
+
+			// Backend rejects invalid identifier
+			mockPOST.mockResolvedValueOnce({ error: 'Invalid identifier for IPDB' });
+			fireEvent.pointerDown(screen.getByRole('option', { name: /Internet Pinball Database #abc/ }));
+
+			await vi.waitFor(() => {
+				// Error message should be visible
+				expect(screen.getByText(/Invalid identifier/i)).toBeInTheDocument();
+				// Quick create item should be hidden
+				expect(
+					screen.queryByRole('option', { name: /Internet Pinball Database #abc/ })
+				).not.toBeInTheDocument();
+				// Generic create should appear as fallback
+				expect(screen.getByRole('option', { name: /\+ Create "abc"/ })).toBeInTheDocument();
+			});
+		});
+
+		it('clears error when user types new input after rejected quick create', async () => {
+			const user = userEvent.setup();
+			renderAutocomplete();
+
+			const filterInput = await enterIpdbIdentifyStage(user);
+			filterInput.focus();
+			await user.keyboard('abc');
+
+			await vi.waitFor(() => {
+				expect(
+					screen.getByRole('option', { name: /Internet Pinball Database #abc/ })
+				).toBeInTheDocument();
+			});
+
+			// Trigger rejection
+			mockPOST.mockResolvedValueOnce({ error: 'Invalid identifier for IPDB' });
+			fireEvent.pointerDown(screen.getByRole('option', { name: /Internet Pinball Database #abc/ }));
+
+			await vi.waitFor(() => {
+				expect(screen.getByText(/Invalid identifier/i)).toBeInTheDocument();
+			});
+
+			// Type new input — error should clear
+			await user.keyboard('4443');
+
+			await vi.waitFor(() => {
+				expect(screen.queryByText(/Invalid identifier/i)).not.toBeInTheDocument();
+				expect(
+					screen.getByRole('option', { name: /Internet Pinball Database #abc4443/ })
+				).toBeInTheDocument();
+			});
+		});
+
+		it('does not offer generic create when recognition is present', async () => {
+			const user = userEvent.setup();
+			renderAutocomplete();
+
+			mockGET.mockImplementation((url: string) => {
+				if (url === '/api/citation-sources/search/') {
+					return mockSearchReturning([IPDB_SOURCE], {
+						parent: { id: IPDB_SOURCE.id, name: IPDB_SOURCE.name },
+						child: {
+							id: IPDB_CHILD.id,
+							name: IPDB_CHILD.name,
+							skip_locator: true
+						},
+						identifier: '4836'
+					});
+				}
+				return Promise.resolve({ data: [] });
+			});
+
+			const input = getSearchInput();
+			input.focus();
+			await user.keyboard('https://www.ipdb.org/machine.cgi?id=4836');
+
+			await vi.waitFor(() => {
+				expect(screen.getByText(IPDB_CHILD.name)).toBeInTheDocument();
+				expect(screen.getByRole('button', { name: 'Cite' })).toBeInTheDocument();
+			});
+
+			// No "Create" option should appear when recognition is present
+			expect(screen.queryByRole('option', { name: /Create/ })).not.toBeInTheDocument();
 		});
 	});
 });
