@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
-	import { pageTitle } from '$lib/constants';
 	import { auth } from '$lib/auth.svelte';
+	import MetaTags from '$lib/components/MetaTags.svelte';
 	import ExternalLinksSidebarSection from '$lib/components/ExternalLinksSidebarSection.svelte';
 	import Markdown from '$lib/components/Markdown.svelte';
 	import HeroHeader from '$lib/components/HeroHeader.svelte';
@@ -38,6 +38,16 @@
 	let isSources = $derived(page.url.pathname.endsWith('/sources'));
 	let isEditHistory = $derived(page.url.pathname.endsWith('/edit-history'));
 
+	let metaDescription = $derived.by(() => {
+		if (model.description?.text) return model.description.text;
+		if (model.title_description?.text) return model.title_description.text;
+		const parts = [model.name];
+		if (model.year) parts.push(`a ${model.year} pinball machine`);
+		else parts.push('pinball machine');
+		if (model.manufacturer) parts.push(`by ${model.manufacturer.name}`);
+		return parts.join(' — ');
+	});
+
 	let parentLink = $derived(
 		model.title ? { text: model.title.name, href: resolve(`/titles/${model.title.slug}`) } : null
 	);
@@ -60,9 +70,13 @@
 	});
 </script>
 
-<svelte:head>
-	<title>{pageTitle(model.name)}</title>
-</svelte:head>
+<MetaTags
+	title={model.name}
+	description={metaDescription}
+	url={page.url.href}
+	image={model.hero_image_url}
+	imageAlt={model.hero_image_url ? `${model.name} pinball machine` : undefined}
+/>
 
 <article>
 	<HeroHeader

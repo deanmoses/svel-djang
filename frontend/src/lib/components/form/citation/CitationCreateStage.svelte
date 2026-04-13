@@ -1,6 +1,6 @@
 <script lang="ts">
 	import client from '$lib/api/client';
-	import type { ParentContext } from './citation-types';
+	import type { ParentContext, ExtractionDraft } from './citation-types';
 	import DropdownHeader from '../DropdownHeader.svelte';
 
 	type SourceType = 'book' | 'magazine' | 'web';
@@ -8,12 +8,14 @@
 	let {
 		parentContext,
 		prefillName,
+		extractionDraft = null,
 		onsourcecreated,
 		oncancel,
 		onback
 	}: {
 		parentContext: ParentContext | null;
 		prefillName: string;
+		extractionDraft?: ExtractionDraft | null;
 		onsourcecreated: (result: {
 			sourceId: number;
 			sourceName: string;
@@ -29,18 +31,29 @@
 	let name = $state(prefillName);
 	// svelte-ignore state_referenced_locally
 	let sourceType = $state<SourceType>(
-		parentContext ? (parentContext.source_type as SourceType) : 'book'
+		extractionDraft
+			? (extractionDraft.source_type as SourceType)
+			: parentContext
+				? (parentContext.source_type as SourceType)
+				: 'book'
 	);
 	// svelte-ignore state_referenced_locally
-	let author = $state(parentContext?.author ?? '');
-	let url = $state('');
+	let author = $state(extractionDraft?.author ?? parentContext?.author ?? '');
+	// svelte-ignore state_referenced_locally
+	let publisher = $state(extractionDraft?.publisher ?? '');
+	// svelte-ignore state_referenced_locally
+	let year = $state<number | null>(extractionDraft?.year ?? null);
+	// svelte-ignore state_referenced_locally
+	let url = $state(extractionDraft?.url ?? '');
 	let error = $state('');
 	let submitting = $state(false);
 	let nameInputEl: HTMLInputElement | undefined = $state();
 
-	let showTypePicker = $derived(!parentContext);
+	let showTypePicker = $derived(!parentContext && !extractionDraft);
 	let showUrlField = $derived(sourceType === 'web');
 	let showAuthorField = $derived(sourceType === 'book' || sourceType === 'magazine');
+	let showPublisherField = $derived(!!extractionDraft);
+	let showYearField = $derived(!!extractionDraft);
 
 	$effect(() => {
 		if (nameInputEl) {
@@ -73,8 +86,10 @@
 				name,
 				source_type: sourceType,
 				author: showAuthorField ? author : '',
-				publisher: '',
+				publisher: showPublisherField ? publisher : '',
+				year: year ?? null,
 				date_note: '',
+				isbn: extractionDraft?.isbn ?? null,
 				description: '',
 				parent_id: parentContext?.id ?? null,
 				identifier: '',
@@ -125,6 +140,9 @@
 			{/each}
 		</div>
 	{/if}
+	{#if extractionDraft && sourceType === 'web'}
+		<div class="extraction-note">Scraped from page — review before saving</div>
+	{/if}
 	<input
 		bind:this={nameInputEl}
 		type="text"
@@ -139,6 +157,32 @@
 			type="text"
 			placeholder="Author (optional)"
 			bind:value={author}
+			autocomplete="off"
+			data-1p-ignore
+			data-lpignore="true"
+		/>
+	{/if}
+	{#if showPublisherField}
+		<input
+			type="text"
+			placeholder="Publisher (optional)"
+			bind:value={publisher}
+			autocomplete="off"
+			data-1p-ignore
+			data-lpignore="true"
+		/>
+	{/if}
+	{#if showYearField}
+		<input
+			type="text"
+			inputmode="numeric"
+			placeholder="Year (optional)"
+			value={year ?? ''}
+			oninput={(e) => {
+				const v = (e.currentTarget as HTMLInputElement).value.trim();
+				const n = v ? parseInt(v, 10) : null;
+				year = n !== null && !isNaN(n) ? n : null;
+			}}
 			autocomplete="off"
 			data-1p-ignore
 			data-lpignore="true"
@@ -190,6 +234,12 @@
 	.type-chip.selected {
 		background-color: var(--color-input-focus-ring);
 		border-color: var(--color-input-focus);
+	}
+
+	.extraction-note {
+		color: var(--color-text-muted);
+		font-size: var(--font-size-0);
+		font-style: italic;
 	}
 
 	.form-error {

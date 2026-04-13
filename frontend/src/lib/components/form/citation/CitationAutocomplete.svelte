@@ -7,7 +7,8 @@
 		type CiteState,
 		type CiteAction,
 		type CitationInstanceDraft,
-		type CitationSourceResult
+		type CitationSourceResult,
+		type ExtractionDraft
 	} from './citation-types';
 	import CitationSearchStage from './CitationSearchStage.svelte';
 	import CitationIdentifyBySearchStage from './CitationIdentifyBySearchStage.svelte';
@@ -85,6 +86,10 @@
 		dispatch({ type: 'source_create_started', prefillName });
 	}
 
+	function handleExtractionDraft(extractionDraft: ExtractionDraft) {
+		dispatch({ type: 'extraction_draft_ready', extractionDraft });
+	}
+
 	function handleSourceCreated(result: {
 		sourceId: number;
 		sourceName: string;
@@ -120,6 +125,7 @@
 			onsourceselected={handleSourceSelected}
 			onsourceidentified={handleSourceIdentified}
 			onsourcecreatestarted={handleSourceCreateStarted}
+			onextractiondraft={handleExtractionDraft}
 			{oncancel}
 			onback={handleBack}
 		/>
@@ -135,6 +141,7 @@
 		<CitationCreateStage
 			parentContext={flow.parent}
 			prefillName={flow.prefillName}
+			extractionDraft={flow.extractionDraft}
 			onsourcecreated={handleSourceCreated}
 			{oncancel}
 			onback={goBackToSearch}

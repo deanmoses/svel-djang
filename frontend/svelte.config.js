@@ -10,6 +10,7 @@ const config = {
 	kit: {
 		adapter: adapter(),
 		prerender: {
+			origin: process.env.SITE_ORIGIN || 'http://localhost:5173',
 			handleHttpError: ({ path, message }) => {
 				// API endpoints are served by Django, not SvelteKit — ignore
 				// them when the prerender crawler discovers <link rel="preload">

@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
-	import { pageTitle } from '$lib/constants';
+	import { SITE_NAME } from '$lib/constants';
 	import { auth } from '$lib/auth.svelte';
+	import MetaTags from '$lib/components/MetaTags.svelte';
 	import PageHeader from '$lib/components/PageHeader.svelte';
 	import AttributionLine from '$lib/components/AttributionLine.svelte';
 	import Markdown from '$lib/components/Markdown.svelte';
@@ -27,9 +28,11 @@
 	let isEditHistory = $derived(page.url.pathname.endsWith('/edit-history'));
 </script>
 
-<svelte:head>
-	<title>{pageTitle(franchise.name)}</title>
-</svelte:head>
+<MetaTags
+	title={franchise.name}
+	description={franchise.description?.text || `${franchise.name} — ${SITE_NAME}`}
+	url={page.url.href}
+/>
 
 <article>
 	<PageHeader title={franchise.name} breadcrumbs={[{ label: 'Franchises', href: '/franchises' }]} />

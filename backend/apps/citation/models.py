@@ -202,6 +202,11 @@ class CitationSource(TimeStampedModel):
             ),
         ]
 
+    @property
+    def skip_locator(self) -> bool:
+        """Web children skip the locator stage — their URL is the locator."""
+        return self.source_type == "web" and self.parent_id is not None
+
     def __str__(self) -> str:
         if self.author and self.year:
             return f"{self.name} ({self.author}, {self.year})"

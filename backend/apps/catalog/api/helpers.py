@@ -184,6 +184,12 @@ def _extract_image_urls(
         effective = rank if rank is not None else UNKNOWN_LICENSE_RANK
         return effective >= min_rank
 
+    def _abs(url: str | None) -> str | None:
+        """Return *url* only if it's an absolute HTTP(S) URL, else None."""
+        if url and (url.startswith("http://") or url.startswith("https://")):
+            return url
+        return None
+
     # Try OPDB structured images first (have size variants).
     images = extra_data.get("opdb.images")
     if images and isinstance(images, list) and _rank_ok("opdb.images"):
@@ -196,8 +202,8 @@ def _extract_image_urls(
             img = images[0] if images else None
         if isinstance(img, dict):
             urls = img.get("urls") or {}
-            thumbnail = urls.get("medium") or urls.get("small")
-            hero = urls.get("large") or urls.get("medium")
+            thumbnail = _abs(urls.get("medium") or urls.get("small"))
+            hero = _abs(urls.get("large") or urls.get("medium"))
             if thumbnail or hero:
                 return thumbnail, hero
 
@@ -206,7 +212,7 @@ def _extract_image_urls(
         image_urls = extra_data.get(key)
         if image_urls and isinstance(image_urls, list) and _rank_ok(key):
             first = image_urls[0]
-            if isinstance(first, str) and first:
+            if isinstance(first, str) and _abs(first):
                 return first, first
 
     return None, None

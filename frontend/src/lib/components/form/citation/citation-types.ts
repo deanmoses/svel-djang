@@ -10,6 +10,9 @@ export type ChildSource = components['schemas']['CitationSourceChildSchema'];
 export type RecognitionResult = components['schemas']['RecognitionSchema'];
 export type SearchResponse = components['schemas']['SearchResponse'];
 
+/** Draft metadata returned by the extract endpoint (Open Library, etc.). */
+export type ExtractionDraft = components['schemas']['ExtractDraftSchema'];
+
 /** Subset of a search result carried through the state machine after selecting an abstract source. */
 export type ParentContext = {
 	id: number;
@@ -37,12 +40,13 @@ export type CiteState =
 			draft: CitationInstanceDraft;
 			parent: ParentContext;
 	  }
-	/** User is creating a new source manually. */
+	/** User is creating a new source manually (or from an extraction draft). */
 	| {
 			stage: 'create';
 			draft: CitationInstanceDraft;
 			parent: ParentContext | null;
 			prefillName: string;
+			extractionDraft: ExtractionDraft | null;
 	  }
 	/** Source is chosen. User enters an optional locator (page number, URL fragment, etc.). */
 	| { stage: 'locator'; draft: CitationInstanceDraft };
@@ -55,6 +59,8 @@ export type CiteAction =
 	| { type: 'source_identified'; sourceId: number; sourceName: string; skipLocator: boolean }
 	/** User wants to create a new CitationSource. → create. */
 	| { type: 'source_create_started'; prefillName: string }
+	/** Extraction API returned a draft for user confirmation. → create (prefilled). */
+	| { type: 'extraction_draft_ready'; extractionDraft: ExtractionDraft }
 	/** New CitationSource was created via API. → locator. */
 	| { type: 'source_created'; sourceId: number; sourceName: string; skipLocator: boolean }
 	/** User submitted or skipped the locator. */
@@ -166,7 +172,19 @@ export function transition(state: CiteState, action: CiteAction): CiteState {
 				stage: 'create',
 				draft: state.draft,
 				parent: state.stage === 'identify' ? state.parent : null,
-				prefillName: action.prefillName
+				prefillName: action.prefillName,
+				extractionDraft: null
+			};
+		}
+
+		case 'extraction_draft_ready': {
+			if (state.stage !== 'search') return state;
+			return {
+				stage: 'create',
+				draft: state.draft,
+				parent: null,
+				prefillName: action.extractionDraft.name,
+				extractionDraft: action.extractionDraft
 			};
 		}
 

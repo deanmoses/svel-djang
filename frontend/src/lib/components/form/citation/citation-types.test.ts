@@ -8,7 +8,8 @@ import {
 	type CitationSourceResult,
 	type CiteState,
 	type CitationInstanceDraft,
-	type ParentContext
+	type ParentContext,
+	type ExtractionDraft
 } from './citation-types';
 
 // ---------------------------------------------------------------------------
@@ -289,7 +290,8 @@ describe('transition', () => {
 				stage: 'create',
 				draft: emptyDraft(),
 				parent: null,
-				prefillName: 'New Source'
+				prefillName: 'New Source',
+				extractionDraft: null
 			};
 			const next = transition(state, {
 				type: 'source_created',
@@ -309,7 +311,8 @@ describe('transition', () => {
 				stage: 'create',
 				draft: emptyDraft(),
 				parent: makeParent(),
-				prefillName: 'Web Child'
+				prefillName: 'Web Child',
+				extractionDraft: null
 			};
 			const next = transition(state, {
 				type: 'source_created',
@@ -320,6 +323,53 @@ describe('transition', () => {
 
 			expect(next.stage).toBe('locator');
 			expect(next.draft.skipLocator).toBe(true);
+		});
+	});
+
+	describe('extraction_draft_ready', () => {
+		const draft: ExtractionDraft = {
+			name: 'Learning Python',
+			source_type: 'book',
+			author: 'Mark Lutz',
+			publisher: "O'Reilly Media",
+			year: 2009,
+			isbn: '9780596517748'
+		};
+
+		it('from search → create with extractionDraft populated', () => {
+			const state = searchState();
+			const next = transition(state, { type: 'extraction_draft_ready', extractionDraft: draft });
+
+			expect(next.stage).toBe('create');
+			if (next.stage === 'create') {
+				expect(next.extractionDraft).toEqual(draft);
+				expect(next.prefillName).toBe('Learning Python');
+				expect(next.parent).toBeNull();
+			}
+		});
+
+		it('from identify → no-op', () => {
+			const state = identifyState();
+			const next = transition(state, { type: 'extraction_draft_ready', extractionDraft: draft });
+			expect(next).toBe(state);
+		});
+
+		it('from locator → no-op', () => {
+			const state: CiteState = { stage: 'locator', draft: emptyDraft() };
+			const next = transition(state, { type: 'extraction_draft_ready', extractionDraft: draft });
+			expect(next).toBe(state);
+		});
+	});
+
+	describe('source_create_started sets extractionDraft null', () => {
+		it('from search → create with extractionDraft: null', () => {
+			const state = searchState();
+			const next = transition(state, { type: 'source_create_started', prefillName: 'Manual' });
+
+			expect(next.stage).toBe('create');
+			if (next.stage === 'create') {
+				expect(next.extractionDraft).toBeNull();
+			}
 		});
 	});
 
@@ -354,7 +404,8 @@ describe('transition', () => {
 				stage: 'create',
 				draft: emptyDraft(),
 				parent: null,
-				prefillName: 'Y'
+				prefillName: 'Y',
+				extractionDraft: null
 			};
 			const next = transition(state, { type: 'source_create_started', prefillName: 'X' });
 			expect(next).toBe(state);

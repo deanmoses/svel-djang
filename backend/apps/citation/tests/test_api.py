@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import json
+from unittest.mock import patch
 
 import pytest
+from django.core.cache import cache
 
+from apps.citation.extraction import ExtractionDraft, ExtractionResult
 from apps.citation.models import CitationSource, CitationSourceLink
 
 pytestmark = pytest.mark.django_db
@@ -1199,3 +1202,145 @@ class TestUpdateCitationSourceLink:
             {"url": "https://other.com"},
         )
         assert resp.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# Extract
+# ---------------------------------------------------------------------------
+
+EXTRACT_URL = "/api/citation-sources/extract/"
+
+
+class TestExtractEndpoint:
+    @patch("apps.citation.api.extract_isbn")
+    def test_extract_isbn_returns_draft(self, mock_extract, client, user):
+        client.force_login(user)
+        mock_extract.return_value = ExtractionResult(
+            draft=ExtractionDraft(
+                name="Learning Python",
+                source_type="book",
+                author="Mark Lutz",
+                publisher="O'Reilly Media",
+                year=2009,
+                isbn="9780596517748",
+            ),
+            confidence="high",
+            source_api="openlibrary",
+        )
+        resp = _post(client, EXTRACT_URL, {"input": "978-0-596-51774-8"})
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["draft"]["name"] == "Learning Python"
+        assert data["draft"]["source_type"] == "book"
+        assert data["draft"]["author"] == "Mark Lutz"
+        assert data["draft"]["publisher"] == "O'Reilly Media"
+        assert data["draft"]["year"] == 2009
+        assert data["draft"]["isbn"] == "9780596517748"
+        assert data["draft"]["url"] is None
+        assert data["confidence"] == "high"
+        assert data["source_api"] == "openlibrary"
+        assert data["match"] is None
+        assert data["error"] is None
+
+    def test_extract_finds_existing_source(self, client, user):
+        client.force_login(user)
+        src = CitationSource.objects.create(
+            name="Learning Python", source_type="book", isbn="9780596517748"
+        )
+        resp = _post(client, EXTRACT_URL, {"input": "9780596517748"})
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["match"]["id"] == src.pk
+        assert data["match"]["name"] == "Learning Python"
+        assert data["match"]["skip_locator"] is False
+        assert data["draft"] is None
+
+    def test_extract_unsupported_input(self, client, user):
+        client.force_login(user)
+        resp = _post(client, EXTRACT_URL, {"input": "hello world"})
+        assert resp.status_code == 422
+
+    def test_extract_requires_auth(self, client):
+        resp = _post(client, EXTRACT_URL, {"input": "9780596517748"})
+        assert resp.status_code in (401, 403)
+
+    def test_extract_rate_limit(self, client, user):
+        cache.clear()
+        client.force_login(user)
+        CitationSource.objects.create(
+            name="Learning Python", source_type="book", isbn="9780596517748"
+        )
+
+        for _ in range(10):
+            resp = _post(client, EXTRACT_URL, {"input": "9780596517748"})
+            assert resp.status_code == 200
+
+        resp = _post(client, EXTRACT_URL, {"input": "9780596517748"})
+        assert resp.status_code == 429
+
+    @patch("apps.citation.api.extract_url")
+    def test_extract_url_returns_draft(self, mock_extract, client, user):
+        cache.clear()
+        client.force_login(user)
+        mock_extract.return_value = ExtractionResult(
+            draft=ExtractionDraft(
+                name="Pinball - Wikipedia",
+                source_type="web",
+                author="",
+                publisher="Wikipedia",
+                year=None,
+                url="https://en.wikipedia.org/wiki/Pinball",
+            ),
+            confidence="low",
+            source_api="og_meta",
+        )
+        resp = _post(
+            client, EXTRACT_URL, {"input": "https://en.wikipedia.org/wiki/Pinball"}
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["draft"]["name"] == "Pinball - Wikipedia"
+        assert data["draft"]["source_type"] == "web"
+        assert data["draft"]["url"] == "https://en.wikipedia.org/wiki/Pinball"
+        assert data["draft"]["publisher"] == "Wikipedia"
+        assert data["confidence"] == "low"
+        assert data["source_api"] == "og_meta"
+        assert data["match"] is None
+
+    @patch("apps.citation.api.extract_url")
+    def test_extract_url_returns_match(self, mock_extract, client, user):
+        cache.clear()
+        client.force_login(user)
+        mock_extract.return_value = ExtractionResult(
+            match={"id": 42, "name": "IPDB #4836", "skip_locator": True}
+        )
+        resp = _post(
+            client, EXTRACT_URL, {"input": "https://www.ipdb.org/machine.cgi?id=4836"}
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["match"]["id"] == 42
+        assert data["match"]["name"] == "IPDB #4836"
+        assert data["draft"] is None
+
+    @patch("apps.citation.api.extract_url")
+    def test_extract_url_returns_error(self, mock_extract, client, user):
+        cache.clear()
+        client.force_login(user)
+        mock_extract.return_value = ExtractionResult(error="blocked")
+        resp = _post(client, EXTRACT_URL, {"input": "http://localhost/admin"})
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["error"] == "blocked"
+        assert data["draft"] is None
+        assert data["match"] is None
+
+    def test_extract_url_classifies_correctly(self, client, user):
+        """URL input no longer returns 422 (unsupported)."""
+        cache.clear()
+        client.force_login(user)
+        with patch("apps.citation.api.extract_url") as mock_extract:
+            mock_extract.return_value = ExtractionResult(error="timeout")
+            resp = _post(client, EXTRACT_URL, {"input": "https://example.com"})
+            assert resp.status_code == 200
+            mock_extract.assert_called_once_with("https://example.com")

@@ -118,7 +118,11 @@ class TestImageLicenseDenormalization:
             [
                 {
                     "primary": True,
-                    "urls": {"small": "s.jpg", "medium": "m.jpg", "large": "l.jpg"},
+                    "urls": {
+                        "small": "https://img.opdb.org/s.jpg",
+                        "medium": "https://img.opdb.org/m.jpg",
+                        "large": "https://img.opdb.org/l.jpg",
+                    },
                 }
             ],
             source=opdb,
@@ -140,7 +144,11 @@ class TestImageLicenseDenormalization:
             [
                 {
                     "primary": True,
-                    "urls": {"small": "s.jpg", "medium": "m.jpg", "large": "l.jpg"},
+                    "urls": {
+                        "small": "https://img.opdb.org/s.jpg",
+                        "medium": "https://img.opdb.org/m.jpg",
+                        "large": "https://img.opdb.org/l.jpg",
+                    },
                 }
             ],
             source=opdb,
@@ -165,7 +173,13 @@ class TestExtractImageUrlsWithThreshold:
         """Images with rank below display threshold should be skipped."""
         extra_data = {
             "opdb.images": [
-                {"primary": True, "urls": {"medium": "m.jpg", "large": "l.jpg"}}
+                {
+                    "primary": True,
+                    "urls": {
+                        "medium": "https://img.opdb.org/m.jpg",
+                        "large": "https://img.opdb.org/l.jpg",
+                    },
+                }
             ],
             "opdb.images.__license_slug": "not-allowed",
             "opdb.images.__permissiveness_rank": 0,
@@ -178,20 +192,32 @@ class TestExtractImageUrlsWithThreshold:
         """When first source is below threshold, fall through to next."""
         extra_data = {
             "opdb.images": [
-                {"primary": True, "urls": {"medium": "opdb.jpg", "large": "opdb-l.jpg"}}
+                {
+                    "primary": True,
+                    "urls": {
+                        "medium": "https://img.opdb.org/opdb.jpg",
+                        "large": "https://img.opdb.org/opdb-l.jpg",
+                    },
+                }
             ],
             "opdb.images.__permissiveness_rank": 0,  # below threshold
-            "ipdb.image_urls": ["ipdb.jpg"],
+            "ipdb.image_urls": ["https://ipdb.org/ipdb.jpg"],
             "ipdb.image_urls.__permissiveness_rank": 85,  # above threshold
         }
         thumb, hero = _extract_image_urls(extra_data)
-        assert thumb == "ipdb.jpg"
+        assert thumb == "https://ipdb.org/ipdb.jpg"
 
     def test_null_rank_uses_unknown_rank(self):
         """Null permissiveness_rank (unknown license) should use UNKNOWN_LICENSE_RANK."""
         extra_data = {
             "opdb.images": [
-                {"primary": True, "urls": {"medium": "m.jpg", "large": "l.jpg"}}
+                {
+                    "primary": True,
+                    "urls": {
+                        "medium": "https://img.opdb.org/m.jpg",
+                        "large": "https://img.opdb.org/l.jpg",
+                    },
+                }
             ],
             "opdb.images.__permissiveness_rank": None,  # unknown
         }
@@ -206,13 +232,19 @@ class TestExtractImageUrlsWithThreshold:
 
         extra_data = {
             "opdb.images": [
-                {"primary": True, "urls": {"medium": "m.jpg", "large": "l.jpg"}}
+                {
+                    "primary": True,
+                    "urls": {
+                        "medium": "https://img.opdb.org/m.jpg",
+                        "large": "https://img.opdb.org/l.jpg",
+                    },
+                }
             ],
             "opdb.images.__permissiveness_rank": 0,
         }
         with override_config(CONTENT_DISPLAY_POLICY="show-all"):
             thumb, hero = _extract_image_urls(extra_data)
-        assert thumb == "m.jpg"
+        assert thumb == "https://img.opdb.org/m.jpg"
 
     def test_include_unknown_shows_null_rank(self):
         """With include-unknown policy, null-rank images display."""
@@ -220,10 +252,16 @@ class TestExtractImageUrlsWithThreshold:
 
         extra_data = {
             "opdb.images": [
-                {"primary": True, "urls": {"medium": "m.jpg", "large": "l.jpg"}}
+                {
+                    "primary": True,
+                    "urls": {
+                        "medium": "https://img.opdb.org/m.jpg",
+                        "large": "https://img.opdb.org/l.jpg",
+                    },
+                }
             ],
             "opdb.images.__permissiveness_rank": None,
         }
         with override_config(CONTENT_DISPLAY_POLICY="include-unknown"):
             thumb, hero = _extract_image_urls(extra_data)
-        assert thumb == "m.jpg"
+        assert thumb == "https://img.opdb.org/m.jpg"

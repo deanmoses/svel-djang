@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
-	import { pageTitle } from '$lib/constants';
 	import { formatYearRange, resolveHref } from '$lib/utils';
+	import MetaTags from '$lib/components/MetaTags.svelte';
 	import { auth } from '$lib/auth.svelte';
 	import PageHeader from '$lib/components/PageHeader.svelte';
 	import ExpandableSidebarList from '$lib/components/ExpandableSidebarList.svelte';
@@ -21,6 +21,7 @@
 	let slug = $derived(page.params.slug);
 
 	let yearsActive = $derived(formatYearRange(mfr.year_start, mfr.year_end));
+	let metaDescription = $derived(mfr.description?.text || `${mfr.name} — pinball manufacturer`);
 
 	$effect(() => {
 		auth.load();
@@ -51,9 +52,13 @@
 	}
 </script>
 
-<svelte:head>
-	<title>{pageTitle(mfr.name)}</title>
-</svelte:head>
+<MetaTags
+	title={mfr.name}
+	description={metaDescription}
+	url={page.url.href}
+	image={mfr.logo_url}
+	imageAlt={mfr.logo_url ? `${mfr.name} logo` : undefined}
+/>
 
 <article>
 	<PageHeader

@@ -206,3 +206,68 @@ export const CREATED_IPDB_CHILD = {
 
 /** Minimal response from POST /api/citation-instances/ — component reads id. */
 export const CREATED_INSTANCE = { id: 42 };
+
+// ---------------------------------------------------------------------------
+// Extraction responses — returned by POST /api/citation-sources/extract/
+// ---------------------------------------------------------------------------
+
+/** Successful extraction: Open Library returned book metadata. */
+export const EXTRACT_ISBN_DRAFT = {
+	draft: {
+		name: 'Learning Python',
+		source_type: 'book',
+		author: 'Mark Lutz',
+		publisher: "O'Reilly Media",
+		year: 2009,
+		isbn: '9780596517748',
+		url: null
+	},
+	match: null,
+	error: null,
+	confidence: 'high',
+	source_api: 'openlibrary'
+};
+
+/** ISBN matched an existing source in the database. */
+export const EXTRACT_ISBN_MATCH = {
+	draft: null,
+	match: { id: 1, name: 'The Encyclopedia of Pinball', skip_locator: false },
+	error: null,
+	confidence: '',
+	source_api: ''
+};
+
+/** Successful URL extraction: page metadata scraped. */
+export const EXTRACT_URL_DRAFT = {
+	draft: {
+		name: 'Pinball - Wikipedia',
+		source_type: 'web',
+		author: '',
+		publisher: 'Wikipedia',
+		year: null,
+		isbn: null,
+		url: 'https://en.wikipedia.org/wiki/Pinball'
+	},
+	match: null,
+	error: null,
+	confidence: 'low',
+	source_api: 'og_meta'
+};
+
+/** URL extraction matched an existing child source. */
+export const EXTRACT_URL_MATCH = {
+	draft: null,
+	match: { id: 42, name: 'IPDB #4836', skip_locator: true },
+	error: null,
+	confidence: '',
+	source_api: ''
+};
+
+/** URL extraction blocked by SSRF protection. */
+export const EXTRACT_URL_BLOCKED = {
+	draft: null,
+	match: null,
+	error: 'blocked',
+	confidence: '',
+	source_api: ''
+};

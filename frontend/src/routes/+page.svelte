@@ -5,6 +5,8 @@
 	import MachineCard from '$lib/components/cards/MachineCard.svelte';
 	import { SITE_NAME } from '$lib/constants';
 	import { resolveHref } from '$lib/utils';
+	import MetaTags from '$lib/components/MetaTags.svelte';
+	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import type { components } from '$lib/api/schema';
 
@@ -42,9 +44,13 @@
 	});
 </script>
 
-<svelte:head>
-	<title>{SITE_NAME}</title>
-</svelte:head>
+<MetaTags
+	title={SITE_NAME}
+	description="The encyclopedia of pinball machines, manufacturers, and the people who make them."
+	url={page.url.href}
+	image={`${page.url.origin}/og-default.png`}
+	imageAlt={SITE_NAME}
+/>
 
 <div class="home">
 	<form class="hero-search" onsubmit={handleSubmit}>

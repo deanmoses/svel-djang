@@ -122,8 +122,7 @@ def recognize_url(url: str) -> Recognition | None:
                 parent_name=parent.name,
                 child_id=child.id,
                 child_name=child.name,
-                child_skip_locator=child.source_type == "web"
-                and child.parent_id is not None,
+                child_skip_locator=child.skip_locator,
                 identifier=extracted_id,
             )
         return Recognition(
@@ -147,8 +146,7 @@ def recognize_url(url: str) -> Recognition | None:
             parent_name=child.parent.name,
             child_id=child.id,
             child_name=child.name,
-            child_skip_locator=child.source_type == "web"
-            and child.parent_id is not None,
+            child_skip_locator=child.skip_locator,
         )
 
     # --- Step 3: Domain match against homepage links -----------------------

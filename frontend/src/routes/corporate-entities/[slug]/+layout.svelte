@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
-	import { pageTitle } from '$lib/constants';
+	import { SITE_NAME } from '$lib/constants';
 	import { formatYearRange } from '$lib/utils';
+	import MetaTags from '$lib/components/MetaTags.svelte';
 	import { auth } from '$lib/auth.svelte';
 	import PageHeader from '$lib/components/PageHeader.svelte';
 	import AttributionLine from '$lib/components/AttributionLine.svelte';
@@ -33,9 +34,11 @@
 	let isEditHistory = $derived(page.url.pathname.endsWith('/edit-history'));
 </script>
 
-<svelte:head>
-	<title>{pageTitle(ce.name)}</title>
-</svelte:head>
+<MetaTags
+	title={ce.name}
+	description={ce.description?.text || `${ce.name} — ${SITE_NAME}`}
+	url={page.url.href}
+/>
 
 <article>
 	<PageHeader

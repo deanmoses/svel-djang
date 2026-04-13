@@ -86,7 +86,11 @@ OPDB_EXTRA_DATA = {
     "opdb.images": [
         {
             "primary": True,
-            "urls": {"small": "s.jpg", "medium": "m.jpg", "large": "l.jpg"},
+            "urls": {
+                "small": "https://img.opdb.org/s.jpg",
+                "medium": "https://img.opdb.org/m.jpg",
+                "large": "https://img.opdb.org/l.jpg",
+            },
         }
     ],
     "opdb.images.__permissiveness_rank": 50,
@@ -158,8 +162,8 @@ class TestUploadedFirstFallback:
         # asset__status="ready". Here we simulate that by passing an empty list.
         thumb, hero = _extract_image_urls(OPDB_EXTRA_DATA, primary_media=[])
 
-        assert thumb == "m.jpg"
-        assert hero == "l.jpg"
+        assert thumb == "https://img.opdb.org/m.jpg"
+        assert hero == "https://img.opdb.org/l.jpg"
 
     def test_no_uploaded_no_external(self):
         thumb, hero = _extract_image_urls({}, primary_media=[])
@@ -171,8 +175,24 @@ class TestUploadedFirstFallback:
         """When primary_media is not passed (None), falls through to external."""
         thumb, hero = _extract_image_urls(OPDB_EXTRA_DATA)
 
-        assert thumb == "m.jpg"
-        assert hero == "l.jpg"
+        assert thumb == "https://img.opdb.org/m.jpg"
+        assert hero == "https://img.opdb.org/l.jpg"
+
+    def test_relative_urls_are_skipped(self):
+        """Image URLs that aren't absolute should be treated as missing."""
+        extra_data = {
+            "opdb.images": [
+                {
+                    "primary": True,
+                    "urls": {"small": "s.jpg", "medium": "m.jpg", "large": "l.jpg"},
+                }
+            ],
+            "opdb.images.__permissiveness_rank": 50,
+        }
+        thumb, hero = _extract_image_urls(extra_data, primary_media=[])
+
+        assert thumb is None
+        assert hero is None
 
 
 # ---------------------------------------------------------------------------
@@ -223,7 +243,13 @@ class TestLicenseGating:
         """External images below threshold are hidden."""
         extra_data = {
             "opdb.images": [
-                {"primary": True, "urls": {"medium": "m.jpg", "large": "l.jpg"}}
+                {
+                    "primary": True,
+                    "urls": {
+                        "medium": "https://img.opdb.org/m.jpg",
+                        "large": "https://img.opdb.org/l.jpg",
+                    },
+                }
             ],
             "opdb.images.__permissiveness_rank": 0,
         }
@@ -310,8 +336,8 @@ class TestModelDetailApiResponse:
 
         assert resp.status_code == 200
         data = resp.json()
-        assert data["thumbnail_url"] == "m.jpg"
-        assert data["hero_image_url"] == "l.jpg"
+        assert data["thumbnail_url"] == "https://img.opdb.org/m.jpg"
+        assert data["hero_image_url"] == "https://img.opdb.org/l.jpg"
         assert data["image_attribution"]["license_slug"] == "cc-by-sa-4-0"
 
 
@@ -347,4 +373,4 @@ class TestModelListApiResponse:
         items = data["items"]
         match = [i for i in items if i["slug"] == machine_model.slug]
         assert len(match) == 1
-        assert match[0]["thumbnail_url"] == "m.jpg"
+        assert match[0]["thumbnail_url"] == "https://img.opdb.org/m.jpg"
