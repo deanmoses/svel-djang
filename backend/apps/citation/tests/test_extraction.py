@@ -55,7 +55,32 @@ class TestClassifyInput:
         assert classify_input("hello world") is None
         assert classify_input("12345") is None
         assert classify_input("") is None
-        assert classify_input("https://example.com") is None
+
+    def test_classify_url_https(self):
+        result = classify_input("https://example.com/page")
+        assert result == ("url", "https://example.com/page")
+
+    def test_classify_url_http(self):
+        result = classify_input("http://example.com/page")
+        assert result == ("url", "http://example.com/page")
+
+    def test_classify_url_strips_whitespace(self):
+        result = classify_input("  https://example.com/page  ")
+        assert result == ("url", "https://example.com/page")
+
+    def test_classify_bare_domain_returns_none(self):
+        assert classify_input("example.com") is None
+
+    def test_classify_url_no_hostname_returns_none(self):
+        assert classify_input("https://") is None
+
+    def test_classify_url_empty_authority_returns_none(self):
+        assert classify_input("http:///foo") is None
+
+    def test_classify_isbn_wins_over_url(self):
+        # ISBNs are digits only, so they can't start with http — but verify
+        # the priority: ISBN check runs first.
+        assert classify_input("9780596517748")[0] == "isbn"
 
 
 class TestNormalizeIsbn:
@@ -155,7 +180,7 @@ class TestExtractIsbnHappyPaths:
         result = extract_isbn("9780596517748")
         assert result.draft.name == "Learning Python"
         assert result.draft.author == "Mark Lutz"
-        mock_cache.get.assert_called_once_with("extract:v1:isbn:9780596517748")
+        mock_cache.get.assert_called_once_with("extract:v2:isbn:9780596517748")
 
     @patch("apps.citation.extraction.cache")
     @patch("apps.citation.extraction.urlopen")
@@ -190,7 +215,7 @@ class TestExtractIsbnHappyPaths:
         extract_isbn("9780596517748")
         mock_cache.set.assert_called_once()
         call_args = mock_cache.set.call_args
-        assert call_args[0][0] == "extract:v1:isbn:9780596517748"
+        assert call_args[0][0] == "extract:v2:isbn:9780596517748"
         assert call_args[0][2] == 60 * 60 * 24 * 7  # 7 days
 
 

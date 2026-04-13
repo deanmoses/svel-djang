@@ -65,6 +65,19 @@
 			: null
 	);
 
+	// -----------------------------------------------------------------------
+	// URL detection
+	// -----------------------------------------------------------------------
+
+	let urlInput = $derived(
+		!recognition &&
+			searchResults.length === 0 &&
+			searchQuery.trim() &&
+			(searchQuery.trim().startsWith('http://') || searchQuery.trim().startsWith('https://'))
+			? searchQuery.trim()
+			: null
+	);
+
 	// ARIA — per-instance IDs for combobox pattern
 	const uid = Math.random().toString(36).slice(2, 8);
 	const listboxId = `cite-search-${uid}`;
@@ -144,16 +157,21 @@
 
 	let hasRecognitionItem = $derived(recognitionItem !== null);
 	let hasIsbnItem = $derived(isbnInput !== null && !recognition);
+	let hasUrlItem = $derived(urlInput !== null && !recognition);
+	let hasExtractionItem = $derived(hasIsbnItem || hasUrlItem);
 	let showCreateNew = $derived(searchQuery.trim().length > 0 && !recognition);
-	let resultsStartIndex = $derived(hasRecognitionItem ? 1 : hasIsbnItem ? 1 : 0);
+	let resultsStartIndex = $derived(hasRecognitionItem ? 1 : hasExtractionItem ? 1 : 0);
 	let createNewIndex = $derived(resultsStartIndex + searchResults.length);
 	let totalItems = $derived(
-		(hasRecognitionItem ? 1 : hasIsbnItem ? 1 : 0) + searchResults.length + (showCreateNew ? 1 : 0)
+		(hasRecognitionItem ? 1 : hasExtractionItem ? 1 : 0) +
+			searchResults.length +
+			(showCreateNew ? 1 : 0)
 	);
 	let activeDescendant = $derived.by(() => {
 		if (activeIndex < 0 || activeIndex >= totalItems) return undefined;
 		if (hasRecognitionItem && activeIndex === 0) return itemId('recognition');
 		if (hasIsbnItem && activeIndex === 0) return itemId('isbn');
+		if (hasUrlItem && activeIndex === 0) return itemId('url');
 		if (activeIndex >= resultsStartIndex && activeIndex < createNewIndex)
 			return itemId(searchResults[activeIndex - resultsStartIndex].id);
 		if (activeIndex === createNewIndex) return itemId('create');
@@ -251,13 +269,13 @@
 		onsourcecreatestarted(searchQuery);
 	}
 
-	async function lookupIsbn(isbn: string) {
+	async function lookupExtraction(input: string, errorMessages: Record<string, string>) {
 		if (extracting) return;
 		extracting = true;
 		extractError = '';
 
 		const { data, error } = await client.POST('/api/citation-sources/extract/', {
-			body: { input: isbn }
+			body: { input }
 		});
 
 		extracting = false;
@@ -283,15 +301,25 @@
 			return;
 		}
 
-		if (data.error === 'not_found') {
-			extractError = 'ISBN not found. You can still create manually.';
-		} else if (data.error === 'timeout') {
-			extractError = 'Lookup timed out. You can still create manually.';
-		} else if (data.error === 'api_error') {
-			extractError = 'External service error. You can still create manually.';
-		} else {
-			extractError = 'Lookup failed. You can still create manually.';
-		}
+		extractError =
+			errorMessages[data.error ?? ''] ?? 'Lookup failed. You can still create manually.';
+	}
+
+	function lookupIsbn(isbn: string) {
+		lookupExtraction(isbn, {
+			not_found: 'ISBN not found. You can still create manually.',
+			timeout: 'Lookup timed out. You can still create manually.',
+			api_error: 'External service error. You can still create manually.'
+		});
+	}
+
+	function lookupUrl(url: string) {
+		lookupExtraction(url, {
+			not_found: 'Page not found. You can still create manually.',
+			blocked: 'URL not allowed. You can still create manually.',
+			timeout: 'Lookup timed out. You can still create manually.',
+			api_error: 'External service error. You can still create manually.'
+		});
 	}
 
 	// -----------------------------------------------------------------------
@@ -315,6 +343,8 @@
 					handleRecognitionSelect();
 				} else if (hasIsbnItem && activeIndex === 0) {
 					if (isbnInput) lookupIsbn(isbnInput);
+				} else if (hasUrlItem && activeIndex === 0) {
+					if (urlInput) lookupUrl(urlInput);
 				} else if (activeIndex >= resultsStartIndex && activeIndex < createNewIndex) {
 					selectSource(searchResults[activeIndex - resultsStartIndex]);
 				} else if (showCreateNew && activeIndex === createNewIndex) {
@@ -388,6 +418,21 @@
 				<span class="item-label">Look up ISBN {isbnInput}</span>
 			{/if}
 		</DropdownItem>
+	{:else if urlInput && !recognition}
+		<DropdownItem
+			id={itemId('url')}
+			active={activeIndex === 0}
+			onselect={() => {
+				if (urlInput) lookupUrl(urlInput);
+			}}
+			onhover={() => (activeIndex = 0)}
+		>
+			{#if extracting}
+				<span class="item-label extract-loading">Looking up URL…</span>
+			{:else}
+				<span class="item-label">Look up URL</span>
+			{/if}
+		</DropdownItem>
 	{/if}
 	{#if extractError}
 		<div class="create-error">{extractError}</div>
@@ -418,7 +463,7 @@
 	{/if}
 	{#if !recognition && !searchResults.length && !searchQuery.trim()}
 		<div class="no-results">Type to search sources…</div>
-	{:else if !recognition && !searchResults.length && searchQuery.trim() && !isbnInput}
+	{:else if !recognition && !searchResults.length && searchQuery.trim() && !isbnInput && !urlInput}
 		<div class="no-results">No matches</div>
 	{/if}
 </div>

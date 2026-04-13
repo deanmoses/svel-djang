@@ -43,7 +43,8 @@
 	let publisher = $state(extractionDraft?.publisher ?? '');
 	// svelte-ignore state_referenced_locally
 	let year = $state<number | null>(extractionDraft?.year ?? null);
-	let url = $state('');
+	// svelte-ignore state_referenced_locally
+	let url = $state(extractionDraft?.url ?? '');
 	let error = $state('');
 	let submitting = $state(false);
 	let nameInputEl: HTMLInputElement | undefined = $state();
@@ -139,6 +140,9 @@
 			{/each}
 		</div>
 	{/if}
+	{#if extractionDraft && sourceType === 'web'}
+		<div class="extraction-note">Scraped from page — review before saving</div>
+	{/if}
 	<input
 		bind:this={nameInputEl}
 		type="text"
@@ -230,6 +234,12 @@
 	.type-chip.selected {
 		background-color: var(--color-input-focus-ring);
 		border-color: var(--color-input-focus);
+	}
+
+	.extraction-note {
+		color: var(--color-text-muted);
+		font-size: var(--font-size-0);
+		font-style: italic;
 	}
 
 	.form-error {

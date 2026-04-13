@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+from urllib.parse import urlparse
 import socket
 import time
 from dataclasses import dataclass
@@ -28,11 +29,12 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ExtractionDraft:
     name: str
-    source_type: str  # always "book" for ISBN
-    author: str  # may be "" if author lookup failed
-    publisher: str
-    year: int | None
-    isbn: str
+    source_type: str  # "book" for ISBN, "web" for URL
+    author: str  # common — always present, may be ""
+    publisher: str  # common — always present, may be ""
+    year: int | None = None  # common — semantically optional
+    isbn: str | None = None  # type-specific — only book drafts
+    url: str | None = None  # type-specific — only web drafts
 
 
 @dataclass
@@ -62,12 +64,16 @@ def normalize_isbn(raw: str) -> str | None:
 def classify_input(raw: str) -> tuple[str, str] | None:
     """Determine what kind of evidence *raw* is.
 
-    Returns ``("isbn", normalized)`` or ``None``.
-    Future: add ``"doi"``, ``"url"`` branches.
+    Returns ``("isbn", normalized)``, ``("url", url)``, or ``None``.
+    ISBN always wins.  URL requires explicit ``http(s)://`` scheme.
     """
     isbn = normalize_isbn(raw)
     if isbn is not None:
         return ("isbn", isbn)
+    stripped = raw.strip()
+    if stripped.startswith("http://") or stripped.startswith("https://"):
+        if urlparse(stripped).hostname:
+            return ("url", stripped)
     return None
 
 
@@ -108,7 +114,7 @@ def extract_isbn(isbn: str) -> ExtractionResult:
         )
 
     # 2. Cache check
-    cache_key = f"extract:v1:isbn:{isbn}"
+    cache_key = f"extract:v2:isbn:{isbn}"
     cached = cache.get(cache_key)
     if cached is not None:
         return cached

@@ -6,6 +6,7 @@ Auto-discovered via the ``routers`` list convention in config/api.py.
 
 from __future__ import annotations
 
+from dataclasses import asdict
 from typing import Optional
 
 from django.core.exceptions import ValidationError
@@ -22,6 +23,7 @@ from pydantic import field_validator
 from ninja.throttling import AuthRateThrottle
 
 from .extraction import classify_input, extract_isbn, normalize_isbn
+from .url_extraction import extract_url
 from .extractors import EXTRACTORS, recognize_url
 from .models import CitationSource, CitationSourceLink
 
@@ -201,7 +203,8 @@ class ExtractDraftSchema(Schema):
     author: str
     publisher: str
     year: Optional[int] = None
-    isbn: str
+    isbn: Optional[str] = None
+    url: Optional[str] = None
 
 
 class ExtractMatchSchema(Schema):
@@ -483,21 +486,19 @@ def extract_citation_source(request, data: ExtractRequestSchema):
     if classified is None:
         raise HttpError(422, "Unsupported input")
 
-    _, normalized = classified
-    result = extract_isbn(normalized)
+    kind, normalized = classified
+    if kind == "isbn":
+        result = extract_isbn(normalized)
+    elif kind == "url":
+        result = extract_url(normalized)
+    else:
+        raise HttpError(422, "Unsupported input")
 
     resp = {}
     if result.match:
         resp["match"] = result.match
     if result.draft:
-        resp["draft"] = {
-            "name": result.draft.name,
-            "source_type": result.draft.source_type,
-            "author": result.draft.author,
-            "publisher": result.draft.publisher,
-            "year": result.draft.year,
-            "isbn": result.draft.isbn,
-        }
+        resp["draft"] = asdict(result.draft)
     if result.error:
         resp["error"] = result.error
     resp["confidence"] = result.confidence
