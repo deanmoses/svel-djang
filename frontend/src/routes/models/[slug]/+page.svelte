@@ -1,8 +1,5 @@
 <script lang="ts">
-	import ModelDetailBody from '$lib/components/ModelDetailBody.svelte';
-
-	let { data } = $props();
-	let model = $derived(data.model);
+	// Content is rendered by the layout's accordion sections.
+	// This page exists for the route; +page.server.ts handles the
+	// single-model-title redirect.
 </script>
-
-<ModelDetailBody {model} />

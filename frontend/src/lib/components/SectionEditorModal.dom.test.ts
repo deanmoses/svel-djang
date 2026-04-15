@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import SectionEditorModalErrorFixture from './SectionEditorModal.error-fixture.svelte';
 import SectionEditorModalFixture from './SectionEditorModal.fixture.svelte';
 
 function renderModal() {
@@ -90,5 +91,21 @@ describe('SectionEditorModal', () => {
 		// Tab from last focusable wraps to first focusable
 		await user.keyboard('{Tab}');
 		expect(closeButton).toHaveFocus();
+	});
+
+	it('displays the error message when error prop is set', () => {
+		render(SectionEditorModalErrorFixture, {
+			props: { error: 'Something went wrong' }
+		});
+
+		expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+	});
+
+	it('does not display an error message when error prop is empty', () => {
+		render(SectionEditorModalErrorFixture, {
+			props: { error: '' }
+		});
+
+		expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument();
 	});
 });

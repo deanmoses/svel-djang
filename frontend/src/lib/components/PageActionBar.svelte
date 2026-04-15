@@ -2,31 +2,50 @@
 	import ActionMenu from '$lib/components/ActionMenu.svelte';
 
 	type Props = {
-		editHref: string;
+		detailHref?: string;
+		editHref?: string;
 		historyHref: string;
 		sourcesHref: string;
 	};
 
-	let { editHref, historyHref, sourcesHref }: Props = $props();
+	let { detailHref, editHref, historyHref, sourcesHref }: Props = $props();
 </script>
 
 <nav aria-label="Page actions">
-	<a href={editHref}>Edit</a>
-	<a href={historyHref}>History</a>
-	<ActionMenu label="Tools">
-		<a class="tools-item" href={sourcesHref} role="menuitem">Sources</a>
-	</ActionMenu>
+	{#if detailHref}
+		<a class="detail-link" href={detailHref}>Detail</a>
+	{/if}
+	<div class="actions">
+		{#if editHref}
+			<a href={editHref}>Edit</a>
+		{/if}
+		<a href={historyHref}>History</a>
+		<ActionMenu label="Tools">
+			<a class="tools-item" href={sourcesHref} role="menuitem">Sources</a>
+		</ActionMenu>
+	</div>
 </nav>
 
 <style>
 	nav {
 		display: flex;
 		align-items: center;
-		justify-content: flex-end;
+		justify-content: space-between;
 		gap: var(--size-4);
 		padding: var(--size-2) 0 var(--size-3);
 		border-bottom: 1px solid var(--color-border-soft);
 		margin-bottom: var(--size-4);
+	}
+
+	.actions {
+		display: flex;
+		align-items: center;
+		gap: var(--size-4);
+		margin-left: auto;
+	}
+
+	.detail-link::before {
+		content: '← ';
 	}
 
 	nav a {

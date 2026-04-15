@@ -7,10 +7,14 @@
 
 	let {
 		html,
-		citations = undefined
+		citations = undefined,
+		showReferences = true,
+		onNavigateToRef = undefined
 	}: {
 		html: string;
 		citations?: InlineCitation[];
+		showReferences?: boolean;
+		onNavigateToRef?: (index: number) => void;
 	} = $props();
 
 	let container: HTMLDivElement | undefined = $state();
@@ -40,9 +44,9 @@
 	{container}
 	htmlSignal={html}
 	{citations}
-	onNavigate={citations && citations.length > 0 ? scrollToRef : undefined}
+	onNavigate={onNavigateToRef ?? (citations && citations.length > 0 ? scrollToRef : undefined)}
 />
-{#if citations && citations.length > 0}
+{#if showReferences && citations && citations.length > 0}
 	<div bind:this={refsSection}>
 		<ReferencesSection {citations} bind:open={refsOpen} onBackLink={scrollToInlineMarker} />
 	</div>

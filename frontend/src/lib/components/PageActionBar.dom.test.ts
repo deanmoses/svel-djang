@@ -24,4 +24,17 @@ describe('PageActionBar', () => {
 		);
 		expect(screen.getByRole('button', { name: 'Tools' })).toBeInTheDocument();
 	});
+
+	it('hides the Edit link when editHref is omitted', () => {
+		render(PageActionBar, {
+			props: {
+				historyHref: '/models/medieval-madness/history',
+				sourcesHref: '/models/medieval-madness/sources'
+			}
+		});
+
+		expect(screen.queryByRole('link', { name: 'Edit' })).not.toBeInTheDocument();
+		expect(screen.getByRole('link', { name: 'History' })).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: 'Tools' })).toBeInTheDocument();
+	});
 });

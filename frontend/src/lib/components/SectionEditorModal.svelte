@@ -5,12 +5,14 @@
 	let {
 		heading,
 		open,
+		error = '',
 		onclose,
 		onsave,
 		children
 	}: {
 		heading: string;
 		open: boolean;
+		error?: string;
 		onclose: () => void;
 		onsave: () => void;
 		children: Snippet;
@@ -128,6 +130,9 @@
 			</header>
 
 			<div class="modal-body" id={bodyId}>
+				{#if error}
+					<p class="save-error">{error}</p>
+				{/if}
 				{@render children()}
 			</div>
 
@@ -248,6 +253,12 @@
 
 	.btn-save:hover {
 		opacity: 0.9;
+	}
+
+	.save-error {
+		color: var(--color-error, #d32f2f);
+		font-size: var(--font-size-1);
+		margin: 0 0 var(--size-3);
 	}
 
 	/* Mobile: full-screen modal */

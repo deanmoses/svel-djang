@@ -4,7 +4,7 @@
 
 	type Credit = components['schemas']['CreditSchema'];
 
-	let { credits }: { credits: Credit[] } = $props();
+	let { credits, showHeading = true }: { credits: Credit[]; showHeading?: boolean } = $props();
 
 	let grouped = $derived.by(() => {
 		const groups: { role: string; people: { name: string; slug: string }[] }[] = [];
@@ -25,7 +25,7 @@
 
 {#if credits.length > 0}
 	<section class="credits">
-		<h2>Credits</h2>
+		{#if showHeading}<h2>Credits</h2>{/if}
 		<dl>
 			{#each grouped as group (group.role)}
 				<div class="credit-row">

@@ -1,6 +1,4 @@
-import { render } from 'svelte/server';
 import { describe, expect, it, vi } from 'vitest';
-import Page from './+page.svelte';
 import { load } from './+layout.server';
 
 const MOCK_MODEL = {
@@ -97,13 +95,6 @@ describe('model detail SSR route', () => {
 		).rejects.toMatchObject({ status: 404 });
 	});
 
-	it('renders meaningful model content into initial HTML', () => {
-		const { body } = render(Page, {
-			props: {
-				data: { model: MOCK_MODEL }
-			}
-		});
-
-		expect(body).toContain('Pat Lawlor');
-	});
+	// Credits and other content are rendered by the layout's accordion
+	// sections, not by +page.svelte (which is now an empty shell).
 });
