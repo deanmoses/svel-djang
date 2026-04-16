@@ -1,14 +1,17 @@
 <script lang="ts">
-	import type { components } from '$lib/api/schema';
-	import PeopleEditor from './PeopleEditor.svelte';
+	import RelationshipsEditor from './RelationshipsEditor.svelte';
 
-	type Credit = components['schemas']['CreditSchema'];
+	type RelationshipsModel = {
+		variant_of?: { slug: string } | null;
+		converted_from?: { slug: string } | null;
+		remake_of?: { slug: string } | null;
+	};
 
 	let {
-		initialCredits = [],
+		initialModel,
 		slug = 'medieval-madness'
 	}: {
-		initialCredits?: Credit[];
+		initialModel: RelationshipsModel;
 		slug?: string;
 	} = $props();
 
@@ -23,22 +26,14 @@
 				isDirty(): boolean;
 		  }
 		| undefined = $state();
-
-	function handleSaved() {
-		savedCount++;
-	}
-
-	function handleError(msg: string) {
-		lastError = msg;
-	}
 </script>
 
-<PeopleEditor
+<RelationshipsEditor
 	bind:this={editorRef}
-	{initialCredits}
+	{initialModel}
 	{slug}
-	onsaved={handleSaved}
-	onerror={handleError}
+	onsaved={() => savedCount++}
+	onerror={(message) => (lastError = message)}
 	ondirtychange={(dirty) => (dirtyFromCallback = dirty)}
 />
 

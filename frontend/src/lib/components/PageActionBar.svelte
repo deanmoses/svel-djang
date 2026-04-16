@@ -1,17 +1,12 @@
 <script lang="ts">
 	import EditSectionMenu from '$lib/components/EditSectionMenu.svelte';
+	import type { EditSectionMenuItem } from '$lib/components/edit-section-menu';
 	import ActionMenu from '$lib/components/ActionMenu.svelte';
-
-	type EditSectionItem = {
-		label: string;
-		href?: string;
-		onclick?: () => void;
-	};
 
 	type Props = {
 		detailHref?: string;
 		editHref?: string;
-		editSections?: EditSectionItem[];
+		editSections?: EditSectionMenuItem[];
 		historyHref: string;
 		sourcesHref: string;
 	};
@@ -21,7 +16,7 @@
 
 <nav aria-label="Page actions">
 	{#if detailHref}
-		<a class="detail-link" href={detailHref}>Detail</a>
+		<a class="detail-link" href={detailHref}>Back</a>
 	{/if}
 	<div class="actions">
 		{#if editSections.length > 0}

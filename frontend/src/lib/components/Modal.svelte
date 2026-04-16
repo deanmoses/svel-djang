@@ -6,12 +6,14 @@
 		title,
 		open,
 		onclose,
+		headerActions,
 		footer,
 		children
 	}: {
 		title: string;
 		open: boolean;
 		onclose: () => void;
+		headerActions?: Snippet;
 		footer?: Snippet;
 		children: Snippet;
 	} = $props();
@@ -121,7 +123,14 @@
 			bind:this={dialogEl}
 		>
 			<header class="modal-header">
-				<h2 id={titleId}>{title}</h2>
+				<div class="header-main">
+					<h2 id={titleId}>{title}</h2>
+					{#if headerActions}
+						<div class="header-actions">
+							{@render headerActions()}
+						</div>
+					{/if}
+				</div>
 				<button
 					type="button"
 					class="close-btn"
@@ -183,9 +192,19 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		gap: var(--size-3);
 		padding: var(--size-3) var(--size-4);
 		border-bottom: 1px solid var(--color-border-soft);
 		flex-shrink: 0;
+	}
+
+	.header-main {
+		display: flex;
+		flex: 1;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--size-3);
+		min-width: 0;
 	}
 
 	.modal-header h2 {
@@ -193,6 +212,11 @@
 		font-weight: 600;
 		margin: 0;
 		color: var(--color-text-primary);
+		min-width: 0;
+	}
+
+	.header-actions {
+		flex-shrink: 0;
 	}
 
 	.close-btn {

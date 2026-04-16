@@ -40,15 +40,39 @@ describe('saveModelClaims', () => {
 		expect(invalidateAll).toHaveBeenCalledOnce();
 	});
 
-	it('returns error string on failure', async () => {
-		PATCH.mockResolvedValue({ data: undefined, error: { detail: 'bad request' } });
-
-		const result = await saveModelClaims('medieval-madness', {
-			fields: { description: 'x' }
+	it('extracts detail string from error object', async () => {
+		PATCH.mockResolvedValue({
+			data: undefined,
+			error: { detail: 'Ensure this value is less than or equal to 10.' }
 		});
 
-		expect(result).toEqual({ ok: false, error: '{"detail":"bad request"}' });
+		const result = await saveModelClaims('medieval-madness', {
+			fields: { pinside_rating: 10234 }
+		});
+
+		expect(result).toEqual({ ok: false, error: 'Ensure this value is less than or equal to 10.' });
 		expect(invalidateAll).not.toHaveBeenCalled();
+	});
+
+	it('joins array-of-objects detail into a readable message', async () => {
+		PATCH.mockResolvedValue({
+			data: undefined,
+			error: {
+				detail: [
+					{
+						loc: ['body', 'fields', 'year'],
+						msg: 'value is not a valid integer',
+						type: 'type_error'
+					}
+				]
+			}
+		});
+
+		const result = await saveModelClaims('medieval-madness', {
+			fields: { year: 'not-a-number' }
+		});
+
+		expect(result).toEqual({ ok: false, error: 'year: value is not a valid integer' });
 	});
 
 	it('handles string errors', async () => {
@@ -59,6 +83,16 @@ describe('saveModelClaims', () => {
 		});
 
 		expect(result).toEqual({ ok: false, error: 'Something went wrong' });
+	});
+
+	it('falls back to JSON for unknown error shapes', async () => {
+		PATCH.mockResolvedValue({ data: undefined, error: { unexpected: 'shape' } });
+
+		const result = await saveModelClaims('medieval-madness', {
+			fields: { description: 'x' }
+		});
+
+		expect(result).toEqual({ ok: false, error: '{"unexpected":"shape"}' });
 	});
 
 	it('sends credits-only body with default fields', async () => {

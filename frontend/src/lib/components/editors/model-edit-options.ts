@@ -25,11 +25,22 @@ export const EMPTY_EDIT_OPTIONS: ModelEditOptions = {
 	corporate_entities: [],
 	people: [],
 	credit_roles: [],
+	titles: [],
 	models: []
 };
 
-/** Fetch model edit options. Returns the empty shape until the request resolves. */
-export async function fetchModelEditOptions(): Promise<ModelEditOptions> {
-	const { data } = await client.GET('/api/models/edit-options/');
-	return data ?? EMPTY_EDIT_OPTIONS;
+let cached: Promise<ModelEditOptions> | null = null;
+
+/** Fetch model edit options (cached for the session). */
+export function fetchModelEditOptions(): Promise<ModelEditOptions> {
+	if (!cached) {
+		cached = client
+			.GET('/api/models/edit-options/')
+			.then(({ data }) => data ?? EMPTY_EDIT_OPTIONS)
+			.catch(() => {
+				cached = null;
+				return EMPTY_EDIT_OPTIONS;
+			});
+	}
+	return cached;
 }

@@ -1,12 +1,10 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { type EditCitationSelection } from '$lib/edit-citation';
-	import Button from '$lib/components/Button.svelte';
-	import EditCitationField from '$lib/components/form/EditCitationField.svelte';
-	import TextField from '$lib/components/form/TextField.svelte';
+	import type { SaveMeta } from '$lib/components/editors/save-model-claims';
+	import EditSectionMenu from '$lib/components/EditSectionMenu.svelte';
+	import type { EditSectionMenuItem } from '$lib/components/edit-section-menu';
 	import Modal from '$lib/components/Modal.svelte';
-
-	type ModalSaveMeta = { note: string; citation: EditCitationSelection | null };
+	import SectionEditorForm from '$lib/components/SectionEditorForm.svelte';
 
 	let {
 		heading,
@@ -14,6 +12,9 @@
 		error = '',
 		showCitation = true,
 		showMixedEditWarning = false,
+		switcherItems = [],
+		currentSectionKey = undefined,
+		switcherDisabled = false,
 		onclose,
 		onsave,
 		children
@@ -23,19 +24,20 @@
 		error?: string;
 		showCitation?: boolean;
 		showMixedEditWarning?: boolean;
+		switcherItems?: EditSectionMenuItem[];
+		currentSectionKey?: string;
+		switcherDisabled?: boolean;
 		onclose: () => void;
-		onsave: (meta: ModalSaveMeta) => void;
+		onsave: (meta: SaveMeta) => void;
 		children: Snippet;
 	} = $props();
 
-	let note = $state('');
-	let citation = $state<EditCitationSelection | null>(null);
+	let formRef: SectionEditorForm | undefined = $state();
 
 	// Reset note/citation state when the modal opens
 	$effect(() => {
 		if (open) {
-			note = '';
-			citation = null;
+			formRef?.resetMeta();
 		}
 	});
 
@@ -45,72 +47,23 @@
 </script>
 
 <Modal title={`Edit ${heading}`} {open} onclose={close}>
-	{#if error}
-		<p class="save-error">{error}</p>
-	{/if}
-	{@render children()}
-
-	<details class="meta-section">
-		<summary>{showCitation ? 'Notes & Citations' : 'Notes'}</summary>
-		<div class="meta-fields">
-			<TextField
-				label="Edit note"
-				bind:value={note}
-				placeholder="Why are you making this change?"
+	{#snippet headerActions()}
+		{#if switcherItems.length > 0}
+			<EditSectionMenu
+				items={switcherItems}
+				currentKey={currentSectionKey}
+				disabled={switcherDisabled}
 			/>
-			{#if showCitation}
-				<EditCitationField bind:citation {showMixedEditWarning} />
-			{/if}
-		</div>
-	</details>
-
-	{#snippet footer()}
-		<button type="button" class="btn-cancel" onclick={close}>Cancel</button>
-		<Button onclick={() => onsave({ note, citation })}>Save</Button>
+		{/if}
 	{/snippet}
+	<SectionEditorForm
+		bind:this={formRef}
+		{error}
+		{showCitation}
+		{showMixedEditWarning}
+		oncancel={close}
+		{onsave}
+	>
+		{@render children()}
+	</SectionEditorForm>
 </Modal>
-
-<style>
-	.btn-cancel {
-		background: none;
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-2);
-		padding: var(--size-1) var(--size-3);
-		font-size: var(--font-size-1);
-		color: var(--color-text-muted);
-		cursor: pointer;
-	}
-
-	.btn-cancel:hover {
-		color: var(--color-text-primary);
-		border-color: var(--color-text-muted);
-	}
-
-	.save-error {
-		color: var(--color-error, #d32f2f);
-		font-size: var(--font-size-1);
-		margin: 0 0 var(--size-3);
-	}
-
-	.meta-section {
-		margin-top: var(--size-4);
-		border-top: 1px solid var(--color-border-soft);
-		padding-top: var(--size-3);
-		background: inherit;
-	}
-
-	.meta-section > summary {
-		cursor: pointer;
-		font-size: var(--font-size-0);
-		color: var(--color-text-muted);
-		user-select: none;
-		background: inherit;
-	}
-
-	.meta-fields {
-		display: flex;
-		flex-direction: column;
-		gap: var(--size-3);
-		margin-top: var(--size-3);
-	}
-</style>

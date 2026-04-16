@@ -1,0 +1,25 @@
+export type EditSectionMenuItem = {
+	key: string;
+	label: string;
+	href?: string;
+	onclick?: () => void;
+};
+
+/**
+ * Get a callback for a menu item — navigates to `href` or calls `onclick`.
+ * Returns `undefined` when the item is not found (useful for auth gating:
+ * pass an empty array when unauthenticated).
+ */
+export function getMenuItemAction(
+	items: EditSectionMenuItem[],
+	key: string,
+	navigate: (href: string) => void
+): (() => void) | undefined {
+	const item = items.find((i) => i.key === key);
+	if (!item) return undefined;
+	if (item.href) {
+		const href = item.href;
+		return () => navigate(href);
+	}
+	return item.onclick;
+}

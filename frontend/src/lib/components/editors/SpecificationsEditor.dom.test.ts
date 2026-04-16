@@ -123,6 +123,25 @@ describe('SpecificationsEditor', () => {
 		expect(screen.getByLabelText('Production quantity')).toHaveValue(4016);
 	});
 
+	it('reports clean state initially and dirty state after editing', async () => {
+		const user = userEvent.setup();
+		renderEditor();
+
+		expect(screen.getByTestId('dirty-callback')).toHaveTextContent('false');
+
+		await user.click(screen.getByRole('button', { name: 'Check dirty' }));
+		expect(screen.getByTestId('dirty-handle')).toHaveTextContent('false');
+
+		const flippersInput = screen.getByLabelText('Flippers');
+		await user.clear(flippersInput);
+		await user.type(flippersInput, '3');
+
+		expect(screen.getByTestId('dirty-callback')).toHaveTextContent('true');
+
+		await user.click(screen.getByRole('button', { name: 'Check dirty' }));
+		expect(screen.getByTestId('dirty-handle')).toHaveTextContent('true');
+	});
+
 	it('save() with no changes calls onsaved() without PATCHing', async () => {
 		const user = userEvent.setup();
 		renderEditor();

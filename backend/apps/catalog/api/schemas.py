@@ -93,6 +93,7 @@ class ModelEditOptionsSchema(Schema):
     corporate_entities: list[EditOptionItem]
     people: list[EditOptionItem]
     credit_roles: list[EditOptionItem]
+    titles: list[EditOptionItem]
     models: list[EditOptionItem]
 
 

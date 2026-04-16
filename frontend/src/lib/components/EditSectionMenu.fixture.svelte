@@ -4,8 +4,16 @@
 
 <EditSectionMenu
 	items={[
-		{ label: 'Overview', href: '/models/medieval-madness/edit/overview' },
-		{ label: 'Specifications', href: '/models/medieval-madness/edit/specifications' },
-		{ label: 'Relationships', href: '/models/medieval-madness/edit/relationships' }
+		{ key: 'overview', label: 'Overview', href: '/models/medieval-madness/edit/overview' },
+		{
+			key: 'specifications',
+			label: 'Specifications',
+			href: '/models/medieval-madness/edit/specifications'
+		},
+		{
+			key: 'relationships',
+			label: 'Relationships',
+			href: '/models/medieval-madness/edit/relationships'
+		}
 	]}
 />

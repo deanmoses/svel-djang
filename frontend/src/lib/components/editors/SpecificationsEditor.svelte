@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import SearchableSelect from '$lib/components/SearchableSelect.svelte';
+	import Fieldset from '$lib/components/form/Fieldset.svelte';
 	import NumberField from '$lib/components/form/NumberField.svelte';
 	import { fetchFieldConstraints, fc, type FieldConstraints } from '$lib/field-constraints';
 	import { diffScalarFields } from '$lib/edit-helpers';
+	import type { EditorDirtyChange } from './editor-contract';
 	import {
 		EMPTY_EDIT_OPTIONS,
 		fetchModelEditOptions,
@@ -49,12 +51,14 @@
 		initialModel,
 		slug,
 		onsaved,
-		onerror
+		onerror,
+		ondirtychange = () => {}
 	}: {
 		initialModel: SpecsModel;
 		slug: string;
 		onsaved: () => void;
 		onerror: (message: string) => void;
+		ondirtychange?: EditorDirtyChange;
 	} = $props();
 
 	type SpecFormFields = {
@@ -88,6 +92,7 @@
 	// untrack: intentional one-time capture; component re-mounts when modal reopens
 	const original = untrack(() => extractFields(initialModel));
 	let fields = $state<SpecFormFields>({ ...original });
+	let dirty = $derived.by(() => Object.keys(diffScalarFields(fields, original)).length > 0);
 
 	let editOptions = $state<ModelEditOptions>(EMPTY_EDIT_OPTIONS);
 	let constraints = $state<FieldConstraints>({});
@@ -104,10 +109,18 @@
 		});
 	});
 
+	$effect(() => {
+		ondirtychange(dirty);
+	});
+
+	export function isDirty(): boolean {
+		return dirty;
+	}
+
 	export async function save(meta?: SaveMeta): Promise<void> {
 		const changed = diffScalarFields(fields, original);
 
-		if (Object.keys(changed).length === 0) {
+		if (!dirty) {
 			onsaved();
 			return;
 		}
@@ -126,8 +139,7 @@
 </script>
 
 <div class="specs-editor">
-	<fieldset class="field-group">
-		<legend>Technology</legend>
+	<Fieldset legend="Technology">
 		<div class="specs-grid">
 			{#each TECHNOLOGY_FIELDS as fk (fk.field)}
 				<SearchableSelect
@@ -140,10 +152,9 @@
 				/>
 			{/each}
 		</div>
-	</fieldset>
+	</Fieldset>
 
-	<fieldset class="field-group">
-		<legend>Machine Facts</legend>
+	<Fieldset legend="Machine Facts">
 		<div class="specs-grid">
 			<NumberField
 				label="Players"
@@ -167,7 +178,7 @@
 			{/each}
 			<NumberField label="Production quantity" bind:value={fields.production_quantity} min={0} />
 		</div>
-	</fieldset>
+	</Fieldset>
 </div>
 
 <style>
@@ -175,20 +186,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--size-3);
-	}
-
-	.field-group {
-		border: 1px solid var(--color-border-soft);
-		border-radius: var(--radius-2);
-		padding: var(--size-3);
-		margin: 0;
-	}
-
-	.field-group > legend {
-		font-size: var(--font-size-1);
-		font-weight: 500;
-		color: var(--color-text-muted);
-		padding: 0 var(--size-1);
 	}
 
 	.specs-grid {

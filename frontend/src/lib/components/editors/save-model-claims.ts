@@ -40,6 +40,25 @@ export type SaveMeta = {
 
 export type SaveResult = { ok: true } | { ok: false; error: string };
 
+/** Extract a human-readable message from a Django Ninja error response. */
+function formatApiError(error: unknown): string {
+	if (typeof error === 'string') return error;
+	if (typeof error === 'object' && error !== null && 'detail' in error) {
+		const { detail } = error as { detail: unknown };
+		if (typeof detail === 'string') return detail;
+		// Pydantic validation: [{ loc: [...], msg: "..." }, ...]
+		if (Array.isArray(detail)) {
+			return detail
+				.map((e) => {
+					const loc = Array.isArray(e.loc) ? e.loc[e.loc.length - 1] : '';
+					return loc ? `${loc}: ${e.msg}` : e.msg;
+				})
+				.join('; ');
+		}
+	}
+	return JSON.stringify(error);
+}
+
 /**
  * PATCH model claims and invalidate page data.
  * Returns `{ ok: true }` on success, or `{ ok: false, error }` on failure.
@@ -51,8 +70,7 @@ export async function saveModelClaims(slug: string, body: SectionPatchBody): Pro
 	});
 
 	if (error) {
-		const message = typeof error === 'string' ? error : JSON.stringify(error);
-		return { ok: false, error: message };
+		return { ok: false, error: formatApiError(error) };
 	}
 
 	await invalidateAll();

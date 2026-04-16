@@ -118,6 +118,23 @@ describe('PeopleEditor', () => {
 		expect(remaining).toHaveLength(1);
 	});
 
+	it('reports dirty state when an incomplete placeholder row is added', async () => {
+		const user = userEvent.setup();
+		renderEditor();
+
+		expect(screen.getByTestId('dirty-callback')).toHaveTextContent('false');
+
+		await user.click(screen.getByRole('button', { name: 'Check dirty' }));
+		expect(screen.getByTestId('dirty-handle')).toHaveTextContent('false');
+
+		await user.click(screen.getByRole('button', { name: 'Add credit' }));
+
+		expect(screen.getByTestId('dirty-callback')).toHaveTextContent('true');
+
+		await user.click(screen.getByRole('button', { name: 'Check dirty' }));
+		expect(screen.getByTestId('dirty-handle')).toHaveTextContent('true');
+	});
+
 	it('save() with no changes calls onsaved without PATCHing', async () => {
 		const user = userEvent.setup();
 		renderEditor([makeCredit('pat-lawlor', 'Pat Lawlor', 'game-design', 'Game Design')]);

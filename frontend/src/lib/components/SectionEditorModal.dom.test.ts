@@ -166,4 +166,29 @@ describe('SectionEditorModal', () => {
 		await user.click(screen.getByText('Notes & Citations'));
 		expect(screen.getByLabelText('Edit note')).toHaveValue('');
 	});
+
+	it('renders the section switcher in the modal header and switches sections', async () => {
+		const user = userEvent.setup();
+		render(SectionEditorModalFixture, {
+			props: { showSwitcher: true }
+		});
+
+		await user.click(screen.getByRole('button', { name: 'Open editor' }));
+		await user.click(screen.getByRole('button', { name: 'Overview' }));
+		await user.click(screen.getByRole('menuitem', { name: 'Specifications' }));
+
+		expect(screen.getByTestId('last-switched')).toHaveTextContent('specifications');
+	});
+
+	it('disables the section switcher when switcherDisabled is true', async () => {
+		const user = userEvent.setup();
+		render(SectionEditorModalFixture, {
+			props: { showSwitcher: true, switcherDisabled: true }
+		});
+
+		await user.click(screen.getByRole('button', { name: 'Open editor' }));
+
+		expect(screen.getByRole('button', { name: 'Overview' })).toBeDisabled();
+		expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+	});
 });

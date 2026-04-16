@@ -1,26 +1,38 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import MarkdownTextArea from '$lib/components/form/MarkdownTextArea.svelte';
+	import type { EditorDirtyChange } from './editor-contract';
 	import { saveModelClaims, type SaveResult, type SaveMeta } from './save-model-claims';
 
 	let {
 		initialDescription = '',
 		slug,
 		onsaved,
-		onerror
+		onerror,
+		ondirtychange = () => {}
 	}: {
 		initialDescription?: string;
 		slug: string;
 		onsaved: () => void;
 		onerror: (message: string) => void;
+		ondirtychange?: EditorDirtyChange;
 	} = $props();
 
 	// untrack: intentional one-time capture; component re-mounts when modal reopens
 	const original = untrack(() => initialDescription);
 	let description = $state(original);
+	let dirty = $derived(description !== original);
+
+	$effect(() => {
+		ondirtychange(dirty);
+	});
+
+	export function isDirty(): boolean {
+		return dirty;
+	}
 
 	export async function save(meta?: SaveMeta): Promise<void> {
-		if (description === original) {
+		if (!dirty) {
 			onsaved();
 			return;
 		}

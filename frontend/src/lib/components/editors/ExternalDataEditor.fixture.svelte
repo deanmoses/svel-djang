@@ -1,14 +1,19 @@
 <script lang="ts">
-	import type { components } from '$lib/api/schema';
-	import PeopleEditor from './PeopleEditor.svelte';
+	import ExternalDataEditor from './ExternalDataEditor.svelte';
 
-	type Credit = components['schemas']['CreditSchema'];
+	type ExternalDataModel = {
+		ipdb_id?: number | null;
+		opdb_id?: string | null;
+		pinside_id?: number | null;
+		ipdb_rating?: number | null;
+		pinside_rating?: number | null;
+	};
 
 	let {
-		initialCredits = [],
+		initialModel,
 		slug = 'medieval-madness'
 	}: {
-		initialCredits?: Credit[];
+		initialModel: ExternalDataModel;
 		slug?: string;
 	} = $props();
 
@@ -23,22 +28,14 @@
 				isDirty(): boolean;
 		  }
 		| undefined = $state();
-
-	function handleSaved() {
-		savedCount++;
-	}
-
-	function handleError(msg: string) {
-		lastError = msg;
-	}
 </script>
 
-<PeopleEditor
+<ExternalDataEditor
 	bind:this={editorRef}
-	{initialCredits}
+	{initialModel}
 	{slug}
-	onsaved={handleSaved}
-	onerror={handleError}
+	onsaved={() => savedCount++}
+	onerror={(message) => (lastError = message)}
 	ondirtychange={(dirty) => (dirtyFromCallback = dirty)}
 />
 

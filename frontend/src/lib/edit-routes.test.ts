@@ -12,4 +12,10 @@ describe('getEditRedirectHref', () => {
 			'/models/medieval-madness-remastered/edit'
 		);
 	});
+
+	it('appends section segment when provided', () => {
+		expect(
+			getEditRedirectHref('models', 'medieval-madness', 'medieval-madness-remastered', 'basics')
+		).toBe('/models/medieval-madness-remastered/edit/basics');
+	});
 });

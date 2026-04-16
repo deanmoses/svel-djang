@@ -3,10 +3,11 @@
 
 	type Props = {
 		label: string;
+		disabled?: boolean;
 		children: Snippet;
 	};
 
-	let { label, children }: Props = $props();
+	let { label, disabled = false, children }: Props = $props();
 
 	let open = $state(false);
 	let triggerEl: HTMLButtonElement | undefined = $state();
@@ -33,6 +34,7 @@
 	}
 
 	function openMenu({ focus }: { focus?: 'first' | 'last' } = {}) {
+		if (disabled) return;
 		pendingFocusTarget = focus ?? null;
 		open = true;
 	}
@@ -43,6 +45,7 @@
 	}
 
 	function toggleMenu() {
+		if (disabled) return;
 		if (open) {
 			closeMenu();
 			return;
@@ -116,6 +119,12 @@
 	}
 
 	$effect(() => {
+		if (disabled && open) {
+			closeMenu();
+		}
+	});
+
+	$effect(() => {
 		if (!open || pendingFocusTarget == null) return;
 
 		const items = getMenuItems();
@@ -171,6 +180,7 @@
 		bind:this={triggerEl}
 		type="button"
 		class="trigger"
+		{disabled}
 		aria-haspopup="menu"
 		aria-expanded={open}
 		aria-controls={open ? menuId : undefined}
@@ -219,6 +229,15 @@
 	.trigger:hover,
 	.trigger[aria-expanded='true'] {
 		color: var(--color-accent);
+	}
+
+	.trigger:disabled {
+		cursor: not-allowed;
+		opacity: 0.5;
+	}
+
+	.trigger:disabled::after {
+		opacity: 0.75;
 	}
 
 	.trigger:focus-visible {

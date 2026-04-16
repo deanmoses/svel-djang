@@ -2,6 +2,7 @@
 	import { untrack } from 'svelte';
 	import SearchableSelect from '$lib/components/SearchableSelect.svelte';
 	import { diffScalarFields } from '$lib/edit-helpers';
+	import type { EditorDirtyChange } from './editor-contract';
 	import {
 		EMPTY_EDIT_OPTIONS,
 		fetchModelEditOptions,
@@ -21,9 +22,11 @@
 		initialModel,
 		slug,
 		onsaved,
-		onerror
+		onerror,
+		ondirtychange = () => {}
 	}: {
 		initialModel: {
+			title?: HierarchyRef;
 			variant_of?: HierarchyRef;
 			converted_from?: HierarchyRef;
 			remake_of?: HierarchyRef;
@@ -31,19 +34,23 @@
 		slug: string;
 		onsaved: () => void;
 		onerror: (message: string) => void;
+		ondirtychange?: EditorDirtyChange;
 	} = $props();
 
 	// Flatten nested FK objects to slug strings for form state
 	const original = untrack(() => ({
+		title: initialModel.title?.slug ?? '',
 		variant_of: initialModel.variant_of?.slug ?? '',
 		converted_from: initialModel.converted_from?.slug ?? '',
 		remake_of: initialModel.remake_of?.slug ?? ''
 	}));
 
 	let fields = $state({ ...original });
+	let dirty = $derived.by(() => Object.keys(diffScalarFields(fields, original)).length > 0);
 
 	let editOptions = $state<ModelEditOptions>(EMPTY_EDIT_OPTIONS);
 
+	let titleOptions = $derived(editOptions.titles ?? []);
 	// Filter out the current model from the options list
 	let modelOptions = $derived((editOptions.models ?? []).filter((o) => o.slug !== slug));
 
@@ -53,10 +60,18 @@
 		});
 	});
 
+	$effect(() => {
+		ondirtychange(dirty);
+	});
+
+	export function isDirty(): boolean {
+		return dirty;
+	}
+
 	export async function save(meta?: SaveMeta): Promise<void> {
 		const changed = diffScalarFields(fields, original);
 
-		if (Object.keys(changed).length === 0) {
+		if (!dirty) {
 			onsaved();
 			return;
 		}
@@ -75,6 +90,15 @@
 </script>
 
 <div class="relationships-editor">
+	<SearchableSelect
+		label="Title"
+		options={titleOptions}
+		bind:selected={fields.title}
+		allowZeroCount
+		showCounts={false}
+		placeholder="Search titles..."
+	/>
+
 	{#each HIERARCHY_FIELDS as { field, label } (field)}
 		<SearchableSelect
 			{label}

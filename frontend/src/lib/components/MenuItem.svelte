@@ -4,20 +4,28 @@
 	let {
 		href = undefined,
 		onclick = undefined,
+		disabled = false,
+		current = false,
 		children
 	}: {
 		href?: string;
 		onclick?: () => void;
+		disabled?: boolean;
+		current?: boolean;
 		children: Snippet;
 	} = $props();
 </script>
 
-{#if href}
+{#if disabled}
+	<span class:current class="menu-item disabled" role="menuitem" aria-disabled="true" tabindex="-1">
+		{@render children()}
+	</span>
+{:else if href}
 	<a class="menu-item" {href} role="menuitem" tabindex="-1">
 		{@render children()}
 	</a>
 {:else}
-	<button class="menu-item" type="button" role="menuitem" tabindex="-1" {onclick}>
+	<button class:current class="menu-item" type="button" role="menuitem" tabindex="-1" {onclick}>
 		{@render children()}
 	</button>
 {/if}
@@ -41,6 +49,24 @@
 	.menu-item:focus-visible {
 		background: var(--color-surface);
 		color: var(--color-accent);
+	}
+
+	.menu-item.current {
+		font-weight: 600;
+	}
+
+	.menu-item.current::before {
+		content: '✓ ';
+	}
+
+	.menu-item.disabled {
+		cursor: default;
+		color: var(--color-text-muted);
+	}
+
+	.menu-item.disabled:hover {
+		background: none;
+		color: var(--color-text-muted);
 	}
 
 	.menu-item:focus-visible {

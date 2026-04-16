@@ -45,8 +45,16 @@ describe('PageActionBar', () => {
 		render(PageActionBar, {
 			props: {
 				editSections: [
-					{ label: 'Overview', href: '/models/medieval-madness/edit/overview' },
-					{ label: 'Relationships', href: '/models/medieval-madness/edit/relationships' }
+					{
+						key: 'overview',
+						label: 'Overview',
+						href: '/models/medieval-madness/edit/overview'
+					},
+					{
+						key: 'relationships',
+						label: 'Relationships',
+						href: '/models/medieval-madness/edit/relationships'
+					}
 				],
 				historyHref: '/models/medieval-madness/history',
 				sourcesHref: '/models/medieval-madness/sources'

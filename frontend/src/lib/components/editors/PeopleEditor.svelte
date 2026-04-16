@@ -3,6 +3,7 @@
 	import type { components } from '$lib/api/schema';
 	import SearchableSelect from '$lib/components/SearchableSelect.svelte';
 	import { creditsChanged } from '$lib/edit-helpers';
+	import type { EditorDirtyChange } from './editor-contract';
 	import {
 		EMPTY_EDIT_OPTIONS,
 		fetchModelEditOptions,
@@ -16,12 +17,14 @@
 		initialCredits,
 		slug,
 		onsaved,
-		onerror
+		onerror,
+		ondirtychange = () => {}
 	}: {
 		initialCredits: Credit[];
 		slug: string;
 		onsaved: () => void;
 		onerror: (message: string) => void;
+		ondirtychange?: EditorDirtyChange;
 	} = $props();
 
 	type KeyedCredit = { key: number; person_slug: string; role: string };
@@ -39,6 +42,11 @@
 	// untrack: intentional one-time capture; component re-mounts when modal reopens
 	const originalCredits = untrack(() => initialCredits);
 	let editCredits = $state<KeyedCredit[]>(untrack(() => toKeyedCredits(initialCredits)));
+	let dirty = $derived.by(() => {
+		const original = originalCredits.map((credit) => `${credit.person.slug}:${credit.role}`);
+		const current = editCredits.map((credit) => `${credit.person_slug}:${credit.role}`);
+		return JSON.stringify(current) !== JSON.stringify(original);
+	});
 
 	let editOptions = $state<ModelEditOptions>(EMPTY_EDIT_OPTIONS);
 
@@ -47,6 +55,14 @@
 			editOptions = opts;
 		});
 	});
+
+	$effect(() => {
+		ondirtychange(dirty);
+	});
+
+	export function isDirty(): boolean {
+		return dirty;
+	}
 
 	function addCredit() {
 		editCredits = [...editCredits, { key: keyCounter++, person_slug: '', role: '' }];

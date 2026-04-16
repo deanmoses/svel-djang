@@ -80,6 +80,7 @@ from ..models import (
     TechnologyGeneration,
     TechnologySubgeneration,
     Theme,
+    Title,
 )
 
 # ---------------------------------------------------------------------------
@@ -926,6 +927,7 @@ def get_model_edit_options(request):
         "credit_roles": _opts(
             CreditRole.objects.active().order_by("display_order", "name")
         ),
+        "titles": _opts(Title.objects.active().order_by("name")),
         "models": [
             {
                 "slug": obj.slug,
