@@ -44,7 +44,7 @@
 
 	.actions {
 		display: flex;
-		align-items: center;
+		align-items: baseline;
 		gap: var(--size-4);
 		margin-left: auto;
 	}

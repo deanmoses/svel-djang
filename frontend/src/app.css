@@ -58,8 +58,7 @@ html {
 
 /* ========================================
    SEMANTIC COLOR TOKENS — Dark Theme
-   Based on VS Code's "Dark Modern" (exact values)
-   Source: https://github.com/microsoft/vscode/blob/main/extensions/theme-defaults/themes/dark_modern.json
+   Based on VS Code's "Dark Modern": https://github.com/microsoft/vscode/blob/main/extensions/theme-defaults/themes/dark_modern.json
    ======================================== */
 @media (prefers-color-scheme: dark) {
 	:root {
