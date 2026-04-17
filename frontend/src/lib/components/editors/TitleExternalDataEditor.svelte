@@ -5,7 +5,7 @@
 	import TextField from '$lib/components/form/TextField.svelte';
 	import { fetchFieldConstraints, fc, type FieldConstraints } from '$lib/field-constraints';
 	import { diffScalarFields } from '$lib/edit-helpers';
-	import type { EditorDirtyChange } from './editor-contract';
+	import type { SectionEditorProps } from './editor-contract';
 	import { type FieldErrors, type SaveResult, type SaveMeta } from './save-claims-shared';
 	import { saveTitleClaims } from './save-title-claims';
 
@@ -15,18 +15,12 @@
 	};
 
 	let {
-		initialTitle,
+		initialData,
 		slug,
 		onsaved,
 		onerror,
 		ondirtychange = () => {}
-	}: {
-		initialTitle: ExternalDataTitle;
-		slug: string;
-		onsaved: () => void;
-		onerror: (message: string) => void;
-		ondirtychange?: EditorDirtyChange;
-	} = $props();
+	}: SectionEditorProps<ExternalDataTitle> = $props();
 
 	type ExternalDataFormFields = {
 		opdb_id: string;
@@ -40,7 +34,7 @@
 		};
 	}
 
-	const original = untrack(() => extractFields(initialTitle));
+	const original = untrack(() => extractFields(initialData));
 	let fields = $state<ExternalDataFormFields>({ ...original });
 	let dirty = $derived.by(() => Object.keys(diffScalarFields(fields, original)).length > 0);
 

@@ -1,27 +1,21 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import MarkdownTextArea from '$lib/components/form/MarkdownTextArea.svelte';
-	import type { EditorDirtyChange } from './editor-contract';
+	import type { SectionEditorProps } from './editor-contract';
 	import { type FieldErrors, type SaveResult, type SaveMeta } from './save-claims-shared';
 	import { saveTitleClaims } from './save-title-claims';
 
 	let {
-		initialDescription = '',
+		initialData,
 		slug,
 		onsaved,
 		onerror,
 		ondirtychange = () => {}
-	}: {
-		initialDescription?: string;
-		slug: string;
-		onsaved: () => void;
-		onerror: (message: string) => void;
-		ondirtychange?: EditorDirtyChange;
-	} = $props();
+	}: SectionEditorProps<string> = $props();
 
 	let fieldErrors = $state<FieldErrors>({});
 
-	const original = untrack(() => initialDescription);
+	const original = untrack(() => initialData);
 	let description = $state(original);
 	let dirty = $derived(description !== original);
 

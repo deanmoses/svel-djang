@@ -10,10 +10,10 @@
 	};
 
 	let {
-		initialTitle,
+		initialData,
 		slug = 'addams-family'
 	}: {
-		initialTitle: BasicsTitle;
+		initialData: BasicsTitle;
 		slug?: string;
 	} = $props();
 
@@ -32,7 +32,7 @@
 
 <TitleBasicsEditor
 	bind:this={editorRef}
-	{initialTitle}
+	{initialData}
 	{slug}
 	onsaved={() => savedCount++}
 	onerror={(message) => (lastError = message)}

@@ -20,7 +20,7 @@
 
 <TitleOverviewEditor
 	bind:this={editorRef}
-	initialDescription="Original description"
+	initialData="Original description"
 	slug="addams-family"
 	onsaved={() => savedCount++}
 	onerror={(message) => (lastError = message)}

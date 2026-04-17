@@ -83,7 +83,7 @@
 				{#if section.key === 'basics'}
 					<BasicsEditor
 						bind:this={editorRef}
-						initialModel={model}
+						initialData={model}
 						slug={model.slug}
 						onsaved={handleSaved}
 						onerror={(msg) => (editError = msg)}
@@ -92,7 +92,7 @@
 				{:else if section.key === 'overview'}
 					<OverviewEditor
 						bind:this={editorRef}
-						initialDescription={model.description?.text ?? ''}
+						initialData={model.description?.text ?? ''}
 						slug={model.slug}
 						onsaved={handleSaved}
 						onerror={(msg) => (editError = msg)}
@@ -101,7 +101,7 @@
 				{:else if section.key === 'technology'}
 					<TechnologyEditor
 						bind:this={editorRef}
-						initialModel={model}
+						initialData={model}
 						slug={model.slug}
 						onsaved={handleSaved}
 						onerror={(msg) => (editError = msg)}
@@ -110,7 +110,7 @@
 				{:else if section.key === 'features'}
 					<FeaturesEditor
 						bind:this={editorRef}
-						initialModel={model}
+						initialData={model}
 						slug={model.slug}
 						onsaved={handleSaved}
 						onerror={(msg) => (editError = msg)}
@@ -119,7 +119,7 @@
 				{:else if section.key === 'people'}
 					<PeopleEditor
 						bind:this={editorRef}
-						initialCredits={model.credits}
+						initialData={model.credits}
 						slug={model.slug}
 						onsaved={handleSaved}
 						onerror={(msg) => (editError = msg)}
@@ -128,7 +128,7 @@
 				{:else if section.key === 'related-models'}
 					<RelatedModelsEditor
 						bind:this={editorRef}
-						initialModel={model}
+						initialData={model}
 						slug={model.slug}
 						onsaved={handleSaved}
 						onerror={(msg) => (editError = msg)}
@@ -137,7 +137,7 @@
 				{:else if section.key === 'external-data'}
 					<ExternalDataEditor
 						bind:this={editorRef}
-						initialModel={model}
+						initialData={model}
 						slug={model.slug}
 						onsaved={handleSaved}
 						onerror={(msg) => (editError = msg)}

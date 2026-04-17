@@ -10,10 +10,10 @@
 	};
 
 	let {
-		initialModel,
+		initialData,
 		slug = 'medieval-madness'
 	}: {
-		initialModel: TechnologyModel;
+		initialData: TechnologyModel;
 		slug?: string;
 	} = $props();
 
@@ -40,7 +40,7 @@
 
 <TechnologyEditor
 	bind:this={editorRef}
-	{initialModel}
+	{initialData}
 	{slug}
 	onsaved={handleSaved}
 	onerror={handleError}

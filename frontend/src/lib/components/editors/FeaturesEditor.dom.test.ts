@@ -86,7 +86,7 @@ describe('FeaturesEditor dirty-state contract', () => {
 		invalidateAll.mockResolvedValue(undefined);
 		const user = userEvent.setup();
 		render(FeaturesEditorFixture, {
-			props: { initialModel: INITIAL_MODEL }
+			props: { initialData: INITIAL_MODEL }
 		});
 
 		// Clear the gameplay feature slug (click the × button on that row's SearchableSelect)
@@ -103,7 +103,7 @@ describe('FeaturesEditor dirty-state contract', () => {
 	it('reports clean state initially and dirty state after editing', async () => {
 		const user = userEvent.setup();
 		render(FeaturesEditorFixture, {
-			props: { initialModel: INITIAL_MODEL }
+			props: { initialData: INITIAL_MODEL }
 		});
 
 		expect(screen.getByTestId('dirty-callback')).toHaveTextContent('false');
@@ -123,7 +123,7 @@ describe('FeaturesEditor dirty-state contract', () => {
 		PATCH.mockResolvedValue({ data: {}, error: undefined });
 		const user = userEvent.setup();
 		render(FeaturesEditorFixture, {
-			props: { initialModel: INITIAL_MODEL }
+			props: { initialData: INITIAL_MODEL }
 		});
 
 		const playersInput = screen.getByLabelText('Players');
@@ -143,7 +143,7 @@ describe('FeaturesEditor dirty-state contract', () => {
 		PATCH.mockResolvedValue({ data: {}, error: undefined });
 		const user = userEvent.setup();
 		render(FeaturesEditorFixture, {
-			props: { initialModel: INITIAL_MODEL }
+			props: { initialData: INITIAL_MODEL }
 		});
 
 		await user.click(screen.getByRole('combobox', { name: 'Themes' }));

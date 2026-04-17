@@ -8,10 +8,10 @@
 	};
 
 	let {
-		initialModel,
+		initialData,
 		slug = 'medieval-madness'
 	}: {
-		initialModel: RelatedModels;
+		initialData: RelatedModels;
 		slug?: string;
 	} = $props();
 
@@ -30,7 +30,7 @@
 
 <RelatedModelsEditor
 	bind:this={editorRef}
-	{initialModel}
+	{initialData}
 	{slug}
 	onsaved={() => savedCount++}
 	onerror={(message) => (lastError = message)}

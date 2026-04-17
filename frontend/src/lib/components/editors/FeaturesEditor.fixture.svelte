@@ -14,10 +14,10 @@
 	};
 
 	let {
-		initialModel,
+		initialData,
 		slug = 'medieval-madness'
 	}: {
-		initialModel: FeaturesModel;
+		initialData: FeaturesModel;
 		slug?: string;
 	} = $props();
 
@@ -36,7 +36,7 @@
 
 <FeaturesEditor
 	bind:this={editorRef}
-	{initialModel}
+	{initialData}
 	{slug}
 	onsaved={() => savedCount++}
 	onerror={(message) => (lastError = message)}

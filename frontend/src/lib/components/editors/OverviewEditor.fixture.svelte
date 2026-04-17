@@ -20,7 +20,7 @@
 
 <OverviewEditor
 	bind:this={editorRef}
-	initialDescription="Original description"
+	initialData="Original description"
 	slug="medieval-madness"
 	onsaved={() => savedCount++}
 	onerror={(message) => (lastError = message)}

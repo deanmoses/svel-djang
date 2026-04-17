@@ -64,10 +64,10 @@ function mockGetResponses() {
 	});
 }
 
-function renderEditor(initialModel = INITIAL_MODEL) {
+function renderEditor(initialData = INITIAL_MODEL) {
 	mockGetResponses();
 	return render(TechnologyEditorFixture, {
-		props: { initialModel, slug: 'medieval-madness' }
+		props: { initialData, slug: 'medieval-madness' }
 	});
 }
 

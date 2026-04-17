@@ -5,7 +5,7 @@
 	import TextField from '$lib/components/form/TextField.svelte';
 	import { fetchFieldConstraints, fc, type FieldConstraints } from '$lib/field-constraints';
 	import { diffScalarFields } from '$lib/edit-helpers';
-	import type { EditorDirtyChange } from './editor-contract';
+	import type { SectionEditorProps } from './editor-contract';
 	import {
 		saveModelClaims,
 		type FieldErrors,
@@ -22,18 +22,12 @@
 	};
 
 	let {
-		initialModel,
+		initialData,
 		slug,
 		onsaved,
 		onerror,
 		ondirtychange = () => {}
-	}: {
-		initialModel: ExternalDataModel;
-		slug: string;
-		onsaved: () => void;
-		onerror: (message: string) => void;
-		ondirtychange?: EditorDirtyChange;
-	} = $props();
+	}: SectionEditorProps<ExternalDataModel> = $props();
 
 	type ExternalDataFormFields = {
 		ipdb_id: string | number;
@@ -54,7 +48,7 @@
 	}
 
 	// untrack: intentional one-time capture; component re-mounts when modal reopens
-	const original = untrack(() => extractFields(initialModel));
+	const original = untrack(() => extractFields(initialData));
 	let fields = $state<ExternalDataFormFields>({ ...original });
 	let dirty = $derived.by(() => Object.keys(diffScalarFields(fields, original)).length > 0);
 

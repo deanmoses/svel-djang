@@ -59,7 +59,7 @@ describe('TitleBasicsEditor dirty-state contract', () => {
 	it('reports clean state initially and dirty state after editing', async () => {
 		const user = userEvent.setup();
 		render(TitleBasicsEditorFixture, {
-			props: { initialTitle: INITIAL_TITLE }
+			props: { initialData: INITIAL_TITLE }
 		});
 
 		expect(screen.getByTestId('dirty-callback')).toHaveTextContent('false');
@@ -81,7 +81,7 @@ describe('TitleBasicsEditor dirty-state contract', () => {
 		PATCH.mockResolvedValue({ data: {}, error: undefined });
 		invalidateAll.mockResolvedValue(undefined);
 		render(TitleBasicsEditorFixture, {
-			props: { initialTitle: INITIAL_TITLE }
+			props: { initialData: INITIAL_TITLE }
 		});
 
 		await user.clear(screen.getByLabelText('Name'));

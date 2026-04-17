@@ -7,7 +7,7 @@
 	import TagInput from '$lib/components/form/TagInput.svelte';
 	import { fetchFieldConstraints, fc, type FieldConstraints } from '$lib/field-constraints';
 	import { diffScalarFields, stringSetChanged } from '$lib/edit-helpers';
-	import type { EditorDirtyChange } from './editor-contract';
+	import type { SectionEditorProps } from './editor-contract';
 	import {
 		EMPTY_EDIT_OPTIONS,
 		fetchModelEditOptions,
@@ -31,18 +31,12 @@
 	};
 
 	let {
-		initialModel,
+		initialData,
 		slug,
 		onsaved,
 		onerror,
 		ondirtychange = () => {}
-	}: {
-		initialModel: BasicsModel;
-		slug: string;
-		onsaved: () => void;
-		onerror: (message: string) => void;
-		ondirtychange?: EditorDirtyChange;
-	} = $props();
+	}: SectionEditorProps<BasicsModel> = $props();
 
 	type BasicsFormFields = {
 		name: string;
@@ -65,10 +59,10 @@
 	}
 
 	// untrack: intentional one-time capture; component re-mounts when modal reopens
-	const original = untrack(() => extractFields(initialModel));
-	const originalAbbreviations = untrack(() => [...initialModel.abbreviations]);
+	const original = untrack(() => extractFields(initialData));
+	const originalAbbreviations = untrack(() => [...initialData.abbreviations]);
 	let fields = $state<BasicsFormFields>({ ...original });
-	let abbreviations = $state<string[]>(untrack(() => [...initialModel.abbreviations]));
+	let abbreviations = $state<string[]>(untrack(() => [...initialData.abbreviations]));
 	let dirty = $derived.by(
 		() =>
 			Object.keys(diffScalarFields(fields, original)).length > 0 ||

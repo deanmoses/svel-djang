@@ -52,7 +52,7 @@ describe('ExternalDataEditor dirty-state contract', () => {
 	it('reports clean state initially and dirty state after editing', async () => {
 		const user = userEvent.setup();
 		render(ExternalDataEditorFixture, {
-			props: { initialModel: INITIAL_MODEL }
+			props: { initialData: INITIAL_MODEL }
 		});
 
 		expect(screen.getByTestId('dirty-callback')).toHaveTextContent('false');

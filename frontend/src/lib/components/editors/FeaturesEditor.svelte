@@ -5,7 +5,7 @@
 	import NumberField from '$lib/components/form/NumberField.svelte';
 	import { diffScalarFields, slugSetChanged } from '$lib/edit-helpers';
 	import { fetchFieldConstraints, fc, type FieldConstraints } from '$lib/field-constraints';
-	import type { EditorDirtyChange } from './editor-contract';
+	import type { SectionEditorProps } from './editor-contract';
 	import {
 		EMPTY_EDIT_OPTIONS,
 		fetchModelEditOptions,
@@ -33,18 +33,12 @@
 	};
 
 	let {
-		initialModel,
+		initialData,
 		slug,
 		onsaved,
 		onerror,
 		ondirtychange = () => {}
-	}: {
-		initialModel: FeaturesModel;
-		slug: string;
-		onsaved: () => void;
-		onerror: (message: string) => void;
-		ondirtychange?: EditorDirtyChange;
-	} = $props();
+	}: SectionEditorProps<FeaturesModel> = $props();
 
 	type FeaturesFormFields = {
 		game_format: string;
@@ -65,17 +59,17 @@
 	}
 
 	// untrack: intentional one-time capture; component re-mounts when modal reopens
-	const original = untrack(() => extractFields(initialModel));
+	const original = untrack(() => extractFields(initialData));
 	let fields = $state<FeaturesFormFields>({ ...original });
 
 	// Simple M2M fields — stored as slug arrays
-	const originalThemes = untrack(() => initialModel.themes);
-	const originalTags = untrack(() => initialModel.tags);
-	const originalRewardTypes = untrack(() => initialModel.reward_types);
+	const originalThemes = untrack(() => initialData.themes);
+	const originalTags = untrack(() => initialData.tags);
+	const originalRewardTypes = untrack(() => initialData.reward_types);
 
-	let themes = $state<string[]>(untrack(() => initialModel.themes.map((t) => t.slug)));
-	let tags = $state<string[]>(untrack(() => initialModel.tags.map((t) => t.slug)));
-	let rewardTypes = $state<string[]>(untrack(() => initialModel.reward_types.map((t) => t.slug)));
+	let themes = $state<string[]>(untrack(() => initialData.themes.map((t) => t.slug)));
+	let tags = $state<string[]>(untrack(() => initialData.tags.map((t) => t.slug)));
+	let rewardTypes = $state<string[]>(untrack(() => initialData.reward_types.map((t) => t.slug)));
 
 	// Gameplay features — slug + optional count
 	type KeyedFeature = { key: number; slug: string; count: string | number };
@@ -85,8 +79,8 @@
 		return features.map((f) => ({ key: keyCounter++, slug: f.slug, count: f.count ?? '' }));
 	}
 
-	const originalFeatures = untrack(() => initialModel.gameplay_features);
-	let features = $state<KeyedFeature[]>(untrack(() => toKeyed(initialModel.gameplay_features)));
+	const originalFeatures = untrack(() => initialData.gameplay_features);
+	let features = $state<KeyedFeature[]>(untrack(() => toKeyed(initialData.gameplay_features)));
 
 	let fieldErrors = $state<FieldErrors>({});
 	let editOptions = $state<ModelEditOptions>(EMPTY_EDIT_OPTIONS);

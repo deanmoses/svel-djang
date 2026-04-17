@@ -56,7 +56,7 @@ function makeCredit(
 function renderEditor(credits: Credit[] = []) {
 	GET.mockResolvedValue(EDIT_OPTIONS);
 	return render(PeopleEditorFixture, {
-		props: { initialCredits: credits, slug: 'medieval-madness' }
+		props: { initialData: credits, slug: 'medieval-madness' }
 	});
 }
 

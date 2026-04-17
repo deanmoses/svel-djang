@@ -46,7 +46,7 @@ describe('RelatedModelsEditor dirty-state contract', () => {
 		const user = userEvent.setup();
 		render(RelatedModelsEditorFixture, {
 			props: {
-				initialModel: {
+				initialData: {
 					variant_of: null,
 					converted_from: null,
 					remake_of: null

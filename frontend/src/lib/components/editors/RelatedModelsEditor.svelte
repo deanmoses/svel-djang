@@ -2,7 +2,7 @@
 	import { untrack } from 'svelte';
 	import SearchableSelect from '$lib/components/SearchableSelect.svelte';
 	import { diffScalarFields } from '$lib/edit-helpers';
-	import type { EditorDirtyChange } from './editor-contract';
+	import type { SectionEditorProps } from './editor-contract';
 	import {
 		EMPTY_EDIT_OPTIONS,
 		fetchModelEditOptions,
@@ -23,29 +23,25 @@
 
 	type HierarchyRef = { slug: string; name?: string } | null | undefined;
 
+	type RelatedModelsModel = {
+		variant_of?: HierarchyRef;
+		converted_from?: HierarchyRef;
+		remake_of?: HierarchyRef;
+	};
+
 	let {
-		initialModel,
+		initialData,
 		slug,
 		onsaved,
 		onerror,
 		ondirtychange = () => {}
-	}: {
-		initialModel: {
-			variant_of?: HierarchyRef;
-			converted_from?: HierarchyRef;
-			remake_of?: HierarchyRef;
-		};
-		slug: string;
-		onsaved: () => void;
-		onerror: (message: string) => void;
-		ondirtychange?: EditorDirtyChange;
-	} = $props();
+	}: SectionEditorProps<RelatedModelsModel> = $props();
 
 	// Flatten nested FK objects to slug strings for form state
 	const original = untrack(() => ({
-		variant_of: initialModel.variant_of?.slug ?? '',
-		converted_from: initialModel.converted_from?.slug ?? '',
-		remake_of: initialModel.remake_of?.slug ?? ''
+		variant_of: initialData.variant_of?.slug ?? '',
+		converted_from: initialData.converted_from?.slug ?? '',
+		remake_of: initialData.remake_of?.slug ?? ''
 	}));
 
 	let fieldErrors = $state<FieldErrors>({});

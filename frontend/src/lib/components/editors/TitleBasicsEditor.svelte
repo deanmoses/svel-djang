@@ -4,7 +4,7 @@
 	import TextField from '$lib/components/form/TextField.svelte';
 	import TagInput from '$lib/components/form/TagInput.svelte';
 	import { diffScalarFields, stringSetChanged } from '$lib/edit-helpers';
-	import type { EditorDirtyChange } from './editor-contract';
+	import type { SectionEditorProps } from './editor-contract';
 	import { type FieldErrors, type SaveResult, type SaveMeta } from './save-claims-shared';
 	import { saveTitleClaims } from './save-title-claims';
 	import {
@@ -22,18 +22,12 @@
 	};
 
 	let {
-		initialTitle,
+		initialData,
 		slug,
 		onsaved,
 		onerror,
 		ondirtychange = () => {}
-	}: {
-		initialTitle: BasicsTitle;
-		slug: string;
-		onsaved: () => void;
-		onerror: (message: string) => void;
-		ondirtychange?: EditorDirtyChange;
-	} = $props();
+	}: SectionEditorProps<BasicsTitle> = $props();
 
 	type BasicsFormFields = {
 		name: string;
@@ -51,10 +45,10 @@
 		};
 	}
 
-	const original = untrack(() => extractFields(initialTitle));
-	const originalAbbreviations = untrack(() => [...initialTitle.abbreviations]);
+	const original = untrack(() => extractFields(initialData));
+	const originalAbbreviations = untrack(() => [...initialData.abbreviations]);
 	let fields = $state<BasicsFormFields>({ ...original });
-	let abbreviations = $state<string[]>(untrack(() => [...initialTitle.abbreviations]));
+	let abbreviations = $state<string[]>(untrack(() => [...initialData.abbreviations]));
 	let dirty = $derived.by(
 		() =>
 			Object.keys(diffScalarFields(fields, original)).length > 0 ||

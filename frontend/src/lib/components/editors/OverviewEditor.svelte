@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import MarkdownTextArea from '$lib/components/form/MarkdownTextArea.svelte';
-	import type { EditorDirtyChange } from './editor-contract';
+	import type { SectionEditorProps } from './editor-contract';
 	import {
 		saveModelClaims,
 		type FieldErrors,
@@ -10,23 +10,17 @@
 	} from './save-model-claims';
 
 	let {
-		initialDescription = '',
+		initialData,
 		slug,
 		onsaved,
 		onerror,
 		ondirtychange = () => {}
-	}: {
-		initialDescription?: string;
-		slug: string;
-		onsaved: () => void;
-		onerror: (message: string) => void;
-		ondirtychange?: EditorDirtyChange;
-	} = $props();
+	}: SectionEditorProps<string> = $props();
 
 	let fieldErrors = $state<FieldErrors>({});
 
 	// untrack: intentional one-time capture; component re-mounts when modal reopens
-	const original = untrack(() => initialDescription);
+	const original = untrack(() => initialData);
 	let description = $state(original);
 	let dirty = $derived(description !== original);
 

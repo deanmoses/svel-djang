@@ -80,7 +80,7 @@
 			{#if section.key === 'overview'}
 				<TitleOverviewEditor
 					bind:this={editorRef}
-					initialDescription={title.description?.text ?? ''}
+					initialData={title.description?.text ?? ''}
 					slug={title.slug}
 					onsaved={handleSaved}
 					onerror={(msg) => (editError = msg)}
@@ -89,7 +89,7 @@
 			{:else if section.key === 'basics'}
 				<TitleBasicsEditor
 					bind:this={editorRef}
-					initialTitle={title}
+					initialData={title}
 					slug={title.slug}
 					onsaved={handleSaved}
 					onerror={(msg) => (editError = msg)}
@@ -98,7 +98,7 @@
 			{:else if section.key === 'external-data'}
 				<TitleExternalDataEditor
 					bind:this={editorRef}
-					initialTitle={title}
+					initialData={title}
 					slug={title.slug}
 					onsaved={handleSaved}
 					onerror={(msg) => (editError = msg)}

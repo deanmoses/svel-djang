@@ -46,7 +46,7 @@ describe('TitleExternalDataEditor dirty-state contract', () => {
 	it('reports clean state initially and dirty state after editing', async () => {
 		const user = userEvent.setup();
 		render(TitleExternalDataEditorFixture, {
-			props: { initialTitle: INITIAL_TITLE }
+			props: { initialData: INITIAL_TITLE }
 		});
 
 		expect(screen.getByTestId('dirty-callback')).toHaveTextContent('false');
@@ -69,7 +69,7 @@ describe('TitleExternalDataEditor dirty-state contract', () => {
 		PATCH.mockResolvedValue({ data: {}, error: undefined });
 		invalidateAll.mockResolvedValue(undefined);
 		render(TitleExternalDataEditorFixture, {
-			props: { initialTitle: INITIAL_TITLE }
+			props: { initialData: INITIAL_TITLE }
 		});
 
 		const opdbInput = screen.getByLabelText('OPDB Group ID');

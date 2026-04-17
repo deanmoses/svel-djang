@@ -359,7 +359,7 @@
 		{#if key === 'basics'}
 			<BasicsEditor
 				bind:this={ref.current}
-				initialModel={model}
+				initialData={model}
 				slug={model.slug}
 				{onsaved}
 				{onerror}
@@ -368,7 +368,7 @@
 		{:else if key === 'overview'}
 			<OverviewEditor
 				bind:this={ref.current}
-				initialDescription={model.description?.text ?? ''}
+				initialData={model.description?.text ?? ''}
 				slug={model.slug}
 				{onsaved}
 				{onerror}
@@ -377,7 +377,7 @@
 		{:else if key === 'technology'}
 			<TechnologyEditor
 				bind:this={ref.current}
-				initialModel={model}
+				initialData={model}
 				slug={model.slug}
 				{onsaved}
 				{onerror}
@@ -386,7 +386,7 @@
 		{:else if key === 'features'}
 			<FeaturesEditor
 				bind:this={ref.current}
-				initialModel={model}
+				initialData={model}
 				slug={model.slug}
 				{onsaved}
 				{onerror}
@@ -395,7 +395,7 @@
 		{:else if key === 'people'}
 			<PeopleEditor
 				bind:this={ref.current}
-				initialCredits={model.credits}
+				initialData={model.credits}
 				slug={model.slug}
 				{onsaved}
 				{onerror}
@@ -404,7 +404,7 @@
 		{:else if key === 'related-models'}
 			<RelatedModelsEditor
 				bind:this={ref.current}
-				initialModel={model}
+				initialData={model}
 				slug={model.slug}
 				{onsaved}
 				{onerror}
@@ -413,7 +413,7 @@
 		{:else if key === 'external-data'}
 			<ExternalDataEditor
 				bind:this={ref.current}
-				initialModel={model}
+				initialData={model}
 				slug={model.slug}
 				{onsaved}
 				{onerror}

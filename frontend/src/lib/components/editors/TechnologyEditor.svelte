@@ -2,7 +2,7 @@
 	import { untrack } from 'svelte';
 	import SearchableSelect from '$lib/components/SearchableSelect.svelte';
 	import { diffScalarFields } from '$lib/edit-helpers';
-	import type { EditorDirtyChange } from './editor-contract';
+	import type { SectionEditorProps } from './editor-contract';
 	import {
 		EMPTY_EDIT_OPTIONS,
 		fetchModelEditOptions,
@@ -40,18 +40,12 @@
 	};
 
 	let {
-		initialModel,
+		initialData,
 		slug,
 		onsaved,
 		onerror,
 		ondirtychange = () => {}
-	}: {
-		initialModel: TechnologyModel;
-		slug: string;
-		onsaved: () => void;
-		onerror: (message: string) => void;
-		ondirtychange?: EditorDirtyChange;
-	} = $props();
+	}: SectionEditorProps<TechnologyModel> = $props();
 
 	type TechnologyFormFields = {
 		technology_generation: string;
@@ -72,7 +66,7 @@
 	}
 
 	// untrack: intentional one-time capture; component re-mounts when modal reopens
-	const original = untrack(() => extractFields(initialModel));
+	const original = untrack(() => extractFields(initialData));
 	let fields = $state<TechnologyFormFields>({ ...original });
 	let dirty = $derived.by(() => Object.keys(diffScalarFields(fields, original)).length > 0);
 

@@ -12,10 +12,10 @@
 	};
 
 	let {
-		initialModel,
+		initialData,
 		slug = 'medieval-madness'
 	}: {
-		initialModel: BasicsModel;
+		initialData: BasicsModel;
 		slug?: string;
 	} = $props();
 
@@ -34,7 +34,7 @@
 
 <BasicsEditor
 	bind:this={editorRef}
-	{initialModel}
+	{initialData}
 	{slug}
 	onsaved={() => savedCount++}
 	onerror={(message) => (lastError = message)}

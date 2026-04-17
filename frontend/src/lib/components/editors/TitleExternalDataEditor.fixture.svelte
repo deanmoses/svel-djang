@@ -7,10 +7,10 @@
 	};
 
 	let {
-		initialTitle,
+		initialData,
 		slug = 'addams-family'
 	}: {
-		initialTitle: ExternalDataTitle;
+		initialData: ExternalDataTitle;
 		slug?: string;
 	} = $props();
 
@@ -29,7 +29,7 @@
 
 <TitleExternalDataEditor
 	bind:this={editorRef}
-	{initialTitle}
+	{initialData}
 	{slug}
 	onsaved={() => savedCount++}
 	onerror={(message) => (lastError = message)}
