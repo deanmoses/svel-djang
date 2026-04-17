@@ -31,6 +31,7 @@ from apps.catalog.models import (
     Manufacturer,
     Person,
     RewardType,
+    Series,
     System,
     Tag,
     TechnologyGeneration,
@@ -97,8 +98,18 @@ def franchise(db):
 
 
 @pytest.fixture
-def title(db, franchise):
-    return Title.objects.create(name="Star Wars", slug="star-wars", franchise=franchise)
+def series(db):
+    return Series.objects.create(name="Classic Line", slug="classic-line")
+
+
+@pytest.fixture
+def title(db, franchise, series):
+    return Title.objects.create(
+        name="Star Wars",
+        slug="star-wars",
+        franchise=franchise,
+        series=series,
+    )
 
 
 @pytest.fixture
@@ -214,6 +225,10 @@ class TestProtectBlocksDeletion:
     def test_franchise_protected(self, title, franchise):
         with pytest.raises(ProtectedError):
             franchise.delete()
+
+    def test_series_protected(self, title, series):
+        with pytest.raises(ProtectedError):
+            series.delete()
 
     def test_manufacturer_protected_by_corporate_entity(self, corp, mfr):
         with pytest.raises(ProtectedError):

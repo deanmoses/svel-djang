@@ -7,6 +7,7 @@ from apps.catalog.models import (
     Franchise,
     Manufacturer,
     MachineModel,
+    Series,
     System,
     Tag,
     Title,
@@ -89,6 +90,20 @@ class TestResolveBulkTitle:
         t.refresh_from_db()
         assert t.franchise == franchise
 
+    def test_fk_resolves_series(self, opdb):
+        from apps.catalog.resolve import resolve_all_entities
+
+        series = Series.objects.create(name="Godzilla Line", slug="godzilla-line")
+        t = Title.objects.create(opdb_id="G1", name="Placeholder", slug="t1")
+
+        Claim.objects.assert_claim(t, "name", "Godzilla", source=opdb)
+        Claim.objects.assert_claim(t, "series", "godzilla-line", source=opdb)
+
+        resolve_all_entities(Title)
+
+        t.refresh_from_db()
+        assert t.series == series
+
     def test_fk_resets_when_no_claim(self, opdb):
         from apps.catalog.resolve import resolve_all_entities
 
@@ -103,6 +118,21 @@ class TestResolveBulkTitle:
 
         t.refresh_from_db()
         assert t.franchise is None
+
+    def test_series_fk_resets_when_no_claim(self, opdb):
+        from apps.catalog.resolve import resolve_all_entities
+
+        series = Series.objects.create(name="Godzilla Line", slug="godzilla-line")
+        t = Title.objects.create(
+            opdb_id="G1", name="Placeholder", slug="t1", series=series
+        )
+
+        # Name claim but no series claim — series should reset to None.
+        Claim.objects.assert_claim(t, "name", "Godzilla", source=opdb)
+        resolve_all_entities(Title)
+
+        t.refresh_from_db()
+        assert t.series is None
 
     def test_object_ids_scoping(self, opdb):
         t1 = Title.objects.create(opdb_id="G1", name="Untouched", slug="t1")
@@ -405,6 +435,20 @@ class TestResolveTitle:
         assert result.description == "A monster game."
         assert result.franchise == franchise
 
+    def test_single_object_wrapper_resolves_series(self, opdb):
+        series = Series.objects.create(name="Godzilla Line", slug="godzilla-line")
+        t = Title.objects.create(opdb_id="G1", name="Placeholder", slug="t1")
+
+        Claim.objects.assert_claim(t, "name", "Godzilla", source=opdb)
+        Claim.objects.assert_claim(t, "description", "A monster game.", source=opdb)
+        Claim.objects.assert_claim(t, "series", "godzilla-line", source=opdb)
+
+        result = resolve_entity(t)
+
+        assert result.name == "Godzilla"
+        assert result.description == "A monster game."
+        assert result.series == series
+
     def test_resets_franchise_when_no_claim(self, opdb):
         franchise = Franchise.objects.create(name="Godzilla", slug="godzilla")
         t = Title.objects.create(
@@ -416,6 +460,18 @@ class TestResolveTitle:
         result = resolve_entity(t)
 
         assert result.franchise is None
+
+    def test_resets_series_when_no_claim(self, opdb):
+        series = Series.objects.create(name="Godzilla Line", slug="godzilla-line")
+        t = Title.objects.create(
+            opdb_id="G1", name="Placeholder", slug="t1", series=series
+        )
+
+        # Only a name claim, no series.
+        Claim.objects.assert_claim(t, "name", "Godzilla", source=opdb)
+        result = resolve_entity(t)
+
+        assert result.series is None
 
 
 @pytest.mark.django_db

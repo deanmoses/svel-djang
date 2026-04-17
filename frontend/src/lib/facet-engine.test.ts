@@ -30,7 +30,7 @@ function makeTitle(overrides: Partial<FacetedTitle> = {}): FacetedTitle {
 		systems: [],
 		themes: [],
 		persons: [],
-		series: [],
+		series: null,
 		gameplay_features: [],
 		reward_types: [],
 		...overrides
@@ -68,7 +68,7 @@ const mandalorian = makeTitle({
 	themes: [{ slug: 'sci-fi', name: 'Sci-Fi' }],
 	persons: [{ slug: 'tim-sexton', name: 'Tim Sexton' }],
 	franchise: { slug: 'star-wars', name: 'Star Wars' },
-	series: [{ slug: 'star-wars-series', name: 'Star Wars Series' }],
+	series: { slug: 'star-wars-series', name: 'Star Wars Series' },
 	year_min: 2021,
 	year_max: 2021,
 	ipdb_rating_max: 7.2

@@ -52,7 +52,6 @@ def _build_entity_ref_targets() -> dict[str, list[RefKey]]:
         RewardType,
         Tag,
         Theme,
-        Title,
     )
     from apps.media.models import MediaAsset
 
@@ -65,7 +64,6 @@ def _build_entity_ref_targets() -> dict[str, list[RefKey]]:
         "location": [RefKey("location", Location)],
         "theme_parent": [RefKey("parent", Theme)],
         "gameplay_feature_parent": [RefKey("parent", GameplayFeature)],
-        "series_title": [RefKey("title", Title)],
         "media_attachment": [RefKey("media_asset", MediaAsset)],
     }
 

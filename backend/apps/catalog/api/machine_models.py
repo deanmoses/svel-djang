@@ -183,7 +183,7 @@ class MachineModelDetailSchema(Schema):
     tags: list[Ref] = []
     reward_types: list[RewardTypeSchema] = []
     franchise: Optional[FranchiseRefSchema] = None
-    series: list[SeriesRefSchema] = []
+    series: Optional[SeriesRefSchema] = None
     variant_of: Optional[ModelRefSchema] = None
     variant_siblings: list[VariantSchema] = []
     converted_from: Optional[ModelRefSchema] = None
@@ -521,10 +521,11 @@ def _serialize_model_detail(pm) -> dict:
             if pm.title and pm.title.franchise
             else None
         ),
-        "series": [
-            {"name": s.name, "slug": s.slug}
-            for s in (pm.title.series.all() if pm.title else [])
-        ],
+        "series": (
+            {"name": pm.title.series.name, "slug": pm.title.series.slug}
+            if pm.title and pm.title.series
+            else None
+        ),
         "title_models": [
             _serialize_title_machine(sibling, min_rank=min_rank)
             for sibling in (pm.title.machine_models.all() if pm.title else [])
@@ -541,6 +542,7 @@ def _model_detail_qs():
             "corporate_entity__manufacturer",
             "title",
             "title__franchise",
+            "title__series",
             "system",
             "system__technology_subgeneration",
             "technology_generation",
@@ -568,7 +570,6 @@ def _model_detail_qs():
             "tags",
             "reward_types",
             "abbreviations",
-            "title__series",
             Prefetch(
                 "title__machine_models",
                 queryset=MachineModel.objects.active()

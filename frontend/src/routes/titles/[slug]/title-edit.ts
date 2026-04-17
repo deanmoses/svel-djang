@@ -5,6 +5,7 @@ export type TitleEditView = {
 	name: string;
 	description?: { text: string } | null;
 	franchise?: { slug: string; name: string } | null;
+	series?: { slug: string; name: string } | null;
 	abbreviations: string[];
 	machines: Array<{
 		slug: string;
@@ -19,6 +20,7 @@ export type TitleEditFormState = {
 	name: string;
 	description: string;
 	franchiseSlug: string;
+	seriesSlug: string;
 	abbreviationsText: string;
 };
 
@@ -51,6 +53,7 @@ export function titleToFormState(title: TitleEditView): TitleEditFormState {
 		name: title.name,
 		description: title.description?.text ?? '',
 		franchiseSlug: title.franchise?.slug ?? '',
+		seriesSlug: title.series?.slug ?? '',
 		abbreviationsText: title.abbreviations.join(', ')
 	};
 }
@@ -69,6 +72,9 @@ function buildChangedTitleFields(
 	}
 	if (form.franchiseSlug !== original.franchiseSlug) {
 		changed.franchise = form.franchiseSlug === '' ? null : form.franchiseSlug;
+	}
+	if (form.seriesSlug !== original.seriesSlug) {
+		changed.series = form.seriesSlug === '' ? null : form.seriesSlug;
 	}
 
 	return changed;

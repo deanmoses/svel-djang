@@ -29,9 +29,8 @@ class Title(EntityStatusMixin, SluggedModel, LinkableModel, TimeStampedModel):
 
     OPDB calls this a "group" in its JSON, but we use "Title" as it is the
     natural pinball-world term (e.g., "Medieval Madness" spans the 1997
-    original, the 2015 remake, and LE/SE variants). Title fields (name, description, franchise) and
-    abbreviations are resolved from claims, just like MachineModel and
-    Manufacturer.
+    original, the 2015 remake, and LE/SE variants). All fields are resolved
+    from claims, just like MachineModel and Manufacturer.
     """
 
     link_url_pattern = "/titles/{slug}"
@@ -51,6 +50,13 @@ class Title(EntityStatusMixin, SluggedModel, LinkableModel, TimeStampedModel):
     description = MarkdownField(blank=True)
     franchise = models.ForeignKey(
         "Franchise",
+        on_delete=models.PROTECT,
+        related_name="titles",
+        null=True,
+        blank=True,
+    )
+    series = models.ForeignKey(
+        "Series",
         on_delete=models.PROTECT,
         related_name="titles",
         null=True,

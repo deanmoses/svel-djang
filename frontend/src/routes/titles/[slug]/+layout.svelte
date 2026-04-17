@@ -248,14 +248,12 @@
 					</SidebarSection>
 				{/if}
 
-				{#if title.series.length > 0}
+				{#if title.series}
 					<SidebarSection heading="Series">
 						<SidebarList>
-							{#each title.series as s (s.slug)}
-								<SidebarListItem>
-									<a href={resolve(`/series/${s.slug}`)}>{s.name}</a>
-								</SidebarListItem>
-							{/each}
+							<SidebarListItem>
+								<a href={resolve(`/series/${title.series.slug}`)}>{title.series.name}</a>
+							</SidebarListItem>
 						</SidebarList>
 					</SidebarSection>
 				{/if}

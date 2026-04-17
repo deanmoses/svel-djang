@@ -24,7 +24,7 @@ const MOCK_TITLE = {
 			variants: []
 		}
 	],
-	series: [],
+	series: null,
 	credits: [],
 	agreed_specs: { themes: [], gameplay_features: [], reward_types: [] },
 	model_detail: null,

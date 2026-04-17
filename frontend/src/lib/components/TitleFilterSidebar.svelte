@@ -54,7 +54,7 @@
 		buildSingleRefOptions(allTitles, (t) => t.franchise, facetCounts.franchise)
 	);
 	let seriesOptions = $derived(
-		buildFacetRefOptions(allTitles, (t) => t.series, facetCounts.series)
+		buildSingleRefOptions(allTitles, (t) => t.series, facetCounts.series)
 	);
 	let playerCountOptions = $derived(buildPlayerCountOptions(facetCounts.playerCount));
 

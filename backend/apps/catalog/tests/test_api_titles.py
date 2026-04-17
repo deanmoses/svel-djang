@@ -126,7 +126,8 @@ class TestTitlesAllFacets:
         title.franchise = franchise
         title.save()
         series = Series.objects.create(name="Castle Series", slug="castle-series")
-        series.titles.add(title)
+        title.series = series
+        title.save()
 
         dmd = DisplayType.objects.create(name="DMD", slug="dmd")
         wpc = System.objects.create(name="WPC-95", slug="wpc-95")
@@ -199,8 +200,7 @@ class TestTitlesAllFacets:
         assert item["franchise"]["slug"] == "castle-games"
 
         # Series
-        assert len(item["series"]) == 1
-        assert item["series"][0]["slug"] == "castle-series"
+        assert item["series"]["slug"] == "castle-series"
 
         # Year range from two models (1997 and 2015)
         assert item["year_min"] == 1997
@@ -244,7 +244,7 @@ class TestTitlesAllFacets:
         assert item["themes"] == []
         assert item["persons"] == []
         assert item["franchise"] is None
-        assert item["series"] == []
+        assert item["series"] is None
         assert item["year_min"] is None
         assert item["year_max"] is None
         assert item["ipdb_rating_max"] is None

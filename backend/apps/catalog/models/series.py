@@ -56,11 +56,6 @@ class Series(EntityStatusMixin, SluggedModel, LinkableModel, TimeStampedModel):
 
     name = models.CharField(max_length=200, validators=[validate_no_mojibake])
     description = MarkdownField(blank=True)
-    titles = models.ManyToManyField(
-        "Title",
-        blank=True,
-        related_name="series",
-    )
 
     claims = GenericRelation("provenance.Claim")
 

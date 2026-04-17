@@ -23,16 +23,25 @@
 
 	let editFields = $state(untrack(() => titleToFormState(data.title)));
 	let selectedFranchise = $state<string | null>(untrack(() => data.title.franchise?.slug ?? null));
+	let selectedSeries = $state<string | null>(untrack(() => data.title.series?.slug ?? null));
 	let editNote = $state('');
 	let editCitation = $state<EditCitationSelection | null>(null);
 	let pendingBody = $derived(
-		buildTitlePatchBody({ ...editFields, franchiseSlug: selectedFranchise ?? '' }, title)
+		buildTitlePatchBody(
+			{
+				...editFields,
+				franchiseSlug: selectedFranchise ?? '',
+				seriesSlug: selectedSeries ?? ''
+			},
+			title
+		)
 	);
 	let showMixedEditWarning = $derived(
 		shouldShowMixedEditCitationWarning(pendingBody, editCitation)
 	);
 
 	let franchiseOptions = $state<{ slug: string; label: string; count: number }[]>([]);
+	let seriesOptions = $state<{ slug: string; label: string; count: number }[]>([]);
 
 	$effect(() => {
 		client.GET('/api/franchises/all/').then(({ data: franchises }) => {
@@ -41,6 +50,18 @@
 					slug: franchise.slug,
 					label: franchise.name,
 					count: franchise.title_count
+				}));
+			}
+		});
+	});
+
+	$effect(() => {
+		client.GET('/api/series/').then(({ data: series }) => {
+			if (series) {
+				seriesOptions = series.map((s) => ({
+					slug: s.slug,
+					label: s.name,
+					count: s.title_count
 				}));
 			}
 		});
@@ -66,6 +87,7 @@
 			const redirectHref = getEditRedirectHref('titles', title.slug, updated.slug);
 			editFields = titleToFormState(updated);
 			selectedFranchise = updated.franchise?.slug ?? null;
+			selectedSeries = updated.series?.slug ?? null;
 			editNote = '';
 			editCitation = null;
 			if (redirectHref) {
@@ -141,6 +163,16 @@
 			bind:selected={selectedFranchise}
 			allowZeroCount
 			placeholder="Search franchises..."
+		/>
+	</div>
+
+	<div class="field-group">
+		<SearchableSelect
+			label="Series"
+			options={seriesOptions}
+			bind:selected={selectedSeries}
+			allowZeroCount
+			placeholder="Search series..."
 		/>
 	</div>
 

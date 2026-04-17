@@ -110,13 +110,10 @@
 		<dt>Variant</dt>
 		<dd>{model.variant_features.join(', ')}</dd>
 	{/if}
-	{#if model.series.length > 0}
+	{#if model.series}
 		<dt>Series</dt>
 		<dd>
-			{#each model.series as s, i (s.slug)}
-				{#if i > 0},{/if}
-				<a href={resolve(`/series/${s.slug}`)}>{s.name}</a>
-			{/each}
+			<a href={resolve(`/series/${model.series.slug}`)}>{model.series.name}</a>
 		</dd>
 	{/if}
 </dl>

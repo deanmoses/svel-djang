@@ -48,6 +48,7 @@ describe('titleToFormState', () => {
 			name: 'Medieval Madness',
 			description: 'Castle bashers.',
 			franchiseSlug: 'castle-games',
+			seriesSlug: '',
 			abbreviationsText: 'MM'
 		});
 	});
@@ -61,6 +62,7 @@ describe('buildTitlePatchBody', () => {
 				name: 'Medieval Madness Remastered',
 				description: 'Updated title copy',
 				franchiseSlug: '',
+				seriesSlug: '',
 				abbreviationsText: 'MM, MMR'
 			},
 			multiModelTitle
@@ -79,6 +81,30 @@ describe('buildTitlePatchBody', () => {
 
 	it('returns null when nothing changed', () => {
 		expect(buildTitlePatchBody(titleToFormState(multiModelTitle), multiModelTitle)).toBeNull();
+	});
+
+	it('includes series changes in the patch body', () => {
+		const titleWithSeries = {
+			...multiModelTitle,
+			series: { slug: 'old-series', name: 'Old Series' }
+		};
+		const body = buildTitlePatchBody(
+			{ ...titleToFormState(titleWithSeries), seriesSlug: 'new-series' },
+			titleWithSeries
+		);
+		expect(body).toEqual({ fields: { series: 'new-series' }, abbreviations: null });
+	});
+
+	it('clears series when form value is empty', () => {
+		const titleWithSeries = {
+			...multiModelTitle,
+			series: { slug: 'castle-series', name: 'Castle Series' }
+		};
+		const body = buildTitlePatchBody(
+			{ ...titleToFormState(titleWithSeries), seriesSlug: '' },
+			titleWithSeries
+		);
+		expect(body).toEqual({ fields: { series: null }, abbreviations: null });
 	});
 });
 

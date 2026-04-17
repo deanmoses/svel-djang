@@ -15,7 +15,6 @@ from __future__ import annotations
 import json
 import logging
 import time
-from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -57,7 +56,6 @@ from apps.catalog.resolve import (
     resolve_all_gameplay_features,
     resolve_all_location_aliases,
     resolve_all_reward_types,
-    resolve_all_series_titles,
     resolve_all_tags,
     resolve_all_themes,
     resolve_all_title_abbreviations,
@@ -1539,7 +1537,6 @@ class Command(BaseCommand):
         # Pass 3 (assert): build and assert all claims against stable post-rename state.
         membership_set = 0
         pending_claims: list[Claim] = []
-        series_title_claims: dict[int, list[Claim]] = defaultdict(list)
         touched_ids: set[int] = set()
 
         for title, entry in collected:
@@ -1615,45 +1612,30 @@ class Command(BaseCommand):
                 if series is None:
                     logger.warning("Series slug %r not found — skipping", series_slug)
                 else:
-                    claim_key, value = build_relationship_claim(
-                        "series_title", {"title": title.pk}
-                    )
-                    series_title_claims[series.pk].append(
-                        Claim.for_object(
-                            series,
-                            field_name="series_title",
-                            claim_key=claim_key,
-                            value=value,
-                        )
+                    touched_ids.add(title.pk)
+                    pending_claims.append(
+                        Claim.for_object(title, field_name="series", value=series_slug)
                     )
                     membership_set += 1
 
-        # Assert title claims.
+        # Sweep franchise and series so removing the slug in a later
+        # pindata export retracts the stale claim.
         claim_stats: dict = {}
         if pending_claims:
-            claim_stats = self._assert_claims_split_descriptions(Title, pending_claims)
+            sweep_kwargs = {}
+            if touched_ids:
+                sweep_kwargs["sweep_field"] = ["franchise", "series"]
+                sweep_kwargs["authoritative_scope"] = make_authoritative_scope(
+                    Title, touched_ids
+                )
+            claim_stats = self._assert_claims_split_descriptions(
+                Title, pending_claims, **sweep_kwargs
+            )
 
         # Resolve touched titles.
         if touched_ids:
             resolve_all_entities(Title, object_ids=touched_ids)
             resolve_all_title_abbreviations(model_ids=touched_ids)
-
-        # Assert series_title claims and resolve.
-        # Scope covers ALL series in the DB (series_by_slug is fetched from
-        # Series.objects.all()), not just those referenced in this file.  This
-        # is intentional: a series with no titles in the current export must
-        # still have its previous claims swept so stale memberships are retracted.
-        all_series_pks = {s.pk for s in series_by_slug.values()}
-        if all_series_pks:
-            all_series_claims = [c for cs in series_title_claims.values() for c in cs]
-            scope = make_authoritative_scope(Series, all_series_pks)
-            Claim.objects.bulk_assert_claims(
-                self.pinbase_source,
-                all_series_claims,
-                sweep_field="series_title",
-                authoritative_scope=scope,
-            )
-            resolve_all_series_titles(model_ids=all_series_pks)
 
         self.stdout.write(
             f"  Titles: {titles_created} created, {membership_set} series memberships, "

@@ -84,7 +84,7 @@ class TitleListSchema(Schema):
     reward_types: list[FacetRef] = []
     persons: list[FacetRef] = []
     franchise: Optional[FacetRef] = None
-    series: list[FacetRef] = []
+    series: Optional[FacetRef] = None
     year_min: Optional[int] = None
     year_max: Optional[int] = None
     ipdb_rating_max: Optional[float] = None
@@ -123,7 +123,7 @@ class TitleDetailSchema(Schema):
     hero_image_url: Optional[str] = None
     franchise: Optional[FacetRef] = None
     machines: list[TitleMachineSchema]
-    series: list[SeriesRefSchema] = []
+    series: Optional[SeriesRefSchema] = None
     credits: list[CreditSchema] = []
     agreed_specs: AgreedSpecsSchema = AgreedSpecsSchema()
     model_detail: Optional[MachineModelDetailSchema] = None
@@ -208,14 +208,13 @@ def _serialize_title_list(title, *, min_rank: int | None = None) -> dict:
         manufacturer = {"slug": mfr.slug, "name": mfr.name} if mfr else None
         year = first.year
 
-    # Franchise (direct on Title) and Series (M2M on Title)
+    # Franchise and Series (both FKs on Title)
     franchise = None
     if title.franchise:
         franchise = {"slug": title.franchise.slug, "name": title.franchise.name}
-    series_list = [
-        {"slug": s.slug, "name": s.name}
-        for s in getattr(title, "series_list", None) or title.series.all()
-    ]
+    series = None
+    if title.series:
+        series = {"slug": title.series.slug, "name": title.series.name}
 
     return {
         "name": title.name,
@@ -234,7 +233,7 @@ def _serialize_title_list(title, *, min_rank: int | None = None) -> dict:
         "reward_types": _dedup_facet_refs(reward_type_pairs),
         "persons": _dedup_facet_refs(person_pairs),
         "franchise": franchise,
-        "series": series_list,
+        "series": series,
         "year_min": min(years) if years else None,
         "year_max": max(years) if years else None,
         "ipdb_rating_max": max(ratings) if ratings else None,
@@ -355,10 +354,9 @@ def _serialize_title_detail(title) -> dict:
     min_rank = get_minimum_display_rank()
     model_objs = list(title.machine_models.all())
     machines = [_serialize_title_machine(pm, min_rank=min_rank) for pm in model_objs]
-    series = [
-        {"name": s.name, "slug": s.slug}
-        for s in getattr(title, "series_list", None) or title.series.all()
-    ]
+    series = (
+        {"name": title.series.name, "slug": title.series.slug} if title.series else None
+    )
     review_links = _build_review_links(title) if title.needs_review else []
 
     # Hero image from the earliest model.
@@ -460,10 +458,9 @@ def _title_models_prefetch():
 def _detail_qs():
     return (
         Title.objects.active()
-        .select_related("franchise")
+        .select_related("franchise", "series")
         .prefetch_related(
             _title_models_prefetch(),
-            "series",
             "abbreviations",
             claims_prefetch(),
         )
@@ -490,8 +487,8 @@ def list_titles(request, display: str = ""):
     if display:
         qs = qs.filter(machine_models__display_type__slug=display).distinct()
     qs = (
-        qs.select_related("franchise")
-        .prefetch_related(_title_models_prefetch(), "series", "abbreviations")
+        qs.select_related("franchise", "series")
+        .prefetch_related(_title_models_prefetch(), "abbreviations")
         .order_by("name")
     )
     min_rank = get_minimum_display_rank()
@@ -547,6 +544,8 @@ def list_all_titles(request):
     T_IPDB_RATING_MAX = 10
     T_FRANCHISE_SLUG = 11
     T_FRANCHISE_NAME = 12
+    T_SERIES_SLUG = 13
+    T_SERIES_NAME = 14
 
     title_rows = list(
         Title.objects.active()
@@ -591,6 +590,8 @@ def list_all_titles(request):
             "ipdb_rating_max",
             "franchise__slug",
             "franchise__name",
+            "series__slug",
+            "series__name",
         )
         .order_by(F("latest_year").desc(nulls_last=True), "name")
     )
@@ -617,13 +618,6 @@ def list_all_titles(request):
         title_id__in=title_ids
     ).values_list("title_id", "value"):
         title_abbrevs[tid].append(value)
-
-    title_series: dict[int, list[tuple[str, str]]] = defaultdict(list)
-    Series = Title.series.through
-    for tid, slug, name in Series.objects.filter(title_id__in=title_ids).values_list(
-        "title_id", "series__slug", "series__name"
-    ):
-        title_series[tid].append((slug, name))
 
     # --- Bulk facet queries via through tables ---
     model_qs = MachineModel.objects.filter(
@@ -698,6 +692,11 @@ def list_all_titles(request):
             if r[T_FRANCHISE_SLUG]
             else None
         )
+        series = (
+            {"slug": r[T_SERIES_SLUG], "name": r[T_SERIES_NAME]}
+            if r[T_SERIES_SLUG]
+            else None
+        )
 
         result.append(
             {
@@ -737,9 +736,7 @@ def list_all_titles(request):
                     p for mid in mids for p in model_persons.get(mid, [])
                 ),
                 "franchise": franchise,
-                "series": [
-                    {"slug": s, "name": n} for s, n in title_series.get(tid, [])
-                ],
+                "series": series,
                 "year_min": r[T_YEAR_MIN],
                 "year_max": r[T_LATEST_YEAR],
                 "ipdb_rating_max": (

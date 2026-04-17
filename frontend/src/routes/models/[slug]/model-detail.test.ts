@@ -48,7 +48,7 @@ const MOCK_MODEL = {
 	abbreviations: [],
 	extra_data: {},
 	franchise: null,
-	series: [],
+	series: null,
 	title_models: [],
 	credits: [
 		{
