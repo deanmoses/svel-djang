@@ -7,11 +7,13 @@
 		label = undefined,
 		currentKey = undefined,
 		disabled = false,
+		variant = 'default',
 		items
 	}: {
 		label?: string;
 		currentKey?: string;
 		disabled?: boolean;
+		variant?: 'default' | 'heading';
 		items: EditSectionMenuItem[];
 	} = $props();
 
@@ -20,7 +22,7 @@
 	);
 </script>
 
-<ActionMenu label={label ?? currentLabel} {disabled}>
+<ActionMenu label={label ?? currentLabel} {disabled} {variant}>
 	{#each items as item (item.key)}
 		<MenuItem
 			href={item.href}

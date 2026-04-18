@@ -38,15 +38,19 @@
 
 <div class="edit-shell">
 	<header class="edit-header">
-		<div class="edit-header-main">
-			<a href={resolve(`/models/${slug}`)} class="back-link">&larr; Back</a>
-			<h1>{currentSection ? `Edit ${currentSection.label}` : 'Edit'}</h1>
-		</div>
-		<EditSectionMenu
-			items={switcherItems}
-			currentKey={currentSection?.key}
-			disabled={editorDirty}
-		/>
+		<a href={resolve(`/models/${slug}`)} class="back-link">&larr; Back</a>
+		<h1>
+			{#if currentSection}
+				<EditSectionMenu
+					items={switcherItems}
+					currentKey={currentSection.key}
+					disabled={editorDirty}
+					variant="heading"
+				/>
+			{:else}
+				Edit
+			{/if}
+		</h1>
 	</header>
 
 	{@render children()}
@@ -60,20 +64,16 @@
 	}
 
 	.edit-header {
+		position: relative;
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
-		gap: var(--size-3);
+		justify-content: center;
 		margin-bottom: var(--size-4);
 	}
 
-	.edit-header-main {
-		display: flex;
-		align-items: center;
-		gap: var(--size-3);
-	}
-
 	.back-link {
+		position: absolute;
+		left: 0;
 		font-size: var(--font-size-1);
 		color: var(--color-text-muted);
 		text-decoration: none;

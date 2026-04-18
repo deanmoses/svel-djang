@@ -107,9 +107,10 @@
 {/if}
 
 {#if immediateEditor && currentSection}
-	<Modal title={`Edit ${currentSection.label}`} open={immediateActive} onclose={closeEditor}>
-		{#snippet headerActions()}
-			<EditSectionMenu items={switcherItems} currentKey={currentSection.key} />
+	{@const section = currentSection}
+	<Modal title={section.label} open={immediateActive} onclose={closeEditor}>
+		{#snippet titleContent()}
+			<EditSectionMenu items={switcherItems} currentKey={section.key} variant="heading" />
 		{/snippet}
 		{#snippet footer()}
 			<Button onclick={closeEditor}>Done</Button>

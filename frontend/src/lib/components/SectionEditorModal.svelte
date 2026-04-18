@@ -46,14 +46,17 @@
 	}
 </script>
 
-<Modal title={`Edit ${heading}`} {open} onclose={close}>
-	{#snippet headerActions()}
+<Modal title={switcherItems.length > 0 ? heading : `Edit ${heading}`} {open} onclose={close}>
+	{#snippet titleContent()}
 		{#if switcherItems.length > 0}
 			<EditSectionMenu
 				items={switcherItems}
 				currentKey={currentSectionKey}
 				disabled={switcherDisabled}
+				variant="heading"
 			/>
+		{:else}
+			Edit {heading}
 		{/if}
 	{/snippet}
 	<SectionEditorForm

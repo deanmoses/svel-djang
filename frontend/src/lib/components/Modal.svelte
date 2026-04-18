@@ -5,6 +5,7 @@
 
 	let {
 		title,
+		titleContent,
 		open,
 		onclose,
 		headerActions,
@@ -12,6 +13,7 @@
 		children
 	}: {
 		title: string;
+		titleContent?: Snippet;
 		open: boolean;
 		onclose: () => void;
 		headerActions?: Snippet;
@@ -124,7 +126,13 @@
 		>
 			<header class="modal-header">
 				<div class="header-main">
-					<h2 id={titleId}>{title}</h2>
+					<h2 id={titleId}>
+						{#if titleContent}
+							{@render titleContent()}
+						{:else}
+							{title}
+						{/if}
+					</h2>
 					{#if headerActions}
 						<div class="header-actions">
 							{@render headerActions()}

@@ -21,7 +21,7 @@ describe('SectionEditorHost', () => {
 
 		await user.click(screen.getByRole('button', { name: 'Open overview' }));
 
-		expect(screen.getByRole('dialog', { name: 'Edit Overview' })).toBeInTheDocument();
+		expect(screen.getByRole('dialog', { name: 'Overview' })).toBeInTheDocument();
 		expect(screen.getByText('fake editor: overview')).toBeInTheDocument();
 	});
 
@@ -31,7 +31,7 @@ describe('SectionEditorHost', () => {
 
 		await user.click(screen.getByRole('button', { name: 'Open media' }));
 
-		expect(screen.getByRole('dialog', { name: 'Edit Media' })).toBeInTheDocument();
+		expect(screen.getByRole('dialog', { name: 'Media' })).toBeInTheDocument();
 		expect(screen.getByTestId('immediate-editor')).toBeInTheDocument();
 		expect(screen.getByRole('button', { name: 'Done' })).toBeInTheDocument();
 		// No Save/Cancel from SectionEditorForm
@@ -59,7 +59,7 @@ describe('SectionEditorHost', () => {
 		await user.click(screen.getByRole('button', { name: 'Save' }));
 
 		expect(screen.getByText('save failed for features')).toBeInTheDocument();
-		expect(screen.getByRole('dialog', { name: 'Edit Features' })).toBeInTheDocument();
+		expect(screen.getByRole('dialog', { name: 'Features' })).toBeInTheDocument();
 	});
 
 	it('confirms before discarding dirty edits on close, and aborts on cancel', async () => {
@@ -76,7 +76,7 @@ describe('SectionEditorHost', () => {
 		await user.click(screen.getByRole('button', { name: 'Close' }));
 
 		expect(confirmSpy).toHaveBeenCalledWith('Discard unsaved changes?');
-		expect(screen.getByRole('dialog', { name: 'Edit Overview' })).toBeInTheDocument();
+		expect(screen.getByRole('dialog', { name: 'Overview' })).toBeInTheDocument();
 		expect(screen.getByTestId('editing-key')).toHaveTextContent('overview');
 	});
 
