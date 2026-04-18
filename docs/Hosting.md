@@ -101,6 +101,17 @@ In the Railway service dashboard:
 - `INTERNAL_API_BASE_URL` is the base URL SvelteKit SSR uses to call Django from server-side routes. In the current production topology it should point directly at Gunicorn on `http://127.0.0.1:8000` so SSR does not bounce back through the public Caddy origin.
 - The Docker image sets `INTERNAL_API_BASE_URL=http://127.0.0.1:8000` by default. You should keep that value unless the internal Django address changes.
 
+### Cache backend — required for shared state across workers
+
+Per-user rate limits ([backend/apps/provenance/rate_limits.py](../backend/apps/provenance/rate_limits.py)) use `django.core.cache` as the shared store for sliding-window timestamps. In a multi-worker deployment (Gunicorn with more than one worker), the default `LocMemCache` backend is **per-process** — each worker keeps its own window, and a user can effectively send `N × limit` requests before any one worker decides to 429. Any other feature that starts using the cache for cross-request state has the same failure mode.
+
+Use a shared backend in production. On Railway, the simplest options are:
+
+- Redis (`django-redis`), added as a Railway plugin and wired up via `CACHES` in `config/settings.py`.
+- Postgres-backed cache (`django.core.cache.backends.db.DatabaseCache`) — slower but requires no new infra since we already have Postgres.
+
+Dev + tests run fine with `LocMemCache` because there's only one process. Document the limit-per-worker behavior if you ever ship multi-worker without a shared backend.
+
 ### 3. Deploy
 
 Push to `main`. Railway builds the Docker image and deploys. The

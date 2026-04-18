@@ -16,7 +16,7 @@ from django.db import IntegrityError, models as db_models, transaction
 from apps.catalog.claims import build_relationship_claim
 from apps.catalog.models import CreditRole, GameplayFeature, Person
 from apps.core.models import get_claim_fields
-from apps.provenance.models import ChangeSet, CitationInstance, Claim
+from apps.provenance.models import ChangeSet, ChangeSetAction, CitationInstance, Claim
 from apps.provenance.validation import validate_claim_value
 
 from ..resolve import resolve_after_mutation
@@ -699,6 +699,7 @@ def execute_claims(
     specs: list[ClaimSpec],
     *,
     user,
+    action: ChangeSetAction = ChangeSetAction.EDIT,
     note: str = "",
     citation: EditCitationInput | None = None,
 ) -> None:
@@ -712,7 +713,7 @@ def execute_claims(
     """
     try:
         with transaction.atomic():
-            cs = ChangeSet.objects.create(user=user, note=note)
+            cs = ChangeSet.objects.create(user=user, action=action, note=note)
             created_claims = []
             for spec in specs:
                 created_claims.append(

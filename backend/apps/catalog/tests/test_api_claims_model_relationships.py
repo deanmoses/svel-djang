@@ -16,6 +16,7 @@ from apps.catalog.models import (
 )
 from apps.citation.models import CitationSource
 from apps.provenance.models import ChangeSet, Claim
+from apps.provenance.test_factories import user_changeset
 from apps.catalog.tests.conftest import make_machine_model
 
 User = get_user_model()
@@ -311,7 +312,7 @@ class TestCombinedEdits:
             "description",
             "Template citation seed",
             user=user,
-            changeset=ChangeSet.objects.create(user=user, note="seed"),
+            changeset=user_changeset(user, note="seed"),
         )
         template_instance = citation_source.instances.create(
             claim=seed_claim,

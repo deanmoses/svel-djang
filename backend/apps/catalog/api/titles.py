@@ -12,16 +12,23 @@ from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
+from ninja.responses import Status
 from ninja.security import django_auth
 
 from .constants import DEFAULT_PAGE_SIZE
 from .edit_claims import (
+    ClaimSpec,
+    StructuredValidationError,
     execute_claims,
     plan_abbreviation_claims,
     raise_form_error,
     plan_scalar_field_claims,
 )
+from apps.catalog.naming import MAX_TITLE_NAME_LENGTH, normalize_title_name
+from apps.provenance.constants import CREATE_RATE_LIMIT, CREATE_WINDOW_SECONDS
 from apps.provenance.helpers import build_sources, claims_prefetch
+from apps.provenance.models import ChangeSetAction
+from apps.provenance.rate_limits import RateLimitSpec, check_and_record
 
 from .helpers import (
     _build_rich_text,
@@ -164,6 +171,114 @@ class TitleClaimPatchSchema(Schema):
     abbreviations: list[str] | None = None
     note: str = ""
     citation: EditCitationInput | None = None
+
+
+class TitleCreateSchema(Schema):
+    name: str
+    slug: str
+    note: str = ""
+    citation: EditCitationInput | None = None
+
+
+_SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+_MAX_SLUG_LENGTH = 300
+
+_CREATE_RATE_LIMIT = RateLimitSpec(
+    bucket="create",
+    limit=CREATE_RATE_LIMIT,
+    window_seconds=CREATE_WINDOW_SECONDS,
+)
+
+
+def _assert_title_name_available(name: str, *, exclude_pk: int | None = None) -> None:
+    """Raise a field-level 422 if *name* collides with an active Title.
+
+    Normalization is shared with the frontend (``frontend/src/lib/naming.ts``)
+    so the UI's "search returned zero results" signal and the API's
+    enforcement stay in sync.
+    """
+    normalized = normalize_title_name(name)
+    if not normalized:
+        raise StructuredValidationError(
+            message="Name cannot be blank.",
+            field_errors={"name": "Name cannot be blank."},
+        )
+
+    existing = Title.objects.active().values_list("pk", "name")
+    for pk, other_name in existing:
+        if exclude_pk is not None and pk == exclude_pk:
+            continue
+        if normalize_title_name(other_name) == normalized:
+            raise StructuredValidationError(
+                message="Name collision.",
+                field_errors={
+                    "name": (
+                        f"A title named {other_name!r} already exists. "
+                        "Pick a disambiguating name."
+                    )
+                },
+            )
+
+
+def _validate_title_slug(slug: str) -> str:
+    slug = (slug or "").strip()
+    if not slug:
+        raise StructuredValidationError(
+            message="Slug cannot be blank.",
+            field_errors={"slug": "Slug cannot be blank."},
+        )
+    if len(slug) > _MAX_SLUG_LENGTH:
+        raise StructuredValidationError(
+            message="Slug too long.",
+            field_errors={
+                "slug": f"Slug must be {_MAX_SLUG_LENGTH} characters or fewer."
+            },
+        )
+    if not _SLUG_RE.match(slug):
+        raise StructuredValidationError(
+            message="Invalid slug.",
+            field_errors={
+                "slug": (
+                    "Slug may contain only lowercase letters, digits, and "
+                    "hyphens, with no leading, trailing, or repeated hyphens."
+                )
+            },
+        )
+    return slug
+
+
+def _assert_title_slug_available(slug: str) -> None:
+    """Raise a field-level 422 if *slug* is already taken.
+
+    Slug uniqueness is globally DB-enforced (including against soft-deleted
+    titles, whose rows still exist). This pre-check exists to produce a
+    nice field-scoped error message for the common case; the DB constraint
+    remains the authoritative backstop against the TOCTOU race window.
+    """
+    if Title.objects.filter(slug=slug).exists():
+        raise StructuredValidationError(
+            message="Slug collision.",
+            field_errors={
+                "slug": f"The slug {slug!r} is already taken. Edit the slug field."
+            },
+        )
+
+
+def _validate_title_name(name: str) -> str:
+    name = (name or "").strip()
+    if not name:
+        raise StructuredValidationError(
+            message="Name cannot be blank.",
+            field_errors={"name": "Name cannot be blank."},
+        )
+    if len(name) > MAX_TITLE_NAME_LENGTH:
+        raise StructuredValidationError(
+            message="Name too long.",
+            field_errors={
+                "name": (f"Name must be {MAX_TITLE_NAME_LENGTH} characters or fewer.")
+            },
+        )
+    return name
 
 
 # ---------------------------------------------------------------------------
@@ -887,6 +1002,15 @@ def patch_title_claims(request, slug: str, data: TitleClaimPatchSchema):
     title = get_object_or_404(
         Title.objects.active().prefetch_related("abbreviations"), slug=slug
     )
+
+    # Name collisions are not DB-enforced (title names are not unique), so
+    # renames must be checked against the same normalized-name rule the
+    # create endpoint uses. Without this, a user could rename one title to
+    # collide with another and bypass the invariant the create flow
+    # establishes.
+    if "name" in data.fields and data.fields["name"]:
+        _assert_title_name_available(data.fields["name"], exclude_pk=title.pk)
+
     specs = (
         plan_scalar_field_claims(Title, data.fields, entity=title)
         if data.fields
@@ -903,9 +1027,67 @@ def patch_title_claims(request, slug: str, data: TitleClaimPatchSchema):
         title,
         specs,
         user=request.user,
+        action=ChangeSetAction.EDIT,
         note=data.note,
         citation=data.citation,
     )
 
     title = get_object_or_404(_detail_qs(), slug=title.slug)
     return _serialize_title_detail(title)
+
+
+@titles_router.post(
+    "/",
+    auth=django_auth,
+    response={201: TitleDetailSchema},
+    tags=["private"],
+)
+def create_title(request, data: TitleCreateSchema):
+    """Create a new Title from a user-supplied name and slug.
+
+    Writes a user ChangeSet with ``action=create`` and three claims — name,
+    slug, and ``status="active"``. The status claim is written explicitly
+    (rather than relying on the row default) so that Undo semantics and
+    future delete flows have a symmetric claim to invert.
+
+    Rate-limited per user. Staff bypass.
+    """
+    from django.db import IntegrityError, transaction
+
+    check_and_record(request.user, _CREATE_RATE_LIMIT)
+
+    name = _validate_title_name(data.name)
+    slug = _validate_title_slug(data.slug)
+    _assert_title_name_available(name)
+    _assert_title_slug_available(slug)
+
+    # Slug uniqueness has a tiny TOCTOU window between the pre-check above
+    # and the insert below; a concurrent create can steal the slug. If that
+    # happens we fall back to the DB's unique constraint to produce the same
+    # field-scoped error rather than letting execute_claims' generic
+    # "Unique constraint violation" message leak through.
+    try:
+        with transaction.atomic():
+            title = Title.objects.create(name=name, slug=slug, status="active")
+            execute_claims(
+                title,
+                [
+                    ClaimSpec(field_name="name", value=name),
+                    ClaimSpec(field_name="slug", value=slug),
+                    ClaimSpec(field_name="status", value="active"),
+                ],
+                user=request.user,
+                action=ChangeSetAction.CREATE,
+                note=data.note,
+                citation=data.citation,
+            )
+    except IntegrityError:
+        raise StructuredValidationError(
+            message="Slug collision.",
+            field_errors={
+                "slug": f"The slug {slug!r} is already taken. Edit the slug field."
+            },
+        )
+
+    created = get_object_or_404(_detail_qs(), slug=slug)
+    return Status(201, _serialize_title_detail(created))

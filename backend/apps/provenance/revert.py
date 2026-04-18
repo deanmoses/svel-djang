@@ -7,7 +7,7 @@ from django.db import IntegrityError, transaction
 from django.core.exceptions import ValidationError
 
 from .constants import REVERT_OTHERS_MIN_EDITS
-from .models import ChangeSet, Claim
+from .models import ChangeSet, ChangeSetAction, Claim
 
 
 class RevertError(Exception):
@@ -63,7 +63,9 @@ def execute_revert(entity, *, claim_id: int, user, note: str) -> None:
 
     try:
         with transaction.atomic():
-            cs = ChangeSet.objects.create(user=user, note=note)
+            cs = ChangeSet.objects.create(
+                user=user, action=ChangeSetAction.REVERT, note=note
+            )
             target.is_active = False
             target.retracted_by_changeset = cs
             target.save(update_fields=["is_active", "retracted_by_changeset"])

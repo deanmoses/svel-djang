@@ -197,7 +197,8 @@ class TestEditHistoryUserDisplayNull:
     """Verify that build_edit_history returns null for non-user changesets."""
 
     def test_ingest_changeset_has_null_user_display(self, client, db):
-        from apps.provenance.models import ChangeSet, IngestRun
+        from apps.provenance.models import IngestRun
+        from apps.provenance.test_factories import ingest_changeset, user_changeset
 
         source = Source.objects.create(
             name="IPDB", slug="ipdb", source_type="database", priority=10
@@ -206,12 +207,12 @@ class TestEditHistoryUserDisplayNull:
 
         # Create an ingest changeset with a claim — this is the non-user path
         ingest_run = IngestRun.objects.create(source=source, input_fingerprint="abc123")
-        ingest_cs = ChangeSet.objects.create(ingest_run=ingest_run)
+        ingest_cs = ingest_changeset(ingest_run)
         Claim.objects.assert_claim(pm, "year", 1979, source=source, changeset=ingest_cs)
 
         # Create a user changeset with a claim — this is the user path
         user = User.objects.create_user(username="tester")
-        user_cs = ChangeSet.objects.create(user=user)
+        user_cs = user_changeset(user)
         Claim.objects.assert_claim(
             pm,
             "description",

@@ -27,6 +27,7 @@ from apps.catalog.models import (
 )
 from apps.citation.models import CitationSource
 from apps.provenance.models import ChangeSet, CitationInstance, Claim, Source
+from apps.provenance.test_factories import user_changeset
 from apps.catalog.tests.conftest import make_machine_model
 
 User = get_user_model()
@@ -549,7 +550,7 @@ class TestPatchRewardTypeResponseShape:
             field_name="description",
             value="Template citation",
             user=user,
-            changeset=ChangeSet.objects.create(user=user, note="seed"),
+            changeset=user_changeset(user, note="seed"),
         )
         template_citation = CitationInstance.objects.create(
             claim=template_claim,

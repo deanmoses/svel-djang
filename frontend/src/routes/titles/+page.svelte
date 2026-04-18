@@ -3,10 +3,12 @@
 	import { resolve } from '$app/paths';
 	import client from '$lib/api/client';
 	import { createAsyncLoader } from '$lib/async-loader.svelte';
+	import { auth } from '$lib/auth.svelte';
 	import ActiveFilterChips from '$lib/components/ActiveFilterChips.svelte';
 	import CardGrid from '$lib/components/grid/CardGrid.svelte';
 	import FilterDrawer from '$lib/components/FilterDrawer.svelte';
 	import ClientFilteredGrid from '$lib/components/grid/ClientFilteredGrid.svelte';
+	import NoResultsCreatePrompt from '$lib/components/NoResultsCreatePrompt.svelte';
 	import SearchBox from '$lib/components/SearchBox.svelte';
 	import SkeletonCard from '$lib/components/cards/SkeletonCard.svelte';
 	import TitleCard from '$lib/components/cards/TitleCard.svelte';
@@ -21,6 +23,7 @@
 		type FacetedTitle,
 		type GameplayFeatureHierarchyEntry
 	} from '$lib/facet-engine';
+	import { decideCreatePrompt } from './titles-create-prompt';
 
 	const SKELETON_INDICES = Array.from({ length: 12 }, (_, i) => i);
 
@@ -62,6 +65,22 @@
 	});
 
 	let filteredTitles = $derived(filterTitles(titles.data, filters));
+
+	let createPrompt = $derived(
+		decideCreatePrompt({
+			titles: titles.data,
+			query: filters.query,
+			isAuthenticated: auth.isAuthenticated
+		})
+	);
+
+	let createHref = $derived(
+		`${resolve('/titles/new')}?name=${encodeURIComponent(createPrompt.query)}`
+	);
+
+	$effect(() => {
+		void auth.load();
+	});
 </script>
 
 <svelte:head>
@@ -99,6 +118,9 @@
 						/>
 					{/snippet}
 				</ClientFilteredGrid>
+				{#if createPrompt.show}
+					<NoResultsCreatePrompt entityLabel="title" query={createPrompt.query} {createHref} />
+				{/if}
 			</main>
 		</div>
 	{/if}

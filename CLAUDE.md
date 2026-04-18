@@ -49,6 +49,15 @@ The provenance system serves **three purposes simultaneously**:
 
 If you think a field genuinely needs an exception, **stop and ask the user first.** See [docs/Provenance.md](Provenance.md) for architecture details.
 
+### Writing ChangeSets — `action` Is Required On User ChangeSets
+
+Every `ChangeSet` attributed to a user must carry an `action` value (`create`, `edit`, `delete`, or `revert`). Ingest ChangeSets never do — they're identified by the `ingest_run` FK. The DB enforces this via the `provenance_changeset_action_iff_user` check constraint, so forgetting means an `IntegrityError`, not a code-review catch.
+
+Prefer the factories over `ChangeSet.objects.create` in new code:
+
+- Application code: call `execute_claims(entity, specs, user=..., action=ChangeSetAction.EDIT)` — the action kwarg is required at the type level for readability, even though `EDIT` is the default. Revert writes use `ChangeSetAction.REVERT`. Create flows use `ChangeSetAction.CREATE`.
+- Test fixtures: use `from apps.provenance.test_factories import user_changeset, ingest_changeset` instead of constructing `ChangeSet` rows directly. The factories encode the constraint invariants so mistakes fail at call time, not at DB time.
+
 ## Project Overview
 
 Django + SvelteKit monorepo. Django owns the data model, APIs (Django Ninja), and admin UI. SvelteKit handles the user-facing frontend with Node SSR for public pages and CSR for authenticated app pages.

@@ -8,7 +8,7 @@
 			slug: 'williams',
 			website: 'https://williams.example',
 			logo_url: 'https://williams.example/logo.png',
-			description: { text: 'Historic manufacturer' }
+			description: { text: 'Historic manufacturer', html: '', citations: [] }
 		},
 		slug = 'williams'
 	}: {

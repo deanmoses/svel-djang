@@ -4,7 +4,8 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 
-from apps.provenance.models import ChangeSet, Claim, Source
+from apps.provenance.models import ChangeSetAction, Claim, Source
+from apps.provenance.test_factories import user_changeset
 from apps.catalog.tests.conftest import make_machine_model
 
 User = get_user_model()
@@ -137,7 +138,7 @@ class TestRevertPredecessor:
         second_claim = _get_active_claim(pm, "year", user)
 
         # Manually retract the first claim (simulating an earlier revert).
-        cs = ChangeSet.objects.create(user=user, note="earlier revert")
+        cs = user_changeset(user, action=ChangeSetAction.REVERT, note="earlier revert")
         first_claim.retracted_by_changeset = cs
         first_claim.save(update_fields=["retracted_by_changeset"])
 
@@ -239,7 +240,7 @@ class TestRevertAuth:
         other = User.objects.create_user(username="veteran", password="pw")
         # Create 5 changesets for other user
         for _ in range(5):
-            ChangeSet.objects.create(user=other, note="edit")
+            user_changeset(other, note="edit")
 
         client.force_login(other)
         resp = _revert(client, pm.slug, claim.pk, "Correcting year")

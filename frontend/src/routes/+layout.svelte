@@ -6,9 +6,10 @@
 
 	let { children } = $props();
 
-	// Focus-mode routes (e.g. /titles/:slug/edit/:section) render their own
-	// minimal chrome; suppress site Nav/Footer and the page-content wrapper.
-	let isFocusMode = $derived(/\/edit(\/|$)/.test(page.url.pathname));
+	// Focus-mode routes (edit pages and the create pages under /:entity/new)
+	// render their own minimal chrome; suppress site Nav/Footer and the
+	// page-content wrapper.
+	let isFocusMode = $derived(/\/edit(\/|$)|\/new$/.test(page.url.pathname));
 </script>
 
 <div class="site-shell">

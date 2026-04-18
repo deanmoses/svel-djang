@@ -17,6 +17,7 @@ from apps.catalog.models import (
     PersonAlias,
 )
 from apps.provenance.models import Claim, IngestRun, Source
+from apps.provenance.test_factories import user_changeset
 from apps.catalog.tests.conftest import make_machine_model
 
 
@@ -269,7 +270,6 @@ class TestSelfRefConstraints:
 class TestProvenanceConstraints:
     def test_claim_retracted_while_active_rejected(self, db):
         from django.contrib.auth import get_user_model
-        from apps.provenance.models import ChangeSet
 
         User = get_user_model()
         user = User.objects.create_user(username="tester")
@@ -277,7 +277,7 @@ class TestProvenanceConstraints:
         mfr = Manufacturer.objects.create(name="Test", slug="test-mfr")
         claim = Claim.objects.assert_claim(mfr, "name", "Test", source=source)
 
-        cs = ChangeSet.objects.create(user=user)
+        cs = user_changeset(user)
         with pytest.raises(IntegrityError):
             _raw_update(Claim, claim.pk, retracted_by_changeset_id=cs.pk)
 

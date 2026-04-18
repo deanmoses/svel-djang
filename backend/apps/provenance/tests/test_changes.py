@@ -9,6 +9,7 @@ from django.utils import timezone
 
 from apps.catalog.models import Manufacturer
 from apps.provenance.models import ChangeSet, Claim, IngestRun, Source
+from apps.provenance.test_factories import ingest_changeset, user_changeset
 from apps.provenance.pagination import cursor_paginate
 from apps.catalog.tests.conftest import make_machine_model
 
@@ -63,7 +64,7 @@ def mfr(db, bootstrap_source):
 class TestCursorPaginate:
     def test_first_page(self, user, pm):
         for i in range(5):
-            cs = ChangeSet.objects.create(user=user)
+            cs = user_changeset(user)
             Claim.objects.assert_claim(pm, "year", 1990 + i, user=user, changeset=cs)
 
         items, next_cursor = cursor_paginate(ChangeSet.objects.all(), "", 3)
@@ -72,7 +73,7 @@ class TestCursorPaginate:
 
     def test_second_page_via_cursor(self, user, pm):
         for i in range(5):
-            cs = ChangeSet.objects.create(user=user)
+            cs = user_changeset(user)
             Claim.objects.assert_claim(pm, "year", 1990 + i, user=user, changeset=cs)
 
         items1, cursor = cursor_paginate(ChangeSet.objects.all(), "", 3)
@@ -89,7 +90,7 @@ class TestCursorPaginate:
         now = timezone.now()
         cs_ids = []
         for i in range(3):
-            cs = ChangeSet.objects.create(user=user)
+            cs = user_changeset(user)
             Claim.objects.assert_claim(pm, "year", 1990 + i, user=user, changeset=cs)
             ChangeSet.objects.filter(pk=cs.pk).update(created_at=now)
             cs_ids.append(cs.pk)
@@ -137,7 +138,7 @@ class TestChangesList:
             input_fingerprint="test",
             finished_at=timezone.now(),
         )
-        cs = ChangeSet.objects.create(ingest_run=run)
+        cs = ingest_changeset(run)
         Claim.objects.assert_claim(pm, "year", 1999, source=source, changeset=cs)
 
         resp = client.get("/api/pages/changes/")
@@ -151,7 +152,7 @@ class TestChangesList:
             input_fingerprint="test",
             finished_at=timezone.now(),
         )
-        cs = ChangeSet.objects.create(ingest_run=run)
+        cs = ingest_changeset(run)
         Claim.objects.assert_claim(pm, "year", 1999, source=source, changeset=cs)
 
         resp = client.get("/api/pages/changes/?include_ingest=true")
@@ -312,12 +313,12 @@ class TestChangesDetail:
     def test_retraction_only_changeset(self, client, user, pm):
         """A changeset with only retracted claims shows retractions, no changes."""
         # Create a claim, then retract it via a separate changeset.
-        original_cs = ChangeSet.objects.create(user=user)
+        original_cs = user_changeset(user)
         claim = Claim.objects.assert_claim(
             pm, "year", 2000, user=user, changeset=original_cs
         )
 
-        retract_cs = ChangeSet.objects.create(user=user)
+        retract_cs = user_changeset(user)
         claim.retracted_by_changeset = retract_cs
         claim.is_active = False
         claim.save()

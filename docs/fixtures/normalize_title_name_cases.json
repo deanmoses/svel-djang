@@ -1,0 +1,32 @@
+{
+  "_comment": "Shared parity fixture for the title-name normalization rule. Both backend/apps/catalog/tests/test_naming.py and frontend/src/lib/naming.test.ts read this file. If you change the rule, update the cases here — both test suites will re-run against the new table. See backend/apps/catalog/naming.py for the rule and its Known Limitation note on NFKC.",
+  "cases": [
+    ["Godzilla", "godzilla"],
+    ["godzilla", "godzilla"],
+    ["GODZILLA", "godzilla"],
+    ["GoDzIlLa", "godzilla"],
+    ["The Godzilla", "godzilla"],
+    ["A Godzilla", "godzilla"],
+    ["An Elephant", "elephant"],
+    ["the godzilla", "godzilla"],
+    ["Godzilla The", "godzilla the"],
+    ["Attack of The Clones", "attack of the clones"],
+    ["Godzilla!", "godzilla"],
+    ["Godzilla?!?", "godzilla"],
+    ["Attack from Mars", "attack from mars"],
+    ["Attack-from-Mars", "attack from mars"],
+    ["Spider-Man 2", "spider man 2"],
+    ["   Godzilla   ", "godzilla"],
+    ["Godzilla    2", "godzilla 2"],
+    ["The   Godzilla!!!", "godzilla"],
+    ["Godzilla™", "godzillatm"],
+    ["Ｇｏｄｚｉｌｌａ", "godzilla"],
+    ["", ""],
+    ["   ", ""],
+    ["!!!", ""],
+    ["2001", "2001"],
+    ["T2: Judgment Day", "t2 judgment day"],
+    ["Medieval Madness", "medieval madness"],
+    ["The Twilight Zone", "twilight zone"]
+  ]
+}

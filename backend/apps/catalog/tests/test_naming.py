@@ -1,0 +1,30 @@
+"""Tests for title name normalization.
+
+The case table is loaded from ``docs/fixtures/normalize_title_name_cases.json``,
+which is shared with ``frontend/src/lib/naming.test.ts`` so both implementations
+run against the same inputs and the two implementations can't drift.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+
+from apps.catalog.naming import normalize_title_name
+
+_FIXTURE = (
+    Path(__file__).resolve().parents[4]
+    / "docs"
+    / "fixtures"
+    / "normalize_title_name_cases.json"
+)
+
+with _FIXTURE.open() as f:
+    _CASES: list[tuple[str, str]] = [tuple(c) for c in json.load(f)["cases"]]
+
+
+@pytest.mark.parametrize("raw,expected", _CASES)
+def test_normalize_title_name(raw: str, expected: str) -> None:
+    assert normalize_title_name(raw) == expected
