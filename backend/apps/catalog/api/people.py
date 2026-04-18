@@ -1,21 +1,37 @@
-"""People router — list, detail, and claim-patch endpoints."""
+"""People router — list, detail, create, delete, restore, and claim-patch endpoints."""
 
 from __future__ import annotations
 
 from typing import Optional
 
-from django.db.models import Count, F, Prefetch
+from django.db.models import Count, F, Prefetch, Q
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
+from ninja.responses import Status
 from ninja.security import django_auth
 
 from ..cache import PEOPLE_ALL_KEY, get_cached_response, set_cached_response
 from .constants import DEFAULT_PAGE_SIZE
+from apps.core.models import active_status_q
+from apps.catalog.naming import normalize_catalog_name
 from apps.provenance.helpers import build_sources, claims_prefetch
+from apps.provenance.models import ChangeSetAction
+from apps.provenance.rate_limits import (
+    CREATE_RATE_LIMIT_SPEC,
+    DELETE_RATE_LIMIT_SPEC,
+    check_and_record,
+)
 
+from .entity_create import (
+    assert_name_available,
+    assert_slug_available,
+    create_entity_with_claims,
+    validate_name,
+    validate_slug_format,
+)
 from .helpers import (
     _build_rich_text,
     _extract_image_urls,
@@ -25,15 +41,26 @@ from .helpers import (
 from .schemas import (
     ClaimPatchSchema,
     ClaimSchema,
+    PersonCreateSchema,
+    PersonDeletePreviewSchema,
+    PersonDeleteResponseSchema,
+    PersonDeleteSchema,
+    PersonRestoreSchema,
     RelatedTitleSchema,
     RichTextSchema,
     UploadedMediaSchema,
+)
+from .soft_delete import (
+    SoftDeleteBlocked,
+    execute_soft_delete,
+    plan_soft_delete,
+    serialize_blocking_referrer,
 )
 
 from apps.core.licensing import get_minimum_display_rank
 
 from ..models import Credit, MachineModel, Person
-from .edit_claims import execute_claims, plan_scalar_field_claims
+from .edit_claims import ClaimSpec, execute_claims, plan_scalar_field_claims
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -251,3 +278,222 @@ def patch_person_claims(request, slug: str, data: ClaimPatchSchema):
 
     person = get_object_or_404(_person_qs(), slug=person.slug)
     return _serialize_person_detail(person)
+
+
+# ---------------------------------------------------------------------------
+# Create
+# ---------------------------------------------------------------------------
+
+
+@people_router.post(
+    "/",
+    auth=django_auth,
+    response={201: PersonDetailSchema},
+    tags=["private"],
+)
+def create_person(request, data: PersonCreateSchema):
+    """Create a new Person from a user-supplied name and slug.
+
+    Mirrors ``create_title``: writes a user ChangeSet with ``action=create``
+    and three claims — name, slug, and ``status="active"``. Biographical
+    fields (birth/death dates, photo, description, wikidata_id) are left
+    for the normal edit flow. Duplicate names are rejected outright per
+    spec (no disambiguation path for people in v1).
+
+    Rate-limited per user on the shared ``create`` bucket. Staff bypass.
+    """
+    check_and_record(request.user, CREATE_RATE_LIMIT_SPEC)
+
+    # Introspect the model's field rather than using MAX_CATALOG_NAME_LENGTH
+    # directly — Person.name happens to be capped at 200, while Title/Model
+    # are 300, and the shared constant is a ceiling not a floor. Mismatch
+    # would let over-long names pass validation and fail at DB insert,
+    # which create_entity_with_claims would then misreport as a slug
+    # collision.
+    name = validate_name(
+        data.name, max_length=Person._meta.get_field("name").max_length
+    )
+    slug = validate_slug_format(data.slug)
+    assert_name_available(
+        Person,
+        name,
+        normalize=normalize_catalog_name,
+        friendly_label="person",
+    )
+    assert_slug_available(Person, slug)
+
+    create_entity_with_claims(
+        Person,
+        row_kwargs={"name": name, "slug": slug, "status": "active"},
+        claim_specs=[
+            ClaimSpec(field_name="name", value=name),
+            ClaimSpec(field_name="slug", value=slug),
+            ClaimSpec(field_name="status", value="active"),
+        ],
+        user=request.user,
+        note=data.note,
+        citation=data.citation,
+    )
+
+    created = get_object_or_404(_person_qs(), slug=slug)
+    return Status(201, _serialize_person_detail(created))
+
+
+# ---------------------------------------------------------------------------
+# Delete / restore
+# ---------------------------------------------------------------------------
+
+
+def _count_person_changesets(person: Person) -> int:
+    """Count user ChangeSets with at least one claim on *person*.
+
+    Mirrors ``_count_model_changesets`` — Person has no lifecycle children
+    to roll up, so there's a single entity to aggregate provenance for.
+    """
+    from django.contrib.contenttypes.models import ContentType
+
+    from apps.provenance.models import ChangeSet
+
+    ct = ContentType.objects.get_for_model(Person)
+    return (
+        ChangeSet.objects.filter(user__isnull=False)
+        .filter(claims__content_type=ct, claims__object_id=person.pk)
+        .distinct()
+        .count()
+    )
+
+
+def _active_credit_count(person: Person) -> int:
+    """Credits pointing to *person* whose parent Model or Series is active.
+
+    Credit has no ``EntityStatusMixin``, so the generic soft-delete walker
+    in :mod:`.soft_delete` skips it entirely — owned-child rows are
+    normally assumed to ride with their parent's visibility. But a Credit
+    is owned by *Model or Series*, not by Person, and from Person's
+    perspective it's a PROTECT reference. We compute it here rather than
+    teaching the walker to follow owned-child chains: Credit is the first
+    case to hit this, and generalizing without a second example risks
+    designing for the wrong shape. See
+    docs/plans/RecordCreateDelete.md §Cascade Behavior for the policy.
+    """
+    # Credit.model XOR Credit.series — exactly one side is non-null. The
+    # null-inclusive ``active_status_q`` can't be used alone because
+    # ``series__status__isnull=True`` matches any Credit where series is
+    # unset, regardless of the model's status. Scope each branch to the
+    # side that's actually populated.
+    return person.credits.filter(
+        (Q(model__isnull=False) & active_status_q("model"))
+        | (Q(series__isnull=False) & active_status_q("series"))
+    ).count()
+
+
+@people_router.get(
+    "/{slug}/delete-preview/",
+    auth=django_auth,
+    response=PersonDeletePreviewSchema,
+    tags=["private"],
+)
+def person_delete_preview(request, slug: str):
+    """Return the impact summary used by the delete confirmation screen."""
+    person = get_object_or_404(Person.objects.active(), slug=slug)
+    plan = plan_soft_delete(person)
+    active_credits = _active_credit_count(person)
+    is_blocked = plan.is_blocked or active_credits > 0
+    changeset_count = 0 if is_blocked else _count_person_changesets(person)
+    return {
+        "person_name": person.name,
+        "person_slug": person.slug,
+        "changeset_count": changeset_count,
+        "active_credit_count": active_credits,
+        "blocked_by": [serialize_blocking_referrer(b) for b in plan.blockers],
+    }
+
+
+@people_router.post(
+    "/{slug}/delete/",
+    auth=django_auth,
+    response={200: PersonDeleteResponseSchema, 422: dict},
+    tags=["private"],
+)
+def delete_person(request, slug: str, data: PersonDeleteSchema):
+    """Soft-delete a Person.
+
+    Writes a single user ChangeSet with ``action=delete`` containing one
+    ``status=deleted`` claim. Blocks with 422 when *person* is credited on
+    any active Model or Series — see :func:`_active_credit_count` for the
+    rationale. Also defers to the generic PROTECT walker for any future
+    blockers (none expected today).
+    """
+    check_and_record(request.user, DELETE_RATE_LIMIT_SPEC)
+
+    person = get_object_or_404(Person.objects.active(), slug=slug)
+
+    active_credits = _active_credit_count(person)
+    if active_credits > 0:
+        return Status(
+            422,
+            {
+                "detail": (
+                    f"Cannot delete: {person.name} is credited on "
+                    f"{active_credits} active machine"
+                    f"{'s' if active_credits != 1 else ''}. "
+                    "Remove the credits first."
+                ),
+                "blocked_by": [],
+                "active_credit_count": active_credits,
+            },
+        )
+
+    try:
+        changeset, deleted = execute_soft_delete(
+            person, user=request.user, note=data.note, citation=data.citation
+        )
+    except SoftDeleteBlocked as exc:
+        return Status(
+            422,
+            {
+                "detail": "Cannot delete: active references would be left dangling.",
+                "blocked_by": [serialize_blocking_referrer(b) for b in exc.blockers],
+                "active_credit_count": 0,
+            },
+        )
+
+    if changeset is None:
+        return Status(422, {"detail": "Person is already deleted."})
+
+    return {
+        "changeset_id": changeset.pk,
+        "affected_people": [e.slug for e in deleted if isinstance(e, Person)],
+    }
+
+
+@people_router.post(
+    "/{slug}/restore/",
+    auth=django_auth,
+    response={200: PersonDetailSchema, 422: dict, 404: dict},
+    tags=["private"],
+)
+def restore_person(request, slug: str, data: PersonRestoreSchema):
+    """Write a fresh ``status=active`` claim on a soft-deleted Person.
+
+    Shares the ``create`` rate-limit bucket (Restore is semantically a
+    re-create). Person has no lifecycle children, so nothing cascades.
+    """
+    check_and_record(request.user, CREATE_RATE_LIMIT_SPEC)
+
+    # Bypass .active() — we're looking for soft-deleted people.
+    person = get_object_or_404(Person, slug=slug)
+    if person.status != "deleted":
+        return Status(422, {"detail": "Person is not deleted."})
+
+    execute_claims(
+        person,
+        [ClaimSpec(field_name="status", value="active")],
+        user=request.user,
+        action=ChangeSetAction.EDIT,
+        note=data.note,
+        citation=data.citation,
+    )
+
+    refreshed = get_object_or_404(_person_qs(), slug=slug)
+    return _serialize_person_detail(refreshed)

@@ -17,7 +17,8 @@
 		placeholder = 'Search...',
 		entityName = 'result',
 		entityNamePlural = `${entityName}s`,
-		children
+		children,
+		noResultsPrompt
 	}: {
 		items: T[];
 		filterFields: (item: T) => (string | number | null | undefined)[];
@@ -27,6 +28,10 @@
 		entityName?: string;
 		entityNamePlural?: string;
 		children: Snippet<[T]>;
+		// Rendered when the user has typed a non-empty query and the filter
+		// produced zero matches. The trimmed query is passed in so the caller
+		// can echo it in "Create {query}?" affordances.
+		noResultsPrompt?: Snippet<[string]>;
 	} = $props();
 
 	let searchQuery = $state('');
@@ -60,6 +65,10 @@
 		{/if}
 
 		<ClientFilteredGrid items={filteredItems} {entityName} {entityNamePlural} {children} />
+
+		{#if noResultsPrompt && filteredItems.length === 0 && searchQuery.trim() !== ''}
+			{@render noResultsPrompt(searchQuery.trim())}
+		{/if}
 	{/if}
 </div>
 

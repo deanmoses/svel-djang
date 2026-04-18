@@ -73,21 +73,31 @@
 		updateEditQuery(editing);
 	});
 
-	let editSections: EditSectionMenuItem[] = $derived(
-		PERSON_EDIT_SECTIONS.map((section) =>
-			isMobile
-				? {
-						key: section.key,
-						label: section.label,
-						href: resolve(`/people/${slug}/edit/${section.segment}`)
-					}
-				: {
-						key: section.key,
-						label: section.label,
-						onclick: () => (editing = section.key)
-					}
-		)
-	);
+	let editSections: EditSectionMenuItem[] = $derived([
+		...PERSON_EDIT_SECTIONS.map(
+			(section): EditSectionMenuItem =>
+				isMobile
+					? {
+							key: section.key,
+							label: section.label,
+							href: resolve(`/people/${slug}/edit/${section.segment}`)
+						}
+					: {
+							key: section.key,
+							label: section.label,
+							onclick: () => (editing = section.key)
+						}
+		),
+		// "Delete Person" is the last item in the menu (destructive action).
+		// Navigates to a focus-mode confirmation page; auth gating rides on
+		// PageActionBar's editSections prop, which is only passed when the
+		// viewer is authenticated.
+		{
+			key: 'delete-person',
+			label: 'Delete Person',
+			href: resolve(`/people/${slug}/delete`)
+		}
+	]);
 
 	function editAction(sectionKey: PersonEditSectionKey): (() => void) | undefined {
 		if (!auth.isAuthenticated) return undefined;

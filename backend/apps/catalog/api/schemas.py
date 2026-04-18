@@ -119,6 +119,40 @@ class ModelDeleteResponseSchema(Schema):
     affected_models: list[str]
 
 
+class PersonCreateSchema(Schema):
+    name: str
+    slug: str
+    note: str = ""
+    citation: EditCitationInput | None = None
+
+
+class PersonDeleteSchema(Schema):
+    note: str = ""
+    citation: EditCitationInput | None = None
+
+
+class PersonRestoreSchema(Schema):
+    note: str = ""
+    citation: EditCitationInput | None = None
+
+
+class PersonDeletePreviewSchema(Schema):
+    person_name: str
+    person_slug: str
+    changeset_count: int
+    # Count of Credits whose parent Model or Series is still active.
+    # When non-zero the UI refuses the delete (see people.py:delete_person);
+    # Credit rows are owned children of Model/Series so the generic
+    # soft-delete walker doesn't see them.
+    active_credit_count: int
+    blocked_by: list[BlockingReferrerSchema] = []
+
+
+class PersonDeleteResponseSchema(Schema):
+    changeset_id: int
+    affected_people: list[str]
+
+
 class EditOptionItem(Schema):
     slug: str
     label: str
