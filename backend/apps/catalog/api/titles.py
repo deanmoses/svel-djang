@@ -445,6 +445,29 @@ def _collect_aggregated_media(models) -> list[dict]:
     return items
 
 
+def _select_title_hero_image_url(models, *, min_rank: int) -> str | None:
+    """Return the title hero from the earliest model with uploaded backglass media.
+
+    Falls back to the earliest model's existing image-selection logic when no
+    uploaded backglass exists on any model.
+    """
+    for model in models:
+        all_media = getattr(model, "all_media", None) or []
+        backglass_media = [em for em in all_media if em.category == "backglass"]
+        if backglass_media:
+            primary_backglass = [em for em in backglass_media if em.is_primary]
+            chosen = primary_backglass[0] if primary_backglass else backglass_media[0]
+            return build_public_url(build_storage_key(chosen.asset.uuid, "display"))
+
+    if not models:
+        return None
+
+    _, hero_image_url = _extract_image_urls(
+        models[0].extra_data or {}, min_rank=min_rank
+    )
+    return hero_image_url
+
+
 def _serialize_title_detail(title) -> dict:
     min_rank = get_minimum_display_rank()
     model_objs = list(title.machine_models.all())
@@ -454,12 +477,7 @@ def _serialize_title_detail(title) -> dict:
     )
     review_links = _build_review_links(title) if title.needs_review else []
 
-    # Hero image from the earliest model.
-    hero_image_url = None
-    if model_objs:
-        _, hero_image_url = _extract_image_urls(
-            model_objs[0].extra_data or {}, min_rank=min_rank
-        )
+    hero_image_url = _select_title_hero_image_url(model_objs, min_rank=min_rank)
 
     # Credits that appear on every model (intersection, not union).
     credit_sets = []

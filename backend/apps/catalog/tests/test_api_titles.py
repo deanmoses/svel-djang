@@ -304,6 +304,94 @@ class TestTitleDetailAggregation:
         assert "thumb" in by_source["mm-1"]["renditions"]
         assert "display" in by_source["mm-1"]["renditions"]
 
+    def test_title_hero_uses_earliest_model_with_backglass_photo(
+        self, client, django_user_model, title
+    ):
+        from apps.media.models import EntityMedia, MediaAsset
+        from django.contrib.contenttypes.models import ContentType
+        from apps.media.storage import build_public_url, build_storage_key
+
+        user = django_user_model.objects.create_user(username="u")
+        earliest = make_machine_model(
+            name="MM",
+            slug="mm-1",
+            title=title,
+            year=1990,
+        )
+        middle = make_machine_model(
+            name="MMR",
+            slug="mm-2",
+            title=title,
+            year=1991,
+        )
+        latest = make_machine_model(
+            name="MM Deluxe",
+            slug="mm-3",
+            title=title,
+            year=1992,
+        )
+        ct = ContentType.objects.get_for_model(MachineModel)
+
+        playfield_asset = MediaAsset.objects.create(
+            kind=MediaAsset.Kind.IMAGE,
+            status=MediaAsset.Status.READY,
+            original_filename="playfield.jpg",
+            mime_type="image/jpeg",
+            byte_size=1,
+            width=800,
+            height=600,
+            uploaded_by=user,
+        )
+        backglass_asset = MediaAsset.objects.create(
+            kind=MediaAsset.Kind.IMAGE,
+            status=MediaAsset.Status.READY,
+            original_filename="backglass.jpg",
+            mime_type="image/jpeg",
+            byte_size=1,
+            width=800,
+            height=600,
+            uploaded_by=user,
+        )
+        later_playfield_asset = MediaAsset.objects.create(
+            kind=MediaAsset.Kind.IMAGE,
+            status=MediaAsset.Status.READY,
+            original_filename="later-playfield.jpg",
+            mime_type="image/jpeg",
+            byte_size=1,
+            width=800,
+            height=600,
+            uploaded_by=user,
+        )
+
+        EntityMedia.objects.create(
+            content_type=ct,
+            object_id=earliest.pk,
+            asset=playfield_asset,
+            category="playfield",
+            is_primary=True,
+        )
+        EntityMedia.objects.create(
+            content_type=ct,
+            object_id=middle.pk,
+            asset=backglass_asset,
+            category="backglass",
+            is_primary=True,
+        )
+        EntityMedia.objects.create(
+            content_type=ct,
+            object_id=latest.pk,
+            asset=later_playfield_asset,
+            category="playfield",
+            is_primary=True,
+        )
+
+        resp = client.get(f"/api/pages/title/{title.slug}")
+        data = resp.json()
+
+        assert data["hero_image_url"] == build_public_url(
+            build_storage_key(backglass_asset.uuid, "display")
+        )
+
 
 class TestTitlesAllFacets:
     """Test that /api/titles/all/ returns enriched facet data."""
