@@ -1,3 +1,5 @@
+import type { EditSectionDef } from './edit-section-def';
+
 export type ModelEditSectionKey =
 	| 'basics'
 	| 'overview'
@@ -8,13 +10,8 @@ export type ModelEditSectionKey =
 	| 'external-data'
 	| 'media';
 
-export type ModelEditSectionDef = {
-	key: ModelEditSectionKey;
+export type ModelEditSectionDef = EditSectionDef<ModelEditSectionKey> & {
 	/** URL segment for the mobile edit route, e.g. 'external-data' */
-	segment: string;
-	label: string;
-	showCitation: boolean;
-	showMixedEditWarning: boolean;
 	/** false for media — uses immediate-action Modal, not SectionEditorForm */
 	usesSectionEditorForm: boolean;
 };

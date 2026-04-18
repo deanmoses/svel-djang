@@ -26,6 +26,21 @@ describe('PageActionBar', () => {
 		expect(screen.getByRole('button', { name: 'Tools' })).toBeInTheDocument();
 	});
 
+	it('renders a Back link when detailHref is provided', () => {
+		render(PageActionBar, {
+			props: {
+				detailHref: '/models/medieval-madness',
+				historyHref: '/models/medieval-madness/history',
+				sourcesHref: '/models/medieval-madness/sources'
+			}
+		});
+
+		expect(screen.getByRole('link', { name: 'Back' })).toHaveAttribute(
+			'href',
+			'/models/medieval-madness'
+		);
+	});
+
 	it('hides the Edit link when editHref is omitted', () => {
 		render(PageActionBar, {
 			props: {

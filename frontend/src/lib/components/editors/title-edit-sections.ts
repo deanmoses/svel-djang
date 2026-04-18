@@ -1,12 +1,9 @@
+import type { EditSectionDef } from './edit-section-def';
+
 export type TitleEditSectionKey = 'overview' | 'basics' | 'external-data';
 
-export type TitleEditSectionDef = {
-	key: TitleEditSectionKey;
+export type TitleEditSectionDef = EditSectionDef<TitleEditSectionKey> & {
 	/** URL segment for the edit route */
-	segment: string;
-	label: string;
-	showCitation: boolean;
-	showMixedEditWarning: boolean;
 	/** False when the section is hidden for single-model titles (e.g. Overview — description is Model-owned). */
 	includeInSingleModel: boolean;
 };

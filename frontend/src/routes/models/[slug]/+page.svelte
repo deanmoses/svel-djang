@@ -9,7 +9,7 @@
 	import { MEDIA_CATEGORIES } from '$lib/api/catalog-meta';
 	import ReferencesSection from '$lib/components/ReferencesSection.svelte';
 	import ModelRelationshipsList from '$lib/components/ModelRelationshipsList.svelte';
-	import { getModelEditActionContext } from '$lib/components/editors/edit-action-context';
+	import { modelEditActionContext } from '$lib/components/editors/edit-action-context';
 	import {
 		deduplicateCitations,
 		findFirstInlineMarker,
@@ -21,7 +21,7 @@
 	let model = $derived(data.model);
 
 	// On desktop, editAction opens the modal editor; on mobile, it navigates to the edit route.
-	const editAction = getModelEditActionContext();
+	const editAction = modelEditActionContext.get();
 
 	let isOnlyModelInTitle = $derived(model.title_models.length <= 1);
 

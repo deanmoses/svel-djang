@@ -19,12 +19,13 @@
 	import { MEDIA_CATEGORIES } from '$lib/api/catalog-meta';
 	import { getMenuItemAction, type EditSectionMenuItem } from '$lib/components/edit-section-menu';
 	import { LAYOUT_BREAKPOINT } from '$lib/constants';
+	import { resolveDetailSubrouteMode } from '$lib/detail-subroute-mode';
 	import {
 		combinedSectionsFor,
 		type CombinedSectionKey
 	} from '$lib/components/editors/combined-edit-sections';
 	import { modelHasTitleOwnedIdentity } from '$lib/catalog-rules';
-	import { setTitleAreaEditActionContext } from '$lib/components/editors/edit-action-context';
+	import { titleAreaEditActionContext } from '$lib/components/editors/edit-action-context';
 	import BasicsEditor from '$lib/components/editors/BasicsEditor.svelte';
 	import ExternalDataEditor from '$lib/components/editors/ExternalDataEditor.svelte';
 	import FeaturesEditor from '$lib/components/editors/FeaturesEditor.svelte';
@@ -47,15 +48,9 @@
 		auth.load();
 	});
 
-	let isEdit = $derived(
-		page.url.pathname.endsWith('/edit') || page.url.pathname.includes('/edit/')
-	);
-	let isDetail = $derived(
-		!isEdit &&
-			!page.url.pathname.endsWith('/sources') &&
-			!page.url.pathname.endsWith('/edit-history') &&
-			!page.url.pathname.includes('/media')
-	);
+	let mode = $derived(resolveDetailSubrouteMode(page.url.pathname));
+	let isEdit = $derived(mode === 'edit');
+	let isDetail = $derived(mode === 'detail');
 
 	// Mobile detection — matches TwoColumnLayout breakpoint (LAYOUT_BREAKPOINT)
 	let isMobile = $state(false);
@@ -134,7 +129,7 @@
 		return getMenuItemAction(switcherItems, key, (href) => goto(href));
 	}
 
-	setTitleAreaEditActionContext(editAction);
+	titleAreaEditActionContext.set(editAction);
 </script>
 
 <MetaTags
@@ -155,6 +150,7 @@
 	{#snippet actionBar()}
 		{#if !isEdit}
 			<PageActionBar
+				detailHref={isDetail ? undefined : resolve(`/titles/${slug}`)}
 				editSections={editSectionsForBar}
 				historyHref={resolve(`/titles/${slug}/edit-history`)}
 				sourcesHref={resolve(`/titles/${slug}/sources`)}

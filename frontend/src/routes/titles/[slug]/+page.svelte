@@ -16,7 +16,7 @@
 		findRefEntry,
 		scrollToAndHighlight
 	} from '$lib/components/citation-refs';
-	import { getTitleAreaEditActionContext } from '$lib/components/editors/edit-action-context';
+	import { titleAreaEditActionContext } from '$lib/components/editors/edit-action-context';
 
 	let { data } = $props();
 	let title = $derived(data.title);
@@ -25,7 +25,7 @@
 
 	// Desktop: opens the layout's SectionEditorHost modal. Mobile: navigates to
 	// the appropriate edit route. Returns undefined when unauthenticated.
-	const editAction = getTitleAreaEditActionContext();
+	const editAction = titleAreaEditActionContext.get();
 
 	let descriptionContentEl: HTMLDivElement | undefined = $state();
 	let refsContentEl: HTMLDivElement | undefined = $state();

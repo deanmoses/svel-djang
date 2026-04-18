@@ -19,7 +19,8 @@
 	import { getMenuItemAction, type EditSectionMenuItem } from '$lib/components/edit-section-menu';
 	import { LAYOUT_BREAKPOINT } from '$lib/constants';
 	import { modelHasTitleOwnedIdentity } from '$lib/catalog-rules';
-	import { setModelEditActionContext } from '$lib/components/editors/edit-action-context';
+	import { resolveDetailSubrouteMode } from '$lib/detail-subroute-mode';
+	import { modelEditActionContext } from '$lib/components/editors/edit-action-context';
 	import OverviewEditor from '$lib/components/editors/OverviewEditor.svelte';
 	import PeopleEditor from '$lib/components/editors/PeopleEditor.svelte';
 	import MediaEditor from '$lib/components/editors/MediaEditor.svelte';
@@ -37,21 +38,12 @@
 		auth.load();
 	});
 
-	let isMedia = $derived(
-		page.url.pathname.endsWith('/media') || page.url.pathname.includes('/media/')
-	);
-	let isEdit = $derived(
-		page.url.pathname.endsWith('/edit') || page.url.pathname.includes('/edit/')
-	);
+	let mode = $derived(resolveDetailSubrouteMode(page.url.pathname));
+	let isEdit = $derived(mode === 'edit');
 	// isDetail still drives (a) the "Reader" back-link in PageActionBar,
 	// and (b) whether the sidebar is desktop-only — on sub-routes the sidebar
 	// is shown on mobile too because the main column no longer duplicates it.
-	let isDetail = $derived(
-		!isEdit &&
-			!page.url.pathname.endsWith('/sources') &&
-			!page.url.pathname.endsWith('/edit-history') &&
-			!isMedia
-	);
+	let isDetail = $derived(mode === 'detail');
 
 	// Mobile detection — matches TwoColumnLayout breakpoint (LAYOUT_BREAKPOINT)
 	let isMobile = $state(false);
@@ -128,7 +120,7 @@
 
 	// Expose editAction to the detail page so accordion [edit] links can reach the
 	// layout's modal host (desktop) or nav (mobile) without the page knowing how.
-	setModelEditActionContext(editAction);
+	modelEditActionContext.set(editAction);
 
 	// Desktop sidebar shows Franchise/Series as their own sections, so the Features
 	// sidebar should hide when *only* franchise/series would appear.
