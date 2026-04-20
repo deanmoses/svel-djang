@@ -1,4 +1,6 @@
 <script lang="ts">
+	import AttributionLine from '$lib/components/AttributionLine.svelte';
+	import Markdown from '$lib/components/Markdown.svelte';
 	import ClientFilteredGrid from '$lib/components/grid/ClientFilteredGrid.svelte';
 	import TitleCard from '$lib/components/cards/TitleCard.svelte';
 
@@ -6,11 +8,18 @@
 	let system = $derived(data.system);
 </script>
 
-{#if system.titles.length === 0}
-	<p class="empty">No titles on this system.</p>
-{:else}
-	<section>
-		<h2>Titles ({system.titles.length})</h2>
+{#if system.description?.html}
+	<section class="description">
+		<Markdown html={system.description.html} citations={system.description.citations ?? []} />
+		<AttributionLine attribution={system.description.attribution} />
+	</section>
+{/if}
+
+<section>
+	<h2>Titles using {system.name} ({system.titles.length})</h2>
+	{#if system.titles.length === 0}
+		<p class="empty">No titles on this system.</p>
+	{:else}
 		<ClientFilteredGrid items={system.titles} showCount={false}>
 			{#snippet children(title)}
 				<TitleCard
@@ -22,10 +31,14 @@
 				/>
 			{/snippet}
 		</ClientFilteredGrid>
-	</section>
-{/if}
+	{/if}
+</section>
 
 <style>
+	.description {
+		margin-bottom: var(--size-6);
+	}
+
 	h2 {
 		font-size: var(--font-size-3);
 		font-weight: 600;

@@ -82,6 +82,7 @@ class TestSystemsAPI:
         assert data["name"] == "Williams WPC-95"
         assert data["slug"] == "wpc-95"
         assert data["manufacturer"]["name"] == "Williams"
+        assert data["technology_subgeneration"] is None
         assert len(data["titles"]) == 2
 
     def test_get_system_detail_titles_sorted_year_desc(

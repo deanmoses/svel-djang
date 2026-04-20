@@ -8,6 +8,7 @@ const MOCK_DATA = {
 	slug: 'wpc-95',
 	description: { text: '', html: '', citations: [], attribution: null },
 	manufacturer: { name: 'Williams', slug: 'williams' },
+	technology_subgeneration: { name: 'Integrated', slug: 'integrated' },
 	titles: [
 		{
 			name: 'Medieval Madness',
@@ -62,5 +63,6 @@ describe('systems detail SSR route', () => {
 		});
 
 		expect(body).toContain('Medieval Madness');
+		expect(body).toContain('Titles using WPC-95 (1)');
 	});
 });

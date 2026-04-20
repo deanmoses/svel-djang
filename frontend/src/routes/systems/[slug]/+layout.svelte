@@ -1,99 +1,160 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { SITE_NAME } from '$lib/constants';
 	import { auth } from '$lib/auth.svelte';
 	import MetaTags from '$lib/components/MetaTags.svelte';
-	import PageHeader from '$lib/components/PageHeader.svelte';
-	import AttributionLine from '$lib/components/AttributionLine.svelte';
-	import Markdown from '$lib/components/Markdown.svelte';
+	import PageActionBar from '$lib/components/PageActionBar.svelte';
+	import RecordDetailShell from '$lib/components/RecordDetailShell.svelte';
+	import SectionEditorHost from '$lib/components/SectionEditorHost.svelte';
 	import SidebarList from '$lib/components/SidebarList.svelte';
 	import SidebarListItem from '$lib/components/SidebarListItem.svelte';
 	import SidebarSection from '$lib/components/SidebarSection.svelte';
-	import TabNav from '$lib/components/TabNav.svelte';
-	import Tab from '$lib/components/Tab.svelte';
-	import TwoColumnLayout from '$lib/components/TwoColumnLayout.svelte';
+	import { type EditSectionMenuItem } from '$lib/components/edit-section-menu';
+	import {
+		findSystemSectionByKey,
+		findSystemSectionBySegment,
+		SYSTEM_EDIT_SECTIONS,
+		type SystemEditSectionKey
+	} from '$lib/components/editors/system-edit-sections';
+	import { LAYOUT_BREAKPOINT } from '$lib/constants';
+	import { resolveDetailSubrouteMode } from '$lib/detail-subroute-mode';
+	import { createIsMobileFlag } from '$lib/use-is-mobile.svelte';
+	import SystemEditorSwitch from './edit/SystemEditorSwitch.svelte';
 
 	let { data, children } = $props();
 	let system = $derived(data.system);
 	let slug = $derived(page.params.slug);
 
+	let metaDescription = $derived(system.description?.text || `${system.name} — ${SITE_NAME}`);
+	let mode = $derived(resolveDetailSubrouteMode(page.url.pathname));
+	let isDetail = $derived(mode === 'detail');
+	let isEdit = $derived(mode === 'edit');
+	const isMobileFlag = createIsMobileFlag(LAYOUT_BREAKPOINT);
+	let isMobile = $derived(isMobileFlag.current);
+	let editing = $state<SystemEditSectionKey | null>(null);
+	let syncEnabled = $derived(!isMobile && !isEdit);
+	let lastUrlEditing = $state<SystemEditSectionKey | null>(null);
+
 	$effect(() => {
 		auth.load();
 	});
 
-	let isDetail = $derived(
-		!page.url.pathname.endsWith('/edit') &&
-			!page.url.pathname.endsWith('/sources') &&
-			!page.url.pathname.endsWith('/edit-history')
+	function updateEditQuery(nextEditing: SystemEditSectionKey | null) {
+		const current = page.url.searchParams.get('edit') ?? null;
+		const desired = nextEditing ? (findSystemSectionByKey(nextEditing)?.segment ?? null) : null;
+		if (current === desired) return;
+		const url = new URL(page.url);
+		if (desired) url.searchParams.set('edit', desired);
+		else url.searchParams.delete('edit');
+		goto(`${url.pathname}${url.search}`, { replaceState: true, noScroll: true, keepFocus: true });
+	}
+
+	function resolveEditingFromUrl(): SystemEditSectionKey | null {
+		if (!syncEnabled) return null;
+		const section = page.url.searchParams.get('edit');
+		const matched = section ? findSystemSectionBySegment(section) : undefined;
+		return matched?.key ?? null;
+	}
+
+	$effect(() => {
+		const nextEditing = resolveEditingFromUrl();
+		lastUrlEditing = nextEditing;
+		editing = nextEditing;
+	});
+
+	$effect(() => {
+		if (!syncEnabled) return;
+		if (editing === lastUrlEditing) return;
+		lastUrlEditing = editing;
+		updateEditQuery(editing);
+	});
+
+	let editSections: EditSectionMenuItem[] = $derived(
+		SYSTEM_EDIT_SECTIONS.map((section) =>
+			isMobile
+				? {
+						key: section.key,
+						label: section.label,
+						href: resolve(`/systems/${slug}/edit/${section.segment}`)
+					}
+				: {
+						key: section.key,
+						label: section.label,
+						onclick: () => (editing = section.key)
+					}
+		)
 	);
-	let isEdit = $derived(page.url.pathname.endsWith('/edit'));
-	let isSources = $derived(page.url.pathname.endsWith('/sources'));
-	let isEditHistory = $derived(page.url.pathname.endsWith('/edit-history'));
 </script>
 
-<MetaTags
-	title={system.name}
-	description={system.description?.text || `${system.name} — ${SITE_NAME}`}
-	url={page.url.href}
-/>
+<MetaTags title={system.name} description={metaDescription} url={page.url.href} />
 
-<article>
-	<PageHeader
-		title={system.name}
-		breadcrumbs={[{ label: 'Systems', href: '/systems' }]}
-		--page-header-title-mb="var(--size-2)"
+{#if isEdit}
+	{@render children()}
+{:else}
+	{#snippet actionBar()}
+		<PageActionBar
+			detailHref={isDetail ? undefined : resolve(`/systems/${slug}`)}
+			editSections={auth.isAuthenticated ? editSections : undefined}
+			historyHref={resolve(`/systems/${slug}/edit-history`)}
+			sourcesHref={resolve(`/systems/${slug}/sources`)}
+		/>
+	{/snippet}
+
+	{#snippet main()}
+		{@render children()}
+	{/snippet}
+
+	{#snippet sidebar()}
+		{#if system.manufacturer}
+			<SidebarSection heading="Manufacturer">
+				<a href={resolve(`/manufacturers/${system.manufacturer.slug}`)}
+					>{system.manufacturer.name}</a
+				>
+			</SidebarSection>
+		{/if}
+
+		{#if system.sibling_systems.length > 0}
+			<SidebarSection heading="Other Systems By This Manufacturer">
+				<SidebarList>
+					{#each system.sibling_systems as sibling (sibling.slug)}
+						<SidebarListItem>
+							<a href={resolve(`/systems/${sibling.slug}`)}>{sibling.name}</a>
+						</SidebarListItem>
+					{/each}
+				</SidebarList>
+			</SidebarSection>
+		{/if}
+	{/snippet}
+
+	<RecordDetailShell
+		name={system.name}
+		parentLink={{ text: 'Systems', href: resolve('/systems') }}
+		{actionBar}
+		{main}
+		{sidebar}
+		sidebarDesktopOnly={true}
 	/>
 
-	<TwoColumnLayout>
-		{#snippet main()}
-			{#if system.description?.html}
-				<div class="description">
-					<Markdown html={system.description.html} citations={system.description.citations} />
-					<AttributionLine attribution={system.description.attribution} />
-				</div>
-			{/if}
-
-			<TabNav>
-				<Tab active={isDetail} href={resolve(`/systems/${slug}`)}>Detail</Tab>
-				{#if auth.isAuthenticated}
-					<Tab active={isEdit} href={resolve(`/systems/${slug}/edit`)}>Edit</Tab>
-				{/if}
-				<Tab active={isSources} href={resolve(`/systems/${slug}/sources`)}>Sources</Tab>
-				<Tab active={isEditHistory} href={resolve(`/systems/${slug}/edit-history`)}
-					>Edit History</Tab
-				>
-			</TabNav>
-
-			{@render children()}
+	<SectionEditorHost
+		bind:editingKey={editing}
+		sections={SYSTEM_EDIT_SECTIONS.map((section) => ({
+			...section,
+			usesSectionEditorForm: true
+		}))}
+		switcherItems={editSections}
+	>
+		{#snippet editor(key, { ref, onsaved, onerror, ondirtychange })}
+			<SystemEditorSwitch
+				sectionKey={key}
+				initialData={system}
+				slug={system.slug}
+				bind:editorRef={ref.current}
+				{onsaved}
+				{onerror}
+				{ondirtychange}
+			/>
 		{/snippet}
-
-		{#snippet sidebar()}
-			{#if system.manufacturer}
-				<SidebarSection heading="Manufacturer">
-					<a href={resolve(`/manufacturers/${system.manufacturer.slug}`)}
-						>{system.manufacturer.name}</a
-					>
-				</SidebarSection>
-			{/if}
-
-			{#if system.sibling_systems.length > 0}
-				<SidebarSection heading="Other Systems By This Manufacturer">
-					<SidebarList>
-						{#each system.sibling_systems as sibling (sibling.slug)}
-							<SidebarListItem>
-								<a href={resolve(`/systems/${sibling.slug}`)}>{sibling.name}</a>
-							</SidebarListItem>
-						{/each}
-					</SidebarList>
-				</SidebarSection>
-			{/if}
-		{/snippet}
-	</TwoColumnLayout>
-</article>
-
-<style>
-	.description {
-		margin-bottom: var(--size-6);
-	}
-</style>
+	</SectionEditorHost>
+{/if}

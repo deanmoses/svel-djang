@@ -54,6 +54,7 @@ class SystemDetailSchema(Schema):
     slug: str
     description: RichTextSchema = RichTextSchema()
     manufacturer: Optional[Ref] = None
+    technology_subgeneration: Optional[Ref] = None
     titles: list[RelatedTitleSchema]
     sibling_systems: list[SiblingSystemSchema] = []
     sources: list[ClaimSchema] = []
@@ -67,7 +68,7 @@ class SystemDetailSchema(Schema):
 def _system_detail_qs():
     return (
         System.objects.active()
-        .select_related("manufacturer")
+        .select_related("manufacturer", "technology_subgeneration")
         .prefetch_related(
             claims_prefetch(),
             Prefetch(
@@ -131,6 +132,14 @@ def _serialize_system_detail(system) -> dict:
         "manufacturer": (
             {"name": system.manufacturer.name, "slug": system.manufacturer.slug}
             if system.manufacturer
+            else None
+        ),
+        "technology_subgeneration": (
+            {
+                "name": system.technology_subgeneration.name,
+                "slug": system.technology_subgeneration.slug,
+            }
+            if system.technology_subgeneration
             else None
         ),
         "titles": list(titles.values()),
