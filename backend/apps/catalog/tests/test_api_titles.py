@@ -403,7 +403,9 @@ class TestTitlesAllFacets:
         cache.clear()
 
     @pytest.fixture
-    def faceted_title(self, db, williams_entity, solid_state, credit_roles):
+    def faceted_title(
+        self, db, manufacturer, williams_entity, solid_state, credit_roles
+    ):
         title = Title.objects.create(
             name="Medieval Madness", slug="medieval-madness", opdb_id="G5pe4"
         )
@@ -415,7 +417,9 @@ class TestTitlesAllFacets:
         title.save()
 
         dmd = DisplayType.objects.create(name="DMD", slug="dmd")
-        wpc = System.objects.create(name="WPC-95", slug="wpc-95")
+        wpc = System.objects.create(
+            name="WPC-95", slug="wpc-95", manufacturer=manufacturer
+        )
         person = Person.objects.create(name="Pat Lawlor", slug="pat-lawlor")
         theme = Theme.objects.create(name="Medieval", slug="medieval")
         role = CreditRole.objects.get(slug="design")

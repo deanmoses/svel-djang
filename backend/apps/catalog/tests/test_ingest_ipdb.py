@@ -7,7 +7,14 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 
 from apps.catalog.ingestion.ipdb.features import extract_ipdb_gameplay_features
-from apps.catalog.models import Credit, MachineModel, Person, System, SystemMpuString
+from apps.catalog.models import (
+    Credit,
+    MachineModel,
+    Manufacturer,
+    Person,
+    System,
+    SystemMpuString,
+)
 from apps.provenance.models import Source
 from apps.catalog.tests.conftest import make_machine_model
 
@@ -17,7 +24,10 @@ FIXTURES = "apps/catalog/tests/fixtures"
 @pytest.fixture
 def _mpu_strings(db):
     """Create SystemMpuString records matching the fixture's system.json."""
-    system = System.objects.create(slug="wpc-95", name="WPC-95")
+    mfr, _ = Manufacturer.objects.get_or_create(
+        slug="williams", defaults={"name": "Williams"}
+    )
+    system = System.objects.create(slug="wpc-95", name="WPC-95", manufacturer=mfr)
     SystemMpuString.objects.create(system=system, value="Williams WPC-95")
 
 

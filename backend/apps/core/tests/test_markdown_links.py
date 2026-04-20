@@ -30,10 +30,12 @@ def manufacturer(db):
 
 
 @pytest.fixture
-def system(db):
+def system(db, manufacturer):
     from apps.catalog.models import System
 
-    return System.objects.create(name="WPC-95", slug="wpc-95")
+    return System.objects.create(
+        name="WPC-95", slug="wpc-95", manufacturer=manufacturer
+    )
 
 
 @pytest.fixture

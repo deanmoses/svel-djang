@@ -1,7 +1,7 @@
 import pytest
 from django.apps import apps
 from django.core.validators import MinValueValidator, RegexValidator
-from django.db import IntegrityError, models
+from django.db import IntegrityError, models, transaction
 
 from apps.catalog.models import (
     CorporateEntity,
@@ -9,6 +9,7 @@ from apps.catalog.models import (
     CreditRole,
     Manufacturer,
     Person,
+    System,
 )
 from apps.core.models import get_claim_fields
 from apps.core.validators import validate_no_mojibake
@@ -130,6 +131,23 @@ class TestCorporateEntity:
             year_end=1999,
         )
         assert manufacturer.entities.count() == 2
+
+
+# --- System ---
+
+
+class TestSystem:
+    """Verify System.manufacturer is required at the DB level."""
+
+    def test_manufacturer_required(self, db):
+        with pytest.raises(IntegrityError):
+            with transaction.atomic():
+                System.objects.create(name="WPC-95", slug="wpc-95")
+
+    def test_explicit_null_manufacturer_rejected(self, db):
+        with pytest.raises(IntegrityError):
+            with transaction.atomic():
+                System.objects.create(name="WPC-95", slug="wpc-95", manufacturer=None)
 
 
 # --- MachineModel ---

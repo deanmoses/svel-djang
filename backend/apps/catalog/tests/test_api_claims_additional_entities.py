@@ -16,6 +16,7 @@ from apps.catalog.models import (
     DisplayType,
     Franchise,
     GameFormat,
+    Manufacturer,
     Person,
     RewardType,
     Series,
@@ -94,7 +95,10 @@ def _create_conflicting_series():
 
 
 def _create_system():
-    return System.objects.create(name="WPC-95", slug="wpc-95")
+    mfr, _ = Manufacturer.objects.get_or_create(
+        slug="williams", defaults={"name": "Williams"}
+    )
+    return System.objects.create(name="WPC-95", slug="wpc-95", manufacturer=mfr)
 
 
 def _create_technology_generation():
@@ -637,7 +641,12 @@ class TestUniqueNameValidation:
         self, client, user, path_template, factory, other_name
     ):
         entity = factory()
-        entity.__class__.objects.create(name=other_name, slug=slugify(other_name))
+        extra_kwargs = {}
+        if isinstance(entity, System):
+            extra_kwargs["manufacturer"] = entity.manufacturer
+        entity.__class__.objects.create(
+            name=other_name, slug=slugify(other_name), **extra_kwargs
+        )
 
         client.force_login(user)
         resp = _patch(

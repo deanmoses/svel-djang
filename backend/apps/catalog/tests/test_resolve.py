@@ -386,7 +386,12 @@ class TestResolveSystem:
         ipdb = Source.objects.create(
             name="IPDB", slug="ipdb", source_type="database", priority=10
         )
-        system = System.objects.create(name="Williams WPC-95", slug="wpc-95")
+        mfr, _ = Manufacturer.objects.get_or_create(
+            slug="williams", defaults={"name": "Williams"}
+        )
+        system = System.objects.create(
+            name="Williams WPC-95", slug="wpc-95", manufacturer=mfr
+        )
         pm = make_machine_model(name="Medieval Madness", slug="medieval-madness")
         Claim.objects.assert_claim(pm, "name", "Medieval Madness", source=ipdb)
         Claim.objects.assert_claim(pm, "system", "wpc-95", source=ipdb)
@@ -411,7 +416,12 @@ class TestResolveSystem:
         ipdb = Source.objects.create(
             name="IPDB", slug="ipdb", source_type="database", priority=10
         )
-        system = System.objects.create(name="Williams WPC-95", slug="wpc-95")
+        mfr, _ = Manufacturer.objects.get_or_create(
+            slug="williams", defaults={"name": "Williams"}
+        )
+        system = System.objects.create(
+            name="Williams WPC-95", slug="wpc-95", manufacturer=mfr
+        )
         pm = make_machine_model(
             name="Medieval Madness", slug="medieval-madness", system=system
         )

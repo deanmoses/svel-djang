@@ -38,8 +38,6 @@ class System(CatalogModel, EntityStatusMixin, SluggedModel, TimeStampedModel):
         "Manufacturer",
         on_delete=models.PROTECT,
         related_name="systems",
-        null=True,
-        blank=True,
     )
     technology_subgeneration = models.ForeignKey(
         "TechnologySubgeneration",

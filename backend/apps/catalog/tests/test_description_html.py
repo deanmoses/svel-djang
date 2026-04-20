@@ -24,9 +24,13 @@ def manufacturer_with_description(db):
 
 @pytest.fixture
 def system_with_description(db):
+    mfr, _ = Manufacturer.objects.get_or_create(
+        slug="williams", defaults={"name": "Williams"}
+    )
     return System.objects.create(
         name="WPC-95",
         slug="wpc-95",
+        manufacturer=mfr,
         description="The final WPC generation.",
     )
 
