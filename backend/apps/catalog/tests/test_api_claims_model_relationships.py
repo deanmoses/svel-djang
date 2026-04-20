@@ -9,7 +9,6 @@ from django.contrib.auth import get_user_model
 
 from apps.catalog.models import (
     GameplayFeature,
-    MachineModel,
     Person,
     RewardType,
     Tag,
@@ -17,6 +16,8 @@ from apps.catalog.models import (
 )
 from apps.citation.models import CitationSource
 from apps.provenance.models import ChangeSet, Claim
+from apps.provenance.test_factories import user_changeset
+from apps.catalog.tests.conftest import make_machine_model
 
 User = get_user_model()
 
@@ -28,9 +29,7 @@ def user(db):
 
 @pytest.fixture
 def pm(db, _bootstrap_source):
-    pm = MachineModel.objects.create(
-        name="Medieval Madness", slug="medieval-madness", year=1997
-    )
+    pm = make_machine_model(name="Medieval Madness", slug="medieval-madness", year=1997)
     Claim.objects.assert_claim(pm, "name", "Medieval Madness", source=_bootstrap_source)
     return pm
 
@@ -313,7 +312,7 @@ class TestCombinedEdits:
             "description",
             "Template citation seed",
             user=user,
-            changeset=ChangeSet.objects.create(user=user, note="seed"),
+            changeset=user_changeset(user, note="seed"),
         )
         template_instance = citation_source.instances.create(
             claim=seed_claim,
@@ -487,7 +486,7 @@ class TestEditOptions:
         assert match["label"] == "Medieval Madness (1997)"
 
     def test_models_label_without_year(self, client, db):
-        MachineModel.objects.create(name="Unknown Game", slug="unknown-game")
+        make_machine_model(name="Unknown Game", slug="unknown-game")
         resp = client.get("/api/models/edit-options/")
         data = resp.json()
         match = next(m for m in data["models"] if m["slug"] == "unknown-game")
@@ -512,9 +511,7 @@ class TestHierarchyFKValidation:
         assert resp.status_code == 422
 
     def test_valid_hierarchy_fk_succeeds(self, client, user, pm):
-        parent = MachineModel.objects.create(
-            name="Star Trek", slug="star-trek", year=1991
-        )
+        parent = make_machine_model(name="Star Trek", slug="star-trek", year=1991)
         client.force_login(user)
         resp = _patch(client, pm.slug, {"fields": {"variant_of": parent.slug}})
         assert resp.status_code == 200

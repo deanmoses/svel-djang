@@ -1,22 +1,16 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
 	import { page } from '$app/state';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { MEDIA_CATEGORIES } from '$lib/api/catalog-meta';
 	import SectionEditorForm from '$lib/components/SectionEditorForm.svelte';
 	import Button from '$lib/components/Button.svelte';
-	import BasicsEditor from '$lib/components/editors/BasicsEditor.svelte';
-	import OverviewEditor from '$lib/components/editors/OverviewEditor.svelte';
-	import SpecificationsEditor from '$lib/components/editors/SpecificationsEditor.svelte';
-	import FeaturesEditor from '$lib/components/editors/FeaturesEditor.svelte';
-	import PeopleEditor from '$lib/components/editors/PeopleEditor.svelte';
-	import RelationshipsEditor from '$lib/components/editors/RelationshipsEditor.svelte';
-	import ExternalDataEditor from '$lib/components/editors/ExternalDataEditor.svelte';
 	import MediaEditor from '$lib/components/editors/MediaEditor.svelte';
+	import ModelEditorSwitch from '../ModelEditorSwitch.svelte';
+	import { getEditLayoutContext } from '$lib/components/editors/edit-layout-context';
 	import type { SectionEditorHandle } from '$lib/components/editors/editor-contract';
 	import type { SaveMeta } from '$lib/components/editors/save-model-claims';
 	import { findSectionBySegment } from '$lib/components/editors/model-edit-sections';
+	import { modelHasTitleOwnedIdentity } from '$lib/catalog-rules';
 
 	let { data } = $props();
 	let model = $derived(data.model);
@@ -24,14 +18,22 @@
 	let sectionSegment = $derived(page.params.section);
 	let section = $derived(sectionSegment ? findSectionBySegment(sectionSegment) : undefined);
 
-	// Redirect invalid sections to basics
+	// On single-model titles the model's title is fixed — the Title picker in
+	// Basics must not be re-assignable. Name/slug/abbreviations are handled
+	// separately: the Name section is filtered out of the switcher and this
+	// page redirects when the URL targets a hidden section.
+	let slimBasics = $derived(modelHasTitleOwnedIdentity(model));
+
+	// Redirect invalid or hidden sections to basics. A section may be hidden when
+	// the model's identity is title-owned (e.g. Name on single-model titles).
 	$effect(() => {
-		if (!section) {
+		const hidden = section?.hideOnTitleOwnedIdentity && modelHasTitleOwnedIdentity(model);
+		if (!section || hidden) {
 			goto(resolve(`/models/${slug}/edit/basics`), { replaceState: true });
 		}
 	});
 
-	const editLayout = getContext<{ setDirty: (dirty: boolean) => void }>('edit-layout');
+	const editLayout = getEditLayoutContext();
 
 	let editorRef = $state<SectionEditorHandle>();
 	let editError = $state('');
@@ -80,79 +82,20 @@
 				oncancel={handleCancel}
 				onsave={handleSave}
 			>
-				{#if section.key === 'basics'}
-					<BasicsEditor
-						bind:this={editorRef}
-						initialModel={model}
-						slug={model.slug}
-						onsaved={handleSaved}
-						onerror={(msg) => (editError = msg)}
-						ondirtychange={handleDirtyChange}
-					/>
-				{:else if section.key === 'overview'}
-					<OverviewEditor
-						bind:this={editorRef}
-						initialDescription={model.description?.text ?? ''}
-						slug={model.slug}
-						onsaved={handleSaved}
-						onerror={(msg) => (editError = msg)}
-						ondirtychange={handleDirtyChange}
-					/>
-				{:else if section.key === 'specifications'}
-					<SpecificationsEditor
-						bind:this={editorRef}
-						initialModel={model}
-						slug={model.slug}
-						onsaved={handleSaved}
-						onerror={(msg) => (editError = msg)}
-						ondirtychange={handleDirtyChange}
-					/>
-				{:else if section.key === 'features'}
-					<FeaturesEditor
-						bind:this={editorRef}
-						initialModel={model}
-						slug={model.slug}
-						onsaved={handleSaved}
-						onerror={(msg) => (editError = msg)}
-						ondirtychange={handleDirtyChange}
-					/>
-				{:else if section.key === 'people'}
-					<PeopleEditor
-						bind:this={editorRef}
-						initialCredits={model.credits}
-						slug={model.slug}
-						onsaved={handleSaved}
-						onerror={(msg) => (editError = msg)}
-						ondirtychange={handleDirtyChange}
-					/>
-				{:else if section.key === 'relationships'}
-					<RelationshipsEditor
-						bind:this={editorRef}
-						initialModel={model}
-						slug={model.slug}
-						onsaved={handleSaved}
-						onerror={(msg) => (editError = msg)}
-						ondirtychange={handleDirtyChange}
-					/>
-				{:else if section.key === 'external-data'}
-					<ExternalDataEditor
-						bind:this={editorRef}
-						initialModel={model}
-						slug={model.slug}
-						onsaved={handleSaved}
-						onerror={(msg) => (editError = msg)}
-						ondirtychange={handleDirtyChange}
-					/>
-				{/if}
+				<ModelEditorSwitch
+					sectionKey={section.key}
+					initialData={model}
+					slug={model.slug}
+					slim={slimBasics}
+					bind:editorRef
+					onsaved={handleSaved}
+					onerror={(msg: string) => (editError = msg)}
+					ondirtychange={handleDirtyChange}
+				/>
 			</SectionEditorForm>
 		{/key}
 	{:else if section.key === 'media'}
-		<MediaEditor
-			entityType="model"
-			slug={model.slug}
-			media={model.uploaded_media}
-			categories={[...MEDIA_CATEGORIES.model]}
-		/>
+		<MediaEditor entityType="model" slug={model.slug} media={model.uploaded_media} />
 		<div class="media-footer">
 			<Button onclick={handleCancel}>Done</Button>
 		</div>

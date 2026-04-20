@@ -6,7 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from apps.catalog.models import (
     Franchise,
     Manufacturer,
-    MachineModel,
+    Series,
     System,
     Tag,
     Title,
@@ -20,6 +20,7 @@ from apps.catalog.resolve import (
 )
 from apps.core.models import RecordReference, get_claim_fields
 from apps.provenance.models import Claim, Source
+from apps.catalog.tests.conftest import make_machine_model
 
 
 @pytest.fixture
@@ -89,6 +90,20 @@ class TestResolveBulkTitle:
         t.refresh_from_db()
         assert t.franchise == franchise
 
+    def test_fk_resolves_series(self, opdb):
+        from apps.catalog.resolve import resolve_all_entities
+
+        series = Series.objects.create(name="Godzilla Line", slug="godzilla-line")
+        t = Title.objects.create(opdb_id="G1", name="Placeholder", slug="t1")
+
+        Claim.objects.assert_claim(t, "name", "Godzilla", source=opdb)
+        Claim.objects.assert_claim(t, "series", "godzilla-line", source=opdb)
+
+        resolve_all_entities(Title)
+
+        t.refresh_from_db()
+        assert t.series == series
+
     def test_fk_resets_when_no_claim(self, opdb):
         from apps.catalog.resolve import resolve_all_entities
 
@@ -103,6 +118,21 @@ class TestResolveBulkTitle:
 
         t.refresh_from_db()
         assert t.franchise is None
+
+    def test_series_fk_resets_when_no_claim(self, opdb):
+        from apps.catalog.resolve import resolve_all_entities
+
+        series = Series.objects.create(name="Godzilla Line", slug="godzilla-line")
+        t = Title.objects.create(
+            opdb_id="G1", name="Placeholder", slug="t1", series=series
+        )
+
+        # Name claim but no series claim — series should reset to None.
+        Claim.objects.assert_claim(t, "name", "Godzilla", source=opdb)
+        resolve_all_entities(Title)
+
+        t.refresh_from_db()
+        assert t.series is None
 
     def test_object_ids_scoping(self, opdb):
         t1 = Title.objects.create(opdb_id="G1", name="Untouched", slug="t1")
@@ -405,6 +435,20 @@ class TestResolveTitle:
         assert result.description == "A monster game."
         assert result.franchise == franchise
 
+    def test_single_object_wrapper_resolves_series(self, opdb):
+        series = Series.objects.create(name="Godzilla Line", slug="godzilla-line")
+        t = Title.objects.create(opdb_id="G1", name="Placeholder", slug="t1")
+
+        Claim.objects.assert_claim(t, "name", "Godzilla", source=opdb)
+        Claim.objects.assert_claim(t, "description", "A monster game.", source=opdb)
+        Claim.objects.assert_claim(t, "series", "godzilla-line", source=opdb)
+
+        result = resolve_entity(t)
+
+        assert result.name == "Godzilla"
+        assert result.description == "A monster game."
+        assert result.series == series
+
     def test_resets_franchise_when_no_claim(self, opdb):
         franchise = Franchise.objects.create(name="Godzilla", slug="godzilla")
         t = Title.objects.create(
@@ -416,6 +460,18 @@ class TestResolveTitle:
         result = resolve_entity(t)
 
         assert result.franchise is None
+
+    def test_resets_series_when_no_claim(self, opdb):
+        series = Series.objects.create(name="Godzilla Line", slug="godzilla-line")
+        t = Title.objects.create(
+            opdb_id="G1", name="Placeholder", slug="t1", series=series
+        )
+
+        # Only a name claim, no series.
+        Claim.objects.assert_claim(t, "name", "Godzilla", source=opdb)
+        result = resolve_entity(t)
+
+        assert result.series is None
 
 
 @pytest.mark.django_db
@@ -511,7 +567,7 @@ class TestApplyResolutionPreserve:
     """_apply_resolution preserves UNIQUE fields when no claim exists."""
 
     def test_preserves_slug_without_claim(self, opdb):
-        mm = MachineModel.objects.create(name="Test", slug="test-slug")
+        mm = make_machine_model(name="Test", slug="test-slug")
         Claim.objects.assert_claim(mm, "name", "Test Model", source=opdb)
         # No slug claim — slug should be preserved after resolution.
 
@@ -522,7 +578,7 @@ class TestApplyResolutionPreserve:
         assert mm.name == "Test Model"  # Resolved from claim.
 
     def test_preserves_opdb_id_without_claim(self, opdb):
-        mm = MachineModel.objects.create(name="Test", slug="test-slug", opdb_id="O123")
+        mm = make_machine_model(name="Test", slug="test-slug", opdb_id="O123")
         Claim.objects.assert_claim(mm, "name", "Test Model", source=opdb)
         # No opdb_id claim.
 
@@ -532,8 +588,8 @@ class TestApplyResolutionPreserve:
         assert mm.opdb_id == "O123"  # Preserved.
 
     def test_bulk_preserves_slug_without_claim(self, opdb):
-        mm1 = MachineModel.objects.create(name="A", slug="a-slug")
-        mm2 = MachineModel.objects.create(name="B", slug="b-slug")
+        mm1 = make_machine_model(name="A", slug="a-slug")
+        mm2 = make_machine_model(name="B", slug="b-slug")
         Claim.objects.assert_claim(mm1, "name", "Model A", source=opdb)
         Claim.objects.assert_claim(mm2, "name", "Model B", source=opdb)
         # No slug claims — both should preserve their slugs.

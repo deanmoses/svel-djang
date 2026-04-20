@@ -82,6 +82,7 @@ _discover_routers()
 # ---------------------------------------------------------------------------
 
 from apps.catalog.api.edit_claims import StructuredValidationError  # noqa: E402
+from apps.provenance.rate_limits import RateLimitExceeded  # noqa: E402
 
 
 @api.exception_handler(StructuredValidationError)
@@ -89,27 +90,36 @@ def _handle_structured_validation_error(request, exc):
     return JsonResponse({"detail": exc.to_response_body()}, status=422)
 
 
+@api.exception_handler(RateLimitExceeded)
+def _handle_rate_limit_exceeded(request, exc):
+    response = JsonResponse(
+        {
+            "detail": {
+                "message": "Rate limit exceeded.",
+                "bucket": exc.bucket,
+                "retry_after": exc.retry_after,
+            }
+        },
+        status=429,
+    )
+    response["Retry-After"] = str(exc.retry_after)
+    return response
+
+
 # ---------------------------------------------------------------------------
 # Field constraints — single source of truth for numeric validation
 # ---------------------------------------------------------------------------
-
-_ENTITY_MODEL_MAP = {
-    "model": "MachineModel",
-    "person": "Person",
-    "corporate-entity": "CorporateEntity",
-    "manufacturer": "Manufacturer",
-}
 
 
 @api.get("/field-constraints/{entity_type}", tags=["private"])
 def get_field_constraints(request, entity_type: str):
     """Return numeric field constraints derived from model validators."""
-    from apps.catalog import models as catalog_models
-    from apps.catalog.api.edit_claims import get_field_constraints as _get  # noqa: E402 — deferred to avoid early app import
+    from apps.catalog.api.edit_claims import get_field_constraints as _get
+    from apps.core.entity_types import get_linkable_model
 
-    class_name = _ENTITY_MODEL_MAP.get(entity_type)
-    if not class_name:
+    try:
+        model_class = get_linkable_model(entity_type)
+    except ValueError:
         raise HttpError(404, f"Unknown entity type: {entity_type}")
 
-    model_class = getattr(catalog_models, class_name)
     return _get(model_class)

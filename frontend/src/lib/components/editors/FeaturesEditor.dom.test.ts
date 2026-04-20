@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/svelte';
+import { render, screen, within } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -38,7 +38,22 @@ const EDIT_OPTIONS = {
 		gameplay_features: [
 			{ slug: 'multiball', label: 'Multiball' },
 			{ slug: 'ramps', label: 'Ramps' }
+		],
+		cabinets: [
+			{ slug: 'standard', label: 'Standard' },
+			{ slug: 'widebody', label: 'Widebody' }
+		],
+		game_formats: [
+			{ slug: 'pinball-machine', label: 'Pinball Machine' },
+			{ slug: 'arcade-video', label: 'Arcade Video' }
 		]
+	}
+};
+
+const FIELD_CONSTRAINTS = {
+	data: {
+		player_count: { min: 1, max: 6, step: 1 },
+		flipper_count: { min: 0, max: 8, step: 1 }
 	}
 };
 
@@ -46,7 +61,12 @@ const INITIAL_MODEL = {
 	themes: [{ slug: 'medieval' }],
 	tags: [{ slug: 'classic' }],
 	reward_types: [{ slug: 'replay' }],
-	gameplay_features: [{ slug: 'multiball', count: 3 }]
+	gameplay_features: [{ slug: 'multiball', count: 3 }],
+	game_format: { slug: 'pinball-machine' },
+	cabinet: { slug: 'standard' },
+	player_count: 4,
+	flipper_count: 2,
+	production_quantity: '4016'
 };
 
 describe('FeaturesEditor dirty-state contract', () => {
@@ -56,6 +76,7 @@ describe('FeaturesEditor dirty-state contract', () => {
 		invalidateAll.mockReset();
 		GET.mockImplementation(async (path: string) => {
 			if (path === '/api/models/edit-options/') return EDIT_OPTIONS;
+			if (path === '/api/field-constraints/{entity_type}') return FIELD_CONSTRAINTS;
 			throw new Error(`Unexpected GET ${path}`);
 		});
 	});
@@ -65,11 +86,12 @@ describe('FeaturesEditor dirty-state contract', () => {
 		invalidateAll.mockResolvedValue(undefined);
 		const user = userEvent.setup();
 		render(FeaturesEditorFixture, {
-			props: { initialModel: INITIAL_MODEL }
+			props: { initialData: INITIAL_MODEL }
 		});
 
-		// Clear the feature slug (click the × button on the SearchableSelect)
-		const clearBtn = screen.getAllByRole('button', { name: 'Clear selection' })[0];
+		// Clear the gameplay feature slug (click the × button on that row's SearchableSelect)
+		const gameplayFieldset = screen.getByRole('group', { name: 'Gameplay Features' });
+		const clearBtn = within(gameplayFieldset).getByRole('button', { name: 'Clear selection' });
 		await user.click(clearBtn);
 
 		// The row now has count=3 but no slug — save should reject
@@ -81,7 +103,7 @@ describe('FeaturesEditor dirty-state contract', () => {
 	it('reports clean state initially and dirty state after editing', async () => {
 		const user = userEvent.setup();
 		render(FeaturesEditorFixture, {
-			props: { initialModel: INITIAL_MODEL }
+			props: { initialData: INITIAL_MODEL }
 		});
 
 		expect(screen.getByTestId('dirty-callback')).toHaveTextContent('false');
@@ -95,5 +117,44 @@ describe('FeaturesEditor dirty-state contract', () => {
 
 		await user.click(screen.getByRole('button', { name: 'Check dirty' }));
 		expect(screen.getByTestId('dirty-handle')).toHaveTextContent('true');
+	});
+
+	it('changing only player_count PATCHes just that scalar, no M2Ms', async () => {
+		PATCH.mockResolvedValue({ data: {}, error: undefined });
+		const user = userEvent.setup();
+		render(FeaturesEditorFixture, {
+			props: { initialData: INITIAL_MODEL }
+		});
+
+		const playersInput = screen.getByLabelText('Players');
+		await user.clear(playersInput);
+		await user.type(playersInput, '6');
+
+		await user.click(screen.getByRole('button', { name: 'Save' }));
+
+		expect(PATCH).toHaveBeenCalledOnce();
+		expect(PATCH).toHaveBeenCalledWith('/api/models/{slug}/claims/', {
+			params: { path: { slug: 'medieval-madness' } },
+			body: { fields: { player_count: 6 }, note: '' }
+		});
+	});
+
+	it('changing only a theme PATCHes just themes, no scalars', async () => {
+		PATCH.mockResolvedValue({ data: {}, error: undefined });
+		const user = userEvent.setup();
+		render(FeaturesEditorFixture, {
+			props: { initialData: INITIAL_MODEL }
+		});
+
+		await user.click(screen.getByRole('combobox', { name: 'Themes' }));
+		await user.click(await screen.findByRole('option', { name: 'Fantasy' }));
+
+		await user.click(screen.getByRole('button', { name: 'Save' }));
+
+		expect(PATCH).toHaveBeenCalledOnce();
+		expect(PATCH).toHaveBeenCalledWith('/api/models/{slug}/claims/', {
+			params: { path: { slug: 'medieval-madness' } },
+			body: { themes: ['medieval', 'fantasy'], note: '' }
+		});
 	});
 });

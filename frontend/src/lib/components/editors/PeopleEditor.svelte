@@ -3,7 +3,7 @@
 	import type { components } from '$lib/api/schema';
 	import SearchableSelect from '$lib/components/SearchableSelect.svelte';
 	import { creditsChanged } from '$lib/edit-helpers';
-	import type { EditorDirtyChange } from './editor-contract';
+	import type { SectionEditorProps } from './editor-contract';
 	import {
 		EMPTY_EDIT_OPTIONS,
 		fetchModelEditOptions,
@@ -19,18 +19,12 @@
 	type Credit = components['schemas']['CreditSchema'];
 
 	let {
-		initialCredits,
+		initialData,
 		slug,
 		onsaved,
 		onerror,
 		ondirtychange = () => {}
-	}: {
-		initialCredits: Credit[];
-		slug: string;
-		onsaved: () => void;
-		onerror: (message: string) => void;
-		ondirtychange?: EditorDirtyChange;
-	} = $props();
+	}: SectionEditorProps<Credit[]> = $props();
 
 	type KeyedCredit = { key: number; person_slug: string; role: string };
 
@@ -45,8 +39,8 @@
 	}
 
 	// untrack: intentional one-time capture; component re-mounts when modal reopens
-	const originalCredits = untrack(() => initialCredits);
-	let editCredits = $state<KeyedCredit[]>(untrack(() => toKeyedCredits(initialCredits)));
+	const originalCredits = untrack(() => initialData);
+	let editCredits = $state<KeyedCredit[]>(untrack(() => toKeyedCredits(initialData)));
 	let dirty = $derived.by(() => {
 		const original = originalCredits.map((credit) => `${credit.person.slug}:${credit.role}`);
 		const current = editCredits.map((credit) => `${credit.person_slug}:${credit.role}`);

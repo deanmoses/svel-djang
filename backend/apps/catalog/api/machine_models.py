@@ -10,11 +10,13 @@ from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
+from ninja.responses import Status
 from ninja.security import django_auth
 
 from ..cache import MODELS_ALL_KEY, get_cached_response, set_cached_response
 from .constants import DEFAULT_PAGE_SIZE
 from .edit_claims import (
+    ClaimSpec,
     StructuredValidationError,
     execute_claims,
     plan_abbreviation_claims,
@@ -24,7 +26,19 @@ from .edit_claims import (
     plan_scalar_field_claims,
     raise_form_error,
 )
+from .soft_delete import (
+    SoftDeleteBlocked,
+    execute_soft_delete,
+    plan_soft_delete,
+    serialize_blocking_referrer,
+)
 from apps.provenance.helpers import build_sources, claims_prefetch
+from apps.provenance.models import ChangeSetAction
+from apps.provenance.rate_limits import (
+    CREATE_RATE_LIMIT_SPEC,
+    DELETE_RATE_LIMIT_SPEC,
+    check_and_record,
+)
 
 from .helpers import (
     _build_rich_text,
@@ -43,7 +57,11 @@ from .schemas import (
     FranchiseRefSchema,
     GameplayFeatureSchema,
     ModelClaimPatchSchema,
+    ModelDeletePreviewSchema,
+    ModelDeleteResponseSchema,
+    ModelDeleteSchema,
     ModelEditOptionsSchema,
+    ModelRestoreSchema,
     Ref,
     RewardTypeSchema,
     RichTextSchema,
@@ -164,7 +182,6 @@ class MachineModelDetailSchema(Schema):
     ipdb_rating: Optional[float] = None
     pinside_rating: Optional[float] = None
     description: RichTextSchema = RichTextSchema()
-    title_description: RichTextSchema = RichTextSchema()
     abbreviations: list[str] = []
     extra_data: dict
     credits: list[CreditSchema]
@@ -183,7 +200,7 @@ class MachineModelDetailSchema(Schema):
     tags: list[Ref] = []
     reward_types: list[RewardTypeSchema] = []
     franchise: Optional[FranchiseRefSchema] = None
-    series: list[SeriesRefSchema] = []
+    series: Optional[SeriesRefSchema] = None
     variant_of: Optional[ModelRefSchema] = None
     variant_siblings: list[VariantSchema] = []
     converted_from: Optional[ModelRefSchema] = None
@@ -442,9 +459,6 @@ def _serialize_model_detail(pm) -> dict:
         "pinside_rating": float(pm.pinside_rating)
         if pm.pinside_rating is not None
         else None,
-        "title_description": _build_rich_text(pm.title, "description")
-        if pm.title
-        else {},
         "abbreviations": [a.value for a in pm.abbreviations.all()],
         "extra_data": pm.extra_data or {},
         "credits": credits,
@@ -521,10 +535,11 @@ def _serialize_model_detail(pm) -> dict:
             if pm.title and pm.title.franchise
             else None
         ),
-        "series": [
-            {"name": s.name, "slug": s.slug}
-            for s in (pm.title.series.all() if pm.title else [])
-        ],
+        "series": (
+            {"name": pm.title.series.name, "slug": pm.title.series.slug}
+            if pm.title and pm.title.series
+            else None
+        ),
         "title_models": [
             _serialize_title_machine(sibling, min_rank=min_rank)
             for sibling in (pm.title.machine_models.all() if pm.title else [])
@@ -541,6 +556,7 @@ def _model_detail_qs():
             "corporate_entity__manufacturer",
             "title",
             "title__franchise",
+            "title__series",
             "system",
             "system__technology_subgeneration",
             "technology_generation",
@@ -568,7 +584,6 @@ def _model_detail_qs():
             "tags",
             "reward_types",
             "abbreviations",
-            "title__series",
             Prefetch(
                 "title__machine_models",
                 queryset=MachineModel.objects.active()
@@ -1020,3 +1035,125 @@ def patch_model_claims(request, slug: str, data: ModelClaimPatchSchema):
 
     pm = get_object_or_404(_model_detail_qs(), slug=pm.slug)
     return _serialize_model_detail(pm)
+
+
+# ---------------------------------------------------------------------------
+# Delete / restore
+# ---------------------------------------------------------------------------
+
+
+def _count_model_changesets(model) -> int:
+    """Count user ChangeSets with at least one claim on *model*.
+
+    Mirrors ``_count_title_changesets`` but scoped to a single MachineModel —
+    Model Delete has no cascade children, so there's only the one entity to
+    aggregate provenance for.
+    """
+    from django.contrib.contenttypes.models import ContentType
+
+    from apps.provenance.models import ChangeSet
+
+    ct = ContentType.objects.get_for_model(MachineModel)
+    return (
+        ChangeSet.objects.filter(user__isnull=False)
+        .filter(claims__content_type=ct, claims__object_id=model.pk)
+        .distinct()
+        .count()
+    )
+
+
+@models_router.get(
+    "/{slug}/delete-preview/",
+    auth=django_auth,
+    response=ModelDeletePreviewSchema,
+    tags=["private"],
+)
+def model_delete_preview(request, slug: str):
+    """Return the impact summary used by the delete confirmation screen."""
+    pm = get_object_or_404(
+        MachineModel.objects.active().select_related("title"), slug=slug
+    )
+    plan = plan_soft_delete(pm)
+    changeset_count = 0 if plan.is_blocked else _count_model_changesets(pm)
+    return {
+        "model_name": pm.name,
+        "model_slug": pm.slug,
+        "title_name": pm.title.name,
+        "title_slug": pm.title.slug,
+        "changeset_count": changeset_count,
+        "blocked_by": [serialize_blocking_referrer(b) for b in plan.blockers],
+    }
+
+
+@models_router.post(
+    "/{slug}/delete/",
+    auth=django_auth,
+    response={200: ModelDeleteResponseSchema, 422: dict},
+    tags=["private"],
+)
+def delete_model(request, slug: str, data: ModelDeleteSchema):
+    """Soft-delete a MachineModel.
+
+    Writes a single user ChangeSet with ``action=delete`` containing one
+    ``status=deleted`` claim. Rate-limited per user on the ``delete`` bucket
+    (5/day; staff bypass). Blocks with 422 when an active PROTECT referrer
+    (a child variant, a model whose ``converted_from`` or ``remake_of``
+    points here, …) would be left dangling. Never cascades to the parent
+    Title — orphan Titles are supported by spec.
+    """
+    check_and_record(request.user, DELETE_RATE_LIMIT_SPEC)
+
+    pm = get_object_or_404(MachineModel.objects.active(), slug=slug)
+    try:
+        changeset, deleted = execute_soft_delete(
+            pm, user=request.user, note=data.note, citation=data.citation
+        )
+    except SoftDeleteBlocked as exc:
+        return Status(
+            422,
+            {
+                "detail": "Cannot delete: active references would be left dangling.",
+                "blocked_by": [serialize_blocking_referrer(b) for b in exc.blockers],
+            },
+        )
+
+    if changeset is None:
+        return Status(422, {"detail": "Model is already deleted."})
+
+    return {
+        "changeset_id": changeset.pk,
+        "affected_models": [e.slug for e in deleted if isinstance(e, MachineModel)],
+    }
+
+
+@models_router.post(
+    "/{slug}/restore/",
+    auth=django_auth,
+    response={200: MachineModelDetailSchema, 422: dict, 404: dict},
+    tags=["private"],
+)
+def restore_model(request, slug: str, data: ModelRestoreSchema):
+    """Write a fresh ``status=active`` claim on a soft-deleted Model.
+
+    This is the "Restore" path (distinct from Undo, which inverts a specific
+    delete ChangeSet). Shares the ``create`` rate-limit bucket. The parent
+    Title is untouched — consistent with delete's no-cascade-to-parent rule.
+    """
+    check_and_record(request.user, CREATE_RATE_LIMIT_SPEC)
+
+    # Bypass .active() — we're looking for soft-deleted models.
+    pm = get_object_or_404(MachineModel, slug=slug)
+    if pm.status != "deleted":
+        return Status(422, {"detail": "Model is not deleted."})
+
+    execute_claims(
+        pm,
+        [ClaimSpec(field_name="status", value="active")],
+        user=request.user,
+        action=ChangeSetAction.EDIT,
+        note=data.note,
+        citation=data.citation,
+    )
+
+    refreshed = get_object_or_404(_model_detail_qs(), slug=slug)
+    return _serialize_model_detail(refreshed)

@@ -31,7 +31,7 @@ export interface FacetedTitle {
 	reward_types: FacetRef[];
 	persons: FacetRef[];
 	franchise?: FacetRef | null;
-	series: FacetRef[];
+	series?: FacetRef | null;
 	year_min?: number | null;
 	year_max?: number | null;
 	ipdb_rating_max?: number | null;
@@ -245,7 +245,7 @@ function matchesFranchise(t: FacetedTitle, slug: string | null): boolean {
 
 function matchesSeries(t: FacetedTitle, slug: string | null): boolean {
 	if (!slug) return true;
-	return t.series.some((s) => s.slug === slug);
+	return t.series?.slug === slug;
 }
 
 function matchesRating(t: FacetedTitle, min: number | null): boolean {
@@ -397,7 +397,7 @@ export function computeFacetCounts(titles: FacetedTitle[], state: FilterState): 
 		playerCount: countNumbers('playerCount', (t) => t.player_counts),
 		system: countFacetRefs('system', (t) => t.systems),
 		franchise: countSingleRef('franchise', (t) => t.franchise),
-		series: countFacetRefs('series', (t) => t.series)
+		series: countSingleRef('series', (t) => t.series)
 	};
 }
 
@@ -489,7 +489,7 @@ export function getActiveFilterLabels(
 		for (const ref of t.reward_types) rewardTypeNames.set(ref.slug, ref.name);
 		for (const ref of t.systems) systemNames.set(ref.slug, ref.name);
 		if (t.franchise) franchiseNames.set(t.franchise.slug, t.franchise.name);
-		for (const ref of t.series) seriesNames.set(ref.slug, ref.name);
+		if (t.series) seriesNames.set(t.series.slug, t.series.name);
 	}
 
 	if (filters.techGeneration) {

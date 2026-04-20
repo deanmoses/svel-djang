@@ -15,6 +15,7 @@ from apps.catalog.ingestion.fandom_wiki import (
 )
 from apps.catalog.models import Credit, CreditRole, MachineModel, Manufacturer, Person
 from apps.provenance.models import Claim, Source
+from apps.catalog.tests.conftest import make_machine_model
 
 FIXTURES = "apps/catalog/tests/fixtures"
 SAMPLE = f"{FIXTURES}/fandom_sample.json"
@@ -30,10 +31,10 @@ MANUFACTURERS_SAMPLE = f"{FIXTURES}/fandom_manufacturers_sample.json"
 @pytest.fixture
 def _seed_db(db, credit_roles):
     """Pre-seed the DB with machines and persons for matching."""
-    addams = MachineModel.objects.create(
+    addams = make_machine_model(
         name="The Addams Family", slug="the-addams-family", year=1992
     )
-    medieval = MachineModel.objects.create(
+    medieval = make_machine_model(
         name="Medieval Madness", slug="medieval-madness", year=1997
     )
 
@@ -291,7 +292,7 @@ class TestParseGamePages:
 @pytest.fixture
 def _seed_persons_db(db, credit_roles):
     """Seed DB for person ingestion tests."""
-    addams = MachineModel.objects.create(
+    addams = make_machine_model(
         name="The Addams Family", slug="the-addams-family", year=1992
     )
     pat = Person.objects.create(name="Pat Lawlor", slug="pat-lawlor")

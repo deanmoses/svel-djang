@@ -4,8 +4,9 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.test import Client
 
-from apps.catalog.models import MachineModel, Manufacturer
+from apps.catalog.models import Manufacturer
 from apps.provenance.models import Claim, Source
+from apps.catalog.tests.conftest import make_machine_model
 
 User = get_user_model()
 
@@ -36,18 +37,14 @@ def manufacturer(db, bootstrap_source):
 
 @pytest.fixture
 def model_a(db, bootstrap_source):
-    pm = MachineModel.objects.create(
-        name="Medieval Madness", slug="medieval-madness", year=1997
-    )
+    pm = make_machine_model(name="Medieval Madness", slug="medieval-madness", year=1997)
     Claim.objects.assert_claim(pm, "name", "Medieval Madness", source=bootstrap_source)
     return pm
 
 
 @pytest.fixture
 def model_b(db, bootstrap_source):
-    pm = MachineModel.objects.create(
-        name="Attack from Mars", slug="attack-from-mars", year=1995
-    )
+    pm = make_machine_model(name="Attack from Mars", slug="attack-from-mars", year=1995)
     Claim.objects.assert_claim(pm, "name", "Attack from Mars", source=bootstrap_source)
     return pm
 
@@ -200,21 +197,22 @@ class TestEditHistoryUserDisplayNull:
     """Verify that build_edit_history returns null for non-user changesets."""
 
     def test_ingest_changeset_has_null_user_display(self, client, db):
-        from apps.provenance.models import ChangeSet, IngestRun
+        from apps.provenance.models import IngestRun
+        from apps.provenance.test_factories import ingest_changeset, user_changeset
 
         source = Source.objects.create(
             name="IPDB", slug="ipdb", source_type="database", priority=10
         )
-        pm = MachineModel.objects.create(name="Gorgar", slug="gorgar", year=1979)
+        pm = make_machine_model(name="Gorgar", slug="gorgar", year=1979)
 
         # Create an ingest changeset with a claim — this is the non-user path
         ingest_run = IngestRun.objects.create(source=source, input_fingerprint="abc123")
-        ingest_cs = ChangeSet.objects.create(ingest_run=ingest_run)
+        ingest_cs = ingest_changeset(ingest_run)
         Claim.objects.assert_claim(pm, "year", 1979, source=source, changeset=ingest_cs)
 
         # Create a user changeset with a claim — this is the user path
         user = User.objects.create_user(username="tester")
-        user_cs = ChangeSet.objects.create(user=user)
+        user_cs = user_changeset(user)
         Claim.objects.assert_claim(
             pm,
             "description",
@@ -223,7 +221,7 @@ class TestEditHistoryUserDisplayNull:
             changeset=user_cs,
         )
 
-        resp = client.get(f"/api/edit-history/machinemodel/{pm.slug}/")
+        resp = client.get(f"/api/edit-history/model/{pm.slug}/")
         data = resp.json()
         # Find entries by user_display to avoid ordering assumptions
         user_entries = [e for e in data if e["user_display"] == "tester"]

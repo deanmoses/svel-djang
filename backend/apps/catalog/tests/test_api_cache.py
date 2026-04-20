@@ -2,7 +2,8 @@ import pytest
 from django.core.cache import cache
 
 from apps.catalog.cache import MODELS_ALL_KEY, TITLES_ALL_KEY
-from apps.catalog.models import MachineModel, Title
+from apps.catalog.models import Title
+from apps.catalog.tests.conftest import make_machine_model
 
 
 class TestAllEndpointCache:
@@ -32,7 +33,7 @@ class TestAllEndpointCache:
         resp1 = client.get("/api/models/all/")
         count_before = len(resp1.json())
 
-        MachineModel.objects.create(name="Godzilla", slug="godzilla", year=2021)
+        make_machine_model(name="Godzilla", slug="godzilla", year=2021)
         resp2 = client.get("/api/models/all/")
         assert len(resp2.json()) == count_before + 1
 

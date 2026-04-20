@@ -5,6 +5,12 @@ export type EditSectionMenuItem = {
 	onclick?: () => void;
 };
 
+/** A labeled dropdown in the page action bar (e.g. "Edit Title", "Edit Model"). */
+export type EditSectionDropdown = {
+	label: string;
+	items: EditSectionMenuItem[];
+};
+
 /**
  * Get a callback for a menu item — navigates to `href` or calls `onclick`.
  * Returns `undefined` when the item is not found (useful for auth gating:

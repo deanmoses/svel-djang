@@ -1,0 +1,98 @@
+<script lang="ts">
+	import { untrack } from 'svelte';
+	import SearchableSelect from '$lib/components/SearchableSelect.svelte';
+	import type { SectionEditorProps } from './editor-contract';
+	import { slugSetChanged } from '$lib/edit-helpers';
+	import type { FieldErrors, SaveMeta, SaveResult } from './save-claims-shared';
+
+	type ParentRef = { slug: string; name?: string };
+	type ParentOption = { slug: string; label: string; count?: number };
+
+	type ParentsData = { parents: ParentRef[] };
+
+	type SaveBody = {
+		parents: string[];
+	} & SaveMeta;
+
+	type SaveFn = (slug: string, body: SaveBody) => Promise<SaveResult>;
+
+	type OptionsLoader = () => Promise<ParentOption[]>;
+
+	let {
+		initialData,
+		slug,
+		save: saveFn,
+		onsaved,
+		onerror,
+		ondirtychange = () => {},
+		optionsLoader,
+		label = 'Parents',
+		placeholder = 'Search...'
+	}: SectionEditorProps<ParentsData> & {
+		save: SaveFn;
+		optionsLoader: OptionsLoader;
+		label?: string;
+		placeholder?: string;
+	} = $props();
+
+	const originalParents: ParentRef[] = untrack(() => initialData.parents.map((p) => ({ ...p })));
+	let selectedParents = $state<string[]>(originalParents.map((p) => p.slug));
+	let parentOptions = $state<ParentOption[]>([]);
+	let fieldErrors = $state<FieldErrors>({});
+	let dirty = $derived(slugSetChanged(selectedParents, originalParents));
+
+	$effect(() => {
+		const currentSlug = untrack(() => slug);
+		optionsLoader().then((opts) => {
+			parentOptions = opts.filter((opt) => opt.slug !== currentSlug);
+		});
+	});
+
+	$effect(() => {
+		ondirtychange(dirty);
+	});
+
+	export function isDirty(): boolean {
+		return dirty;
+	}
+
+	export async function save(meta?: SaveMeta): Promise<void> {
+		fieldErrors = {};
+		if (!dirty) {
+			onsaved();
+			return;
+		}
+
+		const body: SaveBody = { parents: selectedParents, ...meta };
+		const result = await saveFn(slug, body);
+
+		if (result.ok) {
+			onsaved();
+		} else {
+			fieldErrors = result.fieldErrors;
+			onerror(
+				Object.keys(result.fieldErrors).length > 0 ? 'Please fix the errors below.' : result.error
+			);
+		}
+	}
+</script>
+
+<div class="editor-fields">
+	<SearchableSelect
+		{label}
+		options={parentOptions}
+		bind:selected={selectedParents}
+		multi
+		allowZeroCount
+		{placeholder}
+		error={fieldErrors.parents ?? ''}
+	/>
+</div>
+
+<style>
+	.editor-fields {
+		display: flex;
+		flex-direction: column;
+		gap: var(--size-3);
+	}
+</style>

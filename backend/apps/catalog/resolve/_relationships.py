@@ -27,7 +27,6 @@ from ..models import (
     ModelAbbreviation,
     Person,
     RewardType,
-    Series,
     Tag,
     Theme,
     Title,
@@ -288,95 +287,6 @@ def resolve_all_tags(
     model_ids: set[int] | None = None,
 ) -> None:
     _resolve_machine_model_m2m(M2M_FIELDS["tag"], model_ids=model_ids)
-
-
-# ------------------------------------------------------------------
-# Series-title membership (claim lives on Series, not MachineModel)
-# ------------------------------------------------------------------
-
-
-def resolve_all_series_titles(
-    *,
-    model_ids: set[int] | None = None,
-) -> None:
-    """Bulk-resolve series_title claims into Series.titles through-table rows."""
-    from django.contrib.contenttypes.models import ContentType
-
-    ct = ContentType.objects.get_for_model(Series)
-    through = Series.titles.through
-    title_id_col = "title_id"
-
-    # Pre-fetch active claims with priority annotation.
-    claims_qs = _annotate_priority(
-        Claim.objects.filter(content_type=ct, field_name="series_title")
-    )
-    if model_ids is not None:
-        claims_qs = claims_qs.filter(object_id__in=model_ids)
-    claims = claims_qs.order_by(
-        "object_id", "claim_key", "-effective_priority", "-created_at"
-    )
-
-    # Pick winner per (series_id, claim_key).
-    winners_by_series: dict[int, list[Claim]] = {}
-    seen: set[tuple[int, str]] = set()
-    for claim in claims:
-        key = (claim.object_id, claim.claim_key)
-        if key not in seen:
-            seen.add(key)
-            winners_by_series.setdefault(claim.object_id, []).append(claim)
-
-    # Valid PKs for existence check against stale claims.
-    valid_pks = set(Title.objects.values_list("pk", flat=True))
-
-    # Desired title PKs from winning claims.
-    desired_by_series: dict[int, set[int]] = {}
-    for series_id, claims_list in winners_by_series.items():
-        desired: set[int] = set()
-        for claim in claims_list:
-            val = claim.value
-            if not val.get("exists", True):
-                continue
-            title_pk = val.get("title")
-            if title_pk not in valid_pks:
-                logger.warning(
-                    "Unresolved title pk %r in series_title claim (series pk=%s)",
-                    title_pk,
-                    series_id,
-                )
-                continue
-            desired.add(title_pk)
-        desired_by_series[series_id] = desired
-
-    # Determine the full set of series to resolve.
-    if model_ids is not None:
-        all_series_ids = model_ids
-    else:
-        all_series_ids = set(Series.objects.values_list("pk", flat=True))
-
-    # Pre-fetch existing through-table rows (pk included for deletion).
-    # Single query serves both the add-diff and delete-diff below.
-    existing_by_series: dict[int, dict[int, int]] = {}  # series_id → {title_id: row_pk}
-    for row_pk, series_id, t_id in through.objects.filter(
-        series_id__in=all_series_ids
-    ).values_list("pk", "series_id", title_id_col):
-        existing_by_series.setdefault(series_id, {})[t_id] = row_pk
-
-    # Diff and apply.
-    to_create = []
-    to_delete_pks: list[int] = []
-
-    for series_id in all_series_ids:
-        desired = desired_by_series.get(series_id, set())
-        existing = existing_by_series.get(series_id, {})
-        for title_pk in desired - existing.keys():
-            to_create.append(through(series_id=series_id, title_id=title_pk))
-        for title_pk in existing.keys() - desired:
-            to_delete_pks.append(existing[title_pk])
-
-    if to_delete_pks:
-        through.objects.filter(pk__in=to_delete_pks).delete()
-    if to_create:
-        through.objects.bulk_create(to_create, batch_size=2000)
 
 
 # ------------------------------------------------------------------

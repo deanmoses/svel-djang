@@ -16,7 +16,6 @@ from apps.catalog.models import (
     DisplayType,
     Franchise,
     GameFormat,
-    MachineModel,
     Person,
     RewardType,
     Series,
@@ -28,6 +27,8 @@ from apps.catalog.models import (
 )
 from apps.citation.models import CitationSource
 from apps.provenance.models import ChangeSet, CitationInstance, Claim, Source
+from apps.provenance.test_factories import user_changeset
+from apps.catalog.tests.conftest import make_machine_model
 
 User = get_user_model()
 
@@ -403,7 +404,7 @@ class TestPatchSeriesResponseShape:
         _assert_name_claim(series)
         title = Title.objects.create(name="Eight Ball Deluxe", slug="eight-ball-deluxe")
         series.titles.add(title)
-        MachineModel.objects.create(
+        make_machine_model(
             name="Eight Ball Deluxe",
             slug="eight-ball-deluxe",
             title=title,
@@ -467,7 +468,7 @@ class TestPatchSystemResponseShape:
             sibling, "manufacturer", manufacturer.slug, source=source
         )
         title = Title.objects.create(name="Medieval Madness", slug="medieval-madness")
-        MachineModel.objects.create(
+        make_machine_model(
             name="Medieval Madness",
             slug="medieval-madness",
             title=title,
@@ -509,7 +510,7 @@ class TestPatchRewardTypeResponseShape:
     ):
         reward_type = RewardType.objects.create(name="Replay", slug="replay")
         title = Title.objects.create(name="Firepower", slug="firepower")
-        model = MachineModel.objects.create(
+        model = make_machine_model(
             name="Firepower",
             slug="firepower",
             title=title,
@@ -549,7 +550,7 @@ class TestPatchRewardTypeResponseShape:
             field_name="description",
             value="Template citation",
             user=user,
-            changeset=ChangeSet.objects.create(user=user, note="seed"),
+            changeset=user_changeset(user, note="seed"),
         )
         template_citation = CitationInstance.objects.create(
             claim=template_claim,

@@ -16,6 +16,20 @@ Push as much validation as you can to the database. Django has multiple code pat
 
 `on_delete=PROTECT` blocks deletion of a referenced row. This is the safe default — it forces you to handle the dependency explicitly rather than silently losing data. Use `CASCADE` only for wholly owned children (e.g., `MediaVariant` belongs to `MediaAsset` — deleting the asset should delete its variants). Never use `SET_NULL` unless there's a clear product reason to preserve the row without its parent.
 
+### Know which uniqueness guarantees are DB-enforced vs app-enforced
+
+Not every "no duplicates" rule lives in the DB. When a rule needs normalization the DB can't easily express (case-insensitive, article-stripped, punctuation-folded), it lives at the application layer. The split is meaningful:
+
+- **DB-enforced** (e.g., `Title.slug`, `MachineModel.slug`): a unique constraint. The DB raises `IntegrityError` on violation. No TOCTOU race is possible — the constraint is atomic with the insert.
+- **App-enforced** (e.g., `Title.name` normalized): a query-then-insert pattern. There is a race window between the query and the insert where two concurrent writers can both pass the check. The correctness floor is the DB constraint (when one exists) or the acceptance that rare races produce near-duplicates that have to be cleaned up editorially.
+
+When adding an app-enforced uniqueness rule:
+
+1. Document the normalization rule in a colocated module (see [backend/apps/catalog/naming.py](../backend/apps/catalog/naming.py) as the template).
+2. Enforce at the API layer, not only the UI. A UI gate is ergonomic; the API check is the invariant.
+3. State the race behavior in the endpoint's docstring so future readers know what isn't guaranteed.
+4. Prefer a stricter check over a looser one, since relaxing is a one-line change and tightening requires auditing existing rows.
+
 ## Django Pitfalls
 
 These are the specific reasons we enforce constraints at the DB level rather than relying on Django's Python-layer validation:

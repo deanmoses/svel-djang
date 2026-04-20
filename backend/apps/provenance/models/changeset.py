@@ -7,6 +7,13 @@ from django.db import models
 from django.db.models.functions import Now
 
 
+class ChangeSetAction(models.TextChoices):
+    CREATE = "create", "Create"
+    EDIT = "edit", "Edit"
+    DELETE = "delete", "Delete"
+    REVERT = "revert", "Revert"
+
+
 class ChangeSet(models.Model):
     """A grouped edit session that links related claims.
 
@@ -37,6 +44,16 @@ class ChangeSet(models.Model):
         blank=True,
         help_text="The ingest run that produced this changeset. Null for user edits.",
     )
+    action = models.CharField(
+        max_length=8,
+        choices=ChangeSetAction.choices,
+        null=True,
+        blank=True,
+        help_text=(
+            "What kind of user-driven action this ChangeSet represents. "
+            "Populated for every user ChangeSet; always NULL for ingest."
+        ),
+    )
     note = models.TextField(
         blank=True,
         default="",
@@ -51,6 +68,10 @@ class ChangeSet(models.Model):
                 fields=["user", "-created_at"],
                 name="provenance_cs_user_created",
             ),
+            models.Index(
+                fields=["user", "action", "-created_at"],
+                name="provenance_cs_user_action",
+            ),
         ]
         constraints = [
             models.CheckConstraint(
@@ -59,6 +80,13 @@ class ChangeSet(models.Model):
                     | models.Q(user__isnull=True, ingest_run__isnull=False)
                 ),
                 name="provenance_changeset_user_xor_ingest_run",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    models.Q(user__isnull=False, action__isnull=False)
+                    | models.Q(user__isnull=True, action__isnull=True)
+                ),
+                name="provenance_changeset_action_iff_user",
             ),
         ]
 

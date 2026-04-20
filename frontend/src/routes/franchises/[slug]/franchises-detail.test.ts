@@ -61,6 +61,6 @@ describe('franchises detail SSR route', () => {
 			}
 		});
 
-		expect(body).toContain('Star Trek TNG');
+		expect(body).toContain('Titles (1)');
 	});
 });

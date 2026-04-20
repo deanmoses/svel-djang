@@ -10,6 +10,7 @@ from django.core.management import call_command
 from apps.catalog.models import MachineModel, Title
 from apps.catalog.resolve import resolve_model
 from apps.provenance.models import Claim, Source
+from apps.catalog.tests.conftest import make_machine_model
 
 
 @pytest.fixture
@@ -22,7 +23,7 @@ def opdb_source(db):
 @pytest.fixture
 def model_with_opdb_name(db, opdb_source):
     """A MachineModel with an OPDB name claim containing an abbreviation."""
-    mm = MachineModel.objects.create(
+    mm = make_machine_model(
         name="Foo (LE)",
         slug="foo-le",
         opdb_id="Gtest-Mtest",
@@ -48,7 +49,7 @@ def model_with_opdb_name_simple(db, opdb_source):
     """A MachineModel with an OPDB name claim — simpler setup."""
     from django.contrib.contenttypes.models import ContentType
 
-    mm = MachineModel.objects.create(
+    mm = make_machine_model(
         name="Foo (LE)",
         slug="foo-le",
         opdb_id="Gtest-Mtest",
@@ -103,12 +104,16 @@ class TestIngestPinbaseModels:
 
         assert mm.name == "Foo (Limited Edition)"
 
-    def test_skips_unknown_opdb_id(self, db):
+    def test_new_model_without_title_slug_aborts(self, db):
+        """A new model.json entry with no title_slug must abort ingest —
+        MachineModel.title is NOT NULL, so pindata must supply it."""
+        from django.core.management.base import CommandError
+
         export_dir = _write_models_json(
             [{"opdb_id": "Gfake-Mfake", "name": "Nonexistent"}]
         )
-        # Should not raise
-        call_command("ingest_pinbase", export_dir=export_dir)
+        with pytest.raises(CommandError, match="title_slug"):
+            call_command("ingest_pinbase", export_dir=export_dir)
 
     def test_idempotent(self, model_with_opdb_name_simple):
         mm = model_with_opdb_name_simple
@@ -163,10 +168,10 @@ class TestIngestPinbaseModels:
 
     def test_variant_of_claim(self, db):
         """variant_of asserts a claim with the slug value."""
-        MachineModel.objects.create(
+        make_machine_model(
             name="Parent Model", opdb_id="Gtest-Mparent", slug="parent-model"
         )
-        child = MachineModel.objects.create(
+        child = make_machine_model(
             name="Child Model", opdb_id="Gtest-Mchild", slug="child-model"
         )
         export_dir = _write_models_json(
@@ -188,10 +193,10 @@ class TestIngestPinbaseModels:
 
     def test_variant_of_resolves(self, db):
         """variant_of slug claim resolves to FK on model."""
-        parent = MachineModel.objects.create(
+        parent = make_machine_model(
             name="Parent Model", opdb_id="Gtest-Mparent", slug="parent-model"
         )
-        child = MachineModel.objects.create(
+        child = make_machine_model(
             name="Child Model", opdb_id="Gtest-Mchild", slug="child-model"
         )
         export_dir = _write_models_json(
@@ -218,13 +223,13 @@ class TestIngestPinbaseModels:
 
     def test_variant_of_overrides_ingest(self, db):
         """variant_of from pinbase overrides a wrong variant_of from ingest_opdb."""
-        MachineModel.objects.create(
+        make_machine_model(
             name="Wrong Parent", slug="wrong-parent", opdb_id="Gtest-Mwrong"
         )
-        right_parent = MachineModel.objects.create(
+        right_parent = make_machine_model(
             name="Right Parent", opdb_id="Gtest-Mright", slug="right-parent"
         )
-        child = MachineModel.objects.create(
+        child = make_machine_model(
             name="Child",
             opdb_id="Gtest-Mchild",
             slug="child-model",
@@ -255,10 +260,10 @@ class TestIngestPinbaseModels:
     def test_variant_of_clears_circular_reference(self, db):
         """When models.json flips the parent/child, variant_of is cleared on new parent."""
         # ingest_opdb heuristic wrongly made model_a the parent, model_b the child.
-        model_a = MachineModel.objects.create(
+        model_a = make_machine_model(
             name="Model A (CE)", opdb_id="Gtest-Ma", slug="model-a-ce"
         )
-        model_b = MachineModel.objects.create(
+        model_b = make_machine_model(
             name="Model B (LE)",
             opdb_id="Gtest-Mb",
             slug="model-b-le",
@@ -294,10 +299,8 @@ class TestIngestPinbaseModels:
 
     def test_converted_from_claim(self, db):
         """converted_from asserts a claim with the slug value."""
-        MachineModel.objects.create(
-            name="Star Trek", opdb_id="Gtest-Msrc", slug="star-trek"
-        )
-        conv_mm = MachineModel.objects.create(
+        make_machine_model(name="Star Trek", opdb_id="Gtest-Msrc", slug="star-trek")
+        conv_mm = make_machine_model(
             name="Dark Rider", opdb_id="Gtest-Mconv", slug="dark-rider"
         )
         export_dir = _write_models_json(
@@ -322,10 +325,10 @@ class TestIngestPinbaseModels:
 
     def test_converted_from_resolves(self, db):
         """converted_from slug claim resolves to FK on model."""
-        source_mm = MachineModel.objects.create(
+        source_mm = make_machine_model(
             name="Star Trek", opdb_id="Gtest-Msrc", slug="star-trek"
         )
-        conv_mm = MachineModel.objects.create(
+        conv_mm = make_machine_model(
             name="Dark Rider", opdb_id="Gtest-Mconv", slug="dark-rider"
         )
         export_dir = _write_models_json(
@@ -349,7 +352,7 @@ class TestIngestPinbaseModels:
     def test_title_claim(self, db):
         """title asserts a claim with the slug value."""
         Title.objects.create(name="Test Title", slug="test-title", opdb_id="Gtest")
-        mm = MachineModel.objects.create(
+        mm = make_machine_model(
             name="Test Model", opdb_id="Gtest-Mtest", slug="test-model"
         )
         export_dir = _write_models_json(
@@ -373,7 +376,7 @@ class TestIngestPinbaseModels:
         title = Title.objects.create(
             name="Test Title", slug="test-title", opdb_id="Gtest"
         )
-        mm = MachineModel.objects.create(
+        mm = make_machine_model(
             name="Test Model", opdb_id="Gtest-Mtest", slug="test-model"
         )
         export_dir = _write_models_json(

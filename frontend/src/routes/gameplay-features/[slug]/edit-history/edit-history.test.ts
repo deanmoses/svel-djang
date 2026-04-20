@@ -27,12 +27,14 @@ describe('gameplay-features edit-history SSR route', () => {
 
 		expect(result).toEqual({
 			changesets: MOCK_CHANGESETS,
-			entityType: 'gameplayfeature',
+			entityType: 'gameplay-feature',
 			slug: 'test-entity'
 		});
 		const request = fetch.mock.calls[0]?.[0];
 		expect(request).toBeInstanceOf(Request);
-		expect(request.url).toBe('http://localhost:5173/api/edit-history/gameplayfeature/test-entity/');
+		expect(request.url).toBe(
+			'http://localhost:5173/api/edit-history/gameplay-feature/test-entity/'
+		);
 	});
 
 	it('throws on backend failure', async () => {

@@ -114,6 +114,25 @@ def check_nameless_models(result: ValidationResult) -> None:
             result.error(f"  ... and {count - 10} more")
 
 
+def check_titleless_models(result: ValidationResult) -> None:
+    """Every MachineModel must have a Title — enforced by the DB NOT NULL.
+
+    This is a defense-in-depth check: the FK is NOT NULL, so any hit here
+    indicates a constraint bypass (raw SQL, migration issue) and must be
+    fixed before the row leaks into the resolved catalog.
+    """
+    titleless = MachineModel.objects.filter(title__isnull=True)
+    count = titleless.count()
+    if count:
+        result.error(f"{count} machine model(s) have no title")
+        for pm in titleless[:10]:
+            result.error(
+                f"  pk={pm.pk} slug={pm.slug!r} ipdb_id={pm.ipdb_id} opdb_id={pm.opdb_id}"
+            )
+        if count > 10:
+            result.error(f"  ... and {count - 10} more")
+
+
 def check_nameless_titles(result: ValidationResult) -> None:
     """Every Title must have a name."""
     nameless = Title.objects.filter(Q(name="") | Q(name__isnull=True))
@@ -537,6 +556,7 @@ ALL_CHECKS = [
     check_summary_stats,
     check_golden_records,
     check_nameless_models,
+    check_titleless_models,
     check_nameless_titles,
     check_nameless_persons,
     check_self_referential_variant,

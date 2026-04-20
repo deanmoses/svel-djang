@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import pytest
 from django.contrib.contenttypes.models import ContentType
+from django.core.management.base import CommandError
 
 from apps.catalog.ingestion.opdb.adapter import build_opdb_plan, parse_opdb_records
 from apps.catalog.ingestion.opdb.records import OpdbRecord
@@ -17,6 +18,7 @@ from apps.catalog.models import (
     MachineModel,
 )
 from apps.provenance.models import Source
+from apps.catalog.tests.conftest import make_machine_model
 
 
 @pytest.fixture
@@ -69,63 +71,19 @@ def _assertion_value(plan, field_name, *, handle=None, object_id=None):
 
 @pytest.mark.django_db
 class TestPlanForNewEntities:
-    """When OPDB records don't match existing models, the plan creates entities."""
+    """OPDB records with no matching pindata MachineModel abort plan building."""
 
-    def test_new_machine_produces_entity_create(self, opdb_source):
+    def test_new_machine_raises_command_error(self, opdb_source):
         rec = _make_record(opdb_id="GNEW-M1", name="Brand New")
-        plan = build_opdb_plan([rec], opdb_source, "test-fp")
+        with pytest.raises(CommandError, match="do not match any existing"):
+            build_opdb_plan([rec], opdb_source, "test-fp")
 
-        assert len(plan.entities) == 1
-        entity = plan.entities[0]
-        assert entity.model_class is MachineModel
-        assert entity.kwargs["name"] == "Brand New"
-        assert entity.kwargs["opdb_id"] == "GNEW-M1"
-        assert entity.kwargs["slug"]  # generated, non-empty
-        assert entity.handle == "opdb:GNEW-M1"
-
-    def test_new_machine_has_matching_claims(self, opdb_source):
-        rec = _make_record(
-            opdb_id="GNEW-M1",
-            name="Brand New",
-            manufacture_date="2020-03-15",
-            player_count=4,
-            type="ss",
-            display="dmd",
-        )
-        plan = build_opdb_plan([rec], opdb_source, "test-fp")
-
-        handle = "opdb:GNEW-M1"
-        fields = _assertion_fields(plan, handle=handle)
-        assert "name" in fields
-        assert "slug" in fields
-        assert "opdb_id" in fields
-        assert "year" in fields
-        assert "month" in fields
-        assert "player_count" in fields
-        assert "technology_generation" in fields
-        assert "display_type" in fields
-
-    def test_new_machine_scalar_values(self, opdb_source):
-        rec = _make_record(
-            opdb_id="GNEW-M1",
-            name="Brand New",
-            manufacture_date="2020-03-15",
-            player_count=2,
-        )
-        plan = build_opdb_plan([rec], opdb_source, "test-fp")
-
-        handle = "opdb:GNEW-M1"
-        assert _assertion_value(plan, "name", handle=handle) == "Brand New"
-        assert _assertion_value(plan, "year", handle=handle) == 2020
-        assert _assertion_value(plan, "month", handle=handle) == 3
-        assert _assertion_value(plan, "player_count", handle=handle) == 2
-
-    def test_plan_counts(self, opdb_source):
-        rec = _make_record(opdb_id="GNEW-M1")
-        plan = build_opdb_plan([rec], opdb_source, "test-fp")
-
-        assert plan.records_parsed == 1
-        assert plan.records_matched == 0
+    def test_error_lists_opdb_id_and_name(self, opdb_source):
+        rec = _make_record(opdb_id="GNEW-M1", name="Brand New")
+        with pytest.raises(CommandError) as exc:
+            build_opdb_plan([rec], opdb_source, "test-fp")
+        assert "GNEW-M1" in str(exc.value)
+        assert "Brand New" in str(exc.value)
 
 
 @pytest.mark.django_db
@@ -133,7 +91,7 @@ class TestPlanForExistingEntities:
     """When OPDB records match existing models, assertions target the entity PK."""
 
     def test_matched_by_opdb_id(self, opdb_source):
-        pm = MachineModel.objects.create(
+        pm = make_machine_model(
             name="Existing Game",
             slug="existing-game",
             opdb_id="GEXIST-M1",
@@ -149,7 +107,7 @@ class TestPlanForExistingEntities:
         assert "slug" not in fields
 
     def test_matched_by_ipdb_id(self, opdb_source):
-        pm = MachineModel.objects.create(
+        pm = make_machine_model(
             name="IPDB Game",
             slug="ipdb-game",
             ipdb_id=9999,
@@ -163,7 +121,7 @@ class TestPlanForExistingEntities:
         assert "opdb_id" in fields
 
     def test_plan_counts_matched(self, opdb_source):
-        MachineModel.objects.create(
+        make_machine_model(
             name="Existing",
             slug="existing",
             opdb_id="GEXIST-M1",
@@ -175,7 +133,7 @@ class TestPlanForExistingEntities:
         assert plan.records_matched == 1
 
     def test_assertions_target_content_type(self, opdb_source):
-        pm = MachineModel.objects.create(
+        pm = make_machine_model(
             name="Existing",
             slug="existing",
             opdb_id="GEXIST-M1",
@@ -191,9 +149,9 @@ class TestPlanForExistingEntities:
 
 @pytest.mark.django_db
 class TestPlanForAliases:
-    """Alias records produce plan entries only when their parent exists."""
+    """Alias records must match an existing pindata MachineModel too."""
 
-    def test_alias_with_parent_in_same_batch(self, opdb_source):
+    def test_unmatched_alias_with_parent_in_same_batch_raises(self, opdb_source):
         parent = _make_record(opdb_id="GNEW-M1", name="Parent")
         alias = OpdbRecord(
             opdb_id="GNEW-M1-AAlias",
@@ -201,18 +159,19 @@ class TestPlanForAliases:
             is_alias=True,
             is_machine=False,
         )
-        plan = build_opdb_plan([parent, alias], opdb_source, "test-fp")
+        with pytest.raises(CommandError, match="do not match any existing"):
+            build_opdb_plan([parent, alias], opdb_source, "test-fp")
 
-        # Both should be new entities.
-        handles = {e.handle for e in plan.entities}
-        assert "opdb:GNEW-M1" in handles
-        assert "opdb:GNEW-M1-AAlias" in handles
-
-    def test_alias_with_existing_parent(self, opdb_source):
-        MachineModel.objects.create(
+    def test_alias_matched_to_existing_mm(self, opdb_source):
+        make_machine_model(
             name="Parent",
             slug="parent",
             opdb_id="GEXIST-M1",
+        )
+        alias_mm = make_machine_model(
+            name="Alias",
+            slug="alias",
+            opdb_id="GEXIST-M1-AAlias",
         )
         alias = OpdbRecord(
             opdb_id="GEXIST-M1-AAlias",
@@ -222,9 +181,10 @@ class TestPlanForAliases:
         )
         plan = build_opdb_plan([alias], opdb_source, "test-fp")
 
-        # Alias should be a new entity.
-        assert len(plan.entities) == 1
-        assert plan.entities[0].handle == "opdb:GEXIST-M1-AAlias"
+        # No new entities — the alias matches an existing MachineModel.
+        assert len(plan.entities) == 0
+        # Claims target the existing MachineModel's PK.
+        assert any(a.object_id == alias_mm.pk for a in plan.assertions)
 
     def test_orphan_alias_produces_warning(self, opdb_source):
         alias = OpdbRecord(
@@ -251,6 +211,12 @@ class TestPlanForAliases:
 class TestFeatureClassification:
     """OPDB features array terms are classified into vocabulary claims."""
 
+    @pytest.fixture(autouse=True)
+    def _seed(self, db):
+        return make_machine_model(
+            name="Test Game", slug="test-game", opdb_id="GTEST-M1"
+        )
+
     def test_gameplay_feature_claim(self, opdb_source):
         GameplayFeature.objects.create(slug="multiball", name="Multiball")
         rec = _make_record(features=["Multiball"])
@@ -276,14 +242,19 @@ class TestFeatureClassification:
 
 @pytest.mark.django_db
 class TestIpdbCrossReferenceBackfill:
-    """Models matched by ipdb_id are registered in opdb_id lookup for aliases."""
+    """Parent matched by ipdb_id is findable by opdb_id for alias reconciliation."""
 
     def test_alias_finds_parent_matched_by_ipdb(self, opdb_source):
         """Parent matched via ipdb_id should still be findable by opdb_id for aliases."""
-        MachineModel.objects.create(
+        make_machine_model(
             name="IPDB Parent",
             slug="ipdb-parent",
             ipdb_id=5555,
+        )
+        alias_mm = make_machine_model(
+            name="Cross Alias",
+            slug="cross-alias",
+            opdb_id="GCROSS-M1-AAlias",
         )
         parent = _make_record(opdb_id="GCROSS-M1", name="IPDB Parent", ipdb_id=5555)
         alias = OpdbRecord(
@@ -294,11 +265,9 @@ class TestIpdbCrossReferenceBackfill:
         )
         plan = build_opdb_plan([parent, alias], opdb_source, "test-fp")
 
-        # Alias should be created (parent found via ipdb cross-reference).
-        alias_handles = {e.handle for e in plan.entities}
-        assert "opdb:GCROSS-M1-AAlias" in alias_handles
-        # No orphan warning.
+        # Alias matched to its pre-seeded MM; no orphan warning.
         assert not any("GCROSS-M1" in w and "not found" in w for w in plan.warnings)
+        assert any(a.object_id == alias_mm.pk for a in plan.assertions)
 
 
 @pytest.mark.django_db
@@ -306,6 +275,7 @@ class TestResolveHooks:
     """The plan registers relationship resolve hooks."""
 
     def test_resolve_hooks_registered(self, opdb_source):
+        make_machine_model(name="Test Game", slug="test-game", opdb_id="GTEST-M1")
         rec = _make_record()
         plan = build_opdb_plan([rec], opdb_source, "test-fp")
 

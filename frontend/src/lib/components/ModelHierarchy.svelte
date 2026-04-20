@@ -21,13 +21,15 @@
 		heading = 'Models',
 		currentSlug = undefined,
 		variantOfSlug = undefined,
-		excludeSlug = undefined
+		excludeSlug = undefined,
+		inline = false
 	}: {
 		models: Model[];
 		heading?: string;
 		currentSlug?: string;
 		variantOfSlug?: string;
 		excludeSlug?: string;
+		inline?: boolean;
 	} = $props();
 
 	function sortedVariants(variants: Variant[]): Variant[] {
@@ -39,36 +41,72 @@
 	);
 </script>
 
+{#snippet listItems()}
+	{#each filteredModels as parent (parent.slug)}
+		<li
+			class:current={currentSlug !== undefined &&
+				(parent.slug === currentSlug || parent.slug === variantOfSlug)}
+		>
+			<a href={resolve(`/models/${parent.slug}`)}>{parent.name}</a>
+			{#if parent.year}
+				<span class="muted">{parent.year}</span>
+			{/if}
+		</li>
+		{#each sortedVariants(parent.variants) as variant (variant.slug)}
+			<li
+				class="variant-indent"
+				class:current={currentSlug !== undefined && variant.slug === currentSlug}
+			>
+				<a href={resolve(`/models/${variant.slug}`)}>{variant.name}</a>
+				{#if variant.year}
+					<span class="muted">{variant.year}</span>
+				{/if}
+			</li>
+		{/each}
+	{/each}
+{/snippet}
+
 {#if filteredModels.length > 0}
-	<SidebarSection {heading}>
-		<SidebarList>
-			{#each filteredModels as parent (parent.slug)}
-				<li
-					class:current={currentSlug !== undefined &&
-						(parent.slug === currentSlug || parent.slug === variantOfSlug)}
-				>
-					<a href={resolve(`/models/${parent.slug}`)}>{parent.name}</a>
-					{#if parent.year}
-						<span class="muted">{parent.year}</span>
-					{/if}
-				</li>
-				{#each sortedVariants(parent.variants) as variant (variant.slug)}
-					<li
-						class="variant-indent"
-						class:current={currentSlug !== undefined && variant.slug === currentSlug}
-					>
-						<a href={resolve(`/models/${variant.slug}`)}>{variant.name}</a>
-						{#if variant.year}
-							<span class="muted">{variant.year}</span>
-						{/if}
-					</li>
-				{/each}
-			{/each}
-		</SidebarList>
-	</SidebarSection>
+	{#if inline}
+		<div class="relationship-group">
+			<h3>{heading}</h3>
+			<ul>
+				{@render listItems()}
+			</ul>
+		</div>
+	{:else}
+		<SidebarSection {heading}>
+			<SidebarList>
+				{@render listItems()}
+			</SidebarList>
+		</SidebarSection>
+	{/if}
 {/if}
 
 <style>
+	.relationship-group {
+		margin-bottom: var(--size-3);
+	}
+
+	.relationship-group:last-child {
+		margin-bottom: 0;
+	}
+
+	.relationship-group h3 {
+		font-size: var(--font-size-0);
+		font-weight: 600;
+		color: var(--color-text-muted);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		margin: 0 0 var(--size-1);
+	}
+
+	.relationship-group ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
 	li {
 		display: flex;
 		align-items: baseline;

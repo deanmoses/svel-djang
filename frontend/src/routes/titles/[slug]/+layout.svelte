@@ -1,22 +1,36 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { auth } from '$lib/auth.svelte';
 	import MetaTags from '$lib/components/MetaTags.svelte';
 	import ExternalLinksSidebarSection from '$lib/components/ExternalLinksSidebarSection.svelte';
-	import Markdown from '$lib/components/Markdown.svelte';
-	import HeroHeader from '$lib/components/HeroHeader.svelte';
 	import ModelHierarchy from '$lib/components/ModelHierarchy.svelte';
 	import ModelSpecsSidebar from '$lib/components/ModelSpecsSidebar.svelte';
+	import PageActionBar from '$lib/components/PageActionBar.svelte';
 	import RatingsSidebarSection from '$lib/components/RatingsSidebarSection.svelte';
+	import RecordDetailShell from '$lib/components/RecordDetailShell.svelte';
+	import SectionEditorHost from '$lib/components/SectionEditorHost.svelte';
 	import SidebarList from '$lib/components/SidebarList.svelte';
 	import SidebarListItem from '$lib/components/SidebarListItem.svelte';
 	import SidebarSection from '$lib/components/SidebarSection.svelte';
-	import TabNav from '$lib/components/TabNav.svelte';
-	import Tab from '$lib/components/Tab.svelte';
-	import TwoColumnLayout from '$lib/components/TwoColumnLayout.svelte';
-	import AttributionLine from '$lib/components/AttributionLine.svelte';
+	import TaxonomyLinkSidebarSection from '$lib/components/TaxonomyLinkSidebarSection.svelte';
 	import NeedsReviewBanner from '$lib/components/NeedsReviewBanner.svelte';
+	import { getMenuItemAction, type EditSectionMenuItem } from '$lib/components/edit-section-menu';
+	import { LAYOUT_BREAKPOINT } from '$lib/constants';
+	import { resolveDetailSubrouteMode } from '$lib/detail-subroute-mode';
+	import {
+		combinedSectionsFor,
+		type CombinedSectionKey
+	} from '$lib/components/editors/combined-edit-sections';
+	import { modelHasTitleOwnedIdentity } from '$lib/catalog-rules';
+	import { titleAreaEditActionContext } from '$lib/components/editors/edit-action-context';
+	import { createIsMobileFlag } from '$lib/use-is-mobile.svelte';
+	import type { ModelEditSectionKey } from '$lib/components/editors/model-edit-sections';
+	import type { TitleEditSectionKey } from '$lib/components/editors/title-edit-sections';
+	import MediaEditor from '$lib/components/editors/MediaEditor.svelte';
+	import ModelEditorSwitch from '../../models/[slug]/edit/ModelEditorSwitch.svelte';
+	import TitleEditorSwitch from './edit/TitleEditorSwitch.svelte';
 
 	let { data, children } = $props();
 	let title = $derived(data.title);
@@ -28,22 +42,16 @@
 		auth.load();
 	});
 
-	let isMedia = $derived(
-		page.url.pathname.endsWith('/media') || page.url.pathname.includes('/media/')
-	);
-	let isDetail = $derived(
-		!page.url.pathname.endsWith('/edit') &&
-			!page.url.pathname.endsWith('/sources') &&
-			!page.url.pathname.endsWith('/edit-history') &&
-			!isMedia
-	);
-	let isEdit = $derived(page.url.pathname.endsWith('/edit'));
-	let isSources = $derived(page.url.pathname.endsWith('/sources'));
-	let isEditHistory = $derived(page.url.pathname.endsWith('/edit-history'));
+	let mode = $derived(resolveDetailSubrouteMode(page.url.pathname));
+	let isEdit = $derived(mode === 'edit');
+	let isDetail = $derived(mode === 'detail');
+
+	// Mobile detection — matches TwoColumnLayout breakpoint (LAYOUT_BREAKPOINT)
+	const isMobileFlag = createIsMobileFlag(LAYOUT_BREAKPOINT);
+	let isMobile = $derived(isMobileFlag.current);
 
 	let metaDescription = $derived.by(() => {
 		if (title.description?.text) return title.description.text;
-		const md = title.model_detail;
 		const parts = [title.name];
 		if (md?.year) parts.push(`a ${md.year} pinball machine`);
 		else parts.push('pinball title');
@@ -69,6 +77,96 @@
 		}
 		return items;
 	});
+
+	// --- Combined-menu edit state ---
+
+	let sections = $derived(combinedSectionsFor(!!md));
+	let editing = $state<CombinedSectionKey | null>(null);
+	let syncEnabled = $derived(!isMobile && !isEdit);
+	// Tracks the last URL-derived edit section so local modal state doesn't immediately write it back.
+	let lastUrlEditing = $state<CombinedSectionKey | null>(null);
+
+	function updateEditQuery(nextEditing: CombinedSectionKey | null) {
+		const current = page.url.searchParams.get('edit') ?? null;
+		const desired = nextEditing ?? null;
+		if (current === desired) return;
+		const url = new URL(page.url);
+		if (desired) url.searchParams.set('edit', desired);
+		else url.searchParams.delete('edit');
+		goto(`${url.pathname}${url.search}`, { replaceState: true, noScroll: true, keepFocus: true });
+	}
+
+	function resolveEditingFromUrl(): CombinedSectionKey | null {
+		if (!syncEnabled) return null;
+		const value = page.url.searchParams.get('edit');
+		if (!value) return null;
+		const matched = sections.find((s) => s.key === value);
+		return matched?.key ?? null;
+	}
+
+	$effect(() => {
+		const nextEditing = resolveEditingFromUrl();
+		lastUrlEditing = nextEditing;
+		editing = nextEditing;
+	});
+
+	$effect(() => {
+		if (!syncEnabled) return;
+		if (editing === lastUrlEditing) return;
+		lastUrlEditing = editing;
+		updateEditQuery(editing);
+	});
+
+	let switcherItems: EditSectionMenuItem[] = $derived([
+		...sections.map((s): EditSectionMenuItem => {
+			if (!isMobile) {
+				return { key: s.key, label: s.menuLabel, onclick: () => (editing = s.key) };
+			}
+			if (s.tier === 'title') {
+				return {
+					key: s.key,
+					label: s.menuLabel,
+					href: resolve(`/titles/${slug}/edit/${s.segment}`)
+				};
+			}
+			// combinedSectionsFor only emits model-tier entries when md exists.
+			if (!md) throw new Error('unreachable: model-tier section without model_detail');
+			// The model edit route reads the model's title_models count to decide
+			// whether BasicsEditor renders in slim mode — no entry-point signaling
+			// needed here.
+			return {
+				key: s.key,
+				label: s.menuLabel,
+				href: resolve(`/models/${md.slug}/edit/${s.segment}`)
+			};
+		}),
+		// "Create Model" is appended per the Record Create & Delete spec.
+		// It's a navigation action (not a section editor), so it carries only
+		// an `href`; auth gating happens via `editSectionsForBar` below, which
+		// drops the whole menu when anonymous.
+		{
+			key: 'create-model',
+			label: 'Create Model',
+			href: resolve(`/titles/${slug}/models/new`)
+		},
+		// "Delete Title" is the last item in the menu (destructive action).
+		// Navigates to a focus-mode confirmation page; auth gating rides
+		// on editSectionsForBar.
+		{
+			key: 'delete-title',
+			label: 'Delete Title',
+			href: resolve(`/titles/${slug}/delete`)
+		}
+	]);
+
+	let editSectionsForBar = $derived(auth.isAuthenticated ? switcherItems : undefined);
+
+	function editAction(key: CombinedSectionKey): (() => void) | undefined {
+		if (!auth.isAuthenticated) return undefined;
+		return getMenuItemAction(switcherItems, key, (href) => goto(href));
+	}
+
+	titleAreaEditActionContext.set(editAction);
 </script>
 
 <MetaTags
@@ -79,200 +177,219 @@
 	imageAlt={heroImage ? `${title.name} pinball machine` : undefined}
 />
 
-{#if title.needs_review}
-	<NeedsReviewBanner notes={title.needs_review_notes} links={title.review_links} />
-{/if}
+{#if isEdit}
+	{@render children()}
+{:else}
+	{#if title.needs_review}
+		<NeedsReviewBanner notes={title.needs_review_notes} links={title.review_links} />
+	{/if}
 
-<article>
-	<HeroHeader
+	{#snippet actionBar()}
+		{#if !isEdit}
+			<PageActionBar
+				detailHref={isDetail ? undefined : resolve(`/titles/${slug}`)}
+				editSections={editSectionsForBar}
+				historyHref={resolve(`/titles/${slug}/edit-history`)}
+				sourcesHref={resolve(`/titles/${slug}/sources`)}
+			/>
+		{/if}
+	{/snippet}
+
+	{#snippet main()}
+		{@render children()}
+	{/snippet}
+
+	{#snippet sidebar()}
+		{#if md}
+			<SidebarSection heading="Specifications">
+				<ModelSpecsSidebar model={md} />
+			</SidebarSection>
+
+			<RatingsSidebarSection ipdbRating={md.ipdb_rating} pinsideRating={md.pinside_rating} />
+
+			{#if md.variants.length > 0}
+				<SidebarSection heading="Variants">
+					<SidebarList>
+						{#each md.variants as variant (variant.slug)}
+							<SidebarListItem>
+								<a href={resolve(`/models/${variant.slug}`)}>{variant.name}</a>
+								{#if variant.year}
+									<span class="muted">{variant.year}</span>
+								{/if}
+							</SidebarListItem>
+						{/each}
+					</SidebarList>
+				</SidebarSection>
+			{/if}
+
+			<ExternalLinksSidebarSection
+				ipdbId={md.ipdb_id}
+				opdbId={md.opdb_id}
+				pinsideId={md.pinside_id}
+				note="See this title on other sites:"
+				onEdit={editAction('model:external-data')}
+			/>
+		{:else}
+			{#if specs.technology_generation || specs.display_type || specs.player_count || specs.system || specs.cabinet || specs.game_format || specs.display_subtype || specs.production_quantity || (specs.themes && specs.themes.length > 0) || title.abbreviations.length > 0}
+				<SidebarSection heading="Specifications">
+					<dl>
+						{#if specs.technology_generation}
+							<dt>Generation</dt>
+							<dd>
+								<a href={resolve(`/technology-generations/${specs.technology_generation.slug}`)}
+									>{specs.technology_generation.name}</a
+								>
+							</dd>
+						{/if}
+						{#if specs.display_type}
+							<dt>Display Type</dt>
+							<dd>
+								<a href={resolve(`/display-types/${specs.display_type.slug}`)}
+									>{specs.display_type.name}</a
+								>
+							</dd>
+						{/if}
+						{#if specs.player_count}
+							<dt>Players</dt>
+							<dd>{specs.player_count}</dd>
+						{/if}
+						{#if specs.flipper_count}
+							<dt>Flippers</dt>
+							<dd>{specs.flipper_count}</dd>
+						{/if}
+						{#if specs.production_quantity}
+							<dt>Units Made</dt>
+							<dd>{specs.production_quantity}</dd>
+						{/if}
+						{#if specs.system}
+							<dt>System</dt>
+							<dd>
+								<a href={resolve(`/systems/${specs.system.slug}`)}>{specs.system.name}</a>
+							</dd>
+						{/if}
+						{#if specs.themes && specs.themes.length > 0}
+							<dt>Themes</dt>
+							<dd>
+								{#each specs.themes as theme, i (theme.slug)}
+									{#if i > 0},{/if}
+									<a href={resolve(`/themes/${theme.slug}`)}>{theme.name}</a>
+								{/each}
+							</dd>
+						{/if}
+						{#if specs.gameplay_features && specs.gameplay_features.length > 0}
+							<dt>Features</dt>
+							<dd>
+								{#each specs.gameplay_features as feature, i (feature.slug)}
+									{#if i > 0},{/if}
+									<a href={resolve(`/gameplay-features/${feature.slug}`)}>{feature.name}</a
+									>{#if feature.count}&nbsp;({feature.count}){/if}
+								{/each}
+							</dd>
+						{/if}
+						{#if specs.reward_types && specs.reward_types.length > 0}
+							<dt>Reward Types</dt>
+							<dd>
+								{#each specs.reward_types as rt, i (rt.slug)}
+									{#if i > 0},{/if}
+									<a href={resolve(`/reward-types/${rt.slug}`)}>{rt.name}</a>
+								{/each}
+							</dd>
+						{/if}
+						{#if title.abbreviations.length > 0}
+							<dt>Abbrs</dt>
+							<dd>{title.abbreviations.join(', ')}</dd>
+						{/if}
+						{#if specs.cabinet}
+							<dt>Cabinet</dt>
+							<dd>
+								<a href={resolve(`/cabinets/${specs.cabinet.slug}`)}>{specs.cabinet.name}</a>
+							</dd>
+						{/if}
+						{#if specs.game_format}
+							<dt>Format</dt>
+							<dd>
+								<a href={resolve(`/game-formats/${specs.game_format.slug}`)}
+									>{specs.game_format.name}</a
+								>
+							</dd>
+						{/if}
+						{#if specs.display_subtype}
+							<dt>Display</dt>
+							<dd>
+								<a href={resolve(`/display-subtypes/${specs.display_subtype.slug}`)}
+									>{specs.display_subtype.name}</a
+								>
+							</dd>
+						{/if}
+					</dl>
+				</SidebarSection>
+			{/if}
+
+			<TaxonomyLinkSidebarSection
+				heading="Franchise"
+				basePath="/franchises"
+				item={title.franchise}
+				onEdit={editAction('title:franchise')}
+			/>
+			<TaxonomyLinkSidebarSection
+				heading="Series"
+				basePath="/series"
+				item={title.series}
+				onEdit={editAction('title:franchise')}
+			/>
+
+			{#if title.machines.length > 0}
+				<ModelHierarchy models={title.machines} />
+			{/if}
+		{/if}
+	{/snippet}
+
+	<RecordDetailShell
 		name={title.name}
 		heroImageUrl={md ? md.hero_image_url : title.hero_image_url}
 		heroImageAlt="{title.name} backglass"
 		{metaItems}
+		sidebarDesktopOnly={isDetail}
+		{actionBar}
+		{main}
+		sidebar={isEdit ? undefined : sidebar}
 	/>
 
-	<TwoColumnLayout>
-		{#snippet main()}
-			{#if title.description?.html}
-				<section class="prose">
-					<Markdown html={title.description.html} citations={title.description.citations} />
-					<AttributionLine attribution={title.description.attribution} />
-				</section>
-			{/if}
-
-			<TabNav>
-				<Tab active={isDetail} href={resolve(`/titles/${slug}`)}>Detail</Tab>
-				{#if md}
-					<Tab active={isMedia} href={resolve(`/titles/${slug}/media`)}>Media</Tab>
-				{/if}
-				{#if auth.isAuthenticated}
-					<Tab active={isEdit} href={resolve(`/titles/${slug}/edit`)}>Edit</Tab>
-				{/if}
-				<Tab active={isSources} href={resolve(`/titles/${slug}/sources`)}>Sources</Tab>
-				<Tab active={isEditHistory} href={resolve(`/titles/${slug}/edit-history`)}>Edit History</Tab
-				>
-			</TabNav>
-
-			{@render children()}
-		{/snippet}
-
-		{#snippet sidebar()}
-			{#if md}
-				<SidebarSection heading="Specifications">
-					<ModelSpecsSidebar model={md} />
-				</SidebarSection>
-
-				<RatingsSidebarSection ipdbRating={md.ipdb_rating} pinsideRating={md.pinside_rating} />
-
-				{#if md.variants.length > 0}
-					<SidebarSection heading="Variants">
-						<SidebarList>
-							{#each md.variants as variant (variant.slug)}
-								<SidebarListItem>
-									<a href={resolve(`/models/${variant.slug}`)}>{variant.name}</a>
-									{#if variant.year}
-										<span class="muted">{variant.year}</span>
-									{/if}
-								</SidebarListItem>
-							{/each}
-						</SidebarList>
-					</SidebarSection>
-				{/if}
-
-				<ExternalLinksSidebarSection
-					ipdbId={md.ipdb_id}
-					opdbId={md.opdb_id}
-					pinsideId={md.pinside_id}
-					note="See this title on other sites:"
+	<SectionEditorHost bind:editingKey={editing} {sections} {switcherItems}>
+		{#snippet editor(key, { ref, onsaved, onerror, ondirtychange })}
+			{#if key.startsWith('title:')}
+				<TitleEditorSwitch
+					sectionKey={key.slice('title:'.length) as TitleEditSectionKey}
+					initialData={title}
+					slug={title.slug}
+					bind:editorRef={ref.current}
+					{onsaved}
+					{onerror}
+					{ondirtychange}
 				/>
-			{:else}
-				{#if specs.technology_generation || specs.display_type || specs.player_count || specs.system || specs.cabinet || specs.game_format || specs.display_subtype || specs.production_quantity || (specs.themes && specs.themes.length > 0) || title.abbreviations.length > 0}
-					<SidebarSection heading="Specifications">
-						<dl>
-							{#if specs.technology_generation}
-								<dt>Generation</dt>
-								<dd>
-									<a href={resolve(`/technology-generations/${specs.technology_generation.slug}`)}
-										>{specs.technology_generation.name}</a
-									>
-								</dd>
-							{/if}
-							{#if specs.display_type}
-								<dt>Display Type</dt>
-								<dd>
-									<a href={resolve(`/display-types/${specs.display_type.slug}`)}
-										>{specs.display_type.name}</a
-									>
-								</dd>
-							{/if}
-							{#if specs.player_count}
-								<dt>Players</dt>
-								<dd>{specs.player_count}</dd>
-							{/if}
-							{#if specs.flipper_count}
-								<dt>Flippers</dt>
-								<dd>{specs.flipper_count}</dd>
-							{/if}
-							{#if specs.production_quantity}
-								<dt>Units Made</dt>
-								<dd>{specs.production_quantity}</dd>
-							{/if}
-							{#if specs.system}
-								<dt>System</dt>
-								<dd>
-									<a href={resolve(`/systems/${specs.system.slug}`)}>{specs.system.name}</a>
-								</dd>
-							{/if}
-							{#if specs.themes && specs.themes.length > 0}
-								<dt>Themes</dt>
-								<dd>
-									{#each specs.themes as theme, i (theme.slug)}
-										{#if i > 0},{/if}
-										<a href={resolve(`/themes/${theme.slug}`)}>{theme.name}</a>
-									{/each}
-								</dd>
-							{/if}
-							{#if specs.gameplay_features && specs.gameplay_features.length > 0}
-								<dt>Features</dt>
-								<dd>
-									{#each specs.gameplay_features as feature, i (feature.slug)}
-										{#if i > 0},{/if}
-										<a href={resolve(`/gameplay-features/${feature.slug}`)}>{feature.name}</a
-										>{#if feature.count}&nbsp;({feature.count}){/if}
-									{/each}
-								</dd>
-							{/if}
-							{#if specs.reward_types && specs.reward_types.length > 0}
-								<dt>Reward Types</dt>
-								<dd>
-									{#each specs.reward_types as rt, i (rt.slug)}
-										{#if i > 0},{/if}
-										<a href={resolve(`/reward-types/${rt.slug}`)}>{rt.name}</a>
-									{/each}
-								</dd>
-							{/if}
-							{#if title.franchise}
-								<dt>Franchise</dt>
-								<dd>
-									<a href={resolve(`/franchises/${title.franchise.slug}`)}>{title.franchise.name}</a
-									>
-								</dd>
-							{/if}
-							{#if title.abbreviations.length > 0}
-								<dt>Abbrs</dt>
-								<dd>{title.abbreviations.join(', ')}</dd>
-							{/if}
-							{#if specs.cabinet}
-								<dt>Cabinet</dt>
-								<dd>
-									<a href={resolve(`/cabinets/${specs.cabinet.slug}`)}>{specs.cabinet.name}</a>
-								</dd>
-							{/if}
-							{#if specs.game_format}
-								<dt>Format</dt>
-								<dd>
-									<a href={resolve(`/game-formats/${specs.game_format.slug}`)}
-										>{specs.game_format.name}</a
-									>
-								</dd>
-							{/if}
-							{#if specs.display_subtype}
-								<dt>Display</dt>
-								<dd>
-									<a href={resolve(`/display-subtypes/${specs.display_subtype.slug}`)}
-										>{specs.display_subtype.name}</a
-									>
-								</dd>
-							{/if}
-						</dl>
-					</SidebarSection>
-				{/if}
-
-				{#if title.series.length > 0}
-					<SidebarSection heading="Series">
-						<SidebarList>
-							{#each title.series as s (s.slug)}
-								<SidebarListItem>
-									<a href={resolve(`/series/${s.slug}`)}>{s.name}</a>
-								</SidebarListItem>
-							{/each}
-						</SidebarList>
-					</SidebarSection>
-				{/if}
-
-				{#if title.machines.length > 0}
-					<ModelHierarchy models={title.machines} />
-				{/if}
+			{:else if md}
+				<ModelEditorSwitch
+					sectionKey={key.slice('model:'.length) as ModelEditSectionKey}
+					initialData={md}
+					slug={md.slug}
+					slim={modelHasTitleOwnedIdentity(md)}
+					bind:editorRef={ref.current}
+					{onsaved}
+					{onerror}
+					{ondirtychange}
+				/>
 			{/if}
 		{/snippet}
-	</TwoColumnLayout>
-</article>
+
+		{#snippet immediateEditor()}
+			{#if md}
+				<MediaEditor entityType="model" slug={md.slug} media={md.uploaded_media} />
+			{/if}
+		{/snippet}
+	</SectionEditorHost>
+{/if}
 
 <style>
-	.prose {
-		margin-bottom: var(--size-5);
-	}
-
 	dl {
 		display: grid;
 		grid-template-columns: auto 1fr;

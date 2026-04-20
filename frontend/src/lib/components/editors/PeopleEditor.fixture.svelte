@@ -5,10 +5,10 @@
 	type Credit = components['schemas']['CreditSchema'];
 
 	let {
-		initialCredits = [],
+		initialData = [],
 		slug = 'medieval-madness'
 	}: {
-		initialCredits?: Credit[];
+		initialData?: Credit[];
 		slug?: string;
 	} = $props();
 
@@ -35,7 +35,7 @@
 
 <PeopleEditor
 	bind:this={editorRef}
-	{initialCredits}
+	{initialData}
 	{slug}
 	onsaved={handleSaved}
 	onerror={handleError}

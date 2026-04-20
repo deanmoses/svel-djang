@@ -1,5 +1,6 @@
 import pytest
 from django.test import Client
+from django.utils.text import slugify
 
 from apps.catalog.models import (
     CorporateEntity,
@@ -13,8 +14,51 @@ from apps.catalog.models import (
     Person,
     TechnologyGeneration,
     Theme,
+    Title,
 )
 from apps.provenance.models import Claim, Source
+
+
+def make_machine_model(
+    *, title=None, name="Test Machine", slug=None, **kwargs
+) -> MachineModel:
+    """Create a MachineModel for tests, auto-providing a Title when omitted.
+
+    MachineModel.title is NOT NULL; tests that don't care about the title
+    value get a disposable one derived from the machine's slug/name.
+
+    A bootstrap name claim is asserted on the MachineModel and on any
+    auto-created Title so ``resolve_machine_models()`` doesn't reset
+    those names to blank. Callers that supply their own ``title=`` are
+    responsible for backing it with their own name claim before running
+    the resolver — otherwise the resolver will wipe ``title.name`` to
+    ``""`` and trip the Title CHECK constraint.
+    """
+    resolved_slug = slug or slugify(name)
+    src, _ = Source.objects.get_or_create(
+        slug="bootstrap",
+        defaults={
+            "name": "Bootstrap",
+            "source_type": "editorial",
+            "priority": 1,
+        },
+    )
+    if title is None:
+        t_slug = f"auto-title-{resolved_slug}"
+        title, created = Title.objects.get_or_create(
+            slug=t_slug, defaults={"name": name}
+        )
+        if created:
+            Claim.objects.assert_claim(title, "name", name, source=src)
+    mm = MachineModel.objects.create(
+        title=title,
+        name=name,
+        slug=resolved_slug,
+        **kwargs,
+    )
+    Claim.objects.assert_claim(mm, "name", name, source=src)
+    return mm
+
 
 SAMPLE_IMAGES = [
     {
@@ -167,9 +211,14 @@ def stern_entity(db, stern, _bootstrap_source):
 
 @pytest.fixture
 def machine_model(db, williams_entity, solid_state, _bootstrap_source):
+    title = Title.objects.create(name="Medieval Madness", slug="medieval-madness-title")
+    Claim.objects.assert_claim(
+        title, "name", "Medieval Madness", source=_bootstrap_source
+    )
     pm = MachineModel.objects.create(
         name="Medieval Madness",
         slug="medieval-madness",
+        title=title,
         corporate_entity=williams_entity,
         year=1997,
         technology_generation=solid_state,
@@ -256,9 +305,14 @@ def ipdb_narrative_features(db):
 
 @pytest.fixture
 def another_model(db, stern_entity, solid_state, _bootstrap_source):
+    title = Title.objects.create(name="The Mandalorian", slug="the-mandalorian-title")
+    Claim.objects.assert_claim(
+        title, "name", "The Mandalorian", source=_bootstrap_source
+    )
     pm = MachineModel.objects.create(
         name="The Mandalorian",
         slug="the-mandalorian",
+        title=title,
         corporate_entity=stern_entity,
         year=2021,
         technology_generation=solid_state,

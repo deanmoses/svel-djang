@@ -9,6 +9,7 @@ from apps.catalog.claims import (
 )
 from apps.catalog.models import MachineModel, Manufacturer
 from apps.provenance.models import make_claim_key
+from apps.catalog.tests.conftest import make_machine_model
 
 
 # ---------------------------------------------------------------------------
@@ -84,8 +85,8 @@ class TestBuildRelationshipClaim:
 
 class TestMakeAuthoritativeScope:
     def test_builds_scope(self, db):
-        m1 = MachineModel.objects.create(name="Game 1", slug="game-1")
-        m2 = MachineModel.objects.create(name="Game 2", slug="game-2")
+        m1 = make_machine_model(name="Game 1", slug="game-1")
+        m2 = make_machine_model(name="Game 2", slug="game-2")
         scope = make_authoritative_scope(MachineModel, {m1.pk, m2.pk})
         from django.contrib.contenttypes.models import ContentType
 

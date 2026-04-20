@@ -1,0 +1,49 @@
+<script lang="ts">
+	import DeletePage from '$lib/components/DeletePage.svelte';
+	import type { BlockedState } from '$lib/components/delete-page';
+	import type { BlockingReferrer } from '$lib/delete-flow';
+	import { pluralize } from '$lib/utils';
+	import { submitDelete } from './title-delete';
+
+	let { data } = $props();
+	let { preview, slug } = $derived(data);
+
+	let blockedReferrers = $derived(preview.blocked_by ?? []);
+
+	let blocked = $derived<BlockedState | null>(
+		blockedReferrers.length === 0
+			? null
+			: {
+					kind: 'referrers',
+					lead: `This title can't be deleted because active records still point at ${
+						blockedReferrers.length === 1 ? 'it' : 'parts of it'
+					}:`,
+					referrers: blockedReferrers,
+					renderReferrerHref: (r: BlockingReferrer) =>
+						r.slug && r.entity_type === 'model' ? `/models/${r.slug}` : null,
+					renderReferrerHint: (r: BlockingReferrer) =>
+						`references ${r.blocked_target_slug ?? 'this title'} via ${r.relation}`,
+					footer: 'Resolve these references, then try again.'
+				}
+	);
+
+	let impact = $derived({
+		items: [
+			pluralize(preview.active_model_count, 'model'),
+			pluralize(preview.changeset_count, 'change set')
+		],
+		note: 'You can undo this from the toast that appears on the titles list, or restore the record later from its edit history.'
+	});
+</script>
+
+<DeletePage
+	entityLabel="Title"
+	entityName={preview.title_name}
+	{slug}
+	submit={submitDelete}
+	cancelHref={`/titles/${slug}`}
+	redirectAfterDelete="/titles"
+	editHistoryHref={`/titles/${slug}/edit-history`}
+	{blocked}
+	{impact}
+/>

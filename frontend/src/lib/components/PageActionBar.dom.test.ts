@@ -26,6 +26,21 @@ describe('PageActionBar', () => {
 		expect(screen.getByRole('button', { name: 'Tools' })).toBeInTheDocument();
 	});
 
+	it('renders a Back link when detailHref is provided', () => {
+		render(PageActionBar, {
+			props: {
+				detailHref: '/models/medieval-madness',
+				historyHref: '/models/medieval-madness/history',
+				sourcesHref: '/models/medieval-madness/sources'
+			}
+		});
+
+		expect(screen.getByRole('link', { name: 'Back' })).toHaveAttribute(
+			'href',
+			'/models/medieval-madness'
+		);
+	});
+
 	it('hides the Edit link when editHref is omitted', () => {
 		render(PageActionBar, {
 			props: {
@@ -51,9 +66,9 @@ describe('PageActionBar', () => {
 						href: '/models/medieval-madness/edit/overview'
 					},
 					{
-						key: 'relationships',
-						label: 'Relationships',
-						href: '/models/medieval-madness/edit/relationships'
+						key: 'related-models',
+						label: 'Related Models',
+						href: '/models/medieval-madness/edit/related-models'
 					}
 				],
 				historyHref: '/models/medieval-madness/history',
@@ -67,9 +82,9 @@ describe('PageActionBar', () => {
 			'href',
 			'/models/medieval-madness/edit/overview'
 		);
-		expect(screen.getByRole('menuitem', { name: 'Relationships' })).toHaveAttribute(
+		expect(screen.getByRole('menuitem', { name: 'Related Models' })).toHaveAttribute(
 			'href',
-			'/models/medieval-madness/edit/relationships'
+			'/models/medieval-madness/edit/related-models'
 		);
 	});
 });

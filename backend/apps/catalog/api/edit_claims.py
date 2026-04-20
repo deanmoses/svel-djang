@@ -16,7 +16,7 @@ from django.db import IntegrityError, models as db_models, transaction
 from apps.catalog.claims import build_relationship_claim
 from apps.catalog.models import CreditRole, GameplayFeature, Person
 from apps.core.models import get_claim_fields
-from apps.provenance.models import ChangeSet, CitationInstance, Claim
+from apps.provenance.models import ChangeSet, ChangeSetAction, CitationInstance, Claim
 from apps.provenance.validation import validate_claim_value
 
 from ..resolve import resolve_after_mutation
@@ -694,11 +694,64 @@ def _normalize_abbreviations(values: list[str]) -> list[str]:
     return normalized
 
 
+def _write_claims_in_changeset(
+    entity,
+    specs: list[ClaimSpec],
+    *,
+    user,
+    changeset: ChangeSet,
+) -> list:
+    """Assert claims on *entity* inside an already-open *changeset*.
+
+    Does not open a transaction, create a ChangeSet, attach citations, or
+    resolve. The caller is responsible for all of that. Returns the list of
+    newly-created active Claim rows so the caller can attach citations.
+    """
+    created_claims = []
+    for spec in specs:
+        created_claims.append(
+            Claim.objects.assert_claim(
+                entity,
+                spec.field_name,
+                spec.value,
+                user=user,
+                claim_key=spec.claim_key,
+                changeset=changeset,
+            )
+        )
+    return created_claims
+
+
+def _attach_citation(
+    claims: list,
+    citation: EditCitationInput | None,
+) -> None:
+    """Link each claim in *claims* to a copy of the referenced citation instance."""
+    if citation is None:
+        return
+    try:
+        template = CitationInstance.objects.select_related("citation_source").get(
+            pk=citation.citation_instance_id
+        )
+    except CitationInstance.DoesNotExist:
+        raise_form_error("Unknown citation instance.")
+
+    for claim in claims:
+        instance = CitationInstance(
+            citation_source=template.citation_source,
+            claim=claim,
+            locator=template.locator,
+        )
+        instance.full_clean()
+        instance.save()
+
+
 def execute_claims(
     entity,
     specs: list[ClaimSpec],
     *,
     user,
+    action: ChangeSetAction = ChangeSetAction.EDIT,
     note: str = "",
     citation: EditCitationInput | None = None,
 ) -> None:
@@ -712,39 +765,60 @@ def execute_claims(
     """
     try:
         with transaction.atomic():
-            cs = ChangeSet.objects.create(user=user, note=note)
-            created_claims = []
-            for spec in specs:
-                created_claims.append(
-                    Claim.objects.assert_claim(
-                        entity,
-                        spec.field_name,
-                        spec.value,
-                        user=user,
-                        claim_key=spec.claim_key,
-                        changeset=cs,
-                    )
-                )
-            if citation is not None:
-                try:
-                    template = CitationInstance.objects.select_related(
-                        "citation_source"
-                    ).get(pk=citation.citation_instance_id)
-                except CitationInstance.DoesNotExist:
-                    raise_form_error("Unknown citation instance.")
-
-                for claim in created_claims:
-                    instance = CitationInstance(
-                        citation_source=template.citation_source,
-                        claim=claim,
-                        locator=template.locator,
-                    )
-                    instance.full_clean()
-                    instance.save()
-
+            cs = ChangeSet.objects.create(user=user, action=action, note=note)
+            created_claims = _write_claims_in_changeset(
+                entity, specs, user=user, changeset=cs
+            )
+            _attach_citation(created_claims, citation)
             field_names = list({s.field_name for s in specs})
             resolve_after_mutation(entity, field_names=field_names)
     except ValidationError as exc:
         raise_form_error("; ".join(exc.messages))
     except IntegrityError as exc:
         raise_form_error(f"Unique constraint violation: {exc}")
+
+
+def execute_multi_entity_claims(
+    entries: list[tuple[object, list[ClaimSpec]]],
+    *,
+    user,
+    action: ChangeSetAction,
+    note: str = "",
+    citation: EditCitationInput | None = None,
+) -> ChangeSet:
+    """Write claims spanning multiple entities inside a single ChangeSet.
+
+    Used by cascading operations (e.g. soft-delete a Title + each of its
+    active MachineModels) where the unit of work must appear as one action
+    in edit history and be inverted as one unit by Undo.
+
+    *entries* is a list of ``(entity, specs)`` pairs. One ChangeSet is created
+    with the given *action*; each entry's claims are asserted within that
+    changeset; the *citation* (if any) is attached to every created claim
+    across all entities; finally ``resolve_after_mutation`` is invoked per
+    entity for just the fields that entity touched.
+
+    Returns the created ChangeSet so callers can thread its id into the
+    response (Undo needs it).
+    """
+    try:
+        with transaction.atomic():
+            cs = ChangeSet.objects.create(user=user, action=action, note=note)
+            all_created: list = []
+            per_entity_fields: list[tuple[object, list[str]]] = []
+            for entity, specs in entries:
+                if not specs:
+                    continue
+                created = _write_claims_in_changeset(
+                    entity, specs, user=user, changeset=cs
+                )
+                all_created.extend(created)
+                per_entity_fields.append((entity, list({s.field_name for s in specs})))
+            _attach_citation(all_created, citation)
+            for entity, field_names in per_entity_fields:
+                resolve_after_mutation(entity, field_names=field_names)
+    except ValidationError as exc:
+        raise_form_error("; ".join(exc.messages))
+    except IntegrityError as exc:
+        raise_form_error(f"Unique constraint violation: {exc}")
+    return cs

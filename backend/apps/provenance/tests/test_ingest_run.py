@@ -5,7 +5,8 @@ from django.utils import timezone
 import pytest
 
 from apps.catalog.models import Manufacturer
-from apps.provenance.models import ChangeSet, Claim, IngestRun, Source
+from apps.provenance.models import Claim, IngestRun, Source
+from apps.provenance.test_factories import ingest_changeset, user_changeset
 
 
 @pytest.fixture
@@ -120,7 +121,7 @@ class TestChangeSetIngestRunFK:
             source=source,
             input_fingerprint="sha256:abc",
         )
-        cs = ChangeSet.objects.create(ingest_run=run)
+        cs = ingest_changeset(run)
         assert cs.ingest_run == run
         assert run.changesets.count() == 1
 
@@ -128,7 +129,7 @@ class TestChangeSetIngestRunFK:
         from django.contrib.auth import get_user_model
 
         user = get_user_model().objects.create(username="editor")
-        cs = ChangeSet.objects.create(user=user)
+        cs = user_changeset(user)
         assert cs.ingest_run is None
 
     def test_delete_run_blocked_by_changesets(self, source):
@@ -139,7 +140,7 @@ class TestChangeSetIngestRunFK:
             source=source,
             input_fingerprint="sha256:abc",
         )
-        ChangeSet.objects.create(ingest_run=run)
+        ingest_changeset(run)
         with pytest.raises(ProtectedError):
             run.delete()
 
@@ -149,7 +150,7 @@ class TestClaimRetractedByChangeset:
     def test_retracted_by_changeset_set(self, source, mfr):
         run = IngestRun.objects.create(source=source, input_fingerprint="sha256:abc")
         claim = Claim.objects.assert_claim(mfr, "name", "Williams", source=source)
-        cs = ChangeSet.objects.create(ingest_run=run)
+        cs = ingest_changeset(run)
         claim.retracted_by_changeset = cs
         claim.is_active = False
         claim.save()
@@ -169,7 +170,7 @@ class TestClaimRetractedByChangeset:
 
         run = IngestRun.objects.create(source=source, input_fingerprint="sha256:ret")
         claim = Claim.objects.assert_claim(mfr, "name", "Williams", source=source)
-        cs = ChangeSet.objects.create(ingest_run=run)
+        cs = ingest_changeset(run)
         claim.retracted_by_changeset = cs
         claim.is_active = False
         claim.save()

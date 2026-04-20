@@ -5,7 +5,7 @@ This document describes the catalog domain model — the entities and relationsh
 ```mermaid
 erDiagram
     Franchise ||--o{ Title : groups
-    Series }o--o{ Title : groups
+    Series ||--o{ Title : groups
     Title ||--o{ Model : contains
 
     Model ||--o{ Model : variant_of
@@ -85,7 +85,7 @@ A **conversion** is a Model that reuses the physical cabinet of another machine 
 
 - **Franchise**: groups Titles related by intellectual property, regardless of manufacturer. The _Star Trek_ Franchise spans Titles produced by Bally, Data East, Williams, and Stern across different eras.
 - **Series**: groups Titles that share a design lineage by the same creative team. The _Black Knight_ Series spans Williams and Stern. Steve Ritchie is credited with Design on the Series.
-- Series is many-to-many with Title (a Title could theoretically belong to more than one Series, though rare in practice).
+- A Title belongs to at most one Series; a Series can group many Titles.
 - People can be credited on a Series via the Credit entity.
 
 Most Titles do not belong to any Franchise or Series.

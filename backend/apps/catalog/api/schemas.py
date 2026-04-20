@@ -73,6 +73,86 @@ class ModelClaimPatchSchema(Schema):
     citation: EditCitationInput | None = None
 
 
+class ModelCreateSchema(Schema):
+    name: str
+    slug: str
+    note: str = ""
+    citation: EditCitationInput | None = None
+
+
+class BlockingReferrerSchema(Schema):
+    """An active reference blocking a soft-delete.
+
+    Shared across all lifecycle-entity delete endpoints (Title, Model, …).
+    The walker in :mod:`apps.catalog.api.soft_delete` produces these.
+    """
+
+    entity_type: str
+    slug: Optional[str] = None
+    name: str
+    relation: str
+    blocked_target_type: str
+    blocked_target_slug: Optional[str] = None
+
+
+class ModelDeleteSchema(Schema):
+    note: str = ""
+    citation: EditCitationInput | None = None
+
+
+class ModelRestoreSchema(Schema):
+    note: str = ""
+    citation: EditCitationInput | None = None
+
+
+class ModelDeletePreviewSchema(Schema):
+    model_name: str
+    model_slug: str
+    title_name: str
+    title_slug: str
+    changeset_count: int
+    blocked_by: list[BlockingReferrerSchema] = []
+
+
+class ModelDeleteResponseSchema(Schema):
+    changeset_id: int
+    affected_models: list[str]
+
+
+class PersonCreateSchema(Schema):
+    name: str
+    slug: str
+    note: str = ""
+    citation: EditCitationInput | None = None
+
+
+class PersonDeleteSchema(Schema):
+    note: str = ""
+    citation: EditCitationInput | None = None
+
+
+class PersonRestoreSchema(Schema):
+    note: str = ""
+    citation: EditCitationInput | None = None
+
+
+class PersonDeletePreviewSchema(Schema):
+    person_name: str
+    person_slug: str
+    changeset_count: int
+    # Count of Credits whose parent Model or Series is still active.
+    # When non-zero the UI refuses the delete (see people.py:delete_person);
+    # Credit rows are owned children of Model/Series so the generic
+    # soft-delete walker doesn't see them.
+    active_credit_count: int
+    blocked_by: list[BlockingReferrerSchema] = []
+
+
+class PersonDeleteResponseSchema(Schema):
+    changeset_id: int
+    affected_people: list[str]
+
+
 class EditOptionItem(Schema):
     slug: str
     label: str

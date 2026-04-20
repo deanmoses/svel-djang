@@ -1,20 +1,25 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'svelte/server';
-import Page from './+page.svelte';
+import Page from './people-detail.test-harness.svelte';
 import { load } from './+layout.server';
 
 const MOCK_DATA = {
 	name: 'Pat Lawlor',
 	slug: 'pat-lawlor',
-	description: { text: '', html: '', citations: [], attribution: null },
-	birth_year: null,
+	description: {
+		text: 'Pinball designer.',
+		html: '<p>Pinball designer.</p>',
+		citations: [],
+		attribution: null
+	},
+	birth_year: 1951,
 	birth_month: null,
 	birth_day: null,
 	death_year: null,
 	death_month: null,
 	death_day: null,
 	birth_place: null,
-	nationality: null,
+	nationality: 'American',
 	photo_url: null,
 	titles: [
 		{
@@ -70,6 +75,8 @@ describe('people detail SSR route', () => {
 			}
 		});
 
-		expect(body).toContain('Medieval Madness');
+		expect(body).toContain('Bio');
+		expect(body).toContain('Details');
+		expect(body).toContain('Credits (1)');
 	});
 });

@@ -1,23 +1,25 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import { detachMedia, setPrimary } from '$lib/api/media-api';
+	import { MEDIA_CATEGORIES } from '$lib/api/catalog-meta';
 	import type { components } from '$lib/api/schema';
 	import MediaUploadZone from '$lib/components/media/MediaUploadZone.svelte';
 	import MediaGrid from '$lib/components/media/MediaGrid.svelte';
 
 	type UploadedMedia = components['schemas']['UploadedMediaSchema'];
+	type MediaEntityKey = keyof typeof MEDIA_CATEGORIES;
 
 	let {
 		entityType,
 		slug,
-		media,
-		categories
+		media
 	}: {
-		entityType: string;
+		entityType: MediaEntityKey;
 		slug: string;
 		media: UploadedMedia[];
-		categories: readonly string[];
 	} = $props();
+
+	const categories = $derived(MEDIA_CATEGORIES[entityType]);
 
 	let actionError = $state('');
 
@@ -52,7 +54,7 @@
 		<p class="action-error">{actionError}</p>
 	{/if}
 
-	<MediaUploadZone {entityType} {slug} {categories} onuploaded={handleUploaded} />
+	<MediaUploadZone {entityType} {slug} onuploaded={handleUploaded} />
 
 	{#if media.length > 0}
 		<div class="media-grid-section">

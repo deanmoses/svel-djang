@@ -12,7 +12,6 @@ const MOCK_MODEL = {
 		slug: 'williams-electronics'
 	},
 	title: { name: 'Medieval Madness', slug: 'medieval-madness' },
-	title_description: { text: '', html: '', citations: [], attribution: null },
 	description: { text: '', html: '', citations: [], attribution: null },
 	technology_generation: null,
 	technology_subgeneration: null,
@@ -48,7 +47,7 @@ const MOCK_MODEL = {
 	abbreviations: [],
 	extra_data: {},
 	franchise: null,
-	series: [],
+	series: null,
 	title_models: [],
 	credits: [
 		{

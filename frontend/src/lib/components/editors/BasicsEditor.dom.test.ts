@@ -26,6 +26,10 @@ const EDIT_OPTIONS = {
 		corporate_entities: [
 			{ slug: 'williams-electronics', label: 'Williams Electronics' },
 			{ slug: 'stern-pinball-inc', label: 'Stern Pinball, Inc.' }
+		],
+		titles: [
+			{ slug: 'medieval-madness', label: 'Medieval Madness' },
+			{ slug: 'attack-from-mars', label: 'Attack from Mars' }
 		]
 	}
 };
@@ -37,12 +41,10 @@ const FIELD_CONSTRAINTS = {
 };
 
 const INITIAL_MODEL = {
-	name: 'Medieval Madness',
-	slug: 'medieval-madness',
 	year: 1997,
 	month: 6,
-	corporate_entity: { slug: 'williams-electronics' },
-	abbreviations: ['MM']
+	title: { slug: 'medieval-madness' },
+	corporate_entity: { slug: 'williams-electronics' }
 };
 
 function mockGetResponses() {
@@ -61,10 +63,10 @@ describe('BasicsEditor dirty-state contract', () => {
 		mockGetResponses();
 	});
 
-	it('reports clean state initially and dirty state after editing', async () => {
+	it('reports clean state initially and dirty after editing year', async () => {
 		const user = userEvent.setup();
 		render(BasicsEditorFixture, {
-			props: { initialModel: INITIAL_MODEL }
+			props: { initialData: INITIAL_MODEL }
 		});
 
 		expect(screen.getByTestId('dirty-callback')).toHaveTextContent('false');
@@ -72,12 +74,78 @@ describe('BasicsEditor dirty-state contract', () => {
 		await user.click(screen.getByRole('button', { name: 'Check dirty' }));
 		expect(screen.getByTestId('dirty-handle')).toHaveTextContent('false');
 
-		await user.clear(screen.getByLabelText('Name'));
-		await user.type(screen.getByLabelText('Name'), 'Medieval Madness Remake');
+		const yearInput = screen.getByLabelText('Year');
+		await user.clear(yearInput);
+		await user.type(yearInput, '1998');
 
 		expect(screen.getByTestId('dirty-callback')).toHaveTextContent('true');
 
 		await user.click(screen.getByRole('button', { name: 'Check dirty' }));
 		expect(screen.getByTestId('dirty-handle')).toHaveTextContent('true');
+	});
+
+	it('changing Title marks dirty and PATCHes only the title slug', async () => {
+		const user = userEvent.setup();
+		PATCH.mockResolvedValue({ data: {}, error: undefined });
+		invalidateAll.mockResolvedValue(undefined);
+		render(BasicsEditorFixture, {
+			props: { initialData: INITIAL_MODEL }
+		});
+
+		await user.click(screen.getByRole('combobox', { name: 'Title' }));
+		await user.click(await screen.findByRole('option', { name: 'Attack from Mars' }));
+
+		expect(screen.getByTestId('dirty-callback')).toHaveTextContent('true');
+
+		await user.click(screen.getByRole('button', { name: 'Save' }));
+
+		expect(PATCH).toHaveBeenCalledOnce();
+		expect(PATCH).toHaveBeenCalledWith('/api/models/{slug}/claims/', {
+			params: { path: { slug: 'medieval-madness' } },
+			body: { fields: { title: 'attack-from-mars' }, note: '' }
+		});
+	});
+
+	it('PATCHes only the changed year', async () => {
+		const user = userEvent.setup();
+		PATCH.mockResolvedValue({ data: {}, error: undefined });
+		invalidateAll.mockResolvedValue(undefined);
+		render(BasicsEditorFixture, {
+			props: { initialData: INITIAL_MODEL }
+		});
+
+		const yearInput = screen.getByLabelText('Year');
+		await user.clear(yearInput);
+		await user.type(yearInput, '1998');
+
+		await user.click(screen.getByRole('button', { name: 'Save' }));
+
+		expect(PATCH).toHaveBeenCalledOnce();
+		expect(PATCH).toHaveBeenCalledWith('/api/models/{slug}/claims/', {
+			params: { path: { slug: 'medieval-madness' } },
+			body: { fields: { year: 1998 }, note: '' }
+		});
+	});
+});
+
+describe('BasicsEditor slim mode', () => {
+	beforeEach(() => {
+		GET.mockReset();
+		PATCH.mockReset();
+		invalidateAll.mockReset();
+		mockGetResponses();
+	});
+
+	it('hides the Title picker when slim', () => {
+		render(BasicsEditorFixture, {
+			props: { initialData: INITIAL_MODEL, slim: true }
+		});
+
+		expect(screen.queryByRole('combobox', { name: 'Title' })).toBeNull();
+
+		// The kept fields are still rendered.
+		expect(screen.getByRole('combobox', { name: 'Manufacturer' })).toBeInTheDocument();
+		expect(screen.getByLabelText('Year')).toBeInTheDocument();
+		expect(screen.getByLabelText('Month')).toBeInTheDocument();
 	});
 });

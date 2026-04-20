@@ -5,6 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from apps.catalog.models import MachineModel, Manufacturer
 from apps.provenance.models import Claim, Source
+from apps.catalog.tests.conftest import make_machine_model
 
 
 @pytest.fixture
@@ -28,16 +29,14 @@ def manufacturer(db):
 
 @pytest.fixture
 def pm1(db):
-    return MachineModel.objects.create(
+    return make_machine_model(
         name="Medieval Madness", slug="medieval-madness", year=1997
     )
 
 
 @pytest.fixture
 def pm2(db):
-    return MachineModel.objects.create(
-        name="Monster Bash", slug="monster-bash", year=1998
-    )
+    return make_machine_model(name="Monster Bash", slug="monster-bash", year=1998)
 
 
 @pytest.fixture

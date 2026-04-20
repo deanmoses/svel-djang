@@ -9,8 +9,8 @@ import pytest
 from django.contrib.auth.models import User
 from django.test import Client
 
-from apps.catalog.models import MachineModel
 from apps.media.models import MediaAsset, MediaRendition
+from apps.catalog.tests.conftest import make_machine_model
 
 # All upload tests use InMemoryStorage — no filesystem, no S3.
 _TEST_STORAGE = {
@@ -84,7 +84,7 @@ def client(user):
 
 @pytest.fixture
 def machine_model(db):
-    return MachineModel.objects.create(name="Test Machine", slug="test-machine")
+    return make_machine_model(name="Test Machine", slug="test-machine")
 
 
 def _post_upload(client, machine_model, file=None, **extra):
@@ -268,7 +268,7 @@ class TestUploadValidation:
     def test_unknown_entity_type(self, client, machine_model):
         file = _create_test_image()
         resp = _post_upload(client, machine_model, file=file, entity_type="spaceship")
-        assert resp.status_code == 400
+        assert resp.status_code == 404
         assert "unknown entity_type" in resp.json()["detail"].lower()
 
     def test_entity_type_not_media_supported(self, client, machine_model):

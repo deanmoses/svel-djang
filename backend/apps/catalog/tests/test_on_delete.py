@@ -23,7 +23,6 @@ from apps.catalog.models import (
     GameFormat,
     GameplayFeature,
     Location,
-    MachineModel,
     MachineModelGameplayFeature,
     MachineModelRewardType,
     MachineModelTag,
@@ -31,6 +30,7 @@ from apps.catalog.models import (
     Manufacturer,
     Person,
     RewardType,
+    Series,
     System,
     Tag,
     TechnologyGeneration,
@@ -38,6 +38,7 @@ from apps.catalog.models import (
     Theme,
     Title,
 )
+from apps.catalog.tests.conftest import make_machine_model
 
 
 # ---------------------------------------------------------------------------
@@ -97,8 +98,18 @@ def franchise(db):
 
 
 @pytest.fixture
-def title(db, franchise):
-    return Title.objects.create(name="Star Wars", slug="star-wars", franchise=franchise)
+def series(db):
+    return Series.objects.create(name="Classic Line", slug="classic-line")
+
+
+@pytest.fixture
+def title(db, franchise, series):
+    return Title.objects.create(
+        name="Star Wars",
+        slug="star-wars",
+        franchise=franchise,
+        series=series,
+    )
 
 
 @pytest.fixture
@@ -151,7 +162,7 @@ def machine(
     game_format,
     system,
 ):
-    return MachineModel.objects.create(
+    return make_machine_model(
         name="Medieval Madness",
         slug="medieval-madness",
         corporate_entity=corp,
@@ -215,6 +226,10 @@ class TestProtectBlocksDeletion:
         with pytest.raises(ProtectedError):
             franchise.delete()
 
+    def test_series_protected(self, title, series):
+        with pytest.raises(ProtectedError):
+            series.delete()
+
     def test_manufacturer_protected_by_corporate_entity(self, corp, mfr):
         with pytest.raises(ProtectedError):
             mfr.delete()
@@ -224,15 +239,13 @@ class TestProtectBlocksDeletion:
             mfr.delete()
 
     def test_variant_of_protected(self, machine):
-        variant = MachineModel.objects.create(
-            name="MM LE", slug="mm-le", variant_of=machine
-        )
+        variant = make_machine_model(name="MM LE", slug="mm-le", variant_of=machine)
         with pytest.raises(ProtectedError):
             machine.delete()
         variant.delete()  # cleanup reference first
 
     def test_converted_from_protected(self, machine):
-        conversion = MachineModel.objects.create(
+        conversion = make_machine_model(
             name="MM Retheme", slug="mm-retheme", converted_from=machine
         )
         with pytest.raises(ProtectedError):
@@ -240,7 +253,7 @@ class TestProtectBlocksDeletion:
         conversion.delete()
 
     def test_remake_of_protected(self, machine):
-        remake = MachineModel.objects.create(
+        remake = make_machine_model(
             name="MM Remake", slug="mm-remake", remake_of=machine
         )
         with pytest.raises(ProtectedError):

@@ -36,9 +36,9 @@
 	const switcherItems = [
 		{ key: 'overview', label: 'Overview', onclick: () => (lastSwitched = 'overview') },
 		{
-			key: 'specifications',
-			label: 'Specifications',
-			onclick: () => (lastSwitched = 'specifications')
+			key: 'technology',
+			label: 'Technology',
+			onclick: () => (lastSwitched = 'technology')
 		}
 	];
 </script>

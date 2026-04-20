@@ -7,8 +7,8 @@ from django.core.validators import MinValueValidator
 from django.db import models
 
 from apps.core.models import (
+    CatalogModel,
     EntityStatusMixin,
-    LinkableModel,
     MarkdownField,
     SluggedModel,
     TimeStampedModel,
@@ -24,18 +24,24 @@ __all__ = ["Title", "TitleAbbreviation"]
 EXTERNAL_ID_MIN = 1
 
 
-class Title(EntityStatusMixin, SluggedModel, LinkableModel, TimeStampedModel):
+class Title(CatalogModel, EntityStatusMixin, SluggedModel, TimeStampedModel):
     """The canonical identity of a pinball game, independent of edition or variant.
 
     OPDB calls this a "group" in its JSON, but we use "Title" as it is the
     natural pinball-world term (e.g., "Medieval Madness" spans the 1997
-    original, the 2015 remake, and LE/SE variants). Title fields (name, description, franchise) and
-    abbreviations are resolved from claims, just like MachineModel and
-    Manufacturer.
+    original, the 2015 remake, and LE/SE variants). All fields are resolved
+    from claims, just like MachineModel and Manufacturer.
     """
 
-    link_url_pattern = "/titles/{slug}"
+    entity_type = "title"
+    entity_type_plural = "titles"
     link_sort_order = 10
+
+    # A user-driven soft-delete of a Title cascades to its active MachineModels
+    # (each gets a ``status=deleted`` claim in the same ChangeSet). The DB FK
+    # from MachineModel.title is PROTECT, which blocks hard deletion; the
+    # cascade here is an application-layer rule over resolved ``status``.
+    soft_delete_cascade_relations = ("machine_models",)
 
     opdb_id = models.CharField(
         max_length=50,
@@ -51,6 +57,13 @@ class Title(EntityStatusMixin, SluggedModel, LinkableModel, TimeStampedModel):
     description = MarkdownField(blank=True)
     franchise = models.ForeignKey(
         "Franchise",
+        on_delete=models.PROTECT,
+        related_name="titles",
+        null=True,
+        blank=True,
+    )
+    series = models.ForeignKey(
+        "Series",
         on_delete=models.PROTECT,
         related_name="titles",
         null=True,

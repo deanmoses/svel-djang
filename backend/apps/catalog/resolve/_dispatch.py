@@ -67,7 +67,7 @@ def _get_custom_dispatch() -> dict[str, tuple[type, str, str]]:
     """
     global _custom_dispatch  # noqa: PLW0603
     if _custom_dispatch is None:
-        from ..models import CorporateEntity, Series, Title
+        from ..models import CorporateEntity, Title
 
         _custom_dispatch = {
             "abbreviation": (Title, "resolve_all_title_abbreviations", "model_ids"),
@@ -76,7 +76,6 @@ def _get_custom_dispatch() -> dict[str, tuple[type, str, str]]:
                 "resolve_all_corporate_entity_locations",
                 "entity_ids",
             ),
-            "series_title": (Series, "resolve_all_series_titles", "model_ids"),
         }
     return _custom_dispatch
 
@@ -169,7 +168,7 @@ def _resolve_non_machine_model(
             if model is entity_type:
                 _resolve_parents(model, claim_field_prefix=prefix)
 
-    # --- Custom resolvers (abbreviation, location, series_title) ---
+    # --- Custom resolvers (abbreviation, location) ---
     custom_dispatch = _get_custom_dispatch()
     if rel_fields is not None:
         for fn in rel_fields:

@@ -6,6 +6,6 @@
 
 <EntityProvenance
 	sources={data.profile.sources}
-	entityType="displaysubtype"
+	entityType="display-subtype"
 	entitySlug={data.profile.slug}
 />

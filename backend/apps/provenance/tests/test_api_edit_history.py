@@ -3,8 +3,8 @@
 import pytest
 from django.contrib.auth import get_user_model
 
-from apps.catalog.models import MachineModel
 from apps.provenance.models import Claim, Source
+from apps.catalog.tests.conftest import make_machine_model
 
 User = get_user_model()
 
@@ -29,9 +29,7 @@ def source(db):
 
 @pytest.fixture
 def pm(db, _bootstrap_source):
-    pm = MachineModel.objects.create(
-        name="Medieval Madness", slug="medieval-madness", year=1997
-    )
+    pm = make_machine_model(name="Medieval Madness", slug="medieval-madness", year=1997)
     Claim.objects.assert_claim(pm, "name", "Medieval Madness", source=_bootstrap_source)
     return pm
 
@@ -193,6 +191,6 @@ class TestEditHistoryEntityTypeGuard:
         assert resp.status_code == 404
 
     def test_non_linkable_entity_type_returns_404(self, client):
-        """Models without link_url_pattern (e.g. Location) should be rejected."""
+        """Models that aren't LinkableModel subclasses (e.g. Location) should be rejected."""
         resp = client.get("/api/edit-history/location/some-slug/")
         assert resp.status_code == 404

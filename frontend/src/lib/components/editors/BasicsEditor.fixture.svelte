@@ -2,20 +2,20 @@
 	import BasicsEditor from './BasicsEditor.svelte';
 
 	type BasicsModel = {
-		name: string;
-		slug: string;
 		year?: number | null;
 		month?: number | null;
+		title?: { slug: string } | null;
 		corporate_entity?: { slug: string } | null;
-		abbreviations: string[];
 	};
 
 	let {
-		initialModel,
-		slug = 'medieval-madness'
+		initialData,
+		slug = 'medieval-madness',
+		slim = false
 	}: {
-		initialModel: BasicsModel;
+		initialData: BasicsModel;
 		slug?: string;
+		slim?: boolean;
 	} = $props();
 
 	let dirtyFromCallback = $state(false);
@@ -33,8 +33,9 @@
 
 <BasicsEditor
 	bind:this={editorRef}
-	{initialModel}
+	{initialData}
 	{slug}
+	{slim}
 	onsaved={() => savedCount++}
 	onerror={(message) => (lastError = message)}
 	ondirtychange={(dirty) => (dirtyFromCallback = dirty)}

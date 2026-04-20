@@ -6,8 +6,8 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from apps.core.models import (
+    CatalogModel,
     EntityStatusMixin,
-    LinkableModel,
     MarkdownField,
     SluggedModel,
     TimeStampedModel,
@@ -20,13 +20,14 @@ from apps.core.validators import validate_no_mojibake
 __all__ = ["Franchise", "Series"]
 
 
-class Franchise(EntityStatusMixin, SluggedModel, LinkableModel, TimeStampedModel):
+class Franchise(CatalogModel, EntityStatusMixin, SluggedModel, TimeStampedModel):
     """An IP grouping that spans manufacturers and eras.
 
     e.g., Indiana Jones, Star Trek. Most Titles do not belong to a Franchise.
     """
 
-    link_url_pattern = "/franchises/{slug}"
+    entity_type = "franchise"
+    entity_type_plural = "franchises"
 
     name = models.CharField(
         max_length=200, validators=[validate_no_mojibake], unique=True
@@ -43,7 +44,7 @@ class Franchise(EntityStatusMixin, SluggedModel, LinkableModel, TimeStampedModel
         return self.name
 
 
-class Series(EntityStatusMixin, SluggedModel, LinkableModel, TimeStampedModel):
+class Series(CatalogModel, EntityStatusMixin, SluggedModel, TimeStampedModel):
     """A manually-curated grouping of related Titles sharing a thematic lineage.
 
     e.g., the "Eight Ball" series spans Eight Ball, Eight Ball Deluxe, and
@@ -52,15 +53,13 @@ class Series(EntityStatusMixin, SluggedModel, LinkableModel, TimeStampedModel):
     maintained by curators via the admin or seed data.
     """
 
-    link_url_pattern = "/series/{slug}"
+    entity_type = "series"
+    entity_type_plural = "series"
 
-    name = models.CharField(max_length=200, validators=[validate_no_mojibake])
-    description = MarkdownField(blank=True)
-    titles = models.ManyToManyField(
-        "Title",
-        blank=True,
-        related_name="series",
+    name = models.CharField(
+        max_length=200, validators=[validate_no_mojibake], unique=True
     )
+    description = MarkdownField(blank=True)
 
     claims = GenericRelation("provenance.Claim")
 

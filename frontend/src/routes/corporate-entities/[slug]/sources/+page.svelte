@@ -6,6 +6,6 @@
 
 <EntityProvenance
 	sources={data.corporateEntity.sources}
-	entityType="corporateentity"
+	entityType="corporate-entity"
 	entitySlug={data.corporateEntity.slug}
 />

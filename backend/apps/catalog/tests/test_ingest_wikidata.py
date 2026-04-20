@@ -6,6 +6,7 @@ from django.core.management import call_command
 from apps.catalog.ingestion.wikidata_sparql import parse_wikidata_date
 from apps.catalog.models import Credit, CreditRole, MachineModel, Person
 from apps.provenance.models import Claim, Source
+from apps.catalog.tests.conftest import make_machine_model
 
 FIXTURES = "apps/catalog/tests/fixtures"
 SAMPLE = f"{FIXTURES}/wikidata_sample.json"
@@ -22,10 +23,8 @@ def _seed_db(db, credit_roles):
     # Steve Ritchie exists and has credits on machines whose titles overlap
     # with the Wikidata fixture ("Black Knight", "Terminator 2: Judgment Day").
     steve = Person.objects.create(name="Steve Ritchie", slug="steve-ritchie")
-    bk = MachineModel.objects.create(
-        name="Black Knight", slug="black-knight", year=1980
-    )
-    t2 = MachineModel.objects.create(
+    bk = make_machine_model(name="Black Knight", slug="black-knight", year=1980)
+    t2 = make_machine_model(
         name="Terminator 2: Judgment Day", slug="terminator-2-judgment-day", year=1991
     )
     role = CreditRole.objects.get(slug="design")

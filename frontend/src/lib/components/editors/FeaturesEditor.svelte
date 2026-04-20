@@ -3,8 +3,9 @@
 	import SearchableSelect from '$lib/components/SearchableSelect.svelte';
 	import Fieldset from '$lib/components/form/Fieldset.svelte';
 	import NumberField from '$lib/components/form/NumberField.svelte';
-	import { slugSetChanged } from '$lib/edit-helpers';
-	import type { EditorDirtyChange } from './editor-contract';
+	import { diffScalarFields, slugSetChanged } from '$lib/edit-helpers';
+	import { fetchFieldConstraints, fc, type FieldConstraints } from '$lib/field-constraints';
+	import type { SectionEditorProps } from './editor-contract';
 	import {
 		EMPTY_EDIT_OPTIONS,
 		fetchModelEditOptions,
@@ -20,34 +21,55 @@
 	type GameplayFeatureRef = { slug: string; name?: string; count?: number | null };
 
 	type FeaturesModel = {
-		themes: { slug: string }[];
-		tags: { slug: string }[];
+		game_format?: { slug: string } | null;
+		cabinet?: { slug: string } | null;
 		reward_types: { slug: string }[];
+		tags: { slug: string }[];
+		themes: { slug: string }[];
+		production_quantity: string;
+		player_count?: number | null;
+		flipper_count?: number | null;
 		gameplay_features: GameplayFeatureRef[];
 	};
 
 	let {
-		initialModel,
+		initialData,
 		slug,
 		onsaved,
 		onerror,
 		ondirtychange = () => {}
-	}: {
-		initialModel: FeaturesModel;
-		slug: string;
-		onsaved: () => void;
-		onerror: (message: string) => void;
-		ondirtychange?: EditorDirtyChange;
-	} = $props();
+	}: SectionEditorProps<FeaturesModel> = $props();
+
+	type FeaturesFormFields = {
+		game_format: string;
+		cabinet: string;
+		production_quantity: string | number;
+		player_count: string | number;
+		flipper_count: string | number;
+	};
+
+	function extractFields(m: FeaturesModel): FeaturesFormFields {
+		return {
+			game_format: m.game_format?.slug ?? '',
+			cabinet: m.cabinet?.slug ?? '',
+			production_quantity: m.production_quantity ?? '',
+			player_count: m.player_count ?? '',
+			flipper_count: m.flipper_count ?? ''
+		};
+	}
+
+	// untrack: intentional one-time capture; component re-mounts when modal reopens
+	const original = untrack(() => extractFields(initialData));
+	let fields = $state<FeaturesFormFields>({ ...original });
 
 	// Simple M2M fields — stored as slug arrays
-	const originalThemes = untrack(() => initialModel.themes);
-	const originalTags = untrack(() => initialModel.tags);
-	const originalRewardTypes = untrack(() => initialModel.reward_types);
+	const originalThemes = untrack(() => initialData.themes);
+	const originalTags = untrack(() => initialData.tags);
+	const originalRewardTypes = untrack(() => initialData.reward_types);
 
-	let themes = $state<string[]>(untrack(() => initialModel.themes.map((t) => t.slug)));
-	let tags = $state<string[]>(untrack(() => initialModel.tags.map((t) => t.slug)));
-	let rewardTypes = $state<string[]>(untrack(() => initialModel.reward_types.map((t) => t.slug)));
+	let themes = $state<string[]>(untrack(() => initialData.themes.map((t) => t.slug)));
+	let tags = $state<string[]>(untrack(() => initialData.tags.map((t) => t.slug)));
+	let rewardTypes = $state<string[]>(untrack(() => initialData.reward_types.map((t) => t.slug)));
 
 	// Gameplay features — slug + optional count
 	type KeyedFeature = { key: number; slug: string; count: string | number };
@@ -57,11 +79,18 @@
 		return features.map((f) => ({ key: keyCounter++, slug: f.slug, count: f.count ?? '' }));
 	}
 
-	const originalFeatures = untrack(() => initialModel.gameplay_features);
-	let features = $state<KeyedFeature[]>(untrack(() => toKeyed(initialModel.gameplay_features)));
+	const originalFeatures = untrack(() => initialData.gameplay_features);
+	let features = $state<KeyedFeature[]>(untrack(() => toKeyed(initialData.gameplay_features)));
 
 	let fieldErrors = $state<FieldErrors>({});
 	let editOptions = $state<ModelEditOptions>(EMPTY_EDIT_OPTIONS);
+	let constraints = $state<FieldConstraints>({});
+
+	$effect(() => {
+		fetchFieldConstraints('model').then((c) => {
+			constraints = c;
+		});
+	});
 
 	$effect(() => {
 		fetchModelEditOptions().then((opts) => {
@@ -88,6 +117,7 @@
 
 	let dirty = $derived.by(
 		() =>
+			Object.keys(diffScalarFields(fields, original)).length > 0 ||
 			slugSetChanged(themes, originalThemes) ||
 			slugSetChanged(tags, originalTags) ||
 			slugSetChanged(rewardTypes, originalRewardTypes) ||
@@ -115,6 +145,7 @@
 			return;
 		}
 
+		const changed = diffScalarFields(fields, original);
 		const themesChanged = slugSetChanged(themes, originalThemes);
 		const tagsChanged = slugSetChanged(tags, originalTags);
 		const rewardTypesChanged = slugSetChanged(rewardTypes, originalRewardTypes);
@@ -126,6 +157,7 @@
 		}
 
 		const result: SaveResult = await saveModelClaims(slug, {
+			fields: Object.keys(changed).length > 0 ? changed : undefined,
 			themes: themesChanged ? themes : undefined,
 			tags: tagsChanged ? tags : undefined,
 			reward_types: rewardTypesChanged ? rewardTypes : undefined,
@@ -154,13 +186,31 @@
 <div class="features-editor">
 	<div class="features-grid">
 		<SearchableSelect
-			label="Themes"
-			options={editOptions.themes ?? []}
-			bind:selected={themes}
+			label="Game format"
+			options={editOptions.game_formats ?? []}
+			bind:selected={fields.game_format}
+			error={fieldErrors.game_format ?? ''}
+			allowZeroCount
+			showCounts={false}
+			placeholder="Search game formats..."
+		/>
+		<SearchableSelect
+			label="Cabinet"
+			options={editOptions.cabinets ?? []}
+			bind:selected={fields.cabinet}
+			error={fieldErrors.cabinet ?? ''}
+			allowZeroCount
+			showCounts={false}
+			placeholder="Search cabinets..."
+		/>
+		<SearchableSelect
+			label="Reward types"
+			options={editOptions.reward_types ?? []}
+			bind:selected={rewardTypes}
 			multi
 			allowZeroCount
 			showCounts={false}
-			placeholder="Search themes..."
+			placeholder="Search reward types..."
 		/>
 		<SearchableSelect
 			label="Tags"
@@ -172,13 +222,31 @@
 			placeholder="Search tags..."
 		/>
 		<SearchableSelect
-			label="Reward types"
-			options={editOptions.reward_types ?? []}
-			bind:selected={rewardTypes}
+			label="Themes"
+			options={editOptions.themes ?? []}
+			bind:selected={themes}
 			multi
 			allowZeroCount
 			showCounts={false}
-			placeholder="Search reward types..."
+			placeholder="Search themes..."
+		/>
+		<NumberField
+			label="Production quantity"
+			bind:value={fields.production_quantity}
+			error={fieldErrors.production_quantity ?? ''}
+			min={0}
+		/>
+		<NumberField
+			label="Players"
+			bind:value={fields.player_count}
+			error={fieldErrors.player_count ?? ''}
+			{...fc(constraints, 'player_count')}
+		/>
+		<NumberField
+			label="Flippers"
+			bind:value={fields.flipper_count}
+			error={fieldErrors.flipper_count ?? ''}
+			{...fc(constraints, 'flipper_count')}
 		/>
 	</div>
 

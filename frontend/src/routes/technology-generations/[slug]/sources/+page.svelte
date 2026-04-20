@@ -6,6 +6,6 @@
 
 <EntityProvenance
 	sources={data.profile.sources}
-	entityType="technologygeneration"
+	entityType="technology-generation"
 	entitySlug={data.profile.slug}
 />

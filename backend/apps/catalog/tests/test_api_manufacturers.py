@@ -1,11 +1,11 @@
 from apps.catalog.models import (
     CorporateEntity,
     CorporateEntityAlias,
-    MachineModel,
     Title,
 )
 
 from .conftest import SAMPLE_IMAGES
+from apps.catalog.tests.conftest import make_machine_model
 
 
 class TestManufacturersAPI:
@@ -67,13 +67,13 @@ class TestManufacturersAPI:
     def test_list_all_manufacturers_thumbnail_prefers_year(
         self, client, williams_entity, db
     ):
-        MachineModel.objects.create(
+        make_machine_model(
             name="No Year Game",
             slug="no-year-game",
             corporate_entity=williams_entity,
             extra_data={"opdb.images": SAMPLE_IMAGES},
         )
-        MachineModel.objects.create(
+        make_machine_model(
             name="Has Year Game",
             slug="has-year-game",
             corporate_entity=williams_entity,
@@ -110,17 +110,17 @@ class TestManufacturersAPI:
         t_old = Title.objects.create(name="Old Game", slug="old-game", opdb_id="T-old")
         t_mid = Title.objects.create(name="Mid Game", slug="mid-game", opdb_id="T-mid")
         t_new = Title.objects.create(name="New Game", slug="new-game", opdb_id="T-new")
-        MachineModel.objects.create(
+        make_machine_model(
             name="Old", slug="old", corporate_entity=entity2, title=t_old, year=1960
         )
-        MachineModel.objects.create(
+        make_machine_model(
             name="Mid",
             slug="mid",
             corporate_entity=williams_entity,
             title=t_mid,
             year=1995,
         )
-        MachineModel.objects.create(
+        make_machine_model(
             name="New",
             slug="new",
             corporate_entity=williams_entity,
@@ -138,7 +138,7 @@ class TestManufacturersAPI:
         CorporateEntityAlias.objects.create(
             corporate_entity=williams_entity, value="Williams Elektronik"
         )
-        MachineModel.objects.create(
+        make_machine_model(
             name="Test Game", slug="test-game", corporate_entity=williams_entity
         )
         resp = client.get("/api/manufacturers/all/")
@@ -155,13 +155,13 @@ class TestManufacturersAPI:
         t2 = Title.objects.create(
             name="Has Year Title", slug="has-year-title", opdb_id="T-hasyear"
         )
-        MachineModel.objects.create(
+        make_machine_model(
             name="No Year Game",
             slug="no-year-game",
             corporate_entity=williams_entity,
             title=t1,
         )
-        MachineModel.objects.create(
+        make_machine_model(
             name="Has Year Game",
             slug="has-year-game",
             corporate_entity=williams_entity,

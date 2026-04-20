@@ -142,7 +142,7 @@ describe('SectionEditorModal', () => {
 		await user.click(screen.getByText('Notes & Citations'));
 
 		// Type a note
-		const noteInput = screen.getByLabelText('Edit note');
+		const noteInput = screen.getByLabelText(/Edit note/);
 		await user.type(noteInput, 'Corrected per IPDB');
 
 		await user.click(screen.getByRole('button', { name: 'Save' }));
@@ -157,14 +157,14 @@ describe('SectionEditorModal', () => {
 		// Open, type a note, close without saving
 		await user.click(screen.getByRole('button', { name: 'Open editor' }));
 		await user.click(screen.getByText('Notes & Citations'));
-		const noteInput = screen.getByLabelText('Edit note');
+		const noteInput = screen.getByLabelText(/Edit note/);
 		await user.type(noteInput, 'some note');
 		await user.keyboard('{Escape}');
 
 		// Reopen — note should be empty
 		await user.click(screen.getByRole('button', { name: 'Open editor' }));
 		await user.click(screen.getByText('Notes & Citations'));
-		expect(screen.getByLabelText('Edit note')).toHaveValue('');
+		expect(screen.getByLabelText(/Edit note/)).toHaveValue('');
 	});
 
 	it('renders the section switcher in the modal header and switches sections', async () => {
@@ -175,9 +175,9 @@ describe('SectionEditorModal', () => {
 
 		await user.click(screen.getByRole('button', { name: 'Open editor' }));
 		await user.click(screen.getByRole('button', { name: 'Overview' }));
-		await user.click(screen.getByRole('menuitem', { name: 'Specifications' }));
+		await user.click(screen.getByRole('menuitem', { name: 'Technology' }));
 
-		expect(screen.getByTestId('last-switched')).toHaveTextContent('specifications');
+		expect(screen.getByTestId('last-switched')).toHaveTextContent('technology');
 	});
 
 	it('disables the section switcher when switcherDisabled is true', async () => {

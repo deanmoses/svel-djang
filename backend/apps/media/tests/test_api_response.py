@@ -11,6 +11,7 @@ from apps.catalog.api.helpers import _extract_image_attribution, _extract_image_
 from apps.catalog.models import MachineModel
 from apps.media.models import EntityMedia, MediaAsset
 from apps.media.storage import build_public_url, build_storage_key
+from apps.catalog.tests.conftest import make_machine_model
 
 User = get_user_model()
 
@@ -29,7 +30,7 @@ def user(db):
 
 @pytest.fixture
 def machine_model(db):
-    return MachineModel.objects.create(name="Test Machine", slug="test-machine")
+    return make_machine_model(name="Test Machine", slug="test-machine")
 
 
 @pytest.fixture

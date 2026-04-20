@@ -3,9 +3,10 @@
 import pytest
 
 from apps.catalog.claims import build_relationship_claim
-from apps.catalog.models import Credit, CreditRole, MachineModel, Person
+from apps.catalog.models import Credit, CreditRole, Person
 from apps.catalog.resolve import resolve_all_credits
 from apps.provenance.models import Claim, Source
+from apps.catalog.tests.conftest import make_machine_model
 
 
 @pytest.fixture
@@ -34,7 +35,7 @@ def person2(db):
 
 @pytest.fixture
 def machine(db):
-    return MachineModel.objects.create(name="Medieval Madness", slug="medieval-madness")
+    return make_machine_model(name="Medieval Madness", slug="medieval-madness")
 
 
 def _assert_credit_claim(machine, person_pk, role_slug, source):

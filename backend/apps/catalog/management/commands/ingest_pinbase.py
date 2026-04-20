@@ -15,7 +15,6 @@ from __future__ import annotations
 import json
 import logging
 import time
-from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -25,6 +24,7 @@ from django.db import transaction
 
 from apps.catalog.claims import build_relationship_claim, make_authoritative_scope
 from apps.catalog.ingestion.bulk_utils import generate_unique_slug
+from apps.core.models import CatalogModel, LinkableModel
 from apps.core.validators import bulk_create_validated
 from apps.catalog.models import (
     Cabinet,
@@ -57,7 +57,6 @@ from apps.catalog.resolve import (
     resolve_all_gameplay_features,
     resolve_all_location_aliases,
     resolve_all_reward_types,
-    resolve_all_series_titles,
     resolve_all_tags,
     resolve_all_themes,
     resolve_all_title_abbreviations,
@@ -104,32 +103,15 @@ def _normalize_credit_role(raw: str) -> str:
     return _CREDIT_ROLE_MAP.get(lower, lower)
 
 
-# Taxonomy registry: (json_filename, model_class, has_display_order, parent_config)
-# parent_config: (model_fk_field, parent_model, json_fk_key) or None
-# Maps model class → source slug suffix for per-entity AI description sources.
+# Model class → source slug suffix for per-entity AI description sources.
+# Derived from CatalogModel subclasses so new catalog entities are picked up
+# automatically. Location is not a CatalogModel but has its own AI source.
 AI_DESC_SOURCE_REGISTRY: list[tuple[type, str]] = [
-    (MachineModel, "model"),
-    (Title, "title"),
-    (Manufacturer, "manufacturer"),
-    (CorporateEntity, "corporate-entity"),
-    (Person, "person"),
-    (GameplayFeature, "gameplay-feature"),
-    (Theme, "theme"),
-    (Franchise, "franchise"),
-    (Series, "series"),
-    (Cabinet, "cabinet"),
-    (CreditRole, "credit-role"),
-    (DisplayType, "display-type"),
-    (DisplaySubtype, "display-subtype"),
-    (GameFormat, "game-format"),
-    (RewardType, "reward-type"),
-    (System, "system"),
-    (Tag, "tag"),
-    (TechnologyGeneration, "technology-generation"),
-    (TechnologySubgeneration, "technology-subgeneration"),
-    (Location, "location"),
-]
+    (cls, cls.entity_type) for cls in CatalogModel.__subclasses__()
+] + [(Location, "location")]
 
+# Taxonomy ingest registry: (json_filename, model_class, has_display_order, parent_config)
+# parent_config: (model_fk_field, parent_model, json_fk_key) or None
 TAXONOMY_REGISTRY = [
     # Top-level (no parent FK) — order matters: parents before children.
     ("technology_generation.json", TechnologyGeneration, True, None),
@@ -170,7 +152,7 @@ def validate_cross_entity_wikilinks(export_dir: Path, stdout, stderr) -> None:
 
     linkable_models: dict[str, Any] = {}
     for model in apps.get_models():
-        if hasattr(model, "link_url_pattern") and hasattr(model, "slug"):
+        if issubclass(model, LinkableModel) and hasattr(model, "slug"):
             link_type = getattr(
                 model,
                 "link_type_name",
@@ -1539,7 +1521,6 @@ class Command(BaseCommand):
         # Pass 3 (assert): build and assert all claims against stable post-rename state.
         membership_set = 0
         pending_claims: list[Claim] = []
-        series_title_claims: dict[int, list[Claim]] = defaultdict(list)
         touched_ids: set[int] = set()
 
         for title, entry in collected:
@@ -1615,45 +1596,30 @@ class Command(BaseCommand):
                 if series is None:
                     logger.warning("Series slug %r not found — skipping", series_slug)
                 else:
-                    claim_key, value = build_relationship_claim(
-                        "series_title", {"title": title.pk}
-                    )
-                    series_title_claims[series.pk].append(
-                        Claim.for_object(
-                            series,
-                            field_name="series_title",
-                            claim_key=claim_key,
-                            value=value,
-                        )
+                    touched_ids.add(title.pk)
+                    pending_claims.append(
+                        Claim.for_object(title, field_name="series", value=series_slug)
                     )
                     membership_set += 1
 
-        # Assert title claims.
+        # Sweep franchise and series so removing the slug in a later
+        # pindata export retracts the stale claim.
         claim_stats: dict = {}
         if pending_claims:
-            claim_stats = self._assert_claims_split_descriptions(Title, pending_claims)
+            sweep_kwargs = {}
+            if touched_ids:
+                sweep_kwargs["sweep_field"] = ["franchise", "series"]
+                sweep_kwargs["authoritative_scope"] = make_authoritative_scope(
+                    Title, touched_ids
+                )
+            claim_stats = self._assert_claims_split_descriptions(
+                Title, pending_claims, **sweep_kwargs
+            )
 
         # Resolve touched titles.
         if touched_ids:
             resolve_all_entities(Title, object_ids=touched_ids)
             resolve_all_title_abbreviations(model_ids=touched_ids)
-
-        # Assert series_title claims and resolve.
-        # Scope covers ALL series in the DB (series_by_slug is fetched from
-        # Series.objects.all()), not just those referenced in this file.  This
-        # is intentional: a series with no titles in the current export must
-        # still have its previous claims swept so stale memberships are retracted.
-        all_series_pks = {s.pk for s in series_by_slug.values()}
-        if all_series_pks:
-            all_series_claims = [c for cs in series_title_claims.values() for c in cs]
-            scope = make_authoritative_scope(Series, all_series_pks)
-            Claim.objects.bulk_assert_claims(
-                self.pinbase_source,
-                all_series_claims,
-                sweep_field="series_title",
-                authoritative_scope=scope,
-            )
-            resolve_all_series_titles(model_ids=all_series_pks)
 
         self.stdout.write(
             f"  Titles: {titles_created} created, {membership_set} series memberships, "
@@ -1718,6 +1684,10 @@ class Command(BaseCommand):
             mm.slug: mm for mm in MachineModel.objects.all()
         }
 
+        # Titles are required at construction time (NOT NULL FK). Resolve each
+        # entry's title_slug against the Titles ingested in Phase 7.
+        titles_by_slug: dict[str, Title] = {t.slug: t for t in Title.objects.all()}
+
         # Pass 1: match or create MachineModels for every entry.
         new_models: list[MachineModel] = []
         models_needing_update: list[MachineModel] = []
@@ -1754,12 +1724,22 @@ class Command(BaseCommand):
                 entry_models.append(mm)
             else:
                 # Create new model.
+                title_slug = entry.get("title_slug")
+                title_obj = titles_by_slug.get(title_slug) if title_slug else None
+                if title_obj is None:
+                    raise CommandError(
+                        f"model.json entry slug={entry.get('slug')!r} "
+                        f"name={entry.get('name')!r}: "
+                        f"title_slug={title_slug!r} is missing or does not "
+                        f"match any existing Title."
+                    )
                 slug = slug or generate_unique_slug(
                     entry.get("name", ""), existing_slugs
                 )
                 mm = MachineModel(
                     name=entry.get("name", ""),
                     slug=slug,
+                    title=title_obj,
                     opdb_id=opdb_id,
                     ipdb_id=ipdb_id,
                 )

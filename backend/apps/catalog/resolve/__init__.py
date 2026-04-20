@@ -43,7 +43,6 @@ from ._relationships import (  # noqa: F401
     resolve_all_location_aliases,
     resolve_all_model_abbreviations,
     resolve_all_reward_types,
-    resolve_all_series_titles,
     resolve_all_tags,
     resolve_all_themes,
     resolve_all_title_abbreviations,
@@ -213,8 +212,6 @@ def resolve_machine_models(stdout=None) -> int:
         System,
     ]:
         resolve_all_entities(tax_model)
-    resolve_all_series_titles()
-    _status("Series titles resolved")
     resolve_all_entities(Theme)
     resolve_all_entities(GameplayFeature)
     _status("Taxonomy, themes, gameplay features resolved")

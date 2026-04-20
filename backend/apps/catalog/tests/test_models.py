@@ -9,11 +9,11 @@ from apps.catalog.models import (
     CreditRole,
     Manufacturer,
     Person,
-    MachineModel,
 )
 from apps.core.models import get_claim_fields
 from apps.core.validators import validate_no_mojibake
 from apps.provenance.models import Claim, Source
+from apps.catalog.tests.conftest import make_machine_model
 
 
 @pytest.fixture
@@ -44,7 +44,7 @@ def corporate_entity(db, manufacturer):
 
 @pytest.fixture
 def machine_model(db, corporate_entity):
-    return MachineModel.objects.create(
+    return make_machine_model(
         name="Medieval Madness",
         slug="medieval-madness",
         corporate_entity=corporate_entity,

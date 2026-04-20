@@ -87,7 +87,7 @@
 
 	/* Plain header (no image) */
 	header {
-		margin-bottom: var(--size-5);
+		margin-bottom: var(--size-2);
 	}
 
 	/* Hero banner with overlaid text */

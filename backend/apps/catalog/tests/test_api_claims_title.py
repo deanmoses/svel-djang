@@ -13,6 +13,7 @@ from apps.catalog.resolve import resolve_all_entities
 from apps.catalog.resolve._relationships import resolve_all_title_abbreviations
 from apps.citation.models import CitationSource
 from apps.provenance.models import ChangeSet, Claim, Source
+from apps.provenance.test_factories import user_changeset
 
 User = get_user_model()
 
@@ -260,7 +261,7 @@ class TestPatchTitleClaims:
             "description",
             "Template citation seed",
             user=user,
-            changeset=ChangeSet.objects.create(user=user, note="seed"),
+            changeset=user_changeset(user, note="seed"),
         )
         template_instance = citation_source.instances.create(
             claim=template_claim,

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import client from '$lib/api/client';
+	import type { CatalogEntityKey } from '$lib/api/catalog-meta';
 	import type { components } from '$lib/api/schema';
 	import UserBadge from './UserBadge.svelte';
 	import SmartDate from './SmartDate.svelte';
@@ -10,11 +11,11 @@
 
 	let {
 		sources,
-		entityType = '',
+		entityType,
 		entitySlug = ''
 	}: {
 		sources: Claim[];
-		entityType?: string;
+		entityType?: CatalogEntityKey;
 		entitySlug?: string;
 	} = $props();
 

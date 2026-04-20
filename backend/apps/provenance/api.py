@@ -9,12 +9,10 @@ from __future__ import annotations
 import re
 from typing import Optional
 
-from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from apps.core.entity_types import resolve_entity_type
 from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
@@ -23,6 +21,7 @@ from ninja.responses import Status
 from ninja.security import django_auth
 
 from apps.citation.models import CitationSource
+from apps.core.entity_types import get_linkable_model
 
 from .models import CitationInstance
 from .page_endpoints import pages_router
@@ -62,7 +61,8 @@ class ReviewClaimSchema(Schema):
     needs_review_notes: str
     created_at: str
     # Context about the subject (the entity this claim targets).
-    subject_type: str  # ContentType.model value, e.g. "manufacturer"
+    # Canonical hyphenated CatalogModel.entity_type, e.g. "manufacturer".
+    subject_type: str
     subject_name: str
     subject_slug: Optional[str] = None
     # Title that this claim created (for group claims).
@@ -146,7 +146,7 @@ def list_review_claims(request):
                 "value": claim.value,
                 "needs_review_notes": claim.needs_review_notes,
                 "created_at": claim.created_at.isoformat(),
-                "subject_type": claim.content_type.model,
+                "subject_type": claim.content_type.model_class().entity_type,
                 "subject_name": subject_name,
                 "subject_slug": subject_slug,
                 "title_slug": title_slug,
@@ -168,18 +168,14 @@ edit_history_router = Router(tags=["edit-history"])
 
 
 def _resolve_catalog_entity(entity_type: str, slug: str):
-    """Look up a catalog entity by content-type name and slug.
+    """Look up a catalog entity by canonical entity_type and slug.
 
     Returns the entity instance, or a ``Status(404, ...)`` response if the
     entity type is unknown or the slug doesn't exist.
     """
-    ct_name = resolve_entity_type(entity_type)
     try:
-        ct = ContentType.objects.get(app_label="catalog", model=ct_name)
-    except ContentType.DoesNotExist:
-        return Status(404, {"detail": f"Unknown entity type: {entity_type}"})
-    model_class = ct.model_class()
-    if not model_class or not hasattr(model_class, "link_url_pattern"):
+        model_class = get_linkable_model(entity_type)
+    except ValueError:
         return Status(404, {"detail": f"Unknown entity type: {entity_type}"})
     return get_object_or_404(model_class, slug=slug)
 
@@ -219,6 +215,38 @@ def revert_claim(request, entity_type: str, slug: str, data: RevertClaimSchema):
     except RevertError as exc:
         return Status(exc.status_code, {"detail": str(exc)})
     return {"ok": True}
+
+
+class UndoChangeSetSchema(Schema):
+    changeset_id: int
+    note: str = ""
+
+
+@edit_history_router.post(
+    "/undo-changeset/",
+    auth=django_auth,
+    response={200: dict, 403: dict, 404: dict, 422: dict},
+    tags=["private"],
+)
+def undo_changeset(request, data: UndoChangeSetSchema):
+    """Atomically invert a DELETE ChangeSet (restore a soft-deleted tree).
+
+    This powers the post-delete Undo toast. Scoped to delete ChangeSets
+    authored by the caller; other scenarios use per-claim revert.
+    """
+    from .models import ChangeSet
+    from .revert import UndoError, execute_undo_changeset
+
+    try:
+        changeset = ChangeSet.objects.get(pk=data.changeset_id)
+    except ChangeSet.DoesNotExist:
+        return Status(404, {"detail": "ChangeSet not found."})
+
+    try:
+        new_cs = execute_undo_changeset(changeset, user=request.user, note=data.note)
+    except UndoError as exc:
+        return Status(exc.status_code, {"detail": str(exc)})
+    return {"ok": True, "changeset_id": new_cs.pk}
 
 
 citation_instances_router = Router(tags=["citation-instances", "private"])

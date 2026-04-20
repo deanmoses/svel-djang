@@ -124,7 +124,7 @@ class ClaimManager(models.Manager):
         source: Source,
         pending_claims: list["Claim"],
         *,
-        sweep_field: str = "",
+        sweep_field: str | list[str] = "",
         authoritative_scope: set[tuple[int, int]] | None = None,
     ) -> dict[str, int]:
         """Bulk-assert claims for a source. Only writes what changed.
@@ -139,8 +139,9 @@ class ClaimManager(models.Manager):
         ``content_type_id``, ``object_id``, ``field_name``, ``claim_key``,
         ``value``, and ``citation`` set. The ``source`` FK is set here.
 
-        If ``sweep_field`` is provided, any active claims from this source with
-        that field_name that are *not* in ``pending_claims`` will be deactivated.
+        If ``sweep_field`` is provided (a single field name or a list), any
+        active claims from this source with one of those field_names that are
+        *not* in ``pending_claims`` will be deactivated.
         ``authoritative_scope`` is a set of ``(content_type_id, object_id)``
         tuples defining the full set of entities this source is authoritative
         for. If omitted, scope is derived from pending claims.
@@ -206,6 +207,9 @@ class ClaimManager(models.Manager):
         # 4. Sweep: deactivate stale relationship claims not in pending set.
         swept = 0
         if sweep_field:
+            sweep_fields = (
+                [sweep_field] if isinstance(sweep_field, str) else list(sweep_field)
+            )
             pending_keys = {
                 (c.content_type_id, c.object_id, c.claim_key) for c in deduped
             }
@@ -222,7 +226,7 @@ class ClaimManager(models.Manager):
             for ct_id, obj_ids in parent_groups.items():
                 for pk, c_ct_id, c_obj_id, c_ck in self.filter(
                     source=source,
-                    field_name=sweep_field,
+                    field_name__in=sweep_fields,
                     is_active=True,
                     content_type_id=ct_id,
                     object_id__in=obj_ids,

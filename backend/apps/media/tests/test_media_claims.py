@@ -14,6 +14,7 @@ from apps.catalog.claims import build_media_attachment_claim
 from apps.catalog.models import MachineModel
 from apps.media.models import EntityMedia, MediaAsset
 from apps.provenance.models import Claim, Source
+from apps.catalog.tests.conftest import make_machine_model
 
 User = get_user_model()
 
@@ -44,7 +45,7 @@ def high_source(db):
 
 @pytest.fixture
 def machine_model(db):
-    return MachineModel.objects.create(name="Test Machine", slug="test-machine")
+    return make_machine_model(name="Test Machine", slug="test-machine")
 
 
 @pytest.fixture

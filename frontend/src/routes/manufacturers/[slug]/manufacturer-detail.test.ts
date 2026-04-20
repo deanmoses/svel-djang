@@ -1,18 +1,44 @@
 import { render } from 'svelte/server';
 import { describe, expect, it, vi } from 'vitest';
-import Page from './+page.svelte';
+import Page from './manufacturer-detail.test-harness.svelte';
 import { load } from './+layout.server';
 
 const MOCK_MANUFACTURER = {
 	name: 'Williams',
 	slug: 'williams',
-	description: { text: '', html: '', citations: [], attribution: null },
+	description: {
+		text: 'Historic manufacturer [1].',
+		html: '<p>Historic manufacturer.</p>',
+		citations: [
+			{
+				id: 10,
+				index: 1,
+				source_name: 'Pinball Sourcebook',
+				source_type: 'book',
+				author: 'Jane Example',
+				year: 1999,
+				locator: 'p. 42',
+				links: []
+			},
+			{
+				id: 11,
+				index: 1,
+				source_name: 'Pinball Sourcebook',
+				source_type: 'book',
+				author: 'Jane Example',
+				year: 1999,
+				locator: 'p. 42',
+				links: []
+			}
+		],
+		attribution: null
+	},
 	year_start: 1985,
 	year_end: 1999,
 	country: null,
 	headquarters: null,
 	logo_url: null,
-	website: '',
+	website: 'https://williams.example',
 	entities: [
 		{
 			name: 'Williams Electronics',
@@ -30,9 +56,19 @@ const MOCK_MANUFACTURER = {
 			thumbnail_url: null
 		}
 	],
-	systems: [],
-	persons: [],
-	uploaded_media: [],
+	systems: [{ name: 'WPC-95', slug: 'wpc-95' }],
+	persons: [{ name: 'Pat Lawlor', slug: 'pat-lawlor', roles: ['Designer'] }],
+	uploaded_media: [
+		{
+			asset_uuid: 'asset-1',
+			category: 'Cabinet',
+			is_primary: true,
+			renditions: {
+				thumb: 'https://example.com/thumb.jpg',
+				display: 'https://example.com/display.jpg'
+			}
+		}
+	],
 	sources: []
 };
 
@@ -76,6 +112,14 @@ describe('manufacturer detail SSR route', () => {
 			}
 		});
 
-		expect(body).toContain('Medieval Madness');
+		expect(body).toContain('Overview');
+		expect(body).toContain('Companies');
+		expect(body).toContain('Titles (1)');
+		expect(body).toContain('Systems (1)');
+		expect(body).toContain('People (1)');
+		expect(body).toContain('Media (1)');
+		expect(body).toContain('References (1)');
+		expect(body).toContain('Historic manufacturer.');
+		expect(body).toContain('>edit<');
 	});
 });

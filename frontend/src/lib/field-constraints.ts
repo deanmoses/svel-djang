@@ -6,6 +6,7 @@
  */
 
 import client from '$lib/api/client';
+import type { CatalogEntityKey } from '$lib/api/catalog-meta';
 
 export type FieldConstraint = {
 	min?: number;
@@ -17,7 +18,9 @@ export type FieldConstraints = Record<string, FieldConstraint>;
 
 const cache = new Map<string, FieldConstraints>();
 
-export async function fetchFieldConstraints(entityType: string): Promise<FieldConstraints> {
+export async function fetchFieldConstraints(
+	entityType: CatalogEntityKey
+): Promise<FieldConstraints> {
 	const cached = cache.get(entityType);
 	if (cached) return cached;
 

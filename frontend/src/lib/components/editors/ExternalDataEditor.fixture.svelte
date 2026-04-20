@@ -10,10 +10,10 @@
 	};
 
 	let {
-		initialModel,
+		initialData,
 		slug = 'medieval-madness'
 	}: {
-		initialModel: ExternalDataModel;
+		initialData: ExternalDataModel;
 		slug?: string;
 	} = $props();
 
@@ -32,7 +32,7 @@
 
 <ExternalDataEditor
 	bind:this={editorRef}
-	{initialModel}
+	{initialData}
 	{slug}
 	onsaved={() => savedCount++}
 	onerror={(message) => (lastError = message)}

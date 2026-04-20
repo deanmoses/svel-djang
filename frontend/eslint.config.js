@@ -26,7 +26,17 @@ export default ts.config(
 	},
 	{
 		rules: {
-			'svelte/no-navigation-without-resolve': 'off'
+			'svelte/no-navigation-without-resolve': 'off',
+			// Standard convention: `_`-prefixed args/vars are intentionally unused.
+			// Lets snippets accept required arguments they don't need to reference.
+			'@typescript-eslint/no-unused-vars': [
+				'error',
+				{
+					argsIgnorePattern: '^_',
+					varsIgnorePattern: '^_',
+					caughtErrorsIgnorePattern: '^_'
+				}
+			]
 		}
 	},
 	{

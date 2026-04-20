@@ -8,7 +8,6 @@ from pathlib import PurePosixPath
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
-from apps.core.entity_types import resolve_entity_type
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from ninja import File, Form, Router, Schema, Status, UploadedFile
@@ -17,6 +16,7 @@ from ninja.security import django_auth
 
 from apps.catalog.claims import build_media_attachment_claim
 from apps.catalog.resolve import resolve_media_attachments
+from apps.core.entity_types import get_linkable_model
 from apps.core.models import MediaSupported
 from apps.provenance.models import Claim
 from apps.media.constants import (
@@ -115,28 +115,25 @@ class MediaAssetRefIn(Schema):
 def _resolve_entity(entity_type: str, slug: str):
     """Resolve entity_type + slug to (ContentType, entity instance).
 
-    Derives the model name by stripping hyphens from entity_type
-    (e.g. "corporate-entity" -> "corporateentity"), matching ContentType.model.
-    No registry needed — any model that inherits MediaSupported is valid.
+    ``entity_type`` is the canonical hyphenated public identifier declared
+    on each :class:`CatalogModel` subclass. Concatenated ContentType
+    spellings (``'corporateentity'``) are rejected.
 
     Returns (content_type, entity) or raises HttpError.
     """
-    model_name = resolve_entity_type(entity_type)
     try:
-        ct = ContentType.objects.get(model=model_name)
-    except ContentType.DoesNotExist:
-        raise HttpError(400, f"Unknown entity_type '{entity_type}'.")
-    except ContentType.MultipleObjectsReturned:
-        raise HttpError(400, f"Ambiguous entity_type '{entity_type}'.")
+        model_class = get_linkable_model(entity_type)
+    except ValueError:
+        raise HttpError(404, f"Unknown entity_type '{entity_type}'.")
 
-    model_class = ct.model_class()
-    if model_class is None or not issubclass(model_class, MediaSupported):
+    if not issubclass(model_class, MediaSupported):
         raise HttpError(400, f"{entity_type} does not support media attachments.")
 
     entity = model_class.objects.filter(slug=slug).first()
     if entity is None:
         raise HttpError(400, f"{entity_type} '{slug}' not found.")
 
+    ct = ContentType.objects.get_for_model(model_class)
     return ct, entity
 
 

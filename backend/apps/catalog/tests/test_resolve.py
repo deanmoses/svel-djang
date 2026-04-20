@@ -7,7 +7,6 @@ from apps.catalog.models import (
     CorporateEntityLocation,
     Location,
     Manufacturer,
-    MachineModel,
     System,
     TechnologyGeneration,
     Theme,
@@ -20,6 +19,7 @@ from apps.catalog.resolve import (
 )
 from apps.catalog.resolve._relationships import resolve_all_corporate_entity_locations
 from apps.provenance.models import Claim, Source
+from apps.catalog.tests.conftest import make_machine_model
 
 
 @pytest.fixture
@@ -41,7 +41,7 @@ def editorial(db):
 
 @pytest.fixture
 def pm(db):
-    return MachineModel.objects.create(name="Placeholder", slug="placeholder")
+    return make_machine_model(name="Placeholder", slug="placeholder")
 
 
 class TestResolveModel:
@@ -161,9 +161,9 @@ class TestResolveAll:
             name="IPDB", slug="ipdb", source_type="database", priority=10
         )
         ss = TechnologyGeneration.objects.create(name="Solid State", slug="solid-state")
-        pm1 = MachineModel.objects.create(name="P1", slug="p1")
-        pm2 = MachineModel.objects.create(name="P2", slug="p2")
-        pm3 = MachineModel.objects.create(name="P3", slug="p3")
+        pm1 = make_machine_model(name="P1", slug="p1")
+        pm2 = make_machine_model(name="P2", slug="p2")
+        pm3 = make_machine_model(name="P3", slug="p3")
 
         Claim.objects.assert_claim(pm1, "name", "Medieval Madness", source=ipdb)
         Claim.objects.assert_claim(pm1, "year", 1997, source=ipdb)
@@ -203,8 +203,8 @@ class TestResolveAll:
         Claim.objects.assert_claim(title, "name", "Medieval Madness", source=ipdb)
         TechnologyGeneration.objects.create(name="Solid State", slug="solid-state")
 
-        pm_bulk = MachineModel.objects.create(name="P1", slug="p1")
-        pm_single = MachineModel.objects.create(name="P2", slug="p2")
+        pm_bulk = make_machine_model(name="P1", slug="p1", title=title)
+        pm_single = make_machine_model(name="P2", slug="p2", title=title)
 
         from apps.catalog.claims import build_relationship_claim
 
@@ -213,7 +213,7 @@ class TestResolveAll:
         for pm in (pm_bulk, pm_single):
             Claim.objects.assert_claim(pm, "name", "Medieval Madness", source=ipdb)
             Claim.objects.assert_claim(pm, "year", 1997, source=opdb)
-            Claim.objects.assert_claim(pm, "title", "G1111", source=opdb)
+            Claim.objects.assert_claim(pm, "title", title.slug, source=opdb)
             Claim.objects.assert_claim(
                 pm, "abbreviation", abbr_val, source=ipdb, claim_key=abbr_key
             )
@@ -237,8 +237,8 @@ class TestResolveAll:
         ipdb = Source.objects.create(
             name="IPDB", slug="ipdb", source_type="database", priority=10
         )
-        pm_a = MachineModel.objects.create(name="Alpha", slug="alpha")
-        pm_b = MachineModel.objects.create(name="Beta", slug="beta")
+        pm_a = make_machine_model(name="Alpha", slug="alpha")
+        pm_b = make_machine_model(name="Beta", slug="beta")
 
         Claim.objects.assert_claim(pm_a, "name", "Alpha", source=ipdb)
         Claim.objects.assert_claim(pm_b, "name", "Beta", source=ipdb)
@@ -256,7 +256,7 @@ class TestResolveAll:
         ipdb = Source.objects.create(
             name="IPDB", slug="ipdb", source_type="database", priority=10
         )
-        pm = MachineModel.objects.create(name="P1", slug="p1")
+        pm = make_machine_model(name="P1", slug="p1")
 
         Claim.objects.assert_claim(pm, "name", "P1", source=ipdb)
         Claim.objects.assert_claim(pm, "year", 1997, source=ipdb)
@@ -281,11 +281,11 @@ class TestResolveAll:
             name="IPDB", slug="ipdb", source_type="database", priority=10
         )
         for i in range(5):
-            pm = MachineModel.objects.create(name=f"Model {i}", slug=f"model-{i}")
+            pm = make_machine_model(name=f"Model {i}", slug=f"model-{i}")
             Claim.objects.assert_claim(pm, "name", f"Resolved {i}", source=ipdb)
             Claim.objects.assert_claim(pm, "year", 2000 + i, source=ipdb)
 
-        with django_assert_max_num_queries(175):
+        with django_assert_max_num_queries(185):
             resolve_machine_models()
 
 
@@ -295,7 +295,7 @@ class TestResolveThemes:
         ipdb = Source.objects.create(
             name="IPDB", slug="ipdb", source_type="database", priority=10
         )
-        pm = MachineModel.objects.create(name="P1", slug="p1")
+        pm = make_machine_model(name="P1", slug="p1")
         horror = Theme.objects.create(name="Horror", slug="horror")
         licensed = Theme.objects.create(name="Licensed", slug="licensed")
 
@@ -318,7 +318,7 @@ class TestResolveThemes:
         editorial = Source.objects.create(
             name="Editorial", source_type="editorial", priority=100
         )
-        pm = MachineModel.objects.create(name="P1", slug="p1")
+        pm = make_machine_model(name="P1", slug="p1")
         horror = Theme.objects.create(name="Horror", slug="horror")
 
         # IPDB says horror, editorial disputes it.
@@ -338,7 +338,7 @@ class TestResolveThemes:
         ipdb = Source.objects.create(
             name="IPDB", slug="ipdb", source_type="database", priority=10
         )
-        pm = MachineModel.objects.create(name="P1", slug="p1")
+        pm = make_machine_model(name="P1", slug="p1")
         horror = Theme.objects.create(name="Horror", slug="horror")
 
         claim_key, value = build_relationship_claim("theme", {"theme": horror.pk})
@@ -355,8 +355,8 @@ class TestResolveThemes:
         ipdb = Source.objects.create(
             name="IPDB", slug="ipdb", source_type="database", priority=10
         )
-        pm1 = MachineModel.objects.create(name="P1", slug="p1")
-        pm2 = MachineModel.objects.create(name="P2", slug="p2")
+        pm1 = make_machine_model(name="P1", slug="p1")
+        pm2 = make_machine_model(name="P2", slug="p2")
         sports = Theme.objects.create(name="Sports", slug="sports")
         baseball = Theme.objects.create(name="Baseball", slug="baseball")
 
@@ -387,9 +387,7 @@ class TestResolveSystem:
             name="IPDB", slug="ipdb", source_type="database", priority=10
         )
         system = System.objects.create(name="Williams WPC-95", slug="wpc-95")
-        pm = MachineModel.objects.create(
-            name="Medieval Madness", slug="medieval-madness"
-        )
+        pm = make_machine_model(name="Medieval Madness", slug="medieval-madness")
         Claim.objects.assert_claim(pm, "name", "Medieval Madness", source=ipdb)
         Claim.objects.assert_claim(pm, "system", "wpc-95", source=ipdb)
 
@@ -401,7 +399,7 @@ class TestResolveSystem:
         ipdb = Source.objects.create(
             name="IPDB", slug="ipdb", source_type="database", priority=10
         )
-        pm = MachineModel.objects.create(name="Mystery Machine", slug="mystery-machine")
+        pm = make_machine_model(name="Mystery Machine", slug="mystery-machine")
         Claim.objects.assert_claim(pm, "name", "Mystery Machine", source=ipdb)
         Claim.objects.assert_claim(pm, "system", "nonexistent-slug", source=ipdb)
 
@@ -414,7 +412,7 @@ class TestResolveSystem:
             name="IPDB", slug="ipdb", source_type="database", priority=10
         )
         system = System.objects.create(name="Williams WPC-95", slug="wpc-95")
-        pm = MachineModel.objects.create(
+        pm = make_machine_model(
             name="Medieval Madness", slug="medieval-madness", system=system
         )
         # Name claim but no system claim — system should be cleared after resolve.

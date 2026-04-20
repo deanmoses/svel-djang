@@ -13,7 +13,7 @@
 	async function handleDelete(assetUuid: string) {
 		actionError = '';
 		try {
-			await detachMedia('gameplayfeature', profile.slug, assetUuid);
+			await detachMedia('gameplay-feature', profile.slug, assetUuid);
 			await invalidateAll();
 		} catch (err) {
 			actionError = err instanceof Error ? err.message : 'Failed to remove image.';
@@ -23,7 +23,7 @@
 	async function handleSetPrimary(assetUuid: string) {
 		actionError = '';
 		try {
-			await setPrimary('gameplayfeature', profile.slug, assetUuid);
+			await setPrimary('gameplay-feature', profile.slug, assetUuid);
 			await invalidateAll();
 		} catch (err) {
 			actionError = err instanceof Error ? err.message : 'Failed to set primary image.';
@@ -43,7 +43,7 @@
 
 <MediaGrid
 	media={profile.uploaded_media}
-	categories={[...MEDIA_CATEGORIES.gameplayfeature]}
+	categories={[...MEDIA_CATEGORIES['gameplay-feature']]}
 	canEdit={auth.isAuthenticated}
 	ondelete={handleDelete}
 	onsetprimary={handleSetPrimary}

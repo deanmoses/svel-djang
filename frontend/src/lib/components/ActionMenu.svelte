@@ -4,10 +4,11 @@
 	type Props = {
 		label: string;
 		disabled?: boolean;
+		variant?: 'default' | 'heading';
 		children: Snippet;
 	};
 
-	let { label, disabled = false, children }: Props = $props();
+	let { label, disabled = false, variant = 'default', children }: Props = $props();
 
 	let open = $state(false);
 	let triggerEl: HTMLButtonElement | undefined = $state();
@@ -180,6 +181,7 @@
 		bind:this={triggerEl}
 		type="button"
 		class="trigger"
+		class:heading={variant === 'heading'}
 		{disabled}
 		aria-haspopup="menu"
 		aria-expanded={open}
@@ -194,6 +196,7 @@
 			bind:this={menuEl}
 			id={menuId}
 			class="menu"
+			class:align-start={variant === 'heading'}
 			role="menu"
 			tabindex="-1"
 			aria-label={label}
@@ -226,6 +229,12 @@
 		font-size: 0.75em;
 	}
 
+	.trigger.heading {
+		font-size: inherit;
+		font-weight: inherit;
+		color: inherit;
+	}
+
 	.trigger:hover,
 	.trigger[aria-expanded='true'] {
 		color: var(--color-accent);
@@ -256,5 +265,10 @@
 		min-width: 7rem;
 		z-index: 10;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+	}
+
+	.menu.align-start {
+		right: auto;
+		left: 0;
 	}
 </style>

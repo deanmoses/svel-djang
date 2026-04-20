@@ -58,8 +58,7 @@ html {
 
 /* ========================================
    SEMANTIC COLOR TOKENS — Dark Theme
-   Based on VS Code's "Dark Modern" (exact values)
-   Source: https://github.com/microsoft/vscode/blob/main/extensions/theme-defaults/themes/dark_modern.json
+   Based on VS Code's "Dark Modern": https://github.com/microsoft/vscode/blob/main/extensions/theme-defaults/themes/dark_modern.json
    ======================================== */
 @media (prefers-color-scheme: dark) {
 	:root {
@@ -196,4 +195,9 @@ a:hover {
 	clip: rect(0, 0, 0, 0);
 	white-space: nowrap;
 	border-width: 0;
+}
+
+.muted {
+	color: var(--color-text-muted);
+	font-size: var(--font-size-0);
 }

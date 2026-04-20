@@ -2,17 +2,22 @@
 	import FeaturesEditor from './FeaturesEditor.svelte';
 
 	type FeaturesModel = {
-		themes: { slug: string }[];
-		tags: { slug: string }[];
+		game_format?: { slug: string } | null;
+		cabinet?: { slug: string } | null;
 		reward_types: { slug: string }[];
+		tags: { slug: string }[];
+		themes: { slug: string }[];
+		production_quantity: string;
+		player_count?: number | null;
+		flipper_count?: number | null;
 		gameplay_features: { slug: string; count?: number | null }[];
 	};
 
 	let {
-		initialModel,
+		initialData,
 		slug = 'medieval-madness'
 	}: {
-		initialModel: FeaturesModel;
+		initialData: FeaturesModel;
 		slug?: string;
 	} = $props();
 
@@ -31,7 +36,7 @@
 
 <FeaturesEditor
 	bind:this={editorRef}
-	{initialModel}
+	{initialData}
 	{slug}
 	onsaved={() => savedCount++}
 	onerror={(message) => (lastError = message)}

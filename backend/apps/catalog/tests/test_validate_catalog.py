@@ -16,6 +16,7 @@ from apps.catalog.models import (
     Title,
 )
 from apps.provenance.models import Claim, Source
+from apps.catalog.tests.conftest import make_machine_model
 
 
 def _create_with_empty_name(model_class, **kwargs):
@@ -81,7 +82,7 @@ class TestValidateCatalogClean:
         assert "0 warning(s)" in captured.out
 
     def test_clean_model_no_errors(self, db, title, capsys):
-        MachineModel.objects.create(
+        make_machine_model(
             name="Medieval Madness",
             slug="medieval-madness-williams-1997",
             title=title,
@@ -93,12 +94,26 @@ class TestValidateCatalogClean:
 
 
 class TestNamelessEntities:
-    def test_nameless_model_is_error(self, db, capsys):
-        _create_with_empty_name(MachineModel, slug="empty-name")
+    def test_nameless_model_is_error(self, db, title, capsys):
+        _create_with_empty_name(MachineModel, slug="empty-name", title=title)
         with pytest.raises(SystemExit, match="1"):
             call_command("validate_catalog")
         captured = capsys.readouterr()
         assert "have no name" in captured.out
+
+    def test_titleless_check_is_registered(self, db, title, capsys):
+        """check_titleless_models runs as part of validate_catalog and stays
+        at zero for a healthy catalog. The DB NOT NULL guarantees no row can
+        actually violate this check via the ORM, but keeping the check
+        registered catches any future migration or raw-SQL regression."""
+        from apps.catalog.management.commands import validate_catalog
+
+        assert validate_catalog.check_titleless_models in validate_catalog.ALL_CHECKS
+
+        make_machine_model(name="Has Title", slug="has-title", title=title)
+        call_command("validate_catalog")
+        captured = capsys.readouterr()
+        assert "0 error(s)" in captured.out
 
     def test_nameless_title_is_error(self, db, capsys):
         _create_with_empty_name(Title, slug="empty-title", opdb_id="G0000")
@@ -117,18 +132,18 @@ class TestNamelessEntities:
 
 class TestVariantChains:
     def test_variant_chain_is_warning(self, db, capsys):
-        root = MachineModel.objects.create(name="Root", slug="root")
-        mid = MachineModel.objects.create(name="Mid", slug="mid", variant_of=root)
-        MachineModel.objects.create(name="Leaf", slug="leaf", variant_of=mid)
+        root = make_machine_model(name="Root", slug="root")
+        mid = make_machine_model(name="Mid", slug="mid", variant_of=root)
+        make_machine_model(name="Leaf", slug="leaf", variant_of=mid)
         call_command("validate_catalog")
         captured = capsys.readouterr()
         assert "variant_of chains" in captured.out
         assert "0 error(s)" in captured.out
 
     def test_variant_chain_fails_with_fail_on_warn(self, db, capsys):
-        root = MachineModel.objects.create(name="Root", slug="root")
-        mid = MachineModel.objects.create(name="Mid", slug="mid", variant_of=root)
-        MachineModel.objects.create(name="Leaf", slug="leaf", variant_of=mid)
+        root = make_machine_model(name="Root", slug="root")
+        mid = make_machine_model(name="Mid", slug="mid", variant_of=root)
+        make_machine_model(name="Leaf", slug="leaf", variant_of=mid)
         with pytest.raises(SystemExit, match="1"):
             call_command("validate_catalog", "--fail-on-warn")
 
@@ -144,7 +159,7 @@ class TestDuplicatePersons:
 
 class TestUnresolvedFKClaims:
     def test_unresolved_system_claim_is_warning(self, db, ipdb, capsys):
-        pm = MachineModel.objects.create(name="Test", slug="test-model")
+        pm = make_machine_model(name="Test", slug="test-model")
         Claim.objects.assert_claim(pm, "system", "nonexistent-sys", source=ipdb)
         call_command("validate_catalog")
         captured = capsys.readouterr()
@@ -154,7 +169,7 @@ class TestUnresolvedFKClaims:
 class TestUnresolvedCreditClaims:
     def test_missing_person_in_credit_claim(self, db, ipdb, capsys):
         role = CreditRole.objects.create(name="Design", slug="design")
-        pm = MachineModel.objects.create(name="Test", slug="test-model")
+        pm = make_machine_model(name="Test", slug="test-model")
         from apps.catalog.claims import build_relationship_claim
 
         claim_key, value = build_relationship_claim(
@@ -169,7 +184,7 @@ class TestUnresolvedCreditClaims:
 
     def test_missing_role_in_credit_claim(self, db, ipdb, capsys):
         person = Person.objects.create(name="Pat Lawlor", slug="pat-lawlor")
-        pm = MachineModel.objects.create(name="Test", slug="test-model")
+        pm = make_machine_model(name="Test", slug="test-model")
         from apps.catalog.claims import build_relationship_claim
 
         claim_key, value = build_relationship_claim(
@@ -229,7 +244,7 @@ class TestGoldenRecords:
         t = Title.objects.create(
             name="Godzilla", slug="godzilla-stern", opdb_id="GweeP"
         )
-        MachineModel.objects.create(
+        make_machine_model(
             name="Godzilla (Premium)",
             slug="godzilla-premium",
             title=t,
@@ -259,7 +274,7 @@ class TestGoldenRecords:
         assert "0 error(s)" in captured.out
 
     def test_golden_model_wrong_field_is_error(self, db, golden_file, capsys):
-        MachineModel.objects.create(
+        make_machine_model(
             name="Godzilla (Premium)",
             slug="godzilla-premium",
             ipdb_id=6842,
@@ -329,11 +344,11 @@ class TestGoldenRecords:
         assert "golden record(s) passed" in captured.out
 
     def test_golden_variant_of_checked(self, db, golden_file, capsys):
-        parent = MachineModel.objects.create(
+        parent = make_machine_model(
             name="Godzilla (Premium)",
             slug="godzilla-premium",
         )
-        MachineModel.objects.create(
+        make_machine_model(
             name="Godzilla (LE)",
             slug="godzilla-le",
             variant_of=parent,
@@ -355,8 +370,8 @@ class TestGoldenRecords:
         assert "0 error(s)" in captured.out
 
     def test_golden_conversion_checked(self, db, golden_file, capsys):
-        parent = MachineModel.objects.create(name="Eight Ball", slug="eight-ball")
-        MachineModel.objects.create(
+        parent = make_machine_model(name="Eight Ball", slug="eight-ball")
+        make_machine_model(
             name="Challenger",
             slug="challenger",
             converted_from=parent,

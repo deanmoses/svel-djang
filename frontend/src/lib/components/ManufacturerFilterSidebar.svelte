@@ -62,6 +62,7 @@
 
 	<div class="filter-section">
 		<SearchableSelect
+			compact
 			label="Location"
 			options={locationOptions}
 			bind:selected={filters.location}
@@ -76,6 +77,7 @@
 
 	<div class="filter-section">
 		<SearchableSelect
+			compact
 			label="Person"
 			options={personOptions}
 			bind:selected={filters.person}

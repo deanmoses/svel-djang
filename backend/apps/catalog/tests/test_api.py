@@ -1,7 +1,8 @@
 import pytest
 from django.test.utils import CaptureQueriesContext
 
-from apps.catalog.models import MachineModel, System, Title
+from apps.catalog.models import System, Title
+from apps.catalog.tests.conftest import make_machine_model
 
 
 class TestStatsAPI:
@@ -10,7 +11,9 @@ class TestStatsAPI:
         resp = client.get("/api/stats")
         assert resp.status_code == 200
         data = resp.json()
-        assert data["titles"] == 0
+        # The machine_model fixture now creates a backing Title (title is
+        # NOT NULL on MachineModel).
+        assert data["titles"] == 1
         assert data["models"] == 1
         assert data["manufacturers"] == 1
         assert data["people"] == 0
@@ -56,14 +59,14 @@ class TestSystemsAPI:
         t2 = Title.objects.create(
             name="No Good Gofers", slug="no-good-gofers", opdb_id="T-ngg"
         )
-        MachineModel.objects.create(
+        make_machine_model(
             name="Medieval Madness",
             slug="medieval-madness",
             year=1997,
             system=system,
             title=t1,
         )
-        MachineModel.objects.create(
+        make_machine_model(
             name="No Good Gofers",
             slug="no-good-gofers",
             year=1997,
@@ -85,7 +88,7 @@ class TestSystemsAPI:
         self, client, system_with_machines
     ):
         t3 = Title.objects.create(name="Old Title", slug="old-title", opdb_id="T-old-s")
-        MachineModel.objects.create(
+        make_machine_model(
             name="Old Game",
             slug="old-game",
             year=1990,

@@ -1,17 +1,26 @@
 <script lang="ts">
 	import EditSectionMenu from '$lib/components/EditSectionMenu.svelte';
-	import type { EditSectionMenuItem } from '$lib/components/edit-section-menu';
+	import type { EditSectionDropdown, EditSectionMenuItem } from '$lib/components/edit-section-menu';
 	import ActionMenu from '$lib/components/ActionMenu.svelte';
 
 	type Props = {
 		detailHref?: string;
 		editHref?: string;
 		editSections?: EditSectionMenuItem[];
+		/** Multiple labeled edit dropdowns (e.g. single-model title: "Edit Title" + "Edit Model"). Supersedes editSections/editHref. */
+		editDropdowns?: EditSectionDropdown[];
 		historyHref: string;
 		sourcesHref: string;
 	};
 
-	let { detailHref, editHref, editSections = [], historyHref, sourcesHref }: Props = $props();
+	let {
+		detailHref,
+		editHref,
+		editSections = [],
+		editDropdowns,
+		historyHref,
+		sourcesHref
+	}: Props = $props();
 </script>
 
 <nav aria-label="Page actions">
@@ -19,7 +28,11 @@
 		<a class="detail-link" href={detailHref}>Back</a>
 	{/if}
 	<div class="actions">
-		{#if editSections.length > 0}
+		{#if editDropdowns && editDropdowns.length > 0}
+			{#each editDropdowns as dropdown (dropdown.label)}
+				<EditSectionMenu label={dropdown.label} items={dropdown.items} />
+			{/each}
+		{:else if editSections.length > 0}
 			<EditSectionMenu items={editSections} />
 		{:else if editHref}
 			<a href={editHref}>Edit</a>
@@ -44,7 +57,7 @@
 
 	.actions {
 		display: flex;
-		align-items: center;
+		align-items: baseline;
 		gap: var(--size-4);
 		margin-left: auto;
 	}

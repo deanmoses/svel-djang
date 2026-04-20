@@ -1,0 +1,43 @@
+<script lang="ts">
+	import DeletePage from '$lib/components/DeletePage.svelte';
+	import type { BlockedState } from '$lib/components/delete-page';
+	import type { BlockingReferrer } from '$lib/delete-flow';
+	import { pluralize } from '$lib/utils';
+	import { submitDelete } from './model-delete';
+
+	let { data } = $props();
+	let { preview, slug } = $derived(data);
+
+	let blockedReferrers = $derived(preview.blocked_by ?? []);
+
+	let blocked = $derived<BlockedState | null>(
+		blockedReferrers.length === 0
+			? null
+			: {
+					kind: 'referrers',
+					lead: "This model can't be deleted because active records still point at it:",
+					referrers: blockedReferrers,
+					renderReferrerHref: (r: BlockingReferrer) => (r.slug ? `/models/${r.slug}` : null),
+					renderReferrerHint: (r: BlockingReferrer) => `references this model via ${r.relation}`,
+					footer: 'Resolve these references, then try again.'
+				}
+	);
+
+	let impact = $derived({
+		items: ['this model', pluralize(preview.changeset_count, 'change set')],
+		note: 'You can undo this from the toast that appears on the title page, or restore the record later from its edit history.'
+	});
+</script>
+
+<DeletePage
+	entityLabel="Model"
+	entityName={preview.model_name}
+	{slug}
+	submit={submitDelete}
+	cancelHref={`/models/${slug}`}
+	redirectAfterDelete={`/titles/${preview.title_slug}`}
+	editHistoryHref={`/models/${slug}/edit-history`}
+	parentBreadcrumb={{ text: preview.title_name, href: `/titles/${preview.title_slug}` }}
+	{blocked}
+	{impact}
+/>

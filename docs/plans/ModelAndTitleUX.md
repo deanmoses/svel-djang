@@ -1,4 +1,4 @@
-# Model And Title UX
+# Model And Title Detail/Edit UX
 
 ## Goal
 
@@ -17,7 +17,6 @@ This becomes especially problematic on mobile, where the current tab model does 
 ## Core Principles
 
 - Optimize first for the end-user reader, not the editor.
-- Use section-scoped editing rather than one giant page-level form.
 
 ## Edit Interaction Model
 
@@ -35,133 +34,177 @@ Core behavior:
 
 ### Model Reader View
 
-The model detail page should organize reader content as:
+Sections:
 
 - Overview
-- Specifications
+- Technology
+- Features
 - People
 - Relationships
 - Media
 
 Utility actions (not part of the reading flow):
 
-- Sources
+- Edit
 - History
+- Tools
+  - Sources
 
-### Model Edit Sections
+### Model Edit
 
-The model edit page should use these sections:
+Sections:
 
-### Description
-
-Fields:
-
-- Description
-
-### Basics
-
-Fields:
-
-- Name
-- Slug
-- Year
-- Month
-- Manufacturer
-- Abbreviations
-
-### Technology
-
-Fields:
-
-- Technology generation
-- Technology subgeneration
-- Display type
-- Display subtype
-- System
-
-### Features
-
-Fields:
-
-- Game format
-- Cabinet
-- \# Players
-- \# Flippers
-- Reward types
-- Tags
-- Gameplay features
-- Themes
-- Production quantity
-
-### Relationships
-
-Fields:
-
-- Title
-- Variant of
-- Converted from
-- Remake of
-
-### External Data
-
-Fields:
-
-- External links
-  - IPDB ID
-  - OPDB ID
-  - Pinside ID
-- Ratings
-  - Pinside rating
-  - IPDB rating
-
-### Credits
-
-Same contents as existing Credits/People tab
+- Overview
+  - Model.Description
+- Basics
+  - Model.Title, Model.CorporateEntity (but label it Manufacturer)
+  - Model.Name, Model.Slug
+  - Model.Year, Model.Month
+  - Model.Abbreviations
+- Technology
+  - Technology Generation, Technology Subgeneration
+  - Display Type, Display Subtype
+  - System
+- Features
+  - Game format, Cabinet
+  - Reward types, Tags
+  - Themes, Production quantity
+  - \# Players, \# Flippers
+  - Gameplay features
+- Related Models
+  - Variant of
+  - Converted from
+  - Remake of
+- People
+  - Person/Role rows
+- Media
+  - Photos & Videos
+- External Data
+  - Links
+    - IPDB ID
+    - OPDB ID
+    - Pinside ID
+  - Ratings
+    - Pinside rating
+    - IPDB rating
+- Change Title
+  - A dedicated section for changing the model's title?
 
 ## Title Detail UX
 
 ### Title Reader View
 
-The title detail page should use the same reader-first structure:
+Actions in top bar are same as Model page:
+
+- Edit menu of sections
+- History
+- Tools menu
+  - Sources
+
+#### Multi-Model Title Reader View
+
+When showing a title with multiple models, it should have these accordion sections:
 
 - Overview
-- Specifications
-- People
-- Relationships
-- Media
+  - Title.Description
+- Models (hide if none)
+  - Thumbnail of each model. The current tab approach tries to show hierarchy, with variants under parents. Don't. Show thumnail for each model, both top level AND variants.
+- Technology (hide if none)
+- Features (hide if none)
+  - Include Franchise / Series here
+- Related Titles
+  - Show any related model info that aggregates
+- People (hide if none/0)
+- Media (hide if none/0)
+- External Links (hide if none/0)
+  - Links to OPDB group, fandom
+- References (hide if none/0)
 
-Utility actions:
+Aggregation rules:
 
-- Sources
-- History
+- scalars: show-if-unanimous (intersection)
+- people credits: intersection
+- themes: intersection
+- gameplay: intersection
+- reward types: intersection
+- tags: intersection
+- related titles: intersection
+- media: union
+- references: only show references from Description
 
-Notes:
+#### Single-Model Title Reader View
 
-- When a title has a single model and the public view merges title/model information, the reading surface should still feel like one coherent entity page.
-- The reader should not need to understand title-owned vs model-owned facts in order to consume the page.
+When showing a single-model title, the accordion sections should look like the model view, but with the addition of title-specific fields like series / franchise.
 
-### Title Edit Sections
+Put series / franchise under Features, even though it's not a good fit. There's no other great place for them.
 
-The title edit page should be leaner than the model edit page.
+### Title Edit View
 
-Suggested sections:
+#### Single-Model Title Edit
 
-### Overview
+On a single-model title + model, some fields overlap and we're going to have to choose which to show:
 
-Fields:
+- We will make Title.name and Title.slug editable and hide Model.name and Model.slug, because it's the title slug that's used for routing.
+- We will hide Title.description and only show Model.description, because if we ever split the Title + Model, that description should go with the Model.
+- We will hide Model.abbreviations and only show Title.Abbreviations, because if we ever split the Title + Model, those abbreviations will be more relevant to the title.
 
-- Description
+On a single-model title, the edit dropdown menu should contain a combined set of the editors from both title and model editors.
 
-### Title Basics
+Sections:
 
-Fields:
+- Overview [the existing Model Overview section]
+  - Model.Description
+- Title Basics
+  - Title.Name, Title.Slug
+  - Title.Franchise, Title.Series
+  - Title.Abbreviations
+- Model Basics (a slimmed down version w/o name, slug, abbreviations)
+  - Model.Corporate Entity (but label it Manufacturer)
+  - Model.Year, Model.Month
+- Technology [The existing Model Technology section]
+  - Technology Generation, Technology Subgeneration
+  - Display Type, Display Subtype
+  - System
+- Features [the existing Model Features section]
+  - Game format, Cabinet
+  - Reward types, Tags
+  - Themes, Production quantity
+  - \# Players, \# Flippers
+  - Gameplay features
+- Related Models [the existing Model Related Features section]
+  - Variant of
+  - Converted from
+  - Remake of
+- People [The existing Model People section]
+  - Person/Role rows
+- Media [The existing Model Media section]
+  - Photos & Videos
+- Model External Data [the existing Model External Data section]
+  - Links
+    - IPDB ID
+    - opdb_machine_id
+    - Pinside ID
+  - Ratings
+    - Pinside rating
+    - IPDB rating
+- Title External Data
+  - Title.obdb_group_id
+  - Title.fandom_page_id
+- Change Title
+  - A dedicated section for changing the model's title?
 
-- Name
-- Slug
-- Franchise
-- Series (this is a FK on Title not Model, right?)
-- Abbreviations
+#### Multi-Model Title Edit
 
-### Ownership Boundary
+Sections:
 
-We should preserve a clear boundary between title-owned facts and model-owned facts. Model-owned facts should not be edited from title edit, and vice versa.
+- Overview
+  - Title.Description
+- Title Basics
+  - Title.Name, Title.Slug
+  - Title.Franchise, Title.Series
+  - Title.Abbreviations
+- Title External Data
+  - Title.obdb_group_id
+  - Title.fandom_page_id
+
+For multi-model titles, models are edited on their own page.

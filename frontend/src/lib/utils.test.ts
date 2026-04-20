@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatYearRange, normalizeText } from './utils';
+import { formatYearRange, normalizeText, pluralize } from './utils';
 
 describe('normalizeText', () => {
 	it('lowercases text', () => {
@@ -52,5 +52,21 @@ describe('formatYearRange', () => {
 	it('returns null when neither year present', () => {
 		expect(formatYearRange(null, null)).toBeNull();
 		expect(formatYearRange(undefined, undefined)).toBeNull();
+	});
+});
+
+describe('pluralize', () => {
+	it('uses singular form for 1', () => {
+		expect(pluralize(1, 'model')).toBe('1 model');
+	});
+
+	it('appends s for n != 1', () => {
+		expect(pluralize(0, 'model')).toBe('0 models');
+		expect(pluralize(2, 'model')).toBe('2 models');
+	});
+
+	it('uses explicit plural form when provided', () => {
+		expect(pluralize(2, 'child', 'children')).toBe('2 children');
+		expect(pluralize(1, 'child', 'children')).toBe('1 child');
 	});
 });

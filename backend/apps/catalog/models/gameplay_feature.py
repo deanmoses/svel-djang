@@ -9,8 +9,8 @@ from django.db.models.functions import Lower
 
 from apps.core.models import (
     AliasBase,
+    CatalogModel,
     EntityStatusMixin,
-    LinkableModel,
     MarkdownField,
     MediaSupported,
     SluggedModel,
@@ -25,7 +25,11 @@ __all__ = ["GameplayFeature", "GameplayFeatureAlias", "MachineModelGameplayFeatu
 
 
 class GameplayFeature(
-    EntityStatusMixin, SluggedModel, LinkableModel, MediaSupported, TimeStampedModel
+    CatalogModel,
+    EntityStatusMixin,
+    SluggedModel,
+    MediaSupported,
+    TimeStampedModel,
 ):
     """A gameplay mechanism: Flippers, Pop Bumpers, Ramps, Multiball, etc.
 
@@ -33,9 +37,9 @@ class GameplayFeature(
     The MachineModel-GameplayFeature relationship is materialized from claims.
     """
 
+    entity_type = "gameplay-feature"
+    entity_type_plural = "gameplay-features"
     MEDIA_CATEGORIES = ["other"]
-
-    link_url_pattern = "/gameplay-features/{slug}"
 
     name = models.CharField(
         max_length=200, unique=True, validators=[validate_no_mojibake]

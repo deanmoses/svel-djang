@@ -3,9 +3,9 @@
 import pytest
 from django.contrib.auth import get_user_model
 
-from apps.catalog.models import MachineModel
 from apps.catalog.resolve import resolve_model
 from apps.provenance.models import Claim, Source
+from apps.catalog.tests.conftest import make_machine_model
 
 User = get_user_model()
 
@@ -22,9 +22,7 @@ def low_priority_source(db):
 
 @pytest.fixture
 def pm(db, _bootstrap_source):
-    pm = MachineModel.objects.create(
-        name="Medieval Madness", slug="medieval-madness", year=1997
-    )
+    pm = make_machine_model(name="Medieval Madness", slug="medieval-madness", year=1997)
     Claim.objects.assert_claim(pm, "name", "Medieval Madness", source=_bootstrap_source)
     return pm
 
@@ -68,6 +66,18 @@ class TestPatchClaimsValidation:
             content_type="application/json",
         )
         assert resp.status_code == 404
+
+    def test_clearing_required_title_returns_422(self, client, user, pm):
+        """title is NOT NULL on MachineModel — clearing it must be rejected."""
+        client.force_login(user)
+        resp = client.patch(
+            f"/api/models/{pm.slug}/claims/",
+            data='{"fields": {"title": null}}',
+            content_type="application/json",
+        )
+        assert resp.status_code == 422
+        body = resp.json()
+        assert "title" in body["detail"]["field_errors"]
 
 
 @pytest.mark.django_db
@@ -132,7 +142,7 @@ class TestPatchClaimsPersistence:
         assert client.get("/api/pages/model/medieval-madness").status_code == 404
 
     def test_duplicate_slug_returns_422(self, client, user, pm):
-        MachineModel.objects.create(name="Other Game", slug="other-game")
+        make_machine_model(name="Other Game", slug="other-game")
         client.force_login(user)
         resp = client.patch(
             f"/api/models/{pm.slug}/claims/",

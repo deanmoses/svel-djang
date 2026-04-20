@@ -6,6 +6,6 @@
 
 <EntityProvenance
 	sources={data.profile.sources}
-	entityType="gameplayfeature"
+	entityType="gameplay-feature"
 	entitySlug={data.profile.slug}
 />

@@ -6,6 +6,7 @@ from typing import ClassVar
 
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django.db.models.functions import Now
 from django.db.models.signals import post_delete
@@ -305,21 +306,85 @@ def get_claim_fields(model_class: type[models.Model]) -> dict[str, str]:
 
 
 class LinkableModel(models.Model):
-    """Mixin marking a model as a markdown link target.
+    """Mixin marking a model as a publicly addressable entity with a canonical identifier.
 
     Subclasses must define:
     - name: CharField
     - slug: SlugField (unique)
+    - entity_type: str — hyphenated canonical public identifier (e.g. 'corporate-entity')
+    - entity_type_plural: str — hyphenated canonical plural form (e.g. 'corporate-entities')
+
+    ``entity_type`` and ``entity_type_plural`` together are the linguistic
+    identity of a kind of entity — the single source of truth consumed by
+    ``get_linkable_model`` and ``export_catalog_meta``. All URL shapes and
+    UI labels derive from them; they do not drive backend behavior beyond
+    URL and UI consistency.
 
     Class attributes for link registration (all optional):
     - link_type_name: str — overrides the auto-derived type name
     - link_label: str — human-readable label for type picker
     - link_description: str — brief description
-    - link_url_pattern: str — URL pattern like "/manufacturers/{slug}"
     - link_sort_order: int — display order in type picker (lower = higher)
     - link_autocomplete_search_fields: tuple[str, ...] — model fields to search
     - link_autocomplete_ordering: tuple[str, ...] — result ordering
     - link_autocomplete_select_related: tuple[str, ...] — eager loading
+
+    ``link_url_pattern`` is derived from ``entity_type_plural`` at subclass
+    creation time — do not declare it by hand.
+    """
+
+    entity_type: str  # required on concrete subclasses
+    entity_type_plural: str  # required on concrete subclasses
+
+    class Meta:
+        abstract = True
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        # __init_subclass__ fires before Django's ModelBase sets up ``_meta``,
+        # so abstract/concrete cannot be determined via ``_meta.abstract`` here.
+        # Instead, treat ``entity_type`` declaration as the concrete-class
+        # marker: abstract intermediates (CatalogModel) must NOT declare
+        # ``entity_type``; any subclass that does is treated as concrete and
+        # must also declare ``entity_type_plural``. If a future abstract
+        # intermediate needs ``entity_type`` set for some reason, this hook's
+        # invariant will need revisiting.
+        if "entity_type" not in cls.__dict__:
+            # Abstract intermediate; nothing to validate or derive.
+            return
+        entity_type = cls.__dict__["entity_type"]
+        if not isinstance(entity_type, str) or not entity_type:
+            raise ImproperlyConfigured(
+                f"{cls.__name__} inherits LinkableModel but declares "
+                f"entity_type as something other than a non-empty string."
+            )
+        entity_type_plural = cls.__dict__.get("entity_type_plural")
+        if not isinstance(entity_type_plural, str) or not entity_type_plural:
+            raise ImproperlyConfigured(
+                f"{cls.__name__} inherits LinkableModel but does not declare "
+                f"entity_type_plural as a non-empty string."
+            )
+        # Derive link_url_pattern from entity_type_plural. This hook fires
+        # once at class creation, so entity_type_plural must be a class-body
+        # literal; post-hoc assignment will not re-derive link_url_pattern.
+        cls.link_url_pattern = f"/{entity_type_plural}/{{slug}}"
+        # Collision detection happens lazily in get_linkable_model's map
+        # builder, not here, to avoid depending on import order.
+
+
+# ---------------------------------------------------------------------------
+# CatalogModel abstract base — marker for catalog-specific code paths
+# ---------------------------------------------------------------------------
+
+
+class CatalogModel(LinkableModel):
+    """Abstract marker for top-level catalog entities.
+
+    Field-less subclass of ``LinkableModel`` that exists purely to identify
+    catalog-specific code paths (e.g. ``ingest_pinbase``, soft-delete wire
+    format) that must not widen to other ``LinkableModel`` subclasses.
+
+    All fields and validation now live on ``LinkableModel``.
     """
 
     class Meta:

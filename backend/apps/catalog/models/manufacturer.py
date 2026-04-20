@@ -9,8 +9,8 @@ from django.db.models.functions import Lower
 
 from apps.core.models import (
     AliasBase,
+    CatalogModel,
     EntityStatusMixin,
-    LinkableModel,
     MarkdownField,
     MediaSupported,
     SluggedModel,
@@ -34,7 +34,11 @@ EXTERNAL_ID_MIN = 1
 
 
 class Manufacturer(
-    EntityStatusMixin, SluggedModel, LinkableModel, MediaSupported, TimeStampedModel
+    CatalogModel,
+    EntityStatusMixin,
+    SluggedModel,
+    MediaSupported,
+    TimeStampedModel,
 ):
     """A pinball machine brand (user-facing grouping).
 
@@ -43,9 +47,10 @@ class Manufacturer(
     records spanning different ownership eras.
     """
 
+    entity_type = "manufacturer"
+    entity_type_plural = "manufacturers"
     MEDIA_CATEGORIES = ["logo", "other"]
 
-    link_url_pattern = "/manufacturers/{slug}"
     link_sort_order = 30
 
     name = models.CharField(
@@ -120,14 +125,15 @@ class ManufacturerAlias(AliasBase):
         ]
 
 
-class CorporateEntity(EntityStatusMixin, SluggedModel, LinkableModel, TimeStampedModel):
+class CorporateEntity(CatalogModel, EntityStatusMixin, SluggedModel, TimeStampedModel):
     """A specific corporate incarnation of a manufacturer brand.
 
     IPDB tracks corporate entities (e.g., four separate entries for Gottlieb
     across its ownership eras). Each entity maps to one brand-level Manufacturer.
     """
 
-    link_url_pattern = "/corporate-entities/{slug}"
+    entity_type = "corporate-entity"
+    entity_type_plural = "corporate-entities"
 
     manufacturer = models.ForeignKey(
         Manufacturer,

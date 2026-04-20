@@ -44,7 +44,6 @@ class CatalogConfig(AppConfig):
             if not issubclass(model, LinkableModel) or model._meta.abstract:
                 continue
             name = getattr(model, "link_type_name", model.__name__.lower())
-            verbose_plural = model._meta.verbose_name_plural.replace(" ", "-")
             register(
                 LinkType(
                     name=name,
@@ -58,11 +57,7 @@ class CatalogConfig(AppConfig):
                         "link_description",
                         f"Link to a {model._meta.verbose_name}",
                     ),
-                    url_pattern=getattr(
-                        model,
-                        "link_url_pattern",
-                        f"/{verbose_plural}/{{slug}}",
-                    ),
+                    url_pattern=model.link_url_pattern,
                     url_field="slug",
                     label_field="name",
                     sort_order=getattr(model, "link_sort_order", 100),

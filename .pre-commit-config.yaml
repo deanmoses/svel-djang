@@ -41,7 +41,7 @@ repos:
         entry: npx markdownlint-cli2@0.21.0
         language: system
         types: [markdown]
-        exclude: ^(CLAUDE|AGENTS)\.md$
+        exclude: ^(CLAUDE\.md|AGENTS\.md|docs/plans/.*)$
       # Python (backend) — use project's ruff via uv so pre-commit and CI
       # always run the identical binary (avoids platform formatting drift).
       # pass_filenames: false so ruff checks all backend files every time,

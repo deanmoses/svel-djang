@@ -27,6 +27,7 @@ from apps.provenance.validation import (
     validate_fk_claims_batch,
     validate_relationship_claims_batch,
 )
+from apps.catalog.tests.conftest import make_machine_model
 
 
 # ---------------------------------------------------------------------------
@@ -171,7 +172,7 @@ class TestValidateClaimsBatch:
 
     @pytest.fixture
     def model(self):
-        return MachineModel.objects.create(name="Eight Ball", slug="eight-ball")
+        return make_machine_model(name="Eight Ball", slug="eight-ball")
 
     def test_valid_scalar_claim_passes(self, model):
         claim = Claim.for_object(model, field_name="name", value="Eight Ball Deluxe")
@@ -386,18 +387,18 @@ class TestAssertClaimValidation:
 
     def test_rejects_invalid_direct_claim(self, source):
         """assert_claim should reject invalid scalar values."""
-        model = MachineModel.objects.create(name="Test", slug="test")
+        model = make_machine_model(name="Test", slug="test")
         with pytest.raises(ValidationError, match="must be an integer"):
             Claim.objects.assert_claim(model, "ipdb_id", "not-a-number", source=source)
 
     def test_allows_valid_direct_claim(self, source):
-        model = MachineModel.objects.create(name="Test", slug="test")
+        model = make_machine_model(name="Test", slug="test")
         claim = Claim.objects.assert_claim(model, "ipdb_id", 42, source=source)
         assert claim.value == 42
 
     def test_allows_relationship_claim(self, source):
         """assert_claim accepts relationship claims (batch target validation is separate)."""
-        model = MachineModel.objects.create(name="Test", slug="test")
+        model = make_machine_model(name="Test", slug="test")
         claim = Claim.objects.assert_claim(
             model,
             "credit",
@@ -409,7 +410,7 @@ class TestAssertClaimValidation:
 
     def test_allows_extra_data_claim(self, source):
         """Extra-data claims should pass through without validation."""
-        model = MachineModel.objects.create(name="Test", slug="test")
+        model = make_machine_model(name="Test", slug="test")
         claim = Claim.objects.assert_claim(
             model, "opdb.description", "A great game", source=source
         )
@@ -433,7 +434,7 @@ class TestAssertClaimValidation:
 class TestValidateRelationshipClaimsBatch:
     @pytest.fixture
     def model(self):
-        return MachineModel.objects.create(name="Eight Ball", slug="eight-ball")
+        return make_machine_model(name="Eight Ball", slug="eight-ball")
 
     @pytest.fixture
     def theme(self):
@@ -580,7 +581,7 @@ class TestValidateRelationshipClaimsBatch:
 class TestValidateClaimsBatchRelationships:
     @pytest.fixture
     def model(self):
-        return MachineModel.objects.create(name="Test", slug="test")
+        return make_machine_model(name="Test", slug="test")
 
     def test_valid_relationship_passes_batch(self, model, credit_targets):
         pat_pk = credit_targets["persons"]["pat-lawlor"].pk

@@ -1,9 +1,9 @@
 from apps.catalog.models import (
     Credit,
     CreditRole,
-    MachineModel,
     Title,
 )
+from apps.catalog.tests.conftest import make_machine_model
 
 
 class TestPeopleAPI:
@@ -43,15 +43,9 @@ class TestPeopleAPI:
         t3 = Title.objects.create(
             name="No Year Title", slug="no-year-title", opdb_id="T-noyear-p"
         )
-        old = MachineModel.objects.create(
-            name="Old Game", slug="old-game", year=1990, title=t1
-        )
-        new = MachineModel.objects.create(
-            name="New Game", slug="new-game", year=2020, title=t2
-        )
-        no_year = MachineModel.objects.create(
-            name="No Year Game", slug="no-year-game", title=t3
-        )
+        old = make_machine_model(name="Old Game", slug="old-game", year=1990, title=t1)
+        new = make_machine_model(name="New Game", slug="new-game", year=2020, title=t2)
+        no_year = make_machine_model(name="No Year Game", slug="no-year-game", title=t3)
         for m in (old, new, no_year):
             Credit.objects.create(model=m, person=person, role=role)
         resp = client.get(f"/api/pages/person/{person.slug}")

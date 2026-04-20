@@ -148,7 +148,7 @@
 
 	.relationship-group li {
 		padding: var(--size-1) 0;
-		font-size: var(--font-size-1);
+		font-size: var(--font-size-0);
 	}
 
 	.muted {

@@ -7,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 
 from apps.core.validators import bulk_create_validated, validate_no_mojibake
+from apps.catalog.tests.conftest import make_machine_model
 
 
 class TestValidateNoMojibake:
@@ -71,9 +72,8 @@ class TestMojibakeClaimsApiIntegration:
 
     @pytest.fixture
     def pm(self):
-        from apps.catalog.models import MachineModel
 
-        return MachineModel.objects.create(
+        return make_machine_model(
             name="Medieval Madness",
             slug="medieval-madness",
             year=1997,
@@ -112,9 +112,8 @@ class TestMojibakeBulkAssertClaims:
 
     @pytest.fixture
     def pm(self):
-        from apps.catalog.models import MachineModel
 
-        return MachineModel.objects.create(
+        return make_machine_model(
             name="Medieval Madness",
             slug="medieval-madness",
             year=1997,
@@ -192,8 +191,13 @@ class TestMojibakeBulkCreateValidated:
             bulk_create_validated(MachineModel, objs)
 
     def test_accepts_valid_name_in_bulk_create(self):
-        from apps.catalog.models import MachineModel
+        from apps.catalog.models import MachineModel, Title
 
-        objs = [MachineModel(name="Médiéval Madness", slug="medieval-madness")]
+        title = Title.objects.create(
+            name="Médiéval Madness", slug="medieval-madness-title"
+        )
+        objs = [
+            MachineModel(name="Médiéval Madness", slug="medieval-madness", title=title)
+        ]
         created = bulk_create_validated(MachineModel, objs)
         assert len(created) == 1

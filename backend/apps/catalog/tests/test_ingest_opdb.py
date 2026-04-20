@@ -9,6 +9,7 @@ from django.core.management.base import CommandError
 
 from apps.catalog.models import MachineModel, System, SystemMpuString
 from apps.provenance.models import Claim, Source
+from apps.catalog.tests.conftest import make_machine_model
 
 FIXTURES = "apps/catalog/tests/fixtures"
 
@@ -21,6 +22,44 @@ def _mpu_strings(db):
 
 
 @pytest.fixture
+def _ipdb_sample_models(db):
+    """Pre-seed MachineModels for ipdb_sample.json."""
+    make_machine_model(name="Medieval Madness", slug="medieval-madness", ipdb_id=4000)
+    make_machine_model(name="A-B-C Bowler", slug="a-b-c-bowler", ipdb_id=20)
+    make_machine_model(name="The Addams Family", slug="the-addams-family", ipdb_id=61)
+    make_machine_model(name="Baffle Ball", slug="baffle-ball", ipdb_id=100)
+
+
+@pytest.fixture
+def _opdb_sample_models(db, _ipdb_sample_models):
+    """Pre-seed OPDB machines/aliases from opdb_sample.json.
+
+    The adapter now requires every OPDB record to match an existing
+    MachineModel — pindata is the authoritative superset. This fixture
+    mirrors that: pre-seed the OPDB-only records (G2222) and the alias
+    of the IPDB-matched machine (G1111-MTest1-AAlias). G3333-MCombo is
+    non-physical and its aliases have no resolvable parent, so both are
+    skipped by the adapter filter/reconciliation — no pre-seed needed.
+    """
+    # G1111-MTest1 is matched via ipdb_id=4000 by the existing "Medieval Madness" MM.
+    # Backfill its opdb_id here to simulate pindata having both IDs.
+    mm = MachineModel.objects.get(ipdb_id=4000)
+    mm.opdb_id = "G1111-MTest1"
+    mm.save()
+
+    make_machine_model(
+        name="Stern Exclusive Game",
+        slug="stern-exclusive-game",
+        opdb_id="G2222-MTest2",
+    )
+    make_machine_model(
+        name="Medieval Madness (LE)",
+        slug="medieval-madness-le",
+        opdb_id="G1111-MTest1-AAlias",
+    )
+
+
+@pytest.fixture
 def _setup_ipdb_first(
     db,
     _mpu_strings,
@@ -28,6 +67,7 @@ def _setup_ipdb_first(
     ipdb_locations,
     ipdb_narrative_features,
     credit_roles,
+    _ipdb_sample_models,
 ):
     """Seed IPDB data so OPDB can match by ipdb_id."""
     call_command(
@@ -37,7 +77,7 @@ def _setup_ipdb_first(
 
 
 @pytest.fixture
-def _run_opdb(db, _setup_ipdb_first):
+def _run_opdb(db, _setup_ipdb_first, _opdb_sample_models):
     """Run ingest_opdb after IPDB seed."""
     call_command(
         "ingest_opdb",
@@ -224,19 +264,17 @@ class TestOpdbAbortsMissingOpdbId:
 class TestOpdbConflictBranches:
     def test_matched_model_keeps_existing_opdb_id(self):
         """Models matched by opdb_id keep their existing opdb_id."""
-        MachineModel.objects.create(
-            name="Test Game", slug="test-game", opdb_id="GOLD-M1"
-        )
+        make_machine_model(name="Test Game", slug="test-game", opdb_id="GOLD-M1")
         path = _opdb_dump(machines=[{"opdb_id": "GOLD-M1", "name": "Test Game"}])
         call_command("ingest_opdb", opdb=path)
         pm = MachineModel.objects.get(opdb_id="GOLD-M1")
         assert pm.name == "Test Game"
 
-    def test_new_model_created_with_opdb_id(self):
+    def test_unmatched_opdb_record_aborts(self):
+        """OPDB records with no matching pindata MachineModel abort ingest."""
         path = _opdb_dump(machines=[{"opdb_id": "GNEW-M1", "name": "Brand New Game"}])
-        call_command("ingest_opdb", opdb=path)
-        pm = MachineModel.objects.get(opdb_id="GNEW-M1")
-        assert pm.name == "Brand New Game"
+        with pytest.raises(CommandError, match="do not match any existing"):
+            call_command("ingest_opdb", opdb=path)
 
 
 @pytest.mark.django_db
@@ -248,27 +286,14 @@ class TestOpdbAliasEdgeCases:
         call_command("ingest_opdb", opdb=path)
         assert not MachineModel.objects.filter(name="Orphan Alias").exists()
 
-    def test_alias_created_when_parent_exists(self):
+    def test_unmatched_alias_with_parent_in_same_batch_aborts(self):
+        """Even with parent in batch, an unmatched alias aborts ingest."""
         path = _opdb_dump(
             machines=[{"opdb_id": "GNEW-M1", "name": "New Parent"}],
             aliases=[{"opdb_id": "GNEW-M1-AAlias", "name": "New Alias"}],
         )
-        call_command("ingest_opdb", opdb=path)
-        assert MachineModel.objects.filter(opdb_id="GNEW-M1").exists()
-        assert MachineModel.objects.filter(opdb_id="GNEW-M1-AAlias").exists()
-
-    def test_alias_has_no_variant_of_claim(self):
-        """Even when parent exists, OPDB does not assert variant_of."""
-        path = _opdb_dump(
-            machines=[{"opdb_id": "GNEW-M1", "name": "New Parent"}],
-            aliases=[{"opdb_id": "GNEW-M1-AAlias", "name": "New Alias"}],
-        )
-        call_command("ingest_opdb", opdb=path)
-        alias = MachineModel.objects.get(opdb_id="GNEW-M1-AAlias")
-        source = Source.objects.get(slug="opdb")
-        assert not alias.claims.filter(
-            source=source, field_name="variant_of", is_active=True
-        ).exists()
+        with pytest.raises(CommandError, match="do not match any existing"):
+            call_command("ingest_opdb", opdb=path)
 
 
 @pytest.mark.django_db

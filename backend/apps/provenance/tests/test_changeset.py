@@ -29,14 +29,16 @@ def source(db):
 @pytest.mark.django_db
 class TestChangeSetModel:
     def test_create_changeset(self, user):
-        cs = ChangeSet.objects.create(user=user, note="Fixed description")
+        cs = ChangeSet.objects.create(
+            user=user, action="edit", note="Fixed description"
+        )
         assert cs.pk is not None
         assert cs.user == user
         assert cs.note == "Fixed description"
         assert cs.created_at is not None
 
     def test_changeset_without_note(self, user):
-        cs = ChangeSet.objects.create(user=user)
+        cs = ChangeSet.objects.create(user=user, action="edit")
         assert cs.note == ""
 
     def test_changeset_with_ingest_run(self, source):
@@ -50,7 +52,7 @@ class TestChangeSetModel:
 @pytest.mark.django_db
 class TestChangeSetClaimGrouping:
     def test_claims_linked_to_changeset(self, user, mfr):
-        cs = ChangeSet.objects.create(user=user, note="Updated fields")
+        cs = ChangeSet.objects.create(user=user, action="edit", note="Updated fields")
         c1 = Claim.objects.assert_claim(
             mfr, "name", "Williams Electronics", user=user, changeset=cs
         )
@@ -92,18 +94,18 @@ class TestChangeSetClaimGrouping:
     def test_changeset_user_mismatch_rejected(self, user, mfr):
         """ChangeSet user must match the claim user."""
         other_user = User.objects.create(username="other")
-        cs = ChangeSet.objects.create(user=other_user)
+        cs = ChangeSet.objects.create(user=other_user, action="edit")
         with pytest.raises(ValueError, match="must match"):
             Claim.objects.assert_claim(mfr, "name", "Williams", user=user, changeset=cs)
 
     def test_changeset_survives_claim_superseding(self, user, mfr):
         """When a claim is superseded, the old claim keeps its changeset link."""
-        cs1 = ChangeSet.objects.create(user=user, note="First edit")
+        cs1 = ChangeSet.objects.create(user=user, action="edit", note="First edit")
         c1 = Claim.objects.assert_claim(
             mfr, "description", "First", user=user, changeset=cs1
         )
 
-        cs2 = ChangeSet.objects.create(user=user, note="Second edit")
+        cs2 = ChangeSet.objects.create(user=user, action="edit", note="Second edit")
         c2 = Claim.objects.assert_claim(
             mfr, "description", "Second", user=user, changeset=cs2
         )
@@ -118,7 +120,7 @@ class TestChangeSetClaimGrouping:
 @pytest.mark.django_db
 class TestChangeSetConstraints:
     def test_user_only(self, user):
-        cs = ChangeSet.objects.create(user=user)
+        cs = ChangeSet.objects.create(user=user, action="edit")
         assert cs.pk is not None
 
     def test_ingest_run_only(self, source):
@@ -134,6 +136,17 @@ class TestChangeSetConstraints:
         run = IngestRun.objects.create(source=source, input_fingerprint="sha256:abc")
         with pytest.raises(IntegrityError):
             ChangeSet.objects.create(user=user, ingest_run=run)
+
+    def test_user_without_action_rejected(self, user):
+        """User ChangeSets must carry an action value."""
+        with pytest.raises(IntegrityError):
+            ChangeSet.objects.create(user=user)
+
+    def test_ingest_run_with_action_rejected(self, source):
+        """Ingest ChangeSets must not carry an action value."""
+        run = IngestRun.objects.create(source=source, input_fingerprint="sha256:abc")
+        with pytest.raises(IntegrityError):
+            ChangeSet.objects.create(ingest_run=run, action="edit")
 
 
 @pytest.mark.django_db
@@ -165,7 +178,7 @@ class TestClaimProtect:
         """PROTECT prevents deleting a ChangeSet that has claims."""
         from django.db.models import ProtectedError
 
-        cs = ChangeSet.objects.create(user=user)
+        cs = ChangeSet.objects.create(user=user, action="edit")
         Claim.objects.assert_claim(mfr, "name", "Williams", user=user, changeset=cs)
         with pytest.raises(ProtectedError):
             cs.delete()

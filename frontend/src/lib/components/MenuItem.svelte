@@ -43,6 +43,7 @@
 		border: none;
 		cursor: pointer;
 		text-align: start;
+		white-space: nowrap;
 	}
 
 	.menu-item:hover,

@@ -4,8 +4,8 @@ Converts OPDB JSON data into an IngestPlan for the apply layer.
 No database writes — all mutations happen in apply_plan().
 
 The adapter handles:
-- Matching OPDB records to existing MachineModels (by opdb_id, then ipdb_id)
-- Creating PlannedEntityCreate for unmatched records
+- Matching OPDB records to existing MachineModels (by opdb_id, then ipdb_id);
+  unmatched records abort ingest (pindata is the authoritative superset)
 - Collecting scalar and relationship claims as PlannedClaimAssert
 - Classifying OPDB features into gameplay features, reward types, tags, cabinets
 """
@@ -17,14 +17,13 @@ import logging
 from dataclasses import dataclass
 
 from django.contrib.contenttypes.models import ContentType
+from django.core.management.base import CommandError
 
 from apps.catalog.claims import build_relationship_claim
 from apps.catalog.ingestion.apply import (
     IngestPlan,
     PlannedClaimAssert,
-    PlannedEntityCreate,
 )
-from apps.catalog.ingestion.bulk_utils import generate_unique_slug
 from apps.catalog.ingestion.opdb.records import OpdbRecord
 from apps.catalog.ingestion.parsers import (
     map_opdb_display,
@@ -85,11 +84,10 @@ _KNOWN_OPDB_VARIANT_LABELS: frozenset[str] = frozenset(
 
 @dataclass
 class MatchResult:
-    """Result of matching one OPDB record to the catalog."""
+    """An OPDB record paired with the existing MachineModel it reconciled to."""
 
-    model: MachineModel  # existing entity, or unsaved placeholder if new
+    model: MachineModel
     record: OpdbRecord
-    is_new: bool
 
 
 # ---------------------------------------------------------------------------
@@ -119,25 +117,31 @@ def build_opdb_plan(
     machines = [r for r in records if r.is_machine and r.physical_machine != 0]
     aliases = [r for r in records if r.is_alias]
 
-    # Reconcile against existing entities.
-    by_opdb_id, by_ipdb_id, existing_slugs = _prefetch_lookups()
-    match_results = _reconcile_machines(
-        machines, by_opdb_id, by_ipdb_id, existing_slugs
-    )
-    alias_results, alias_warnings = _reconcile_aliases(
-        aliases,
-        by_opdb_id,
-        by_ipdb_id,
-        existing_slugs,
+    # Reconcile against existing entities. OPDB records must match an existing
+    # pindata MachineModel; any record with no match aborts ingest (pindata is
+    # the authoritative superset — add the missing model there and re-run).
+    by_opdb_id, by_ipdb_id = _prefetch_lookups()
+    match_results, unmatched = _reconcile_machines(machines, by_opdb_id, by_ipdb_id)
+    alias_results, alias_warnings, alias_unmatched = _reconcile_aliases(
+        aliases, by_opdb_id, by_ipdb_id
     )
     match_results.extend(alias_results)
+    unmatched.extend(alias_unmatched)
+    if unmatched:
+        lines = "\n".join(f"  {r.opdb_id} — {r.name!r}" for r in unmatched)
+        raise CommandError(
+            f"{len(unmatched)} OPDB record(s) do not match any existing "
+            f"MachineModel. Every OPDB machine must correspond to a pindata "
+            f"model file. Add the missing models to pindata and re-run ingest:\n"
+            f"{lines}"
+        )
 
     # Build the plan.
     plan = IngestPlan(
         source=source,
         input_fingerprint=input_fingerprint,
         records_parsed=len(records),
-        records_matched=sum(1 for m in match_results if not m.is_new),
+        records_matched=len(match_results),
     )
 
     # Register relationship resolve hooks.
@@ -156,38 +160,8 @@ def build_opdb_plan(
     unmatched_opdb_terms: list[str] = []
 
     for mr in match_results:
-        if mr.is_new:
-            handle = f"opdb:{mr.record.opdb_id}"
-            plan.entities.append(
-                PlannedEntityCreate(
-                    model_class=MachineModel,
-                    kwargs={
-                        "name": mr.record.name,
-                        "opdb_id": mr.record.opdb_id,
-                        "slug": mr.model.slug,
-                        "status": "active",
-                    },
-                    handle=handle,
-                )
-            )
-            plan.assertions.append(
-                PlannedClaimAssert(field_name="status", value="active", handle=handle)
-            )
-            _collect_claims(
-                mr.record,
-                ct_id,
-                plan.assertions,
-                handle=handle,
-                slug=mr.model.slug,
-            )
-        else:
-            _collect_claims(
-                mr.record,
-                ct_id,
-                plan.assertions,
-                content_type_id=ct_id,
-                object_id=mr.model.pk,
-            )
+        target_kwargs = {"content_type_id": ct_id, "object_id": mr.model.pk}
+        _collect_claims(mr.record, plan.assertions, **target_kwargs)
 
         # Classify features into vocabulary claims.
         if mr.record.features:
@@ -196,7 +170,7 @@ def build_opdb_plan(
                 reward_slugs,
                 tag_slugs,
                 cabinet_slug,
-                unmatched,
+                unmatched_feature_terms,
             ) = _classify_opdb_features(
                 mr.record.features,
                 feature_map,
@@ -204,9 +178,7 @@ def build_opdb_plan(
                 tag_map,
                 cabinet_map,
             )
-            unmatched_opdb_terms.extend(unmatched)
-
-            target_kwargs = _target_kwargs(mr, ct_id)
+            unmatched_opdb_terms.extend(unmatched_feature_terms)
 
             for slug in gameplay_slugs:
                 pk = feature_slug_to_pk.get(slug)
@@ -319,9 +291,7 @@ def _manufacturer_diagnostics(machines: list[OpdbRecord]) -> list[str]:
 # ---------------------------------------------------------------------------
 
 
-def _prefetch_lookups() -> tuple[
-    dict[str, MachineModel], dict[int, MachineModel], set[str]
-]:
+def _prefetch_lookups() -> tuple[dict[str, MachineModel], dict[int, MachineModel]]:
     """Pre-fetch all MachineModels into lookup dicts."""
     by_opdb_id: dict[str, MachineModel] = {
         pm.opdb_id: pm for pm in MachineModel.objects.filter(opdb_id__isnull=False)
@@ -329,18 +299,21 @@ def _prefetch_lookups() -> tuple[
     by_ipdb_id: dict[int, MachineModel] = {
         pm.ipdb_id: pm for pm in MachineModel.objects.filter(ipdb_id__isnull=False)
     }
-    existing_slugs: set[str] = set(MachineModel.objects.values_list("slug", flat=True))
-    return by_opdb_id, by_ipdb_id, existing_slugs
+    return by_opdb_id, by_ipdb_id
 
 
 def _reconcile_machines(
     machines: list[OpdbRecord],
     by_opdb_id: dict[str, MachineModel],
     by_ipdb_id: dict[int, MachineModel],
-    existing_slugs: set[str],
-) -> list[MatchResult]:
-    """Match machine records to existing MachineModels or plan creation."""
+) -> tuple[list[MatchResult], list[OpdbRecord]]:
+    """Match machine records to existing MachineModels.
+
+    Returns (matched results, unmatched records). Unmatched records drive
+    the ingest-aborting CommandError upstream.
+    """
     results: list[MatchResult] = []
+    unmatched: list[OpdbRecord] = []
 
     for rec in machines:
         pm = by_opdb_id.get(rec.opdb_id)
@@ -352,33 +325,28 @@ def _reconcile_machines(
             # the opdb_id lookup so aliases can find their parent later.
             if rec.opdb_id and rec.opdb_id not in by_opdb_id:
                 by_opdb_id[rec.opdb_id] = pm
-            results.append(MatchResult(model=pm, record=rec, is_new=False))
+            results.append(MatchResult(model=pm, record=rec))
         else:
-            slug = generate_unique_slug(rec.name, existing_slugs)
-            # Create a transient MachineModel to carry the slug — not saved.
-            placeholder = MachineModel(
-                name=rec.name,
-                opdb_id=rec.opdb_id,
-                slug=slug,
-            )
-            # Track in lookups so aliases can find their parents.
-            by_opdb_id[rec.opdb_id] = placeholder
-            if rec.ipdb_id:
-                by_ipdb_id[rec.ipdb_id] = placeholder
-            results.append(MatchResult(model=placeholder, record=rec, is_new=True))
+            unmatched.append(rec)
 
-    return results
+    return results, unmatched
 
 
 def _reconcile_aliases(
     aliases: list[OpdbRecord],
     by_opdb_id: dict[str, MachineModel],
     by_ipdb_id: dict[int, MachineModel],
-    existing_slugs: set[str],
-) -> tuple[list[MatchResult], list[str]]:
-    """Match alias records.  Aliases need their parent in the lookup."""
+) -> tuple[list[MatchResult], list[str], list[OpdbRecord]]:
+    """Match alias records to existing MachineModels.
+
+    Returns (matched results, warnings, unmatched records). Orphan aliases
+    (parent not found) produce a warning and are silently skipped; aliases
+    whose opdb_id has no matching MM but whose parent *is* found are
+    reported as unmatched and abort ingest upstream.
+    """
     results: list[MatchResult] = []
     warnings: list[str] = []
+    unmatched: list[OpdbRecord] = []
 
     for rec in aliases:
         pm = by_opdb_id.get(rec.opdb_id)
@@ -386,26 +354,19 @@ def _reconcile_aliases(
             pm = by_ipdb_id.get(rec.ipdb_id)
 
         if pm:
-            results.append(MatchResult(model=pm, record=rec, is_new=False))
-        else:
-            parent = by_opdb_id.get(rec.parent_opdb_id)
-            if not parent:
-                warnings.append(
-                    f"Alias {rec.opdb_id} ({rec.name}): "
-                    f"parent {rec.parent_opdb_id} not found, skipping"
-                )
-                continue
+            results.append(MatchResult(model=pm, record=rec))
+            continue
 
-            slug = generate_unique_slug(rec.name, existing_slugs)
-            placeholder = MachineModel(
-                name=rec.name,
-                opdb_id=rec.opdb_id,
-                slug=slug,
+        if by_opdb_id.get(rec.parent_opdb_id) is None:
+            warnings.append(
+                f"Alias {rec.opdb_id} ({rec.name}): "
+                f"parent {rec.parent_opdb_id} not found, skipping"
             )
-            by_opdb_id[rec.opdb_id] = placeholder
-            results.append(MatchResult(model=placeholder, record=rec, is_new=True))
+            continue
 
-    return results, warnings
+        unmatched.append(rec)
+
+    return results, warnings, unmatched
 
 
 # ---------------------------------------------------------------------------
@@ -413,29 +374,15 @@ def _reconcile_aliases(
 # ---------------------------------------------------------------------------
 
 
-def _target_kwargs(mr: MatchResult, ct_id: int) -> dict:
-    """Return the PlannedClaimAssert target kwargs for a MatchResult."""
-    if mr.is_new:
-        return {"handle": f"opdb:{mr.record.opdb_id}"}
-    return {"content_type_id": ct_id, "object_id": mr.model.pk}
-
-
 def _collect_claims(
     rec: OpdbRecord,
-    ct_id: int,
     assertions: list[PlannedClaimAssert],
     *,
-    handle: str | None = None,
-    content_type_id: int | None = None,
-    object_id: int | None = None,
-    slug: str | None = None,
+    content_type_id: int,
+    object_id: int,
 ) -> None:
     """Collect scalar claims for one record into the assertions list."""
-    target: dict = {}
-    if handle is not None:
-        target = {"handle": handle}
-    else:
-        target = {"content_type_id": content_type_id, "object_id": object_id}
+    target = {"content_type_id": content_type_id, "object_id": object_id}
 
     def _add(field_name: str, value) -> None:
         assertions.append(
@@ -444,8 +391,6 @@ def _collect_claims(
 
     if rec.name:
         _add("name", rec.name)
-    if slug is not None:
-        _add("slug", slug)
     if rec.opdb_id:
         _add("opdb_id", rec.opdb_id)
 

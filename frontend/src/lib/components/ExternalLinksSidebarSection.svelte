@@ -5,17 +5,19 @@
 		ipdbId,
 		opdbId,
 		pinsideId,
-		note = 'See this on other sites:'
+		note = 'See this on other sites:',
+		onEdit = undefined
 	}: {
 		ipdbId?: number | null;
 		opdbId?: string | null;
 		pinsideId?: number | null;
 		note?: string;
+		onEdit?: (() => void) | undefined;
 	} = $props();
 </script>
 
 {#if ipdbId || opdbId || pinsideId}
-	<SidebarSection heading="External Links" {note}>
+	<SidebarSection heading="External Links" {note} {onEdit}>
 		<div class="external-ids">
 			{#if ipdbId}
 				<a href="https://www.ipdb.org/machine.cgi?id={ipdbId}"> Internet Pinball Database </a>

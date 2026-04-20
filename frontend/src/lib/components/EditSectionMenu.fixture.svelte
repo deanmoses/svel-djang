@@ -6,14 +6,14 @@
 	items={[
 		{ key: 'overview', label: 'Overview', href: '/models/medieval-madness/edit/overview' },
 		{
-			key: 'specifications',
-			label: 'Specifications',
-			href: '/models/medieval-madness/edit/specifications'
+			key: 'technology',
+			label: 'Technology',
+			href: '/models/medieval-madness/edit/technology'
 		},
 		{
-			key: 'relationships',
-			label: 'Relationships',
-			href: '/models/medieval-madness/edit/relationships'
+			key: 'related-models',
+			label: 'Related Models',
+			href: '/models/medieval-madness/edit/related-models'
 		}
 	]}
 />

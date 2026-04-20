@@ -4,17 +4,19 @@
 	import { createUploadManager } from '$lib/media-upload.svelte';
 	import Button from '$lib/components/Button.svelte';
 
+	type MediaEntityKey = keyof typeof MEDIA_CATEGORIES;
+
 	let {
 		entityType,
 		slug,
-		categories = [...MEDIA_CATEGORIES.model] as string[],
 		onuploaded
 	}: {
-		entityType: string;
+		entityType: MediaEntityKey;
 		slug: string;
-		categories?: readonly string[];
 		onuploaded: () => void;
 	} = $props();
+
+	const categories = $derived(MEDIA_CATEGORIES[entityType]);
 
 	let fileInput: HTMLInputElement | undefined = $state();
 	// svelte-ignore state_referenced_locally

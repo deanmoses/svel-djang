@@ -19,13 +19,13 @@ describe('EditSectionMenu', () => {
 			'href',
 			'/models/medieval-madness/edit/overview'
 		);
-		expect(screen.getByRole('menuitem', { name: 'Specifications' })).toHaveAttribute(
+		expect(screen.getByRole('menuitem', { name: 'Technology' })).toHaveAttribute(
 			'href',
-			'/models/medieval-madness/edit/specifications'
+			'/models/medieval-madness/edit/technology'
 		);
-		expect(screen.getByRole('menuitem', { name: 'Relationships' })).toHaveAttribute(
+		expect(screen.getByRole('menuitem', { name: 'Related Models' })).toHaveAttribute(
 			'href',
-			'/models/medieval-madness/edit/relationships'
+			'/models/medieval-madness/edit/related-models'
 		);
 	});
 
@@ -38,9 +38,9 @@ describe('EditSectionMenu', () => {
 				items: [
 					{ key: 'overview', label: 'Overview', href: '/models/medieval-madness/edit/overview' },
 					{
-						key: 'specifications',
-						label: 'Specifications',
-						href: '/models/medieval-madness/edit/specifications'
+						key: 'technology',
+						label: 'Technology',
+						href: '/models/medieval-madness/edit/technology'
 					}
 				]
 			}
@@ -53,9 +53,9 @@ describe('EditSectionMenu', () => {
 			'aria-disabled',
 			'true'
 		);
-		expect(screen.getByRole('menuitem', { name: 'Specifications' })).toHaveAttribute(
+		expect(screen.getByRole('menuitem', { name: 'Technology' })).toHaveAttribute(
 			'href',
-			'/models/medieval-madness/edit/specifications'
+			'/models/medieval-madness/edit/technology'
 		);
 	});
 

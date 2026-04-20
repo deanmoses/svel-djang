@@ -1,5 +1,185 @@
 <script lang="ts">
-	// Content is rendered by the layout's accordion sections.
-	// This page exists for the route; +page.server.ts handles the
-	// single-model-title redirect.
+	import AccordionSection from '$lib/components/AccordionSection.svelte';
+	import ModelHierarchy from '$lib/components/ModelHierarchy.svelte';
+	import ModelSpecsSidebar from '$lib/components/ModelSpecsSidebar.svelte';
+	import CreditsList from '$lib/components/CreditsList.svelte';
+	import MediaGrid from '$lib/components/media/MediaGrid.svelte';
+	import { MEDIA_CATEGORIES } from '$lib/api/catalog-meta';
+	import RichTextOverviewAccordion from '$lib/components/RichTextOverviewAccordion.svelte';
+	import RichTextReferencesAccordion from '$lib/components/RichTextReferencesAccordion.svelte';
+	import { createRichTextAccordionState } from '$lib/components/rich-text-accordion-state.svelte';
+	import ModelRelationshipsList from '$lib/components/ModelRelationshipsList.svelte';
+	import { modelEditActionContext } from '$lib/components/editors/edit-action-context';
+
+	let { data } = $props();
+	let model = $derived(data.model);
+
+	// On desktop, editAction opens the modal editor; on mobile, it navigates to the edit route.
+	const editAction = modelEditActionContext.get();
+	const richTextState = createRichTextAccordionState();
+
+	let hasRelationships = $derived(
+		model.title ||
+			model.variants.length > 0 ||
+			model.variant_of ||
+			(model.variant_siblings && model.variant_siblings.length > 0) ||
+			model.converted_from ||
+			(model.conversions && model.conversions.length > 0) ||
+			model.remake_of ||
+			(model.remakes && model.remakes.length > 0) ||
+			model.title_models.length > 1
+	);
+	let hasTechnology = $derived(
+		!!model.technology_generation ||
+			!!model.technology_subgeneration ||
+			!!model.display_type ||
+			!!model.display_subtype ||
+			!!model.system
+	);
+	let hasFeatures = $derived(
+		!!model.game_format ||
+			!!model.cabinet ||
+			(model.reward_types?.length ?? 0) > 0 ||
+			model.themes.length > 0 ||
+			!!model.production_quantity ||
+			!!model.player_count ||
+			!!model.flipper_count ||
+			model.gameplay_features.length > 0 ||
+			!!model.franchise ||
+			!!model.series ||
+			model.variant_features.length > 0
+	);
+	let peopleHeading = $derived(`People (${model.credits.length})`);
+	let mediaHeading = $derived(`Media (${model.uploaded_media.length})`);
+	let hasExternalLinks = $derived(!!(model.ipdb_id || model.opdb_id || model.pinside_id));
 </script>
+
+{#if model.description?.html}
+	<RichTextOverviewAccordion
+		richText={model.description}
+		state={richTextState}
+		onEdit={editAction('overview')}
+	/>
+{/if}
+
+<!-- Technology — mobile only -->
+{#if hasTechnology}
+	<div class="mobile-only">
+		<AccordionSection heading="Technology" onEdit={editAction('technology')}>
+			<ModelSpecsSidebar {model} section="technology" />
+		</AccordionSection>
+	</div>
+{/if}
+
+<!-- Features — mobile only -->
+{#if hasFeatures}
+	<div class="mobile-only">
+		<AccordionSection heading="Features" onEdit={editAction('features')}>
+			<ModelSpecsSidebar {model} section="features" />
+			{#if model.ipdb_rating || model.pinside_rating}
+				<div class="mobile-ratings">
+					{#if model.ipdb_rating}
+						<span>IPDB: {model.ipdb_rating.toFixed(1)}</span>
+					{/if}
+					{#if model.pinside_rating}
+						<span>Pinside: {model.pinside_rating.toFixed(1)}</span>
+					{/if}
+				</div>
+			{/if}
+		</AccordionSection>
+	</div>
+{/if}
+
+<!-- People -->
+{#if model.credits.length > 0}
+	<AccordionSection heading={peopleHeading} onEdit={editAction('people')}>
+		<CreditsList credits={model.credits} showHeading={false} />
+	</AccordionSection>
+{/if}
+
+<!-- Related Models — mobile only -->
+{#if hasRelationships}
+	<div class="mobile-only">
+		<AccordionSection heading="Related Models" onEdit={editAction('related-models')}>
+			<ModelRelationshipsList {model} />
+			<ModelHierarchy
+				models={model.title_models}
+				heading="Other Models In Title"
+				excludeSlug={model.variant_of?.slug ?? model.slug}
+				inline
+			/>
+		</AccordionSection>
+	</div>
+{/if}
+
+<!-- Media -->
+{#if model.uploaded_media.length > 0}
+	<AccordionSection heading={mediaHeading} onEdit={editAction('media')}>
+		<MediaGrid
+			media={model.uploaded_media}
+			categories={[...MEDIA_CATEGORIES.model]}
+			canEdit={false}
+		/>
+	</AccordionSection>
+{/if}
+
+<!-- External Links — mobile only -->
+{#if hasExternalLinks}
+	<div class="mobile-only">
+		<AccordionSection heading="External Links" onEdit={editAction('external-data')}>
+			<p class="external-note">See this model on other sites:</p>
+			<div class="external-ids">
+				{#if model.ipdb_id}
+					<a href="https://www.ipdb.org/machine.cgi?id={model.ipdb_id}">
+						Internet Pinball Database
+					</a>
+				{/if}
+				{#if model.opdb_id}
+					<a href="https://opdb.org/machines/{model.opdb_id}">Open Pinball Database</a>
+				{/if}
+				{#if model.pinside_id}
+					<a href="https://pinside.com/pinball/machine/{model.pinside_id}">Pinside</a>
+				{/if}
+			</div>
+		</AccordionSection>
+	</div>
+{/if}
+
+<RichTextReferencesAccordion richText={model.description} state={richTextState} />
+
+<style>
+	/* Mobile-only: visible below 52rem — keep in sync with LAYOUT_BREAKPOINT */
+	.mobile-only {
+		display: block;
+	}
+
+	@media (min-width: 52rem) {
+		.mobile-only {
+			display: none;
+		}
+	}
+
+	.external-note {
+		font-size: var(--font-size-0);
+		color: var(--color-text-muted);
+		margin: 0 0 var(--size-2);
+	}
+
+	.external-ids {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--size-3);
+		font-size: var(--font-size-0);
+	}
+
+	/* Mobile ratings supplement */
+	.mobile-ratings {
+		display: flex;
+		gap: var(--size-4);
+		margin-top: var(--size-3);
+		padding-top: var(--size-3);
+		border-top: 1px solid var(--color-border-soft);
+		font-size: var(--font-size-0);
+		color: var(--color-text-muted);
+	}
+</style>

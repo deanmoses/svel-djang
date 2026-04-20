@@ -8,6 +8,7 @@ output, not the framework's execution.
 from __future__ import annotations
 
 import pytest
+from django.core.management.base import CommandError
 
 from apps.catalog.ingestion.ipdb.adapter import build_ipdb_plan
 from apps.catalog.ingestion.ipdb.records import IpdbRecord
@@ -20,6 +21,7 @@ from apps.catalog.models import (
     Theme,
 )
 from apps.provenance.models import Source
+from apps.catalog.tests.conftest import make_machine_model
 
 pytestmark = pytest.mark.django_db
 
@@ -31,6 +33,29 @@ def ipdb_source(db):
         name="IPDB",
         source_type="database",
         priority=100,
+    )
+
+
+@pytest.fixture
+def _seed_mm_9999(db):
+    """Pre-seed the default test MachineModel (ipdb_id=9999).
+
+    The adapter requires every IPDB record to match an existing MachineModel;
+    nearly every test here feeds _make_record(ipdb_id=9999, ...), so centralise
+    the seed. Tests that want to test the unmatched-record behavior can omit
+    this fixture and/or use a different ipdb_id.
+    """
+    return make_machine_model(name="Test Machine", slug="test-machine", ipdb_id=9999)
+
+
+@pytest.fixture
+def _seed_mm_9998_and_9999(_seed_mm_9999, db):
+    """Pre-seed both ipdb_id=9998 and 9999 for tests that use both."""
+    return (
+        make_machine_model(
+            name="Test Machine 9998", slug="test-machine-9998", ipdb_id=9998
+        ),
+        _seed_mm_9999,
     )
 
 
@@ -101,19 +126,14 @@ class TestMachineModelReconciliation:
     def _setup(self, ipdb_narrative_features):
         """Narrative features must exist for vocabulary validation."""
 
-    def test_new_machine_produces_entity_create(self, ipdb_source):
+    def test_unmatched_record_raises(self, ipdb_source):
+        """IPDB records with no matching MachineModel abort plan building."""
         rec = _make_record(ipdb_id=9999, title="Brand New")
-        plan = build_ipdb_plan([rec], ipdb_source, "fp-1")
-
-        mm_entities = [e for e in plan.entities if e.model_class is MachineModel]
-        assert len(mm_entities) == 1
-        assert mm_entities[0].kwargs["name"] == "Brand New"
-        assert mm_entities[0].kwargs["ipdb_id"] == 9999
-        assert mm_entities[0].kwargs["status"] == "active"
-        assert mm_entities[0].handle == "ipdb:9999"
+        with pytest.raises(CommandError, match="do not match any existing"):
+            build_ipdb_plan([rec], ipdb_source, "fp-1")
 
     def test_existing_machine_matched_no_entity_create(self, ipdb_source):
-        MachineModel.objects.create(name="Existing", slug="existing", ipdb_id=9999)
+        make_machine_model(name="Existing", slug="existing", ipdb_id=9999)
         rec = _make_record(ipdb_id=9999, title="Existing")
         plan = build_ipdb_plan([rec], ipdb_source, "fp-1")
 
@@ -121,7 +141,8 @@ class TestMachineModelReconciliation:
         assert len(mm_entities) == 0
         assert plan.records_matched == 1
 
-    def test_new_machine_has_scalar_claims(self, ipdb_source):
+    def test_matched_machine_has_scalar_claims(self, ipdb_source, _seed_mm_9999):
+        mm = _seed_mm_9999
         rec = _make_record(
             ipdb_id=9999,
             title="Test Game",
@@ -132,20 +153,19 @@ class TestMachineModelReconciliation:
             type_short_name="SS",
         )
         plan = build_ipdb_plan([rec], ipdb_source, "fp-1")
-        handle = "ipdb:9999"
 
-        fields = _assertion_fields(plan, handle=handle)
-        assert "name" in fields
-        assert "slug" in fields
+        fields = _assertion_fields(plan, object_id=mm.pk)
         assert "ipdb_id" in fields
-        assert "status" in fields
         assert "player_count" in fields
         assert "ipdb_rating" in fields
         assert "year" in fields
         assert "month" in fields
+        # IPDB never asserts name claims — pindata is authoritative for names.
+        assert "name" not in fields
+        assert "slug" not in fields
 
     def test_existing_machine_skips_name_claim(self, ipdb_source):
-        mm = MachineModel.objects.create(name="Existing", slug="existing", ipdb_id=9999)
+        mm = make_machine_model(name="Existing", slug="existing", ipdb_id=9999)
         rec = _make_record(ipdb_id=9999, title="Existing")
         plan = build_ipdb_plan([rec], ipdb_source, "fp-1")
 
@@ -161,7 +181,7 @@ class TestMachineModelReconciliation:
 
 class TestCorporateEntityReconciliation:
     @pytest.fixture(autouse=True)
-    def _setup(self, ipdb_narrative_features, ipdb_locations):
+    def _setup(self, ipdb_narrative_features, ipdb_locations, _seed_mm_9998_and_9999):
         """Locations + narrative features must exist."""
 
     def test_existing_ce_matched_by_ipdb_id(self, ipdb_source):
@@ -183,7 +203,7 @@ class TestCorporateEntityReconciliation:
         assert "manufacturer" in fields
         assert "name" in fields
 
-    def test_extra_data_claims_on_machine_model(self, ipdb_source):
+    def test_extra_data_claims_on_machine_model(self, ipdb_source, _seed_mm_9999):
         """Parsed manufacturer string produces informational extra_data claims."""
         rec = _make_record(
             ipdb_id=9999,
@@ -191,17 +211,17 @@ class TestCorporateEntityReconciliation:
             manufacturer_id=351,
         )
         plan = build_ipdb_plan([rec], ipdb_source, "fp-1")
-        handle = "ipdb:9999"
+        mm_pk = _seed_mm_9999.pk
 
-        fields = _assertion_fields(plan, handle=handle)
+        fields = _assertion_fields(plan, object_id=mm_pk)
         assert "ipdb.corporate_entity_name" in fields
         assert "ipdb.manufacturer_trade_name" in fields
         assert (
-            _assertion_value(plan, "ipdb.corporate_entity_name", handle=handle)
+            _assertion_value(plan, "ipdb.corporate_entity_name", object_id=mm_pk)
             == "Williams Electronic Games"
         )
         assert (
-            _assertion_value(plan, "ipdb.manufacturer_trade_name", handle=handle)
+            _assertion_value(plan, "ipdb.manufacturer_trade_name", object_id=mm_pk)
             == "Williams"
         )
 
@@ -235,7 +255,7 @@ class TestCorporateEntityReconciliation:
 
 class TestPersonAndCredits:
     @pytest.fixture(autouse=True)
-    def _setup(self, ipdb_narrative_features, credit_roles):
+    def _setup(self, ipdb_narrative_features, credit_roles, _seed_mm_9999):
         """Credit roles + narrative features must exist."""
 
     def test_new_person_produces_entity_create(self, ipdb_source):
@@ -267,11 +287,13 @@ class TestPersonAndCredits:
         assert credit_claims[0].value["person"] == p.pk
         assert credit_claims[0].value["exists"] is True
 
-    def test_credit_claim_for_new_person_uses_identity_refs(self, ipdb_source):
+    def test_credit_claim_for_new_person_uses_identity_refs(
+        self, ipdb_source, _seed_mm_9999
+    ):
         rec = _make_record(ipdb_id=9999, design_by="Brian Eddy")
         plan = build_ipdb_plan([rec], ipdb_source, "fp-1")
 
-        deferred = _deferred_assertions(plan, "credit", handle="ipdb:9999")
+        deferred = _deferred_assertions(plan, "credit", object_id=_seed_mm_9999.pk)
         assert len(deferred) == 1
         assert deferred[0].relationship_namespace == "credit"
         assert "person" in deferred[0].identity_refs
@@ -294,7 +316,7 @@ class TestPersonAndCredits:
 
 class TestThemes:
     @pytest.fixture(autouse=True)
-    def _setup(self, ipdb_narrative_features):
+    def _setup(self, ipdb_narrative_features, _seed_mm_9999):
         pass
 
     def test_new_theme_produces_entity_create(self, ipdb_source):
@@ -324,11 +346,13 @@ class TestThemes:
         assert len(theme_claims) == 1
         assert theme_claims[0].value["theme"] == t.pk
 
-    def test_theme_claim_for_new_theme_uses_identity_refs(self, ipdb_source):
+    def test_theme_claim_for_new_theme_uses_identity_refs(
+        self, ipdb_source, _seed_mm_9999
+    ):
         rec = _make_record(ipdb_id=9999, theme="Medieval")
         plan = build_ipdb_plan([rec], ipdb_source, "fp-1")
 
-        deferred = _deferred_assertions(plan, "theme", handle="ipdb:9999")
+        deferred = _deferred_assertions(plan, "theme", object_id=_seed_mm_9999.pk)
         assert len(deferred) == 1
         assert deferred[0].relationship_namespace == "theme"
         assert "theme" in deferred[0].identity_refs
@@ -341,7 +365,7 @@ class TestThemes:
 
 class TestGameplayFeatures:
     @pytest.fixture(autouse=True)
-    def _setup(self, ipdb_narrative_features):
+    def _setup(self, ipdb_narrative_features, _seed_mm_9999):
         pass
 
     def test_gameplay_feature_claim_with_count(self, ipdb_source):
@@ -369,7 +393,7 @@ class TestGameplayFeatures:
 
 class TestAbbreviations:
     @pytest.fixture(autouse=True)
-    def _setup(self, ipdb_narrative_features):
+    def _setup(self, ipdb_narrative_features, _seed_mm_9999):
         pass
 
     def test_abbreviation_claims(self, ipdb_source):
@@ -389,7 +413,7 @@ class TestAbbreviations:
 
 class TestErrors:
     @pytest.fixture(autouse=True)
-    def _setup(self, ipdb_narrative_features):
+    def _setup(self, ipdb_narrative_features, _seed_mm_9999):
         pass
 
     def test_unknown_mpu_raises(self, ipdb_source):

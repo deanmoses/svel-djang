@@ -38,7 +38,6 @@ function renderZone() {
 	const result = render(MediaUploadZone, {
 		entityType: 'model',
 		slug: 'attack-from-mars',
-		categories: ['Cabinet', 'Backglass'],
 		onuploaded
 	});
 	return { ...result, onuploaded };
@@ -73,7 +72,7 @@ describe('MediaUploadZone', () => {
 		const input = container.querySelector('input[type="file"]') as HTMLInputElement;
 		const file = new File(['image'], 'cabinet.png', { type: 'image/png' });
 
-		await user.selectOptions(screen.getByRole('combobox'), 'Backglass');
+		await user.selectOptions(screen.getByRole('combobox'), 'backglass');
 		await user.click(screen.getByRole('checkbox', { name: /set as primary/i }));
 		setInputFiles(input, [file]);
 
@@ -84,7 +83,7 @@ describe('MediaUploadZone', () => {
 				file,
 				'model',
 				'attack-from-mars',
-				{ category: 'Backglass', isPrimary: true },
+				{ category: 'backglass', isPrimary: true },
 				expect.any(Function)
 			);
 		});

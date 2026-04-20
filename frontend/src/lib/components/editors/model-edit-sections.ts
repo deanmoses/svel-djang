@@ -1,25 +1,38 @@
+import type { EditSectionDef } from './edit-section-def';
+
 export type ModelEditSectionKey =
+	| 'name'
 	| 'basics'
 	| 'overview'
-	| 'specifications'
+	| 'technology'
 	| 'features'
 	| 'people'
-	| 'relationships'
+	| 'related-models'
 	| 'external-data'
 	| 'media';
 
-export type ModelEditSectionDef = {
-	key: ModelEditSectionKey;
+export type ModelEditSectionDef = EditSectionDef<ModelEditSectionKey> & {
 	/** URL segment for the mobile edit route, e.g. 'external-data' */
-	segment: string;
-	label: string;
-	showCitation: boolean;
-	showMixedEditWarning: boolean;
 	/** false for media — uses immediate-action Modal, not SectionEditorForm */
 	usesSectionEditorForm: boolean;
+	/**
+	 * Hide when the model's identity is title-owned (single-model titles). Per
+	 * ModelAndTitleUX.md, name/slug/abbreviations on single-model titles live on
+	 * the Title row; the model-side editor must not surface them at all.
+	 */
+	hideOnTitleOwnedIdentity?: boolean;
 };
 
 export const MODEL_EDIT_SECTIONS: ModelEditSectionDef[] = [
+	{
+		key: 'name',
+		segment: 'name',
+		label: 'Name',
+		showCitation: true,
+		showMixedEditWarning: false,
+		usesSectionEditorForm: true,
+		hideOnTitleOwnedIdentity: true
+	},
 	{
 		key: 'basics',
 		segment: 'basics',
@@ -37,9 +50,9 @@ export const MODEL_EDIT_SECTIONS: ModelEditSectionDef[] = [
 		usesSectionEditorForm: true
 	},
 	{
-		key: 'specifications',
-		segment: 'specifications',
-		label: 'Specifications',
+		key: 'technology',
+		segment: 'technology',
+		label: 'Technology',
 		showCitation: true,
 		showMixedEditWarning: true,
 		usesSectionEditorForm: true
@@ -61,17 +74,9 @@ export const MODEL_EDIT_SECTIONS: ModelEditSectionDef[] = [
 		usesSectionEditorForm: true
 	},
 	{
-		key: 'relationships',
-		segment: 'relationships',
-		label: 'Relationships',
-		showCitation: true,
-		showMixedEditWarning: true,
-		usesSectionEditorForm: true
-	},
-	{
-		key: 'external-data',
-		segment: 'external-data',
-		label: 'External Data',
+		key: 'related-models',
+		segment: 'related-models',
+		label: 'Related Models',
 		showCitation: true,
 		showMixedEditWarning: true,
 		usesSectionEditorForm: true
@@ -83,6 +88,14 @@ export const MODEL_EDIT_SECTIONS: ModelEditSectionDef[] = [
 		showCitation: false,
 		showMixedEditWarning: false,
 		usesSectionEditorForm: false
+	},
+	{
+		key: 'external-data',
+		segment: 'external-data',
+		label: 'External Data',
+		showCitation: true,
+		showMixedEditWarning: true,
+		usesSectionEditorForm: true
 	}
 ];
 
@@ -92,4 +105,10 @@ export function findSectionByKey(key: string): ModelEditSectionDef | undefined {
 
 export function findSectionBySegment(segment: string): ModelEditSectionDef | undefined {
 	return MODEL_EDIT_SECTIONS.find((s) => s.segment === segment);
+}
+
+export function modelSectionsFor(hasTitleOwnedIdentity: boolean): ModelEditSectionDef[] {
+	return hasTitleOwnedIdentity
+		? MODEL_EDIT_SECTIONS.filter((s) => !s.hideOnTitleOwnedIdentity)
+		: MODEL_EDIT_SECTIONS;
 }

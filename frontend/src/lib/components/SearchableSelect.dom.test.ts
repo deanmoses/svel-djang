@@ -133,6 +133,21 @@ describe('SearchableSelect', () => {
 		expect(screen.getByText('Stern Pinball')).toBeInTheDocument();
 	});
 
+	it('keeps the multi-select input empty when a single value is selected (chip speaks for it)', () => {
+		renderMulti({ selected: ['stern'] });
+
+		// The selection is already rendered as a chip; the input must not
+		// duplicate it as its value, which would read as a search query.
+		expect(getCombobox()).toHaveValue('');
+		expect(screen.getByText('Stern Pinball')).toBeInTheDocument();
+	});
+
+	it('summarizes the multi-select input when more than one value is selected', () => {
+		renderMulti({ selected: ['stern', 'bally'] });
+
+		expect(getCombobox()).toHaveValue('2 selected');
+	});
+
 	it('marks zero-count options disabled and does not select them by keyboard by default', async () => {
 		const user = userEvent.setup();
 		renderSingle({ allowZeroCount: false });

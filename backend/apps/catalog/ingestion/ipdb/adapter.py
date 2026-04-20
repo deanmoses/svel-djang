@@ -4,8 +4,8 @@ Converts IPDB JSON data into an IngestPlan for the apply layer.
 No database writes — all mutations happen in apply_plan().
 
 The adapter handles:
-- Matching IPDB records to existing MachineModels (by ipdb_id)
-- Creating PlannedEntityCreate for unmatched records
+- Matching IPDB records to existing MachineModels (by ipdb_id); unmatched
+  records abort ingest (pindata is the authoritative superset of machines)
 - CorporateEntity reconciliation (by IPDB mfr ID, then name/alias)
 - Person and Theme reconciliation and creation
 - Collecting scalar and relationship claims as PlannedClaimAssert
@@ -42,7 +42,6 @@ from apps.catalog.ingestion.ipdb.features import (
     validate_narrative_slugs,
 )
 from apps.catalog.ingestion.ipdb.records import IpdbRecord
-from apps.catalog.ingestion.ipdb_title_fixes import TITLE_FIXES
 from apps.catalog.ingestion.parsers import (
     _IPDBLocationLookup,
     get_ipdb_location,
@@ -79,8 +78,9 @@ from apps.provenance.models import Source
 logger = logging.getLogger(__name__)
 
 # IpdbRecord attribute → Claim field_name for direct/extra_data claims.
+# IPDB never asserts a "name" claim — pindata is the authoritative source
+# for machine names, and IPDB titles are frequently encoding-damaged.
 CLAIM_FIELDS = {
-    "title": "name",
     "ipdb_id": "ipdb_id",
     "players": "player_count",
     "production_number": "production_quantity",
@@ -112,12 +112,10 @@ CREDIT_FIELDS = {
 
 @dataclass
 class MatchResult:
-    """Result of matching one IPDB record to the catalog."""
+    """An IPDB record paired with the existing MachineModel it reconciled to."""
 
-    model: MachineModel  # existing entity, or unsaved placeholder if new
+    model: MachineModel
     record: IpdbRecord
-    is_new: bool
-    title: str  # corrected title (after TITLE_FIXES + unescape)
 
 
 # ---------------------------------------------------------------------------
@@ -214,31 +212,35 @@ def build_ipdb_plan(
     existing_by_ipdb: dict[int, MachineModel] = {
         pm.ipdb_id: pm for pm in MachineModel.objects.filter(ipdb_id__isnull=False)
     }
-    existing_slugs: set[str] = set(MachineModel.objects.values_list("slug", flat=True))
 
     match_results: list[MatchResult] = []
-    skipped = 0
+    unmatched_records: list[tuple[int, str]] = []
 
     for rec in records:
         if not rec.ipdb_id:
-            skipped += 1
             continue
 
-        title = unescape(TITLE_FIXES.get(rec.ipdb_id, rec.title))
         pm = existing_by_ipdb.get(rec.ipdb_id)
         if pm:
-            match_results.append(
-                MatchResult(model=pm, record=rec, is_new=False, title=title)
-            )
+            match_results.append(MatchResult(model=pm, record=rec))
         else:
-            slug = generate_unique_slug(title, existing_slugs)
-            placeholder = MachineModel(ipdb_id=rec.ipdb_id, name=title, slug=slug)
-            existing_by_ipdb[rec.ipdb_id] = placeholder
-            match_results.append(
-                MatchResult(model=placeholder, record=rec, is_new=True, title=title)
-            )
+            unmatched_records.append((rec.ipdb_id, unescape(rec.title)))
 
-    plan.records_matched = sum(1 for mr in match_results if not mr.is_new)
+    # IPDB records must match an existing pindata MachineModel. Any record
+    # with no match indicates pindata is missing the model file; abort ingest
+    # and instruct the user to add it to pindata first.
+    if unmatched_records:
+        lines = "\n".join(
+            f"  ipdb_id={ipdb_id} — {title!r}" for ipdb_id, title in unmatched_records
+        )
+        raise CommandError(
+            f"{len(unmatched_records)} IPDB record(s) do not match any existing "
+            f"MachineModel. Every IPDB machine must correspond to a pindata "
+            f"model file. Add the missing models to pindata and re-run ingest:\n"
+            f"{lines}"
+        )
+
+    plan.records_matched = len(match_results)
 
     # Collect queues for deferred processing.
     credit_queue: list[tuple[dict, str, str]] = []  # (target_kwargs, name, role_slug)
@@ -251,27 +253,7 @@ def build_ipdb_plan(
 
     # ── Step 3: Process each record ──────────────────────────────
     for mr in match_results:
-        if mr.is_new:
-            handle = f"ipdb:{mr.record.ipdb_id}"
-            plan.entities.append(
-                PlannedEntityCreate(
-                    model_class=MachineModel,
-                    kwargs={
-                        "name": mr.title,
-                        "slug": mr.model.slug,
-                        "ipdb_id": mr.record.ipdb_id,
-                        "status": "active",
-                    },
-                    handle=handle,
-                )
-            )
-            target = {"handle": handle}
-            # Claims for entity-creation kwargs.
-            plan.assertions.append(
-                PlannedClaimAssert(field_name="status", value="active", **target)
-            )
-        else:
-            target = {"content_type_id": ct_mm, "object_id": mr.model.pk}
+        target = {"content_type_id": ct_mm, "object_id": mr.model.pk}
 
         _collect_mm_claims(mr, target, plan, mpu_to_slug, unknown_mpu_strings)
 
@@ -444,28 +426,15 @@ def _collect_mm_claims(
     rec = mr.record
 
     for attr, claim_field in CLAIM_FIELDS.items():
-        # Skip name claim for matched models — pindata already has the
-        # correct name; IPDB titles often contain encoding corruption.
-        if attr == "title" and not mr.is_new:
-            continue
         value = getattr(rec, attr)
         if value is None or value == "":
             continue
-        # Use corrected title for name claims on newly created models.
-        if attr == "title" and rec.ipdb_id in TITLE_FIXES:
-            value = TITLE_FIXES[rec.ipdb_id]
         if attr == "production_number":
             value = str(value)
         if isinstance(value, str):
             value = unescape(value)
         plan.assertions.append(
             PlannedClaimAssert(field_name=claim_field, value=value, **target)
-        )
-
-    # Slug claim — only for models IPDB created.
-    if mr.is_new:
-        plan.assertions.append(
-            PlannedClaimAssert(field_name="slug", value=mr.model.slug, **target)
         )
 
     # Date fields.

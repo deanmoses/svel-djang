@@ -7,7 +7,8 @@ from django.contrib.auth import get_user_model
 
 from apps.catalog.models import Title
 from apps.citation.models import CitationSource, CitationSourceLink
-from apps.provenance.models import ChangeSet, CitationInstance, Claim, Source
+from apps.provenance.models import CitationInstance, Claim, Source
+from apps.provenance.test_factories import user_changeset
 
 User = get_user_model()
 
@@ -58,7 +59,7 @@ class TestCitedEditEvidence:
     def test_returns_cited_changesets_with_fields_and_citation_details(
         self, client, user, title, citation_source
     ):
-        changeset = ChangeSet.objects.create(user=user, note="Documented the flyer")
+        changeset = user_changeset(user, note="Documented the flyer")
         year_claim = Claim.objects.assert_claim(
             title, "name", "Medieval Madness (1997)", user=user, changeset=changeset
         )
@@ -85,7 +86,7 @@ class TestCitedEditEvidence:
     def test_coalesces_repeated_copied_claim_citations(
         self, client, user, title, citation_source
     ):
-        changeset = ChangeSet.objects.create(user=user, note="Grouped edit")
+        changeset = user_changeset(user, note="Grouped edit")
         first_claim = Claim.objects.assert_claim(
             title, "name", "Medieval Madness (1997)", user=user, changeset=changeset
         )
@@ -101,8 +102,8 @@ class TestCitedEditEvidence:
         assert len(resp.json()[0]["citations"]) == 1
 
     def test_omits_uncited_changesets(self, client, user, title, citation_source):
-        uncited = ChangeSet.objects.create(user=user, note="Uncited cleanup")
-        cited = ChangeSet.objects.create(user=user, note="Cited update")
+        uncited = user_changeset(user, note="Uncited cleanup")
+        cited = user_changeset(user, note="Cited update")
         Claim.objects.assert_claim(
             title, "description", "Cleanup", user=user, changeset=uncited
         )

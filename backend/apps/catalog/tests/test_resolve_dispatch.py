@@ -5,7 +5,6 @@ import pytest
 from apps.catalog._alias_registry import discover_alias_types
 from apps.catalog.claims import _get_literal_schemas, build_relationship_claim
 from apps.catalog.models import (
-    MachineModel,
     Manufacturer,
     TechnologyGeneration,
     Theme,
@@ -13,6 +12,7 @@ from apps.catalog.models import (
 )
 from apps.catalog.resolve._dispatch import resolve_after_mutation
 from apps.provenance.models import Claim, Source
+from apps.catalog.tests.conftest import make_machine_model
 
 
 # ---------------------------------------------------------------------------
@@ -44,7 +44,7 @@ def manufacturer(db):
 
 @pytest.fixture
 def pm(db):
-    return MachineModel.objects.create(name="Placeholder", slug="placeholder")
+    return make_machine_model(name="Placeholder", slug="placeholder")
 
 
 # ---------------------------------------------------------------------------

@@ -3,11 +3,12 @@
 import pytest
 
 from apps.catalog.api.helpers import _extract_image_urls
-from apps.catalog.models import MachineModel, Title
+from apps.catalog.models import Title
 from apps.catalog.resolve import resolve_model
 from apps.core.licensing import resolve_effective_license
 from apps.core.models import License
 from apps.provenance.models import Claim, Source, SourceFieldLicense
+from apps.catalog.tests.conftest import make_machine_model
 
 
 @pytest.fixture
@@ -110,7 +111,7 @@ class TestImageLicenseDenormalization:
         opdb.default_license = cc_by_sa
         opdb.save()
 
-        pm = MachineModel.objects.create(name="Test", slug="test-pm")
+        pm = make_machine_model(name="Test", slug="test-pm")
         Claim.objects.assert_claim(pm, "name", "Test", source=opdb)
         Claim.objects.assert_claim(
             pm,
@@ -136,7 +137,7 @@ class TestImageLicenseDenormalization:
 
     def test_null_license_stores_null_rank(self, opdb):
         """Null license should store null rank in extra_data."""
-        pm = MachineModel.objects.create(name="Test", slug="test-pm")
+        pm = make_machine_model(name="Test", slug="test-pm")
         Claim.objects.assert_claim(pm, "name", "Test", source=opdb)
         Claim.objects.assert_claim(
             pm,

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { components } from '$lib/api/schema';
 	import client from '$lib/api/client';
-	import { ENTITY_TYPES } from '$lib/api/catalog-meta';
+	import { CATALOG_META } from '$lib/api/catalog-meta';
 	import { SITE_NAME } from '$lib/constants';
 	import { resolveHref } from '$lib/utils';
 	import SmartDate from '$lib/components/SmartDate.svelte';
@@ -167,8 +167,8 @@
 			<span class="filter-label">Entity type</span>
 			<select bind:value={entityType}>
 				<option value="">All types</option>
-				{#each ENTITY_TYPES as et (et.value)}
-					<option value={et.value}>{et.label}</option>
+				{#each Object.values(CATALOG_META) as et (et.entity_type)}
+					<option value={et.entity_type}>{et.label}</option>
 				{/each}
 			</select>
 		</label>

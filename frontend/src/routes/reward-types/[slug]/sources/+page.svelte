@@ -6,6 +6,6 @@
 
 <EntityProvenance
 	sources={data.profile.sources}
-	entityType="rewardtype"
+	entityType="reward-type"
 	entitySlug={data.profile.slug}
 />

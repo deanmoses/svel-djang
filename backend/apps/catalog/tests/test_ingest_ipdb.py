@@ -9,6 +9,7 @@ from django.core.management.base import CommandError
 from apps.catalog.ingestion.ipdb.features import extract_ipdb_gameplay_features
 from apps.catalog.models import Credit, MachineModel, Person, System, SystemMpuString
 from apps.provenance.models import Source
+from apps.catalog.tests.conftest import make_machine_model
 
 FIXTURES = "apps/catalog/tests/fixtures"
 
@@ -21,6 +22,20 @@ def _mpu_strings(db):
 
 
 @pytest.fixture
+def _ipdb_sample_models(db):
+    """Pre-seed MachineModels that ingest_ipdb expects to exist in pindata.
+
+    Pindata is the authoritative superset of machines, so IPDB ingest
+    matches by ipdb_id rather than creating. Mirror that with pre-seeded
+    rows covering every record in ipdb_sample.json.
+    """
+    make_machine_model(name="Medieval Madness", slug="medieval-madness", ipdb_id=4000)
+    make_machine_model(name="A-B-C Bowler", slug="a-b-c-bowler", ipdb_id=20)
+    make_machine_model(name="The Addams Family", slug="the-addams-family", ipdb_id=61)
+    make_machine_model(name="Baffle Ball", slug="baffle-ball", ipdb_id=100)
+
+
+@pytest.fixture
 def _run_ipdb(
     db,
     credit_roles,
@@ -28,6 +43,7 @@ def _run_ipdb(
     ingest_taxonomy,
     ipdb_locations,
     ipdb_narrative_features,
+    _ipdb_sample_models,
 ):
     """Run ingest_ipdb with the sample fixture."""
     call_command(
@@ -39,12 +55,21 @@ def _run_ipdb(
 @pytest.mark.django_db
 @pytest.mark.usefixtures("_run_ipdb")
 class TestIngestIpdb:
+    """Integration tests against a pre-seeded MachineModel set.
+
+    IPDB ingest no longer creates MachineModels — pindata is the authoritative
+    superset, so every IPDB record must match a pre-seeded MM (see the
+    ``_ipdb_sample_models`` fixture). These tests verify reconciliation,
+    claim assertion, and downstream entity creation (Persons, Credits, etc.).
+    """
+
     def test_creates_source(self):
         source = Source.objects.get(slug="ipdb")
         assert source.name == "IPDB"
         assert source.priority == 100
 
-    def test_creates_models(self):
+    def test_all_records_reconciled_no_extras_created(self):
+        """Every pre-seeded MM is matched; ingest adds no MMs and removes none."""
         assert MachineModel.objects.count() == 4
         assert MachineModel.objects.filter(ipdb_id=4000).exists()
         assert MachineModel.objects.filter(ipdb_id=20).exists()
@@ -56,8 +81,9 @@ class TestIngestIpdb:
         source = Source.objects.get(slug="ipdb")
         active_claims = pm.claims.filter(source=source, is_active=True)
 
+        # IPDB does not assert name claims — pindata is the authoritative
+        # name source (IPDB titles often contain encoding corruption).
         claim_fields = set(active_claims.values_list("field_name", flat=True))
-        assert "name" in claim_fields
         assert "year" in claim_fields
         assert "technology_generation" in claim_fields
         assert "ipdb_rating" in claim_fields
@@ -144,6 +170,7 @@ class TestIngestIpdbDryRun:
         ingest_taxonomy,
         ipdb_locations,
         ipdb_narrative_features,
+        _ipdb_sample_models,
     ):
         """--dry-run validates the plan without writing entities or claims."""
         initial_mm = MachineModel.objects.count()
@@ -172,20 +199,24 @@ class TestIngestIpdbDryRun:
         ingest_taxonomy,
         ipdb_locations,
         ipdb_narrative_features,
+        _ipdb_sample_models,
     ):
-        """Dry-run followed by real run produces the expected entities."""
+        """Dry-run is a no-op; the real run then populates Person rows."""
+        initial_mm = MachineModel.objects.count()
         call_command(
             "ingest_ipdb",
             ipdb=f"{FIXTURES}/ipdb_sample.json",
             dry_run=True,
         )
-        assert MachineModel.objects.count() == 0
+        assert MachineModel.objects.count() == initial_mm
+        assert Person.objects.count() == 0
 
         call_command(
             "ingest_ipdb",
             ipdb=f"{FIXTURES}/ipdb_sample.json",
         )
-        assert MachineModel.objects.count() == 4
+        # IPDB no longer creates MachineModels — they must pre-exist.
+        assert MachineModel.objects.count() == initial_mm
         assert Person.objects.count() == 6
 
 
@@ -193,7 +224,8 @@ class TestIngestIpdbDryRun:
 @pytest.mark.django_db
 class TestIngestIpdbUnknownMpu:
     @pytest.mark.usefixtures("ipdb_narrative_features", "credit_roles")
-    def test_unknown_mpu_raises_command_error(self, tmp_path):
+    def test_unknown_mpu_raises_command_error(self, db, tmp_path):
+        make_machine_model(name="Mystery Machine", slug="mystery-machine", ipdb_id=9999)
         fixture = tmp_path / "bad_ipdb.json"
         fixture.write_text(
             json.dumps(

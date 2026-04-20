@@ -1,0 +1,171 @@
+<script lang="ts" generics="TKey extends string">
+	import { untrack, type Snippet } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+	import { resolveHref } from '$lib/utils';
+	import { SITE_NAME, LAYOUT_BREAKPOINT } from '$lib/constants';
+	import { auth } from '$lib/auth.svelte';
+	import MetaTags from '$lib/components/MetaTags.svelte';
+	import PageActionBar from '$lib/components/PageActionBar.svelte';
+	import RecordDetailShell from '$lib/components/RecordDetailShell.svelte';
+	import SectionEditorHost from '$lib/components/SectionEditorHost.svelte';
+	import { getMenuItemAction, type EditSectionMenuItem } from '$lib/components/edit-section-menu';
+	import type { EditSectionDef } from '$lib/components/editors/edit-section-def';
+	import type {
+		EditActionContext,
+		EditActionFn
+	} from '$lib/components/editors/edit-action-context';
+	import type { SectionEditorHandle } from '$lib/components/editors/editor-contract';
+	import { resolveDetailSubrouteMode } from '$lib/detail-subroute-mode';
+	import { createIsMobileFlag } from '$lib/use-is-mobile.svelte';
+
+	type SectionDef = EditSectionDef<TKey> & { usesSectionEditorForm: boolean };
+
+	type EditorRefBox = { current: SectionEditorHandle | undefined };
+	type EditorCallbacks = {
+		ref: EditorRefBox;
+		onsaved: () => void;
+		onerror: (msg: string) => void;
+		ondirtychange: (dirty: boolean) => void;
+	};
+
+	let {
+		profile,
+		parentLabel,
+		basePath,
+		sections,
+		editor: editorSnippet,
+		immediateEditor,
+		sidebar,
+		editActionContext,
+		children
+	}: {
+		profile: { name: string; slug: string; description: { text: string } };
+		parentLabel: string;
+		basePath: string;
+		sections: SectionDef[];
+		editor: Snippet<[TKey, EditorCallbacks]>;
+		immediateEditor?: Snippet;
+		sidebar?: Snippet;
+		/**
+		 * Optional context to publish an `editAction(sectionKey)` function the
+		 * detail `+page.svelte` can use for accordion `[edit]` affordances.
+		 * On desktop, the action opens the SectionEditorHost modal; on mobile,
+		 * it navigates to the mobile section route. Auth-gated.
+		 */
+		editActionContext?: EditActionContext<TKey>;
+		children: Snippet;
+	} = $props();
+
+	let slug = $derived(page.params.slug);
+
+	let metaDescription = $derived(profile.description.text || `${profile.name} — ${SITE_NAME}`);
+	let mode = $derived(resolveDetailSubrouteMode(page.url.pathname));
+	let isDetail = $derived(mode === 'detail');
+	let isEdit = $derived(mode === 'edit');
+	const isMobileFlag = createIsMobileFlag(LAYOUT_BREAKPOINT);
+	let isMobile = $derived(isMobileFlag.current);
+	let editing = $state<TKey | null>(null);
+	let syncEnabled = $derived(!isMobile && !isEdit);
+	let lastUrlEditing = $state<TKey | null>(null);
+
+	$effect(() => {
+		auth.load();
+	});
+
+	function updateEditQuery(nextEditing: TKey | null) {
+		const current = page.url.searchParams.get('edit') ?? null;
+		const desired = nextEditing
+			? (sections.find((s) => s.key === nextEditing)?.segment ?? null)
+			: null;
+		if (current === desired) return;
+		const url = new URL(page.url);
+		if (desired) url.searchParams.set('edit', desired);
+		else url.searchParams.delete('edit');
+		goto(`${url.pathname}${url.search}`, { replaceState: true, noScroll: true, keepFocus: true });
+	}
+
+	function resolveEditingFromUrl(): TKey | null {
+		if (!syncEnabled) return null;
+		const segment = page.url.searchParams.get('edit');
+		const matched = segment ? sections.find((s) => s.segment === segment) : undefined;
+		return matched?.key ?? null;
+	}
+
+	$effect(() => {
+		const nextEditing = resolveEditingFromUrl();
+		lastUrlEditing = nextEditing;
+		editing = nextEditing;
+	});
+
+	$effect(() => {
+		if (!syncEnabled) return;
+		if (editing === lastUrlEditing) return;
+		lastUrlEditing = editing;
+		updateEditQuery(editing);
+	});
+
+	let editSections: EditSectionMenuItem[] = $derived(
+		sections.map((section) =>
+			isMobile
+				? {
+						key: section.key,
+						label: section.label,
+						href: resolveHref(`${basePath}/${slug}/edit/${section.segment}`)
+					}
+				: {
+						key: section.key,
+						label: section.label,
+						onclick: () => (editing = section.key)
+					}
+		)
+	);
+
+	const editAction: EditActionFn<TKey> = (key) => {
+		if (!auth.isAuthenticated) return undefined;
+		return getMenuItemAction(editSections, key, (href) => goto(href));
+	};
+
+	// setContext must run during initialization (not in $effect) for descendants
+	// to see it. The prop's reference is stable for the layout's lifetime, so
+	// `untrack` is correct here — we don't want a reactivity dependency.
+	untrack(() => {
+		if (editActionContext) editActionContext.set(editAction);
+	});
+</script>
+
+<MetaTags title={profile.name} description={metaDescription} url={page.url.href} />
+
+{#if isEdit}
+	{@render children()}
+{:else}
+	{#snippet actionBar()}
+		<PageActionBar
+			detailHref={isDetail ? undefined : resolveHref(`${basePath}/${slug}`)}
+			editSections={auth.isAuthenticated ? editSections : undefined}
+			historyHref={resolveHref(`${basePath}/${slug}/edit-history`)}
+			sourcesHref={resolveHref(`${basePath}/${slug}/sources`)}
+		/>
+	{/snippet}
+
+	{#snippet main()}
+		{@render children()}
+	{/snippet}
+
+	<RecordDetailShell
+		name={profile.name}
+		parentLink={{ text: parentLabel, href: resolveHref(basePath) }}
+		{actionBar}
+		{main}
+		{sidebar}
+		sidebarDesktopOnly={isDetail}
+	/>
+
+	<SectionEditorHost
+		bind:editingKey={editing}
+		{sections}
+		switcherItems={editSections}
+		editor={editorSnippet}
+		{immediateEditor}
+	/>
+{/if}

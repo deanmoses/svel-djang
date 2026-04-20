@@ -27,12 +27,14 @@ describe('corporate-entities edit-history SSR route', () => {
 
 		expect(result).toEqual({
 			changesets: MOCK_CHANGESETS,
-			entityType: 'corporateentity',
+			entityType: 'corporate-entity',
 			slug: 'test-entity'
 		});
 		const request = fetch.mock.calls[0]?.[0];
 		expect(request).toBeInstanceOf(Request);
-		expect(request.url).toBe('http://localhost:5173/api/edit-history/corporateentity/test-entity/');
+		expect(request.url).toBe(
+			'http://localhost:5173/api/edit-history/corporate-entity/test-entity/'
+		);
 	});
 
 	it('throws on backend failure', async () => {

@@ -1,11 +1,18 @@
 <script lang="ts">
-	import AttributionLine from '$lib/components/AttributionLine.svelte';
-	import Markdown from '$lib/components/Markdown.svelte';
+	import { MEDIA_CATEGORIES } from '$lib/api/catalog-meta';
+	import AccordionSection from '$lib/components/AccordionSection.svelte';
+	import RichTextOverviewAccordion from '$lib/components/RichTextOverviewAccordion.svelte';
+	import RichTextReferencesAccordion from '$lib/components/RichTextReferencesAccordion.svelte';
+	import { createRichTextAccordionState } from '$lib/components/rich-text-accordion-state.svelte';
+	import { personEditActionContext } from '$lib/components/editors/edit-action-context';
 	import SearchableGrid from '$lib/components/grid/SearchableGrid.svelte';
 	import TitleCard from '$lib/components/cards/TitleCard.svelte';
+	import MediaGrid from '$lib/components/media/MediaGrid.svelte';
 
 	let { data } = $props();
 	let person = $derived(data.person);
+	let editAction = personEditActionContext.get();
+	const richTextState = createRichTextAccordionState();
 
 	function formatDate(
 		year: number | null | undefined,
@@ -21,9 +28,9 @@
 
 	let birthDate = $derived(formatDate(person.birth_year, person.birth_month, person.birth_day));
 	let deathDate = $derived(formatDate(person.death_year, person.death_month, person.death_day));
-	let hasBiographicalInfo = $derived(
-		birthDate || deathDate || person.birth_place || person.nationality
-	);
+	let hasDetails = $derived(!!(birthDate || deathDate || person.birth_place || person.nationality));
+	let mediaHeading = $derived(`Media (${person.uploaded_media.length})`);
+	let titlesHeading = $derived(`Credits (${person.titles.length})`);
 </script>
 
 {#if person.photo_url}
@@ -32,63 +39,79 @@
 	</div>
 {/if}
 
-{#if hasBiographicalInfo}
-	<dl class="bio-meta">
-		{#if person.nationality}
-			<div class="bio-meta-row">
-				<dt>Nationality</dt>
-				<dd>{person.nationality}</dd>
-			</div>
-		{/if}
-		{#if birthDate}
-			<div class="bio-meta-row">
-				<dt>Born</dt>
-				<dd>
-					{birthDate}{#if person.birth_place}, {person.birth_place}{/if}
-				</dd>
-			</div>
-		{:else if person.birth_place}
-			<div class="bio-meta-row">
-				<dt>Birth place</dt>
-				<dd>{person.birth_place}</dd>
-			</div>
-		{/if}
-		{#if deathDate}
-			<div class="bio-meta-row">
-				<dt>Died</dt>
-				<dd>{deathDate}</dd>
-			</div>
-		{/if}
-	</dl>
+{#if person.description?.html}
+	<RichTextOverviewAccordion
+		richText={person.description}
+		state={richTextState}
+		heading="Bio"
+		onEdit={editAction('bio')}
+	/>
 {/if}
 
-{#if person.description?.html}
-	<section class="bio">
-		<Markdown html={person.description.html} citations={person.description.citations} />
-		<AttributionLine attribution={person.description.attribution} />
-	</section>
+{#if hasDetails}
+	<AccordionSection heading="Details" onEdit={editAction('details')}>
+		<dl class="bio-meta">
+			{#if person.nationality}
+				<div class="bio-meta-row">
+					<dt>Nationality</dt>
+					<dd>{person.nationality}</dd>
+				</div>
+			{/if}
+			{#if birthDate}
+				<div class="bio-meta-row">
+					<dt>Born</dt>
+					<dd>
+						{birthDate}{#if person.birth_place}, {person.birth_place}{/if}
+					</dd>
+				</div>
+			{:else if person.birth_place}
+				<div class="bio-meta-row">
+					<dt>Birth place</dt>
+					<dd>{person.birth_place}</dd>
+				</div>
+			{/if}
+			{#if deathDate}
+				<div class="bio-meta-row">
+					<dt>Died</dt>
+					<dd>{deathDate}</dd>
+				</div>
+			{/if}
+		</dl>
+	</AccordionSection>
 {/if}
+
+{#if person.uploaded_media.length > 0}
+	<AccordionSection heading={mediaHeading} onEdit={editAction('media')}>
+		<MediaGrid
+			media={person.uploaded_media}
+			categories={[...MEDIA_CATEGORIES.person]}
+			canEdit={false}
+		/>
+	</AccordionSection>
+{/if}
+
+<RichTextReferencesAccordion richText={person.description} state={richTextState} />
 
 {#if person.titles.length > 0}
-	<SearchableGrid
-		items={person.titles}
-		filterFields={(item) => [item.name]}
-		placeholder="Search titles..."
-		entityName="title"
-	>
-		{#snippet children(title)}
-			<TitleCard
-				slug={title.slug}
-				name={title.name}
-				year={title.year}
-				thumbnailUrl={title.thumbnail_url}
-				manufacturerName={title.manufacturer_name}
-				roles={title.roles}
-			/>
-		{/snippet}
-	</SearchableGrid>
-{:else}
-	<p class="empty">No credits listed.</p>
+	<AccordionSection heading={titlesHeading} open>
+		<SearchableGrid
+			items={person.titles}
+			filterFields={(item) => [item.name]}
+			placeholder="Search titles..."
+			entityName="title"
+		>
+			{#snippet children(title)}
+				<TitleCard
+					slug={title.slug}
+					name={title.name}
+					year={title.year}
+					thumbnailUrl={title.thumbnail_url}
+					manufacturerName={title.manufacturer_name}
+					roles={title.roles}
+				/>
+			{/snippet}
+		</SearchableGrid>
+	</AccordionSection>
 {/if}
 
 <style>
@@ -108,7 +131,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--size-1);
-		margin: 0 0 var(--size-5);
+		margin: 0;
 	}
 
 	.bio-meta-row {
@@ -126,16 +149,5 @@
 	.bio-meta dd {
 		color: var(--color-text-primary);
 		margin: 0;
-	}
-
-	.bio {
-		margin-bottom: var(--size-6);
-	}
-
-	.empty {
-		color: var(--color-text-muted);
-		font-size: var(--font-size-2);
-		padding: var(--size-8) 0;
-		text-align: center;
 	}
 </style>

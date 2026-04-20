@@ -5,7 +5,6 @@ import pytest
 from apps.catalog.claims import build_relationship_claim
 from apps.catalog.models import (
     CreditRole,
-    MachineModel,
     Manufacturer,
     Person,
     Theme,
@@ -19,6 +18,7 @@ from apps.catalog.resolve import (
 )
 from apps.catalog.resolve._relationships import resolve_all_credits
 from apps.provenance.models import Claim, Source
+from apps.catalog.tests.conftest import make_machine_model
 
 
 @pytest.fixture
@@ -127,7 +127,7 @@ class TestIsEnabledRelationshipResolution:
     def test_disabled_source_theme_excluded(self, source_a):
         """Theme claims from a disabled source should not materialize."""
         theme = Theme.objects.create(name="Medieval", slug="medieval")
-        pm = MachineModel.objects.create(name="Test", slug="test-pm")
+        pm = make_machine_model(name="Test", slug="test-pm")
 
         claim_key, value = build_relationship_claim("theme", {"theme": theme.pk})
         Claim.objects.assert_claim(
@@ -153,7 +153,7 @@ class TestIsEnabledRelationshipResolution:
         """Credit claims from a disabled source should not materialize."""
         role = CreditRole.objects.create(name="Design", slug="design")
         person = Person.objects.create(name="Pat Lawlor", slug="pat-lawlor")
-        pm = MachineModel.objects.create(name="Test", slug="test-pm")
+        pm = make_machine_model(name="Test", slug="test-pm")
 
         claim_key, value = build_relationship_claim(
             "credit", {"person": person.pk, "role": role.pk}

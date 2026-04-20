@@ -1,13 +1,28 @@
-"""Per-field claim revert logic."""
+"""Per-field claim revert logic, plus whole-ChangeSet undo.
+
+Two inverse operations live here:
+
+* :func:`execute_revert` deactivates **one** user claim. This is what
+  surfaces on the edit-history page as a per-field Revert button.
+* :func:`execute_undo_changeset` atomically inverts **every** claim in a
+  single DELETE ChangeSet. This is what powers the post-delete Undo toast —
+  one click restores a Title plus every cascaded Model in one unit of work.
+
+Keeping them separate protects the per-claim contract (validation,
+ownership, blast radius) from the different eligibility rules that apply
+to a whole-changeset undo.
+"""
 
 from __future__ import annotations
+
+from collections import defaultdict
 
 from django.contrib.contenttypes.models import ContentType
 from django.db import IntegrityError, transaction
 from django.core.exceptions import ValidationError
 
 from .constants import REVERT_OTHERS_MIN_EDITS
-from .models import ChangeSet, Claim
+from .models import ChangeSet, ChangeSetAction, Claim
 
 
 class RevertError(Exception):
@@ -63,7 +78,9 @@ def execute_revert(entity, *, claim_id: int, user, note: str) -> None:
 
     try:
         with transaction.atomic():
-            cs = ChangeSet.objects.create(user=user, note=note)
+            cs = ChangeSet.objects.create(
+                user=user, action=ChangeSetAction.REVERT, note=note
+            )
             target.is_active = False
             target.retracted_by_changeset = cs
             target.save(update_fields=["is_active", "retracted_by_changeset"])
@@ -95,3 +112,108 @@ def execute_revert(entity, *, claim_id: int, user, note: str) -> None:
         raise RevertError("; ".join(exc.messages)) from exc
     except IntegrityError as exc:
         raise RevertError(f"Unique constraint violation: {exc}") from exc
+
+
+class UndoError(Exception):
+    """Domain error raised by :func:`execute_undo_changeset`."""
+
+    def __init__(self, message: str, *, status_code: int = 422):
+        super().__init__(message)
+        self.status_code = status_code
+
+
+def execute_undo_changeset(changeset: ChangeSet, *, user, note: str = "") -> ChangeSet:
+    """Atomically invert every claim in a DELETE *changeset*.
+
+    Creates a new ``REVERT`` ChangeSet, deactivates each claim in the
+    target, re-activates the most recent user predecessor per ``claim_key``
+    so each field falls back to its prior user value, and re-resolves every
+    affected entity.
+
+    Eligibility:
+
+    * Must be a user-authored ChangeSet (``user_id`` set).
+    * Must have ``action = DELETE``. Per-claim reverts of EDIT ChangeSets
+      use :func:`execute_revert`; CREATE undo (symmetric \u201cmake it as if
+      the record was never created\u201d) is deferred \u2014 it requires extra
+      machinery to handle the row columns written alongside the claims.
+    * Caller must be the author. Other users use per-claim revert from
+      edit history.
+    * Every claim in the target must still be ``is_active=True``. If any
+      have been superseded by a later user action, the ChangeSet is no
+      longer the latest action and Undo is refused.
+
+    Returns the newly-created REVERT ChangeSet.
+    """
+    if changeset.user_id is None:
+        raise UndoError("Only user changesets can be undone.")
+    if changeset.action != ChangeSetAction.DELETE:
+        raise UndoError(
+            "Only delete changesets can be undone via this endpoint. "
+            "Edit changesets are reverted per-claim from edit history."
+        )
+    if changeset.user_id != user.pk:
+        raise UndoError(
+            "Only the author of a changeset can undo it. "
+            "Use per-claim revert from edit history instead.",
+            status_code=403,
+        )
+
+    claims = list(changeset.claims.all())
+    if not claims:
+        raise UndoError("This changeset has no claims to undo.")
+
+    inactive = [c for c in claims if not c.is_active]
+    if inactive:
+        raise UndoError(
+            "This delete is no longer the latest action on every affected "
+            "field. Use edit history to restore individual fields."
+        )
+
+    from apps.catalog.resolve import resolve_after_mutation
+
+    affected_fields: dict[tuple[int, int], set[str]] = defaultdict(set)
+    try:
+        with transaction.atomic():
+            new_cs = ChangeSet.objects.create(
+                user=user, action=ChangeSetAction.REVERT, note=note
+            )
+            for claim in claims:
+                claim.is_active = False
+                claim.retracted_by_changeset = new_cs
+                claim.save(update_fields=["is_active", "retracted_by_changeset"])
+                affected_fields[(claim.content_type_id, claim.object_id)].add(
+                    claim.field_name
+                )
+
+                # Re-activate the most recent superseded (but not retracted)
+                # claim from the same user for the same claim_key, so the
+                # field falls back to their prior value rather than dropping
+                # to the source default. Mirrors execute_revert() semantics.
+                predecessor = (
+                    Claim.objects.filter(
+                        content_type_id=claim.content_type_id,
+                        object_id=claim.object_id,
+                        user_id=claim.user_id,
+                        claim_key=claim.claim_key,
+                        is_active=False,
+                        retracted_by_changeset__isnull=True,
+                    )
+                    .exclude(pk=claim.pk)
+                    .order_by("-created_at", "-pk")
+                    .first()
+                )
+                if predecessor:
+                    predecessor.is_active = True
+                    predecessor.save(update_fields=["is_active"])
+
+            for (ct_id, obj_id), fields in affected_fields.items():
+                ct = ContentType.objects.get_for_id(ct_id)
+                entity = ct.get_object_for_this_type(pk=obj_id)
+                resolve_after_mutation(entity, field_names=list(fields))
+    except ValidationError as exc:
+        raise UndoError("; ".join(exc.messages)) from exc
+    except IntegrityError as exc:
+        raise UndoError(f"Unique constraint violation: {exc}") from exc
+
+    return new_cs

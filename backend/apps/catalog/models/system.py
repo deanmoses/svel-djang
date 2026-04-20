@@ -6,8 +6,8 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from apps.core.models import (
+    CatalogModel,
     EntityStatusMixin,
-    LinkableModel,
     MarkdownField,
     SluggedModel,
     TimeStampedModel,
@@ -20,14 +20,15 @@ from apps.core.validators import validate_no_mojibake
 __all__ = ["System", "SystemMpuString"]
 
 
-class System(EntityStatusMixin, SluggedModel, LinkableModel, TimeStampedModel):
+class System(CatalogModel, EntityStatusMixin, SluggedModel, TimeStampedModel):
     """An electronic hardware generation for pinball machines.
 
     e.g. WPC-95, System 6, SAM System, SPIKE.
     MachineModel.system FK is resolved from 'system' slug claims.
     """
 
-    link_url_pattern = "/systems/{slug}"
+    entity_type = "system"
+    entity_type_plural = "systems"
 
     name = models.CharField(
         max_length=200, unique=True, validators=[validate_no_mojibake]

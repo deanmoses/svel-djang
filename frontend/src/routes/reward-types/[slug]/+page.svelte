@@ -1,10 +1,19 @@
 <script lang="ts">
+	import AttributionLine from '$lib/components/AttributionLine.svelte';
+	import Markdown from '$lib/components/Markdown.svelte';
 	import ClientFilteredGrid from '$lib/components/grid/ClientFilteredGrid.svelte';
 	import MachineCard from '$lib/components/cards/MachineCard.svelte';
 
 	let { data } = $props();
 	let profile = $derived(data.profile);
 </script>
+
+{#if profile.description?.html}
+	<section class="description">
+		<Markdown html={profile.description.html} citations={profile.description.citations ?? []} />
+		<AttributionLine attribution={profile.description.attribution} />
+	</section>
+{/if}
 
 {#if profile.machines.length === 0}
 	<p class="empty">No machines with this reward type.</p>
@@ -26,6 +35,10 @@
 {/if}
 
 <style>
+	.description {
+		margin-bottom: var(--size-6);
+	}
+
 	h2 {
 		font-size: var(--font-size-3);
 		font-weight: 600;

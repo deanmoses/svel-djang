@@ -9,11 +9,11 @@ from django.contrib.auth import get_user_model
 
 from apps.catalog.models import (
     CorporateEntity,
-    MachineModel,
     Manufacturer,
     Title,
 )
 from apps.provenance.models import ChangeSet, Claim
+from apps.catalog.tests.conftest import make_machine_model
 
 User = get_user_model()
 
@@ -91,17 +91,17 @@ class TestListCorporateEntities:
         assert data[0]["manufacturer"]["slug"] == "gottlieb"
 
     def test_list_includes_model_count(self, client, entity):
-        MachineModel.objects.create(
+        make_machine_model(
             name="Ace High", slug="ace-high", corporate_entity=entity, year=1957
         )
         resp = client.get("/api/corporate-entities/")
         assert resp.json()[0]["model_count"] == 1
 
     def test_list_excludes_variants_from_count(self, client, entity):
-        base = MachineModel.objects.create(
+        base = make_machine_model(
             name="Ace High", slug="ace-high", corporate_entity=entity
         )
-        MachineModel.objects.create(
+        make_machine_model(
             name="Ace High LE",
             slug="ace-high-le",
             corporate_entity=entity,
@@ -134,7 +134,7 @@ class TestGetCorporateEntity:
 
     def test_detail_includes_titles(self, client, entity):
         title = Title.objects.create(name="Ace High", slug="ace-high")
-        MachineModel.objects.create(
+        make_machine_model(
             name="Ace High",
             slug="ace-high",
             corporate_entity=entity,
@@ -283,7 +283,7 @@ class TestPatchCorporateEntityAliases:
 @pytest.mark.django_db
 class TestCorporateEntityEditHistory:
     def test_edit_history_empty(self, client, entity):
-        resp = client.get(f"/api/edit-history/corporateentity/{entity.slug}/")
+        resp = client.get(f"/api/edit-history/corporate-entity/{entity.slug}/")
         assert resp.status_code == 200
         assert resp.json() == []
 
@@ -292,7 +292,7 @@ class TestCorporateEntityEditHistory:
         _patch(
             client, entity.slug, {"fields": {"description": "Updated"}, "note": "Fix"}
         )
-        resp = client.get(f"/api/edit-history/corporateentity/{entity.slug}/")
+        resp = client.get(f"/api/edit-history/corporate-entity/{entity.slug}/")
         assert resp.status_code == 200
         data = resp.json()
         assert len(data) == 1
