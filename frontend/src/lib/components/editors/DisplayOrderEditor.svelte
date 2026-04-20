@@ -1,35 +1,31 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import NumberField from '$lib/components/form/NumberField.svelte';
-	import type { SectionEditorProps } from '$lib/components/editors/editor-contract';
+	import type { SectionEditorProps } from './editor-contract';
 	import { diffScalarFields } from '$lib/edit-helpers';
-	import type { DisplayTypeEditView } from './display-type-edit-types';
-	import {
-		saveDisplayTypeClaims,
-		type FieldErrors,
-		type SaveMeta,
-		type SaveResult
-	} from './save-display-type-claims';
+	import type { FieldErrors, SaveMeta, SaveResult } from './save-claims-shared';
 
 	type DisplayOrderFields = {
 		display_order: string | number;
 	};
 
+	type SaveFn = (
+		slug: string,
+		body: { fields: Partial<DisplayOrderFields> } & SaveMeta
+	) => Promise<SaveResult>;
+
 	let {
 		initialData,
 		slug,
+		save: saveFn,
 		onsaved,
 		onerror,
 		ondirtychange = () => {}
-	}: SectionEditorProps<DisplayTypeEditView> = $props();
+	}: SectionEditorProps<number | null> & { save: SaveFn } = $props();
 
-	function extractFields(displayType: DisplayTypeEditView): DisplayOrderFields {
-		return {
-			display_order: displayType.display_order ?? ''
-		};
-	}
-
-	const original = untrack(() => extractFields(initialData));
+	const original = untrack<DisplayOrderFields>(() => ({
+		display_order: initialData ?? ''
+	}));
 	let fields = $state<DisplayOrderFields>({ ...original });
 	let fieldErrors = $state<FieldErrors>({});
 	let changedFields = $derived(diffScalarFields(fields, original));
@@ -50,7 +46,7 @@
 			return;
 		}
 
-		const result: SaveResult = await saveDisplayTypeClaims(slug, {
+		const result = await saveFn(slug, {
 			fields: changedFields,
 			...meta
 		});
