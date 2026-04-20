@@ -227,11 +227,12 @@ def _resolve_bulk(
     if has_unique_slug:
         resolve_unique_conflicts(all_objs, "slug", model_class, pre_slugs)
 
-    # 4c. Validate check constraints before writing.
-    for obj in all_objs:
-        validate_check_constraints(obj)
-
-    # 5. Bulk write.
+    # 5. Bulk write.  Cross-field CheckConstraints are enforced by the DB
+    # on bulk_update — a violation aborts the whole batch with IntegrityError,
+    # which is the desired ingest behaviour (source data is broken, stop).
+    # Per-object Python-side validation was removed because each call issued
+    # a savepoint + SELECT round trip, producing thousands of round trips per
+    # bulk and triggering Postgres subtransaction SLRU overflow on managed DBs.
     update_fields = list(set(direct_fields.values())) + ["updated_at"]
     if has_extra_data:
         update_fields.append("extra_data")
