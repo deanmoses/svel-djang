@@ -2,7 +2,9 @@ import type { EditSectionDef } from './edit-section-def';
 
 export type ManufacturerEditSectionKey = 'name' | 'description' | 'basics';
 
-export type ManufacturerEditSectionDef = EditSectionDef<ManufacturerEditSectionKey>;
+export type ManufacturerEditSectionDef = EditSectionDef<ManufacturerEditSectionKey> & {
+	usesSectionEditorForm: boolean;
+};
 
 export const MANUFACTURER_EDIT_SECTIONS: ManufacturerEditSectionDef[] = [
 	{
@@ -10,21 +12,24 @@ export const MANUFACTURER_EDIT_SECTIONS: ManufacturerEditSectionDef[] = [
 		segment: 'name',
 		label: 'Name',
 		showCitation: true,
-		showMixedEditWarning: false
+		showMixedEditWarning: false,
+		usesSectionEditorForm: true
 	},
 	{
 		key: 'description',
 		segment: 'description',
 		label: 'Description',
 		showCitation: false,
-		showMixedEditWarning: false
+		showMixedEditWarning: false,
+		usesSectionEditorForm: true
 	},
 	{
 		key: 'basics',
 		segment: 'basics',
 		label: 'Basics',
 		showCitation: true,
-		showMixedEditWarning: true
+		showMixedEditWarning: true,
+		usesSectionEditorForm: true
 	}
 ];
 

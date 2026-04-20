@@ -2,7 +2,9 @@ import type { EditSectionDef } from './edit-section-def';
 
 export type SeriesEditSectionKey = 'name' | 'description';
 
-export type SeriesEditSectionDef = EditSectionDef<SeriesEditSectionKey>;
+export type SeriesEditSectionDef = EditSectionDef<SeriesEditSectionKey> & {
+	usesSectionEditorForm: boolean;
+};
 
 export const SERIES_EDIT_SECTIONS: SeriesEditSectionDef[] = [
 	{
@@ -10,14 +12,16 @@ export const SERIES_EDIT_SECTIONS: SeriesEditSectionDef[] = [
 		segment: 'name',
 		label: 'Name',
 		showCitation: true,
-		showMixedEditWarning: false
+		showMixedEditWarning: false,
+		usesSectionEditorForm: true
 	},
 	{
 		key: 'description',
 		segment: 'description',
 		label: 'Description',
 		showCitation: false,
-		showMixedEditWarning: false
+		showMixedEditWarning: false,
+		usesSectionEditorForm: true
 	}
 ];
 

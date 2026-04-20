@@ -113,10 +113,7 @@
 
 	<SectionEditorHost
 		bind:editingKey={editing}
-		sections={SERIES_EDIT_SECTIONS.map((section) => ({
-			...section,
-			usesSectionEditorForm: true
-		}))}
+		sections={SERIES_EDIT_SECTIONS}
 		switcherItems={editSections}
 	>
 		{#snippet editor(key, { ref, onsaved, onerror, ondirtychange })}

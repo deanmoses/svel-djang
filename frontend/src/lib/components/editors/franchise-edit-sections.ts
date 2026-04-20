@@ -2,7 +2,9 @@ import type { EditSectionDef } from './edit-section-def';
 
 export type FranchiseEditSectionKey = 'name' | 'description';
 
-export type FranchiseEditSectionDef = EditSectionDef<FranchiseEditSectionKey>;
+export type FranchiseEditSectionDef = EditSectionDef<FranchiseEditSectionKey> & {
+	usesSectionEditorForm: boolean;
+};
 
 export const FRANCHISE_EDIT_SECTIONS: FranchiseEditSectionDef[] = [
 	{
@@ -10,14 +12,16 @@ export const FRANCHISE_EDIT_SECTIONS: FranchiseEditSectionDef[] = [
 		segment: 'name',
 		label: 'Name',
 		showCitation: true,
-		showMixedEditWarning: false
+		showMixedEditWarning: false,
+		usesSectionEditorForm: true
 	},
 	{
 		key: 'description',
 		segment: 'description',
 		label: 'Description',
 		showCitation: false,
-		showMixedEditWarning: false
+		showMixedEditWarning: false,
+		usesSectionEditorForm: true
 	}
 ];
 
