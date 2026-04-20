@@ -108,12 +108,20 @@ The system must aggressively prevent duplicate records.
 
 All duplicate-prevention rules below are enforced at the API layer, independent of whatever the UI does. The UI gates (search-then-create, collision messaging) are ergonomic affordances, not the mechanism. The API must reject a colliding create even when it arrives without having gone through the UI gate — whether because two users raced to submit the same name, a client has stale state, or the request bypassed the UI entirely. Slug uniqueness is already enforced by the DB; name-collision rules are not, and must be enforced in the create endpoint.
 
-#### Create Is Offered Only After Search
+#### Create Is Offered Only After Search (or When the List Is Fully Visible)
 
-- Creation should only be offered to the user after a search for that record type returns no results.
+The rule's intent is duplicate prevention — force the user to look before they create. How "look" is surfaced depends on list size, matching the existing `SearchableGrid.svelte` threshold (`SEARCH_THRESHOLD = 12`):
+
+- **`items.length >= SEARCH_THRESHOLD`** (larger lists like titles, people, manufacturers): search is required, and creation is offered only when a search returns zero results, via `NoResultsCreatePrompt`.
   - This assumes the normal search normalizes basic things like case, punctuation, articles.
   - Aliases count as results.
-- For a future version, maybe there's a special search that finds misspellings, chops things like "Limited" and "Edition". But not for this v1.
+- **`items.length < SEARCH_THRESHOLD`** (smaller lists like most taxonomy entities): no search input is rendered — the full list is visible on screen, so duplicate prevention is satisfied by visibility. Creation is offered as an auth-gated "+ New {entity}" link in the list header.
+
+As a list crosses the threshold, the header link disappears and the search + no-results prompt takes over. The transition is coherent and happens automatically based on item count. Both list-page variants and any dedicated create routes must keep the constant in lockstep — reuse `SEARCH_THRESHOLD` from `SearchableGrid.svelte` rather than redefining it.
+
+For a future version, maybe there's a special search that finds misspellings, chops things like "Limited" and "Edition". But not for this v1.
+
+The API-level duplicate prevention described above applies in both cases — the UI gate is an ergonomic affordance, not the enforcement mechanism.
 
 #### Name Collisions
 
