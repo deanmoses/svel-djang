@@ -18,7 +18,7 @@
 
 <TaxonomyListPage
 	catalogKey="gameplay-feature"
-	subtitle="Mechanical and digital features that define how a pinball machine plays."
+	subtitle="Mechanical and digital features that define how a game plays."
 	items={loader.data}
 	loading={loader.loading}
 	error={loader.error}

@@ -16,7 +16,7 @@
 
 <TaxonomyListPage
 	catalogKey="series"
-	subtitle="Curated groups of related pinball titles sharing a franchise lineage."
+	subtitle="Pinball titles sharing an original, non-licensed lineage."
 	items={loader.data}
 	loading={loader.loading}
 	error={loader.error}
