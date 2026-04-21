@@ -6,47 +6,7 @@ Ordered by rough ROI.
 
 ---
 
-## 1. Parameterize the 17 edit-history route tests
-
-**Problem.** There are 17 near-identical test files at `frontend/src/routes/{entity}/[slug]/edit-history/edit-history.test.ts`. Each is ~35 lines of almost-verbatim copy-paste, differing only in the entity type string and slug fixtures. The sources subroute doesn't have per-entity route tests at all (intentional — nothing to lock in beyond what the loader itself does), but the edit-history tests were left in place when we migrated loaders and URLs, and every URL change had to hit all 17 files.
-
-**Why it matters.** Any future change to the edit-history load path (URL, return shape, error handling) forces 17 mechanical edits. The repetition doesn't buy anything — the tests assert the same invariant for each entity.
-
-**Shape.** Replace all 17 files with one `frontend/src/lib/provenance-loaders.test.ts` driven by `describe.each(ENTITY_TYPES)` (or similar). Drive the enumeration from `catalog-meta.ts` so adding a new entity automatically picks up coverage.
-
-**Starting points:**
-
-- [frontend/src/routes/titles/[slug]/edit-history/edit-history.test.ts](../../frontend/src/routes/titles/%5Bslug%5D/edit-history/edit-history.test.ts) — representative sample
-- [frontend/src/lib/api/catalog-meta.ts](../../frontend/src/lib/api/catalog-meta.ts) — source of the entity list
-- [frontend/src/lib/provenance-loaders.ts](../../frontend/src/lib/provenance-loaders.ts) — the module under test
-
-**Risk.** Low. Pure test refactor.
-
----
-
-## 2. Registry-driven invariant: every catalog entity has the standard subroutes
-
-**Problem.** `credit-role` was missing from the edit-history and sources UI for an unknown length of time. Nothing in the codebase enforced that every `LinkableModel`-registered entity had the full set of standard frontend subroutes. The gap only surfaced because a human noticed it during plan review.
-
-**Why it matters.** The same class of oversight will recur every time a new catalog entity is added. Structural invariants should be enforced by code, not diligence.
-
-**Shape.** Add a Python or TypeScript test that:
-
-1. Enumerates all `LinkableModel` subclasses via [`get_linkable_model()`](../../backend/apps/core/entity_types.py) / the `entity_type` registry.
-2. For each entity, asserts the corresponding frontend route directories exist: `frontend/src/routes/{plural}/[slug]/edit-history/` and `.../sources/`, with both `+page.server.ts` and `+page.svelte` present.
-3. Asserts the entity is listed in `catalog-meta.ts`.
-
-**Starting points:**
-
-- [backend/apps/core/entity_types.py](../../backend/apps/core/entity_types.py) — registry
-- [backend/tests/test_router_registration.py](../../backend/tests/test_router_registration.py) — precedent for this style of structural invariant test
-- The entity-type slug mapping is currently implicit (e.g. `titles` route → `title` entity type). This test is also a good place to codify that mapping in one spot.
-
-**Risk.** Low. Adds coverage, no runtime behavior change.
-
----
-
-## 3. Audit `apps/catalog/api/schemas.py` for misplaced schemas
+## Audit `apps/catalog/api/schemas.py` for misplaced schemas
 
 **Problem.** `ClaimSchema` drifted into `apps/catalog/api/schemas.py` because the original consumer was the catalog detail endpoints — but it models a provenance concept, not a catalog concept. Moving it to `apps/provenance/schemas.py` during this refactor was trivial (one consumer left by the end). The same drift pattern probably affected other schemas in that file.
 
@@ -63,7 +23,7 @@ Ordered by rough ROI.
 
 ---
 
-## 4. Decide the soft-delete policy for per-entity provenance endpoints
+## Decide the soft-delete policy for per-entity provenance endpoints
 
 **Problem.** `GET /api/pages/edit-history/{type}/{slug}/` has always returned 200 for soft-deleted entities (no `.active()` filter). `GET /api/pages/sources/{type}/{slug}/` was previously inconsistent — the old `/api/pages/evidence/` predecessor _did_ filter `.active()`. The consolidation refactor made both consistent by dropping `.active()` from sources, but this was a policy call made implicitly, not deliberately.
 
@@ -89,7 +49,7 @@ Normal SvelteKit navigation already gates on the parent `[slug]/+layout.server.t
 
 ---
 
-## 5. Drop the prefetch fallback in `_serialize_model_detail`
+## Drop the prefetch fallback in `_serialize_model_detail`
 
 **Problem.** [machine_models.py:346-361](../../backend/apps/catalog/api/machine_models.py#L346-L361) reads `active_claims` off the prefetched model, and if missing, reconstructs the prefetch queryset inline — with a `Case/When` priority annotation that duplicates the logic in [`claims_prefetch()`](../../backend/apps/provenance/helpers.py). If the priority tiebreak rule in `claims_prefetch()` ever changes, this fallback will silently diverge.
 
@@ -107,7 +67,7 @@ Normal SvelteKit navigation already gates on the parent `[slug]/+layout.server.t
 
 ---
 
-## 6. Update `WebApiDesign.md` with the reads-vs-writes namespace split
+## Update `WebApiDesign.md` with the reads-vs-writes namespace split
 
 **Problem.** [docs/WebApiDesign.md](../WebApiDesign.md) formalizes the reads-under-`/api/pages/` vs resources-under-`/api/` split, but says nothing about **where write endpoints for resource concepts belong**. This refactor established a convention — resource-style mutations live under a namespaced router like `/api/provenance/claims/{id}/revert/`, not under `/api/pages/`. That decision isn't written down anywhere, so the next person designing a write endpoint will re-derive it (or not).
 
@@ -128,7 +88,7 @@ Normal SvelteKit navigation already gates on the parent `[slug]/+layout.server.t
 
 ---
 
-## 7. Shared resolver helper for per-entity generic endpoints
+## Shared resolver helper for per-entity generic endpoints
 
 **Problem.** Both [`edit_history_page`](../../backend/apps/provenance/page_endpoints.py) and [`sources_page`](../../backend/apps/provenance/page_endpoints.py) start with the same 3-line dance: `get_linkable_model(entity_type)` wrapped in `try/except ValueError → 404`, then `get_object_or_404(model_class, slug=slug)`. Any future generic per-entity provenance endpoint (relationships, suggestions, moderation queue, etc.) will repeat it.
 
@@ -155,7 +115,7 @@ def resolve_linkable_entity(entity_type: str, slug: str, *, queryset=None):
 
 ---
 
-## 8. Document the `entity_type` slug convention
+## Document the `entity_type` slug convention
 
 **Problem.** The mapping between frontend route segments and backend `entity_type` strings is implicit (`/titles/` routes use `entity_type="title"`; `/corporate-entities/` uses `"corporate-entity"`; etc.). I had to grep existing loaders to derive it when generating the new sources routes. Anyone adding a new entity type will have to do the same.
 
@@ -169,7 +129,7 @@ Even better: derive the canonical list by inspection at doc-build time, so the l
 
 ---
 
-## 9. Audit other frontend components for dead URL-construction props
+## Audit other frontend components for dead URL-construction props
 
 **Problem.** `EditHistory.svelte` accepted `entityType` and `entitySlug` props that existed _solely_ to construct the revert URL. When I moved revert to a claim-keyed URL, those props became dead weight — I dropped them and updated all 18 call sites. The same pattern may exist elsewhere: components taking props to build URLs that could be self-contained once the URL shape is designed right.
 
@@ -187,7 +147,7 @@ Even better: derive the canonical list by inspection at doc-build time, so the l
 
 ---
 
-## 10. Rename `entity-provenance.ts` → `entity-sources.ts`
+## Rename `entity-provenance.ts` → `entity-sources.ts`
 
 **Problem.** The component was renamed `EntityProvenance.svelte` → `EntitySources.svelte`, but its companion helper [`entity-provenance.ts`](../../frontend/src/lib/components/entity-provenance.ts) (containing `groupSourcesByField`) kept its old name.
 
@@ -199,11 +159,11 @@ Even better: derive the canonical list by inspection at doc-build time, so the l
 
 ---
 
-## 11. Parity test for edit-history soft-delete behavior
+## Parity test for edit-history soft-delete behavior
 
-**Problem.** Whatever policy is chosen in follow-up #4, there's currently **no test** covering "does GET edit-history for a soft-deleted entity return 200 or 404?" The behavior is whatever the code happens to do.
+**Problem.** Whatever policy is chosen in the soft-delete follow-up above, there's currently **no test** covering "does GET edit-history for a soft-deleted entity return 200 or 404?" The behavior is whatever the code happens to do.
 
-**Shape.** Covered by #4. Called out separately because even if #4's product decision ratifies the status quo ("yes, soft-delete is soft, both endpoints return 200"), a regression test is still needed so nobody accidentally changes it later.
+**Shape.** Covered by the soft-delete follow-up above. Called out separately because even if that product decision ratifies the status quo ("yes, soft-delete is soft, both endpoints return 200"), a regression test is still needed so nobody accidentally changes it later.
 
 ---
 
