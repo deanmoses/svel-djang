@@ -13,10 +13,10 @@ from ninja.pagination import PageNumberPagination, paginate
 from ninja.responses import Status
 from ninja.security import django_auth
 
-from ..cache import PEOPLE_ALL_KEY, get_cached_response, set_cached_response
-from .constants import DEFAULT_PAGE_SIZE
-from apps.core.models import active_status_q
 from apps.catalog.naming import normalize_catalog_name
+from apps.core.licensing import get_minimum_display_rank
+from apps.core.models import active_status_q
+from apps.media.schemas import UploadedMediaSchema
 from apps.provenance.helpers import claims_prefetch
 from apps.provenance.models import ChangeSetAction
 from apps.provenance.rate_limits import (
@@ -24,7 +24,12 @@ from apps.provenance.rate_limits import (
     DELETE_RATE_LIMIT_SPEC,
     check_and_record,
 )
+from apps.provenance.schemas import RichTextSchema
 
+from ..cache import PEOPLE_ALL_KEY, get_cached_response, set_cached_response
+from ..models import Credit, MachineModel, Person
+from .constants import DEFAULT_PAGE_SIZE
+from .edit_claims import ClaimSpec, execute_claims, plan_scalar_field_claims
 from .entity_create import (
     assert_name_available,
     assert_slug_available,
@@ -46,8 +51,6 @@ from .schemas import (
     PersonDeleteSchema,
     PersonRestoreSchema,
     RelatedTitleSchema,
-    RichTextSchema,
-    UploadedMediaSchema,
 )
 from .soft_delete import (
     SoftDeleteBlocked,
@@ -56,11 +59,6 @@ from .soft_delete import (
     plan_soft_delete,
     serialize_blocking_referrer,
 )
-
-from apps.core.licensing import get_minimum_display_rank
-
-from ..models import Credit, MachineModel, Person
-from .edit_claims import ClaimSpec, execute_claims, plan_scalar_field_claims
 
 # ---------------------------------------------------------------------------
 # Schemas

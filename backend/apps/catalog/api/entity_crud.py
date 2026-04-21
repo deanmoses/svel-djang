@@ -30,6 +30,7 @@ from apps.provenance.rate_limits import (
     DELETE_RATE_LIMIT_SPEC,
     check_and_record,
 )
+from apps.provenance.schemas import EditCitationInput
 
 from .edit_claims import ClaimSpec, execute_claims
 from .entity_create import (
@@ -39,7 +40,7 @@ from .entity_create import (
     validate_name,
     validate_slug_format,
 )
-from .schemas import BlockingReferrerSchema, EditCitationInput
+from .schemas import BlockingReferrerSchema
 from .soft_delete import (
     SoftDeleteBlocked,
     count_entity_changesets,
@@ -47,7 +48,6 @@ from .soft_delete import (
     plan_soft_delete,
     serialize_blocking_referrer,
 )
-
 
 # ---------------------------------------------------------------------------
 # Schemas — names kept stable for OpenAPI consumers.

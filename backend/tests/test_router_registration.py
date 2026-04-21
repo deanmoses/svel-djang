@@ -4,7 +4,7 @@ from config.api import api
 
 EXPECTED_PREFIXES = {
     "/auth/",
-    "/users/",
+    "/pages/user/",
     "/corporate-entities/",
     "/display-types/",
     "/technology-generations/",

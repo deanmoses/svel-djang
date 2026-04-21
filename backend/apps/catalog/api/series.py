@@ -6,17 +6,19 @@ from typing import Optional
 
 from django.db.models import Count, F, Prefetch, Q
 from django.shortcuts import get_object_or_404
-
-from apps.core.models import active_status_q
 from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
 from ninja.security import django_auth
 
+from apps.core.licensing import get_minimum_display_rank
+from apps.core.models import active_status_q
+from apps.provenance.helpers import claims_prefetch
+from apps.provenance.schemas import RichTextSchema
+
+from ..models import Credit, MachineModel, Series, Title
 from .edit_claims import execute_claims, plan_scalar_field_claims
 from .entity_crud import register_entity_create, register_entity_delete_restore
-from apps.provenance.helpers import claims_prefetch
-
 from .helpers import (
     _build_rich_text,
     _extract_image_urls,
@@ -26,13 +28,8 @@ from .helpers import (
 from .schemas import (
     ClaimPatchSchema,
     CreditSchema,
-    RichTextSchema,
     TitleRefSchema,
 )
-
-from apps.core.licensing import get_minimum_display_rank
-
-from ..models import Credit, MachineModel, Series, Title
 
 # ---------------------------------------------------------------------------
 # Schemas

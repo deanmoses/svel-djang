@@ -29,13 +29,13 @@ from django.db import IntegrityError, transaction
 from django.db.models import Q
 
 from apps.provenance.models import ChangeSetAction
+from apps.provenance.schemas import EditCitationInput
 
 from .edit_claims import (
     ClaimSpec,
     StructuredValidationError,
     execute_claims,
 )
-from .schemas import EditCitationInput
 
 # Slug format is globally consistent across catalog record types: lowercase
 # ASCII letters/digits, single hyphens between segments, no leading/trailing

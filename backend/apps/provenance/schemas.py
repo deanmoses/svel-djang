@@ -44,3 +44,51 @@ class ClaimSchema(Schema):
     created_at: str
     is_winner: bool
     changeset_note: Optional[str] = None
+
+
+class EditCitationInput(Schema):
+    """Reference an existing CitationInstance to clone onto a user edit."""
+
+    citation_instance_id: int
+
+
+class AttributionSchema(Schema):
+    """License and source attribution for rendered content."""
+
+    license_slug: Optional[str] = None
+    license_name: Optional[str] = None
+    license_url: Optional[str] = None
+    permissiveness_rank: Optional[int] = None
+    requires_attribution: bool = False
+    source_name: Optional[str] = None
+    source_url: Optional[str] = None
+    attribution_text: Optional[str] = None
+
+
+class InlineCitationLinkSchema(Schema):
+    """A link attached to a citation source."""
+
+    url: str
+    label: str
+
+
+class InlineCitationSchema(Schema):
+    """Metadata for an inline citation in rendered markdown."""
+
+    id: int
+    index: int
+    source_name: str
+    source_type: str
+    author: str
+    year: Optional[int] = None
+    locator: str
+    links: list[InlineCitationLinkSchema] = []
+
+
+class RichTextSchema(Schema):
+    """A text field bundled with rendered HTML plus provenance metadata."""
+
+    text: str = ""
+    html: str = ""
+    citations: list[InlineCitationSchema] = []
+    attribution: Optional[AttributionSchema] = None

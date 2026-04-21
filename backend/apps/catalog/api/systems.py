@@ -6,14 +6,20 @@ from typing import Optional
 
 from django.db.models import Count, F, Max, Prefetch, Q
 from django.shortcuts import get_object_or_404
-
-from apps.core.models import active_status_q
 from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
 from ninja.responses import Status
 from ninja.security import django_auth
 
+from apps.catalog.naming import normalize_catalog_name
+from apps.core.licensing import get_minimum_display_rank
+from apps.core.models import active_status_q
+from apps.provenance.helpers import claims_prefetch
+from apps.provenance.rate_limits import CREATE_RATE_LIMIT_SPEC, check_and_record
+from apps.provenance.schemas import EditCitationInput, RichTextSchema
+
+from ..models import MachineModel, Manufacturer, System
 from .edit_claims import (
     ClaimSpec,
     StructuredValidationError,
@@ -28,25 +34,15 @@ from .entity_create import (
     validate_slug_format,
 )
 from .entity_crud import register_entity_delete_restore
-from apps.catalog.naming import normalize_catalog_name
-from apps.provenance.helpers import claims_prefetch
-from apps.provenance.rate_limits import CREATE_RATE_LIMIT_SPEC, check_and_record
-
 from .helpers import (
     _build_rich_text,
     _extract_image_urls,
 )
 from .schemas import (
     ClaimPatchSchema,
-    EditCitationInput,
     Ref,
     RelatedTitleSchema,
-    RichTextSchema,
 )
-
-from apps.core.licensing import get_minimum_display_rank
-
-from ..models import MachineModel, Manufacturer, System
 
 # ---------------------------------------------------------------------------
 # Schemas

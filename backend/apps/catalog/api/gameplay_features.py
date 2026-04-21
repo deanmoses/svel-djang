@@ -9,6 +9,11 @@ from ninja import Router, Schema
 from ninja.decorators import decorate_view
 from ninja.security import django_auth
 
+from apps.media.schemas import UploadedMediaSchema
+from apps.provenance.helpers import claims_prefetch
+from apps.provenance.schemas import RichTextSchema
+
+from ..models import GameplayFeature
 from ._counts import bulk_title_counts_via_models
 from .edit_claims import (
     execute_claims,
@@ -18,8 +23,6 @@ from .edit_claims import (
     validate_scalar_fields,
 )
 from .entity_crud import register_entity_create, register_entity_delete_restore
-from apps.provenance.helpers import claims_prefetch
-
 from .helpers import (
     _build_rich_text,
     _media_prefetch,
@@ -28,11 +31,7 @@ from .helpers import (
 from .schemas import (
     GameplayFeatureSchema,
     HierarchyClaimPatchSchema,
-    RichTextSchema,
-    UploadedMediaSchema,
 )
-
-from ..models import GameplayFeature
 
 # ---------------------------------------------------------------------------
 # Schemas

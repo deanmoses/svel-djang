@@ -6,23 +6,6 @@ Ordered by rough ROI.
 
 ---
 
-## Audit `apps/catalog/api/schemas.py` for misplaced schemas
-
-**Problem.** `ClaimSchema` drifted into `apps/catalog/api/schemas.py` because the original consumer was the catalog detail endpoints — but it models a provenance concept, not a catalog concept. Moving it to `apps/provenance/schemas.py` during this refactor was trivial (one consumer left by the end). The same drift pattern probably affected other schemas in that file.
-
-**Why it matters.** `catalog` depends on `provenance`, not the other way around. Schemas placed in the wrong app create backward dependencies that cause circular-import risk and make the layering harder to reason about. Pre-launch is the cheapest time to fix this; every consumer added makes a future move costlier.
-
-**Shape.** Walk each class in [apps/catalog/api/schemas.py](../../backend/apps/catalog/api/schemas.py) and check whether it models a catalog concept (title, machine, person, credit) or a provenance/citation/media/etc. concept. Move anything in the latter group to its owning app.
-
-**Starting points:**
-
-- [backend/apps/catalog/api/schemas.py](../../backend/apps/catalog/api/schemas.py) — contains a mix of genuinely shared catalog shapes (`Ref`, `TitleMachineSchema`) and cross-cutting ones worth examining (`AttributionSchema`, `InlineCitationSchema`, `RichTextSchema`, `UploadedMediaSchema`, `BlockingReferrerSchema`).
-- Search pattern: `grep -rn "from apps.catalog.api.schemas import"` to enumerate consumers per schema and decide the right home.
-
-**Risk.** Low-medium per schema. Each move is mechanical once the right home is chosen. Do them one at a time, regenerate `schema.d.ts`, run tests.
-
----
-
 ## Decide the soft-delete policy for per-entity provenance endpoints
 
 **Problem.** `GET /api/pages/edit-history/{type}/{slug}/` has always returned 200 for soft-deleted entities (no `.active()` filter). `GET /api/pages/sources/{type}/{slug}/` was previously inconsistent — the old `/api/pages/evidence/` predecessor _did_ filter `.active()`. The consolidation refactor made both consistent by dropping `.active()` from sources, but this was a policy call made implicitly, not deliberately.

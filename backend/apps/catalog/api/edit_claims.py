@@ -11,16 +11,17 @@ from typing import NoReturn
 
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import IntegrityError, models as db_models, transaction
+from django.db import IntegrityError, transaction
+from django.db import models as db_models
 
 from apps.catalog.claims import build_relationship_claim
 from apps.catalog.models import CreditRole, GameplayFeature, Person
 from apps.core.models import get_claim_fields
 from apps.provenance.models import ChangeSet, ChangeSetAction, CitationInstance, Claim
+from apps.provenance.schemas import EditCitationInput
 from apps.provenance.validation import validate_claim_value
 
 from ..resolve import resolve_after_mutation
-from .schemas import EditCitationInput
 
 
 @dataclass(frozen=True)

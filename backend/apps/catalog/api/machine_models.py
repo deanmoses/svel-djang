@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from collections import defaultdict
 from typing import Optional
 
-from django.db.models import F, Prefetch, Q
+from django.db.models import Case, F, IntegerField, Prefetch, Q, Value, When
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
@@ -13,26 +14,9 @@ from ninja.pagination import PageNumberPagination, paginate
 from ninja.responses import Status
 from ninja.security import django_auth
 
-from ..cache import MODELS_ALL_KEY, get_cached_response, set_cached_response
-from .constants import DEFAULT_PAGE_SIZE
-from .edit_claims import (
-    ClaimSpec,
-    StructuredValidationError,
-    execute_claims,
-    plan_abbreviation_claims,
-    plan_credit_claims,
-    plan_gameplay_feature_claims,
-    plan_m2m_claims,
-    plan_scalar_field_claims,
-    raise_form_error,
-)
-from .soft_delete import (
-    SoftDeleteBlocked,
-    count_entity_changesets,
-    execute_soft_delete,
-    plan_soft_delete,
-    serialize_blocking_referrer,
-)
+from apps.core.licensing import get_minimum_display_rank
+from apps.media.models import EntityMedia
+from apps.media.schemas import UploadedMediaSchema
 from apps.provenance.helpers import claims_prefetch
 from apps.provenance.models import ChangeSetAction
 from apps.provenance.rate_limits import (
@@ -40,45 +24,9 @@ from apps.provenance.rate_limits import (
     DELETE_RATE_LIMIT_SPEC,
     check_and_record,
 )
+from apps.provenance.schemas import AttributionSchema, RichTextSchema
 
-from .helpers import (
-    _build_rich_text,
-    _extract_image_attribution,
-    _extract_image_urls,
-    _extract_variant_features,
-    _get_feature_descendant_slugs,
-    _media_prefetch,
-    _serialize_credit,
-    _serialize_title_machine,
-    _serialize_uploaded_media,
-)
-from .schemas import (
-    AttributionSchema,
-    CreditSchema,
-    FranchiseRefSchema,
-    GameplayFeatureSchema,
-    ModelClaimPatchSchema,
-    ModelDeletePreviewSchema,
-    ModelDeleteResponseSchema,
-    ModelDeleteSchema,
-    ModelEditOptionsSchema,
-    ModelRestoreSchema,
-    Ref,
-    RewardTypeSchema,
-    RichTextSchema,
-    SeriesRefSchema,
-    ThemeSchema,
-    TitleMachineSchema,
-    UploadedMediaSchema,
-)
-
-from collections import defaultdict
-
-from django.db.models import Case, IntegerField, Value, When
-
-from apps.core.licensing import get_minimum_display_rank
-from apps.media.models import EntityMedia
-
+from ..cache import MODELS_ALL_KEY, get_cached_response, set_cached_response
 from ..models import (
     Cabinet,
     CorporateEntity,
@@ -101,6 +49,52 @@ from ..models import (
     TechnologySubgeneration,
     Theme,
     Title,
+)
+from .constants import DEFAULT_PAGE_SIZE
+from .edit_claims import (
+    ClaimSpec,
+    StructuredValidationError,
+    execute_claims,
+    plan_abbreviation_claims,
+    plan_credit_claims,
+    plan_gameplay_feature_claims,
+    plan_m2m_claims,
+    plan_scalar_field_claims,
+    raise_form_error,
+)
+from .helpers import (
+    _build_rich_text,
+    _extract_image_attribution,
+    _extract_image_urls,
+    _extract_variant_features,
+    _get_feature_descendant_slugs,
+    _media_prefetch,
+    _serialize_credit,
+    _serialize_title_machine,
+    _serialize_uploaded_media,
+)
+from .schemas import (
+    CreditSchema,
+    FranchiseRefSchema,
+    GameplayFeatureSchema,
+    ModelClaimPatchSchema,
+    ModelDeletePreviewSchema,
+    ModelDeleteResponseSchema,
+    ModelDeleteSchema,
+    ModelEditOptionsSchema,
+    ModelRestoreSchema,
+    Ref,
+    RewardTypeSchema,
+    SeriesRefSchema,
+    ThemeSchema,
+    TitleMachineSchema,
+)
+from .soft_delete import (
+    SoftDeleteBlocked,
+    count_entity_changesets,
+    execute_soft_delete,
+    plan_soft_delete,
+    serialize_blocking_referrer,
 )
 
 # ---------------------------------------------------------------------------

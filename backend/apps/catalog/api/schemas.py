@@ -6,16 +6,14 @@ from typing import Any, Optional
 
 from ninja import Schema
 
+from apps.provenance.schemas import EditCitationInput
+
 
 class Ref(Schema):
     """A reference to a named entity with a slug."""
 
     name: str
     slug: str
-
-
-class EditCitationInput(Schema):
-    citation_instance_id: int
 
 
 class ClaimPatchSchema(Schema):
@@ -165,48 +163,6 @@ class ModelEditOptionsSchema(Schema):
     models: list[EditOptionItem]
 
 
-class AttributionSchema(Schema):
-    """License and attribution info for a piece of content (image, description, etc.)."""
-
-    license_slug: Optional[str] = None
-    license_name: Optional[str] = None
-    license_url: Optional[str] = None
-    permissiveness_rank: Optional[int] = None
-    requires_attribution: bool = False
-    source_name: Optional[str] = None
-    source_url: Optional[str] = None
-    attribution_text: Optional[str] = None
-
-
-class InlineCitationLinkSchema(Schema):
-    """A link attached to a citation source."""
-
-    url: str
-    label: str
-
-
-class InlineCitationSchema(Schema):
-    """Metadata for an inline citation in rendered markdown."""
-
-    id: int
-    index: int
-    source_name: str
-    source_type: str
-    author: str
-    year: Optional[int] = None
-    locator: str
-    links: list[InlineCitationLinkSchema] = []
-
-
-class RichTextSchema(Schema):
-    """A text field bundled with its rendered HTML, citations, and attribution."""
-
-    text: str = ""
-    html: str = ""
-    citations: list[InlineCitationSchema] = []
-    attribution: Optional[AttributionSchema] = None
-
-
 class ThemeSchema(Schema):
     name: str
     slug: str
@@ -297,16 +253,3 @@ class CorporateEntityLocationSchema(Schema):
     display_name: str
     slug: str
     ancestors: list[CorporateEntityLocationAncestorRef] = []
-
-
-class MediaRenditionsSchema(Schema):
-    thumb: str
-    display: str
-
-
-class UploadedMediaSchema(Schema):
-    asset_uuid: str
-    category: Optional[str] = None
-    is_primary: bool
-    uploaded_by_username: Optional[str] = None
-    renditions: MediaRenditionsSchema

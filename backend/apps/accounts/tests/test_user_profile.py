@@ -1,4 +1,4 @@
-"""Tests for GET /api/users/{username}/ endpoint."""
+"""Tests for GET /api/pages/user/{username}/ endpoint."""
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -52,14 +52,14 @@ def model_b(db, bootstrap_source):
 @pytest.mark.django_db
 class TestUserProfileNotFound:
     def test_nonexistent_user_returns_404(self, client):
-        resp = client.get("/api/users/nonexistent/")
+        resp = client.get("/api/pages/user/nonexistent/")
         assert resp.status_code == 404
 
 
 @pytest.mark.django_db
 class TestUserProfileEmpty:
     def test_user_with_no_edits(self, client, user):
-        resp = client.get(f"/api/users/{user.username}/")
+        resp = client.get(f"/api/pages/user/{user.username}/")
         assert resp.status_code == 200
         data = resp.json()
         assert data["username"] == "historian"
@@ -80,7 +80,7 @@ class TestUserProfileWithEdits:
             content_type="application/json",
         )
 
-        resp = client.get(f"/api/users/{user.username}/")
+        resp = client.get(f"/api/pages/user/{user.username}/")
         assert resp.status_code == 200
         data = resp.json()
 
@@ -116,7 +116,7 @@ class TestUserProfileWithEdits:
             content_type="application/json",
         )
 
-        resp = client.get(f"/api/users/{user.username}/")
+        resp = client.get(f"/api/pages/user/{user.username}/")
         data = resp.json()
 
         assert data["edit_count"] == 2
@@ -144,7 +144,7 @@ class TestUserProfileWithEdits:
             content_type="application/json",
         )
 
-        resp = client.get(f"/api/users/{user.username}/")
+        resp = client.get(f"/api/pages/user/{user.username}/")
         data = resp.json()
 
         assert data["edit_count"] == 2
@@ -166,7 +166,7 @@ class TestUserProfileWithEdits:
             content_type="application/json",
         )
 
-        resp = client.get(f"/api/users/{user.username}/")
+        resp = client.get(f"/api/pages/user/{user.username}/")
         data = resp.json()
 
         assert data["edit_count"] == 2
@@ -185,7 +185,7 @@ class TestUserProfileWithEdits:
             content_type="application/json",
         )
 
-        resp = client.get(f"/api/users/{user.username}/")
+        resp = client.get(f"/api/pages/user/{user.username}/")
         data = resp.json()
         assert data["edit_count"] == 0
         assert data["entities_edited"] == []

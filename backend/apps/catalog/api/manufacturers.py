@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import defaultdict
 from typing import Optional
 
 from django.db.models import Count, F, Max, Min, Prefetch, Q
@@ -12,14 +13,26 @@ from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
 from ninja.security import django_auth
 
+from apps.core.licensing import get_minimum_display_rank
 from apps.core.models import active_status_q
-
+from apps.media.schemas import UploadedMediaSchema
+from apps.provenance.helpers import claims_prefetch
+from apps.provenance.schemas import RichTextSchema
 
 from ..cache import MANUFACTURERS_ALL_KEY, get_cached_response, set_cached_response
+from ..models import (
+    CorporateEntity,
+    CorporateEntityAlias,
+    CorporateEntityLocation,
+    Credit,
+    MachineModel,
+    Manufacturer,
+    ManufacturerAlias,
+    System,
+)
 from .constants import DEFAULT_PAGE_SIZE
+from .edit_claims import execute_claims, plan_scalar_field_claims
 from .entity_crud import register_entity_create, register_entity_delete_restore
-from apps.provenance.helpers import claims_prefetch
-
 from .helpers import (
     _build_rich_text,
     _collect_titles,
@@ -33,26 +46,8 @@ from .schemas import (
     CorporateEntityLocationSchema,
     FacetRef,
     RelatedTitleSchema,
-    RichTextSchema,
-    UploadedMediaSchema,
 )
 from .titles import _dedup_facet_refs
-
-from collections import defaultdict
-
-from apps.core.licensing import get_minimum_display_rank
-
-from ..models import (
-    CorporateEntity,
-    CorporateEntityAlias,
-    CorporateEntityLocation,
-    Credit,
-    MachineModel,
-    Manufacturer,
-    ManufacturerAlias,
-    System,
-)
-from .edit_claims import execute_claims, plan_scalar_field_claims
 
 # ---------------------------------------------------------------------------
 # Schemas

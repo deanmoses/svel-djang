@@ -11,14 +11,10 @@ from ninja import Router, Schema
 from ninja.decorators import decorate_view
 from ninja.security import django_auth
 
+from apps.core.licensing import get_minimum_display_rank
+from apps.core.models import active_status_q
 from apps.provenance.helpers import claims_prefetch
-
-from ._counts import bulk_title_counts_via_models
-from .edit_claims import execute_claims, plan_scalar_field_claims
-from .entity_crud import (
-    register_entity_create,
-    register_entity_delete_restore,
-)
+from apps.provenance.schemas import RichTextSchema
 
 from ..models import (
     Cabinet,
@@ -34,17 +30,18 @@ from ..models import (
     TechnologyGeneration,
     TechnologySubgeneration,
 )
-from apps.core.licensing import get_minimum_display_rank
-from apps.core.models import active_status_q
-
+from ._counts import bulk_title_counts_via_models
+from .edit_claims import execute_claims, plan_scalar_field_claims
+from .entity_crud import (
+    register_entity_create,
+    register_entity_delete_restore,
+)
 from .helpers import _build_rich_text, _extract_image_urls, _serialize_title_machine
 from .people import PersonGridSchema
 from .schemas import (
     ClaimPatchSchema,
-    RichTextSchema,
     TitleMachineSchema,
 )
-
 
 # ---------------------------------------------------------------------------
 # Schemas

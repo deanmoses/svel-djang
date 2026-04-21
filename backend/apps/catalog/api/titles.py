@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
+import re
+from collections import defaultdict
 from typing import Any, Optional
 
-from django.db.models import Count, F, Max, Prefetch, Q
+from django.db.models import Count, F, Max, Min, OuterRef, Prefetch, Q, Subquery
 from django.shortcuts import get_object_or_404
-
-from apps.core.models import active_status_q
 from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
@@ -15,13 +15,35 @@ from ninja.pagination import PageNumberPagination, paginate
 from ninja.responses import Status
 from ninja.security import django_auth
 
+from apps.catalog.naming import MAX_CATALOG_NAME_LENGTH, normalize_catalog_name
+from apps.core.licensing import get_minimum_display_rank
+from apps.core.models import active_status_q
+from apps.media.schemas import MediaRenditionsSchema
+from apps.media.storage import build_public_url, build_storage_key
+from apps.provenance.helpers import claims_prefetch
+from apps.provenance.models import ChangeSetAction
+from apps.provenance.rate_limits import (
+    CREATE_RATE_LIMIT_SPEC,
+    DELETE_RATE_LIMIT_SPEC,
+    check_and_record,
+)
+from apps.provenance.schemas import EditCitationInput, RichTextSchema
+
+from ..cache import TITLES_ALL_KEY, get_cached_response, set_cached_response
+from ..models import (
+    Credit,
+    MachineModel,
+    MachineModelGameplayFeature,
+    Title,
+    TitleAbbreviation,
+)
 from .constants import DEFAULT_PAGE_SIZE
 from .edit_claims import (
     ClaimSpec,
     execute_claims,
     plan_abbreviation_claims,
-    raise_form_error,
     plan_scalar_field_claims,
+    raise_form_error,
 )
 from .entity_create import (
     assert_name_available,
@@ -30,22 +52,6 @@ from .entity_create import (
     validate_name,
     validate_slug_format,
 )
-from .soft_delete import (
-    SoftDeleteBlocked,
-    count_entity_changesets,
-    execute_soft_delete,
-    plan_soft_delete,
-    serialize_blocking_referrer,
-)
-from apps.catalog.naming import MAX_CATALOG_NAME_LENGTH, normalize_catalog_name
-from apps.provenance.helpers import claims_prefetch
-from apps.provenance.models import ChangeSetAction
-from apps.provenance.rate_limits import (
-    CREATE_RATE_LIMIT_SPEC,
-    DELETE_RATE_LIMIT_SPEC,
-    check_and_record,
-)
-
 from .helpers import (
     _build_rich_text,
     _extract_image_urls,
@@ -58,31 +64,19 @@ from .machine_models import MachineModelDetailSchema
 from .schemas import (
     BlockingReferrerSchema,
     CreditSchema,
-    EditCitationInput,
     FacetRef,
     GameplayFeatureSchema,
-    MediaRenditionsSchema,
     ModelCreateSchema,
-    RichTextSchema,
     SeriesRefSchema,
     ThemeSchema,
     TitleMachineSchema,
 )
-import re
-from collections import defaultdict
-
-from django.db.models import Min, OuterRef, Subquery
-
-from apps.core.licensing import get_minimum_display_rank
-from apps.media.storage import build_public_url, build_storage_key
-
-from ..cache import TITLES_ALL_KEY, get_cached_response, set_cached_response
-from ..models import (
-    Credit,
-    MachineModel,
-    MachineModelGameplayFeature,
-    Title,
-    TitleAbbreviation,
+from .soft_delete import (
+    SoftDeleteBlocked,
+    count_entity_changesets,
+    execute_soft_delete,
+    plan_soft_delete,
+    serialize_blocking_referrer,
 )
 
 # ---------------------------------------------------------------------------
@@ -576,7 +570,10 @@ def _serialize_title_detail(title) -> dict:
     # For single-model titles with no variants, include full model detail inline.
     model_detail = None
     if len(machines) == 1 and not machines[0].get("variants"):
-        from .machine_models import _model_detail_qs, _serialize_model_detail  # noqa: E402 — avoid circular at module level
+        from .machine_models import (  # noqa: E402 — avoid circular at module level
+            _model_detail_qs,
+            _serialize_model_detail,
+        )
 
         pm = _model_detail_qs().get(slug=machines[0]["slug"])
         model_detail = _serialize_model_detail(pm)

@@ -42,9 +42,9 @@ from django.db import models as db_models
 
 from apps.core.models import CatalogModel, EntityStatusMixin
 from apps.provenance.models import ChangeSet, ChangeSetAction
+from apps.provenance.schemas import EditCitationInput
 
 from .edit_claims import ClaimSpec, execute_multi_entity_claims
-from .schemas import EditCitationInput
 
 
 @dataclass(frozen=True)
