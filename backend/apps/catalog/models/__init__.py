@@ -4,13 +4,35 @@ The catalog represents the resolved/materialized view of each entity.
 Field values are derived by resolving claims from the provenance layer.
 """
 
-from .gameplay_feature import *  # noqa: F403
-from .location import *  # noqa: F403
-from .machine_model import *  # noqa: F403
-from .manufacturer import *  # noqa: F403
-from .person import *  # noqa: F403
-from .series import *  # noqa: F403
-from .system import *  # noqa: F403
-from .taxonomy import *  # noqa: F403
-from .theme import *  # noqa: F403
-from .title import *  # noqa: F403
+from .gameplay_feature import (
+    GameplayFeature,
+    GameplayFeatureAlias,
+    MachineModelGameplayFeature,
+)
+from .location import CorporateEntityLocation, Location, LocationAlias
+from .machine_model import MachineModel, ModelAbbreviation
+from .manufacturer import (
+    CorporateEntity,
+    CorporateEntityAlias,
+    Manufacturer,
+    ManufacturerAlias,
+)
+from .person import Credit, Person, PersonAlias
+from .series import Franchise, Series
+from .system import System, SystemMpuString
+from .taxonomy import (
+    Cabinet,
+    CreditRole,
+    DisplaySubtype,
+    DisplayType,
+    GameFormat,
+    MachineModelRewardType,
+    MachineModelTag,
+    RewardType,
+    RewardTypeAlias,
+    Tag,
+    TechnologyGeneration,
+    TechnologySubgeneration,
+)
+from .theme import MachineModelTheme, Theme, ThemeAlias
+from .title import Title, TitleAbbreviation
