@@ -31,11 +31,13 @@ from .helpers import (
 from .schemas import (
     ClaimPatchSchema,
     ClaimSchema,
+    CorporateEntityLocationSchema,
+    FacetRef,
     RelatedTitleSchema,
     RichTextSchema,
     UploadedMediaSchema,
 )
-from .titles import FacetRef, _dedup_facet_refs
+from .titles import _dedup_facet_refs
 
 from collections import defaultdict
 
@@ -75,19 +77,6 @@ class ManufacturerSchema(Schema):
     name: str
     slug: str
     model_count: int = 0
-
-
-class CorporateEntityLocationAncestorRef(Schema):
-    display_name: str
-    location_path: str
-
-
-class CorporateEntityLocationSchema(Schema):
-    location_path: str
-    location_type: str
-    display_name: str
-    slug: str
-    ancestors: list[CorporateEntityLocationAncestorRef] = []
 
 
 class CorporateEntitySchema(Schema):

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 from django.db.models import Count, Prefetch, Q
 from django.shortcuts import get_object_or_404
 
@@ -21,7 +19,7 @@ from .helpers import (
     _build_rich_text,
     _serialize_title_ref,
 )
-from .schemas import ClaimPatchSchema, ClaimSchema, RichTextSchema
+from .schemas import ClaimPatchSchema, ClaimSchema, RichTextSchema, TitleRefSchema
 
 from apps.core.licensing import get_minimum_display_rank
 
@@ -31,16 +29,6 @@ from ..models import Franchise, MachineModel, Title
 # ---------------------------------------------------------------------------
 # Schemas
 # ---------------------------------------------------------------------------
-
-
-class TitleRefSchema(Schema):
-    name: str
-    slug: str
-    abbreviations: list[str] = []
-    machine_count: int = 0
-    manufacturer_name: Optional[str] = None  # display-only, no paired slug
-    year: Optional[int] = None
-    thumbnail_url: Optional[str] = None
 
 
 class FranchiseListSchema(Schema):

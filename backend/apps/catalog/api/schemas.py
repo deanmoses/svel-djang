@@ -255,6 +255,16 @@ class RelatedTitleSchema(Schema):
     thumbnail_url: Optional[str] = None
 
 
+class TitleRefSchema(Schema):
+    name: str
+    slug: str
+    abbreviations: list[str] = []
+    machine_count: int = 0
+    manufacturer_name: Optional[str] = None  # display-only, no paired slug
+    year: Optional[int] = None
+    thumbnail_url: Optional[str] = None
+
+
 class SeriesRefSchema(Schema):
     name: str
     slug: str
@@ -274,6 +284,31 @@ class RewardTypeSchema(Schema):
 class FranchiseRefSchema(Schema):
     name: str
     slug: str
+
+
+class FacetRef(Schema):
+    slug: str
+    name: str
+
+
+class CreditSchema(Schema):
+    person: Ref
+    role: str
+    role_display: str
+    role_sort_order: int
+
+
+class CorporateEntityLocationAncestorRef(Schema):
+    display_name: str
+    location_path: str
+
+
+class CorporateEntityLocationSchema(Schema):
+    location_path: str
+    location_type: str
+    display_name: str
+    slug: str
+    ancestors: list[CorporateEntityLocationAncestorRef] = []
 
 
 class MediaRenditionsSchema(Schema):

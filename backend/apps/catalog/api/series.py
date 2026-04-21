@@ -23,8 +23,13 @@ from .helpers import (
     _serialize_credit,
     _serialize_title_ref,
 )
-from .machine_models import CreditSchema
-from .schemas import ClaimPatchSchema, ClaimSchema, RichTextSchema
+from .schemas import (
+    ClaimPatchSchema,
+    ClaimSchema,
+    CreditSchema,
+    RichTextSchema,
+    TitleRefSchema,
+)
 
 from apps.core.licensing import get_minimum_display_rank
 
@@ -33,16 +38,6 @@ from ..models import Credit, MachineModel, Series, Title
 # ---------------------------------------------------------------------------
 # Schemas
 # ---------------------------------------------------------------------------
-
-
-class TitleRefSchema(Schema):
-    name: str
-    slug: str
-    abbreviations: list[str] = []
-    machine_count: int = 0
-    manufacturer_name: Optional[str] = None  # display-only, no paired slug
-    year: Optional[int] = None
-    thumbnail_url: Optional[str] = None
 
 
 class SeriesListSchema(Schema):

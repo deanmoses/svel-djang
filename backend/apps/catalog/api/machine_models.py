@@ -55,6 +55,7 @@ from .helpers import (
 from .schemas import (
     AttributionSchema,
     ClaimSchema,
+    CreditSchema,
     FranchiseRefSchema,
     GameplayFeatureSchema,
     ModelClaimPatchSchema,
@@ -132,13 +133,6 @@ class MachineModelListSchema(Schema):
     pinside_rating: Optional[float] = None
     themes: list[ThemeSchema] = []
     thumbnail_url: Optional[str] = None
-
-
-class CreditSchema(Schema):
-    person: Ref
-    role: str
-    role_display: str
-    role_sort_order: int
 
 
 class VariantSchema(Schema):

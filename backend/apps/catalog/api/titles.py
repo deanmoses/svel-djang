@@ -54,11 +54,13 @@ from .helpers import (
     _serialize_credit,
     _serialize_title_machine,
 )
-from .machine_models import CreditSchema, MachineModelDetailSchema
+from .machine_models import MachineModelDetailSchema
 from .schemas import (
     BlockingReferrerSchema,
     ClaimSchema,
+    CreditSchema,
     EditCitationInput,
+    FacetRef,
     GameplayFeatureSchema,
     MediaRenditionsSchema,
     ModelCreateSchema,
@@ -87,11 +89,6 @@ from ..models import (
 # ---------------------------------------------------------------------------
 # Schemas
 # ---------------------------------------------------------------------------
-
-
-class FacetRef(Schema):
-    slug: str
-    name: str
 
 
 class TitleListSchema(Schema):

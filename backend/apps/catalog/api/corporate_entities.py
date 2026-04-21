@@ -27,10 +27,11 @@ from .helpers import (
     _collect_titles,
     _serialize_locations,
 )
-from .manufacturers import CorporateEntityLocationSchema, manufacturers_router
+from .manufacturers import manufacturers_router
 from .schemas import (
     ClaimSchema,
     CorporateEntityClaimPatchSchema,
+    CorporateEntityLocationSchema,
     RelatedTitleSchema,
     RichTextSchema,
 )
