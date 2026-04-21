@@ -11,21 +11,18 @@
 
 {#snippet row(f: (typeof loader.data)[number])}
 	<span class="franchise-name">{f.name}</span>
-	{#if f.title_count}
-		<span class="franchise-count">{f.title_count}</span>
-	{/if}
+	<span class="franchise-count">{f.title_count} title{f.title_count === 1 ? '' : 's'}</span>
 {/snippet}
 
 <TaxonomyListPage
-	title="Franchises"
+	catalogKey="franchise"
 	subtitle="Licensed and original franchises featured in pinball."
-	basePath="/franchises"
 	items={loader.data}
 	loading={loader.loading}
 	error={loader.error}
 	rowSnippet={row}
 	rowStyle="justify-content: space-between; gap: var(--size-4)"
-	createHref="/franchises/new"
+	canCreate
 />
 
 <style>

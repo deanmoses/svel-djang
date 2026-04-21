@@ -10,9 +10,8 @@
 </script>
 
 <TaxonomyListPage
-	title="Credit Roles"
+	catalogKey="credit-role"
 	subtitle="Roles credited on pinball machine development."
-	basePath="/credit-roles"
 	items={loader.data}
 	loading={loader.loading}
 	error={loader.error}

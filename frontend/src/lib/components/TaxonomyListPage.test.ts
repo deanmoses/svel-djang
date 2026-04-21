@@ -13,28 +13,26 @@ describe('TaxonomyListPage', () => {
 	it('renders title, subtitle, and item list', () => {
 		const { body } = render(TaxonomyListPage, {
 			props: {
-				title: 'Widgets',
-				subtitle: 'All the widgets.',
-				basePath: '/widgets',
+				catalogKey: 'tag',
+				subtitle: 'All the tags.',
 				items: ITEMS,
 				loading: false,
 				error: null
 			}
 		});
 
-		expect(body).toContain('Widgets');
-		expect(body).toContain('All the widgets.');
+		expect(body).toContain('Tags');
+		expect(body).toContain('All the tags.');
 		expect(body).toContain('Alpha');
 		expect(body).toContain('Beta');
-		expect(body).toContain('/widgets/alpha');
-		expect(body).toContain('/widgets/beta');
+		expect(body).toContain('/tags/alpha');
+		expect(body).toContain('/tags/beta');
 	});
 
 	it('renders loading state', () => {
 		const { body } = render(TaxonomyListPage, {
 			props: {
-				title: 'Widgets',
-				basePath: '/widgets',
+				catalogKey: 'tag',
 				items: [],
 				loading: true,
 				error: null
@@ -48,37 +46,34 @@ describe('TaxonomyListPage', () => {
 	it('renders error state', () => {
 		const { body } = render(TaxonomyListPage, {
 			props: {
-				title: 'Widgets',
-				basePath: '/widgets',
+				catalogKey: 'tag',
 				items: [],
 				loading: false,
 				error: 'Something went wrong'
 			}
 		});
 
-		expect(body).toContain('Failed to load widgets.');
+		expect(body).toContain('Failed to load tags.');
 		expect(body).not.toContain('Alpha');
 	});
 
 	it('renders empty state', () => {
 		const { body } = render(TaxonomyListPage, {
 			props: {
-				title: 'Widgets',
-				basePath: '/widgets',
+				catalogKey: 'tag',
 				items: [],
 				loading: false,
 				error: null
 			}
 		});
 
-		expect(body).toContain('No widgets found.');
+		expect(body).toContain('No tags found.');
 	});
 
 	it('applies rowStyle to row links', () => {
 		const { body } = render(TaxonomyListPage, {
 			props: {
-				title: 'Widgets',
-				basePath: '/widgets',
+				catalogKey: 'tag',
 				items: ITEMS,
 				loading: false,
 				error: null,
@@ -92,30 +87,28 @@ describe('TaxonomyListPage', () => {
 	it('includes preload link for endpoint', () => {
 		const { head } = render(TaxonomyListPage, {
 			props: {
-				title: 'Widgets',
-				basePath: '/widgets',
+				catalogKey: 'tag',
 				items: [],
 				loading: false,
 				error: null
 			}
 		});
 
-		expect(head).toContain('/api/widgets/');
+		expect(head).toContain('/api/tags/');
 		expect(head).toContain('preload');
 	});
 
 	it('includes page title in head', () => {
 		const { head } = render(TaxonomyListPage, {
 			props: {
-				title: 'Widgets',
-				basePath: '/widgets',
+				catalogKey: 'tag',
 				items: [],
 				loading: false,
 				error: null
 			}
 		});
 
-		expect(head).toContain('Widgets');
+		expect(head).toContain('Tags');
 	});
 
 	it('renders custom row content via rowSnippet', () => {
@@ -138,12 +131,11 @@ describe('TaxonomyListPage', () => {
 		// 2 items is far below the 12-item threshold.
 		const { body } = render(TaxonomyListPage, {
 			props: {
-				title: 'Widgets',
-				basePath: '/widgets',
+				catalogKey: 'tag',
 				items: ITEMS,
 				loading: false,
 				error: null,
-				createHref: '/widgets/new'
+				canCreate: true
 			}
 		});
 
@@ -152,34 +144,19 @@ describe('TaxonomyListPage', () => {
 
 	it('renders search input at/above SEARCH_THRESHOLD', () => {
 		const many = Array.from({ length: 12 }, (_, i) => ({
-			slug: `w-${i}`,
-			name: `Widget ${i}`
+			slug: `t-${i}`,
+			name: `Tag ${i}`
 		}));
 		const { body } = render(TaxonomyListPage, {
 			props: {
-				title: 'Widgets',
-				basePath: '/widgets',
+				catalogKey: 'tag',
 				items: many,
 				loading: false,
 				error: null,
-				createHref: '/widgets/new'
+				canCreate: true
 			}
 		});
 
 		expect(body).toContain('type="search"');
-	});
-
-	it('does not render create affordances when createHref is absent', () => {
-		const { body } = render(TaxonomyListPage, {
-			props: {
-				title: 'Widgets',
-				basePath: '/widgets',
-				items: ITEMS,
-				loading: false,
-				error: null
-			}
-		});
-
-		expect(body).not.toContain('/widgets/new');
 	});
 });

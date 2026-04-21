@@ -17,15 +17,13 @@
 {/snippet}
 
 <TaxonomyListPage
-	title="Gameplay Features"
+	catalogKey="gameplay-feature"
 	subtitle="Mechanical and digital features that define how a pinball machine plays."
-	basePath="/gameplay-features"
 	items={loader.data}
 	loading={loader.loading}
 	error={loader.error}
 	rowSnippet={row}
-	createEntityLabel="gameplay feature"
-	createHref="/gameplay-features/new"
+	canCreate
 />
 
 <style>

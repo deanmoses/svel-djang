@@ -15,15 +15,14 @@
 {/snippet}
 
 <TaxonomyListPage
-	title="Series"
+	catalogKey="series"
 	subtitle="Curated groups of related pinball titles sharing a franchise lineage."
-	basePath="/series"
 	items={loader.data}
 	loading={loader.loading}
 	error={loader.error}
 	rowSnippet={row}
 	rowStyle="justify-content: space-between; gap: var(--size-4)"
-	createHref="/series/new"
+	canCreate
 />
 
 <style>

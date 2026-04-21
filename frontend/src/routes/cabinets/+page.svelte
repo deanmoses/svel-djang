@@ -10,11 +10,10 @@
 </script>
 
 <TaxonomyListPage
-	title="Cabinets"
+	catalogKey="cabinet"
 	subtitle="Physical cabinet styles used in pinball machines."
-	basePath="/cabinets"
 	items={loader.data}
 	loading={loader.loading}
 	error={loader.error}
-	createHref="/cabinets/new"
+	canCreate
 />

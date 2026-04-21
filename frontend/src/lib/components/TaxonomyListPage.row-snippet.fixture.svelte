@@ -15,9 +15,8 @@
 {/snippet}
 
 <TaxonomyListPage
-	title="Widgets"
-	subtitle="All the widgets."
-	basePath="/widgets"
+	catalogKey="tag"
+	subtitle="All the tags."
 	{items}
 	loading={false}
 	error={null}

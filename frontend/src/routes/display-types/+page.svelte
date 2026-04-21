@@ -10,11 +10,10 @@
 </script>
 
 <TaxonomyListPage
-	title="Display Types"
+	catalogKey="display-type"
 	subtitle="Score display technologies used in pinball machines."
-	basePath="/display-types"
 	items={loader.data}
 	loading={loader.loading}
 	error={loader.error}
-	createHref="/display-types/new"
+	canCreate
 />

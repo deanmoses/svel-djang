@@ -9,11 +9,12 @@
 	import { auth } from '$lib/auth.svelte';
 	import { normalizeText, resolveHref } from '$lib/utils';
 	import { pageTitle } from '$lib/constants';
+	import { CATALOG_META, type CatalogEntityKey } from '$lib/api/catalog-meta';
 
 	interface Props {
-		title: string;
+		/** Catalog entity key. Title, basePath, singular/plural labels, and endpoint are derived from CATALOG_META. */
+		catalogKey: CatalogEntityKey;
 		subtitle?: string;
-		basePath: string;
 		items: T[];
 		loading: boolean;
 		error: string | null;
@@ -21,32 +22,35 @@
 		headerSnippet?: Snippet;
 		rowSnippet?: Snippet<[item: T]>;
 		/**
-		 * When set, the page renders create affordances (auth-gated):
+		 * When true, the page renders create affordances (auth-gated) pointing
+		 * at `/{entity_type_plural}/new`:
 		 *  - below SEARCH_THRESHOLD: a "+ New {entity}" link in the header
 		 *  - at/above the threshold: a SearchBox + inline filter; zero-match
 		 *    renders NoResultsCreatePrompt with the typed query.
 		 */
-		createHref?: string;
-		/** Singular label for the create affordance (e.g. "tag"). Defaults to title.toLowerCase() with trailing "s" trimmed. */
-		createEntityLabel?: string;
+		canCreate?: boolean;
 	}
 
 	let {
-		title,
+		catalogKey,
 		subtitle,
-		basePath,
 		items,
 		loading,
 		error,
 		rowStyle,
 		headerSnippet,
 		rowSnippet,
-		createHref,
-		createEntityLabel
+		canCreate = false
 	}: Props = $props();
 
-	let entityLabel = $derived(title.toLowerCase());
+	let meta = $derived(CATALOG_META[catalogKey]);
+	let title = $derived(meta.label_plural);
+	let basePath = $derived(`/${meta.entity_type_plural}`);
+	let entityLabel = $derived(meta.label_plural.toLowerCase());
+	let singularLabel = $derived(meta.label.toLowerCase());
+	let singularTitle = $derived(meta.label);
 	let endpoint = $derived(`/api${basePath}/`);
+	let createHref = $derived(canCreate ? `${basePath}/new` : undefined);
 
 	let searchQuery = $state('');
 
@@ -67,13 +71,6 @@
 			return (item.aliases ?? []).some((alias) => normalizeText(alias).includes(q));
 		});
 	});
-
-	let singularLabel = $derived(
-		createEntityLabel ?? (entityLabel.endsWith('s') ? entityLabel.slice(0, -1) : entityLabel)
-	);
-
-	// Title-cased singular for the action menu label (e.g. "Technology Generation").
-	let singularTitle = $derived(title.endsWith('s') ? title.slice(0, -1) : title);
 
 	let actionItems: EditSectionMenuItem[] = $derived(
 		createHref

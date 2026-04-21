@@ -10,11 +10,10 @@
 </script>
 
 <TaxonomyListPage
-	title="Tags"
+	catalogKey="tag"
 	subtitle="Descriptive tags applied to pinball machines."
-	basePath="/tags"
 	items={loader.data}
 	loading={loader.loading}
 	error={loader.error}
-	createHref="/tags/new"
+	canCreate
 />

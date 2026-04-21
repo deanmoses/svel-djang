@@ -10,11 +10,4 @@
 	</div>
 {/snippet}
 
-<TaxonomyListPage
-	title="Widgets"
-	basePath="/widgets"
-	{items}
-	loading={false}
-	error={null}
-	headerSnippet={header}
-/>
+<TaxonomyListPage catalogKey="tag" {items} loading={false} error={null} headerSnippet={header} />

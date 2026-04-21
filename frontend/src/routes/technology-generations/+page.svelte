@@ -10,11 +10,10 @@
 </script>
 
 <TaxonomyListPage
-	title="Technology Generations"
+	catalogKey="technology-generation"
 	subtitle="Major eras of pinball technology."
-	basePath="/technology-generations"
 	items={loader.data}
 	loading={loader.loading}
 	error={loader.error}
-	createHref="/technology-generations/new"
+	canCreate
 />

@@ -10,11 +10,10 @@
 </script>
 
 <TaxonomyListPage
-	title="Themes"
+	catalogKey="theme"
 	subtitle="Thematic categories for pinball machines."
-	basePath="/themes"
 	items={loader.data}
 	loading={loader.loading}
 	error={loader.error}
-	createHref="/themes/new"
+	canCreate
 />

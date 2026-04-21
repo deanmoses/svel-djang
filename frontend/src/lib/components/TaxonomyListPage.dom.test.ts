@@ -30,12 +30,11 @@ describe('TaxonomyListPage alias-aware search', () => {
 		const user = userEvent.setup();
 		render(TaxonomyListPage, {
 			props: {
-				title: 'Gameplay Features',
-				basePath: '/gameplay-features',
+				catalogKey: 'gameplay-feature',
 				items: ITEMS,
 				loading: false,
 				error: null,
-				createHref: '/gameplay-features/new'
+				canCreate: true
 			}
 		});
 
@@ -52,12 +51,11 @@ describe('TaxonomyListPage alias-aware search', () => {
 		const user = userEvent.setup();
 		render(TaxonomyListPage, {
 			props: {
-				title: 'Gameplay Features',
-				basePath: '/gameplay-features',
+				catalogKey: 'gameplay-feature',
 				items: ITEMS,
 				loading: false,
 				error: null,
-				createHref: '/gameplay-features/new'
+				canCreate: true
 			}
 		});
 
@@ -71,5 +69,24 @@ describe('TaxonomyListPage alias-aware search', () => {
 		// evidence that the alias filter didn't accidentally retain items.
 		expect(screen.queryByText('Multiball')).not.toBeInTheDocument();
 		expect(screen.queryByText('Flippers')).not.toBeInTheDocument();
+	});
+});
+
+describe('TaxonomyListPage create-menu label', () => {
+	it('uses the catalog singular label (e.g. "Series", not naive "Serie")', async () => {
+		const user = userEvent.setup();
+		render(TaxonomyListPage, {
+			props: {
+				catalogKey: 'series',
+				items: [{ slug: 'alpha', name: 'Alpha', aliases: [] }],
+				loading: false,
+				error: null,
+				canCreate: true
+			}
+		});
+
+		// Open the action menu to surface its items.
+		await user.click(screen.getByRole('button', { name: /edit/i }));
+		expect(screen.getByRole('menuitem', { name: '+ New Series' })).toBeInTheDocument();
 	});
 });

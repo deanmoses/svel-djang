@@ -10,9 +10,8 @@
 </script>
 
 <TaxonomyListPage
-	title="Display Subtypes"
+	catalogKey="display-subtype"
 	subtitle="Specific variations of score display technologies."
-	basePath="/display-subtypes"
 	items={loader.data}
 	loading={loader.loading}
 	error={loader.error}

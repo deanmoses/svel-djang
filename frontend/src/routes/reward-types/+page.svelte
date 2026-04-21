@@ -49,13 +49,12 @@
 {/snippet}
 
 <TaxonomyListPage
-	title="Reward Types"
-	basePath="/reward-types"
+	catalogKey="reward-type"
 	items={loader.data}
 	loading={loader.loading}
 	error={loader.error}
 	headerSnippet={header}
-	createHref="/reward-types/new"
+	canCreate
 />
 
 <style>

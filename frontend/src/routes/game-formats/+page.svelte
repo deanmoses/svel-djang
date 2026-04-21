@@ -10,11 +10,10 @@
 </script>
 
 <TaxonomyListPage
-	title="Game Formats"
+	catalogKey="game-format"
 	subtitle="Different game play formats in pinball."
-	basePath="/game-formats"
 	items={loader.data}
 	loading={loader.loading}
 	error={loader.error}
-	createHref="/game-formats/new"
+	canCreate
 />

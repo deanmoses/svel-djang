@@ -10,9 +10,8 @@
 </script>
 
 <TaxonomyListPage
-	title="Technology Subgenerations"
+	catalogKey="technology-subgeneration"
 	subtitle="Subdivisions within major pinball technology eras."
-	basePath="/technology-subgenerations"
 	items={loader.data}
 	loading={loader.loading}
 	error={loader.error}
