@@ -249,14 +249,14 @@ def _clean_and_save(instance, update_fields=None, *, integrity_msg=""):
             detail = "; ".join(parts)
         else:
             detail = str(exc)
-        raise HttpError(422, detail)
+        raise HttpError(422, detail) from exc
     try:
         instance.save(update_fields=update_fields)
     except IntegrityError as exc:
         msg = str(exc).lower()
         if integrity_msg and ("unique" in msg or "duplicate" in msg):
-            raise HttpError(422, integrity_msg)
-        raise HttpError(422, f"Integrity error: {exc}")
+            raise HttpError(422, integrity_msg) from exc
+        raise HttpError(422, f"Integrity error: {exc}") from exc
 
 
 def _detail_qs():

@@ -284,11 +284,11 @@ def create_entity_with_claims(
                 note=note,
                 citation=citation,
             )
-    except IntegrityError:
+    except IntegrityError as err:
         raise StructuredValidationError(
             message="Slug collision.",
             field_errors={
                 "slug": f"The slug {slug!r} is already taken. Edit the slug field."
             },
-        )
+        ) from err
     return entity

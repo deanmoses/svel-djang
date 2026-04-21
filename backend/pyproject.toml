@@ -67,7 +67,6 @@ ignore = [
     # one rule at a time. Do not add to this list without a follow-up.
     "B007",  # Unused loop variable
     "B017",  # assertRaises(Exception) too broad
-    "B904",  # raise without `from` inside except
     "B905",  # zip() without explicit strict=
     "C401",  # Unnecessary generator in set()
     "C416",  # Unnecessary comprehension

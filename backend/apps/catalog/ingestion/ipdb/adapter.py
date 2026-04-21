@@ -607,10 +607,10 @@ def _process_corporate_entity(
                 year_start = int(parts[0])
                 if len(parts) > 1 and parts[1] != "present":
                     year_end = int(parts[1])
-            except ValueError:
+            except ValueError as err:
                 raise CommandError(
                     f"Cannot parse years_active {ya!r} for IPDB manufacturer {company!r}"
-                )
+                ) from err
 
         ce_slug = generate_unique_slug(company, ce_slugs)
         handle = f"ce:{mfr_id}"

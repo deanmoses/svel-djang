@@ -58,7 +58,7 @@ def execute_revert(entity, *, claim_id: int, user, note: str) -> None:
     try:
         target = Claim.objects.get(pk=claim_id, content_type=ct, object_id=entity.pk)
     except Claim.DoesNotExist:
-        raise RevertError("Claim not found for this entity.", status_code=404)
+        raise RevertError("Claim not found for this entity.", status_code=404) from None
 
     if target.source_id is not None:
         raise RevertError("Source-attributed claims cannot be reverted.")

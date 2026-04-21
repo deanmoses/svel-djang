@@ -287,8 +287,8 @@ def batch_citation_instances(request, ids: str = ""):
 
     try:
         id_list = [int(x) for x in ids.split(",") if x.strip()]
-    except ValueError:
-        raise HttpError(422, "ids must be comma-separated integers.")
+    except ValueError as err:
+        raise HttpError(422, "ids must be comma-separated integers.") from err
 
     if len(id_list) > 50:
         raise HttpError(422, "Maximum 50 IDs per request.")

@@ -120,6 +120,6 @@ def get_field_constraints(request, entity_type: str):
     try:
         model_class = get_linkable_model(entity_type)
     except ValueError:
-        raise HttpError(404, f"Unknown entity type: {entity_type}")
+        raise HttpError(404, f"Unknown entity type: {entity_type}") from None
 
     return _get(model_class)
