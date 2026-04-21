@@ -25,7 +25,7 @@ log = logging.getLogger(__name__)
 User = get_user_model()
 
 auth_router = Router(tags=["auth", "private"])
-users_router = Router(tags=["users"])
+user_page_router = Router(tags=["private"])
 
 
 # ── Schemas ──────────────────────────────────────────────────────────
@@ -37,8 +37,33 @@ class AuthStatusSchema(Schema):
     username: Optional[str] = None
 
 
-class ErrorSchema(Schema):
+class _ErrorSchema(Schema):
     detail: str
+
+
+class EntityContributionSchema(Schema):
+    entity_href: str
+    entity_name: str
+    entity_type_label: str
+    edit_count: int
+    last_edited_at: str
+
+
+class UserChangeSetSchema(Schema):
+    id: int
+    note: str
+    created_at: str
+    entity_href: str
+    entity_name: str
+    entity_type_label: str
+
+
+class UserProfileSchema(Schema):
+    username: str
+    member_since: str
+    edit_count: int
+    entities_edited: list[EntityContributionSchema]
+    recent_edits: list[UserChangeSetSchema]
 
 
 # ── Helpers ──────────────────────────────────────────────────────────
@@ -182,46 +207,16 @@ def auth_logout(request):
     return {"is_authenticated": False}
 
 
-# ── User profile schemas ───────────────────────────────────────────
-
-
-class EntityContributionSchema(Schema):
-    entity_href: str
-    entity_name: str
-    entity_type_label: str
-    edit_count: int
-    last_edited_at: str
-
-
-class UserChangeSetSchema(Schema):
-    id: int
-    note: str
-    created_at: str
-    entity_href: str
-    entity_name: str
-    entity_type_label: str
-
-
-class UserProfileSchema(Schema):
-    username: str
-    member_since: str
-    edit_count: int
-    entities_edited: list[EntityContributionSchema]
-    recent_edits: list[UserChangeSetSchema]
-
-
-# ── User profile endpoint ──────────────────────────────────────────
-
-
-@users_router.get("/{username}/", response={200: UserProfileSchema, 404: ErrorSchema})
-def user_profile(request, username: str):
-    """Public profile showing a user's contributions."""
+@user_page_router.get(
+    "/{username}/", response={200: UserProfileSchema, 404: _ErrorSchema}
+)
+def user_profile_page(request, username: str):
+    """Page model for the user profile page: contribution history."""
     user = get_object_or_404(User, username=username)
 
     edit_count = ChangeSet.objects.filter(user=user).count()
     member_since = user.profile.created_at.isoformat()
 
-    # Entities edited: distinct (content_type, object_id) from user's claims
     entity_rows = list(
         Claim.objects.filter(user=user, changeset__isnull=False)
         .values("content_type_id", "object_id")
@@ -249,15 +244,12 @@ def user_profile(request, username: str):
             }
         )
 
-    # Recent edits: last 50 changesets with entity context
     recent_changesets = (
         ChangeSet.objects.filter(user=user)
         .prefetch_related("claims")
         .order_by("-created_at")[:50]
     )
 
-    # Collect entity refs from changesets for batch resolution.
-    # Access the prefetch cache via .all() without slicing to avoid N+1.
     cs_entity_refs: list[dict] = []
     cs_first_claim: dict[int, tuple[int, int]] = {}
     for cs in recent_changesets:
@@ -300,5 +292,5 @@ def user_profile(request, username: str):
 
 routers = [
     ("/auth/", auth_router),
-    ("/users/", users_router),
+    ("/pages/user/", user_page_router),
 ]

@@ -6,7 +6,7 @@ export const prerender = false;
 export const ssr = false;
 
 export const load: PageLoad = async ({ params }) => {
-	const { data, response } = await client.GET('/api/users/{username}/', {
+	const { data, response } = await client.GET('/api/pages/user/{username}/', {
 		params: { path: { username: params.username } }
 	});
 
