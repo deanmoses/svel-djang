@@ -1,6 +1,7 @@
 from apps.catalog.models import (
     CorporateEntity,
     CorporateEntityAlias,
+    ManufacturerAlias,
     Title,
 )
 
@@ -145,6 +146,27 @@ class TestManufacturersAPI:
         data = resp.json()
         mfr = data[0]
         assert "Williams Elektronik" in mfr["search_text"]
+
+    def test_list_all_manufacturers_search_text_includes_manufacturer_aliases(
+        self, client, manufacturer, williams_entity, db
+    ):
+        """ManufacturerAlias values must appear in search_text so the frontend's
+        "no results → create?" prompt doesn't misfire when a user searches by
+        a brand's known alias. The server-side create path already rejects
+        alias collisions via ``assert_name_available``; the list endpoint must
+        stay aligned so the UI gate doesn't mislead users into attempting a
+        duplicate create in the first place."""
+        ManufacturerAlias.objects.create(
+            manufacturer=manufacturer, value="WMS Industries"
+        )
+        make_machine_model(
+            name="Test Game", slug="test-game", corporate_entity=williams_entity
+        )
+        resp = client.get("/api/manufacturers/all/")
+        data = resp.json()
+        mfr = data[0]
+        assert mfr["search_text"] is not None
+        assert "WMS Industries" in mfr["search_text"]
 
     def test_get_manufacturer_detail_nulls_last(
         self, client, manufacturer, williams_entity, db

@@ -175,6 +175,21 @@ export function filterManufacturers(
 	return manufacturers.filter((m) => all.every((p) => p(m)));
 }
 
+/**
+ * Filter by the search query only, ignoring location / year / person / tech-gen
+ * facets. Used by the "no results → create?" gate so that active facet filters
+ * can't trick the UI into offering a duplicate-create affordance for a brand
+ * the user just filtered out of view.
+ */
+export function filterManufacturersByQueryOnly(
+	manufacturers: FacetedManufacturer[],
+	query: string
+): FacetedManufacturer[] {
+	const q = normalizeText(query.trim());
+	if (!q) return manufacturers;
+	return manufacturers.filter((m) => matchesQuery(m, q));
+}
+
 // ---------------------------------------------------------------------------
 // Facet counts (N-1 approach)
 // ---------------------------------------------------------------------------

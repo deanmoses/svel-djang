@@ -58,6 +58,10 @@
 		return matched?.key ?? null;
 	}
 
+	// URL → state. Must assign `editing` unconditionally. An `if (editing !==
+	// nextEditing)` guard turns `editing` into a read-dep of this effect,
+	// which re-runs on local writes and reverts the user's click in the same
+	// tick. Same-value $state writes are already no-ops.
 	$effect(() => {
 		const nextEditing = resolveEditingFromUrl();
 		lastUrlEditing = nextEditing;
@@ -71,8 +75,8 @@
 		updateEditQuery(editing);
 	});
 
-	let editSections: EditSectionMenuItem[] = $derived(
-		SYSTEM_EDIT_SECTIONS.map((section) =>
+	let editSections: EditSectionMenuItem[] = $derived([
+		...SYSTEM_EDIT_SECTIONS.map((section) =>
 			isMobile
 				? {
 						key: section.key,
@@ -84,8 +88,13 @@
 						label: section.label,
 						onclick: () => (editing = section.key)
 					}
-		)
-	);
+		),
+		{
+			key: 'delete',
+			label: 'Delete System',
+			href: resolve(`/systems/${slug}/delete`)
+		}
+	]);
 </script>
 
 <MetaTags title={system.name} description={metaDescription} url={page.url.href} />

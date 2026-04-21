@@ -159,4 +159,48 @@ describe('TaxonomyListPage', () => {
 
 		expect(body).toContain('type="search"');
 	});
+
+	it('filterFn narrows the rendered list', () => {
+		const { body } = render(TaxonomyListPage, {
+			props: {
+				catalogKey: 'tag',
+				items: ITEMS,
+				loading: false,
+				error: null,
+				filterFn: (item: { slug: string }) => item.slug === 'alpha'
+			}
+		});
+
+		expect(body).toContain('Alpha');
+		expect(body).not.toContain('/tags/beta');
+	});
+
+	it('filterFn yielding zero items shows no-matches state', () => {
+		const { body } = render(TaxonomyListPage, {
+			props: {
+				catalogKey: 'tag',
+				items: ITEMS,
+				loading: false,
+				error: null,
+				filterFn: () => false
+			}
+		});
+
+		expect(body).toContain('No matching tags.');
+		expect(body).not.toContain('/tags/alpha');
+	});
+
+	it('filterFn undefined leaves existing behavior intact', () => {
+		const { body } = render(TaxonomyListPage, {
+			props: {
+				catalogKey: 'tag',
+				items: ITEMS,
+				loading: false,
+				error: null
+			}
+		});
+
+		expect(body).toContain('Alpha');
+		expect(body).toContain('Beta');
+	});
 });

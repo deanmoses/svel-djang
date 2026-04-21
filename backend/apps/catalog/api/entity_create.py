@@ -112,8 +112,9 @@ def assert_name_available(
     scope_filter: Q | None = None,
     exclude_pk: int | None = None,
     friendly_label: str,
+    include_deleted: bool = False,
 ) -> None:
-    """Raise a field-level 422 if *name* collides with an active record.
+    """Raise a field-level 422 if *name* collides with an existing record.
 
     Names are compared after passing through *normalize* — typically
     :func:`apps.catalog.naming.normalize_catalog_name`. The normalization
@@ -126,6 +127,21 @@ def assert_name_available(
 
     *friendly_label* is the noun shown to the user, e.g. "title" or
     "model": "A model named 'Pro' already exists."
+
+    *include_deleted* extends the collision scan to soft-deleted rows.
+    Required for any entity whose ``name`` column is DB-unique (e.g.
+    ``System.name``, ``Manufacturer.name``): a name that collides with a
+    soft-deleted row would otherwise pass this pre-check and trip the DB
+    unique constraint, which ``create_entity_with_claims`` misreports as a
+    slug collision. With this flag set, the collision surfaces as a
+    field-level name error before the insert is attempted.
+
+    The alias-collision scan below does NOT follow ``include_deleted`` —
+    it continues to filter ``parent__status=active``. Aliases have their
+    own uniqueness (per-parent), separate from the parent ``name`` UNIQUE
+    constraint, so they don't contribute to the IntegrityError this flag
+    exists to prevent. If a future entity needs alias collisions against
+    soft-deleted parents to count, extend both scans together.
 
     When *model_cls* exposes an ``aliases`` reverse manager (Theme,
     GameplayFeature, RewardType, …), aliases of active parents also count
@@ -140,7 +156,7 @@ def assert_name_available(
             field_errors={"name": "Name cannot be blank."},
         )
 
-    qs = model_cls.objects.active()
+    qs = model_cls.objects.all() if include_deleted else model_cls.objects.active()
     if scope_filter is not None:
         qs = qs.filter(scope_filter)
     for pk, other_name in qs.values_list("pk", "name"):

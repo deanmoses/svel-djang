@@ -80,8 +80,8 @@
 
 	let hasEntityLocations = $derived(mfr.entities.some((entity) => entity.locations.length > 0));
 	let metaItems = $derived(yearsActive ? [{ text: yearsActive }] : []);
-	let editSections: EditSectionMenuItem[] = $derived(
-		MANUFACTURER_EDIT_SECTIONS.map((section) =>
+	let editSections: EditSectionMenuItem[] = $derived([
+		...MANUFACTURER_EDIT_SECTIONS.map((section) =>
 			isMobile
 				? {
 						key: section.key,
@@ -93,8 +93,19 @@
 						label: section.label,
 						onclick: () => (editing = section.key)
 					}
-		)
-	);
+		),
+		{
+			key: 'create-corporate-entity',
+			label: 'Create Corporate Entity',
+			href: resolve(`/manufacturers/${slug}/corporate-entities/new`)
+		},
+		{
+			key: 'delete-manufacturer',
+			label: `Delete ${mfr.name}`,
+			href: resolve(`/manufacturers/${slug}/delete`),
+			separatorBefore: true
+		}
+	]);
 
 	function editAction(sectionKey: ManufacturerEditSectionKey): (() => void) | undefined {
 		if (!auth.isAuthenticated) return undefined;

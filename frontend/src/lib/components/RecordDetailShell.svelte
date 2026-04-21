@@ -22,6 +22,14 @@
 		heroImageAlt?: string;
 		parentLink?: ParentLink | null;
 		metaItems?: MetaItem[];
+		/**
+		 * When true, hides the sidebar on mobile. Default `false` stacks
+		 * the sidebar below the main column on mobile — correct only when
+		 * the sidebar's content isn't already visible elsewhere on mobile.
+		 * Pass `isDetail` when the main column duplicates sidebar content
+		 * via a mobile meta bar / children accordion / relationships
+		 * accordion; otherwise mobile renders the sidebar content twice.
+		 */
 		sidebarDesktopOnly?: boolean;
 		actionBar?: Snippet;
 		main: Snippet;

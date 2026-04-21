@@ -11,10 +11,26 @@ from apps.core.models import active_status_q
 from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
+from ninja.responses import Status
 from ninja.security import django_auth
 
-from .edit_claims import execute_claims, plan_scalar_field_claims
+from .edit_claims import (
+    ClaimSpec,
+    StructuredValidationError,
+    execute_claims,
+    plan_scalar_field_claims,
+)
+from .entity_create import (
+    assert_name_available,
+    assert_slug_available,
+    create_entity_with_claims,
+    validate_name,
+    validate_slug_format,
+)
+from .entity_crud import register_entity_delete_restore
+from apps.catalog.naming import normalize_catalog_name
 from apps.provenance.helpers import build_sources, claims_prefetch
+from apps.provenance.rate_limits import CREATE_RATE_LIMIT_SPEC, check_and_record
 
 from .helpers import (
     _build_rich_text,
@@ -23,6 +39,7 @@ from .helpers import (
 from .schemas import (
     ClaimPatchSchema,
     ClaimSchema,
+    EditCitationInput,
     Ref,
     RelatedTitleSchema,
     RichTextSchema,
@@ -30,7 +47,7 @@ from .schemas import (
 
 from apps.core.licensing import get_minimum_display_rank
 
-from ..models import MachineModel, System
+from ..models import MachineModel, Manufacturer, System
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -42,6 +59,14 @@ class SystemListSchema(Schema):
     slug: str
     manufacturer: Optional[Ref] = None
     machine_count: int = 0
+
+
+class SystemCreateSchema(Schema):
+    name: str
+    slug: str
+    manufacturer_slug: str
+    note: str = ""
+    citation: EditCitationInput | None = None
 
 
 class SiblingSystemSchema(Schema):
@@ -200,3 +225,91 @@ def patch_system_claims(request, slug: str, data: ClaimPatchSchema):
 
     system = get_object_or_404(_system_detail_qs(), slug=system.slug)
     return _serialize_system_detail(system)
+
+
+# ---------------------------------------------------------------------------
+# Create / delete / restore wiring
+# ---------------------------------------------------------------------------
+
+
+@systems_router.post(
+    "/",
+    auth=django_auth,
+    response={201: SystemDetailSchema},
+    tags=["private"],
+)
+def create_system(request, data: SystemCreateSchema):
+    """Create a new System.
+
+    Required fields: ``name``, ``slug``, ``manufacturer_slug``. Optional
+    ``technology_subgeneration`` is deferred to edit — not part of the
+    minimum-viable create per ``docs/plans/RecordCreateDelete.md``.
+
+    Bespoke (rather than ``register_entity_create``) because System has a
+    required non-URL-nested FK (manufacturer) which the shared registrar
+    doesn't express. Uses the same building blocks.
+    """
+    check_and_record(request.user, CREATE_RATE_LIMIT_SPEC)
+
+    name_max = System._meta.get_field("name").max_length
+    name = validate_name(data.name, max_length=name_max)
+    slug = validate_slug_format(data.slug)
+
+    manufacturer_slug = (data.manufacturer_slug or "").strip()
+    if not manufacturer_slug:
+        raise StructuredValidationError(
+            message="Manufacturer is required.",
+            field_errors={"manufacturer_slug": "Manufacturer is required."},
+        )
+    manufacturer = Manufacturer.objects.active().filter(slug=manufacturer_slug).first()
+    if manufacturer is None:
+        raise StructuredValidationError(
+            message="Manufacturer not found.",
+            field_errors={"manufacturer_slug": "Manufacturer not found."},
+        )
+
+    # ``include_deleted=True`` is load-bearing: ``System.name`` is
+    # ``unique=True`` at the DB level, so a name that collides with a
+    # soft-deleted System would otherwise pass the active-only pre-check
+    # and trip the DB unique constraint, which
+    # ``create_entity_with_claims`` misreports as a slug collision.
+    assert_name_available(
+        System,
+        name,
+        normalize=normalize_catalog_name,
+        friendly_label="system",
+        include_deleted=True,
+    )
+    assert_slug_available(System, slug)
+
+    create_entity_with_claims(
+        System,
+        row_kwargs={
+            "name": name,
+            "slug": slug,
+            "status": "active",
+            "manufacturer": manufacturer,
+        },
+        claim_specs=[
+            ClaimSpec(field_name="name", value=name),
+            ClaimSpec(field_name="slug", value=slug),
+            ClaimSpec(field_name="status", value="active"),
+            # FK claim value is the parent's slug string.
+            ClaimSpec(field_name="manufacturer", value=manufacturer.slug),
+        ],
+        user=request.user,
+        note=data.note,
+        citation=data.citation,
+    )
+
+    created = get_object_or_404(_system_detail_qs(), slug=slug)
+    return Status(201, _serialize_system_detail(created))
+
+
+register_entity_delete_restore(
+    systems_router,
+    System,
+    detail_qs=_system_detail_qs,
+    serialize_detail=_serialize_system_detail,
+    response_schema=SystemDetailSchema,
+)

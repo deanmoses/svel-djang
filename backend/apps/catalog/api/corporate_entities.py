@@ -19,6 +19,7 @@ from .edit_claims import (
     raise_form_error,
     validate_scalar_fields,
 )
+from .entity_crud import register_entity_create, register_entity_delete_restore
 from apps.provenance.helpers import build_sources, claims_prefetch
 
 from .helpers import (
@@ -26,7 +27,7 @@ from .helpers import (
     _collect_titles,
     _serialize_locations,
 )
-from .manufacturers import CorporateEntityLocationSchema
+from .manufacturers import CorporateEntityLocationSchema, manufacturers_router
 from .schemas import (
     ClaimSchema,
     CorporateEntityClaimPatchSchema,
@@ -34,7 +35,12 @@ from .schemas import (
     RichTextSchema,
 )
 
-from ..models import CorporateEntity, CorporateEntityLocation, MachineModel
+from ..models import (
+    CorporateEntity,
+    CorporateEntityLocation,
+    MachineModel,
+    Manufacturer,
+)
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -194,3 +200,32 @@ def patch_corporate_entity_claims(
 
     ce = get_object_or_404(_detail_qs(), slug=ce.slug)
     return _serialize_detail(ce)
+
+
+# ---------------------------------------------------------------------------
+# Create / delete / restore wiring
+# ---------------------------------------------------------------------------
+
+# Create is parented: ``POST /api/manufacturers/{parent_slug}/corporate-entities/``
+# mounted on the manufacturer router. Name collisions are scoped per parent —
+# two manufacturers may each own a corporate entity with the same name, but
+# not the same manufacturer.
+register_entity_create(
+    manufacturers_router,
+    CorporateEntity,
+    detail_qs=_detail_qs,
+    serialize_detail=_serialize_detail,
+    response_schema=CorporateEntityDetailSchema,
+    parent_field="manufacturer",
+    parent_model=Manufacturer,
+    route_suffix="corporate-entities",
+    scope_filter_builder=lambda m: Q(manufacturer_id=m.pk),
+)
+register_entity_delete_restore(
+    corporate_entities_router,
+    CorporateEntity,
+    detail_qs=_detail_qs,
+    serialize_detail=_serialize_detail,
+    response_schema=CorporateEntityDetailSchema,
+    parent_field="manufacturer",
+)

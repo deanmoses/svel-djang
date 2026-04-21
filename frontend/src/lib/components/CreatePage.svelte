@@ -1,4 +1,5 @@
 <script lang="ts" generics="T extends { slug: string; name: string }">
+	import type { Snippet } from 'svelte';
 	import { goto } from '$app/navigation';
 	import Button from '$lib/components/Button.svelte';
 	import NotesAndCitationsDetails from '$lib/components/NotesAndCitationsDetails.svelte';
@@ -14,6 +15,7 @@
 		slug: string;
 		note: string;
 		citation: ReturnType<typeof buildEditCitationRequest>;
+		[extra: string]: unknown;
 	};
 
 	type SubmitResult = {
@@ -21,6 +23,8 @@
 		error?: unknown;
 		response: Response;
 	};
+
+	type ExtraBodyResult = Record<string, unknown> | { error: string } | null;
 
 	type Props = {
 		entityLabel: string;
@@ -32,6 +36,26 @@
 		parentBreadcrumb?: { text: string; href: string };
 		projectSlug?: (name: string) => string;
 		notePlaceholder?: string;
+		/**
+		 * Field keys whose server-side errors should route to the caller
+		 * (via the `errors` arg on the `extraFields` snippet). Any field
+		 * error whose key is NOT in this set or `{name, slug}` falls through
+		 * to the top-level `formError` as today.
+		 */
+		extraFieldKeys?: readonly string[];
+		/**
+		 * Extra form fields rendered between the built-in Name/Slug block and
+		 * the notes/citations details. The snippet receives a reactive `errors`
+		 * record keyed by `extraFieldKeys`, cleared on each submit.
+		 */
+		extraFields?: Snippet<[{ disabled: boolean; errors: Record<string, string> }]>;
+		/**
+		 * Called at submit time to collect extra body fields. Return an
+		 * object to merge into the request body, `{ error }` to block
+		 * submission with a form-level error, or null/undefined for no
+		 * extras.
+		 */
+		extraBody?: () => ExtraBodyResult | undefined;
 	};
 
 	let {
@@ -43,8 +67,13 @@
 		cancelHref,
 		parentBreadcrumb,
 		projectSlug,
-		notePlaceholder
+		notePlaceholder,
+		extraFieldKeys,
+		extraFields,
+		extraBody
 	}: Props = $props();
+
+	let extraErrors = $state<Record<string, string>>({});
 
 	const project = (value: string) => (projectSlug ? projectSlug(value) : slugifyForCatalog(value));
 
@@ -76,6 +105,7 @@
 		formError = '';
 		nameError = '';
 		slugError = '';
+		extraErrors = {};
 
 		if (!name.trim()) {
 			nameError = 'Name cannot be blank.';
@@ -84,6 +114,18 @@
 		if (!slug.trim()) {
 			slugError = 'Slug cannot be blank.';
 			return;
+		}
+
+		let extras: Record<string, unknown> = {};
+		if (extraBody) {
+			const result = extraBody();
+			if (result && 'error' in result && typeof result.error === 'string') {
+				formError = result.error;
+				return;
+			}
+			if (result) {
+				extras = result as Record<string, unknown>;
+			}
 		}
 
 		submitting = true;
@@ -96,7 +138,8 @@
 				name: name.trim(),
 				slug: slug.trim(),
 				note: note || '',
-				citation: buildEditCitationRequest(citation)
+				citation: buildEditCitationRequest(citation),
+				...extras
 			});
 
 			const outcome = classifyCreateResponse({ data: created, error, response });
@@ -108,13 +151,21 @@
 				case 'rate_limited':
 					formError = outcome.message;
 					return;
-				case 'field_errors':
+				case 'field_errors': {
 					nameError = outcome.fieldErrors.name ?? '';
 					slugError = outcome.fieldErrors.slug ?? '';
-					if (!nameError && !slugError) {
+					const nextExtra: Record<string, string> = {};
+					for (const key of extraFieldKeys ?? []) {
+						const msg = outcome.fieldErrors[key];
+						if (msg) nextExtra[key] = msg;
+					}
+					extraErrors = nextExtra;
+					const hasExtra = Object.keys(nextExtra).length > 0;
+					if (!nameError && !slugError && !hasExtra) {
 						formError = outcome.message;
 					}
 					return;
+				}
 				case 'form_error':
 					formError = outcome.message;
 					return;
@@ -155,6 +206,9 @@
 			error={slugError}
 			placeholder="lowercase-hyphenated"
 		/>
+		{#if extraFields}
+			{@render extraFields({ disabled: submitting, errors: extraErrors })}
+		{/if}
 	</div>
 
 	<NotesAndCitationsDetails

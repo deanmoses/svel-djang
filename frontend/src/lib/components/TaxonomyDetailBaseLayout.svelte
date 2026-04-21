@@ -98,6 +98,10 @@
 		return matched?.key ?? null;
 	}
 
+	// URL → state. Must assign `editing` unconditionally. An `if (editing !==
+	// nextEditing)` guard turns `editing` into a read-dep of this effect,
+	// which re-runs on local writes and reverts the user's click in the same
+	// tick. Same-value $state writes are already no-ops.
 	$effect(() => {
 		const nextEditing = resolveEditingFromUrl();
 		lastUrlEditing = nextEditing;
