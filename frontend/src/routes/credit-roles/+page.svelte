@@ -11,7 +11,7 @@
 
 <TaxonomyListPage
 	catalogKey="credit-role"
-	subtitle="Roles credited on pinball machine development."
+	subtitle="Roles credited in game development."
 	items={loader.data}
 	loading={loader.loading}
 	error={loader.error}

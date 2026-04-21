@@ -6,17 +6,19 @@
 		slug,
 		name,
 		thumbnailUrl = null,
-		creditCount = 0
+		creditCount = 0,
+		creditLabel = 'credit'
 	}: {
 		slug: string;
 		name: string;
 		thumbnailUrl?: string | null;
 		creditCount?: number;
+		creditLabel?: string;
 	} = $props();
 </script>
 
 <Card href={resolve(`/people/${slug}`)} title={name} {thumbnailUrl}>
-	<p class="card-count">{creditCount} credit{creditCount === 1 ? '' : 's'}</p>
+	<p class="card-count">{creditCount} {creditLabel}{creditCount === 1 ? '' : 's'}</p>
 </Card>
 
 <style>

@@ -16,14 +16,14 @@
 	</section>
 {/if}
 
-<h2 class="section-heading">People</h2>
+<h2 class="section-heading">People With {profile.name} Credits</h2>
 {#if people.length > 0}
 	<SearchableGrid
 		items={people}
 		filterFields={(item) => [item.name, ...(item.aliases ?? [])]}
-		placeholder="Search people in this role..."
+		placeholder="Search people credited with this role..."
 		entityName="person"
-		entityNamePlural="people"
+		entityNamePlural={`people with ${profile.name} credits`}
 	>
 		{#snippet children(person)}
 			<PersonCard
@@ -31,6 +31,7 @@
 				name={person.name}
 				thumbnailUrl={person.thumbnail_url}
 				creditCount={person.credit_count}
+				creditLabel={`${profile.name} credit`}
 			/>
 		{/snippet}
 	</SearchableGrid>
