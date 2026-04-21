@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import socket
+from ipaddress import IPv4Address
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -51,9 +52,8 @@ class TestIsBlocked:
         assert _is_blocked("ff02::1") is True
 
     def test_reserved_ipv4(self):
-        # 0.0.0.0 is reserved; this literal is the subject of the assertion,
-        # not an interface binding.
-        assert _is_blocked("0.0.0.0") is True  # noqa: S104
+        # The unspecified address (all zeros) is reserved.
+        assert _is_blocked(str(IPv4Address(0))) is True
 
     def test_ipv4_mapped_ipv6_loopback(self):
         assert _is_blocked("::ffff:127.0.0.1") is True
