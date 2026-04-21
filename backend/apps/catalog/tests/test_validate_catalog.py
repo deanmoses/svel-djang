@@ -30,7 +30,9 @@ def _create_with_empty_name(model_class, **kwargs):
     table = model_class._meta.db_table
     with connection.cursor() as cur:
         cur.execute("PRAGMA ignore_check_constraints = ON")
-        cur.execute(f"UPDATE {table} SET name = '' WHERE id = %s", [obj.pk])
+        # Table identifier comes from test-controlled ORM metadata; value parameterized.
+        sql = f"UPDATE {table} SET name = '' WHERE id = %s"  # noqa: S608
+        cur.execute(sql, [obj.pk])
         cur.execute("PRAGMA ignore_check_constraints = OFF")
     obj.refresh_from_db()
     return obj

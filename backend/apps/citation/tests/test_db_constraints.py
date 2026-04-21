@@ -16,7 +16,9 @@ def _raw_update(model, pk, **fields):
     table = model._meta.db_table
     sets = ", ".join(f"{col} = %s" for col in fields)
     with connection.cursor() as cur:
-        cur.execute(f"UPDATE {table} SET {sets} WHERE id = %s", [*fields.values(), pk])
+        # Table/column identifiers come from test-controlled ORM metadata; values parameterized.
+        sql = f"UPDATE {table} SET {sets} WHERE id = %s"  # noqa: S608
+        cur.execute(sql, [*fields.values(), pk])
 
 
 # ---------------------------------------------------------------------------
