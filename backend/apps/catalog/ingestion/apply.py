@@ -744,7 +744,7 @@ def _persist(
     changesets = [ChangeSet(ingest_run=run) for _ in entity_list]
     ChangeSet.objects.bulk_create(changesets)
     entity_to_cs: dict[tuple[int, int], ChangeSet] = dict(
-        zip(entity_list, changesets),
+        zip(entity_list, changesets, strict=True),
     )
 
     # Deactivate superseded claims before inserting replacements.
