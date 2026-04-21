@@ -92,7 +92,11 @@
 	);
 
 	let showActionMenu = $derived(
-		actionItems.length > 0 && auth.isAuthenticated && !loading && !error
+		actionItems.length > 0 &&
+			auth.isAuthenticated &&
+			!loading &&
+			!error &&
+			items.length < SEARCH_THRESHOLD
 	);
 </script>
 
