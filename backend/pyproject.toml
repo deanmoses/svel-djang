@@ -66,7 +66,6 @@ ignore = [
     # security, or style) and should be re-enabled and fixed in follow-up PRs,
     # one rule at a time. Do not add to this list without a follow-up.
     "N806",  # Variable in function should be lowercase
-    "S310",  # urlopen without allowed-scheme audit
     "S608",  # Possible SQL injection via string concat
 ]
 

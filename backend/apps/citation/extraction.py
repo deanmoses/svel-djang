@@ -123,9 +123,11 @@ def extract_isbn(isbn: str) -> ExtractionResult:
 
     # 3a. Edition request
     edition_url = f"https://openlibrary.org/isbn/{isbn}.json"
+    if urlparse(edition_url).scheme != "https":
+        return ExtractionResult(error="api_error")
     try:
-        req = Request(edition_url, headers={"User-Agent": _USER_AGENT})
-        with urlopen(req, timeout=_OL_TIMEOUT) as resp:
+        req = Request(edition_url, headers={"User-Agent": _USER_AGENT})  # noqa: S310 — scheme checked above
+        with urlopen(req, timeout=_OL_TIMEOUT) as resp:  # noqa: S310 — scheme checked above
             edition = json.loads(resp.read())
     except HTTPError as exc:
         if exc.code == 404:
@@ -148,11 +150,11 @@ def extract_isbn(isbn: str) -> ExtractionResult:
         remaining = deadline - time.monotonic()
         author_timeout = max(remaining, 0.5)
         author_key = author_keys[0].get("key", "")
-        if author_key:
-            author_url = f"https://openlibrary.org{author_key}.json"
+        author_url = f"https://openlibrary.org{author_key}.json" if author_key else ""
+        if author_url and urlparse(author_url).scheme == "https":
             try:
-                req = Request(author_url, headers={"User-Agent": _USER_AGENT})
-                with urlopen(req, timeout=author_timeout) as resp:
+                req = Request(author_url, headers={"User-Agent": _USER_AGENT})  # noqa: S310 — scheme checked above
+                with urlopen(req, timeout=author_timeout) as resp:  # noqa: S310 — scheme checked above
                     author_data = json.loads(resp.read())
                 author = author_data.get("name", "")
             except Exception:
