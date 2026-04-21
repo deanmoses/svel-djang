@@ -363,7 +363,7 @@ def _apply_resolution(
     extra_data: dict = {}
 
     # Apply winners.
-    for claim_key, claim in winners.items():
+    for _claim_key, claim in winners.items():
         if claim.field_name in get_relationship_namespaces():
             continue
         if claim.field_name in claim_fields:

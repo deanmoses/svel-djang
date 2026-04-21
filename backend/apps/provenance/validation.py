@@ -275,7 +275,7 @@ def validate_claims_batch(
     if rel_claims:
         rejected.extend(validate_relationship_claims_batch(rel_claims))
 
-    rejected_set = set(id(c) for c in rejected)
+    rejected_set = {id(c) for c in rejected}
     valid = [c for c in pending_claims if id(c) not in rejected_set]
     return valid, len(rejected)
 

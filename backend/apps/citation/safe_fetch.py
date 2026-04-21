@@ -71,7 +71,7 @@ def _resolve_and_validate(hostname: str, port: int) -> str:
     if not infos:
         raise OSError(f"DNS resolution returned no results for {hostname}")
 
-    for family, _type, _proto, _canonname, sockaddr in infos:
+    for _family, _type, _proto, _canonname, sockaddr in infos:
         addr = sockaddr[0]
         if not _is_blocked(addr):
             return addr

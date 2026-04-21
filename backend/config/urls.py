@@ -47,7 +47,7 @@ def _should_serve_local_media() -> bool:
 if _should_serve_local_media():
     urlpatterns += [
         re_path(
-            r"^%s(?P<path>.*)$" % settings.MEDIA_URL.lstrip("/"),
+            r"^{}(?P<path>.*)$".format(settings.MEDIA_URL.lstrip("/")),
             _serve_media,
             {"document_root": settings.MEDIA_ROOT},
         ),

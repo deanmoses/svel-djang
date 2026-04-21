@@ -579,7 +579,7 @@ def _validate_fail_fast(
     """Validate claims.  Raises ``ValidationError`` if any are rejected."""
     valid, rejected_count = validate_claims_batch(all_claims)
     if rejected_count > 0:
-        valid_ids = set(id(c) for c in valid)
+        valid_ids = {id(c) for c in valid}
         for c in all_claims:
             if id(c) not in valid_ids:
                 report.errors.append(
@@ -598,7 +598,7 @@ def _validate_and_collect_errors(
     """Validate claims for dry-run (non-fatal).  Appends errors to report."""
     valid, rejected_count = validate_claims_batch(claims)
     if rejected_count > 0:
-        valid_ids = set(id(c) for c in valid)
+        valid_ids = {id(c) for c in valid}
         for c in claims:
             if id(c) not in valid_ids:
                 report.errors.append(

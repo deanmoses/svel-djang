@@ -328,7 +328,7 @@ class TestExtractIpdbGameplayFeatures:
 
     def _counts(self, raw: str) -> dict[str, int | None]:
         pairs, _ = extract_ipdb_gameplay_features(raw, _FM)
-        return {slug: count for slug, count in pairs}
+        return dict(pairs)
 
     def _unmatched(self, raw: str) -> list[str]:
         _, unmatched = extract_ipdb_gameplay_features(raw, _FM)

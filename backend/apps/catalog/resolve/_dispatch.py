@@ -164,7 +164,7 @@ def _resolve_non_machine_model(
                 if model is entity_type:
                     _resolve_parents(model, claim_field_prefix=prefix)
     else:
-        for fn, (model, prefix) in parent_dispatch.items():
+        for _fn, (model, prefix) in parent_dispatch.items():
             if model is entity_type:
                 _resolve_parents(model, claim_field_prefix=prefix)
 
@@ -175,7 +175,7 @@ def _resolve_non_machine_model(
             if fn in custom_dispatch and custom_dispatch[fn][0] is entity_type:
                 _call_custom_resolver(custom_dispatch[fn], entity.pk)
     else:
-        for fn, spec in custom_dispatch.items():
+        for _fn, spec in custom_dispatch.items():
             if spec[0] is entity_type:
                 _call_custom_resolver(spec, entity.pk)
 
