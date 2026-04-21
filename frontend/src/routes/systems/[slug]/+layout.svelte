@@ -92,7 +92,8 @@
 		{
 			key: 'delete',
 			label: 'Delete System',
-			href: resolve(`/systems/${slug}/delete`)
+			href: resolve(`/systems/${slug}/delete`),
+			separatorBefore: true
 		}
 	]);
 </script>

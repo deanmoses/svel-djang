@@ -148,7 +148,8 @@
 		{
 			key: 'delete-model',
 			label: 'Delete Model',
-			href: resolve(`/models/${slug}/delete`)
+			href: resolve(`/models/${slug}/delete`),
+			separatorBefore: true
 		}
 	]);
 

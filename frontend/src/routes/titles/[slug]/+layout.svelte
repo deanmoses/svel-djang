@@ -155,7 +155,8 @@
 		{
 			key: 'delete-title',
 			label: 'Delete Title',
-			href: resolve(`/titles/${slug}/delete`)
+			href: resolve(`/titles/${slug}/delete`),
+			separatorBefore: true
 		}
 	]);
 

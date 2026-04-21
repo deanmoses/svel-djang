@@ -146,7 +146,8 @@
 					{
 						key: 'delete',
 						label: `Delete ${profile.name}`,
-						href: resolveHref(deleteHref)
+						href: resolveHref(deleteHref),
+						separatorBefore: true
 					} as EditSectionMenuItem
 				]
 			: [])

@@ -94,7 +94,8 @@
 		{
 			key: 'delete-person',
 			label: 'Delete Person',
-			href: resolve(`/people/${slug}/delete`)
+			href: resolve(`/people/${slug}/delete`),
+			separatorBefore: true
 		}
 	]);
 
