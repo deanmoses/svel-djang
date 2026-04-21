@@ -264,8 +264,6 @@ class Claim(models.Model):
     CheckConstraint and by ClaimManager.assert_claim().
     """
 
-    objects = ClaimManager()
-
     content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
     object_id = models.PositiveBigIntegerField()
     subject = GenericForeignKey("content_type", "object_id")
@@ -337,6 +335,8 @@ class Claim(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True, db_default=Now())
 
+    objects = ClaimManager()
+
     class Meta:
         indexes = [
             models.Index(fields=["content_type", "object_id", "field_name"]),
@@ -379,6 +379,10 @@ class Claim(models.Model):
             ),
         ]
 
+    def __str__(self) -> str:
+        author = self.source.name if self.source_id else self.user.username
+        return f"{author}: {self.subject}.{self.field_name}"
+
     @classmethod
     def for_object(
         cls, obj, *, field_name: str, value, claim_key: str = "", **kwargs
@@ -398,7 +402,3 @@ class Claim(models.Model):
             value=value,
             **kwargs,
         )
-
-    def __str__(self) -> str:
-        author = self.source.name if self.source_id else self.user.username
-        return f"{author}: {self.subject}.{self.field_name}"

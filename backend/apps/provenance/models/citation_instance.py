@@ -47,13 +47,13 @@ class CitationInstance(models.Model):
             ),
         ]
 
+    def __str__(self) -> str:
+        loc = f" @ {self.locator}" if self.locator else ""
+        return f"Citation: {self.citation_source_id}{loc}"
+
     def save(self, *args, **kwargs):
         if self.pk is not None:
             raise ValueError(
                 "CitationInstance is immutable. Create a new instance instead."
             )
         super().save(*args, **kwargs)
-
-    def __str__(self) -> str:
-        loc = f" @ {self.locator}" if self.locator else ""
-        return f"Citation: {self.citation_source_id}{loc}"
