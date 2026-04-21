@@ -85,8 +85,8 @@
 		href: resolve(`/manufacturers/${ce.manufacturer.slug}`)
 	});
 
-	let editSections: EditSectionMenuItem[] = $derived(
-		CORPORATE_ENTITY_EDIT_SECTIONS.map((section) =>
+	let editSections: EditSectionMenuItem[] = $derived([
+		...CORPORATE_ENTITY_EDIT_SECTIONS.map((section) =>
 			isMobile
 				? {
 						key: section.key,
@@ -98,8 +98,14 @@
 						label: section.label,
 						onclick: () => (editing = section.key)
 					}
-		)
-	);
+		),
+		{
+			key: 'delete-corporate-entity',
+			label: `Delete ${ce.name}`,
+			href: resolve(`/corporate-entities/${slug}/delete`),
+			separatorBefore: true
+		}
+	]);
 
 	function editAction(sectionKey: CorporateEntityEditSectionKey): (() => void) | undefined {
 		if (!auth.isAuthenticated) return undefined;

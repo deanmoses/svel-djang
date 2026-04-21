@@ -29,6 +29,15 @@
 		 *    renders NoResultsCreatePrompt with the typed query.
 		 */
 		canCreate?: boolean;
+		/** Optional filter UI rendered between the SearchBox and the list. */
+		filters?: Snippet;
+		/**
+		 * Optional pre-search filter. Applied before the name/alias match so
+		 * the empty-state and zero-results prompts compose with active
+		 * filters. Callers own the filter state and bind it through their
+		 * `filters` snippet.
+		 */
+		filterFn?: (item: T) => boolean;
 	}
 
 	let {
@@ -40,7 +49,9 @@
 		rowStyle,
 		headerSnippet,
 		rowSnippet,
-		canCreate = false
+		canCreate = false,
+		filters,
+		filterFn
 	}: Props = $props();
 
 	let meta = $derived(CATALOG_META[catalogKey]);
@@ -60,13 +71,15 @@
 
 	let showSearch = $derived(items.length >= SEARCH_THRESHOLD || searchQuery.trim() !== '');
 
+	let scopedItems = $derived(filterFn ? items.filter(filterFn) : items);
+
 	let filteredItems = $derived.by(() => {
 		const q = normalizeText(searchQuery.trim());
-		if (!q) return items;
+		if (!q) return scopedItems;
 		// Per RecordCreateDelete.md:115, aliases must count as results for the
 		// duplicate-prevention gate — otherwise a search for an existing alias
 		// would wrongly trigger NoResultsCreatePrompt.
-		return items.filter((item) => {
+		return scopedItems.filter((item) => {
 			if (normalizeText(item.name).includes(q)) return true;
 			return (item.aliases ?? []).some((alias) => normalizeText(alias).includes(q));
 		});
@@ -113,6 +126,10 @@
 	{:else}
 		{#if showSearch}
 			<SearchBox bind:value={searchQuery} placeholder={`Search ${entityLabel}...`} />
+		{/if}
+
+		{#if filters}
+			{@render filters()}
 		{/if}
 
 		{#if items.length === 0}

@@ -244,3 +244,80 @@ describe('CreatePage', () => {
 		expect(goto).toHaveBeenCalledWith('/people');
 	});
 });
+
+describe('CreatePage extras', () => {
+	beforeEach(() => {
+		goto.mockReset();
+		goto.mockResolvedValue(undefined);
+		resolve.mockClear();
+		toast._resetForTest();
+	});
+
+	afterEach(() => {
+		toast._resetForTest();
+	});
+
+	it('merges extraBody output into the submit body', async () => {
+		const user = userEvent.setup();
+		const submit = vi.fn().mockResolvedValue({
+			data: { slug: 'ada-lovelace', name: 'Ada Lovelace' },
+			error: undefined,
+			response: makeResponse(201)
+		});
+
+		const ExtrasFixture = (await import('./CreatePage.extras.fixture.svelte')).default;
+		render(ExtrasFixture, { extraValue: 'stern', submit });
+
+		await user.click(screen.getByRole('button', { name: 'Create System' }));
+
+		expect(submit).toHaveBeenCalledOnce();
+		const body = submit.mock.calls[0]?.[0];
+		expect(body).toMatchObject({
+			name: 'Ada',
+			slug: 'ada',
+			manufacturer_slug: 'stern'
+		});
+	});
+
+	it('extraBody {error} blocks submission with a form-level error', async () => {
+		const user = userEvent.setup();
+		const submit = vi.fn();
+
+		const ExtrasFixture = (await import('./CreatePage.extras.fixture.svelte')).default;
+		render(ExtrasFixture, {
+			extraError: 'Manufacturer is required.',
+			submit
+		});
+
+		await user.click(screen.getByRole('button', { name: 'Create System' }));
+
+		expect(submit).not.toHaveBeenCalled();
+		expect(screen.getByRole('alert')).toHaveTextContent('Manufacturer is required.');
+	});
+
+	it('server field_errors route to extraFieldKeys instead of formError', async () => {
+		const user = userEvent.setup();
+		const submit = vi.fn().mockResolvedValue({
+			data: undefined,
+			error: {
+				detail: [
+					{
+						loc: ['body', 'payload', 'manufacturer_slug'],
+						msg: 'Manufacturer not found.'
+					}
+				]
+			},
+			response: makeResponse(422)
+		});
+
+		const ExtrasFixture = (await import('./CreatePage.extras.fixture.svelte')).default;
+		render(ExtrasFixture, { extraValue: 'stern', submit });
+
+		await user.click(screen.getByRole('button', { name: 'Create System' }));
+
+		expect(await screen.findByTestId('extra-error')).toHaveTextContent('Manufacturer not found.');
+		// formError is NOT the generic fallback in this case
+		expect(screen.queryByRole('alert')).toBeNull();
+		expect(goto).not.toHaveBeenCalled();
+	});
+});

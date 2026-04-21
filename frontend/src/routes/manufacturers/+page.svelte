@@ -3,10 +3,12 @@
 	import { resolve } from '$app/paths';
 	import client from '$lib/api/client';
 	import { createAsyncLoader } from '$lib/async-loader.svelte';
+	import { auth } from '$lib/auth.svelte';
 	import ManufacturerActiveFilterChips from '$lib/components/ManufacturerActiveFilterChips.svelte';
 	import CardGrid from '$lib/components/grid/CardGrid.svelte';
 	import FilterDrawer from '$lib/components/FilterDrawer.svelte';
 	import ClientFilteredGrid from '$lib/components/grid/ClientFilteredGrid.svelte';
+	import NoResultsCreatePrompt from '$lib/components/NoResultsCreatePrompt.svelte';
 	import SearchBox from '$lib/components/SearchBox.svelte';
 	import SkeletonCard from '$lib/components/cards/SkeletonCard.svelte';
 	import ManufacturerCard from '$lib/components/cards/ManufacturerCard.svelte';
@@ -14,6 +16,7 @@
 	import { pageTitle } from '$lib/constants';
 	import {
 		filterManufacturers,
+		filterManufacturersByQueryOnly,
 		mfrFiltersFromParams,
 		mfrFiltersToParams,
 		type FacetedManufacturer
@@ -46,6 +49,17 @@
 	});
 
 	let filteredManufacturers = $derived(filterManufacturers(manufacturers.data, filters));
+
+	// Gate the "no results → create?" prompt on a search-only match set so
+	// active facet filters can't hide an existing brand and trick the UI into
+	// offering a duplicate-create affordance.
+	let searchOnlyMatches = $derived(
+		filterManufacturersByQueryOnly(manufacturers.data, filters.query)
+	);
+
+	$effect(() => {
+		void auth.load();
+	});
 </script>
 
 <svelte:head>
@@ -82,6 +96,14 @@
 						/>
 					{/snippet}
 				</ClientFilteredGrid>
+
+				{#if searchOnlyMatches.length === 0 && filters.query.trim() !== '' && auth.isAuthenticated}
+					<NoResultsCreatePrompt
+						entityLabel="manufacturer"
+						query={filters.query.trim()}
+						createHref={`${resolve('/manufacturers/new')}?name=${encodeURIComponent(filters.query.trim())}`}
+					/>
+				{/if}
 			</main>
 		</div>
 	{/if}

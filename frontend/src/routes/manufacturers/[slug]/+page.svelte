@@ -2,6 +2,7 @@
 	import { resolve } from '$app/paths';
 	import { MEDIA_CATEGORIES } from '$lib/api/catalog-meta';
 	import AccordionSection from '$lib/components/AccordionSection.svelte';
+	import CreateFirstCorporateEntityPrompt from '$lib/components/CreateFirstCorporateEntityPrompt.svelte';
 	import RichTextOverviewAccordion from '$lib/components/RichTextOverviewAccordion.svelte';
 	import RichTextReferencesAccordion from '$lib/components/RichTextReferencesAccordion.svelte';
 	import { createRichTextAccordionState } from '$lib/components/rich-text-accordion-state.svelte';
@@ -34,6 +35,14 @@
 		state={richTextState}
 		onEdit={editAction('description')}
 	/>
+{/if}
+
+<!-- "Create first corporate entity" CTA when the manufacturer has no active
+     entities. Shown to all viewers, mirroring Title's `CreateFirstModelPrompt`
+     (see docs/plans/RecordCreateDelete.md). Anonymous users clicking through
+     get bounced to login by the create page's load guard. -->
+{#if mfr.entities.length === 0}
+	<CreateFirstCorporateEntityPrompt manufacturerSlug={mfr.slug} manufacturerName={mfr.name} />
 {/if}
 
 {#if hasCompanyDetails}

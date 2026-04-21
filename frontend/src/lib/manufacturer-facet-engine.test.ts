@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
 	filterManufacturers,
+	filterManufacturersByQueryOnly,
 	computeMfrFacetCounts,
 	emptyMfrFilterState,
 	mfrFiltersFromParams,
@@ -134,6 +135,42 @@ describe('filterManufacturers', () => {
 			techGeneration: 'solid-state'
 		};
 		expect(filterManufacturers(allMfrs, f).map((m) => m.slug)).toEqual(['williams', 'stern']);
+	});
+});
+
+// ---------------------------------------------------------------------------
+// filterManufacturersByQueryOnly — gate for "no results → create?" prompt
+// ---------------------------------------------------------------------------
+
+describe('filterManufacturersByQueryOnly', () => {
+	it('returns all when query is empty or whitespace', () => {
+		expect(filterManufacturersByQueryOnly(allMfrs, '')).toHaveLength(3);
+		expect(filterManufacturersByQueryOnly(allMfrs, '   ')).toHaveLength(3);
+	});
+
+	it('matches on name', () => {
+		expect(filterManufacturersByQueryOnly(allMfrs, 'stern').map((m) => m.slug)).toEqual(['stern']);
+	});
+
+	it('matches on search_text (aliases / CE names / locations)', () => {
+		// "Chicago" appears in Williams's search_text but not Stern's (which
+		// is Elk Grove Village), so this is a single-hit match.
+		expect(filterManufacturersByQueryOnly(allMfrs, 'chicago').map((m) => m.slug)).toEqual([
+			'williams'
+		]);
+	});
+
+	it('ignores facet dimensions entirely — query is the only filter', () => {
+		// Regression guard for the "no results → create?" prompt: facet state
+		// (location, year, person, tech-gen) must not influence this helper.
+		// Otherwise a user with an active year filter could search for an
+		// existing brand and still see the "create duplicate?" prompt because
+		// the year filter hid the match. The helper takes only the query.
+		expect(filterManufacturersByQueryOnly(allMfrs, 'stern')).toHaveLength(1);
+	});
+
+	it('returns empty for genuinely novel queries', () => {
+		expect(filterManufacturersByQueryOnly(allMfrs, 'no-such-brand')).toHaveLength(0);
 	});
 });
 

@@ -17,6 +17,7 @@ from __future__ import annotations
 
 from typing import Any, Callable, Optional
 
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from ninja import Router, Schema
 from ninja.responses import Status
@@ -278,6 +279,8 @@ def register_entity_create(
     parent_field: str | None = None,
     parent_model=None,
     route_suffix: str = "",
+    scope_filter_builder: Callable[[Any], Q] | None = None,
+    include_deleted_name_check: bool = False,
 ) -> None:
     """Attach a POST create route.
 
@@ -289,12 +292,28 @@ def register_entity_create(
     FK claim values are stored as the parent's slug string, matching the
     shipped convention (see titles.py:1091 and the ``claim_fk_lookups``
     contract validated at provenance/validation.py:286).
+
+    *scope_filter_builder* (parented mode only) narrows the name-collision
+    scan to rows related to the resolved parent. Required for entities
+    whose names are unique per-parent rather than globally (e.g.
+    CorporateEntity: two manufacturers may each own a "Productions"
+    entity, but not the same manufacturer). Receives the resolved parent
+    instance and returns a ``Q`` to pass to ``assert_name_available``.
+
+    *include_deleted_name_check* forwards to ``assert_name_available``'s
+    ``include_deleted``. Required for entities whose ``name`` column is
+    DB-unique (e.g. ``Manufacturer.name``) to avoid misreporting a
+    soft-deleted-name collision as a slug collision.
     """
     parented = parent_field is not None
     if parented and not (parent_model and route_suffix):
         raise TypeError(
             "register_entity_create: when parent_field is set, "
             "parent_model and route_suffix are required."
+        )
+    if scope_filter_builder is not None and not parented:
+        raise TypeError(
+            "register_entity_create: scope_filter_builder requires parent_field."
         )
 
     entity_label = model_cls.__name__
@@ -306,11 +325,18 @@ def register_entity_create(
 
         name = validate_name(data.name, max_length=name_max)
         slug = validate_slug_format(data.slug)
+        scope_filter = (
+            scope_filter_builder(parent)
+            if scope_filter_builder is not None and parent is not None
+            else None
+        )
         assert_name_available(
             model_cls,
             name,
             normalize=normalize_catalog_name,
+            scope_filter=scope_filter,
             friendly_label=friendly,
+            include_deleted=include_deleted_name_check,
         )
         assert_slug_available(model_cls, slug)
 

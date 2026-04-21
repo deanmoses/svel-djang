@@ -17,6 +17,7 @@ from apps.core.models import active_status_q
 
 from ..cache import MANUFACTURERS_ALL_KEY, get_cached_response, set_cached_response
 from .constants import DEFAULT_PAGE_SIZE
+from .entity_crud import register_entity_create, register_entity_delete_restore
 from apps.provenance.helpers import build_sources, claims_prefetch
 
 from .helpers import (
@@ -47,6 +48,7 @@ from ..models import (
     Credit,
     MachineModel,
     Manufacturer,
+    ManufacturerAlias,
     System,
 )
 from .edit_claims import execute_claims, plan_scalar_field_claims
@@ -347,13 +349,23 @@ def list_all_manufacturers(request):
         for eid in eids:
             entity_to_mfr[eid] = mfr_id
 
-    mfr_alias_names: dict[int, list[str]] = defaultdict(list)
+    mfr_ce_alias_names: dict[int, list[str]] = defaultdict(list)
     for eid, aval in CorporateEntityAlias.objects.filter(
         corporate_entity_id__in=all_entity_ids
     ).values_list("corporate_entity_id", "value"):
         mid = entity_to_mfr.get(eid)
         if mid:
-            mfr_alias_names[mid].append(aval)
+            mfr_ce_alias_names[mid].append(aval)
+
+    # Manufacturer's own aliases — must contribute to search_text so the UI's
+    # "no results → create?" gate stays aligned with ``assert_name_available``,
+    # which walks the ``aliases`` reverse relation and blocks alias-collision
+    # creates at the API layer.
+    mfr_brand_alias_names: dict[int, list[str]] = defaultdict(list)
+    for mid, aval in ManufacturerAlias.objects.filter(
+        manufacturer_id__in=mfr_ids
+    ).values_list("manufacturer_id", "value"):
+        mfr_brand_alias_names[mid].append(aval)
 
     # Locations per manufacturer (with hierarchy)
     mfr_location_names: dict[int, list[str]] = defaultdict(list)
@@ -428,8 +440,9 @@ def list_all_manufacturers(request):
     result = []
     for mfr in manufacturers:
         search_parts: list[str] = []
+        search_parts.extend(mfr_brand_alias_names.get(mfr.id, []))
         search_parts.extend(mfr_entity_names.get(mfr.id, []))
-        search_parts.extend(mfr_alias_names.get(mfr.id, []))
+        search_parts.extend(mfr_ce_alias_names.get(mfr.id, []))
         search_parts.extend(mfr_location_names.get(mfr.id, []))
 
         thumb = None
@@ -478,3 +491,28 @@ def patch_manufacturer_claims(request, slug: str, data: ClaimPatchSchema):
 
     mfr = get_object_or_404(_manufacturer_qs(), slug=mfr.slug)
     return _serialize_manufacturer_detail(mfr)
+
+
+# ---------------------------------------------------------------------------
+# Create / delete / restore wiring
+# ---------------------------------------------------------------------------
+
+# ``include_deleted_name_check=True`` is load-bearing: ``Manufacturer.name``
+# is ``unique=True`` at the DB level, so a name colliding with a soft-deleted
+# Manufacturer would otherwise pass the active-only pre-check and surface as
+# a misleading slug collision from the DB constraint.
+register_entity_create(
+    manufacturers_router,
+    Manufacturer,
+    detail_qs=_manufacturer_qs,
+    serialize_detail=_serialize_manufacturer_detail,
+    response_schema=ManufacturerDetailSchema,
+    include_deleted_name_check=True,
+)
+register_entity_delete_restore(
+    manufacturers_router,
+    Manufacturer,
+    detail_qs=_manufacturer_qs,
+    serialize_detail=_serialize_manufacturer_detail,
+    response_schema=ManufacturerDetailSchema,
+)
