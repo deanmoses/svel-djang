@@ -77,4 +77,25 @@ describe('catalog-meta vs route tree', () => {
 			).toContain(key);
 		}
 	});
+
+	// Every linkable entity must have edit-history/ and sources/ subroutes.
+	// These are thin wrappers over $lib/provenance-loaders and $lib/components,
+	// but each entity still needs its own +page.server.ts + +page.svelte so the
+	// files live under the entity's shared +layout.server.ts — otherwise
+	// navigating to edit-history re-runs the entity load. The cost of this
+	// requirement is ~10 lines of boilerplate per entity; the cost of forgetting
+	// is an invisible UX gap (see credit-role, missing for an unknown period).
+	describe.each(['edit-history', 'sources'])('%s subroute', (subroute) => {
+		const files = import.meta.glob('/src/routes/*/[slug]/*/+page.*', { eager: false });
+
+		it.each(Object.keys(CATALOG_META) as CatalogEntityKey[])(
+			'%s has +page.server.ts and +page.svelte',
+			(key) => {
+				const plural = CATALOG_META[key].entity_type_plural;
+				const base = `/src/routes/${plural}/[slug]/${subroute}`;
+				expect(files).toHaveProperty(`${base}/+page.server.ts`);
+				expect(files).toHaveProperty(`${base}/+page.svelte`);
+			}
+		);
+	});
 });

@@ -6,28 +6,6 @@ Ordered by rough ROI.
 
 ---
 
-## Registry-driven invariant: every catalog entity has the standard subroutes
-
-**Problem.** `credit-role` was missing from the edit-history and sources UI for an unknown length of time. Nothing in the codebase enforced that every `LinkableModel`-registered entity had the full set of standard frontend subroutes. The gap only surfaced because a human noticed it during plan review.
-
-**Why it matters.** The same class of oversight will recur every time a new catalog entity is added. Structural invariants should be enforced by code, not diligence.
-
-**Potential solution.** Add a Python or TypeScript test that:
-
-1. Enumerates all `LinkableModel` subclasses via [`get_linkable_model()`](../../backend/apps/core/entity_types.py) / the `entity_type` registry.
-2. For each entity, asserts the corresponding frontend route directories exist: `frontend/src/routes/{plural}/[slug]/edit-history/` and `.../sources/`, with both `+page.server.ts` and `+page.svelte` present.
-3. Asserts the entity is listed in `catalog-meta.ts`.
-
-**Starting points:**
-
-- [backend/apps/core/entity_types.py](../../backend/apps/core/entity_types.py) — registry
-- [backend/tests/test_router_registration.py](../../backend/tests/test_router_registration.py) — precedent for this style of structural invariant test
-- The entity-type slug mapping is currently implicit (e.g. `titles` route → `title` entity type). This test is also a good place to codify that mapping in one spot.
-
-**Risk.** Low. Adds coverage, no runtime behavior change.
-
----
-
 ## Audit `apps/catalog/api/schemas.py` for misplaced schemas
 
 **Problem.** `ClaimSchema` drifted into `apps/catalog/api/schemas.py` because the original consumer was the catalog detail endpoints — but it models a provenance concept, not a catalog concept. Moving it to `apps/provenance/schemas.py` during this refactor was trivial (one consumer left by the end). The same drift pattern probably affected other schemas in that file.
