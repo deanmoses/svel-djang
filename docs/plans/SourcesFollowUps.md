@@ -112,36 +112,6 @@ Even better: derive the canonical list by inspection at doc-build time, so the l
 
 ---
 
-## Audit other frontend components for dead URL-construction props
-
-**Problem.** `EditHistory.svelte` accepted `entityType` and `entitySlug` props that existed _solely_ to construct the revert URL. When I moved revert to a claim-keyed URL, those props became dead weight — I dropped them and updated all 18 call sites. The same pattern may exist elsewhere: components taking props to build URLs that could be self-contained once the URL shape is designed right.
-
-**Why it matters.** Dead props are a quiet form of coupling — every component that takes them forces callers to thread them through, often from a parent that also doesn't need them. The fix is usually free: move URL construction inside the component or redesign the endpoint to not need routing context.
-
-**Shape.** Grep for components that accept `entityType` + `entitySlug` (or similar) and verify each prop is actually consumed for something other than URL construction.
-
-**Starting points:**
-
-- `grep -rn "entityType" frontend/src/lib/components/` — enumerate candidates
-- [frontend/src/lib/components/EditHistory.svelte](../../frontend/src/lib/components/EditHistory.svelte) — the canonical example of what "good" looks like post-refactor
-- [frontend/src/lib/components/EntitySources.svelte](../../frontend/src/lib/components/EntitySources.svelte) — another fully-decoupled example
-
-**Risk.** Medium per component. Each candidate needs investigation; some props may turn out to be load-bearing.
-
----
-
-## Rename `entity-provenance.ts` → `entity-sources.ts`
-
-**Problem.** The component was renamed `EntityProvenance.svelte` → `EntitySources.svelte`, but its companion helper [`entity-provenance.ts`](../../frontend/src/lib/components/entity-provenance.ts) (containing `groupSourcesByField`) kept its old name.
-
-**Why it matters.** Pure naming consistency. Low priority, but trivial to fix while the diff is fresh.
-
-**Shape.** Rename the file; update the one import in [EntitySources.svelte](../../frontend/src/lib/components/EntitySources.svelte).
-
-**Risk.** Zero.
-
----
-
 ## Parity test for edit-history soft-delete behavior
 
 **Problem.** Whatever policy is chosen in the soft-delete follow-up above, there's currently **no test** covering "does GET edit-history for a soft-deleted entity return 200 or 404?" The behavior is whatever the code happens to do.

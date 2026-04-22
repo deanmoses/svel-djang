@@ -4,7 +4,7 @@
 	import UserBadge from './UserBadge.svelte';
 	import SmartDate from './SmartDate.svelte';
 	import { getEntityContext } from '$lib/entity-context';
-	import { groupSourcesByField } from './entity-provenance';
+	import { groupSourcesByField } from './entity-sources';
 
 	type Claim = components['schemas']['ClaimSchema'];
 	type CitedChangeSet = components['schemas']['CitedChangeSetSchema'];
