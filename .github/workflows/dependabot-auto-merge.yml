@@ -1,6 +1,11 @@
 name: Dependabot auto-merge
 
-on: pull_request
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
 
 permissions:
   contents: write
@@ -8,17 +13,57 @@ permissions:
 
 jobs:
   auto-merge:
-    if: github.actor == 'dependabot[bot]'
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Fetch Dependabot metadata
         id: meta
-        uses: dependabot/fetch-metadata@v2
+        uses: dependabot/fetch-metadata@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Decide whether this PR is eligible for auto-merge
+        id: decision
+        uses: actions/github-script@v8
+        env:
+          UPDATE_TYPE: ${{ steps.meta.outputs.update-type }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        with:
+          script: |
+            const updateType = process.env.UPDATE_TYPE || '';
+            const title = process.env.PR_TITLE || '';
+
+            let eligible = false;
+            let reason = 'unclassified';
+
+            if (updateType === 'version-update:semver-patch' || updateType === 'version-update:semver-minor') {
+              eligible = true;
+              reason = `metadata reported ${updateType}`;
+            } else if (updateType === 'version-update:semver-major') {
+              reason = 'metadata reported a semver-major update';
+            } else {
+              const match = title.match(/ from (\d+)(?:\.\S*)? to (\d+)(?:\.\S*)?/i);
+
+              if (match) {
+                const [, fromMajor, toMajor] = match;
+                eligible = fromMajor !== '0' && fromMajor === toMajor;
+                reason = eligible
+                  ? `title fallback kept major version ${fromMajor}`
+                  : fromMajor === '0'
+                    ? 'title fallback skipped a pre-1.0 update'
+                    : `title fallback detected major version change ${fromMajor} -> ${toMajor}`;
+              } else if (/bump the .*group/i.test(title)) {
+                reason = 'grouped PR without usable semver metadata';
+              } else {
+                reason = 'no usable semver metadata found';
+              }
+            }
+
+            core.notice(`Dependabot auto-merge decision: ${eligible ? 'eligible' : 'skip'} (${reason})`);
+            core.setOutput('eligible', eligible ? 'true' : 'false');
+
       - name: Enable auto-merge for patch and minor updates
-        if: steps.meta.outputs.update-type == 'version-update:semver-patch' || steps.meta.outputs.update-type == 'version-update:semver-minor'
+        if: steps.decision.outputs.eligible == 'true'
         run: gh pr merge --auto --squash "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
