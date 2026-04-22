@@ -1,6 +1,6 @@
 {
     "files": {
-        "./apps/accounts/api.py": [
+        "./backend/apps/accounts/api.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -50,7 +50,7 @@
                 }
             }
         ],
-        "./apps/accounts/tests/test_models.py": [
+        "./backend/apps/accounts/tests/test_models.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -132,7 +132,7 @@
                 }
             }
         ],
-        "./apps/accounts/tests/test_workos_auth.py": [
+        "./backend/apps/accounts/tests/test_workos_auth.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -198,7 +198,7 @@
                 }
             }
         ],
-        "./apps/catalog/_alias_registry.py": [
+        "./backend/apps/catalog/_alias_registry.py": [
             {
                 "code": "reportOptionalMemberAccess",
                 "range": {
@@ -224,7 +224,7 @@
                 }
             }
         ],
-        "./apps/catalog/api/corporate_entities.py": [
+        "./backend/apps/catalog/api/corporate_entities.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -234,7 +234,7 @@
                 }
             }
         ],
-        "./apps/catalog/api/edit_claims.py": [
+        "./backend/apps/catalog/api/edit_claims.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -292,7 +292,7 @@
                 }
             }
         ],
-        "./apps/catalog/api/entity_crud.py": [
+        "./backend/apps/catalog/api/entity_crud.py": [
             {
                 "code": "reportArgumentType",
                 "range": {
@@ -318,7 +318,7 @@
                 }
             }
         ],
-        "./apps/catalog/api/franchises.py": [
+        "./backend/apps/catalog/api/franchises.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -328,7 +328,7 @@
                 }
             }
         ],
-        "./apps/catalog/api/gameplay_features.py": [
+        "./backend/apps/catalog/api/gameplay_features.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -346,7 +346,7 @@
                 }
             }
         ],
-        "./apps/catalog/api/helpers.py": [
+        "./backend/apps/catalog/api/helpers.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -396,7 +396,7 @@
                 }
             }
         ],
-        "./apps/catalog/api/locations.py": [
+        "./backend/apps/catalog/api/locations.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -414,7 +414,7 @@
                 }
             }
         ],
-        "./apps/catalog/api/machine_models.py": [
+        "./backend/apps/catalog/api/machine_models.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -424,7 +424,7 @@
                 }
             }
         ],
-        "./apps/catalog/api/manufacturers.py": [
+        "./backend/apps/catalog/api/manufacturers.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -530,7 +530,7 @@
                 }
             }
         ],
-        "./apps/catalog/api/people.py": [
+        "./backend/apps/catalog/api/people.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -572,7 +572,7 @@
                 }
             }
         ],
-        "./apps/catalog/api/series.py": [
+        "./backend/apps/catalog/api/series.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -590,7 +590,7 @@
                 }
             }
         ],
-        "./apps/catalog/api/systems.py": [
+        "./backend/apps/catalog/api/systems.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -600,7 +600,7 @@
                 }
             }
         ],
-        "./apps/catalog/api/taxonomy.py": [
+        "./backend/apps/catalog/api/taxonomy.py": [
             {
                 "code": "reportArgumentType",
                 "range": {
@@ -642,7 +642,7 @@
                 }
             }
         ],
-        "./apps/catalog/api/themes.py": [
+        "./backend/apps/catalog/api/themes.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -660,7 +660,7 @@
                 }
             }
         ],
-        "./apps/catalog/api/titles.py": [
+        "./backend/apps/catalog/api/titles.py": [
             {
                 "code": "reportArgumentType",
                 "range": {
@@ -670,7 +670,7 @@
                 }
             }
         ],
-        "./apps/catalog/apps.py": [
+        "./backend/apps/catalog/apps.py": [
             {
                 "code": "reportOptionalMemberAccess",
                 "range": {
@@ -680,7 +680,7 @@
                 }
             }
         ],
-        "./apps/catalog/ingestion/apply.py": [
+        "./backend/apps/catalog/ingestion/apply.py": [
             {
                 "code": "reportArgumentType",
                 "range": {
@@ -762,7 +762,7 @@
                 }
             }
         ],
-        "./apps/catalog/ingestion/ipdb/adapter.py": [
+        "./backend/apps/catalog/ingestion/ipdb/adapter.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -796,7 +796,7 @@
                 }
             }
         ],
-        "./apps/catalog/ingestion/opdb/adapter.py": [
+        "./backend/apps/catalog/ingestion/opdb/adapter.py": [
             {
                 "code": "reportAssignmentType",
                 "range": {
@@ -934,7 +934,7 @@
                 }
             }
         ],
-        "./apps/catalog/management/commands/ingest_fandom.py": [
+        "./backend/apps/catalog/management/commands/ingest_fandom.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -944,7 +944,7 @@
                 }
             }
         ],
-        "./apps/catalog/management/commands/ingest_pinbase.py": [
+        "./backend/apps/catalog/management/commands/ingest_pinbase.py": [
             {
                 "code": "reportAssignmentType",
                 "range": {
@@ -986,7 +986,7 @@
                 }
             }
         ],
-        "./apps/catalog/management/commands/pull_and_ingest.py": [
+        "./backend/apps/catalog/management/commands/pull_and_ingest.py": [
             {
                 "code": "reportArgumentType",
                 "range": {
@@ -996,7 +996,7 @@
                 }
             }
         ],
-        "./apps/catalog/management/commands/pull_ingest_sources.py": [
+        "./backend/apps/catalog/management/commands/pull_ingest_sources.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1006,7 +1006,7 @@
                 }
             }
         ],
-        "./apps/catalog/management/commands/scrape_images.py": [
+        "./backend/apps/catalog/management/commands/scrape_images.py": [
             {
                 "code": "reportOperatorIssue",
                 "range": {
@@ -1024,7 +1024,7 @@
                 }
             }
         ],
-        "./apps/catalog/management/commands/validate_catalog.py": [
+        "./backend/apps/catalog/management/commands/validate_catalog.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1074,7 +1074,7 @@
                 }
             }
         ],
-        "./apps/catalog/models/person.py": [
+        "./backend/apps/catalog/models/person.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1084,7 +1084,7 @@
                 }
             }
         ],
-        "./apps/catalog/resolve/_dispatch.py": [
+        "./backend/apps/catalog/resolve/_dispatch.py": [
             {
                 "code": "reportArgumentType",
                 "range": {
@@ -1094,7 +1094,7 @@
                 }
             }
         ],
-        "./apps/catalog/resolve/_entities.py": [
+        "./backend/apps/catalog/resolve/_entities.py": [
             {
                 "code": "reportAssignmentType",
                 "range": {
@@ -1112,7 +1112,7 @@
                 }
             }
         ],
-        "./apps/catalog/resolve/_helpers.py": [
+        "./backend/apps/catalog/resolve/_helpers.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1258,7 +1258,7 @@
                 }
             }
         ],
-        "./apps/catalog/resolve/_media.py": [
+        "./backend/apps/catalog/resolve/_media.py": [
             {
                 "code": "reportOptionalMemberAccess",
                 "range": {
@@ -1316,7 +1316,7 @@
                 }
             }
         ],
-        "./apps/catalog/resolve/_relationships.py": [
+        "./backend/apps/catalog/resolve/_relationships.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1334,7 +1334,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_api_claims_additional_entities.py": [
+        "./backend/apps/catalog/tests/test_api_claims_additional_entities.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1352,7 +1352,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_api_claims_corporate_entity.py": [
+        "./backend/apps/catalog/tests/test_api_claims_corporate_entity.py": [
             {
                 "code": "reportOptionalMemberAccess",
                 "range": {
@@ -1378,7 +1378,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_api_claims_gameplay_feature.py": [
+        "./backend/apps/catalog/tests/test_api_claims_gameplay_feature.py": [
             {
                 "code": "reportOptionalMemberAccess",
                 "range": {
@@ -1452,7 +1452,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_api_claims_model_relationships.py": [
+        "./backend/apps/catalog/tests/test_api_claims_model_relationships.py": [
             {
                 "code": "reportOptionalMemberAccess",
                 "range": {
@@ -1494,7 +1494,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_api_claims_theme.py": [
+        "./backend/apps/catalog/tests/test_api_claims_theme.py": [
             {
                 "code": "reportOptionalMemberAccess",
                 "range": {
@@ -1520,7 +1520,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_api_claims_title.py": [
+        "./backend/apps/catalog/tests/test_api_claims_title.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1554,7 +1554,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_api_corporate_entity_create.py": [
+        "./backend/apps/catalog/tests/test_api_corporate_entity_create.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1564,7 +1564,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_api_manufacturer_delete.py": [
+        "./backend/apps/catalog/tests/test_api_manufacturer_delete.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1574,7 +1574,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_api_model_create.py": [
+        "./backend/apps/catalog/tests/test_api_model_create.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1584,7 +1584,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_api_model_delete.py": [
+        "./backend/apps/catalog/tests/test_api_model_delete.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1610,7 +1610,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_api_person_delete.py": [
+        "./backend/apps/catalog/tests/test_api_person_delete.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1636,7 +1636,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_api_system_create.py": [
+        "./backend/apps/catalog/tests/test_api_system_create.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1646,7 +1646,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_api_system_delete.py": [
+        "./backend/apps/catalog/tests/test_api_system_delete.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1656,7 +1656,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_api_taxonomy_counts.py": [
+        "./backend/apps/catalog/tests/test_api_taxonomy_counts.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1730,7 +1730,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_api_taxonomy_crud.py": [
+        "./backend/apps/catalog/tests/test_api_taxonomy_crud.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1748,7 +1748,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_api_title_delete.py": [
+        "./backend/apps/catalog/tests/test_api_title_delete.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1766,7 +1766,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_api_titles.py": [
+        "./backend/apps/catalog/tests/test_api_titles.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1784,7 +1784,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_apply.py": [
+        "./backend/apps/catalog/tests/test_apply.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1794,7 +1794,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_description_html.py": [
+        "./backend/apps/catalog/tests/test_description_html.py": [
             {
                 "code": "reportOptionalMemberAccess",
                 "range": {
@@ -1812,7 +1812,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_edit_claims.py": [
+        "./backend/apps/catalog/tests/test_edit_claims.py": [
             {
                 "code": "reportIndexIssue",
                 "range": {
@@ -1846,7 +1846,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_entity_crud_registrar.py": [
+        "./backend/apps/catalog/tests/test_entity_crud_registrar.py": [
             {
                 "code": "reportArgumentType",
                 "range": {
@@ -1864,7 +1864,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_ingest_fandom.py": [
+        "./backend/apps/catalog/tests/test_ingest_fandom.py": [
             {
                 "code": "reportOptionalSubscript",
                 "range": {
@@ -1898,7 +1898,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_ingest_pinbase_franchise.py": [
+        "./backend/apps/catalog/tests/test_ingest_pinbase_franchise.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1908,7 +1908,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_ingest_pinbase_locations.py": [
+        "./backend/apps/catalog/tests/test_ingest_pinbase_locations.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1926,7 +1926,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_ingest_pinbase_series.py": [
+        "./backend/apps/catalog/tests/test_ingest_pinbase_series.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1960,7 +1960,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_models.py": [
+        "./backend/apps/catalog/tests/test_models.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1970,7 +1970,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_page_endpoints.py": [
+        "./backend/apps/catalog/tests/test_page_endpoints.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -1988,7 +1988,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_resolve.py": [
+        "./backend/apps/catalog/tests/test_resolve.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -2030,7 +2030,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_resolve_bulk.py": [
+        "./backend/apps/catalog/tests/test_resolve_bulk.py": [
             {
                 "code": "reportOptionalMemberAccess",
                 "range": {
@@ -2048,7 +2048,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_resolve_parents.py": [
+        "./backend/apps/catalog/tests/test_resolve_parents.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -2058,7 +2058,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_source_enabled.py": [
+        "./backend/apps/catalog/tests/test_source_enabled.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -2084,7 +2084,7 @@
                 }
             }
         ],
-        "./apps/catalog/tests/test_status.py": [
+        "./backend/apps/catalog/tests/test_status.py": [
             {
                 "code": "reportOptionalMemberAccess",
                 "range": {
@@ -2094,7 +2094,7 @@
                 }
             }
         ],
-        "./apps/citation/admin.py": [
+        "./backend/apps/citation/admin.py": [
             {
                 "code": "reportIncompatibleMethodOverride",
                 "range": {
@@ -2104,7 +2104,7 @@
                 }
             }
         ],
-        "./apps/citation/api.py": [
+        "./backend/apps/citation/api.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -2146,7 +2146,7 @@
                 }
             }
         ],
-        "./apps/citation/extractors.py": [
+        "./backend/apps/citation/extractors.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -2196,7 +2196,7 @@
                 }
             }
         ],
-        "./apps/citation/models.py": [
+        "./backend/apps/citation/models.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -2206,7 +2206,7 @@
                 }
             }
         ],
-        "./apps/citation/safe_fetch.py": [
+        "./backend/apps/citation/safe_fetch.py": [
             {
                 "code": "reportArgumentType",
                 "range": {
@@ -2256,7 +2256,7 @@
                 }
             }
         ],
-        "./apps/citation/seeding.py": [
+        "./backend/apps/citation/seeding.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -2274,7 +2274,7 @@
                 }
             }
         ],
-        "./apps/citation/tests/test_admin.py": [
+        "./backend/apps/citation/tests/test_admin.py": [
             {
                 "code": "reportCallIssue",
                 "range": {
@@ -2284,7 +2284,7 @@
                 }
             }
         ],
-        "./apps/citation/tests/test_db_constraints.py": [
+        "./backend/apps/citation/tests/test_db_constraints.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -2302,7 +2302,7 @@
                 }
             }
         ],
-        "./apps/citation/tests/test_extraction.py": [
+        "./backend/apps/citation/tests/test_extraction.py": [
             {
                 "code": "reportOptionalSubscript",
                 "range": {
@@ -2352,7 +2352,7 @@
                 }
             }
         ],
-        "./apps/citation/tests/test_seeding.py": [
+        "./backend/apps/citation/tests/test_seeding.py": [
             {
                 "code": "reportOptionalMemberAccess",
                 "range": {
@@ -2394,7 +2394,7 @@
                 }
             }
         ],
-        "./apps/citation/tests/test_url_extraction.py": [
+        "./backend/apps/citation/tests/test_url_extraction.py": [
             {
                 "code": "reportOptionalMemberAccess",
                 "range": {
@@ -2508,7 +2508,7 @@
                 }
             }
         ],
-        "./apps/core/licensing.py": [
+        "./backend/apps/core/licensing.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -2518,7 +2518,7 @@
                 }
             }
         ],
-        "./apps/core/markdown_links.py": [
+        "./backend/apps/core/markdown_links.py": [
             {
                 "code": "reportArgumentType",
                 "range": {
@@ -2528,7 +2528,7 @@
                 }
             }
         ],
-        "./apps/core/models.py": [
+        "./backend/apps/core/models.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -2538,7 +2538,7 @@
                 }
             }
         ],
-        "./apps/core/tests/test_markdown.py": [
+        "./backend/apps/core/tests/test_markdown.py": [
             {
                 "code": "reportArgumentType",
                 "range": {
@@ -2556,7 +2556,7 @@
                 }
             }
         ],
-        "./apps/media/api.py": [
+        "./backend/apps/media/api.py": [
             {
                 "code": "reportOptionalOperand",
                 "range": {
@@ -2606,7 +2606,7 @@
                 }
             }
         ],
-        "./apps/media/models.py": [
+        "./backend/apps/media/models.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -2632,7 +2632,7 @@
                 }
             }
         ],
-        "./apps/media/processing.py": [
+        "./backend/apps/media/processing.py": [
             {
                 "code": "reportReturnType",
                 "range": {
@@ -2642,7 +2642,7 @@
                 }
             }
         ],
-        "./apps/media/storage.py": [
+        "./backend/apps/media/storage.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -2660,7 +2660,7 @@
                 }
             }
         ],
-        "./apps/media/tests/test_upload_api.py": [
+        "./backend/apps/media/tests/test_upload_api.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -2758,7 +2758,7 @@
                 }
             }
         ],
-        "./apps/provenance/api.py": [
+        "./backend/apps/provenance/api.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -2784,7 +2784,7 @@
                 }
             }
         ],
-        "./apps/provenance/entity_resolution.py": [
+        "./backend/apps/provenance/entity_resolution.py": [
             {
                 "code": "reportOptionalMemberAccess",
                 "range": {
@@ -2794,7 +2794,7 @@
                 }
             }
         ],
-        "./apps/provenance/history.py": [
+        "./backend/apps/provenance/history.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -2812,7 +2812,7 @@
                 }
             }
         ],
-        "./apps/provenance/models/changeset.py": [
+        "./backend/apps/provenance/models/changeset.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -2838,7 +2838,7 @@
                 }
             }
         ],
-        "./apps/provenance/models/citation_instance.py": [
+        "./backend/apps/provenance/models/citation_instance.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -2848,7 +2848,7 @@
                 }
             }
         ],
-        "./apps/provenance/models/claim.py": [
+        "./backend/apps/provenance/models/claim.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -2938,7 +2938,7 @@
                 }
             }
         ],
-        "./apps/provenance/page_endpoints.py": [
+        "./backend/apps/provenance/page_endpoints.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -2980,7 +2980,7 @@
                 }
             }
         ],
-        "./apps/provenance/revert.py": [
+        "./backend/apps/provenance/revert.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -3006,7 +3006,7 @@
                 }
             }
         ],
-        "./apps/provenance/tests/test_api_citation_instances.py": [
+        "./backend/apps/provenance/tests/test_api_citation_instances.py": [
             {
                 "code": "reportOptionalMemberAccess",
                 "range": {
@@ -3032,7 +3032,7 @@
                 }
             }
         ],
-        "./apps/provenance/tests/test_changes.py": [
+        "./backend/apps/provenance/tests/test_changes.py": [
             {
                 "code": "reportArgumentType",
                 "range": {
@@ -3050,7 +3050,7 @@
                 }
             }
         ],
-        "./apps/provenance/tests/test_changeset.py": [
+        "./backend/apps/provenance/tests/test_changeset.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -3060,7 +3060,7 @@
                 }
             }
         ],
-        "./apps/provenance/tests/test_claim_factory.py": [
+        "./backend/apps/provenance/tests/test_claim_factory.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -3086,7 +3086,7 @@
                 }
             }
         ],
-        "./apps/provenance/tests/test_ingest_run.py": [
+        "./backend/apps/provenance/tests/test_ingest_run.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -3104,7 +3104,7 @@
                 }
             }
         ],
-        "./apps/provenance/tests/test_undo_changeset.py": [
+        "./backend/apps/provenance/tests/test_undo_changeset.py": [
             {
                 "code": "reportArgumentType",
                 "range": {
@@ -3154,7 +3154,7 @@
                 }
             }
         ],
-        "./apps/provenance/validation.py": [
+        "./backend/apps/provenance/validation.py": [
             {
                 "code": "reportAttributeAccessIssue",
                 "range": {
@@ -3172,7 +3172,7 @@
                 }
             }
         ],
-        "./config/api.py": [
+        "./backend/config/api.py": [
             {
                 "code": "reportGeneralTypeIssues",
                 "range": {
@@ -3182,7 +3182,7 @@
                 }
             }
         ],
-        "./config/settings.py": [
+        "./backend/config/settings.py": [
             {
                 "code": "reportArgumentType",
                 "range": {
@@ -3192,7 +3192,7 @@
                 }
             }
         ],
-        "./config/urls.py": [
+        "./backend/config/urls.py": [
             {
                 "code": "reportArgumentType",
                 "range": {

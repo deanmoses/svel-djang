@@ -45,5 +45,6 @@
 
   "files.associations": {
     ".worktreeinclude": "gitignore"
-  }
+  },
+  "mypy-type-checker.ignorePatterns": ["**"]
 }

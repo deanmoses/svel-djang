@@ -92,18 +92,5 @@ quote-style = "double"
 indent-style = "space"
 line-ending = "lf"
 
-[tool.basedpyright]
-pythonVersion = "3.14"
-typeCheckingMode = "standard"
-include = ["apps", "config", "tests", "conftest.py", "manage.py"]
-exclude = [
-    "**/__pycache__",
-    "**/migrations",
-    ".venv",
-    "media",
-]
-reportMissingTypeStubs = false
-# Django models always redeclare an inner `class Meta:` in subclasses, which
-# basedpyright flags as an incompatible override. This is universal Django
-# idiom; the rule is a false positive here.
-reportIncompatibleVariableOverride = false
+# basedpyright config lives at the repo root (../pyrightconfig.json) so the
+# VS Code extension finds it from the workspace root. Do not duplicate here.

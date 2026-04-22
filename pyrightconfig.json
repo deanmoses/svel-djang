@@ -1,0 +1,18 @@
+{
+  "pythonVersion": "3.14",
+  "typeCheckingMode": "standard",
+  "include": [
+    "backend/apps",
+    "backend/config",
+    "backend/tests",
+    "backend/conftest.py",
+    "backend/manage.py"
+  ],
+  "exclude": ["**/__pycache__", "**/migrations", "**/.venv", "backend/media"],
+  "extraPaths": ["backend"],
+  "venvPath": "backend",
+  "venv": ".venv",
+  "reportMissingTypeStubs": false,
+  "reportIncompatibleVariableOverride": false,
+  "reportImplicitRelativeImport": false
+}
