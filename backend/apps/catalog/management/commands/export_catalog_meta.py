@@ -14,8 +14,9 @@ Run via ``make api-gen`` or directly::
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -23,18 +24,27 @@ from django.core.management.base import BaseCommand
 from apps.core.models import LinkableModel
 
 
+class CatalogEntry(NamedTuple):
+    entity_type: str
+    entity_type_plural: str
+    label: str
+    label_plural: str
+
+
 class Command(BaseCommand):
     help = "Generate frontend/src/lib/api/catalog-meta.ts from linkable models."
 
     def handle(self, **options: Any) -> None:
-        catalog_meta: list[tuple[str, str, str, str]] = []
+        catalog_meta: list[CatalogEntry] = []
         media_categories: dict[str, list[str]] = {}
 
-        for cls in _iter_concrete_subclasses(LinkableModel):
+        for cls in _iter_concrete_subclasses(LinkableModel):  # type: ignore[type-abstract]
             key = cls.entity_type
             label = str(cls._meta.verbose_name).title()
             label_plural = str(cls._meta.verbose_name_plural).title()
-            catalog_meta.append((key, cls.entity_type_plural, label, label_plural))
+            catalog_meta.append(
+                CatalogEntry(key, cls.entity_type_plural, label, label_plural)
+            )
             cats = getattr(cls, "MEDIA_CATEGORIES", [])
             if cats:
                 media_categories[key] = list(cats)
@@ -47,12 +57,12 @@ class Command(BaseCommand):
             "",
             "export const CATALOG_META = {",
         ]
-        for key, plural, label, label_plural in catalog_meta:
-            lines.append(f"\t'{key}': {{")
-            lines.append(f"\t\tentity_type: '{key}',")
-            lines.append(f"\t\tentity_type_plural: '{plural}',")
-            lines.append(f"\t\tlabel: '{label}',")
-            lines.append(f"\t\tlabel_plural: '{label_plural}',")
+        for entry in catalog_meta:
+            lines.append(f"\t'{entry.entity_type}': {{")
+            lines.append(f"\t\tentity_type: '{entry.entity_type}',")
+            lines.append(f"\t\tentity_type_plural: '{entry.entity_type_plural}',")
+            lines.append(f"\t\tlabel: '{entry.label}',")
+            lines.append(f"\t\tlabel_plural: '{entry.label_plural}',")
             lines.append("\t},")
         lines.append("} as const;")
         lines.append("")
@@ -72,10 +82,11 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f"Wrote {output_path}"))
 
 
-def _iter_concrete_subclasses(root: type[Any]) -> Any:
+def _iter_concrete_subclasses(
+    root: type[LinkableModel],
+) -> Iterator[type[LinkableModel]]:
     for cls in root.__subclasses__():
         yield from _iter_concrete_subclasses(cls)
-        meta = getattr(cls, "_meta", None)
-        if meta is None or meta.abstract:
+        if cls._meta.abstract:
             continue
         yield cls

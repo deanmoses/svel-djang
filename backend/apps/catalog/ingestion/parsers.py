@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import re
-from typing import Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from apps.catalog.models import Location
 
 
 def parse_ipdb_date(s: str | None) -> tuple[int | None, int | None]:
@@ -263,7 +266,7 @@ def parse_ipdb_location(location: str) -> dict[str, str]:
     return _normalize_location({"city": "", "state": "", "country": parts[0]})
 
 
-def _get_location_root(loc: Any) -> Any:
+def _get_location_root(loc: Location) -> Location:
     """Walk the parent chain to find the root (country) Location."""
     while loc.parent is not None:
         loc = loc.parent

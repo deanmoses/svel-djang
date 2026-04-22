@@ -11,7 +11,7 @@ from dataclasses import dataclass
 
 from apps.provenance.models import Claim
 
-from .._alias_registry import discover_alias_types
+from .._alias_registry import AliasType, discover_alias_types
 from ..models import (
     CorporateEntity,
     CorporateEntityLocation,
@@ -672,7 +672,7 @@ def _resolve_aliases(
 # registry is guaranteed to be ready.  ``ALIAS_TYPES`` is kept as a public
 # binding (same shape as before) so that existing callers — including the
 # test suite — continue to work.
-ALIAS_TYPES: list[tuple[type, str]] = list(discover_alias_types())
+ALIAS_TYPES: list[AliasType] = list(discover_alias_types())
 
 
 def resolve_theme_aliases() -> None:

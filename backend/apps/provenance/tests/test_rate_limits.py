@@ -127,12 +127,10 @@ class TestRateLimits:
             reset_for_user(other, SPEC.bucket)
 
     def test_anonymous_raises(self):
-        class Anon:
-            is_authenticated = False
-            is_staff = False
+        from django.contrib.auth.models import AnonymousUser
 
         with pytest.raises(RateLimitExceededError):
-            check_and_record(Anon(), SPEC)
+            check_and_record(AnonymousUser(), SPEC)
 
 
 class TestBucketConfig:

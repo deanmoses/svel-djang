@@ -93,8 +93,8 @@ def _get_literal_schemas() -> dict[str, LiteralKey]:
         from ._alias_registry import discover_alias_types
 
         _literal_schemas = {"abbreviation": LiteralKey("value", "value")}
-        for _model, claim_field in discover_alias_types():
-            _literal_schemas[claim_field] = LiteralKey("alias_value", "alias")
+        for at in discover_alias_types():
+            _literal_schemas[at.claim_field] = LiteralKey("alias_value", "alias")
     return _literal_schemas
 
 

@@ -23,8 +23,8 @@ from __future__ import annotations
 import math
 import time
 from dataclasses import dataclass
-from typing import Any
 
+from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
 from django.core.cache import cache
 
 from .constants import (
@@ -77,14 +77,16 @@ def _cache_key(user_id: int, bucket: str) -> str:
     return f"ratelimit:{bucket}:user:{user_id}"
 
 
-def check_and_record(user: Any, spec: RateLimitSpec) -> None:
+def check_and_record(
+    user: AbstractBaseUser | AnonymousUser | None, spec: RateLimitSpec
+) -> None:
     """Consume one slot in the user's bucket, or raise if the bucket is full.
 
     Staff users bypass the check entirely and nothing is recorded for them.
     """
     if user is None or not user.is_authenticated:
         raise RateLimitExceededError(bucket=spec.bucket, retry_after=1)
-    if user.is_staff:
+    if getattr(user, "is_staff", False):
         return
 
     now = time.time()
@@ -104,6 +106,6 @@ def check_and_record(user: Any, spec: RateLimitSpec) -> None:
     cache.set(key, pruned, timeout=spec.window_seconds + _CACHE_TTL_FUDGE_SECONDS)
 
 
-def reset_for_user(user: Any, bucket: str) -> None:
+def reset_for_user(user: AbstractBaseUser, bucket: str) -> None:
     """Test helper: clear a user's bucket."""
     cache.delete(_cache_key(user.pk, bucket))

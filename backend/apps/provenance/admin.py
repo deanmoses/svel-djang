@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Model
 from django.http import HttpRequest
 
 from .models import (
@@ -9,6 +10,23 @@ from .models import (
     Source,
     SourceFieldLicense,
 )
+
+
+class ReadOnlyAdminMixin:
+    """Disallow add / change / delete so the admin is view-only."""
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
+    def has_change_permission(
+        self, request: HttpRequest, obj: Model | None = None
+    ) -> bool:
+        return False
+
+    def has_delete_permission(
+        self, request: HttpRequest, obj: Model | None = None
+    ) -> bool:
+        return False
 
 
 class SourceFieldLicenseInline(admin.TabularInline[SourceFieldLicense, Source]):
@@ -34,7 +52,7 @@ class SourceAdmin(admin.ModelAdmin[Source]):
 
 
 @admin.register(IngestRun)
-class IngestRunAdmin(admin.ModelAdmin[IngestRun]):
+class IngestRunAdmin(ReadOnlyAdminMixin, admin.ModelAdmin[IngestRun]):
     """Read-only inspection view. IngestRun records are created by the apply layer."""
 
     list_display = ("pk", "source", "status", "started_at", "finished_at")
@@ -55,23 +73,6 @@ class IngestRunAdmin(admin.ModelAdmin[IngestRun]):
         "errors",
     )
 
-    def has_add_permission(self, request: HttpRequest) -> bool:
-        return False
-
-    def has_change_permission(
-        self,
-        request: HttpRequest,
-        obj: IngestRun | None = None,
-    ) -> bool:
-        return False
-
-    def has_delete_permission(
-        self,
-        request: HttpRequest,
-        obj: IngestRun | None = None,
-    ) -> bool:
-        return False
-
 
 @admin.register(ChangeSet)
 class ChangeSetAdmin(admin.ModelAdmin[ChangeSet]):
@@ -87,7 +88,7 @@ class ChangeSetAdmin(admin.ModelAdmin[ChangeSet]):
 
 
 @admin.register(Claim)
-class ClaimAdmin(admin.ModelAdmin[Claim]):
+class ClaimAdmin(ReadOnlyAdminMixin, admin.ModelAdmin[Claim]):
     """Read-only inspection view. Claims must not be created or edited in admin."""
 
     list_display = (
@@ -109,26 +110,9 @@ class ClaimAdmin(admin.ModelAdmin[Claim]):
             return s[:80] + "..."
         return s
 
-    def has_add_permission(self, request: HttpRequest) -> bool:
-        return False
-
-    def has_change_permission(
-        self,
-        request: HttpRequest,
-        obj: Claim | None = None,
-    ) -> bool:
-        return False
-
-    def has_delete_permission(
-        self,
-        request: HttpRequest,
-        obj: Claim | None = None,
-    ) -> bool:
-        return False
-
 
 @admin.register(CitationInstance)
-class CitationInstanceAdmin(admin.ModelAdmin[CitationInstance]):
+class CitationInstanceAdmin(ReadOnlyAdminMixin, admin.ModelAdmin[CitationInstance]):
     """Read-only inspection view. CitationInstances are immutable."""
 
     list_display = ("citation_source", "claim", "locator_truncated", "created_at")
@@ -140,20 +124,3 @@ class CitationInstanceAdmin(admin.ModelAdmin[CitationInstance]):
         if len(obj.locator) > 60:
             return obj.locator[:60] + "..."
         return obj.locator
-
-    def has_add_permission(self, request: HttpRequest) -> bool:
-        return False
-
-    def has_change_permission(
-        self,
-        request: HttpRequest,
-        obj: CitationInstance | None = None,
-    ) -> bool:
-        return False
-
-    def has_delete_permission(
-        self,
-        request: HttpRequest,
-        obj: CitationInstance | None = None,
-    ) -> bool:
-        return False

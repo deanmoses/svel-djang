@@ -20,11 +20,12 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import http.client
 import json
 import os
 import tempfile
 import urllib.request
-from typing import Any
+from typing import Any, cast
 from urllib.error import HTTPError
 
 from django.core.management.base import BaseCommand
@@ -50,8 +51,10 @@ _MANIFESTS = [
 ]
 
 
-def _urlopen(url: str) -> Any:
-    return _OPENER.open(url)
+def _urlopen(url: str) -> http.client.HTTPResponse:
+    # OpenerDirector.open() is typed as Any in typeshed; the concrete return for
+    # http/https URLs is an HTTPResponse.
+    return cast(http.client.HTTPResponse, _OPENER.open(url))
 
 
 def _sha256(path: str) -> str:

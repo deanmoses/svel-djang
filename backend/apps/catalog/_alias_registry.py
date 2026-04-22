@@ -7,20 +7,28 @@ creating circular dependencies — it only touches ``core.models.AliasBase``.
 from __future__ import annotations
 
 import functools
+from typing import NamedTuple
 
 from django.db import models
 
 
+class AliasType(NamedTuple):
+    """A discovered ``AliasBase`` subclass and the claim field that holds its aliases."""
+
+    parent_model: type[models.Model]
+    claim_field: str
+
+
 @functools.lru_cache(maxsize=1)
-def discover_alias_types() -> tuple[tuple[type[models.Model], str], ...]:
-    """Return ``((parent_model, claim_field_name), ...)`` for every AliasBase subclass.
+def discover_alias_types() -> tuple[AliasType, ...]:
+    """Return an ``AliasType`` per ``AliasBase`` subclass.
 
     Must be called after Django's app registry is ready (i.e. not at import
     time).  Results are cached after the first call.
     """
     from apps.core.models import AliasBase
 
-    result: list[tuple[type[models.Model], str]] = []
+    result: list[AliasType] = []
     for alias_cls in AliasBase.__subclasses__():
         # Each AliasBase subclass has exactly one FK to its parent model.
         fks = [
@@ -39,6 +47,6 @@ def discover_alias_types() -> tuple[tuple[type[models.Model], str], ...]:
         if verbose_name is None:
             raise RuntimeError(f"{alias_cls.__name__} parent model has no verbose_name")
         claim_field = f"{verbose_name.replace(' ', '_')}_alias"
-        result.append((parent_model, claim_field))
+        result.append(AliasType(parent_model, claim_field))
 
-    return tuple(sorted(result, key=lambda pair: pair[1]))
+    return tuple(sorted(result, key=lambda at: at.claim_field))

@@ -34,7 +34,7 @@ def _get_alias_dispatch() -> dict[str, type]:
     global _alias_dispatch
     if _alias_dispatch is None:
         _alias_dispatch = {
-            field_name: model for model, field_name in discover_alias_types()
+            at.claim_field: at.parent_model for at in discover_alias_types()
         }
     return _alias_dispatch
 
