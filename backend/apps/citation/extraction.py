@@ -11,6 +11,7 @@ import logging
 import re
 import time
 from dataclasses import dataclass
+from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
@@ -39,7 +40,9 @@ class ExtractionDraft:
 @dataclass
 class ExtractionResult:
     draft: ExtractionDraft | None = None
-    match: dict | None = None  # {"id": int, "name": str, "skip_locator": bool}
+    match: dict[str, Any] | None = (
+        None  # {"id": int, "name": str, "skip_locator": bool}
+    )
     error: str | None = None  # "not_found" | "timeout" | "api_error" | "parse_error"
     confidence: str = ""  # "high" | "low"
     source_api: str = ""  # "openlibrary"
@@ -114,7 +117,7 @@ def extract_isbn(isbn: str) -> ExtractionResult:
     # 2. Cache check
     cache_key = f"extract:v2:isbn:{isbn}"
     cached = cache.get(cache_key)
-    if cached is not None:
+    if isinstance(cached, ExtractionResult):
         return cached
 
     # 3. Open Library fetch
