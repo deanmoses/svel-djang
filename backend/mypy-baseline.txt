@@ -12,6 +12,8 @@ apps/catalog/ingestion/wikidata_sparql.py:0: error: Missing type arguments for g
 apps/catalog/ingestion/wikidata_sparql.py:0: error: Missing type arguments for generic type "dict"  [type-arg]
 apps/catalog/ingestion/wikidata_sparql.py:0: error: Missing type arguments for generic type "dict"  [type-arg]
 apps/catalog/ingestion/fandom_wiki.py:0: error: Library stubs not installed for "requests"  [import-untyped]
+apps/catalog/ingestion/fandom_wiki.py:0: note: Hint: "python3 -m pip install types-requests"
+apps/catalog/ingestion/fandom_wiki.py:0: note: See https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
 apps/catalog/ingestion/fandom_wiki.py:0: error: Missing type arguments for generic type "dict"  [type-arg]
 apps/catalog/ingestion/fandom_wiki.py:0: error: Missing type arguments for generic type "dict"  [type-arg]
 apps/catalog/ingestion/fandom_wiki.py:0: error: Missing type arguments for generic type "dict"  [type-arg]
