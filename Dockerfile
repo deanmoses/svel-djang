@@ -2,7 +2,7 @@
 # Used by Railway for the single production service
 
 # ── Stage 1: Build SvelteKit frontend ──────────────────────────────
-FROM node:24-slim AS frontend-build
+FROM node:25-slim AS frontend-build
 
 RUN corepack enable
 
@@ -19,7 +19,7 @@ RUN pnpm build
 RUN pnpm prune --prod
 
 # ── Stage 2: Runtime dependencies for Caddy + Node ────────────────
-FROM node:24-slim AS node-runtime
+FROM node:25-slim AS node-runtime
 
 FROM caddy:2.11.2 AS caddy-runtime
 
