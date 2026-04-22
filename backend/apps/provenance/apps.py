@@ -17,7 +17,7 @@ def _format_citation_link(obj: Any, index: int, base_url: str, plain_text: bool)
     )
 
 
-def _collect_citation_metadata(obj: Any, index: int) -> dict:
+def _collect_citation_metadata(obj: Any, index: int) -> dict[str, Any]:
     """Collect structured metadata for a citation instance.
 
     Called by core's render pipeline via the collect_metadata callback.

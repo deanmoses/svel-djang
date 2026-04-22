@@ -2,16 +2,18 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from django.db.models.signals import post_delete, post_save
 
 from .cache import invalidate_all
 
 
-def _invalidate_cache(sender, **kwargs):
+def _invalidate_cache(sender: Any, **kwargs: Any) -> None:
     invalidate_all()
 
 
-def connect():
+def connect() -> None:
     """Connect cache-invalidation signals. Called from AppConfig.ready()."""
     from .models import (
         CorporateEntity,

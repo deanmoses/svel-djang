@@ -16,6 +16,7 @@ to a whole-changeset undo.
 from __future__ import annotations
 
 from collections import defaultdict
+from typing import Any
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
@@ -37,7 +38,7 @@ class RevertError(Exception):
         self.status_code = status_code
 
 
-def execute_revert(entity, *, claim_id: int, user, note: str) -> None:
+def execute_revert(entity: Any, *, claim_id: int, user: Any, note: str) -> None:
     """Deactivate a single user claim and re-resolve the entity.
 
     Creates a new ChangeSet recording the revert, deactivates the target
@@ -122,7 +123,9 @@ class UndoError(Exception):
         self.status_code = status_code
 
 
-def execute_undo_changeset(changeset: ChangeSet, *, user, note: str = "") -> ChangeSet:
+def execute_undo_changeset(
+    changeset: ChangeSet, *, user: Any, note: str = ""
+) -> ChangeSet:
     """Atomically invert every claim in a DELETE *changeset*.
 
     Creates a new ``REVERT`` ChangeSet, deactivates each claim in the

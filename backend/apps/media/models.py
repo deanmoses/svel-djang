@@ -273,7 +273,7 @@ class EntityMedia(TimeStampedModel):
             ),
         ]
 
-    def clean(self):
+    def clean(self) -> None:
         model_class = self.content_type.model_class()
         if model_class is None or not issubclass(model_class, MediaSupported):
             raise ValidationError(

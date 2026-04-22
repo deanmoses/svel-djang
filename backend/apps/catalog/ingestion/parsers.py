@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from typing import Any
 
 
 def parse_ipdb_date(s: str | None) -> tuple[int | None, int | None]:
@@ -16,7 +17,7 @@ def parse_ipdb_date(s: str | None) -> tuple[int | None, int | None]:
     if not match:
         return None, None
     year = int(match.group(1))
-    month = int(match.group(2))
+    month: int | None = int(match.group(2))
     # IPDB uses month=1 as a placeholder when only year is known.
     if month == 1 and s.endswith("01-01T00:00:00"):
         month = None
@@ -262,7 +263,7 @@ def parse_ipdb_location(location: str) -> dict[str, str]:
     return _normalize_location({"city": "", "state": "", "country": parts[0]})
 
 
-def _get_location_root(loc):
+def _get_location_root(loc: Any) -> Any:
     """Walk the parent chain to find the root (country) Location."""
     while loc.parent is not None:
         loc = loc.parent

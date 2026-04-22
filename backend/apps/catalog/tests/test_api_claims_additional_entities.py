@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-from typing import cast
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -50,7 +49,7 @@ def citation_source(db):
     )
 
 
-def _patch(client, path: str, body: dict):
+def _patch(client, path: str, body: dict[str, object]):
     return client.patch(
         path,
         data=json.dumps(body),
@@ -430,7 +429,7 @@ class TestPatchSeriesResponseShape:
         series = Series.objects.create(name="Eight Ball", slug="eight-ball")
         _assert_name_claim(series)
         title = Title.objects.create(name="Eight Ball Deluxe", slug="eight-ball-deluxe")
-        title.series_id = cast(int, series.pk)
+        title.series_id = series.pk
         title.save(update_fields=["series"])
         make_machine_model(
             name="Eight Ball Deluxe",

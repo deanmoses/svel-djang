@@ -4,7 +4,7 @@ import time
 
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import redirect
 
@@ -93,7 +93,7 @@ def _run_resolve(target: str) -> tuple[str, int]:
 
 
 @staff_member_required
-def resolve_view(request):
+def resolve_view(request: HttpRequest) -> HttpResponse:
     """Re-resolve catalog entities from their claims.
 
     GET renders a page with buttons for each entity type.

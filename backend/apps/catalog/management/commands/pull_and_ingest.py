@@ -12,8 +12,10 @@ Usage (local):
 
 from __future__ import annotations
 
+import argparse
 import os
 import tempfile
+from typing import Any
 
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
@@ -24,7 +26,7 @@ _DEFAULT_DEST = os.path.join(tempfile.gettempdir(), "ingest_sources")
 class Command(BaseCommand):
     help = "Pull ingest sources from R2, then run ingest_all."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
             "--dest",
             default=_DEFAULT_DEST,
@@ -36,7 +38,7 @@ class Command(BaseCommand):
             help="Run ingest_all without --write (rolls back changes).",
         )
 
-    def handle(self, **options):
+    def handle(self, **options: Any) -> None:
         dest = options["dest"]
         write = not options["dry_run"]
 

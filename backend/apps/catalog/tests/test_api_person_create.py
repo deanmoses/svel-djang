@@ -37,7 +37,7 @@ def _clear_cache():
     cache.clear()
 
 
-def _post(client, body: dict):
+def _post(client, body: dict[str, object]):
     return client.post(
         "/api/people/",
         data=json.dumps(body),

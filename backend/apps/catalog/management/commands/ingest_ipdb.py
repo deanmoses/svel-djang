@@ -6,6 +6,9 @@ and prints a report.  All logic lives in the adapter module.
 
 from __future__ import annotations
 
+import argparse
+from typing import Any
+
 from django.core.management.base import BaseCommand
 
 from apps.catalog.ingestion.apply import apply_plan
@@ -21,7 +24,7 @@ from apps.catalog.ingestion.ipdb.adapter import (
 class Command(BaseCommand):
     help = "Ingest pinball machines from an IPDB JSON dump."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
             "--ipdb",
             default=DEFAULT_IPDB_PATH,
@@ -33,7 +36,7 @@ class Command(BaseCommand):
             help="Validate plan without writing to the database.",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: object, **options: Any) -> None:
         ipdb_path = options["ipdb"]
 
         records = parse_ipdb_records(ipdb_path)

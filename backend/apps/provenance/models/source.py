@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from django.db import models
 
 from apps.core.models import TimeStampedModel, field_not_blank, unique_slug
@@ -62,7 +64,7 @@ class Source(TimeStampedModel):
     def __str__(self) -> str:
         return self.name
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.slug:
             self.slug = unique_slug(self, self.name, "source")
         super().save(*args, **kwargs)

@@ -1,5 +1,7 @@
 """Tests for the markdown rendering pipeline."""
 
+from typing import Any
+
 import pytest
 
 from apps.core.markdown import render_markdown_fields, render_markdown_html
@@ -85,7 +87,7 @@ class TestRenderMarkdownHtml:
             name="Source Book", source_type="book", author="A. Author"
         )
         ci = CitationInstance.objects.create(citation_source=src, locator="ch. 3")
-        metadata: list[dict] = []
+        metadata: list[dict[str, Any]] = []
         html = render_markdown_html(f"Fact.[[cite:{ci.pk}]]", metadata_out=metadata)
         assert "data-cite-id" in html
         assert len(metadata) == 1

@@ -27,8 +27,10 @@ Usage::
 
 from __future__ import annotations
 
+import argparse
 import json
 import logging
+from typing import Any
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
@@ -65,7 +67,7 @@ def _last_name(name: str) -> str:
 class Command(BaseCommand):
     help = "Ingest pinball data from the Pinball Fandom wiki."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
         # Games dump flags (existing).
         parser.add_argument(
             "--dump",
@@ -111,7 +113,7 @@ class Command(BaseCommand):
             help="Load manufacturers JSON from this file instead of fetching live.",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: object, **options: Any) -> None:
         verbosity = options["verbosity"]
         b, r = "\033[1m", "\033[0m"
         dim, undim = "\033[2m", "\033[22m"
@@ -415,12 +417,12 @@ class Command(BaseCommand):
         for fm in fandom_mfrs:
             mfr = resolver.resolve_object(fm.title)
             if mfr is None:
-                slug = resolver.resolve_by_corporate_entity(fm.title)
-                if slug is None:
-                    slug = resolver.resolve_by_corporate_entity_normalized(fm.title)
-                if slug is None:
-                    slug = resolver.resolve_normalized(fm.title)
-                mfr = resolver.get_by_slug(slug) if slug else None
+                mfr_slug: str | None = resolver.resolve_by_corporate_entity(fm.title)
+                if mfr_slug is None:
+                    mfr_slug = resolver.resolve_by_corporate_entity_normalized(fm.title)
+                if mfr_slug is None:
+                    mfr_slug = resolver.resolve_normalized(fm.title)
+                mfr = resolver.get_by_slug(mfr_slug) if mfr_slug else None
             if mfr is None:
                 unmatched_mfrs.append(fm.title)
                 continue

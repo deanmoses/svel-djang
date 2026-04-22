@@ -106,7 +106,7 @@ class TestFromDumpEmpty:
     """Empty dump should not crash and should still create the source."""
 
     def test_empty_bindings(self, db):
-        empty = {"results": {"bindings": []}}
+        empty: dict[str, object] = {"results": {"bindings": []}}
         data = {"manufacturers": empty, "bio": empty}
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             json.dump(data, f)

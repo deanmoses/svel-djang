@@ -1,6 +1,6 @@
 """Seed data for website citation sources."""
 
-WEBSITE_SOURCES: list[dict] = [
+WEBSITE_SOURCES: list[dict[str, object]] = [
     {
         "name": "Internet Pinball Database (IPDB)",
         "source_type": "web",

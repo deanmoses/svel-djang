@@ -197,7 +197,7 @@ class TestFromDumpEmpty:
         import json
         import tempfile
 
-        empty = {"results": {"bindings": []}}
+        empty: dict[str, object] = {"results": {"bindings": []}}
         data = {"persons": empty, "bio": empty, "credits": empty}
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             json.dump(data, f)

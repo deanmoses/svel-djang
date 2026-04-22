@@ -40,7 +40,7 @@ def _clear_cache():
     cache.clear()
 
 
-def _post(client, body: dict):
+def _post(client, body: dict[str, object]):
     return client.post(
         "/api/titles/",
         data=json.dumps(body),
@@ -48,7 +48,7 @@ def _post(client, body: dict):
     )
 
 
-def _patch(client, slug: str, body: dict):
+def _patch(client, slug: str, body: dict[str, object]):
     return client.patch(
         f"/api/titles/{slug}/claims/",
         data=json.dumps(body),

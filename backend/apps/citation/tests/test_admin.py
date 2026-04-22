@@ -1,5 +1,7 @@
 """Tests for citation admin configuration."""
 
+from typing import Any
+
 import pytest
 from django.contrib import admin
 from django.contrib.auth import get_user_model
@@ -11,14 +13,14 @@ from apps.citation.models import CitationSource, CitationSourceLink
 
 User = get_user_model()
 
-LinkFormSetCreate = inlineformset_factory(
+LinkFormSetCreate: Any = inlineformset_factory(
     CitationSource,
     CitationSourceLink,
     fields=("link_type", "url", "label"),
     extra=1,
     can_delete=True,
 )
-LinkFormSetUpdate = inlineformset_factory(
+LinkFormSetUpdate: Any = inlineformset_factory(
     CitationSource,
     CitationSourceLink,
     fields=("link_type", "url", "label"),

@@ -4,7 +4,7 @@ These are publication-level roots only. Individual issues and articles
 will be added as children by contributors.
 """
 
-MAGAZINE_SOURCES: list[dict] = [
+MAGAZINE_SOURCES: list[dict[str, object]] = [
     # =====================================================================
     # Pinball-dedicated publications
     # =====================================================================

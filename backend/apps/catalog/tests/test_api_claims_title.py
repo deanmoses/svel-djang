@@ -54,7 +54,7 @@ def citation_source(db):
     return CitationSource.objects.create(name="Williams Flyer", source_type="web")
 
 
-def _patch(client, slug: str, body: dict):
+def _patch(client, slug: str, body: dict[str, object]):
     return client.patch(
         f"/api/titles/{slug}/claims/",
         data=json.dumps(body),
@@ -275,6 +275,7 @@ class TestPatchTitleClaims:
         )
 
         assert resp.status_code == 200, resp.json()
+        assert template_claim.changeset_id is not None
         changeset = ChangeSet.objects.exclude(pk=template_claim.changeset_id).get()
         created_claim = changeset.claims.get(field_name="description")
         claim_citations = list(created_claim.citation_instances.all())

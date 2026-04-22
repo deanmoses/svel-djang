@@ -7,15 +7,16 @@ inherent in offset pagination on mutable feeds.
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 
 from django.db.models import Q, QuerySet
 
 
 def cursor_paginate(
-    queryset: QuerySet,
+    queryset: QuerySet[Any, Any],
     cursor: str,
     limit: int,
-) -> tuple[list, str | None]:
+) -> tuple[list[Any], str | None]:
     """Apply keyset pagination to a queryset ordered by (-created_at, -id).
 
     Returns (items, next_cursor).  ``next_cursor`` is ``None`` when there

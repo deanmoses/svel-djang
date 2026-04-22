@@ -10,11 +10,13 @@ user) so mistakes fail at call time rather than at constraint time.
 
 from __future__ import annotations
 
+from typing import Any
+
 from .models import ChangeSet, ChangeSetAction, IngestRun
 
 
 def user_changeset(
-    user,
+    user: Any,
     *,
     action: ChangeSetAction | str = ChangeSetAction.EDIT,
     note: str = "",

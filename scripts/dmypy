@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Daemon variant of scripts/mypy. See scripts/mypy for the full explanation
 # of exit-code logic, PIPESTATUS handling, and why --ignore is used for the
-# install-types note. Same rules apply here; this script just swaps `mypy`
-# for `dmypy check` against a pre-warmed daemon.
+# small set of missing-import companion notes that plain mypy emits
+# inconsistently relative to dmypy. Same rules apply here; this script just
+# swaps `mypy` for `dmypy check` against a pre-warmed daemon.
 #
 # dmypy holds the project type graph in memory between runs; first invocation
 # spins up the daemon (slow, ~5s on dev, longer on CI), subsequent runs reuse
@@ -24,7 +25,7 @@ fi
 # treated as positional FILE arguments. Always run the full backend tree (see
 # scripts/mypy for rationale on why we ignore caller-supplied paths).
 uv run --directory backend dmypy check -- . \
-    | uv run --directory backend mypy-baseline filter --ignore '.*--install-types.*'
+    | uv run --directory backend mypy-baseline filter --ignore '.*(--install-types|running_mypy\.html#missing-imports|types-requests).*'
 statuses=("${PIPESTATUS[@]}")
 dmypy_status=${statuses[0]}
 filter_status=${statuses[1]}

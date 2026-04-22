@@ -4,7 +4,7 @@ from .models import License
 
 
 @admin.register(License)
-class LicenseAdmin(admin.ModelAdmin):
+class LicenseAdmin(admin.ModelAdmin[License]):
     list_display = (
         "short_name",
         "slug",

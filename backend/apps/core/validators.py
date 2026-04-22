@@ -2,20 +2,28 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from django.core.exceptions import ValidationError
 
 
-def bulk_create_validated(model, objs, **kwargs):
+def bulk_create_validated(
+    model: Any,
+    objs: list[Any],
+    **kwargs: Any,
+) -> Any:
     """Like ``model.objects.bulk_create()`` but runs mojibake validation first.
 
     Checks every field that has ``validate_no_mojibake`` in its validators
     and raises ``ValidationError`` if any value contains encoding corruption.
     Use this in ingestion commands instead of bare ``bulk_create()``.
     """
-    checked_fields = [
+    checked_fields: list[Any] = [
         f
         for f in model._meta.get_fields()
-        if hasattr(f, "validators") and validate_no_mojibake in f.validators
+        if hasattr(f, "validators")
+        and hasattr(f, "attname")
+        and validate_no_mojibake in f.validators
     ]
     if checked_fields:
         for obj in objs:
@@ -26,7 +34,7 @@ def bulk_create_validated(model, objs, **kwargs):
     return model.objects.bulk_create(objs, **kwargs)
 
 
-def validate_no_mojibake(value):
+def validate_no_mojibake(value: object) -> None:
     """Reject text containing mojibake (encoding-corruption artifacts).
 
     Detects UTF-8 text that was misinterpreted as Latin-1 or Windows-1252

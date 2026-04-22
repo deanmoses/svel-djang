@@ -15,6 +15,7 @@ Run via ``make api-gen`` or directly::
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -25,14 +26,14 @@ from apps.core.models import LinkableModel
 class Command(BaseCommand):
     help = "Generate frontend/src/lib/api/catalog-meta.ts from linkable models."
 
-    def handle(self, **options):
+    def handle(self, **options: Any) -> None:
         catalog_meta: list[tuple[str, str, str, str]] = []
         media_categories: dict[str, list[str]] = {}
 
         for cls in _iter_concrete_subclasses(LinkableModel):
             key = cls.entity_type
-            label = cls._meta.verbose_name.title()
-            label_plural = cls._meta.verbose_name_plural.title()
+            label = str(cls._meta.verbose_name).title()
+            label_plural = str(cls._meta.verbose_name_plural).title()
             catalog_meta.append((key, cls.entity_type_plural, label, label_plural))
             cats = getattr(cls, "MEDIA_CATEGORIES", [])
             if cats:
@@ -71,7 +72,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f"Wrote {output_path}"))
 
 
-def _iter_concrete_subclasses(root):
+def _iter_concrete_subclasses(root: type[Any]) -> Any:
     for cls in root.__subclasses__():
         yield from _iter_concrete_subclasses(cls)
         meta = getattr(cls, "_meta", None)

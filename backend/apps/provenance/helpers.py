@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
+from typing import Any
+
 from django.db.models import Case, F, IntegerField, Prefetch, Value, When
 
 from .models import CitationInstance, Claim
 
 
-def claims_prefetch(to_attr: str = "active_claims"):
+def claims_prefetch(to_attr: str = "active_claims") -> Any:
     """Return a Prefetch for active claims with priority annotation."""
     return Prefetch(
         "claims",
@@ -36,14 +39,14 @@ def claims_prefetch(to_attr: str = "active_claims"):
     )
 
 
-def build_sources(active_claims) -> list[dict]:
+def build_sources(active_claims: Iterable[Any]) -> list[dict[str, Any]]:
     """Serialize pre-fetched active claims into the sources list format.
 
     Claims should be ordered by claim_key, -priority, -created_at. The first
     claim seen per claim_key is marked as the winner.
     """
     winners: set[str] = set()
-    sources: list[dict] = []
+    sources: list[dict[str, Any]] = []
     for claim in active_claims:
         is_winner = claim.claim_key not in winners
         if is_winner:

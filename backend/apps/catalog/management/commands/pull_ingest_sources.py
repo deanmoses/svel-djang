@@ -18,11 +18,13 @@ Usage (Railway):
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import os
 import tempfile
 import urllib.request
+from typing import Any
 from urllib.error import HTTPError
 
 from django.core.management.base import BaseCommand
@@ -48,7 +50,7 @@ _MANIFESTS = [
 ]
 
 
-def _urlopen(url: str):
+def _urlopen(url: str) -> Any:
     return _OPENER.open(url)
 
 
@@ -63,7 +65,7 @@ def _sha256(path: str) -> str:
 class Command(BaseCommand):
     help = "Download ingest source files from Cloudflare R2."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
             "--url",
             default=os.environ.get(
@@ -77,7 +79,7 @@ class Command(BaseCommand):
             help=f"Local directory to download into (default: {_DEFAULT_DEST}).",
         )
 
-    def handle(self, **options):
+    def handle(self, **options: Any) -> None:
         base_url = options["url"].rstrip("/")
         dest = options["dest"]
 

@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.apps import AppConfig
 
 
@@ -6,7 +8,7 @@ class CatalogConfig(AppConfig):
     name = "apps.catalog"
     verbose_name = "Catalog"
 
-    def ready(self):
+    def ready(self) -> None:
         from . import signals
         from .claims import register_relationship_targets
 
@@ -16,7 +18,7 @@ class CatalogConfig(AppConfig):
         self._register_reference_cleanup()
 
     @staticmethod
-    def _register_reference_cleanup():
+    def _register_reference_cleanup() -> None:
         from django.apps import apps
 
         from apps.core.models import MarkdownField, register_reference_cleanup
@@ -31,13 +33,13 @@ class CatalogConfig(AppConfig):
             register_reference_cleanup(*models_with_markdown)
 
     @staticmethod
-    def _register_link_types():
+    def _register_link_types() -> None:
         from django.apps import apps
 
         from apps.core.markdown_links import LinkType, register
         from apps.core.models import LinkableModel
 
-        def _default_serialize(obj):
+        def _default_serialize(obj: Any) -> dict[str, str]:
             return {"ref": obj.slug, "label": str(obj.name)}
 
         for model in apps.get_app_config("catalog").get_models():

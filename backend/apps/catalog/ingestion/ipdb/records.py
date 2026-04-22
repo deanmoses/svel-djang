@@ -9,6 +9,7 @@ manufacturer resolution) stays in parsers.py and the ingest command.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any
 
 
 @dataclass
@@ -46,7 +47,7 @@ class IpdbRecord:
     software_by: str = ""
 
     @classmethod
-    def from_raw(cls, d: dict) -> IpdbRecord:
+    def from_raw(cls, d: dict[str, Any]) -> IpdbRecord:
         """Map raw JSON keys to Python field names. Key mapping only."""
         return cls(
             ipdb_id=d["IpdbId"],  # KeyError if missing = drift detection

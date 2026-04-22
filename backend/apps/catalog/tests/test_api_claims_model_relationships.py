@@ -340,6 +340,7 @@ class TestCombinedEdits:
         )
         assert resp.status_code == 200, resp.json()
 
+        assert seed_claim.changeset_id is not None
         changeset = ChangeSet.objects.exclude(pk=seed_claim.changeset_id).get()
         claims = list(changeset.claims.order_by("pk"))
         assert claims

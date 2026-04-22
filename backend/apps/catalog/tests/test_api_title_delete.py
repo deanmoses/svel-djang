@@ -64,7 +64,7 @@ def _make_model(bootstrap_source, title: Title, slug: str) -> MachineModel:
     return m
 
 
-def _post_delete(client, slug: str, body: dict | None = None):
+def _post_delete(client, slug: str, body: dict[str, object] | None = None):
     return client.post(
         f"/api/titles/{slug}/delete/",
         data=json.dumps(body or {}),
@@ -72,7 +72,7 @@ def _post_delete(client, slug: str, body: dict | None = None):
     )
 
 
-def _post_restore(client, slug: str, body: dict | None = None):
+def _post_restore(client, slug: str, body: dict[str, object] | None = None):
     return client.post(
         f"/api/titles/{slug}/restore/",
         data=json.dumps(body or {}),

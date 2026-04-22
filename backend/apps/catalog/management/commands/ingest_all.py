@@ -9,8 +9,10 @@ Runs: ingest_pinbase → ingest_ipdb → ingest_opdb →
 
 from __future__ import annotations
 
+import argparse
 import time
 from pathlib import Path
+from typing import Any
 
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
@@ -40,7 +42,7 @@ STEPS = [
 class Command(BaseCommand):
     help = "Run the full ingestion pipeline: Pinbase, IPDB, OPDB, resolve."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
             "--ipdb",
             default=DEFAULT_IPDB_PATH,
@@ -63,7 +65,7 @@ class Command(BaseCommand):
             "runs in dry-run mode and rolls back all changes.",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: object, **options: Any) -> None:
         write = options["write"]
         ipdb_path = options["ipdb"]
         opdb_path = options["opdb"]

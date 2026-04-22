@@ -16,8 +16,10 @@ Usage::
 
 from __future__ import annotations
 
+import argparse
 import json
 import logging
+from typing import Any
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
@@ -38,7 +40,7 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     help = "Ingest pinball manufacturer data from Wikidata via SPARQL."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
             "--dump",
             default="",
@@ -60,7 +62,7 @@ class Command(BaseCommand):
             help="SPARQL query timeout in seconds (default: 15).",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: object, **options: Any) -> None:
         dump_path = options["dump"]
         from_dump = options["from_dump"]
 
@@ -184,7 +186,7 @@ def _collect_manufacturer_claims(
     claims: list[Claim] = []
     citation = wm.citation_url
 
-    def add(field_name: str, value) -> None:
+    def add(field_name: str, value: object) -> None:
         if value is not None and value != "":
             claims.append(
                 Claim(

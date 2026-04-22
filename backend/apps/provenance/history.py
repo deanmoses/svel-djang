@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from typing import Any
 
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Case, F, IntegerField, Prefetch, Q, Value, When
@@ -10,7 +11,7 @@ from django.db.models import Case, F, IntegerField, Prefetch, Q, Value, When
 from .models import ChangeSet, Claim
 
 
-def _compute_winning_claim_ids(ct, entity_pk: int) -> set[int]:
+def _compute_winning_claim_ids(ct: ContentType, entity_pk: int) -> set[int]:
     """Return the set of claim PKs that are current winners for the entity.
 
     For each ``claim_key``, the winner is the active claim with the highest
@@ -44,7 +45,7 @@ def _compute_winning_claim_ids(ct, entity_pk: int) -> set[int]:
     return winners
 
 
-def build_edit_history(entity) -> list[dict]:
+def build_edit_history(entity: Any) -> list[dict[str, Any]]:
     """Build changeset-grouped edit history with old→new diffs for an entity.
 
     Returns a list of dicts matching ChangeSetSchema, newest first.
@@ -102,9 +103,9 @@ def build_edit_history(entity) -> list[dict]:
     winning_ids = _compute_winning_claim_ids(ct, entity.pk)
 
     # 4. Build response.
-    result: list[dict] = []
+    result: list[dict[str, Any]] = []
     for cs in changesets:
-        changes: list[dict] = []
+        changes: list[dict[str, Any]] = []
         for claim in cs.claims.all():
             chain = (
                 history.get((claim.claim_key, claim.user_id), [])

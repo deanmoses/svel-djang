@@ -491,7 +491,7 @@ def extract_citation_source(request, data: ExtractRequestSchema):
     else:
         raise HttpError(422, "Unsupported input")
 
-    resp = {}
+    resp: dict[str, object] = {}
     if result.match:
         resp["match"] = result.match
     if result.draft:

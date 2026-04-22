@@ -6,8 +6,10 @@ All source-specific logic lives in the adapter module.
 
 from __future__ import annotations
 
+import argparse
 import json
 import logging
+from typing import Any
 
 from django.core.management.base import BaseCommand, CommandError
 
@@ -26,7 +28,7 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     help = "Ingest pinball machines from an OPDB JSON dump."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
             "--opdb",
             default=DEFAULT_OPDB_PATH,
@@ -38,7 +40,7 @@ class Command(BaseCommand):
             help="Validate and diff without writing to the database.",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: object, **options: Any) -> None:
         opdb_path = options["opdb"]
         dry_run = options["dry_run"]
 

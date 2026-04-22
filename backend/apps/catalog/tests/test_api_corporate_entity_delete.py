@@ -79,7 +79,7 @@ def _make_model(
     return m
 
 
-def _post_delete(client, slug: str, body: dict | None = None):
+def _post_delete(client, slug: str, body: dict[str, object] | None = None):
     return client.post(
         f"/api/corporate-entities/{slug}/delete/",
         data=json.dumps(body or {}),
@@ -87,7 +87,7 @@ def _post_delete(client, slug: str, body: dict | None = None):
     )
 
 
-def _post_restore(client, slug: str, body: dict | None = None):
+def _post_restore(client, slug: str, body: dict[str, object] | None = None):
     return client.post(
         f"/api/corporate-entities/{slug}/restore/",
         data=json.dumps(body or {}),

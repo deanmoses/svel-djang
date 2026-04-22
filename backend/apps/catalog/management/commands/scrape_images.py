@@ -16,10 +16,12 @@ Usage:
 
 from __future__ import annotations
 
+import argparse
 import logging
 import re
 import time
 from html import unescape
+from typing import Any
 from urllib.parse import quote_plus, urljoin
 
 import requests
@@ -60,7 +62,7 @@ MANUAL_IMAGES: dict[str, list[str]] = {
 }
 
 
-def _has_images(extra_data: dict) -> bool:
+def _has_images(extra_data: dict[str, object]) -> bool:
     """Check if extra_data already contains usable image URLs."""
     for key in ("image_urls", "ipdb.image_urls"):
         if extra_data.get(key):
@@ -149,7 +151,7 @@ def _try_bing_images(query: str) -> list[str] | None:
 class Command(BaseCommand):
     help = "Scrape images for machines without artwork (demo tool)."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
             "--year-min",
             type=int,
@@ -162,7 +164,7 @@ class Command(BaseCommand):
             help="Preview what would be scraped without saving.",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: object, **options: Any) -> None:
         year_min = options["year_min"]
         dry_run = options["dry_run"]
 

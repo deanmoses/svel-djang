@@ -2,6 +2,8 @@ from pathlib import Path
 
 from django.conf import settings
 from django.contrib import admin
+from django.http import HttpRequest
+from django.http.response import HttpResponseBase
 from django.urls import URLPattern, URLResolver, path, re_path
 
 from .admin_views import resolve_view
@@ -19,7 +21,11 @@ urlpatterns: list[URLPattern | URLResolver] = [
 # the file's magic bytes to set the correct header.
 
 
-def _serve_media(request, path="", document_root=None):
+def _serve_media(
+    request: HttpRequest,
+    path: str = "",
+    document_root: str | None = None,
+) -> HttpResponseBase:
     from django.views.static import serve
 
     from apps.media.storage import sniff_image_content_type

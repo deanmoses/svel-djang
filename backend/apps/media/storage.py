@@ -44,7 +44,7 @@ def build_public_url(storage_key: str) -> str:
 
 def get_media_storage():
     """Return the configured default storage backend."""
-    return default_storage
+    return cast(Any, default_storage)
 
 
 def upload_to_storage(storage_key: str, data: bytes, content_type: str) -> None:

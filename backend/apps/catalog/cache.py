@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from hashlib import md5
+from typing import Any
 
 from django.core.cache import cache
 from django.http import HttpResponse
@@ -32,7 +33,9 @@ def get_cached_response(cache_key: str) -> HttpResponse | None:
     return response
 
 
-def set_cached_response(cache_key: str, data: list | dict) -> HttpResponse:
+def set_cached_response(
+    cache_key: str, data: list[Any] | dict[str, Any]
+) -> HttpResponse:
     """Serialize *data* to JSON, compute its ETag, cache both, and return
     an ``HttpResponse`` ready to send.
     """

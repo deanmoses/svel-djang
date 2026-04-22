@@ -34,7 +34,7 @@ def _clear_cache():
     cache.clear()
 
 
-def _post(client, path: str, body: dict):
+def _post(client, path: str, body: dict[str, object]):
     return client.post(path, data=json.dumps(body), content_type="application/json")
 
 

@@ -69,7 +69,7 @@ def parse_ipdb_themes(raw_theme: str) -> list[str]:
 # the structured "Feature (N)" list.  Each pattern is matched against
 # the full notable_features string.  Target slugs are validated at startup
 # against the DB-driven feature/reward-type maps.
-_NARRATIVE_FEATURE_PATTERNS: list[tuple[re.Pattern, str]] = [
+_NARRATIVE_FEATURE_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"\b[Mm]ulti-?ball\b"), "multiball"),
     (re.compile(r"\b[Kk]ickback\b"), "kickback"),
     (re.compile(r"\b[Mm]agna.?[Ss]ave\b"), "magna-save"),

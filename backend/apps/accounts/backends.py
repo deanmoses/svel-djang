@@ -8,16 +8,19 @@ reload the user from the session.
 
 from __future__ import annotations
 
+from typing import Any
+
 from django.contrib.auth import get_user_model
+from django.http import HttpRequest
 
 User = get_user_model()
 
 
 class WorkOSBackend:
-    def authenticate(self, request, **kwargs):
+    def authenticate(self, request: HttpRequest | None, **kwargs: Any) -> None:
         return None
 
-    def get_user(self, user_id):
+    def get_user(self, user_id: int) -> Any | None:
         try:
             return User.objects.get(pk=user_id)
         except User.DoesNotExist:

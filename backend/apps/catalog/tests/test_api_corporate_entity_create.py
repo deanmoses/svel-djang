@@ -44,7 +44,7 @@ def _clear_cache():
     cache.clear()
 
 
-def _post(client, parent_slug: str, body: dict):
+def _post(client, parent_slug: str, body: dict[str, object]):
     return client.post(
         f"/api/manufacturers/{parent_slug}/corporate-entities/",
         data=json.dumps(body),

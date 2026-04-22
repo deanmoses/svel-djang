@@ -63,7 +63,7 @@ def _make_system(bootstrap_source, mfr, slug: str, *, status: str = "active") ->
     return s
 
 
-def _post_delete(client, slug: str, body: dict | None = None):
+def _post_delete(client, slug: str, body: dict[str, object] | None = None):
     return client.post(
         f"/api/manufacturers/{slug}/delete/",
         data=json.dumps(body or {}),
@@ -71,7 +71,7 @@ def _post_delete(client, slug: str, body: dict | None = None):
     )
 
 
-def _post_restore(client, slug: str, body: dict | None = None):
+def _post_restore(client, slug: str, body: dict[str, object] | None = None):
     return client.post(
         f"/api/manufacturers/{slug}/restore/",
         data=json.dumps(body or {}),
