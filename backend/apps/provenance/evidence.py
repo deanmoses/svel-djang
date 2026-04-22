@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
+from typing import Any
 
-def build_cited_changesets(active_claims) -> list[dict]:
+
+def build_cited_changesets(active_claims: Iterable[Any]) -> list[dict[str, Any]]:
     """Serialize active user changesets that have attached citation instances."""
-    grouped: dict[int, dict] = {}
+    grouped: dict[int, dict[str, Any]] = {}
 
     for claim in active_claims:
         if claim.changeset_id is None or claim.user_id is None:

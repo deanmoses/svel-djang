@@ -423,7 +423,7 @@ def _apply_dry_run(plan: IngestPlan, report: RunReport) -> RunReport:
         }
         sentinel_claims = [
             Claim(
-                content_type_id=handle_to_ct[pca.handle],  # type: ignore[arg-type]
+                content_type_id=handle_to_ct[pca.handle],
                 object_id=0,
                 field_name=pca.field_name,
                 claim_key=pca.claim_key or pca.field_name,

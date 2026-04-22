@@ -300,14 +300,14 @@ def list_all_manufacturers(request):
         if mfr_id not in mfr_thumb_model:
             mfr_thumb_model[mfr_id] = model_id
     thumb_models = {
-        cast(int, m.pk): m
+        m.pk: m
         for m in MachineModel.objects.filter(id__in=mfr_thumb_model.values()).only(
             "id", "extra_data"
         )
     }
 
     # --- Bulk search text + facet data per manufacturer ---
-    mfr_ids = {cast(int, m.pk) for m in manufacturers}
+    mfr_ids = {m.pk for m in manufacturers}
 
     # Entity names per manufacturer
     mfr_entity_names: dict[int, list[str]] = defaultdict(list)
@@ -417,7 +417,7 @@ def list_all_manufacturers(request):
     # --- Assembly ---
     result = []
     for mfr in manufacturers:
-        mfr_id = cast(int, mfr.pk)
+        mfr_id = mfr.pk
         model_count = cast(HasModelCount, mfr).model_count
         year_min = cast(HasYearRange, mfr).year_min
         year_max = cast(HasYearRange, mfr).year_max

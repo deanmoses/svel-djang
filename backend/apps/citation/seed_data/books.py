@@ -1,6 +1,6 @@
 """Seed data for book citation sources."""
 
-BOOK_SOURCES: list[dict] = [
+BOOK_SOURCES: list[dict[str, object]] = [
     # =====================================================================
     # Multi-edition works (root + children)
     # =====================================================================
