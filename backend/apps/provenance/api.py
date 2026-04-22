@@ -1,6 +1,6 @@
 """API endpoints for the provenance app.
 
-Routers: sources, review, provenance, pages.
+Routers: sources, claims, changesets, pages, review, citation-instances.
 Auto-discovered via the ``routers`` list convention in config/api.py.
 """
 
@@ -142,7 +142,7 @@ def list_review_claims(request):
     return results
 
 
-# ── Provenance mutations (revert, undo-changeset) ──────────────────
+# ── Claim and ChangeSet mutations (revert, undo) ───────────────────
 
 
 class RevertNoteSchema(Schema):
@@ -150,15 +150,15 @@ class RevertNoteSchema(Schema):
 
 
 class UndoChangeSetSchema(Schema):
-    changeset_id: int
     note: str = ""
 
 
-provenance_router = Router(tags=["provenance", "private"])
+claims_router = Router(tags=["claims", "private"])
+changesets_router = Router(tags=["changesets", "private"])
 
 
-@provenance_router.post(
-    "/claims/{claim_id}/revert/",
+@claims_router.post(
+    "/{claim_id}/revert/",
     auth=django_auth,
     response={200: dict, 403: dict, 404: dict, 422: dict},
 )
@@ -191,12 +191,12 @@ def revert_claim(request, claim_id: int, data: RevertNoteSchema):
     return {"ok": True}
 
 
-@provenance_router.post(
-    "/undo-changeset/",
+@changesets_router.post(
+    "/{changeset_id}/undo/",
     auth=django_auth,
     response={200: dict, 403: dict, 404: dict, 422: dict},
 )
-def undo_changeset(request, data: UndoChangeSetSchema):
+def undo_changeset(request, changeset_id: int, data: UndoChangeSetSchema):
     """Atomically invert a DELETE ChangeSet (restore a soft-deleted tree).
 
     This powers the post-delete Undo toast. Scoped to delete ChangeSets
@@ -206,7 +206,7 @@ def undo_changeset(request, data: UndoChangeSetSchema):
     from .revert import UndoError, execute_undo_changeset
 
     try:
-        changeset = ChangeSet.objects.get(pk=data.changeset_id)
+        changeset = ChangeSet.objects.get(pk=changeset_id)
     except ChangeSet.DoesNotExist:
         return Status(404, {"detail": "ChangeSet not found."})
 
@@ -357,7 +357,8 @@ def create_citation_instance(request, data: CitationInstanceCreateIn):
 
 routers = [
     ("/sources/", sources_router),
-    ("/provenance/", provenance_router),
+    ("/claims/", claims_router),
+    ("/changesets/", changesets_router),
     ("/pages/", pages_router),
     ("/review/", review_router),
     ("/citation-instances/", citation_instances_router),

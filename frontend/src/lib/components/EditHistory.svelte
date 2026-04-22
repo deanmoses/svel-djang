@@ -103,7 +103,7 @@
 		revertLoading = true;
 		revertError = null;
 
-		const { error } = await client.POST('/api/provenance/claims/{claim_id}/revert/', {
+		const { error } = await client.POST('/api/claims/{claim_id}/revert/', {
 			params: { path: { claim_id: revertingClaimId } },
 			body: { note: revertNote }
 		});

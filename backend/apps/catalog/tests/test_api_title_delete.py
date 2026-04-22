@@ -338,8 +338,8 @@ class TestUndoDelete:
         cs_id = resp.json()["changeset_id"]
 
         undo = client.post(
-            "/api/provenance/undo-changeset/",
-            data=json.dumps({"changeset_id": cs_id, "note": "oops"}),
+            f"/api/changesets/{cs_id}/undo/",
+            data=json.dumps({"note": "oops"}),
             content_type="application/json",
         )
         assert undo.status_code == 200, undo.content
@@ -359,8 +359,8 @@ class TestUndoDelete:
 
         client.force_login(other)
         resp = client.post(
-            "/api/provenance/undo-changeset/",
-            data=json.dumps({"changeset_id": cs_id}),
+            f"/api/changesets/{cs_id}/undo/",
+            data=json.dumps({}),
             content_type="application/json",
         )
         assert resp.status_code == 403
@@ -376,8 +376,8 @@ class TestUndoDelete:
         _post_restore(client, "g")
 
         resp = client.post(
-            "/api/provenance/undo-changeset/",
-            data=json.dumps({"changeset_id": cs_id}),
+            f"/api/changesets/{cs_id}/undo/",
+            data=json.dumps({}),
             content_type="application/json",
         )
         assert resp.status_code == 422
