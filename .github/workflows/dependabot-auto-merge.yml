@@ -24,7 +24,7 @@ jobs:
 
       - name: Decide whether this PR is eligible for auto-merge
         id: decision
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           UPDATE_TYPE: ${{ steps.meta.outputs.update-type }}
           PR_TITLE: ${{ github.event.pull_request.title }}
