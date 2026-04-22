@@ -233,7 +233,7 @@ def _resolve_bulk(
     # Per-object Python-side validation was removed because each call issued
     # a savepoint + SELECT round trip, producing thousands of round trips per
     # bulk and triggering Postgres subtransaction SLRU overflow on managed DBs.
-    update_fields = list(set(direct_fields.values())) + ["updated_at"]
+    update_fields = [*set(direct_fields.values()), "updated_at"]
     if has_extra_data:
         update_fields.append("extra_data")
     model_class.objects.bulk_update(all_objs, update_fields, batch_size=100)

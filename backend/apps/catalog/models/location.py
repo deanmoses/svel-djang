@@ -10,9 +10,9 @@ from apps.core.models import AliasBase, EntityStatusMixin, field_not_blank, stat
 from apps.core.validators import validate_no_mojibake
 
 __all__ = [
+    "CorporateEntityLocation",
     "Location",
     "LocationAlias",
-    "CorporateEntityLocation",
 ]
 
 

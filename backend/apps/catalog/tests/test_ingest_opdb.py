@@ -244,9 +244,8 @@ def _opdb_dump(machines=None, aliases=None):
     for a in aliases or []:
         a.setdefault("is_alias", True)
         data.append(a)
-    f = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
-    json.dump(data, f)
-    f.close()
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+        json.dump(data, f)
     return f.name
 
 

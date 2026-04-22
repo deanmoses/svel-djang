@@ -49,7 +49,6 @@ class TestValidateNoMojibake:
             ("\u00e2\u20ac\u2122s", "mojibake"),  # â€™s
             ("\u00e2\u20ac\u201d", "mojibake"),  # â€” (em dash)
             ("â„¢", "mojibake"),
-            ("â€”", "mojibake"),
             ("ðŸŽ± Pinball", "mojibake"),
             ("hello\ufffd", "replacement character"),
             ("\ufffd", "replacement character"),

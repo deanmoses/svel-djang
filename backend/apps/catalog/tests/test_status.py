@@ -189,13 +189,12 @@ class TestStatusConstraint:
 
     def test_invalid_status_rejected_by_db(self):
         """DB constraint rejects invalid status values."""
-        Manufacturer.objects.create(name="Test", slug="test-bad", status="active")
-        with pytest.raises(IntegrityError):
-            # Raw SQL bypasses Python validation — only DB constraint catches it.
-            from django.db import connection
+        # Raw SQL bypasses Python validation — only DB constraint catches it.
+        from django.db import connection
 
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    "UPDATE catalog_manufacturer SET status = 'bogus' "
-                    "WHERE slug = 'test-bad'"
-                )
+        Manufacturer.objects.create(name="Test", slug="test-bad", status="active")
+        with connection.cursor() as cursor, pytest.raises(IntegrityError):
+            cursor.execute(
+                "UPDATE catalog_manufacturer SET status = 'bogus' "
+                "WHERE slug = 'test-bad'"
+            )

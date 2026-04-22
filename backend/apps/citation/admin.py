@@ -20,7 +20,7 @@ class CitationSourceAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         if obj:  # editing existing — parent is locked
-            return self.readonly_fields + ("parent",)
+            return (*self.readonly_fields, "parent")
         return self.readonly_fields
 
     def has_delete_permission(self, request, obj=None):

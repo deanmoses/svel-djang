@@ -19,7 +19,7 @@ from apps.core.models import (
 )
 from apps.core.validators import validate_no_mojibake
 
-__all__ = ["Theme", "ThemeAlias", "MachineModelTheme"]
+__all__ = ["MachineModelTheme", "Theme", "ThemeAlias"]
 
 
 class Theme(CatalogModel, EntityStatusMixin, SluggedModel, TimeStampedModel):

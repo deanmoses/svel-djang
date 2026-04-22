@@ -47,9 +47,9 @@ def _assertion_fields(plan, *, handle=None, object_id=None) -> set[str]:
     """Extract field_names from assertions targeting a handle or object_id."""
     result = set()
     for a in plan.assertions:
-        if handle is not None and a.handle == handle:
-            result.add(a.field_name)
-        elif object_id is not None and a.object_id == object_id:
+        if (handle is not None and a.handle == handle) or (
+            object_id is not None and a.object_id == object_id
+        ):
             result.add(a.field_name)
     return result
 

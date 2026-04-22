@@ -22,7 +22,7 @@ from apps.core.models import (
 )
 from apps.core.validators import validate_no_mojibake
 
-__all__ = ["Person", "PersonAlias", "Credit"]
+__all__ = ["Credit", "Person", "PersonAlias"]
 
 YEAR_MIN, YEAR_MAX = 1800, 2100
 MONTH_MIN, MONTH_MAX = 1, 12

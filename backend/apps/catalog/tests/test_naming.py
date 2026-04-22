@@ -25,6 +25,6 @@ with _FIXTURE.open() as f:
     _CASES: list[tuple[str, str]] = [tuple(c) for c in json.load(f)["cases"]]
 
 
-@pytest.mark.parametrize("raw,expected", _CASES)
+@pytest.mark.parametrize(("raw", "expected"), _CASES)
 def test_normalize_catalog_name(raw: str, expected: str) -> None:
     assert normalize_catalog_name(raw) == expected

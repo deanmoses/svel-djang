@@ -24,8 +24,8 @@ from ..models import (
     MachineModel,
     Title,
 )
-from ._dispatch import resolve_after_mutation as resolve_after_mutation  # noqa: F401
-from ._entities import (  # noqa: F401
+from ._dispatch import resolve_after_mutation as resolve_after_mutation
+from ._entities import (
     _resolve_bulk as _resolve_bulk,
 )
 from ._entities import (
@@ -48,7 +48,7 @@ from ._helpers import (
     resolve_unique_conflicts,
     validate_check_constraints,
 )
-from ._media import resolve_media_attachments as resolve_media_attachments  # noqa: F401
+from ._media import resolve_media_attachments as resolve_media_attachments
 from ._relationships import (  # noqa: F401
     resolve_all_aliases,
     resolve_all_corporate_entity_locations,
@@ -277,7 +277,7 @@ def resolve_machine_models(stdout=None) -> int:
         pm.updated_at = now
 
     # 8. Bulk write (~1 query, batched).
-    update_fields = list(claim_fields.values()) + ["extra_data", "updated_at"]
+    update_fields = [*claim_fields.values(), "extra_data", "updated_at"]
     # batch_size=100 is optimal for SQLite (CASE WHEN overhead grows with
     # batch size × field count). PostgreSQL uses a more efficient UPDATE FROM
     # VALUES syntax and handles larger batches fine.

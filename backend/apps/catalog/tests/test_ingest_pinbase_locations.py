@@ -18,7 +18,7 @@ from apps.provenance.models import Source
 PINBASE_SOURCE_SLUG = "pinbase"
 
 
-@pytest.fixture()
+@pytest.fixture
 def pinbase_source(db):
     return Source.objects.create(
         slug=PINBASE_SOURCE_SLUG,

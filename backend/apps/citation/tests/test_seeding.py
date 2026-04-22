@@ -243,7 +243,7 @@ class TestSeedAmbiguousLookupFails:
 
         seed = [{"name": "Ambiguous", "source_type": "web"}]
 
-        with pytest.raises(Exception, match="[Mm]ultiple"):
+        with pytest.raises(Exception, match=r"[Mm]ultiple"):
             ensure_citation_sources(sources=seed)
 
 

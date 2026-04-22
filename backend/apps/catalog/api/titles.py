@@ -570,7 +570,7 @@ def _serialize_title_detail(title) -> dict:
     # For single-model titles with no variants, include full model detail inline.
     model_detail = None
     if len(machines) == 1 and not machines[0].get("variants"):
-        from .machine_models import (  # noqa: E402 — avoid circular at module level
+        from .machine_models import (
             _model_detail_qs,
             _serialize_model_detail,
         )
@@ -945,7 +945,7 @@ def patch_title_claims(request, slug: str, data: TitleClaimPatchSchema):
     # create endpoint uses. Without this, a user could rename one title to
     # collide with another and bypass the invariant the create flow
     # establishes.
-    if "name" in data.fields and data.fields["name"]:
+    if data.fields.get("name"):
         _assert_title_name_available(data.fields["name"], exclude_pk=title.pk)
 
     specs = (

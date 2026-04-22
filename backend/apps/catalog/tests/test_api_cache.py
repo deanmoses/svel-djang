@@ -94,7 +94,7 @@ class TestConditionalGet:
         assert resp["ETag"]
 
     @pytest.mark.parametrize(
-        "path,cache_key",
+        ("path", "cache_key"),
         [
             ("/api/models/all/", MODELS_ALL_KEY),
             ("/api/titles/all/", TITLES_ALL_KEY),
@@ -106,4 +106,5 @@ class TestConditionalGet:
         assert cached is not None
         json_bytes, etag = cached
         assert isinstance(json_bytes, bytes)
-        assert etag.startswith('"') and etag.endswith('"')
+        assert etag.startswith('"')
+        assert etag.endswith('"')

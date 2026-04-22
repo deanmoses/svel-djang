@@ -117,10 +117,10 @@ class Command(BaseCommand):
                 if (
                     os.path.exists(local_path)
                     and os.path.getsize(local_path) == expected_size
+                    and _sha256(local_path) == expected_sha
                 ):
-                    if _sha256(local_path) == expected_sha:
-                        up_to_date += 1
-                        continue
+                    up_to_date += 1
+                    continue
 
                 os.makedirs(os.path.dirname(local_path), exist_ok=True)
                 file_url = f"{manifest_base}/{rel_path}"

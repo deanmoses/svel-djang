@@ -36,6 +36,6 @@ EXPECTED_PREFIXES = {
 
 def test_all_routers_registered():
     registered = {prefix for prefix, _router in api._routers if prefix}
-    assert EXPECTED_PREFIXES <= registered, (
+    assert registered >= EXPECTED_PREFIXES, (
         f"Missing routers: {EXPECTED_PREFIXES - registered}"
     )

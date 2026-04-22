@@ -52,7 +52,7 @@ RANGE_FIELDS = [
 
 
 @pytest.mark.parametrize(
-    "model_class,field_name,mod,min_const,max_const",
+    ("model_class", "field_name", "mod", "min_const", "max_const"),
     RANGE_FIELDS,
     ids=[f"{m.__name__}.{f}" for m, f, *_ in RANGE_FIELDS],
 )

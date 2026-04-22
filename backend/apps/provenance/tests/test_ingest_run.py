@@ -87,12 +87,11 @@ class TestIngestRunModel:
             source=source,
             input_fingerprint="sha256:abc",
         )
-        with connection.cursor() as cursor:
-            with pytest.raises(IntegrityError):
-                cursor.execute(
-                    "UPDATE provenance_ingestrun SET status = %s WHERE id = %s",
-                    ["bogus", run.pk],
-                )
+        with connection.cursor() as cursor, pytest.raises(IntegrityError):
+            cursor.execute(
+                "UPDATE provenance_ingestrun SET status = %s WHERE id = %s",
+                ["bogus", run.pk],
+            )
 
     def test_negative_count_rejected(self, source):
         """DB-level CHECK constraint rejects negative count values."""

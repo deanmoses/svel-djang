@@ -284,10 +284,12 @@ def extract_ipdb_reward_types(raw: str, reward_map: dict[str, str]) -> list[str]
     seen: set[str] = set()
     slugs: list[str] = []
     for term, slug in reward_map.items():
-        if re.search(r"\b" + re.escape(term) + r"\b", raw, re.IGNORECASE):
-            if slug not in seen:
-                seen.add(slug)
-                slugs.append(slug)
+        if (
+            re.search(r"\b" + re.escape(term) + r"\b", raw, re.IGNORECASE)
+            and slug not in seen
+        ):
+            seen.add(slug)
+            slugs.append(slug)
     return slugs
 
 

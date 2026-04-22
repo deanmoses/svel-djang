@@ -253,7 +253,7 @@ class MarkdownField(models.TextField):
     default_validators = [_validate_no_mojibake]
 
     def deconstruct(self):
-        name, path, args, kwargs = super().deconstruct()
+        name, _path, args, kwargs = super().deconstruct()
         return name, "django.db.models.TextField", args, kwargs
 
 

@@ -156,12 +156,11 @@ class TestClaimConstraints:
         from django.db import IntegrityError, connection
 
         claim = Claim.objects.assert_claim(mfr, "name", "Williams", source=source)
-        with connection.cursor() as cursor:
-            with pytest.raises(IntegrityError):
-                cursor.execute(
-                    "UPDATE provenance_claim SET claim_key = '' WHERE id = %s",
-                    [claim.pk],
-                )
+        with connection.cursor() as cursor, pytest.raises(IntegrityError):
+            cursor.execute(
+                "UPDATE provenance_claim SET claim_key = '' WHERE id = %s",
+                [claim.pk],
+            )
 
 
 @pytest.mark.django_db
