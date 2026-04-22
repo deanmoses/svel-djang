@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from django.core.management.base import CommandError
 from django.db import transaction
 
@@ -9,7 +11,7 @@ from apps.citation.seed_data import SEED_SOURCES as _SEED_SOURCES
 
 
 def ensure_citation_sources(
-    sources: list[dict] | None = None,
+    sources: list[dict[str, Any]] | None = None,
 ) -> dict[str, int]:
     """Seed citation sources. Returns {"created": N, "updated": N, "unchanged": N}.
 
@@ -46,8 +48,8 @@ _SOURCE_FIELDS = frozenset(
 
 
 def _seed_nodes(
-    nodes: list[dict],
-    parent,
+    nodes: list[dict[str, Any]],
+    parent: Any,
     counts: dict[str, int],
 ) -> None:
     from apps.citation.models import CitationSource, CitationSourceLink
