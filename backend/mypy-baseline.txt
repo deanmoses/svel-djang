@@ -103,7 +103,6 @@ apps/provenance/entity_resolution.py:0: error: Returning Any from function decla
 apps/provenance/entity_resolution.py:0: error: Function is missing a type annotation  [no-untyped-def]
 apps/provenance/entity_resolution.py:0: error: Missing type arguments for generic type "dict"  [type-arg]
 apps/provenance/entity_resolution.py:0: error: "type[Model]" has no attribute "objects"  [attr-defined]
-apps/provenance/apps.py:0: error: Missing type arguments for generic type "dict"  [type-arg]
 apps/core/markdown.py:0: error: Missing type arguments for generic type "Match"  [type-arg]
 apps/core/markdown.py:0: error: Function is missing a type annotation for one or more parameters  [no-untyped-def]
 apps/core/markdown.py:0: error: Incompatible types in assignment (expression has type "list[dict[str, Any]]", target has type "str")  [assignment]
@@ -203,7 +202,6 @@ apps/catalog/models/gameplay_feature.py:0: error: Call to untyped function "slug
 apps/catalog/models/gameplay_feature.py:0: error: Call to untyped function "status_valid" in typed context  [no-untyped-call]
 apps/catalog/models/gameplay_feature.py:0: error: Call to untyped function "field_not_blank" in typed context  [no-untyped-call]
 apps/catalog/models/gameplay_feature.py:0: error: Call to untyped function "field_not_blank" in typed context  [no-untyped-call]
-apps/accounts/signals.py:0: error: Function is missing a type annotation  [no-untyped-def]
 apps/citation/seeding.py:0: error: Missing type arguments for generic type "dict"  [type-arg]
 apps/citation/seeding.py:0: error: Function is missing a type annotation for one or more parameters  [no-untyped-def]
 apps/citation/seeding.py:0: error: Missing type arguments for generic type "dict"  [type-arg]
@@ -241,8 +239,6 @@ apps/catalog/resolve/_entities.py:0: error: Missing type arguments for generic t
 apps/catalog/resolve/_entities.py:0: error: Function is missing a type annotation  [no-untyped-def]
 apps/catalog/resolve/_entities.py:0: error: Call to untyped function "validate_check_constraints" in typed context  [no-untyped-call]
 apps/catalog/resolve/_entities.py:0: error: Function is missing a type annotation for one or more parameters  [no-untyped-def]
-apps/accounts/apps.py:0: error: Function is missing a return type annotation  [no-untyped-def]
-apps/accounts/apps.py:0: note: Use "-> None" if function does not return a value
 apps/provenance/rate_limits.py:0: error: Function is missing a type annotation for one or more parameters  [no-untyped-def]
 apps/provenance/rate_limits.py:0: error: Function is missing a type annotation for one or more parameters  [no-untyped-def]
 apps/citation/extraction.py:0: error: Missing type arguments for generic type "dict"  [type-arg]
@@ -380,10 +376,7 @@ apps/citation/url_extraction.py:0: error: Function is missing a return type anno
 apps/citation/url_extraction.py:0: error: Call to untyped function "_MetaParser" in typed context  [no-untyped-call]
 apps/citation/url_extraction.py:0: error: Returning Any from function declared to return "ExtractionResult"  [no-any-return]
 apps/citation/tests/test_extraction.py:0: error: Missing type arguments for generic type "dict"  [type-arg]
-apps/core/apps.py:0: error: Function is missing a return type annotation  [no-untyped-def]
-apps/core/apps.py:0: note: Use "-> None" if function does not return a value
 apps/core/apps.py:0: error: Skipping analyzing "constance.signals": module is installed, but missing library stubs or py.typed marker  [import-untyped]
-apps/core/apps.py:0: error: Function is missing a type annotation  [no-untyped-def]
 apps/catalog/signals.py:0: error: Function is missing a type annotation  [no-untyped-def]
 apps/catalog/signals.py:0: error: Function is missing a return type annotation  [no-untyped-def]
 apps/catalog/signals.py:0: note: Use "-> None" if function does not return a value
