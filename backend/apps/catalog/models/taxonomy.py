@@ -72,6 +72,7 @@ class TechnologySubgeneration(
 
     entity_type = "technology-subgeneration"
     entity_type_plural = "technology-subgenerations"
+    technology_generation_id: int
 
     name = models.CharField(
         max_length=200, unique=True, validators=[validate_no_mojibake]
@@ -127,6 +128,7 @@ class DisplaySubtype(CatalogModel, EntityStatusMixin, SluggedModel, TimeStampedM
 
     entity_type = "display-subtype"
     entity_type_plural = "display-subtypes"
+    display_type_id: int
 
     name = models.CharField(
         max_length=200, unique=True, validators=[validate_no_mojibake]

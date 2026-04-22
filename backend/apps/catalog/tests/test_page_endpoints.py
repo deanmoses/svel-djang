@@ -1,5 +1,7 @@
 """Tests for /api/pages/ endpoints that have no migrated coverage from old detail GETs."""
 
+from typing import cast
+
 import pytest
 
 from apps.catalog.models import (
@@ -28,7 +30,8 @@ class TestSeriesPageEndpoint:
     def test_returns_series(self, client, db):
         title = Title.objects.create(name="Eight Ball Deluxe", slug="eight-ball-deluxe")
         s = Series.objects.create(name="Eight Ball", slug="eight-ball")
-        s.titles.add(title)
+        title.series_id = cast(int, s.pk)
+        title.save(update_fields=["series"])
         resp = client.get("/api/pages/series/eight-ball")
         assert resp.status_code == 200
         data = resp.json()
@@ -70,7 +73,8 @@ class TestFranchisePageEndpoint:
     def test_returns_franchise(self, client, db):
         f = Franchise.objects.create(name="Star Trek", slug="star-trek")
         title = Title.objects.create(name="Star Trek TNG", slug="star-trek-tng")
-        f.titles.add(title)
+        title.franchise_id = cast(int, f.pk)
+        title.save(update_fields=["franchise"])
         resp = client.get("/api/pages/franchise/star-trek")
         assert resp.status_code == 200
         data = resp.json()

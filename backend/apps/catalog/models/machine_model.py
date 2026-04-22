@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -21,6 +23,9 @@ from apps.core.models import (
 from apps.core.validators import validate_no_mojibake
 
 __all__ = ["MachineModel", "ModelAbbreviation"]
+
+if TYPE_CHECKING:
+    from .person import Credit
 
 # Range constants — referenced by both field validators and Meta.constraints.
 # Module-level so they're accessible inside class Meta (nested class scoping).
@@ -52,6 +57,10 @@ class MachineModel(
     entity_type = "model"
     entity_type_plural = "models"
     MEDIA_CATEGORIES = ["backglass", "playfield", "cabinet", "other"]
+    abbreviations: models.Manager[ModelAbbreviation]
+    credits: models.Manager[Credit]
+    title_id: int
+    technology_generation_id: int | None
 
     link_sort_order = 20
 

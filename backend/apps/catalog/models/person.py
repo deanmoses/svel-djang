@@ -41,6 +41,8 @@ class Person(
     entity_type = "person"
     entity_type_plural = "people"
     MEDIA_CATEGORIES = ["portrait", "other"]
+    aliases: models.Manager[PersonAlias]
+    credits: models.Manager[Credit]
 
     link_sort_order = 40
 
@@ -217,6 +219,11 @@ class PersonAlias(AliasBase):
 class Credit(TimeStampedModel):
     """Links a person to a machine model or series with a specific role."""
 
+    model_id: int | None
+    series_id: int | None
+    person_id: int
+    role_id: int
+
     model = models.ForeignKey(
         "MachineModel",
         on_delete=models.CASCADE,
@@ -265,5 +272,10 @@ class Credit(TimeStampedModel):
         ]
 
     def __str__(self) -> str:
-        target = self.model.name if self.model else self.series.name
+        if self.model is not None:
+            target = self.model.name
+        elif self.series is not None:
+            target = self.series.name
+        else:
+            target = "<unbound>"
         return f"{self.person.name} — {self.role.name} on {target}"

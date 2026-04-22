@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from django.db import models
 
@@ -29,11 +30,13 @@ def validate_check_constraints(obj):
     per constraint, which is O(n * constraints) in a bulk loop.
     """
     for constraint in obj._meta.constraints:
-        if (
-            isinstance(constraint, models.CheckConstraint)
-            and constraint.violation_error_code is not None
-        ):
-            constraint.validate(type(obj), obj)
+        if not isinstance(constraint, models.CheckConstraint):
+            continue
+
+        violation_error_code = getattr(constraint, "violation_error_code", None)
+        validate = getattr(constraint, "validate", None)
+        if violation_error_code is not None and callable(validate):
+            validate(type(obj), obj)
 
 
 @dataclass
@@ -74,6 +77,11 @@ def _resolve_fk_generic(
 
     field = model_class._meta.get_field(field_name)
     target_model = field.related_model
+    if target_model is None:
+        logger.warning(
+            "FK field %s on %s has no related model", field_name, model_class
+        )
+        return None
     fk_lookups_map = getattr(model_class, "claim_fk_lookups", {})
     lookup_key = fk_lookups_map.get(field_name, "slug")
 
@@ -99,6 +107,8 @@ def build_fk_info(
             info.fk_fields.add(attr)
             lookup_key = fk_lookups_map.get(attr, "slug")
             target_model = f.related_model
+            if target_model is None:
+                continue
             info.lookups[attr] = {
                 getattr(obj, lookup_key): obj for obj in target_model.objects.all()
             }
@@ -224,13 +234,14 @@ def get_preserve_fields(
     preserve: set[str] = set()
     for attr in direct_fields.values():
         field = model_class._meta.get_field(attr)
-        if field.unique or (field.many_to_one and not field.null):
+        is_unique = bool(getattr(field, "unique", False))
+        if is_unique or (field.many_to_one and not field.null):
             preserve.add(attr)
     return preserve
 
 
 def resolve_unique_conflicts(
-    all_objs,
+    all_objs: Sequence[models.Model],
     field_name: str,
     model_class: type[models.Model],
     pre_values: dict[int, Any] | None = None,
@@ -251,7 +262,7 @@ def resolve_unique_conflicts(
     inspection.
     """
     nullable = model_class._meta.get_field(field_name).null
-    seen: dict[Any, object] = {}
+    seen: dict[Any, models.Model] = {}
     for obj in all_objs:
         value = getattr(obj, field_name)
         if not value:
@@ -263,34 +274,45 @@ def resolve_unique_conflicts(
         owner = seen[value]
         if nullable:
             # Nullable: first encountered wins, loser clears to None.
+            obj_name = getattr(obj, "name", f"<{type(obj).__name__}>")
+            owner_name = getattr(owner, "name", f"<{type(owner).__name__}>")
             logger.warning(
                 "Cannot resolve %s=%r onto '%s' (pk=%s): already owned by '%s' (pk=%s)",
                 field_name,
                 value,
-                obj.name,
+                obj_name,
                 obj.pk,
-                owner.name,
+                owner_name,
                 owner.pk,
             )
             setattr(obj, field_name, None)
         else:
             # Non-nullable: preserver wins over changer.
-            owner_changed = getattr(owner, field_name) != pre_values[owner.pk]
-            obj_changed = value != pre_values[obj.pk]
+            if pre_values is None:
+                raise ValueError(
+                    "pre_values is required for non-nullable unique fields"
+                )
+
+            owner_changed = (
+                getattr(owner, field_name) != pre_values[cast(int, owner.pk)]
+            )
+            obj_changed = value != pre_values[cast(int, obj.pk)]
             if owner_changed and not obj_changed:
                 loser, winner = owner, obj
             else:
                 loser, winner = obj, owner
+            winner_name = getattr(winner, "name", f"<{type(winner).__name__}>")
+            loser_name = getattr(loser, "name", f"<{type(loser).__name__}>")
             logger.warning(
                 "%s conflict %r: keeping on '%s' (pk=%s), "
                 "reverting '%s' (pk=%s) to previous value %r",
                 field_name,
                 getattr(winner, field_name),
-                winner.name,
+                winner_name,
                 winner.pk,
-                loser.name,
+                loser_name,
                 loser.pk,
-                pre_values[loser.pk],
+                pre_values[cast(int, loser.pk)],
             )
-            setattr(loser, field_name, pre_values[loser.pk])
+            setattr(loser, field_name, pre_values[cast(int, loser.pk)])
             seen[getattr(winner, field_name)] = winner

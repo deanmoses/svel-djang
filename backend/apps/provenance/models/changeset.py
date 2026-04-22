@@ -2,9 +2,14 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from django.conf import settings
 from django.db import models
 from django.db.models.functions import Now
+
+if TYPE_CHECKING:
+    from .claim import Claim
 
 
 class ChangeSetAction(models.TextChoices):
@@ -27,6 +32,11 @@ class ChangeSet(models.Model):
     ingest_run is set; same-actor consistency within those groups is
     enforced by assert_claim().
     """
+
+    claims: models.Manager[Claim]
+    retracted_claims: models.Manager[Claim]
+    user_id: int | None
+    ingest_run_id: int | None
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -91,8 +101,13 @@ class ChangeSet(models.Model):
         ]
 
     def __str__(self) -> str:
-        if self.user_id:
+        if self.user is not None:
             actor = self.user.username
         else:
-            actor = f"ingest:{self.ingest_run.source.name}"
+            ingest_run = self.ingest_run
+            actor = (
+                f"ingest:{ingest_run.source.name}"
+                if ingest_run is not None
+                else "ingest:unknown"
+            )
         return f"ChangeSet #{self.pk} by {actor}"

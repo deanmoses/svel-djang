@@ -306,6 +306,8 @@ def get_claim_fields(model_class: type[models.Model]) -> dict[str, str]:
     per_model_exempt = getattr(model_class, "claims_exempt", frozenset())
     fields: dict[str, str] = {}
     for f in model_class._meta.get_fields():
+        if not isinstance(f, models.Field):
+            continue
         if not getattr(f, "concrete", False):
             continue
         if f.primary_key:

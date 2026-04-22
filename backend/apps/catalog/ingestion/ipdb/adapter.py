@@ -210,7 +210,9 @@ def build_ipdb_plan(
 
     # ── Step 2: Reconcile MachineModels ──────────────────────────
     existing_by_ipdb: dict[int, MachineModel] = {
-        pm.ipdb_id: pm for pm in MachineModel.objects.filter(ipdb_id__isnull=False)
+        ipdb_id: pm
+        for pm in MachineModel.objects.filter(ipdb_id__isnull=False)
+        if (ipdb_id := pm.ipdb_id) is not None
     }
 
     match_results: list[MatchResult] = []
@@ -596,6 +598,10 @@ def _process_corporate_entity(
                 f"All manufacturers must pre-exist in pinbase."
             )
         mfr = resolver.get_by_slug(slug)
+        if mfr is None:
+            raise CommandError(
+                f"IPDB mfr {mfr_id}: resolved manufacturer slug {slug!r} does not exist."
+            )
 
         # Parse years_active.
         year_start = None
@@ -636,33 +642,37 @@ def _process_corporate_entity(
         )
 
         # Claims for all kwargs fields.
-        ce_target: dict = {"handle": handle}
+        ce_handle_target: dict = {"handle": handle}
         plan.assertions.append(
-            PlannedClaimAssert(field_name="name", value=company, **ce_target)
+            PlannedClaimAssert(field_name="name", value=company, **ce_handle_target)
         )
         plan.assertions.append(
-            PlannedClaimAssert(field_name="slug", value=ce_slug, **ce_target)
-        )
-        plan.assertions.append(
-            PlannedClaimAssert(field_name="manufacturer", value=slug, **ce_target)
+            PlannedClaimAssert(field_name="slug", value=ce_slug, **ce_handle_target)
         )
         plan.assertions.append(
             PlannedClaimAssert(
-                field_name="ipdb_manufacturer_id", value=mfr_id, **ce_target
+                field_name="manufacturer", value=slug, **ce_handle_target
             )
         )
         plan.assertions.append(
-            PlannedClaimAssert(field_name="status", value="active", **ce_target)
+            PlannedClaimAssert(
+                field_name="ipdb_manufacturer_id", value=mfr_id, **ce_handle_target
+            )
+        )
+        plan.assertions.append(
+            PlannedClaimAssert(field_name="status", value="active", **ce_handle_target)
         )
         if year_start is not None:
             plan.assertions.append(
                 PlannedClaimAssert(
-                    field_name="year_start", value=year_start, **ce_target
+                    field_name="year_start", value=year_start, **ce_handle_target
                 )
             )
         if year_end is not None:
             plan.assertions.append(
-                PlannedClaimAssert(field_name="year_end", value=year_end, **ce_target)
+                PlannedClaimAssert(
+                    field_name="year_end", value=year_end, **ce_handle_target
+                )
             )
 
         # Track in local lookups so subsequent records with the same

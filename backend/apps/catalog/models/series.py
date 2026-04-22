@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
@@ -19,6 +21,9 @@ from apps.core.validators import validate_no_mojibake
 
 __all__ = ["Franchise", "Series"]
 
+if TYPE_CHECKING:
+    from .title import Title
+
 
 class Franchise(CatalogModel, EntityStatusMixin, SluggedModel, TimeStampedModel):
     """An IP grouping that spans manufacturers and eras.
@@ -28,6 +33,7 @@ class Franchise(CatalogModel, EntityStatusMixin, SluggedModel, TimeStampedModel)
 
     entity_type = "franchise"
     entity_type_plural = "franchises"
+    titles: models.Manager[Title]
 
     name = models.CharField(
         max_length=200, validators=[validate_no_mojibake], unique=True
@@ -55,6 +61,7 @@ class Series(CatalogModel, EntityStatusMixin, SluggedModel, TimeStampedModel):
 
     entity_type = "series"
     entity_type_plural = "series"
+    titles: models.Manager[Title]
 
     name = models.CharField(
         max_length=200, validators=[validate_no_mojibake], unique=True

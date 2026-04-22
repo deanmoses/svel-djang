@@ -7,11 +7,12 @@ Nothing about storage paths is stored in the database.
 from __future__ import annotations
 
 import logging
+from typing import Any, cast
 from uuid import UUID
 
 from django.conf import settings
 from django.core.files.base import ContentFile
-from django.core.files.storage import storages
+from django.core.files.storage import default_storage
 
 from apps.media.constants import STORAGE_PREFIX
 from apps.media.models import MediaRendition
@@ -43,7 +44,7 @@ def build_public_url(storage_key: str) -> str:
 
 def get_media_storage():
     """Return the configured default storage backend."""
-    return storages["default"]
+    return default_storage
 
 
 def upload_to_storage(storage_key: str, data: bytes, content_type: str) -> None:
@@ -57,8 +58,9 @@ def upload_to_storage(storage_key: str, data: bytes, content_type: str) -> None:
     """
     storage = get_media_storage()
     file = ContentFile(data, name=storage_key)
-    file.content_type = content_type
-    actual_key = storage.save(storage_key, file)
+    content_file = cast(Any, file)
+    content_file.content_type = content_type
+    actual_key = storage.save(storage_key, content_file)
     if actual_key != storage_key:
         storage.delete(actual_key)
         msg = f"Storage key mismatch: expected {storage_key}, got {actual_key}"

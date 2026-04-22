@@ -1,6 +1,7 @@
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
@@ -224,7 +225,7 @@ DISPLAY_POLICY_CHOICES = (
     ("licensed-only", "✅ Show Only Licensed Content — no OPDB or IPDB images"),
 )
 
-CONSTANCE_CONFIG = {
+CONSTANCE_CONFIG: dict[str, Any] = {
     "CONTENT_DISPLAY_POLICY": (
         "licensed-only",
         "Controls which content is shown based on license status",

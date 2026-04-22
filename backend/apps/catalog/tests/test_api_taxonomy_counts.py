@@ -57,6 +57,12 @@ def _model(
     return mm
 
 
+def _assign_and_save(obj, **fields) -> None:
+    for field_name, value in fields.items():
+        setattr(obj, field_name, value)
+    obj.save(update_fields=list(fields))
+
+
 # ---------------------------------------------------------------------------
 # gameplay-features: hierarchy + rollup + dedup
 # ---------------------------------------------------------------------------
@@ -201,8 +207,7 @@ class TestFlatTaxonomyTitleCount:
         cab = Cabinet.objects.create(name="Floor", slug="floor", display_order=1)
         title = _title("Funhouse")
         m = _model(title, "Funhouse")
-        m.cabinet = cab
-        m.save(update_fields=["cabinet"])
+        _assign_and_save(m, cabinet=cab)
 
         rows = {r["slug"]: r for r in client.get("/api/cabinets/").json()}
         assert rows["floor"]["title_count"] == 1
@@ -211,17 +216,14 @@ class TestFlatTaxonomyTitleCount:
         cab = Cabinet.objects.create(name="Floor", slug="floor", display_order=1)
         title = _title("Funhouse")
         primary = _model(title, "Funhouse")
-        primary.cabinet = cab
-        primary.save(update_fields=["cabinet"])
+        _assign_and_save(primary, cabinet=cab)
         # Variant of primary, also tagged with cabinet — should not double-count.
         v = _model(title, "Funhouse Variant", variant_of=primary)
-        v.cabinet = cab
-        v.save(update_fields=["cabinet"])
+        _assign_and_save(v, cabinet=cab)
         # A deleted model on a different title — should not contribute.
         other = _title("Other Game")
         m = _model(other, "Other", status=EntityStatus.DELETED)
-        m.cabinet = cab
-        m.save(update_fields=["cabinet"])
+        _assign_and_save(m, cabinet=cab)
 
         rows = {r["slug"]: r for r in client.get("/api/cabinets/").json()}
         assert rows["floor"]["title_count"] == 1
@@ -333,9 +335,7 @@ class TestDisplayTypesNestedSubtypes:
         )
         title = _title("Wizard of Oz")
         mm = _model(title, "Wizard of Oz")
-        mm.display_type = lcd
-        mm.display_subtype = hd
-        mm.save(update_fields=["display_type", "display_subtype"])
+        _assign_and_save(mm, display_type=lcd, display_subtype=hd)
 
         body = client.get("/api/display-types/").json()
         row = next(r for r in body if r["slug"] == "lcd")
@@ -452,9 +452,11 @@ class TestTechnologyGenerationsNestedSubgenerations:
         )
         title = _title("Funhouse")
         mm = _model(title, "Funhouse")
-        mm.technology_generation = ss
-        mm.technology_subgeneration = mpu
-        mm.save(update_fields=["technology_generation", "technology_subgeneration"])
+        _assign_and_save(
+            mm,
+            technology_generation=ss,
+            technology_subgeneration=mpu,
+        )
 
         body = client.get("/api/technology-generations/").json()
         row = next(r for r in body if r["slug"] == "solid-state")
@@ -487,8 +489,7 @@ class TestTechnologyGenerationsNestedSubgenerations:
         title = _title("Funhouse")
         mm = _model(title, "Funhouse")
         # Direct FK deliberately left unset — subgen is inherited via system.
-        mm.system = system
-        mm.save(update_fields=["system"])
+        _assign_and_save(mm, system=system)
 
         body = client.get("/api/technology-generations/").json()
         row = next(r for r in body if r["slug"] == "solid-state")

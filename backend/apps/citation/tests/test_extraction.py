@@ -1,6 +1,7 @@
 """Tests for the extraction module (ISBN classification + Open Library fetch)."""
 
 import json
+from email.message import Message
 from http.client import HTTPResponse
 from io import BytesIO
 from unittest.mock import MagicMock, patch
@@ -18,6 +19,15 @@ from apps.citation.extraction import (
 from apps.citation.models import CitationSource
 
 pytestmark = pytest.mark.django_db
+
+
+def _draft(result: ExtractionResult) -> ExtractionDraft:
+    assert result.draft is not None
+    return result.draft
+
+
+def _headers() -> Message:
+    return Message()
 
 
 # ---------------------------------------------------------------------------
@@ -79,7 +89,9 @@ class TestClassifyInput:
     def test_classify_isbn_wins_over_url(self):
         # ISBNs are digits only, so they can't start with http — but verify
         # the priority: ISBN check runs first.
-        assert classify_input("9780596517748")[0] == "isbn"
+        result = classify_input("9780596517748")
+        assert result is not None
+        assert result[0] == "isbn"
 
 
 class TestNormalizeIsbn:
@@ -177,8 +189,9 @@ class TestExtractIsbnHappyPaths:
         )
         mock_cache.get.return_value = cached_result
         result = extract_isbn("9780596517748")
-        assert result.draft.name == "Learning Python"
-        assert result.draft.author == "Mark Lutz"
+        draft = _draft(result)
+        assert draft.name == "Learning Python"
+        assert draft.author == "Mark Lutz"
         mock_cache.get.assert_called_once_with("extract:v2:isbn:9780596517748")
 
     @patch("apps.citation.extraction.cache")
@@ -191,13 +204,13 @@ class TestExtractIsbnHappyPaths:
             _make_urlopen_response(AUTHOR_DATA),
         ]
         result = extract_isbn("9780596517748")
-        assert result.draft is not None
-        assert result.draft.name == "Learning Python"
-        assert result.draft.source_type == "book"
-        assert result.draft.author == "Mark Lutz"
-        assert result.draft.publisher == "O'Reilly Media"
-        assert result.draft.year == 2009
-        assert result.draft.isbn == "9780596517748"
+        draft = _draft(result)
+        assert draft.name == "Learning Python"
+        assert draft.source_type == "book"
+        assert draft.author == "Mark Lutz"
+        assert draft.publisher == "O'Reilly Media"
+        assert draft.year == 2009
+        assert draft.isbn == "9780596517748"
         assert result.confidence == "high"
         assert result.source_api == "openlibrary"
         assert result.error is None
@@ -249,7 +262,7 @@ class TestExtractIsbnPartialFailure:
             url="https://openlibrary.org/authors/OL34184A.json",
             code=404,
             msg="Not Found",
-            hdrs={},
+            hdrs=_headers(),
             fp=BytesIO(b""),
         )
         mock_urlopen.side_effect = [
@@ -298,7 +311,7 @@ class TestExtractIsbnTotalFailure:
             url="https://openlibrary.org/isbn/9780596517748.json",
             code=404,
             msg="Not Found",
-            hdrs={},
+            hdrs=_headers(),
             fp=BytesIO(b""),
         )
         mock_urlopen.side_effect = err

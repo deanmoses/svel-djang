@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -23,6 +25,9 @@ __all__ = ["Title", "TitleAbbreviation"]
 
 EXTERNAL_ID_MIN = 1
 
+if TYPE_CHECKING:
+    from .machine_model import MachineModel
+
 
 class Title(CatalogModel, EntityStatusMixin, SluggedModel, TimeStampedModel):
     """The canonical identity of a pinball game, independent of edition or variant.
@@ -36,6 +41,10 @@ class Title(CatalogModel, EntityStatusMixin, SluggedModel, TimeStampedModel):
     entity_type = "title"
     entity_type_plural = "titles"
     link_sort_order = 10
+    abbreviations: models.Manager[TitleAbbreviation]
+    franchise_id: int | None
+    machine_models: models.Manager[MachineModel]
+    series_id: int | None
 
     # A user-driven soft-delete of a Title cascades to its active MachineModels
     # (each gets a ``status=deleted`` claim in the same ChangeSet). The DB FK

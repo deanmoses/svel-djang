@@ -296,6 +296,8 @@ class Command(BaseCommand):
 
         machine_credited_persons: dict[int, list[Person]] = {}
         for dc in Credit.objects.select_related("person").all():
+            if dc.model_id is None:
+                continue
             machine_credited_persons.setdefault(dc.model_id, []).append(dc.person)
 
         person_ct_id = ContentType.objects.get_for_model(Person).pk

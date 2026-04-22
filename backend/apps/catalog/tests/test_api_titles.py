@@ -413,10 +413,10 @@ class TestTitlesAllFacets:
             name="Medieval Madness", slug="medieval-madness", opdb_id="G5pe4"
         )
         franchise = Franchise.objects.create(name="Castle Games", slug="castle-games")
-        title.franchise = franchise
+        title.franchise_id = franchise.pk
         title.save()
         series = Series.objects.create(name="Castle Series", slug="castle-series")
-        title.series = series
+        title.series_id = series.pk
         title.save()
 
         dmd = DisplayType.objects.create(name="DMD", slug="dmd")

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 from django.db.models import Count, F, Max, Prefetch, Q
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
@@ -16,8 +18,10 @@ from apps.core.models import active_status_q
 from apps.provenance.helpers import claims_prefetch
 from apps.provenance.rate_limits import CREATE_RATE_LIMIT_SPEC, check_and_record
 from apps.provenance.schemas import EditCitationInput, RichTextSchema
+from apps.provenance.typing import HasActiveClaims
 
 from ..models import MachineModel, Manufacturer, System
+from ._typing import HasModelCount
 from .edit_claims import (
     ClaimSpec,
     StructuredValidationError,
@@ -144,7 +148,7 @@ def _serialize_system_detail(system) -> dict:
         "name": system.name,
         "slug": system.slug,
         "description": _build_rich_text(
-            system, "description", getattr(system, "active_claims", [])
+            system, "description", cast(HasActiveClaims, system).active_claims
         ),
         "manufacturer": (
             {"name": system.manufacturer.name, "slug": system.manufacturer.slug}
@@ -196,7 +200,7 @@ def list_all_systems(request):
                 if s.manufacturer
                 else None
             ),
-            "model_count": s.model_count,
+            "model_count": cast(HasModelCount, s).model_count,
         }
         for s in qs
     ]

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 from django.core.cache import cache
 from django.db.models import Count, F, Prefetch, Q
 from django.views.decorators.cache import cache_control
@@ -20,6 +22,7 @@ from ..models import (
     MachineModel,
     Manufacturer,
 )
+from ._typing import HasModelCount
 from .helpers import _first_thumbnail
 
 # ---------------------------------------------------------------------------
@@ -193,7 +196,7 @@ def _get_manufacturers_for_pks(pks):
         {
             "name": mfr.name,
             "slug": mfr.slug,
-            "model_count": mfr.model_count,
+            "model_count": cast(HasModelCount, mfr).model_count,
             "thumbnail_url": _first_thumbnail(mfr.entities.all(), min_rank=min_rank),
         }
         for mfr in qs

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+from typing import cast
 
 from apps.provenance.models import Claim
 
@@ -861,7 +862,8 @@ def resolve_all_corporate_entity_locations(
 
     current: dict[int, dict[int, CorporateEntityLocation]] = defaultdict(dict)
     for cel in existing_qs:
-        current[cel.corporate_entity_id][cel.location_id] = cel
+        location_id = cast(int, cel.location_id)
+        current[cel.corporate_entity_id][location_id] = cel
 
     # Create missing rows.
     for ce_pk, loc_pks in desired.items():

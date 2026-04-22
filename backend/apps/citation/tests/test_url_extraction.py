@@ -12,6 +12,11 @@ from apps.citation.url_extraction import PageMeta, extract_url, parse_page_meta
 pytestmark = pytest.mark.django_db
 
 
+def _draft_name(result):
+    assert result.draft is not None
+    return result.draft
+
+
 # ---------------------------------------------------------------------------
 # _MetaParser — TDD (these define the parser's behavior)
 # ---------------------------------------------------------------------------
@@ -126,7 +131,7 @@ class TestEncoding:
             body=body,
         )
         result = extract_url("https://example.com/page")
-        assert result.draft.name == "Gewürzträger"
+        assert _draft_name(result).name == "Gewürzträger"
 
     @patch("apps.citation.url_extraction.safe_fetch")
     @patch("apps.citation.url_extraction.recognize_url", return_value=None)
@@ -141,7 +146,7 @@ class TestEncoding:
             body=body,
         )
         result = extract_url("https://example.com/page")
-        assert result.draft.name == "Ünïcödé"
+        assert _draft_name(result).name == "Ünïcödé"
 
     @patch("apps.citation.url_extraction.safe_fetch")
     @patch("apps.citation.url_extraction.recognize_url", return_value=None)
@@ -157,7 +162,7 @@ class TestEncoding:
             body=body,
         )
         result = extract_url("https://example.com/page")
-        assert result.draft.name == "Café"
+        assert _draft_name(result).name == "Café"
 
     @patch("apps.citation.url_extraction.safe_fetch")
     @patch("apps.citation.url_extraction.recognize_url", return_value=None)
@@ -172,7 +177,7 @@ class TestEncoding:
             body=body,
         )
         result = extract_url("https://example.com/page")
-        assert result.draft.name == "Hello"
+        assert _draft_name(result).name == "Hello"
 
 
 # ---------------------------------------------------------------------------
@@ -311,7 +316,7 @@ class TestExtractUrlCache:
         )
         mock_cache.get.return_value = cached
         result = extract_url("https://example.com")
-        assert result.draft.name == "Cached"
+        assert _draft_name(result).name == "Cached"
         mock_cache.get.assert_called_once_with("extract:v1:url:https://example.com")
 
     @patch("apps.citation.url_extraction.safe_fetch")
@@ -350,10 +355,11 @@ class TestExtractUrlSuccess:
             </head><body></body></html>""",
         )
         result = extract_url("https://en.wikipedia.org/wiki/Pinball")
-        assert result.draft.name == "Pinball History"
-        assert result.draft.publisher == "Wikipedia"
-        assert result.draft.source_type == "web"
-        assert result.draft.url == "https://en.wikipedia.org/wiki/Pinball"
+        draft = _draft_name(result)
+        assert draft.name == "Pinball History"
+        assert draft.publisher == "Wikipedia"
+        assert draft.source_type == "web"
+        assert draft.url == "https://en.wikipedia.org/wiki/Pinball"
         assert result.confidence == "low"
         assert result.source_api == "og_meta"
 
@@ -368,8 +374,9 @@ class TestExtractUrlSuccess:
             body=b"<html><head><title>Just Title</title></head></html>",
         )
         result = extract_url("https://example.com/page")
-        assert result.draft.name == "Just Title"
-        assert result.draft.publisher == ""
+        draft = _draft_name(result)
+        assert draft.name == "Just Title"
+        assert draft.publisher == ""
 
     @patch("apps.citation.url_extraction.safe_fetch")
     @patch("apps.citation.url_extraction.recognize_url", return_value=None)
@@ -382,7 +389,7 @@ class TestExtractUrlSuccess:
             body=b"<html><head></head><body></body></html>",
         )
         result = extract_url("https://example.com/bare")
-        assert result.draft.name == "https://example.com/bare"
+        assert _draft_name(result).name == "https://example.com/bare"
 
     @patch("apps.citation.url_extraction.safe_fetch")
     @patch("apps.citation.url_extraction.recognize_url", return_value=None)
@@ -396,5 +403,6 @@ class TestExtractUrlSuccess:
         )
         result = extract_url("https://example.com/doc.pdf")
         # Non-HTML: falls back to URL as name
-        assert result.draft.name == "https://example.com/doc.pdf"
-        assert result.draft.source_type == "web"
+        draft = _draft_name(result)
+        assert draft.name == "https://example.com/doc.pdf"
+        assert draft.source_type == "web"

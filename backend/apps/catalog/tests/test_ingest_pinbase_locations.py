@@ -12,7 +12,7 @@ import json
 import pytest
 from django.core.management import call_command
 
-from apps.catalog.models import Location
+from apps.catalog.models import Location, LocationAlias
 from apps.provenance.models import Source
 
 PINBASE_SOURCE_SLUG = "pinbase"
@@ -142,14 +142,18 @@ class TestIngestLocationsAliases:
     def test_aliases_created(self, db, pinbase_source, tmp_path):
         _run_ingest(tmp_path, SAMPLE_LOCATIONS)
         usa = Location.objects.get(location_path="usa")
-        alias_values = set(usa.aliases.values_list("value", flat=True))
+        alias_values = set(
+            LocationAlias.objects.filter(location=usa).values_list("value", flat=True)
+        )
         # _resolve_aliases stores lowercase alias_value but original-case display
         assert any("united states" in v.lower() for v in alias_values)
 
     def test_city_alias_created(self, db, pinbase_source, tmp_path):
         _run_ingest(tmp_path, SAMPLE_LOCATIONS)
         chicago = Location.objects.get(location_path="usa/il/chicago")
-        alias_values = {a.value.lower() for a in chicago.aliases.all()}
+        alias_values = {
+            a.value.lower() for a in LocationAlias.objects.filter(location=chicago)
+        }
         assert "chi-town" in alias_values
 
 

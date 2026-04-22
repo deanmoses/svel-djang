@@ -5,6 +5,7 @@ API serializers to produce ``{field}_html`` output for markdown fields.
 """
 
 import re
+from typing import Any
 
 import nh3
 from django.utils.safestring import mark_safe
@@ -129,7 +130,9 @@ def fenced_code_ranges(content: str) -> list[tuple[int, int]]:
     ]
 
 
-def render_markdown_html(text: str, metadata_out: list[dict] | None = None) -> str:
+def render_markdown_html(
+    text: str | None, metadata_out: list[dict[str, Any]] | None = None
+) -> str:
     """Convert markdown text to sanitized HTML.
 
     Full pipeline: wiki links -> markdown (with linkify) -> nh3 -> checkboxes.
@@ -156,7 +159,7 @@ def render_markdown_html(text: str, metadata_out: list[dict] | None = None) -> s
     return mark_safe(_convert_task_list_items(safe_html))  # noqa: S308 — HTML sanitized by nh3
 
 
-def render_markdown_fields(obj) -> dict[str, str | list[dict]]:
+def render_markdown_fields(obj) -> dict[str, str | list[dict[str, Any]]]:
     """Return ``{field}_html`` rendered values for all MarkdownField instances on *obj*.
 
     Designed for use with ``**`` spread in API serialization dicts::
@@ -171,7 +174,7 @@ def render_markdown_fields(obj) -> dict[str, str | list[dict]]:
 
     result = {}
     for field in get_markdown_fields(type(obj)):
-        citations: list[dict] = []
+        citations: list[dict[str, Any]] = []
         result[f"{field}_html"] = render_markdown_html(
             getattr(obj, field, ""), metadata_out=citations
         )

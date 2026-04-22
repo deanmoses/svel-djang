@@ -178,9 +178,12 @@ def check_variant_chains(result: ValidationResult) -> None:
     if count:
         result.warn(f"{count} model(s) form variant_of chains (more than 1 hop)")
         for pm in chains[:10]:
+            parent = pm.variant_of
+            assert parent is not None
+            grandparent = parent.variant_of
+            assert grandparent is not None
             result.warn(
-                f"  {pm.name!r} (pk={pm.pk}) → {pm.variant_of.slug!r}"
-                f" → {pm.variant_of.variant_of.slug!r}"
+                f"  {pm.name!r} (pk={pm.pk}) → {parent.slug!r} → {grandparent.slug!r}"
             )
         if count > 10:
             result.warn(f"  ... and {count - 10} more")
@@ -289,6 +292,8 @@ def check_unresolved_fk_claims(result: ValidationResult) -> None:
             continue
 
         target_model = field.related_model
+        if target_model is None:
+            continue
         lookup_key = fk_lookups_map.get(field_name, "slug")
 
         # Get winning claim values for this field (one per object+claim_key).

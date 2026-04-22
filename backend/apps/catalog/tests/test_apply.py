@@ -661,7 +661,7 @@ def test_handle_refs_resolves_fk(test_source):
 
     mfr = Manufacturer.objects.get(slug="williams")
     ce = CorporateEntity.objects.get(slug="williams-electronics")
-    assert ce.manufacturer_id == mfr.pk
+    assert ce.manufacturer == mfr
 
 
 # ── Test 17: handle_refs forward reference raises ────────────────

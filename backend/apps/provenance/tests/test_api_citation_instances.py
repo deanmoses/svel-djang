@@ -66,6 +66,7 @@ class TestListCitationInstances:
         mfr = Manufacturer.objects.create(name="Williams", slug="williams")
         Claim.objects.assert_claim(mfr, "name", "Williams", source=src)
         claim = Claim.objects.filter(is_active=True).first()
+        assert claim is not None
 
         ci = CitationInstance.objects.create(
             citation_source=citation_source, claim=claim, locator="p. 42"
@@ -167,9 +168,9 @@ class TestBatchCitationInstances:
         CitationInstance.objects.create(
             citation_source=citation_source, locator="front"
         )
-        resp = client.get(
-            f"/api/citation-instances/batch/?ids={CitationInstance.objects.first().pk}"
-        )
+        instance = CitationInstance.objects.first()
+        assert instance is not None
+        resp = client.get(f"/api/citation-instances/batch/?ids={instance.pk}")
         data = resp.json()[0]
         assert set(data.keys()) == {
             "id",

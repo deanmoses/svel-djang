@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
@@ -12,6 +14,7 @@ from ninja.security import django_auth
 from apps.media.schemas import UploadedMediaSchema
 from apps.provenance.helpers import claims_prefetch
 from apps.provenance.schemas import RichTextSchema
+from apps.provenance.typing import HasActiveClaims
 
 from ..models import GameplayFeature
 from ._counts import bulk_title_counts_via_models
@@ -76,7 +79,7 @@ def _serialize_detail(feature) -> dict:
         "name": feature.name,
         "slug": feature.slug,
         "description": _build_rich_text(
-            feature, "description", getattr(feature, "active_claims", [])
+            feature, "description", cast(HasActiveClaims, feature).active_claims
         ),
         "aliases": [a.value for a in feature.aliases.all()],
         "parents": [{"name": p.name, "slug": p.slug} for p in feature.parents.all()],

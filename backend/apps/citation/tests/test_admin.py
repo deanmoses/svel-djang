@@ -29,7 +29,11 @@ LinkFormSetUpdate = inlineformset_factory(
 
 @pytest.fixture
 def admin_user(db):
-    return User.objects.create_superuser(username="admin", email="admin@test.com")
+    return User.objects.create_superuser(
+        username="admin",
+        email="admin@test.com",
+        password="password",  # pragma: allowlist secret
+    )
 
 
 @pytest.fixture

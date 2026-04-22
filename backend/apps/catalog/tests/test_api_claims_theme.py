@@ -74,6 +74,7 @@ class TestPatchThemeClaims:
         )
         assert ChangeSet.objects.count() == 1
         cs = ChangeSet.objects.first()
+        assert cs is not None
         assert cs.note == "Test note"
         assert cs.claims.count() == 1
 

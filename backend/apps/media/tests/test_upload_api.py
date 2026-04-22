@@ -26,6 +26,12 @@ UPLOAD_URL = "/api/media/upload/"
 pytestmark = pytest.mark.django_db
 
 
+def _only_asset() -> MediaAsset:
+    asset = MediaAsset.objects.first()
+    assert asset is not None
+    return asset
+
+
 def _create_test_image(
     width: int = 100,
     height: int = 100,
@@ -123,7 +129,7 @@ class TestUploadHappyPath:
         assert MediaAsset.objects.count() == 1
         assert MediaRendition.objects.count() == 3
 
-        asset = MediaAsset.objects.first()
+        asset = _only_asset()
         types = set(asset.renditions.values_list("rendition_type", flat=True))
         assert types == {"original", "thumb", "display"}
 
@@ -132,7 +138,7 @@ class TestUploadHappyPath:
         resp = _post_upload(client, machine_model, file=file)
         assert resp.status_code == 200
 
-        asset = MediaAsset.objects.first()
+        asset = _only_asset()
         original_rendition = asset.renditions.get(rendition_type="original")
         # PNG with alpha stays PNG
         assert original_rendition.mime_type == "image/png"
@@ -157,7 +163,7 @@ class TestUploadHappyPath:
         resp = _post_upload(client, machine_model, file=file)
         assert resp.status_code == 200
 
-        asset = MediaAsset.objects.first()
+        asset = _only_asset()
         original_rendition = asset.renditions.get(rendition_type="original")
         # BMP converted to JPEG
         assert original_rendition.mime_type == "image/jpeg"
@@ -217,7 +223,7 @@ class TestUploadHappyPath:
             field_name="media_attachment",
             is_active=True,
         )
-        assert claim.value["media_asset"] == em.asset_id
+        assert claim.value["media_asset"] == em.asset.pk
         assert claim.user is not None
 
 
@@ -340,7 +346,7 @@ class TestUploadRateLimit:
     def test_rate_limit_exceeded(self, client, machine_model, user):
         from django.core.cache import cache
 
-        cache.set(f"media_upload_count:{user.id}", 60, 3600)
+        cache.set(f"media_upload_count:{user.pk}", 60, 3600)
 
         resp = _post_upload(client, machine_model)
         assert resp.status_code == 429
@@ -353,7 +359,7 @@ class TestUploadRateLimit:
         user1 = User.objects.create_user("user1")
         user2 = User.objects.create_user("user2")
 
-        cache.set(f"media_upload_count:{user1.id}", 60, 3600)
+        cache.set(f"media_upload_count:{user1.pk}", 60, 3600)
 
         c2 = Client()
         c2.force_login(user2)

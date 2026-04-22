@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import logging
 from collections import defaultdict
+from datetime import datetime
+from typing import cast
 
 from django.contrib.contenttypes.models import ContentType
 
 from apps.core.models import MediaSupported
 from apps.media.models import EntityMedia, MediaAsset
 from apps.provenance.models import Claim
+from apps.provenance.typing import HasEffectivePriority
 
 from ._helpers import _annotate_priority
 
@@ -66,7 +69,11 @@ def resolve_media_attachments(
             is_supported = model_class is not None and issubclass(
                 model_class, MediaSupported
             )
-            categories = model_class.MEDIA_CATEGORIES if is_supported else []
+            categories = (
+                cast(list[str], getattr(model_class, "MEDIA_CATEGORIES", []))
+                if is_supported
+                else []
+            )
             _ct_cache[ct_id] = (model_class, is_supported, categories)
         return _ct_cache[ct_id]
 
@@ -75,10 +82,10 @@ def resolve_media_attachments(
     desired_by_entity: dict[tuple[int, int], dict[int, tuple[str | None, bool]]] = {}
     # For primary enforcement: {(ct_id, obj_id, category): [(asset_pk, priority, created_at)]}
     primary_candidates: dict[
-        tuple[int, int, str | None], list[tuple[int, int, object]]
+        tuple[int, int, str | None], list[tuple[int, int, datetime]]
     ] = defaultdict(list)
     # For auto-promotion: all attachments per (entity, category) with timestamps
-    all_attachments: dict[tuple[int, int, str | None], list[tuple[int, object]]] = (
+    all_attachments: dict[tuple[int, int, str | None], list[tuple[int, datetime]]] = (
         defaultdict(list)
     )
 
@@ -132,8 +139,9 @@ def resolve_media_attachments(
                 (asset_pk, claim.created_at)
             )
             if is_primary:
+                effective_priority = cast(HasEffectivePriority, claim)
                 primary_candidates[(ct_id, obj_id, category)].append(
-                    (asset_pk, claim.effective_priority, claim.created_at)
+                    (asset_pk, effective_priority.effective_priority, claim.created_at)
                 )
 
         desired_by_entity[entity_key] = desired
@@ -147,9 +155,9 @@ def resolve_media_attachments(
             continue
         ct_id, obj_id, category = group_key
         entity_key = (ct_id, obj_id)
-        desired = desired_by_entity.get(entity_key)
-        if desired is None:
+        if entity_key not in desired_by_entity:
             continue
+        desired = desired_by_entity[entity_key]
 
         # Sort: highest priority first, then most recent
         candidates.sort(key=lambda c: (c[1], c[2]), reverse=True)
@@ -167,9 +175,9 @@ def resolve_media_attachments(
     for group_key, attachments in all_attachments.items():
         ct_id, obj_id, category = group_key
         entity_key = (ct_id, obj_id)
-        desired = desired_by_entity.get(entity_key)
-        if desired is None:
+        if entity_key not in desired_by_entity:
             continue
+        desired = desired_by_entity[entity_key]
 
         has_primary = any(
             primary for asset_pk, (cat, primary) in desired.items() if cat == category

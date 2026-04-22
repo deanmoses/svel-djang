@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from typing import cast
 
 from django.db.models import Count, F, Max, Min, Prefetch, Q
 from django.shortcuts import get_object_or_404
@@ -29,6 +30,7 @@ from ..models import (
     ManufacturerAlias,
     System,
 )
+from ._typing import HasModelCount, HasYearRange
 from .constants import DEFAULT_PAGE_SIZE
 from .edit_claims import execute_claims, plan_scalar_field_claims
 from .entity_crud import register_entity_create, register_entity_delete_restore
@@ -47,10 +49,6 @@ from .schemas import (
     RelatedTitleSchema,
 )
 from .titles import _dedup_facet_refs
-
-# ---------------------------------------------------------------------------
-# Schemas
-# ---------------------------------------------------------------------------
 
 
 class ManufacturerGridSchema(Schema):
@@ -302,14 +300,14 @@ def list_all_manufacturers(request):
         if mfr_id not in mfr_thumb_model:
             mfr_thumb_model[mfr_id] = model_id
     thumb_models = {
-        m.id: m
+        cast(int, m.pk): m
         for m in MachineModel.objects.filter(id__in=mfr_thumb_model.values()).only(
             "id", "extra_data"
         )
     }
 
     # --- Bulk search text + facet data per manufacturer ---
-    mfr_ids = {m.id for m in manufacturers}
+    mfr_ids = {cast(int, m.pk) for m in manufacturers}
 
     # Entity names per manufacturer
     mfr_entity_names: dict[int, list[str]] = defaultdict(list)
@@ -419,19 +417,23 @@ def list_all_manufacturers(request):
     # --- Assembly ---
     result = []
     for mfr in manufacturers:
+        mfr_id = cast(int, mfr.pk)
+        model_count = cast(HasModelCount, mfr).model_count
+        year_min = cast(HasYearRange, mfr).year_min
+        year_max = cast(HasYearRange, mfr).year_max
         search_parts: list[str] = []
-        search_parts.extend(mfr_brand_alias_names.get(mfr.id, []))
-        search_parts.extend(mfr_entity_names.get(mfr.id, []))
-        search_parts.extend(mfr_ce_alias_names.get(mfr.id, []))
-        search_parts.extend(mfr_location_names.get(mfr.id, []))
+        search_parts.extend(mfr_brand_alias_names.get(mfr_id, []))
+        search_parts.extend(mfr_entity_names.get(mfr_id, []))
+        search_parts.extend(mfr_ce_alias_names.get(mfr_id, []))
+        search_parts.extend(mfr_location_names.get(mfr_id, []))
 
         thumb = None
-        tm_id = mfr_thumb_model.get(mfr.id)
+        tm_id = mfr_thumb_model.get(mfr_id)
         tm = thumb_models.get(tm_id) if tm_id else None
         if tm and tm.extra_data:
             thumb, _ = _extract_image_urls(tm.extra_data, min_rank=min_rank)
 
-        loc_refs_map = mfr_location_refs.get(mfr.id, {})
+        loc_refs_map = mfr_location_refs.get(mfr_id, {})
         locations = [
             {"slug": path, "name": name} for path, name in loc_refs_map.items()
         ]
@@ -440,14 +442,14 @@ def list_all_manufacturers(request):
             {
                 "name": mfr.name,
                 "slug": mfr.slug,
-                "model_count": mfr.model_count,
+                "model_count": model_count,
                 "thumbnail_url": thumb,
                 "search_text": (" | ".join(search_parts) if search_parts else None),
                 "locations": locations,
-                "year_min": mfr.year_min,
-                "year_max": mfr.year_max,
-                "persons": _dedup_facet_refs(mfr_persons.get(mfr.id, [])),
-                "tech_generations": _dedup_facet_refs(mfr_tech_gens.get(mfr.id, [])),
+                "year_min": year_min,
+                "year_max": year_max,
+                "persons": _dedup_facet_refs(mfr_persons.get(mfr_id, [])),
+                "tech_generations": _dedup_facet_refs(mfr_tech_gens.get(mfr_id, [])),
             }
         )
     return set_cached_response(MANUFACTURERS_ALL_KEY, result)

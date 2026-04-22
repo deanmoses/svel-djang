@@ -118,7 +118,7 @@ def _list_taxonomy_with_counts(
 
 
 def _taxonomy_detail_qs(model_class):
-    prefetches = [claims_prefetch()]
+    prefetches: list[object] = [claims_prefetch()]
     if hasattr(model_class, "aliases"):
         prefetches.append("aliases")
     return model_class.objects.active().prefetch_related(*prefetches)
@@ -509,7 +509,7 @@ def _credit_role_people(cr: CreditRole) -> list[dict]:
         if person_id not in person_thumb_model:
             person_thumb_model[person_id] = model_id
     thumb_models = {
-        m.id: m
+        m.pk: m
         for m in MachineModel.objects.filter(
             id__in=set(person_thumb_model.values())
         ).only("id", "extra_data")

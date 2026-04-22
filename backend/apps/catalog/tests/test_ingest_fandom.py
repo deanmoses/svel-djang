@@ -500,18 +500,22 @@ class TestParseCompanyTemplate:
 
     def test_year_start(self):
         result = _parse_company_template(self.WILLIAMS_WIKITEXT)
+        assert result is not None
         assert result["year_start"] == 1943
 
     def test_year_end(self):
         result = _parse_company_template(self.WILLIAMS_WIKITEXT)
+        assert result is not None
         assert result["year_end"] == 1999
 
     def test_headquarters(self):
         result = _parse_company_template(self.WILLIAMS_WIKITEXT)
+        assert result is not None
         assert result["headquarters"] == "Chicago, Illinois"
 
     def test_website_strips_external_link_markup(self):
         result = _parse_company_template(self.WILLIAMS_WIKITEXT)
+        assert result is not None
         assert result["website"] == "http://www.williams.com/"
 
     def test_no_company_template_returns_none(self):

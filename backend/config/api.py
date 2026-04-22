@@ -32,14 +32,16 @@ def stats(request):
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT
+                SELECT
                 (SELECT COUNT(*) FROM catalog_title),
                 (SELECT COUNT(*) FROM catalog_machinemodel),
                 (SELECT COUNT(*) FROM catalog_manufacturer),
                 (SELECT COUNT(*) FROM catalog_person)
             """
         )
-        titles, models, manufacturers, people = cursor.fetchone()
+        row = cursor.fetchone()
+        assert row is not None
+        titles, models, manufacturers, people = row
     return {
         "titles": titles,
         "models": models,

@@ -159,6 +159,7 @@ class TestSeedCreatesLinks:
         links = CitationSourceLink.objects.filter(citation_source=src)
         assert links.count() == 1
         link = links.first()
+        assert link is not None
         assert link.url == "https://example.com/"
         assert link.label == "Homepage"
         assert link.link_type == "homepage"

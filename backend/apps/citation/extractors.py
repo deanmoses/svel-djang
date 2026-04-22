@@ -141,10 +141,13 @@ def recognize_url(url: str) -> Recognition | None:
     )
     if child_link:
         child = child_link.citation_source
+        parent = child.parent
+        if parent is None:
+            return None
         return Recognition(
-            parent_id=child.parent_id,
-            parent_name=child.parent.name,
-            child_id=child.id,
+            parent_id=parent.pk,
+            parent_name=parent.name,
+            child_id=child.pk,
             child_name=child.name,
             child_skip_locator=child.skip_locator,
         )

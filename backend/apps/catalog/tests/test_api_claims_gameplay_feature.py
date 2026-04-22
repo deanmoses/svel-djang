@@ -11,6 +11,12 @@ from apps.provenance.models import ChangeSet
 User = get_user_model()
 
 
+def _only_changeset() -> ChangeSet:
+    cs = ChangeSet.objects.first()
+    assert cs is not None
+    return cs
+
+
 @pytest.fixture
 def user(db):
     return User.objects.create(username="editor")
@@ -142,7 +148,7 @@ class TestPatchGameplayFeatureChangeSet:
             {"fields": {"name": "Multiball Mania", "description": "Updated"}},
         )
         assert ChangeSet.objects.count() == 1
-        cs = ChangeSet.objects.first()
+        cs = _only_changeset()
         assert cs.user == user
         assert cs.claims.count() == 2
         assert set(cs.claims.values_list("field_name", flat=True)) == {
@@ -160,7 +166,7 @@ class TestPatchGameplayFeatureChangeSet:
                 "note": "Corrected from IPDB listing",
             },
         )
-        cs = ChangeSet.objects.first()
+        cs = _only_changeset()
         assert cs.note == "Corrected from IPDB listing"
 
     def test_changeset_note_in_sources_response(self, client, user, feature):
@@ -182,7 +188,7 @@ class TestPatchGameplayFeatureChangeSet:
     def test_changeset_note_defaults_to_empty(self, client, user, feature):
         client.force_login(user)
         _patch(client, feature.slug, {"fields": {"description": "Updated"}})
-        cs = ChangeSet.objects.first()
+        cs = _only_changeset()
         assert cs.note == ""
 
 
@@ -276,7 +282,7 @@ class TestPatchGameplayFeatureParents:
         assert [p["slug"] for p in data["parents"]] == ["scoring"]
         # All claims in one changeset.
         assert ChangeSet.objects.count() == 1
-        cs = ChangeSet.objects.first()
+        cs = _only_changeset()
         assert cs.claims.count() == 2  # description + parent
 
     def test_null_parents_leaves_parents_unchanged(

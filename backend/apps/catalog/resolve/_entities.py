@@ -85,7 +85,7 @@ def _resolve_single(
 
     # Apply winners.
     has_extra_data = hasattr(obj, "extra_data")
-    extra_data: dict = {} if has_extra_data else None
+    extra_data: dict | None = {} if has_extra_data else None
     for field_name, claim in winners.items():
         if field_name in direct_fields:
             attr = direct_fields[field_name]
@@ -103,6 +103,7 @@ def _resolve_single(
             else:
                 setattr(obj, attr, _coerce(model_class, attr, claim.value))
         elif has_extra_data:
+            assert extra_data is not None
             extra_data[field_name] = claim.value
     if has_extra_data:
         obj.extra_data = extra_data
@@ -199,7 +200,7 @@ def _resolve_bulk(
             setattr(obj, attr, default)
 
         # Apply winners.
-        extra_data: dict = {} if has_extra_data else None
+        extra_data: dict | None = {} if has_extra_data else None
         for field_name, claim in winners.items():
             if field_name in direct_fields:
                 attr = direct_fields[field_name]
@@ -217,6 +218,7 @@ def _resolve_bulk(
                 else:
                     setattr(obj, attr, _coerce(model_class, attr, claim.value))
             elif has_extra_data:
+                assert extra_data is not None
                 extra_data[field_name] = claim.value
         if has_extra_data:
             obj.extra_data = extra_data

@@ -114,7 +114,9 @@ def _try_ipdb_scrape(ipdb_id: int) -> list[str] | None:
     urls = []
 
     for img in soup.find_all("img"):
-        src = img.get("src", "")
+        src = img.get("src")
+        if not isinstance(src, str):
+            continue
         if f"/images/{ipdb_id}/" in src:
             full_url = urljoin("https://www.ipdb.org/", src)
             urls.append(full_url)

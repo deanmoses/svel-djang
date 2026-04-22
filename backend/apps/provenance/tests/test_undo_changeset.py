@@ -22,6 +22,11 @@ User = get_user_model()
 pytestmark = pytest.mark.django_db
 
 
+def _require_changeset(changeset: ChangeSet | None) -> ChangeSet:
+    assert changeset is not None
+    return changeset
+
+
 @pytest.fixture
 def author(db):
     return User.objects.create_user(username="author")
@@ -59,7 +64,7 @@ class TestEligibility:
         t = _title("g", bootstrap_source)
         cs, _ = execute_soft_delete(t, user=author)
         with pytest.raises(UndoError) as exc:
-            execute_undo_changeset(cs, user=other)
+            execute_undo_changeset(_require_changeset(cs), user=other)
         assert exc.value.status_code == 403
 
     def test_rejects_when_claims_already_superseded(self, author, bootstrap_source):
@@ -70,7 +75,7 @@ class TestEligibility:
 
         Claim.objects.assert_claim(t, "status", "active", user=author)
         with pytest.raises(UndoError):
-            execute_undo_changeset(cs, user=author)
+            execute_undo_changeset(_require_changeset(cs), user=author)
 
 
 class TestInverseBehavior:
@@ -90,7 +95,9 @@ class TestInverseBehavior:
         assert t.status == "deleted"
         assert m.status == "deleted"
 
-        revert_cs = execute_undo_changeset(delete_cs, user=author, note="oops")
+        revert_cs = execute_undo_changeset(
+            _require_changeset(delete_cs), user=author, note="oops"
+        )
         assert revert_cs.action == ChangeSetAction.REVERT
         assert revert_cs.note == "oops"
 
@@ -101,7 +108,7 @@ class TestInverseBehavior:
 
         # All delete-side claims are deactivated and point at the revert
         # changeset as their retractor.
-        for claim in delete_cs.claims.all():
+        for claim in _require_changeset(delete_cs).claims.all():
             assert claim.is_active is False
             assert claim.retracted_by_changeset_id == revert_cs.pk
 
@@ -114,7 +121,7 @@ class TestInverseBehavior:
         prior.refresh_from_db()
         assert prior.is_active is False
 
-        execute_undo_changeset(delete_cs, user=author)
+        execute_undo_changeset(_require_changeset(delete_cs), user=author)
         prior.refresh_from_db()
         assert prior.is_active is True
 

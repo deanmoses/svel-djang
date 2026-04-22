@@ -77,6 +77,7 @@ class TestCursorPaginate:
             Claim.objects.assert_claim(pm, "year", 1990 + i, user=user, changeset=cs)
 
         items1, cursor = cursor_paginate(ChangeSet.objects.all(), "", 3)
+        assert cursor is not None
         items2, cursor2 = cursor_paginate(ChangeSet.objects.all(), cursor, 3)
         assert len(items2) == 2
         assert cursor2 is None
@@ -97,6 +98,7 @@ class TestCursorPaginate:
 
         items, cursor = cursor_paginate(ChangeSet.objects.all(), "", 2)
         assert len(items) == 2
+        assert cursor is not None
         items2, _ = cursor_paginate(ChangeSet.objects.all(), cursor, 2)
         assert len(items2) == 1
         all_ids = [i.pk for i in items] + [i.pk for i in items2]

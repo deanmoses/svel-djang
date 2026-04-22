@@ -24,6 +24,11 @@ class CitationSource(TimeStampedModel):
     within magazine issue, edition within book).
     """
 
+    id: int
+    has_children: bool
+    links: models.Manager[CitationSourceLink]
+    parent_id: int | None
+
     class SourceType(models.TextChoices):
         BOOK = "book", "Book"
         MAGAZINE = "magazine", "Magazine"

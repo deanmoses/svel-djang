@@ -82,7 +82,7 @@ class TestCreateHappyPath:
 
         system = System.objects.get(slug="spike")
         assert system.status == "active"
-        assert system.manufacturer_id == mfr.pk
+        assert system.manufacturer == mfr
 
         cs = ChangeSet.objects.get(user=user, action=ChangeSetAction.CREATE)
         claim_fields = {

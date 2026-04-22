@@ -7,7 +7,7 @@ build a list of ClaimSpecs, then execute them atomically in a ChangeSet.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import NoReturn
+from typing import NoReturn, cast
 
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -154,7 +154,7 @@ def get_field_constraints(model_class) -> dict[str, dict]:
         entry: dict[str, float | int] = {}
         # Use _validators (explicitly declared) rather than .validators
         # (which includes DB-range validators like max=9223372036854775807).
-        for v in field._validators:
+        for v in cast(list[object], getattr(field, "_validators", [])):
             if isinstance(v, MinValueValidator):
                 entry["min"] = v.limit_value
             elif isinstance(v, MaxValueValidator):
@@ -696,19 +696,19 @@ def _normalize_abbreviations(values: list[str]) -> list[str]:
 
 
 def _write_claims_in_changeset(
-    entity,
+    entity: db_models.Model,
     specs: list[ClaimSpec],
     *,
     user,
     changeset: ChangeSet,
-) -> list:
+) -> list[Claim]:
     """Assert claims on *entity* inside an already-open *changeset*.
 
     Does not open a transaction, create a ChangeSet, attach citations, or
     resolve. The caller is responsible for all of that. Returns the list of
     newly-created active Claim rows so the caller can attach citations.
     """
-    created_claims = []
+    created_claims: list[Claim] = []
     for spec in specs:
         created_claims.append(
             Claim.objects.assert_claim(
@@ -724,7 +724,7 @@ def _write_claims_in_changeset(
 
 
 def _attach_citation(
-    claims: list,
+    claims: list[Claim],
     citation: EditCitationInput | None,
 ) -> None:
     """Link each claim in *claims* to a copy of the referenced citation instance."""
@@ -748,7 +748,7 @@ def _attach_citation(
 
 
 def execute_claims(
-    entity,
+    entity: db_models.Model,
     specs: list[ClaimSpec],
     *,
     user,
@@ -780,7 +780,7 @@ def execute_claims(
 
 
 def execute_multi_entity_claims(
-    entries: list[tuple[object, list[ClaimSpec]]],
+    entries: list[tuple[db_models.Model, list[ClaimSpec]]],
     *,
     user,
     action: ChangeSetAction,
@@ -805,8 +805,8 @@ def execute_multi_entity_claims(
     try:
         with transaction.atomic():
             cs = ChangeSet.objects.create(user=user, action=action, note=note)
-            all_created: list = []
-            per_entity_fields: list[tuple[object, list[str]]] = []
+            all_created: list[Claim] = []
+            per_entity_fields: list[tuple[db_models.Model, list[str]]] = []
             for entity, specs in entries:
                 if not specs:
                     continue

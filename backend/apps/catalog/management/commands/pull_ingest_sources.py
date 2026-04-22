@@ -23,6 +23,7 @@ import json
 import os
 import tempfile
 import urllib.request
+from urllib.error import HTTPError
 
 from django.core.management.base import BaseCommand
 
@@ -90,7 +91,7 @@ class Command(BaseCommand):
             try:
                 with _urlopen(manifest_url) as resp:
                     manifest = json.loads(resp.read())
-            except urllib.error.HTTPError as e:
+            except HTTPError as e:
                 self.stdout.write(self.style.WARNING(f"  Skipped ({e.code})"))
                 continue
 

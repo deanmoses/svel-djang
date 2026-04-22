@@ -114,6 +114,8 @@ class CorporateEntityLocation(models.Model):
     CorporateEntity — do not create or delete rows directly.
     """
 
+    corporate_entity_id: int
+    location_id: int
     corporate_entity = models.ForeignKey(
         "catalog.CorporateEntity",
         on_delete=models.CASCADE,

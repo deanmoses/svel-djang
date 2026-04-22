@@ -892,9 +892,9 @@ def list_all_titles(request):
                 ),
                 "player_counts": sorted(
                     {
-                        model_player_count[mid]
+                        count
                         for mid in mids
-                        if model_player_count.get(mid) is not None
+                        if (count := model_player_count.get(mid)) is not None
                     }
                 ),
                 "systems": _dedup_facet_refs(

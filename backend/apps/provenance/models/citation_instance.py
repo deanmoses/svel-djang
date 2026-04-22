@@ -18,6 +18,9 @@ class CitationInstance(models.Model):
     set for scalar claim citations.
     """
 
+    citation_source_id: int
+    claim_id: int | None
+
     citation_source = models.ForeignKey(
         "citation.CitationSource",
         on_delete=models.PROTECT,

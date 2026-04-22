@@ -26,6 +26,7 @@ def _serve_media(request, path="", document_root=None):
 
     response = serve(request, path, document_root=document_root)
     if response.get("Content-Type", "").startswith("application/octet-stream"):
+        assert document_root is not None
         filepath = Path(document_root) / path
         with open(filepath, "rb") as f:
             head = f.read(16)

@@ -198,6 +198,8 @@ class TestBuildGameplayFeatureClaimSpecs:
             "gameplay_feature|gameplay_feature:10",
             "gameplay_feature|gameplay_feature:20",
         }
+        assert isinstance(by_key["gameplay_feature|gameplay_feature:20"].value, dict)
+        assert isinstance(by_key["gameplay_feature|gameplay_feature:10"].value, dict)
         assert by_key["gameplay_feature|gameplay_feature:20"].value["count"] == 2
         assert by_key["gameplay_feature|gameplay_feature:10"].value["exists"] is False
 
@@ -275,6 +277,7 @@ class TestBuildCreditClaimSpecs:
             "credit|person:100|role:200",
             "credit|person:101|role:201",
         }
+        assert isinstance(by_key["credit|person:100|role:200"].value, dict)
         assert by_key["credit|person:100|role:200"].value["exists"] is False
 
     def test_skips_unchanged_specs(self):
@@ -297,6 +300,7 @@ class TestBuildM2MClaimSpecs:
             "theme|theme:2",
             "theme|theme:1",
         }
+        assert isinstance(by_key["theme|theme:1"].value, dict)
         assert by_key["theme|theme:1"].value["exists"] is False
 
     def test_skips_unchanged_specs(self):

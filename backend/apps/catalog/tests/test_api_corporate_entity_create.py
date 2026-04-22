@@ -83,7 +83,7 @@ class TestCreateHappyPath:
         assert body["manufacturer"]["slug"] == "stern"
 
         ce = CorporateEntity.objects.get(slug="stern-pinball-inc")
-        assert ce.manufacturer_id == mfr.pk
+        assert ce.manufacturer == mfr
         assert ce.status == "active"
 
         cs = ChangeSet.objects.get(user=user, action=ChangeSetAction.CREATE)

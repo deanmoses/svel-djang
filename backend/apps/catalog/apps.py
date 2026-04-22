@@ -50,7 +50,7 @@ class CatalogConfig(AppConfig):
                     model_path=f"catalog.{model.__name__}",
                     slug_field="slug",
                     label=getattr(
-                        model, "link_label", model._meta.verbose_name.title()
+                        model, "link_label", str(model._meta.verbose_name).title()
                     ),
                     description=getattr(
                         model,

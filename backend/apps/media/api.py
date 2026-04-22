@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import uuid as uuid_lib
 from pathlib import PurePosixPath
+from typing import cast
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
@@ -68,7 +69,7 @@ def _check_rate_limit(user_id: int) -> None:
     after a successful upload so failed attempts don't consume quota.
     """
     key = f"media_upload_count:{user_id}"
-    count = cache.get_or_set(key, 0, 3600)
+    count = cast(int, cache.get_or_set(key, 0, 3600))
     if count >= MAX_UPLOADS_PER_HOUR:
         raise HttpError(429, "Upload limit exceeded. Try again later.")
 
@@ -140,11 +141,11 @@ def _resolve_entity(entity_type: str, slug: str):
 @media_router.post("/upload/", response=UploadOut, auth=django_auth)
 def upload_media(
     request,
-    file: UploadedFile = File(...),
-    entity_type: str = Form(...),
-    slug: str = Form(...),
-    category: str | None = Form(None),
-    is_primary: bool = Form(False),
+    file: File[UploadedFile],
+    entity_type: Form[str],
+    slug: Form[str],
+    category: Form[str | None] = None,
+    is_primary: Form[bool] = False,
 ):
     """Upload an image and create MediaAsset + MediaRendition rows."""
     # --- Rate limit ---

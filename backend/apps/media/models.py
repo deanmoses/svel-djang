@@ -22,6 +22,8 @@ from apps.core.models import MediaSupported, TimeStampedModel, field_not_blank
 class MediaAsset(TimeStampedModel):
     """One logical Pinbase-owned uploaded media item (infrastructure)."""
 
+    renditions: models.Manager[MediaRendition]
+
     class Kind(models.TextChoices):
         IMAGE = "image", "Image"
         VIDEO = "video", "Video"
@@ -138,6 +140,8 @@ class MediaAsset(TimeStampedModel):
 class MediaRendition(TimeStampedModel):
     """One physical stored file for a media asset (infrastructure)."""
 
+    asset_id: int
+
     class RenditionType(models.TextChoices):
         ORIGINAL = "original", "Original"
         THUMB = "thumb", "Thumbnail"
@@ -215,6 +219,9 @@ class EntityMedia(TimeStampedModel):
 
     Materialized from claims — not hand-edited.
     """
+
+    content_type_id: int
+    asset_id: int
 
     content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
     object_id = models.PositiveBigIntegerField()

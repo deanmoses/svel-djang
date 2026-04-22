@@ -22,6 +22,12 @@ from apps.provenance.test_factories import user_changeset
 User = get_user_model()
 
 
+def _only_changeset() -> ChangeSet:
+    cs = ChangeSet.objects.first()
+    assert cs is not None
+    return cs
+
+
 @pytest.fixture
 def user(db):
     return User.objects.create_user(username="editor")
@@ -287,7 +293,7 @@ class TestCombinedEdits:
         assert resp.status_code == 200
 
         assert ChangeSet.objects.count() == 1
-        cs = ChangeSet.objects.first()
+        cs = _only_changeset()
         assert cs.note == "Full edit"
         field_names = set(cs.claims.values_list("field_name", flat=True))
         assert "year" in field_names

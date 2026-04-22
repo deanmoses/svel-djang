@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 from django.db.models import Count, F, Prefetch, Q
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
@@ -12,6 +14,7 @@ from ninja.security import django_auth
 from apps.core.models import active_status_q
 from apps.provenance.helpers import claims_prefetch
 from apps.provenance.schemas import RichTextSchema
+from apps.provenance.typing import HasActiveClaims
 
 from ..models import (
     CorporateEntity,
@@ -19,6 +22,7 @@ from ..models import (
     MachineModel,
     Manufacturer,
 )
+from ._typing import HasModelCount
 from .edit_claims import (
     execute_claims,
     plan_alias_claims,
@@ -104,7 +108,7 @@ def _serialize_detail(ce) -> dict:
         "name": ce.name,
         "slug": ce.slug,
         "description": _build_rich_text(
-            ce, "description", getattr(ce, "active_claims", [])
+            ce, "description", cast(HasActiveClaims, ce).active_claims
         ),
         "manufacturer": {"name": ce.manufacturer.name, "slug": ce.manufacturer.slug},
         "year_start": ce.year_start,
@@ -154,7 +158,7 @@ def list_corporate_entities(request):
             },
             "year_start": ce.year_start,
             "year_end": ce.year_end,
-            "model_count": ce.model_count,
+            "model_count": cast(HasModelCount, ce).model_count,
             "locations": _serialize_locations(ce),
         }
         for ce in qs

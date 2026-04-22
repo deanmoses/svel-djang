@@ -9,10 +9,14 @@ from __future__ import annotations
 
 import pytest
 from django.db.models import Q
-from ninja import Router
+from ninja import Router, Schema
 
 from apps.catalog.api.entity_crud import register_entity_create
 from apps.catalog.models import Theme
+
+
+class DummySchema(Schema):
+    pass
 
 
 def test_scope_filter_builder_requires_parent_field():
@@ -26,7 +30,7 @@ def test_scope_filter_builder_requires_parent_field():
             Theme,
             detail_qs=lambda: Theme.objects.all(),
             serialize_detail=lambda _t: {},
-            response_schema=type("S", (), {}),  # dummy; never reached
+            response_schema=DummySchema,  # dummy; never reached
             scope_filter_builder=lambda _p: Q(),
         )
 
@@ -40,6 +44,6 @@ def test_parented_without_parent_model_still_raises():
             Theme,
             detail_qs=lambda: Theme.objects.all(),
             serialize_detail=lambda _t: {},
-            response_schema=type("S", (), {}),
+            response_schema=DummySchema,
             parent_field="parent",
         )

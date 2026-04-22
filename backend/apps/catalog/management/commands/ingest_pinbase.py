@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import logging
 import time
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -106,9 +107,9 @@ def _normalize_credit_role(raw: str) -> str:
 # Model class → source slug suffix for per-entity AI description sources.
 # Derived from CatalogModel subclasses so new catalog entities are picked up
 # automatically. Location is not a CatalogModel but has its own AI source.
-AI_DESC_SOURCE_REGISTRY: list[tuple[type, str]] = [
+AI_DESC_SOURCE_REGISTRY: Sequence[tuple[type, str]] = tuple(
     (cls, cls.entity_type) for cls in CatalogModel.__subclasses__()
-] + [(Location, "location")]
+) + ((Location, "location"),)
 
 # Taxonomy ingest registry: (json_filename, model_class, has_display_order, parent_config)
 # parent_config: (model_fk_field, parent_model, json_fk_key) or None
@@ -153,10 +154,13 @@ def validate_cross_entity_wikilinks(export_dir: Path, stdout, stderr) -> None:
     linkable_models: dict[str, Any] = {}
     for model in apps.get_models():
         if issubclass(model, LinkableModel) and hasattr(model, "slug"):
+            model_name = model._meta.model_name
+            if model_name is None:
+                raise RuntimeError(f"{model.__name__} has no model_name")
             link_type = getattr(
                 model,
                 "link_type_name",
-                model._meta.model_name.replace("_", "-"),
+                model_name.replace("_", "-"),
             )
             linkable_models[link_type] = model
 
@@ -1671,10 +1675,14 @@ class Command(BaseCommand):
         ct_id = ContentType.objects.get_for_model(MachineModel).pk
 
         by_opdb_id: dict[str, MachineModel] = {
-            mm.opdb_id: mm for mm in MachineModel.objects.filter(opdb_id__isnull=False)
+            opdb_id: mm
+            for mm in MachineModel.objects.filter(opdb_id__isnull=False)
+            if (opdb_id := mm.opdb_id) is not None
         }
         by_ipdb_id: dict[int, MachineModel] = {
-            mm.ipdb_id: mm for mm in MachineModel.objects.filter(ipdb_id__isnull=False)
+            ipdb_id: mm
+            for mm in MachineModel.objects.filter(ipdb_id__isnull=False)
+            if (ipdb_id := mm.ipdb_id) is not None
         }
         existing_slugs: set[str] = set(
             MachineModel.objects.values_list("slug", flat=True)

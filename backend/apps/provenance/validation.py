@@ -176,7 +176,7 @@ def validate_claim_value(
         # Field.run_validators().  Check it explicitly so invalid choices
         # (e.g. status='bogus') are caught at the claim boundary.
         if field.choices:
-            valid_choices = {k for k, _v in field.flatchoices}
+            valid_choices = {k for k, _v in getattr(field, "flatchoices", ())}
             if typed not in valid_choices:
                 raise ValidationError(
                     f"Value {value!r} is not a valid choice for "
@@ -219,7 +219,16 @@ def validate_claims_batch(
         ct_id = claim.content_type_id
 
         if ct_id not in model_cache:
-            model_cache[ct_id] = ContentType.objects.get_for_id(ct_id).model_class()
+            model_class = ContentType.objects.get_for_id(ct_id).model_class()
+            if model_class is None:
+                logger.warning(
+                    "Rejected claim for unknown content type id %s (object_id=%s)",
+                    ct_id,
+                    claim.object_id,
+                )
+                rejected.append(claim)
+                continue
+            model_cache[ct_id] = model_class
             fields_cache[ct_id] = get_claim_fields(model_cache[ct_id])
 
         model_class = model_cache[ct_id]

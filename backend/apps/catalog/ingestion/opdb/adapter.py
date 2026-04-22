@@ -293,12 +293,15 @@ def _manufacturer_diagnostics(machines: list[OpdbRecord]) -> list[str]:
 
 def _prefetch_lookups() -> tuple[dict[str, MachineModel], dict[int, MachineModel]]:
     """Pre-fetch all MachineModels into lookup dicts."""
-    by_opdb_id: dict[str, MachineModel] = {
-        pm.opdb_id: pm for pm in MachineModel.objects.filter(opdb_id__isnull=False)
-    }
-    by_ipdb_id: dict[int, MachineModel] = {
-        pm.ipdb_id: pm for pm in MachineModel.objects.filter(ipdb_id__isnull=False)
-    }
+    by_opdb_id: dict[str, MachineModel] = {}
+    for pm in MachineModel.objects.filter(opdb_id__isnull=False):
+        if pm.opdb_id is not None:
+            by_opdb_id[pm.opdb_id] = pm
+
+    by_ipdb_id: dict[int, MachineModel] = {}
+    for pm in MachineModel.objects.filter(ipdb_id__isnull=False):
+        if pm.ipdb_id is not None:
+            by_ipdb_id[pm.ipdb_id] = pm
     return by_opdb_id, by_ipdb_id
 
 
@@ -382,11 +385,15 @@ def _collect_claims(
     object_id: int,
 ) -> None:
     """Collect scalar claims for one record into the assertions list."""
-    target = {"content_type_id": content_type_id, "object_id": object_id}
 
     def _add(field_name: str, value) -> None:
         assertions.append(
-            PlannedClaimAssert(field_name=field_name, value=value, **target)
+            PlannedClaimAssert(
+                field_name=field_name,
+                value=value,
+                content_type_id=content_type_id,
+                object_id=object_id,
+            )
         )
 
     if rec.name:
@@ -441,7 +448,8 @@ def _collect_claims(
                 field_name="abbreviation",
                 claim_key=claim_key,
                 value=abbr_value,
-                **target,
+                content_type_id=content_type_id,
+                object_id=object_id,
             )
         )
 

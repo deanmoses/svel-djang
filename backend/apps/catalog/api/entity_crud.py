@@ -278,7 +278,7 @@ def register_entity_create(
     serialize_detail: SerializeFn,
     response_schema: type[Schema],
     parent_field: str | None = None,
-    parent_model=None,
+    parent_model: Any = None,
     route_suffix: str = "",
     scope_filter_builder: Callable[[Any], Q] | None = None,
     include_deleted_name_check: bool = False,
@@ -348,6 +348,7 @@ def register_entity_create(
             ClaimSpec(field_name="status", value="active"),
         ]
         if parent is not None:
+            assert parent_field is not None
             row_kwargs[parent_field] = parent
             # FK claim value is the parent's slug string.
             claim_specs.append(ClaimSpec(field_name=parent_field, value=parent.slug))
@@ -365,23 +366,26 @@ def register_entity_create(
         return Status(201, serialize_detail(created))
 
     if parented:
+        assert parent_model is not None
 
-        def _create(request, parent_slug: str, data: TaxonomyCreateSchema):
+        def _create_parented(request, parent_slug: str, data: TaxonomyCreateSchema):
             parent = get_object_or_404(parent_model.objects.active(), slug=parent_slug)
             return _do_create(request, data, parent=parent)
 
         path = f"/{{parent_slug}}/{route_suffix}/"
+        create_view = _create_parented
     else:
 
-        def _create(request, data: TaxonomyCreateSchema):
+        def _create_unparented(request, data: TaxonomyCreateSchema):
             return _do_create(request, data)
 
         path = "/"
+        create_view = _create_unparented
 
-    _create.__name__ = f"{entity_label.lower()}_create"
+    create_view.__name__ = f"{entity_label.lower()}_create"
     router.post(
         path,
         auth=django_auth,
         response={201: response_schema},
         tags=["private"],
-    )(_create)
+    )(create_view)

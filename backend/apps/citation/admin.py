@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.contrib import admin
 
 from .models import CitationSource, CitationSourceLink
@@ -18,10 +20,10 @@ class CitationSourceAdmin(admin.ModelAdmin):
     readonly_fields = ("created_by", "updated_by")
     inlines = [CitationSourceLinkInline]
 
-    def get_readonly_fields(self, request, obj=None):
+    def get_readonly_fields(self, request, obj=None) -> tuple[Any, ...]:
         if obj:  # editing existing — parent is locked
             return (*self.readonly_fields, "parent")
-        return self.readonly_fields
+        return tuple(self.readonly_fields)
 
     def has_delete_permission(self, request, obj=None):
         return False

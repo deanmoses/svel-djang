@@ -568,7 +568,11 @@ def _build_claims(
             needs_review_notes=pca.needs_review_notes,
             license_id=pca.license_id,
         )
-        seen[(pca.content_type_id, pca.object_id, claim_key)] = claim
+        content_type_id = pca.content_type_id
+        object_id = pca.object_id
+        assert content_type_id is not None
+        assert object_id is not None
+        seen[(content_type_id, object_id, claim_key)] = claim
     return list(seen.values())
 
 

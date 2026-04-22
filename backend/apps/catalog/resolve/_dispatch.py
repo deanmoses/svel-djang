@@ -9,7 +9,7 @@ the claim field names that changed, then invalidates cached endpoint data.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from django.db import transaction
 
@@ -121,9 +121,10 @@ def resolve_after_mutation(
 
 def _resolve_machine_model(entity: models.Model) -> None:
     """MachineModel path — resolve_model() handles everything."""
+    from ..models import MachineModel
     from . import resolve_model
 
-    resolve_model(entity)
+    resolve_model(cast(MachineModel, entity))
 
 
 def _resolve_non_machine_model(

@@ -76,6 +76,8 @@ class SourceFieldLicense(models.Model):
     This model captures that relationship without denormalizing to per-claim.
     """
 
+    source_id: int
+
     source = models.ForeignKey(
         Source,
         on_delete=models.CASCADE,

@@ -142,10 +142,15 @@ class TestRenderMarkdownFields:
             name="Test", slug="test", description=f"Info.[[cite:{ci.pk}]]"
         )
         result = render_markdown_fields(mfr)
+        citations = result["description_citations"]
+        assert isinstance(citations, list)
+        assert citations
+        citation = citations[0]
+        assert isinstance(citation, dict)
         assert "description_html" in result
         assert "description_citations" in result
-        assert len(result["description_citations"]) == 1
-        assert result["description_citations"][0]["id"] == ci.pk
+        assert len(citations) == 1
+        assert citation["id"] == ci.pk
 
     def test_no_citations_key_when_empty(self):
         from apps.catalog.models import Manufacturer

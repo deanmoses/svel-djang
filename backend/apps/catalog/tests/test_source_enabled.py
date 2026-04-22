@@ -1,5 +1,7 @@
 """Tests for Source.is_enabled filtering in claim resolution."""
 
+from typing import cast
+
 import pytest
 from django.contrib.auth import get_user_model
 
@@ -20,6 +22,7 @@ from apps.catalog.resolve._relationships import resolve_all_credits
 from apps.catalog.tests.conftest import make_machine_model
 from apps.core.models import get_claim_fields
 from apps.provenance.models import Claim, Source
+from apps.provenance.typing import HasActiveClaims
 
 User = get_user_model()
 
@@ -195,7 +198,7 @@ class TestIsEnabledSourcesPrefetch:
             pk=mfr.pk
         )
 
-        claims = prefetched.active_claims
+        claims = cast(HasActiveClaims, prefetched).active_claims
         source_slugs = {c.source.slug for c in claims if c.source}
         assert "source-a" not in source_slugs
         assert "source-b" in source_slugs

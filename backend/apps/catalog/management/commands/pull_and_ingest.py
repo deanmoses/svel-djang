@@ -51,7 +51,7 @@ class Command(BaseCommand):
         )
 
         self.stdout.write(self.style.MIGRATE_HEADING("Running ingest pipeline..."))
-        kwargs = {
+        kwargs: dict[str, str | bool] = {
             "ipdb": f"{dest}/ipdb_xantari.json",
             "opdb": f"{dest}/opdb_export_machines.json",
             "export_dir": f"{dest}/pinbase/",

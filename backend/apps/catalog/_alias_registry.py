@@ -31,7 +31,12 @@ def discover_alias_types() -> tuple[tuple[type, str], ...]:
                 f"{alias_cls.__name__} has {len(fks)} ForeignKeys; expected exactly 1"
             )
         parent_model = fks[0].related_model
-        claim_field = f"{parent_model._meta.verbose_name.replace(' ', '_')}_alias"
+        if parent_model is None:
+            raise RuntimeError(f"{alias_cls.__name__} FK has no related model")
+        verbose_name = parent_model._meta.verbose_name
+        if verbose_name is None:
+            raise RuntimeError(f"{alias_cls.__name__} parent model has no verbose_name")
+        claim_field = f"{verbose_name.replace(' ', '_')}_alias"
         result.append((parent_model, claim_field))
 
     return tuple(sorted(result, key=lambda pair: pair[1]))

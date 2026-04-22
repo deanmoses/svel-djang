@@ -150,7 +150,9 @@ class TestDeleteHappyPath:
         assert cs.note == "bye"
         # Single status claim; no cascade children.
         assert cs.claims.count() == 1
-        assert cs.claims.first().field_name == "status"
+        first_claim = cs.claims.first()
+        assert first_claim is not None
+        assert first_claim.field_name == "status"
 
     def test_parent_title_untouched(self, client, user, bootstrap_source):
         t = _make_title(bootstrap_source, "mm")

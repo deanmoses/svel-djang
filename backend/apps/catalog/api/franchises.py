@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 from django.db.models import Count, Prefetch, Q
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
@@ -13,8 +15,10 @@ from apps.core.licensing import get_minimum_display_rank
 from apps.core.models import active_status_q
 from apps.provenance.helpers import claims_prefetch
 from apps.provenance.schemas import RichTextSchema
+from apps.provenance.typing import HasActiveClaims
 
 from ..models import Franchise, MachineModel, Title
+from ._typing import HasRelatedTitles, HasTitleCount
 from .edit_claims import execute_claims, plan_scalar_field_claims
 from .entity_crud import register_entity_create, register_entity_delete_restore
 from .helpers import (
@@ -61,7 +65,7 @@ def list_franchises(request):
         {
             "name": f.name,
             "slug": f.slug,
-            "title_count": f.title_count,
+            "title_count": cast(HasTitleCount, f).title_count,
         }
         for f in qs
     ]
@@ -98,14 +102,17 @@ def _franchise_detail_qs():
 
 def _serialize_franchise_detail(franchise) -> dict:
     min_rank = get_minimum_display_rank()
+    franchise_with_claims = cast(HasActiveClaims, franchise)
+    franchise_with_titles = cast(HasRelatedTitles[Title], franchise)
     return {
         "name": franchise.name,
         "slug": franchise.slug,
         "description": _build_rich_text(
-            franchise, "description", getattr(franchise, "active_claims", [])
+            franchise, "description", franchise_with_claims.active_claims
         ),
         "titles": [
-            _serialize_title_ref(t, min_rank=min_rank) for t in franchise.titles.all()
+            _serialize_title_ref(t, min_rank=min_rank)
+            for t in franchise_with_titles.titles.all()
         ],
     }
 

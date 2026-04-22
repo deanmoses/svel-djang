@@ -50,6 +50,7 @@ class Manufacturer(
     entity_type = "manufacturer"
     entity_type_plural = "manufacturers"
     MEDIA_CATEGORIES = ["logo", "other"]
+    entities: models.Manager[CorporateEntity]
 
     link_sort_order = 30
 

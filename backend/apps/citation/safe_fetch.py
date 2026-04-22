@@ -73,11 +73,13 @@ def _resolve_and_validate(hostname: str, port: int) -> str:
 
     for _family, _type, _proto, _canonname, sockaddr in infos:
         addr = sockaddr[0]
-        if not _is_blocked(addr):
+        if isinstance(addr, str) and not _is_blocked(addr):
             return addr
 
     # Every resolved IP was blocked — raise with the first one for diagnostics.
     first_addr = infos[0][4][0]
+    if not isinstance(first_addr, str):
+        raise OSError(f"DNS resolution returned non-IP sockaddr for {hostname}")
     raise SSRFBlockedError(f"http://{hostname}:{port}", first_addr)
 
 
@@ -146,6 +148,7 @@ def safe_fetch(url: str, *, timeout: float, max_bytes: int = 65536) -> FetchResp
     deadline = time.monotonic() + timeout
 
     current_url = url
+    last_response: tuple[int, dict[str, str], bytes] | None = None
     for _ in range(_MAX_REDIRECTS + 1):
         parsed = urlparse(current_url)
         scheme = parsed.scheme.lower()
@@ -180,6 +183,7 @@ def safe_fetch(url: str, *, timeout: float, max_bytes: int = 65536) -> FetchResp
             timeout=hop_timeout,
             max_bytes=max_bytes,
         )
+        last_response = (status, headers, body)
 
         if redirect_location is None:
             return FetchResponse(status=status, headers=headers, body=body)
@@ -188,4 +192,6 @@ def safe_fetch(url: str, *, timeout: float, max_bytes: int = 65536) -> FetchResp
         current_url = urljoin(current_url, redirect_location)
 
     # Exhausted redirect budget — return last response as-is
+    assert last_response is not None
+    status, headers, body = last_response
     return FetchResponse(status=status, headers=headers, body=body)

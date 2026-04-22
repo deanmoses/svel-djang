@@ -24,9 +24,14 @@ from __future__ import annotations
 import re
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 from django.core.exceptions import ValidationError
+
+if TYPE_CHECKING:
+    from django.core.exceptions import ValidationErrorMessageArg
+else:
+    ValidationErrorMessageArg = object
 from django.db import models, transaction
 from django.db.models import Q
 
@@ -360,7 +365,7 @@ def convert_authoring_to_storage(content: str) -> str:
         content = _convert_to_storage(content, lt, pats["authoring"], errors)
 
     if errors:
-        raise ValidationError(errors)
+        raise ValidationError(cast(list[ValidationErrorMessageArg], errors))
     return content
 
 

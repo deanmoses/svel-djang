@@ -4,7 +4,7 @@ import pytest
 from django.utils import timezone
 
 from apps.catalog.models import Manufacturer
-from apps.provenance.models import Claim, IngestRun, Source
+from apps.provenance.models import ChangeSet, Claim, IngestRun, Source
 from apps.provenance.test_factories import ingest_changeset, user_changeset
 
 
@@ -121,7 +121,7 @@ class TestChangeSetIngestRunFK:
         )
         cs = ingest_changeset(run)
         assert cs.ingest_run == run
-        assert run.changesets.count() == 1
+        assert ChangeSet.objects.filter(ingest_run=run).count() == 1
 
     def test_changeset_without_ingest_run(self):
         from django.contrib.auth import get_user_model

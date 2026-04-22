@@ -352,6 +352,8 @@ class TestFieldValidatorCoverage:
         missing = []
         for model in self._catalog_models():
             for f in model._meta.get_fields():
+                if not isinstance(f, models.Field):
+                    continue
                 if not getattr(f, "concrete", False):
                     continue
                 if f.name != "wikidata_id":

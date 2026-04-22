@@ -199,5 +199,5 @@ def check_codec_support() -> dict[str, bool]:
         pass
     from PIL import features
 
-    avif_ok = features.check("avif")
+    avif_ok = bool(features.check("avif"))
     return {"heic": heif_ok, "heif": heif_ok, "avif": avif_ok}

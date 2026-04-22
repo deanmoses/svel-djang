@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -14,6 +14,9 @@ from apps.core.models import field_not_blank
 
 from .changeset import ChangeSet
 from .source import Source
+
+if TYPE_CHECKING:
+    from .citation_instance import CitationInstance
 
 
 def _escape_claim_value(s: str) -> str:
@@ -66,11 +69,15 @@ class ClaimManager(models.Manager):
         if (source is None) == (user is None):
             raise ValueError("Exactly one of source or user must be provided.")
         if changeset is not None:
-            if user is not None and changeset.user_id != user.pk:
+            if (
+                user is not None
+                and changeset.user is not None
+                and changeset.user.pk != user.pk
+            ):
                 raise ValueError("ChangeSet user must match the claim user.")
+            ingest_run = changeset.ingest_run
             if source is not None and (
-                not changeset.ingest_run_id
-                or changeset.ingest_run.source_id != source.pk
+                ingest_run is None or ingest_run.source.pk != source.pk
             ):
                 raise ValueError(
                     "ChangeSet must belong to an IngestRun from the same source."
@@ -266,6 +273,14 @@ class Claim(models.Model):
     CheckConstraint and by ClaimManager.assert_claim().
     """
 
+    content_type_id: int
+    source_id: int | None
+    user_id: int | None
+    license_id: int | None
+    changeset_id: int | None
+    retracted_by_changeset_id: int | None
+    citation_instances: models.Manager[CitationInstance]
+
     content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
     object_id = models.PositiveBigIntegerField()
     subject = GenericForeignKey("content_type", "object_id")
@@ -382,7 +397,10 @@ class Claim(models.Model):
         ]
 
     def __str__(self) -> str:
-        author = self.source.name if self.source_id else self.user.username
+        if self.source is not None:
+            author = self.source.name
+        else:
+            author = self.user.username if self.user is not None else "unknown"
         return f"{author}: {self.subject}.{self.field_name}"
 
     @classmethod

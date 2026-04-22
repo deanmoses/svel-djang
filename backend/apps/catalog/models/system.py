@@ -63,6 +63,7 @@ class SystemMpuString(TimeStampedModel):
     e.g., "Stern SPIKE System", "Williams WPC-95".
     """
 
+    system_id: int
     system = models.ForeignKey(
         System, on_delete=models.CASCADE, related_name="mpu_strings"
     )

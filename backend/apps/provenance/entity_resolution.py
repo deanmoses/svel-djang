@@ -37,7 +37,7 @@ def batch_resolve_entities(entity_rows):
         if not model_class:
             continue
         entities = model_class.objects.in_bulk(list(obj_ids))
-        type_label = model_class._meta.verbose_name.title()
+        type_label = str(model_class._meta.verbose_name).title()
         for obj_id, entity in entities.items():
             href = resolve_entity_href(model_class, entity)
             if href is None:

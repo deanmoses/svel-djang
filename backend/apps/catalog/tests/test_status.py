@@ -59,7 +59,9 @@ class TestActiveQuerySet:
         Manufacturer.objects.create(name="Drop", slug="drop", status="deleted")
         qs = Manufacturer.objects.active().filter(name="Keep")
         assert qs.count() == 1
-        assert qs.first().slug == "keep"
+        first = qs.first()
+        assert first is not None
+        assert first.slug == "keep"
 
 
 # ── Apply layer status='active' enforcement ──────────────────────

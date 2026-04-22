@@ -92,8 +92,10 @@ def build_edit_history(entity) -> list[dict]:
     )
 
     # Build lookup: (claim_key, user_id) → list of claims ordered newest-first.
-    history: dict[tuple[str, int], list] = defaultdict(list)
+    history: dict[tuple[str, int], list[Claim]] = defaultdict(list)
     for c in all_user_claims:
+        if c.user_id is None:
+            continue
         history[(c.claim_key, c.user_id)].append(c)
 
     # 3. Compute winning claims for is_winning.
@@ -104,7 +106,11 @@ def build_edit_history(entity) -> list[dict]:
     for cs in changesets:
         changes: list[dict] = []
         for claim in cs.claims.all():
-            chain = history.get((claim.claim_key, claim.user_id), [])
+            chain = (
+                history.get((claim.claim_key, claim.user_id), [])
+                if claim.user_id is not None
+                else []
+            )
             old_value = None
             for i, c in enumerate(chain):
                 if c.pk == claim.pk and i + 1 < len(chain):

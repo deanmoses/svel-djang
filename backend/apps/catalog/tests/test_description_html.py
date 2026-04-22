@@ -203,8 +203,10 @@ class TestReferenceSync:
         refs = RecordReference.objects.filter(source_type=mfr_ct, source_id=mfr.pk)
         assert refs.count() == 1
         system_ct = ContentType.objects.get_for_model(System)
-        assert refs.first().target_type == system_ct
-        assert refs.first().target_id == system.pk
+        ref = refs.first()
+        assert ref is not None
+        assert ref.target_type == system_ct
+        assert ref.target_id == system.pk
 
     def test_blanked_field_cleans_up_references(self):
         """When a description is blanked, stale RecordReference rows are removed."""

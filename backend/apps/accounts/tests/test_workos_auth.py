@@ -9,7 +9,13 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.test import Client
 
+from apps.accounts.models import UserProfile
+
 User = get_user_model()
+
+
+def _profile(user):
+    return UserProfile.objects.get(user=user)
 
 
 def _make_workos_user(
@@ -141,7 +147,7 @@ class TestAuthCallback:
         assert resp.status_code == 302
 
         user = User.objects.get(email="alice@example.com")
-        assert user.profile.workos_user_id == "user_01ABC"
+        assert _profile(user).workos_user_id == "user_01ABC"
         assert user.first_name == "Alice"
 
     def test_callback_links_existing_user_by_email(self, client):
@@ -149,15 +155,18 @@ class TestAuthCallback:
         resp = self._do_callback(client)
         assert resp.status_code == 302
 
-        existing.profile.refresh_from_db()
-        assert existing.profile.workos_user_id == "user_01ABC"
+        profile = _profile(existing)
+        profile.refresh_from_db()
+        assert profile.workos_user_id == "user_01ABC"
         # No new user should have been created
         assert User.objects.filter(email="alice@example.com").count() == 1
 
     def test_callback_linking_preserves_superuser_flags(self, client):
         """Linking a WorkOS login to an existing superuser must not reset is_staff/is_superuser."""
         existing = User.objects.create_superuser(
-            username="moses", email="alice@example.com"
+            username="moses",
+            email="alice@example.com",
+            password="password",  # pragma: allowlist secret
         )
         assert existing.is_staff is True
         assert existing.is_superuser is True
@@ -165,7 +174,7 @@ class TestAuthCallback:
         self._do_callback(client)
 
         existing.refresh_from_db()
-        assert existing.profile.workos_user_id == "user_01ABC"
+        assert _profile(existing).workos_user_id == "user_01ABC"
         assert existing.is_staff is True, "is_staff was reset during linking"
         assert existing.is_superuser is True, "is_superuser was reset during linking"
 
@@ -175,8 +184,9 @@ class TestAuthCallback:
         self._do_callback(client, workos_user=workos_user)
 
         # Should have created a NEW user, not linked the existing one
-        existing.profile.refresh_from_db()
-        assert existing.profile.workos_user_id is None
+        profile = _profile(existing)
+        profile.refresh_from_db()
+        assert profile.workos_user_id is None
         assert User.objects.filter(email="alice@example.com").count() == 2
 
     def test_callback_refuses_link_ambiguous_email(self, client):
@@ -189,8 +199,9 @@ class TestAuthCallback:
 
     def test_callback_recognizes_returning_user(self, client):
         user = User.objects.create_user(username="alice", email="alice@example.com")
-        user.profile.workos_user_id = "user_01ABC"
-        user.profile.save(update_fields=["workos_user_id"])
+        profile = _profile(user)
+        profile.workos_user_id = "user_01ABC"
+        profile.save(update_fields=["workos_user_id"])
 
         self._do_callback(client)
 

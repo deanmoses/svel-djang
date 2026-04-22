@@ -79,6 +79,10 @@ def _generate_username(email: str) -> str:
     return username
 
 
+def _get_profile(user) -> UserProfile:
+    return UserProfile.objects.get(user=user)
+
+
 def get_or_create_django_user(workos_user):
     """Match or create a Django User from a WorkOS user profile.
 
@@ -101,8 +105,9 @@ def get_or_create_django_user(workos_user):
         matches = User.objects.filter(email=workos_user.email)
         if matches.count() == 1:
             user = matches.get()
-            user.profile.workos_user_id = workos_user.id
-            user.profile.save(update_fields=["workos_user_id"])
+            profile = _get_profile(user)
+            profile.workos_user_id = workos_user.id
+            profile.save(update_fields=["workos_user_id"])
             return user
 
     # 3. Create new user
@@ -113,8 +118,9 @@ def get_or_create_django_user(workos_user):
         last_name=workos_user.last_name or "",
     )
     # Profile auto-created by post_save signal
-    user.profile.workos_user_id = workos_user.id
-    user.profile.save(update_fields=["workos_user_id"])
+    profile = _get_profile(user)
+    profile.workos_user_id = workos_user.id
+    profile.save(update_fields=["workos_user_id"])
     return user
 
 
@@ -212,9 +218,10 @@ def auth_logout(request):
 def user_profile_page(request, username: str):
     """Page model for the user profile page: contribution history."""
     user = get_object_or_404(User, username=username)
+    profile = _get_profile(user)
 
     edit_count = ChangeSet.objects.filter(user=user).count()
-    member_since = user.profile.created_at.isoformat()
+    member_since = profile.created_at.isoformat()
 
     entity_rows = list(
         Claim.objects.filter(user=user, changeset__isnull=False)
