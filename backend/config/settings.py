@@ -4,7 +4,12 @@ from pathlib import Path
 from typing import Any
 
 import dj_database_url
+import django_stubs_ext
 from django.core.exceptions import ImproperlyConfigured
+
+# Required for generic model support under django-stubs. Must run before any
+# model class is defined.
+django_stubs_ext.monkeypatch()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 

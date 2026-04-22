@@ -20,11 +20,14 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "basedpyright>=1.39.3",
     "beautifulsoup4>=4.12",
-    "django-types>=0.23.0",
+    "django-stubs-ext>=6.0.3",
+    "django-stubs[compatible-mypy]>=6.0.3",
+    "mypy>=1.20.2",
+    "mypy-baseline>=0.7.4",
     "pytest>=9.0.3",
     "pytest-django>=4.9",
+    "pytest-xdist>=3.8.0",
     "requests>=2.32",
     "ruff>=0.8",
 ]
@@ -92,5 +95,43 @@ quote-style = "double"
 indent-style = "space"
 line-ending = "lf"
 
-# basedpyright config lives at the repo root (../pyrightconfig.json) so the
-# VS Code extension finds it from the workspace root. Do not duplicate here.
+[tool.mypy]
+python_version = "3.14"
+strict = true
+plugins = ["mypy_django_plugin.main"]
+explicit_package_bases = true
+exclude = [
+    "migrations/",
+    "\\.venv/",
+    "media/",
+    "cache/",
+]
+warn_unused_ignores = true
+warn_redundant_casts = true
+# Barrel __init__.py files re-export symbols via `from X import Y`. Treat these
+# as intentional public API rather than requiring `__all__` on every barrel.
+implicit_reexport = true
+
+[tool.django-stubs]
+django_settings_module = "config.settings"
+strict_settings = true
+
+# Migrations are generated; don't type-check them.
+[[tool.mypy.overrides]]
+module = "*.migrations.*"
+ignore_errors = true
+
+# Tests and conftest: relax annotation requirements for fixtures. Type correctness
+# of the code under test still matters; per-function annotations in tests do not.
+[[tool.mypy.overrides]]
+module = ["*.tests.*", "tests.*", "conftest"]
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+disallow_untyped_decorators = false
+disallow_untyped_calls = false
+
+# Django Ninja decorators are untyped; relax that one rule for API modules so the
+# rest of --strict still applies. Scope is intentionally narrow.
+[[tool.mypy.overrides]]
+module = "apps.*.api.*"
+disallow_untyped_decorators = false

@@ -12,6 +12,7 @@
   "ruff.lint.enable": true,
   "ruff.importStrategy": "fromEnvironment",
   "python.analysis.extraPaths": ["${workspaceFolder}/backend"],
+  "python.analysis.typeCheckingMode": "off",
 
   "[svelte]": {
     "editor.defaultFormatter": "svelte.svelte-vscode",
@@ -46,5 +47,13 @@
   "files.associations": {
     ".worktreeinclude": "gitignore"
   },
-  "mypy-type-checker.ignorePatterns": ["**"]
+
+  "mypy-type-checker.path": ["${workspaceFolder}/scripts/dmypy"],
+  "mypy-type-checker.cwd": "${workspaceFolder}",
+  "mypy-type-checker.importStrategy": "fromEnvironment",
+  "mypy-type-checker.reportingScope": "workspace",
+
+  "basedpyright.disableLanguageServices": true,
+  "basedpyright.disableOrganizeImports": true,
+  "basedpyright.analysis.ignore": ["**/*"]
 }

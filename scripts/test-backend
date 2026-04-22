@@ -3,4 +3,4 @@ set -e
 cd "$(dirname "$0")/../backend"
 
 echo "==> Backend tests..."
-uv run pytest
+uv run pytest -n auto

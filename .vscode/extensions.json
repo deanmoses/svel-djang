@@ -2,11 +2,11 @@
   "recommendations": [
     "charliermarsh.ruff",
     "dbaeumer.vscode-eslint",
-    "detachhead.basedpyright",
     "editorconfig.editorconfig",
     "esbenp.prettier-vscode",
+    "ms-python.mypy-type-checker",
     "ms-python.python",
     "svelte.svelte-vscode"
   ],
-  "unwantedRecommendations": ["ms-python.mypy-type-checker"]
+  "unwantedRecommendations": ["detachhead.basedpyright"]
 }

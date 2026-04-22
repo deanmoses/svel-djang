@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# Runs mypy and filters output through mypy-baseline so the editor, pre-commit,
+# and CI all see the same set of errors (those above the committed baseline).
+#
+# =====================================================================
+# Exit-code logic — read before editing
+# =====================================================================
+# mypy's exit codes:
+#   0  = no errors
+#   1  = type errors found (including baselined ones — "errors exist")
+#   2+ = crash, bad config, or other fatal problem
+#
+# mypy-baseline filter's exit codes:
+#   0 = no errors remain above the committed baseline
+#   1 = new errors exist that aren't in the baseline
+#
+# What we want this wrapper to return:
+#   0    when only baselined errors exist (mypy=1, filter=0)
+#   1    when new errors exist (mypy=1, filter=1)
+#   2+   when mypy itself crashed (pass mypy's exit code through)
+#
+# Why not `set -o pipefail`? pipefail returns the earliest non-zero exit
+# in the pipeline, so a baselined-errors run (mypy=1, filter=0) would
+# incorrectly fail as 1. We need to distinguish mypy=1/filter=0 from
+# mypy=1/filter=1 — which requires inspecting both exit codes independently
+# via PIPESTATUS.
+#
+# PIPESTATUS is a bash array; bash clobbers it after *any* subsequent
+# command, so we copy it to a named array immediately after the pipe.
+# =====================================================================
+
+set -eu
+
+# Always run the full backend tree. Callers (VS Code mypy extension, CI, etc.)
+# may pass absolute or workspace-relative paths; if we forward those, mypy
+# emits absolute paths that don't match the backend-relative paths stored in
+# mypy-baseline.txt, and baselined errors appear as "new". Ignoring passed
+# paths keeps the output format consistent across every entry point.
+#
+# `--ignore 'mypy --install-types'` drops one specific note that mypy emits
+# but dmypy doesn't (the "or run mypy --install-types" suggestion chained
+# after any import-untyped error). Targeting this one line keeps mypy and
+# dmypy output matching the baseline, without suppressing the genuinely
+# useful diagnostic notes mypy attaches to errors (type-suggestion hints,
+# "-> None" recommendations, variance explanations, etc.).
+uv run --directory backend mypy --config-file pyproject.toml . \
+    | uv run --directory backend mypy-baseline filter --ignore '.*--install-types.*'
+statuses=("${PIPESTATUS[@]}")
+mypy_status=${statuses[0]}
+filter_status=${statuses[1]}
+
+if [ "$mypy_status" -ge 2 ]; then
+    echo "mypy crashed with exit code $mypy_status" >&2
+    exit "$mypy_status"
+fi
+
+exit "$filter_status"

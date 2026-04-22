@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Self, TypeVar
+from typing import ClassVar, Self, TypeVar
 
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -186,21 +186,7 @@ class CatalogQuerySet(models.QuerySet[_CatalogModel]):
         )
 
 
-# `Manager.from_queryset` is a runtime factory that returns an untyped class,
-# so basedpyright cannot see the queryset methods (e.g. `.active()`) that it
-# copies onto the manager. The TYPE_CHECKING shim below declares the manager
-# as a generic subclass of both Manager and the queryset, so `.active()` is
-# visible *and* the per-subclass type binding (`Manufacturer.objects` →
-# `CatalogManager[Manufacturer]`) carries through via django-types' descriptor.
-if TYPE_CHECKING:
-
-    class CatalogManager(
-        models.Manager[_CatalogModel],
-        CatalogQuerySet[_CatalogModel],
-    ):
-        pass
-else:
-    CatalogManager = models.Manager.from_queryset(CatalogQuerySet)
+CatalogManager = models.Manager.from_queryset(CatalogQuerySet)
 
 
 def active_status_q(relation: str) -> models.Q:

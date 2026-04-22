@@ -7,6 +7,9 @@ __pycache__/
 dist/
 build/
 .venv/
+.mypy_cache/
+.dmypy.json
+dmypy.json
 
 # uv
 .python-version.tmp

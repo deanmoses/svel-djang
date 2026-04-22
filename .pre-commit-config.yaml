@@ -49,13 +49,15 @@ repos:
         language: system
         files: ^backend/
         pass_filenames: false
-      # Static type checking via basedpyright. A baseline at
-      # backend/.basedpyright/baseline.json captures known-accepted findings
-      # from the initial adoption; the hook only fails on *new* errors.
-      # Regenerate with `cd backend && uv run basedpyright --writebaseline`.
-      - id: basedpyright
-        name: basedpyright
-        entry: bash -c 'cd backend && uv run basedpyright'
+      # Static type checking via mypy (with django-stubs plugin) in daemon mode.
+      # dmypy holds the project type graph in memory across commits — cold start
+      # is slow (~30-60s) but every subsequent run is fast and full-project.
+      # A baseline at backend/mypy-baseline.txt captures known-accepted findings;
+      # the hook only fails on *new* errors above baseline.
+      # If the daemon gets out of sync: run `make mypy-restart`.
+      - id: mypy
+        name: mypy (dmypy)
+        entry: ./scripts/dmypy
         language: system
         files: ^backend/.*\.py$
         pass_filenames: false

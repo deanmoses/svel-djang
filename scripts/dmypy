@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Daemon variant of scripts/mypy. See scripts/mypy for the full explanation
+# of exit-code logic, PIPESTATUS handling, and why --ignore is used for the
+# install-types note. Same rules apply here; this script just swaps `mypy`
+# for `dmypy check` against a pre-warmed daemon.
+#
+# dmypy holds the project type graph in memory between runs; first invocation
+# spins up the daemon (slow, ~5s on dev, longer on CI), subsequent runs reuse
+# it (fast, <1s). This wrapper is what the pre-commit hook and the VS Code
+# mypy extension call. If the daemon gets out of sync: run `make mypy-restart`.
+set -eu
+
+# Ensure the daemon is running before checking. `dmypy run` auto-starts the
+# daemon if needed but has a hardcoded client-side connect timeout (~30s) that
+# can fire on slow hosts / cold CI runners even when the daemon is starting
+# successfully. `dmypy start` blocks until the daemon is listening, so we use
+# start+check instead of run. On warm sessions the status check short-circuits.
+if ! uv run --directory backend dmypy status >/dev/null 2>&1; then
+    uv run --directory backend dmypy start -- --config-file pyproject.toml
+fi
+
+# `dmypy check` uses the config baked into the running daemon at start time,
+# so config flags go on `dmypy start` (above) — passing them here would be
+# treated as positional FILE arguments. Always run the full backend tree (see
+# scripts/mypy for rationale on why we ignore caller-supplied paths).
+uv run --directory backend dmypy check -- . \
+    | uv run --directory backend mypy-baseline filter --ignore '.*--install-types.*'
+statuses=("${PIPESTATUS[@]}")
+dmypy_status=${statuses[0]}
+filter_status=${statuses[1]}
+
+# dmypy exit codes: 0 = clean, 1 = type errors, 2+ = daemon/config crash.
+if [ "$dmypy_status" -ge 2 ]; then
+    echo "dmypy crashed with exit code $dmypy_status" >&2
+    echo "If this persists, try: make mypy-restart" >&2
+    exit "$dmypy_status"
+fi
+
+exit "$filter_status"

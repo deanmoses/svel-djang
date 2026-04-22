@@ -6,7 +6,7 @@ echo "==> Backend lint..."
 (cd backend && uv run ruff check . && uv run ruff format --check .)
 
 echo "==> Backend type check..."
-(cd backend && uv run basedpyright)
+./scripts/mypy
 
 echo "==> Frontend lint..."
 (cd frontend && pnpm lint)
