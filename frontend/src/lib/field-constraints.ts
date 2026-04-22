@@ -7,13 +7,9 @@
 
 import client from '$lib/api/client';
 import type { CatalogEntityKey } from '$lib/api/catalog-meta';
+import type { components } from '$lib/api/schema';
 
-export type FieldConstraint = {
-  min?: number;
-  max?: number;
-  step?: number;
-};
-
+export type FieldConstraint = components['schemas']['FieldConstraint'];
 export type FieldConstraints = Record<string, FieldConstraint>;
 
 const cache = new Map<string, FieldConstraints>();
@@ -28,12 +24,25 @@ export async function fetchFieldConstraints(
     params: { path: { entity_type: entityType } },
   });
 
-  const constraints: FieldConstraints = (data as unknown as FieldConstraints) ?? {};
+  const constraints: FieldConstraints = data ?? {};
   cache.set(entityType, constraints);
   return constraints;
 }
 
-/** Get constraint props for a NumberField, suitable for spreading: `{...fc('year')}` */
-export function fc(constraints: FieldConstraints, field: string): FieldConstraint {
-  return constraints[field] ?? {};
+/** Props for spreading into a NumberField: `{...fc(constraints, 'year')}`.
+ *
+ * Null values from the backend (unbounded min/max) are stripped so the
+ * NumberField component sees `undefined` — its props are typed as optional
+ * `number`, not `number | null`.
+ */
+export function fc(
+  constraints: FieldConstraints,
+  field: string,
+): { min?: number; max?: number; step?: number } {
+  const c = constraints[field];
+  if (!c) return {};
+  const out: { min?: number; max?: number; step?: number } = { step: c.step };
+  if (c.min != null) out.min = c.min;
+  if (c.max != null) out.max = c.max;
+  return out;
 }

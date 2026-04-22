@@ -13,6 +13,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import IntegrityError, transaction
 from django.db import models as db_models
+from ninja import Schema
 
 from apps.catalog.claims import build_relationship_claim
 from apps.catalog.models import CreditRole, GameplayFeature, Person
@@ -128,11 +129,22 @@ def plan_scalar_field_claims(
     return specs
 
 
-def get_field_constraints(model_class) -> dict[str, dict]:
+class FieldConstraint(Schema):
+    """Numeric validator-derived constraint for a single field.
+
+    The endpoint serializes with ``exclude_none=True`` so ``min`` / ``max``
+    keys are omitted when unbounded rather than sent as ``null``.
+    """
+
+    min: float | int | None = None
+    max: float | int | None = None
+    step: float | int
+
+
+def get_field_constraints(model_class) -> dict[str, FieldConstraint]:
     """Extract min/max/step constraints from numeric claim fields.
 
-    Returns a dict like ``{"year": {"min": 1800, "max": 2100, "step": 1}}``.
-    Only fields with at least one validator-derived constraint are included.
+    Only fields with at least one validator-derived bound are included.
     Step is derived from ``DecimalField.decimal_places``.
     """
     numeric_types = (
@@ -144,29 +156,29 @@ def get_field_constraints(model_class) -> dict[str, dict]:
         db_models.FloatField,
     )
     editable = get_claim_fields(model_class)
-    constraints: dict[str, dict] = {}
+    constraints: dict[str, FieldConstraint] = {}
 
     for field_name in editable:
         field = model_class._meta.get_field(field_name)
         if not isinstance(field, numeric_types):
             continue
 
-        entry: dict[str, float | int] = {}
+        bounds: dict[str, float | int] = {}
         # Use _validators (explicitly declared) rather than .validators
         # (which includes DB-range validators like max=9223372036854775807).
         for v in cast(list[object], getattr(field, "_validators", [])):
             if isinstance(v, MinValueValidator):
-                entry["min"] = v.limit_value
+                bounds["min"] = v.limit_value
             elif isinstance(v, MaxValueValidator):
-                entry["max"] = v.limit_value
+                bounds["max"] = v.limit_value
 
-        if not entry:
+        if not bounds:
             continue
         if isinstance(field, db_models.DecimalField) and field.decimal_places:
-            entry["step"] = float(f"1e-{field.decimal_places}")
+            step: float | int = float(f"1e-{field.decimal_places}")
         else:
-            entry["step"] = 1
-        constraints[field_name] = entry
+            step = 1
+        constraints[field_name] = FieldConstraint(**bounds, step=step)
 
     return constraints
 
