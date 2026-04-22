@@ -293,7 +293,7 @@ def _make_location(location_path, name, location_type, parent=None):
 
 
 class TestIPDBLocationLookup:
-    @pytest.fixture()
+    @pytest.fixture
     def loc_tree(self, db):
         usa = _make_location("usa", "USA", "country")
         il = _make_location("usa/il", "Illinois", "state", parent=usa)
@@ -378,7 +378,7 @@ class TestIPDBLocationLookup:
 
 
 class TestGetIpdbLocation:
-    @pytest.fixture()
+    @pytest.fixture
     def loc_tree(self, db):
         usa = _make_location("usa", "USA", "country")
         il = _make_location("usa/il", "Illinois", "state", parent=usa)

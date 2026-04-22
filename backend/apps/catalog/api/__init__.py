@@ -41,6 +41,7 @@ __all__ = [
     "locations_router",
     "manufacturers_router",
     "models_router",
+    "pages_router",
     "people_router",
     "reward_types_router",
     "routers",
@@ -50,7 +51,6 @@ __all__ = [
     "technology_generations_router",
     "technology_subgenerations_router",
     "themes_router",
-    "pages_router",
     "titles_router",
 ]
 

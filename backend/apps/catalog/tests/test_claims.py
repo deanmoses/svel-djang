@@ -63,7 +63,7 @@ class TestBuildRelationshipClaim:
     def test_exists_false(self, credit_targets):
         person_pk = credit_targets["persons"]["pat-lawlor"].pk
         role_pk = credit_targets["roles"]["design"].pk
-        key, val = build_relationship_claim(
+        _, val = build_relationship_claim(
             "credit", {"person": person_pk, "role": role_pk}, exists=False
         )
         assert val["exists"] is False

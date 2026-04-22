@@ -20,18 +20,18 @@ from apps.core.models import (
 from apps.core.validators import validate_no_mojibake
 
 __all__ = [
-    "TechnologyGeneration",
-    "TechnologySubgeneration",
-    "DisplayType",
-    "DisplaySubtype",
     "Cabinet",
+    "CreditRole",
+    "DisplaySubtype",
+    "DisplayType",
     "GameFormat",
+    "MachineModelRewardType",
+    "MachineModelTag",
     "RewardType",
     "RewardTypeAlias",
-    "MachineModelRewardType",
     "Tag",
-    "MachineModelTag",
-    "CreditRole",
+    "TechnologyGeneration",
+    "TechnologySubgeneration",
 ]
 
 

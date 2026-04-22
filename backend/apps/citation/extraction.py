@@ -70,9 +70,8 @@ def classify_input(raw: str) -> tuple[str, str] | None:
     if isbn is not None:
         return ("isbn", isbn)
     stripped = raw.strip()
-    if stripped.startswith("http://") or stripped.startswith("https://"):
-        if urlparse(stripped).hostname:
-            return ("url", stripped)
+    if stripped.startswith(("http://", "https://")) and urlparse(stripped).hostname:
+        return ("url", stripped)
     return None
 
 

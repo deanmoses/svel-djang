@@ -23,10 +23,10 @@ from apps.core.models import (
 from apps.core.validators import validate_no_mojibake
 
 __all__ = [
-    "Manufacturer",
-    "ManufacturerAlias",
     "CorporateEntity",
     "CorporateEntityAlias",
+    "Manufacturer",
+    "ManufacturerAlias",
 ]
 
 YEAR_MIN, YEAR_MAX = 1800, 2100

@@ -31,7 +31,7 @@ _alias_dispatch: dict[str, type] | None = None
 
 def _get_alias_dispatch() -> dict[str, type]:
     """field_name → parent model class for alias resolvers."""
-    global _alias_dispatch  # noqa: PLW0603
+    global _alias_dispatch
     if _alias_dispatch is None:
         _alias_dispatch = {
             field_name: model for model, field_name in discover_alias_types()
@@ -44,7 +44,7 @@ _parent_dispatch: dict[str, tuple[type, str | None]] | None = None
 
 def _get_parent_dispatch() -> dict[str, tuple[type, str | None]]:
     """field_name → (model, claim_field_prefix) for _resolve_parents()."""
-    global _parent_dispatch  # noqa: PLW0603
+    global _parent_dispatch
     if _parent_dispatch is None:
         from ..models import GameplayFeature, Theme
 
@@ -65,7 +65,7 @@ def _get_custom_dispatch() -> dict[str, tuple[type, str, str]]:
     ``resolve_all_*`` function to call, and which keyword argument
     receives the scoped ID set.
     """
-    global _custom_dispatch  # noqa: PLW0603
+    global _custom_dispatch
     if _custom_dispatch is None:
         from ..models import CorporateEntity, Title
 
@@ -182,12 +182,13 @@ def _resolve_non_machine_model(
     # --- Media attachments ---
     from apps.core.models import MediaSupported
 
-    if isinstance(entity, MediaSupported):
-        if rel_fields is None or "media_attachment" in rel_fields:
-            from django.contrib.contenttypes.models import ContentType
+    if isinstance(entity, MediaSupported) and (
+        rel_fields is None or "media_attachment" in rel_fields
+    ):
+        from django.contrib.contenttypes.models import ContentType
 
-            ct = ContentType.objects.get_for_model(entity_type)
-            resolve_media_attachments(content_type_id=ct.id, entity_ids={entity.pk})
+        ct = ContentType.objects.get_for_model(entity_type)
+        resolve_media_attachments(content_type_id=ct.id, entity_ids={entity.pk})
 
     # --- Scalar fields ---
     resolve_entity(entity)

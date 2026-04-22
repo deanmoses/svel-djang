@@ -140,14 +140,12 @@ class TestSystem:
     """Verify System.manufacturer is required at the DB level."""
 
     def test_manufacturer_required(self, db):
-        with pytest.raises(IntegrityError):
-            with transaction.atomic():
-                System.objects.create(name="WPC-95", slug="wpc-95")
+        with pytest.raises(IntegrityError), transaction.atomic():
+            System.objects.create(name="WPC-95", slug="wpc-95")
 
     def test_explicit_null_manufacturer_rejected(self, db):
-        with pytest.raises(IntegrityError):
-            with transaction.atomic():
-                System.objects.create(name="WPC-95", slug="wpc-95", manufacturer=None)
+        with pytest.raises(IntegrityError), transaction.atomic():
+            System.objects.create(name="WPC-95", slug="wpc-95", manufacturer=None)
 
 
 # --- MachineModel ---

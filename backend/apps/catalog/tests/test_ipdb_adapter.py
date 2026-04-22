@@ -70,9 +70,9 @@ def _assertion_fields(plan, *, handle=None, object_id=None) -> set[str]:
     """Extract field_names from assertions targeting a handle or object_id."""
     result = set()
     for a in plan.assertions:
-        if handle is not None and a.handle == handle:
-            result.add(a.field_name)
-        elif object_id is not None and a.object_id == object_id:
+        if (handle is not None and a.handle == handle) or (
+            object_id is not None and a.object_id == object_id
+        ):
             result.add(a.field_name)
     return result
 
@@ -96,9 +96,9 @@ def _assertions_for(plan, *, handle=None, object_id=None):
     """Return all assertions targeting a handle or object_id."""
     result = []
     for a in plan.assertions:
-        if handle is not None and a.handle == handle:
-            result.append(a)
-        elif object_id is not None and a.object_id == object_id:
+        if (handle is not None and a.handle == handle) or (
+            object_id is not None and a.object_id == object_id
+        ):
             result.append(a)
     return result
 
@@ -109,9 +109,9 @@ def _deferred_assertions(plan, field_name, *, handle=None, object_id=None):
     for a in plan.assertions:
         if a.field_name != field_name or not a.relationship_namespace:
             continue
-        if handle is not None and a.handle == handle:
-            result.append(a)
-        elif object_id is not None and a.object_id == object_id:
+        if (handle is not None and a.handle == handle) or (
+            object_id is not None and a.object_id == object_id
+        ):
             result.append(a)
     return result
 

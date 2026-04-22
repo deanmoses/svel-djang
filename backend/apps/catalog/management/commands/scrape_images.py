@@ -66,9 +66,7 @@ def _has_images(extra_data: dict) -> bool:
         if extra_data.get(key):
             return True
     images = extra_data.get("opdb.images")
-    if images and isinstance(images, list):
-        return True
-    return False
+    return bool(images and isinstance(images, list))
 
 
 def _try_group_sibling(pm: MachineModel) -> list[str] | None:

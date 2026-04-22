@@ -593,7 +593,7 @@ def test_both_handle_and_target_raises(test_source):
         ],
     )
 
-    with pytest.raises(ValueError, match="both a handle.*and content_type_id"):
+    with pytest.raises(ValueError, match=r"both a handle.*and content_type_id"):
         apply_plan(plan)
 
 
@@ -849,7 +849,7 @@ def test_handle_ref_without_claim_raises(test_source):
         ],
     )
 
-    with pytest.raises(ValueError, match="manufacturer.*via handle_ref"):
+    with pytest.raises(ValueError, match=r"manufacturer.*via handle_ref"):
         apply_plan(plan)
 
 
@@ -1014,7 +1014,7 @@ def test_identity_refs_unknown_handle_raises(test_source):
         ],
     )
 
-    with pytest.raises(ValueError, match="identity_ref.*parent.*theme:nonexistent"):
+    with pytest.raises(ValueError, match=r"identity_ref.*parent.*theme:nonexistent"):
         apply_plan(plan)
 
 
@@ -1055,7 +1055,7 @@ def test_identity_refs_mutual_exclusivity_raises(test_source):
         ],
     )
 
-    with pytest.raises(ValueError, match="both concrete.*and relationship_namespace"):
+    with pytest.raises(ValueError, match=r"both concrete.*and relationship_namespace"):
         apply_plan(plan)
 
 

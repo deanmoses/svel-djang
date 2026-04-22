@@ -38,7 +38,7 @@ def _make_mfr_at(name, slug, location):
     return mfr
 
 
-@pytest.fixture()
+@pytest.fixture
 def locations(db):
     """Standard location tree used across most tests."""
     usa = _make_location("usa", "USA", "country", divisions=["state", "city"])
@@ -59,7 +59,7 @@ def locations(db):
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def manufacturers(db, locations):
     """Standard manufacturers linked to the location tree."""
     williams = _make_mfr_at("Williams", "williams-electronics", locations["chicago"])

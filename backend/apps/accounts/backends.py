@@ -14,7 +14,7 @@ User = get_user_model()
 
 
 class WorkOSBackend:
-    def authenticate(self, request, **kwargs):  # noqa: ARG002
+    def authenticate(self, request, **kwargs):
         return None
 
     def get_user(self, user_id):

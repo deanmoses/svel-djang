@@ -73,7 +73,7 @@ _entity_ref_targets: dict[str, list[RefKey]] | None = None
 
 
 def _get_entity_ref_targets() -> dict[str, list[RefKey]]:
-    global _entity_ref_targets  # noqa: PLW0603
+    global _entity_ref_targets
     if _entity_ref_targets is None:
         _entity_ref_targets = _build_entity_ref_targets()
     return _entity_ref_targets
@@ -88,7 +88,7 @@ def _get_literal_schemas() -> dict[str, LiteralKey]:
     Lazy — safe to call at any time; caches after first call.
     Follows the same pattern as ``_get_entity_ref_targets()``.
     """
-    global _literal_schemas  # noqa: PLW0603
+    global _literal_schemas
     if _literal_schemas is None:
         from ._alias_registry import discover_alias_types
 
@@ -106,7 +106,7 @@ def get_relationship_namespaces() -> frozenset[str]:
 
     Lazy — safe to call at any time; caches after first call.
     """
-    global _relationship_namespaces  # noqa: PLW0603
+    global _relationship_namespaces
     if _relationship_namespaces is None:
         _relationship_namespaces = frozenset(_get_entity_ref_targets()) | frozenset(
             _get_literal_schemas()

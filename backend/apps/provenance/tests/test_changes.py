@@ -97,7 +97,7 @@ class TestCursorPaginate:
 
         items, cursor = cursor_paginate(ChangeSet.objects.all(), "", 2)
         assert len(items) == 2
-        items2, cursor2 = cursor_paginate(ChangeSet.objects.all(), cursor, 2)
+        items2, _ = cursor_paginate(ChangeSet.objects.all(), cursor, 2)
         assert len(items2) == 1
         all_ids = [i.pk for i in items] + [i.pk for i in items2]
         assert len(set(all_ids)) == 3

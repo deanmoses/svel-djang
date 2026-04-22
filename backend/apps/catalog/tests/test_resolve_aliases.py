@@ -111,7 +111,7 @@ def _get_fk_attr(parent_model):
 @pytest.mark.django_db
 class TestAliasSweptAllTypes:
     @pytest.mark.parametrize(
-        "parent_model,claim_field",
+        ("parent_model", "claim_field"),
         ALIAS_TYPES,
         ids=_ALIAS_IDS,
     )
@@ -130,7 +130,7 @@ class TestAliasSweptAllTypes:
         assert values == {"Alt Name A", "Alt Name B"}
 
     @pytest.mark.parametrize(
-        "parent_model,claim_field",
+        ("parent_model", "claim_field"),
         ALIAS_TYPES,
         ids=_ALIAS_IDS,
     )
@@ -148,7 +148,7 @@ class TestAliasSweptAllTypes:
         assert alias_model.objects.filter(**{fk_attr: parent}).count() == 0
 
     @pytest.mark.parametrize(
-        "parent_model,claim_field",
+        ("parent_model", "claim_field"),
         ALIAS_TYPES,
         ids=_ALIAS_IDS,
     )

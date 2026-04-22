@@ -43,23 +43,34 @@ exclude = [
 [tool.ruff.lint]
 # Mirrors flipfix (~/dev/flipfix) so both Django projects share a linting surface.
 select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "I",   # isort
-    "N",   # pep8-naming
-    "UP",  # pyupgrade
-    "B",   # flake8-bugbear
-    "C4",  # flake8-comprehensions
-    "DJ",  # flake8-django
-    "S",   # flake8-bandit (security)
-    "T20", # flake8-print
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "DJ",     # flake8-django
+    "S",      # flake8-bandit (security)
+    "T20",    # flake8-print
+    "DTZ",    # flake8-datetimez (naive datetime bugs)
+    "SIM",    # flake8-simplify
+    "PT",     # flake8-pytest-style
+    "LOG",    # flake8-logging
+    "G",      # flake8-logging-format
+    "PGH",    # pygrep-hooks (blanket noqa/type-ignore)
+    "ISC",    # flake8-implicit-str-concat
+    "RUF100", # unused-noqa
+    "RUF059", # unused-unpacked-variable
 ]
 ignore = [
     "E501",  # Line too long — handled by formatter
     "DJ001", # Avoid nullable CharField — common Django pattern
     "S101",  # Use of assert — okay in tests (also per-file-ignored below)
     "S311",  # Use of random — not cryptographic in this app
+    "PT019", # Underscore-prefix fixtures are the pytest idiom for side-effect-only fixtures
+    "SIM118", # Django SessionStore has .keys() but non-dict iteration
 ]
 
 [tool.ruff.lint.per-file-ignores]
