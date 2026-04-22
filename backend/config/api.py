@@ -1,8 +1,9 @@
 import importlib
+from typing import Any
 
 from django.apps import apps
 from django.db import connection
-from django.http import JsonResponse
+from django.http import HttpRequest, JsonResponse
 from ninja import NinjaAPI, Schema
 from ninja.errors import HttpError
 
@@ -28,7 +29,7 @@ class StatsSchema(Schema):
 
 
 @api.get("/stats", response=StatsSchema, tags=["private"])
-def stats(request):
+def stats(request: HttpRequest) -> dict[str, int]:
     with connection.cursor() as cursor:
         cursor.execute(
             """
@@ -51,7 +52,7 @@ def stats(request):
 
 
 @api.get("/health", tags=["private"])
-def health(request):
+def health(request: HttpRequest) -> dict[str, str]:
     with connection.cursor() as cursor:
         cursor.execute("SELECT 1")
     return {"status": "ok"}
@@ -64,7 +65,7 @@ def health(request):
 # ---------------------------------------------------------------------------
 
 
-def _discover_routers():
+def _discover_routers() -> None:
     for app_config in apps.get_app_configs():
         module_path = f"{app_config.name}.api"
         try:
@@ -87,12 +88,16 @@ _discover_routers()
 
 
 @api.exception_handler(StructuredValidationError)
-def _handle_structured_validation_error(request, exc):
+def _handle_structured_validation_error(
+    request: HttpRequest, exc: StructuredValidationError
+) -> JsonResponse:
     return JsonResponse({"detail": exc.to_response_body()}, status=422)
 
 
 @api.exception_handler(RateLimitExceededError)
-def _handle_rate_limit_exceeded(request, exc):
+def _handle_rate_limit_exceeded(
+    request: HttpRequest, exc: RateLimitExceededError
+) -> JsonResponse:
     response = JsonResponse(
         {
             "detail": {
@@ -113,7 +118,7 @@ def _handle_rate_limit_exceeded(request, exc):
 
 
 @api.get("/field-constraints/{entity_type}", tags=["private"])
-def get_field_constraints(request, entity_type: str):
+def get_field_constraints(request: HttpRequest, entity_type: str) -> Any:
     """Return numeric field constraints derived from model validators."""
     from apps.catalog.api.edit_claims import get_field_constraints as _get
     from apps.core.entity_types import get_linkable_model
