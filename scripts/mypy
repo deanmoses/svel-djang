@@ -37,14 +37,17 @@ set -eu
 # mypy-baseline.txt, and baselined errors appear as "new". Ignoring passed
 # paths keeps the output format consistent across every entry point.
 #
-# `--ignore 'mypy --install-types'` drops one specific note that mypy emits
-# but dmypy doesn't (the "or run mypy --install-types" suggestion chained
-# after any import-untyped error). Targeting this one line keeps mypy and
-# dmypy output matching the baseline, without suppressing the genuinely
-# useful diagnostic notes mypy attaches to errors (type-suggestion hints,
-# "-> None" recommendations, variance explanations, etc.).
+# `--ignore ...` drops the small set of import-missing companion notes that
+# plain mypy emits inconsistently relative to dmypy:
+# - the "or run mypy --install-types" suggestion
+# - the generic missing-import docs link
+# - the per-package `types-requests` install hint
+# Filtering only these keeps mypy and dmypy output matching the baseline,
+# without suppressing the genuinely useful diagnostic notes mypy attaches to
+# errors (type-suggestion hints, "-> None" recommendations, variance
+# explanations, etc.).
 uv run --directory backend mypy --config-file pyproject.toml . \
-    | uv run --directory backend mypy-baseline filter --ignore '.*--install-types.*'
+    | uv run --directory backend mypy-baseline filter --ignore '.*(--install-types|running_mypy\.html#missing-imports|types-requests).*'
 statuses=("${PIPESTATUS[@]}")
 mypy_status=${statuses[0]}
 filter_status=${statuses[1]}
