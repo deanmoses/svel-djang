@@ -54,7 +54,7 @@ class CitationInstance(models.Model):
         loc = f" @ {self.locator}" if self.locator else ""
         return f"Citation: {self.citation_source_id}{loc}"
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: object, **kwargs: object) -> None:
         if self.pk is not None:
             raise ValueError(
                 "CitationInstance is immutable. Create a new instance instead."
