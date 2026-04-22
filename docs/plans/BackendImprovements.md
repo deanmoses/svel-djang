@@ -4,23 +4,13 @@ Audit of the Django backend at [backend/](../../backend/) against modern Python/
 
 ## High-impact gaps
 
-### 1. No static type checking
+### Static type checking gaps
 
-No mypy, pyright, basedpyright, or ty configured anywhere. The only reference is a `.mypy_cache` entry in ruff's exclude list at [backend/pyproject.toml:39](../../backend/pyproject.toml#L39).
+We just added type checking and grandfathered in a lot of errors. The exception baseline is at backend/.basedpyright/baseline.json. It's a single JSON file keyed by file path, with each entry storing the rule name, code range, and a hash — basedpyright matches by position+hash so edits to a line generally invalidate the baseline entry (forcing a re-check). To retire baseline entries after fixing them: cd backend && uv run basedpyright --writebaseline.
 
-For a Python 3.14 + Django 5 project, this is the single biggest miss. Recommend `basedpyright` (stricter, faster than mypy) or `ty` (Astral's new checker, pairs with ruff). Wire into pre-commit and CI. Start in `strict` mode on one app and expand.
-
-### 2. No test coverage or parallelization
+### No test coverage or parallelization
 
 [backend/pytest.ini](../../backend/pytest.ini) has no `pytest-cov`, `pytest-xdist`, or `pytest-timeout`. For a project where tests gate commits via pre-commit, `-n auto` alone would noticeably speed up the hook. Add coverage thresholds in `pyproject.toml`.
-
-### 3. No observability stack
-
-Bare `logging.getLogger(__name__)` everywhere; no Sentry, no structlog/JSON logs, no request IDs, no OpenTelemetry. For a deployed Railway app this is a real gap — no way to correlate a user-reported bug to a trace. The basic logging config in [backend/config/settings.py:150-177](../../backend/config/settings.py#L150-L177) doesn't integrate with modern observability tools.
-
-### 4. Settings use raw `os.environ.get()`
-
-[backend/config/settings.py](../../backend/config/settings.py) parses env vars inline with no schema validation. Empty `ALLOWED_HOSTS` / `CSRF_TRUSTED_ORIGINS` silently become `[""]`. `SECRET_KEY` crashes in prod if missing, but other critical vars fail silently. Move to `pydantic-settings` or `django-environ` for fail-fast validation.
 
 ## Mid-impact
 
