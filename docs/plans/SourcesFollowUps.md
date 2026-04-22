@@ -98,28 +98,8 @@ def resolve_linkable_entity(entity_type: str, slug: str, *, queryset=None):
 
 ---
 
-## Document the `entity_type` slug convention
-
-**Problem.** The mapping between frontend route segments and backend `entity_type` strings is implicit (`/titles/` routes use `entity_type="title"`; `/corporate-entities/` uses `"corporate-entity"`; etc.). I had to grep existing loaders to derive it when generating the new sources routes. Anyone adding a new entity type will have to do the same.
-
-**Why it matters.** This is a piece of "load-bearing knowledge" that exists only in examples. One place for the naming rule (hyphenated singular of the route segment) would prevent a class of "I named it plural and now nothing works" bugs.
-
-**Shape.** A short section in [docs/DomainModel.md](../DomainModel.md) or a new `docs/EntityTypes.md`: the canonical list of entity types, the corresponding route segment, and the rule ("hyphenated singular; matches `CatalogModel.entity_type`").
-
-Even better: derive the canonical list by inspection at doc-build time, so the list can't go stale. But a plain table is 80% of the value.
-
-**Risk.** Zero. Doc-only.
-
----
-
 ## Parity test for edit-history soft-delete behavior
 
 **Problem.** Whatever policy is chosen in the soft-delete follow-up above, there's currently **no test** covering "does GET edit-history for a soft-deleted entity return 200 or 404?" The behavior is whatever the code happens to do.
 
 **Shape.** Covered by the soft-delete follow-up above. Called out separately because even if that product decision ratifies the status quo ("yes, soft-delete is soft, both endpoints return 200"), a regression test is still needed so nobody accidentally changes it later.
-
----
-
-## Meta-observation: the plan-mode review cycle worked
-
-Not a follow-up per se, but worth noting: this PR went through a plan-file review pass, then an AI code-review pass after the plan was drafted, and found two genuine bugs pre-commit (the revert blast-radius when moving to changeset-keyed URLs — reverted to claim-keyed after review; and using `ChangeSetSchema` vs `CitedChangeSetSchema` for evidence). Both would have shipped without the review pass. Worth keeping in the toolkit for other refactors this size.

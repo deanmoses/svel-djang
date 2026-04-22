@@ -50,6 +50,10 @@ Use route files by responsibility:
 
 For public SSR pages, `+page.server.ts` or `+layout.server.ts` should be the default choice.
 
+### Route directory naming
+
+A `src/routes/[slug]/` directory name is the **plural** of the backend's `entity_type` string — e.g. `corporate-entities/` for `entity_type="corporate-entity"`. The rule and the generated canonical list are in [EntityNaming.md](EntityNaming.md). Parity is test-enforced, so CI catches a wrong name.
+
 ## Implementing SSR Routes
 
 For SSR routes, prefer:
