@@ -43,7 +43,7 @@ class ChangeSetSummarySchema(Schema):
     entity_type_label: str
 
 
-class ChangesListSchema(Schema):
+class ChangeSetListSchema(Schema):
     items: list[ChangeSetSummarySchema]
     next_cursor: str | None = None
 
@@ -129,7 +129,11 @@ pages_router = Router(tags=["private"])
 )
 @decorate_view(cache_control(no_cache=True))
 def edit_history_page(request, entity_type: str, slug: str):
-    """Return changeset-grouped edit history for any catalog entity."""
+    """Return changeset-grouped edit history for any catalog entity.
+
+    Accepts soft-deleted entities so the provenance record remains
+    inspectable after deletion — matches ``sources_page``.
+    """
     try:
         model_class = get_linkable_model(entity_type)
     except ValueError:
@@ -164,7 +168,7 @@ def sources_page(request, entity_type: str, slug: str):
     }
 
 
-@pages_router.get("/changes/", response=ChangesListSchema)
+@pages_router.get("/changesets/", response=ChangeSetListSchema)
 @decorate_view(cache_control(no_cache=True))
 def list_changes(
     request,
@@ -278,7 +282,7 @@ def list_changes(
 
 
 @pages_router.get(
-    "/changes/{changeset_id}/",
+    "/changesets/{changeset_id}/",
     response={200: ChangeSetDetailSchema, 404: dict},
 )
 def change_detail(request, changeset_id: int):

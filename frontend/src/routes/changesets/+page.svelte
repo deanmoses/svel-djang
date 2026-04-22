@@ -49,7 +49,7 @@
 
 	async function fetchPage(cursor?: string) {
 		const { after, before } = computeTimeFilter();
-		const { data } = await client.GET('/api/pages/changes/', {
+		const { data } = await client.GET('/api/pages/changesets/', {
 			params: {
 				query: {
 					entity_type: entityType || undefined,
@@ -112,7 +112,7 @@
 		if (!detailCache.has(id)) {
 			loadingDetailIds.add(id);
 			try {
-				const { data } = await client.GET('/api/pages/changes/{changeset_id}/', {
+				const { data } = await client.GET('/api/pages/changesets/{changeset_id}/', {
 					params: { path: { changeset_id: id } }
 				});
 				if (data) {

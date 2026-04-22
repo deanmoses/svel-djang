@@ -1,4 +1,4 @@
-"""Tests for per-field claim revert via POST /api/provenance/claims/{claim_id}/revert/."""
+"""Tests for per-field claim revert via POST /api/claims/{claim_id}/revert/."""
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -10,7 +10,7 @@ from apps.provenance.test_factories import user_changeset
 
 User = get_user_model()
 
-REVERT_URL = "/api/provenance/claims/{claim_id}/revert/"
+REVERT_URL = "/api/claims/{claim_id}/revert/"
 
 
 @pytest.fixture

@@ -351,8 +351,8 @@ class TestUndoDelete:
         cs_id = _post_delete(client, "pat-lawlor").json()["changeset_id"]
 
         undo = client.post(
-            "/api/provenance/undo-changeset/",
-            data=json.dumps({"changeset_id": cs_id, "note": "oops"}),
+            f"/api/changesets/{cs_id}/undo/",
+            data=json.dumps({"note": "oops"}),
             content_type="application/json",
         )
         assert undo.status_code == 200, undo.content

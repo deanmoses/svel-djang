@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { groupSourcesByField } from './entity-provenance';
+import { groupSourcesByField } from './entity-sources';
 
 describe('groupSourcesByField', () => {
 	it('separates conflicts, agreement, and single-source fields', () => {

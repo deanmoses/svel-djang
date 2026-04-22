@@ -116,3 +116,29 @@ class TestCitedEditEvidence:
 
         assert resp.status_code == 200
         assert [item["note"] for item in resp.json()["evidence"]] == ["Cited update"]
+
+    def test_soft_deleted_entity_still_returns_sources(
+        self, client, user, title, citation_source
+    ):
+        """Soft-delete is soft: sources page remains inspectable by slug.
+
+        Policy: provenance surfaces intentionally use the default manager
+        (not ``.active()``) so deleted entities keep their claims and
+        citations visible to direct API callers. See ``sources_page``
+        docstring.
+        """
+        changeset = user_changeset(user, note="Documented the flyer")
+        cited_claim = Claim.objects.assert_claim(
+            title, "name", "Medieval Madness (1997)", user=user, changeset=changeset
+        )
+        _attach_citation(cited_claim, citation_source)
+
+        title.status = "deleted"
+        title.save(update_fields=["status"])
+
+        resp = client.get("/api/pages/sources/title/medieval-madness/")
+        assert resp.status_code == 200
+        body = resp.json()
+        assert len(body["sources"]) >= 1
+        assert len(body["evidence"]) == 1
+        assert body["evidence"][0]["note"] == "Documented the flyer"

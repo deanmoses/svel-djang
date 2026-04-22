@@ -185,6 +185,31 @@ class TestEditHistoryOrdering:
 
 
 @pytest.mark.django_db
+class TestEditHistorySoftDeleted:
+    def test_soft_deleted_entity_still_returns_history(self, client, user, pm):
+        """Soft-delete is soft: audit trail remains inspectable by slug.
+
+        Policy: provenance surfaces intentionally use the default manager
+        (not ``.active()``) so deleted entities keep their history visible
+        to direct API callers. See ``edit_history_page`` docstring.
+        """
+        client.force_login(user)
+        client.patch(
+            f"/api/models/{pm.slug}/claims/",
+            data='{"fields": {"year": 1998}}',
+            content_type="application/json",
+        )
+        pm.status = "deleted"
+        pm.save(update_fields=["status"])
+
+        resp = client.get(f"/api/pages/edit-history/model/{pm.slug}/")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert len(data) == 1
+        assert data[0]["changes"][0]["new_value"] == 1998
+
+
+@pytest.mark.django_db
 class TestEditHistoryEntityTypeGuard:
     def test_unknown_entity_type_returns_404(self, client):
         resp = client.get("/api/pages/edit-history/nonexistent/some-slug/")
