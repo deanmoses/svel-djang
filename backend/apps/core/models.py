@@ -344,11 +344,12 @@ class LinkableModel(models.Model):
 
     entity_type: str  # required on concrete subclasses
     entity_type_plural: str  # required on concrete subclasses
+    link_url_pattern: ClassVar[str]
 
     class Meta:
         abstract = True
 
-    def __init_subclass__(cls, **kwargs):
+    def __init_subclass__(cls, **kwargs: object) -> None:
         super().__init_subclass__(**kwargs)
         # __init_subclass__ fires before Django's ModelBase sets up ``_meta``,
         # so abstract/concrete cannot be determined via ``_meta.abstract`` here.
