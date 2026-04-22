@@ -27,6 +27,14 @@ describe('isFocusModePath', () => {
 		it('matches delete confirmation', () => {
 			expect(isFocusModePath('/titles/medieval-madness/delete')).toBe(true);
 		});
+
+		it('matches edit-history', () => {
+			expect(isFocusModePath('/titles/medieval-madness/edit-history')).toBe(true);
+		});
+
+		it('matches sources', () => {
+			expect(isFocusModePath('/titles/medieval-madness/sources')).toBe(true);
+		});
 	});
 
 	describe('full-chrome routes', () => {
@@ -62,6 +70,22 @@ describe('isFocusModePath', () => {
 
 		it('does not match "delete" appearing mid-path', () => {
 			expect(isFocusModePath('/titles/medieval-madness/delete/extra')).toBe(false);
+		});
+
+		it('does not match an entity record whose slug is "sources"', () => {
+			expect(isFocusModePath('/titles/sources')).toBe(false);
+		});
+
+		it('does not match an entity record whose slug is "edit-history"', () => {
+			expect(isFocusModePath('/titles/edit-history')).toBe(false);
+		});
+
+		it('does not match "sources" with trailing extra segments', () => {
+			expect(isFocusModePath('/titles/medieval-madness/sources/something')).toBe(false);
+		});
+
+		it('does not match "edit-history" with trailing extra segments', () => {
+			expect(isFocusModePath('/titles/medieval-madness/edit-history/something')).toBe(false);
 		});
 	});
 });

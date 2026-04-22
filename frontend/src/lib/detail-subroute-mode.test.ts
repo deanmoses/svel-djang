@@ -30,4 +30,23 @@ describe('resolveDetailSubrouteMode', () => {
 	it('returns edit-history for the edit history route', () => {
 		expect(resolveDetailSubrouteMode('/titles/medieval-madness/edit-history')).toBe('edit-history');
 	});
+
+	it('returns detail when slug happens to be "sources"', () => {
+		// /titles/sources is a detail page for a title with slug='sources',
+		// not the sources audit route — guards against the includes()-based
+		// classifier bug.
+		expect(resolveDetailSubrouteMode('/titles/sources')).toBe('detail');
+	});
+
+	it('returns detail when slug happens to be "edit-history"', () => {
+		expect(resolveDetailSubrouteMode('/titles/edit-history')).toBe('detail');
+	});
+
+	it('returns detail when slug happens to be "edit"', () => {
+		expect(resolveDetailSubrouteMode('/titles/edit')).toBe('detail');
+	});
+
+	it('returns detail when slug happens to be "media"', () => {
+		expect(resolveDetailSubrouteMode('/titles/media')).toBe('detail');
+	});
 });

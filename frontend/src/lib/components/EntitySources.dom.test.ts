@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/svelte';
 import { describe, expect, it } from 'vitest';
 
-import EntitySources from './EntitySources.svelte';
+import EntitySources from './EntitySources.test-harness.svelte';
 
 const sampleClaim = {
 	source_name: 'IPDB',
@@ -45,7 +45,7 @@ describe('EntitySources', () => {
 		expect(screen.getByText('Documented the flyer')).toBeInTheDocument();
 		expect(screen.getByText(/Applies to: year, description/i)).toBeInTheDocument();
 		expect(screen.getByText('Williams Flyer')).toBeInTheDocument();
-		expect(screen.getByText('Sources')).toBeInTheDocument();
+		expect(screen.getByRole('heading', { name: 'Sources', level: 1 })).toBeInTheDocument();
 		expect(screen.getByText('Single source (1 field)')).toBeInTheDocument();
 	});
 
@@ -57,7 +57,7 @@ describe('EntitySources', () => {
 			}
 		});
 
-		expect(screen.getByText('Sources')).toBeInTheDocument();
+		expect(screen.getByRole('heading', { name: 'Sources', level: 1 })).toBeInTheDocument();
 		expect(screen.queryByText('Evidence')).not.toBeInTheDocument();
 	});
 
@@ -66,7 +66,7 @@ describe('EntitySources', () => {
 			props: { sources: [sampleClaim] }
 		});
 
-		expect(screen.getByText('Sources')).toBeInTheDocument();
+		expect(screen.getByRole('heading', { name: 'Sources', level: 1 })).toBeInTheDocument();
 		expect(screen.queryByText('Evidence')).not.toBeInTheDocument();
 	});
 

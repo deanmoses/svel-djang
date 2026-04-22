@@ -23,6 +23,8 @@
 	} from '$lib/components/editors/manufacturer-edit-sections';
 	import { LAYOUT_BREAKPOINT } from '$lib/constants';
 	import { resolveDetailSubrouteMode } from '$lib/detail-subroute-mode';
+	import { isFocusModePath } from '$lib/focus-mode';
+	import { setEntityContext } from '$lib/entity-context';
 	import { createIsMobileFlag } from '$lib/use-is-mobile.svelte';
 	import ManufacturerEditorSwitch from './edit/ManufacturerEditorSwitch.svelte';
 
@@ -34,11 +36,20 @@
 	let metaDescription = $derived(mfr.description?.text || `${mfr.name} — pinball manufacturer`);
 	let mode = $derived(resolveDetailSubrouteMode(page.url.pathname));
 	let isDetail = $derived(mode === 'detail');
-	let isEdit = $derived(mode === 'edit');
+	let isFocusMode = $derived(isFocusModePath(page.url.pathname));
+
+	setEntityContext({
+		get name() {
+			return mfr.name;
+		},
+		get detailHref() {
+			return resolve(`/manufacturers/${slug}`);
+		}
+	});
 	const isMobileFlag = createIsMobileFlag(LAYOUT_BREAKPOINT);
 	let isMobile = $derived(isMobileFlag.current);
 	let editing = $state<ManufacturerEditSectionKey | null>(null);
-	let syncEnabled = $derived(!isMobile && !isEdit);
+	let syncEnabled = $derived(!isMobile && !isFocusMode);
 	// Tracks the last URL-derived edit section so local modal state doesn't immediately write it back.
 	let lastUrlEditing = $state<ManufacturerEditSectionKey | null>(null);
 
@@ -123,7 +134,7 @@
 	imageAlt={mfr.logo_url ? `${mfr.name} logo` : undefined}
 />
 
-{#if isEdit}
+{#if isFocusMode}
 	{@render children()}
 {:else}
 	{#snippet actionBar()}

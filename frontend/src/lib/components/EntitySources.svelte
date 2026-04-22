@@ -1,7 +1,9 @@
 <script lang="ts">
 	import type { components } from '$lib/api/schema';
+	import FocusContentShell from './FocusContentShell.svelte';
 	import UserBadge from './UserBadge.svelte';
 	import SmartDate from './SmartDate.svelte';
+	import { getEntityContext } from '$lib/entity-context';
 	import { groupSourcesByField } from './entity-provenance';
 
 	type Claim = components['schemas']['ClaimSchema'];
@@ -16,6 +18,7 @@
 	} = $props();
 
 	let sourceGroups = $derived(groupSourcesByField(sources));
+	const entity = getEntityContext();
 
 	function claimAttribution(claim: Claim): string {
 		return claim.source_name ?? (claim.user_display ? `@${claim.user_display}` : 'Unknown');
@@ -42,135 +45,140 @@
 	{/if}
 {/snippet}
 
-{#if sources.length > 0}
-	{@const { conflicts, agreed, single } = sourceGroups}
-	{@const contributorNames = [
-		...new Set(
-			sources
-				.map((c) => c.source_name ?? (c.user_display ? `@${c.user_display}` : null))
-				.filter(Boolean)
-		)
-	]}
-	<section class="sources">
-		{#if evidence.length > 0}
-			<section class="evidence">
-				<h2>Evidence</h2>
-				<ol class="changeset-list">
-					{#each evidence as changeset (changeset.id)}
-						<li class="changeset-card">
-							<div class="changeset-header">
-								{#if changeset.user_display}
-									<UserBadge username={changeset.user_display} />
-								{:else}
-									<span class="source-badge">Unknown</span>
-								{/if}
-								<span class="timestamp"><SmartDate iso={changeset.created_at} /></span>
-							</div>
-							{#if changeset.note}
-								<p class="evidence-note">{changeset.note}</p>
-							{/if}
-							<p class="changeset-fields">Applies to: {changeset.fields.join(', ')}</p>
-							{#each changeset.citations as citation, i (i)}
-								<div class="evidence-citation">
-									<div class="source-name">{citation.source_name}</div>
-									{#if citation.author || citation.year}
-										<div class="meta">
-											{[citation.author, citation.year].filter(Boolean).join(', ')}
-										</div>
+<FocusContentShell backHref={entity.detailHref} maxWidth="64rem">
+	{#snippet heading()}
+		<h1>Sources</h1>
+	{/snippet}
+
+	{#if sources.length > 0}
+		{@const { conflicts, agreed, single } = sourceGroups}
+		{@const contributorNames = [
+			...new Set(
+				sources
+					.map((c) => c.source_name ?? (c.user_display ? `@${c.user_display}` : null))
+					.filter(Boolean)
+			)
+		]}
+		<section class="sources">
+			{#if evidence.length > 0}
+				<section class="evidence">
+					<h2>Evidence</h2>
+					<ol class="changeset-list">
+						{#each evidence as changeset (changeset.id)}
+							<li class="changeset-card">
+								<div class="changeset-header">
+									{#if changeset.user_display}
+										<UserBadge username={changeset.user_display} />
+									{:else}
+										<span class="source-badge">Unknown</span>
 									{/if}
-									{#if citation.locator}
-										<div class="locator">{citation.locator}</div>
-									{/if}
-									{#if citation.links.length > 0}
-										<div class="links">
-											{#each citation.links as link (link.url)}
-												<a href={link.url} target="_blank" rel="noopener">{link.label}</a>
-											{/each}
-										</div>
-									{/if}
+									<span class="timestamp"><SmartDate iso={changeset.created_at} /></span>
 								</div>
-							{/each}
-						</li>
-					{/each}
-				</ol>
-			</section>
-		{/if}
-
-		<h2>Sources</h2>
-		<p class="sources-summary">
-			{contributorNames.join(' and ')} contributed to this record.
-		</p>
-
-		{#if conflicts.length > 0}
-			<details class="sources-group" open>
-				<summary>
-					<h3>
-						Conflicts resolved ({conflicts.length} field{conflicts.length === 1 ? '' : 's'})
-					</h3>
-				</summary>
-				<dl class="field-list">
-					{#each conflicts as { field, claims } (field)}
-						<div class="field-row conflict">
-							<dt>{field}</dt>
-							<dd>
-								{#each claims as claim, i (i)}
-									<span class="claim" class:used={claim.is_winner}>
-										{@render claimDetail(claim)}
-									</span>
+								{#if changeset.note}
+									<p class="evidence-note">{changeset.note}</p>
+								{/if}
+								<p class="changeset-fields">Applies to: {changeset.fields.join(', ')}</p>
+								{#each changeset.citations as citation, i (i)}
+									<div class="evidence-citation">
+										<div class="source-name">{citation.source_name}</div>
+										{#if citation.author || citation.year}
+											<div class="meta">
+												{[citation.author, citation.year].filter(Boolean).join(', ')}
+											</div>
+										{/if}
+										{#if citation.locator}
+											<div class="locator">{citation.locator}</div>
+										{/if}
+										{#if citation.links.length > 0}
+											<div class="links">
+												{#each citation.links as link (link.url)}
+													<a href={link.url} target="_blank" rel="noopener">{link.label}</a>
+												{/each}
+											</div>
+										{/if}
+									</div>
 								{/each}
-							</dd>
-						</div>
-					{/each}
-				</dl>
-			</details>
-		{/if}
+							</li>
+						{/each}
+					</ol>
+				</section>
+			{/if}
 
-		{#if agreed.length > 0}
-			<details class="sources-group">
-				<summary>
-					<h3>Sources agree ({agreed.length} field{agreed.length === 1 ? '' : 's'})</h3>
-				</summary>
-				<dl class="field-list">
-					{#each agreed as { field, claims } (field)}
-						<div class="field-row">
-							<dt>{field}</dt>
-							<dd>
-								<span class="claim used">
-									{formatValue(claims[0].value)}
-									<span class="source-list">
-										{claims.map(claimAttribution).join(', ')}
+			<p class="sources-summary">
+				{contributorNames.join(' and ')} contributed to this record.
+			</p>
+
+			{#if conflicts.length > 0}
+				<details class="sources-group" open>
+					<summary>
+						<h3>
+							Conflicts resolved ({conflicts.length} field{conflicts.length === 1 ? '' : 's'})
+						</h3>
+					</summary>
+					<dl class="field-list">
+						{#each conflicts as { field, claims } (field)}
+							<div class="field-row conflict">
+								<dt>{field}</dt>
+								<dd>
+									{#each claims as claim, i (i)}
+										<span class="claim" class:used={claim.is_winner}>
+											{@render claimDetail(claim)}
+										</span>
+									{/each}
+								</dd>
+							</div>
+						{/each}
+					</dl>
+				</details>
+			{/if}
+
+			{#if agreed.length > 0}
+				<details class="sources-group">
+					<summary>
+						<h3>Sources agree ({agreed.length} field{agreed.length === 1 ? '' : 's'})</h3>
+					</summary>
+					<dl class="field-list">
+						{#each agreed as { field, claims } (field)}
+							<div class="field-row">
+								<dt>{field}</dt>
+								<dd>
+									<span class="claim used">
+										{formatValue(claims[0].value)}
+										<span class="source-list">
+											{claims.map(claimAttribution).join(', ')}
+										</span>
 									</span>
-								</span>
-							</dd>
-						</div>
-					{/each}
-				</dl>
-			</details>
-		{/if}
+								</dd>
+							</div>
+						{/each}
+					</dl>
+				</details>
+			{/if}
 
-		{#if single.length > 0}
-			<details class="sources-group">
-				<summary>
-					<h3>Single source ({single.length} field{single.length === 1 ? '' : 's'})</h3>
-				</summary>
-				<dl class="field-list">
-					{#each single as { field, claims } (field)}
-						<div class="field-row">
-							<dt>{field}</dt>
-							<dd>
-								<span class="claim used">
-									{@render claimDetail(claims[0])}
-								</span>
-							</dd>
-						</div>
-					{/each}
-				</dl>
-			</details>
-		{/if}
-	</section>
-{:else}
-	<p class="no-sources">No source data recorded yet.</p>
-{/if}
+			{#if single.length > 0}
+				<details class="sources-group">
+					<summary>
+						<h3>Single source ({single.length} field{single.length === 1 ? '' : 's'})</h3>
+					</summary>
+					<dl class="field-list">
+						{#each single as { field, claims } (field)}
+							<div class="field-row">
+								<dt>{field}</dt>
+								<dd>
+									<span class="claim used">
+										{@render claimDetail(claims[0])}
+									</span>
+								</dd>
+							</div>
+						{/each}
+					</dl>
+				</details>
+			{/if}
+		</section>
+	{:else}
+		<p class="no-sources">No source data recorded yet.</p>
+	{/if}
+</FocusContentShell>
 
 <style>
 	h2 {

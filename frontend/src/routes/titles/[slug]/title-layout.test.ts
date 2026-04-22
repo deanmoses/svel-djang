@@ -72,15 +72,29 @@ describe('title layout', () => {
 		expect(body).not.toContain('>Back<');
 	});
 
-	it('renders a Back link on sources subroutes', () => {
+	it('strips the detail shell on sources subroutes (focus mode)', () => {
 		pageState.url = new URL('http://localhost:5173/titles/medieval-madness/sources');
 
 		const { body } = render(Harness, {
 			props: { data: { title: MOCK_TITLE } }
 		});
 
-		expect(body).toContain('>Back<');
-		expect(body).toContain('/titles/medieval-madness');
+		// Layout renders only the child in focus mode; chrome is gone.
+		expect(body).toContain('Child content');
+		expect(body).not.toContain('History');
+		expect(body).not.toContain('Sources');
+		expect(body).not.toContain('Edit');
+	});
+
+	it('strips the detail shell on edit-history subroutes (focus mode)', () => {
+		pageState.url = new URL('http://localhost:5173/titles/medieval-madness/edit-history');
+
+		const { body } = render(Harness, {
+			props: { data: { title: MOCK_TITLE } }
+		});
+
+		expect(body).toContain('Child content');
+		expect(body).not.toContain('History');
 	});
 
 	it('renders direct edit links on editable title sidebar sections when authenticated', () => {

@@ -20,6 +20,8 @@
 	} from '$lib/components/editors/system-edit-sections';
 	import { LAYOUT_BREAKPOINT } from '$lib/constants';
 	import { resolveDetailSubrouteMode } from '$lib/detail-subroute-mode';
+	import { isFocusModePath } from '$lib/focus-mode';
+	import { setEntityContext } from '$lib/entity-context';
 	import { createIsMobileFlag } from '$lib/use-is-mobile.svelte';
 	import SystemEditorSwitch from './edit/SystemEditorSwitch.svelte';
 
@@ -30,11 +32,20 @@
 	let metaDescription = $derived(system.description?.text || `${system.name} — ${SITE_NAME}`);
 	let mode = $derived(resolveDetailSubrouteMode(page.url.pathname));
 	let isDetail = $derived(mode === 'detail');
-	let isEdit = $derived(mode === 'edit');
+	let isFocusMode = $derived(isFocusModePath(page.url.pathname));
+
+	setEntityContext({
+		get name() {
+			return system.name;
+		},
+		get detailHref() {
+			return resolve(`/systems/${slug}`);
+		}
+	});
 	const isMobileFlag = createIsMobileFlag(LAYOUT_BREAKPOINT);
 	let isMobile = $derived(isMobileFlag.current);
 	let editing = $state<SystemEditSectionKey | null>(null);
-	let syncEnabled = $derived(!isMobile && !isEdit);
+	let syncEnabled = $derived(!isMobile && !isFocusMode);
 	let lastUrlEditing = $state<SystemEditSectionKey | null>(null);
 
 	$effect(() => {
@@ -100,7 +111,7 @@
 
 <MetaTags title={system.name} description={metaDescription} url={page.url.href} />
 
-{#if isEdit}
+{#if isFocusMode}
 	{@render children()}
 {:else}
 	{#snippet actionBar()}

@@ -21,6 +21,8 @@
 	} from '$lib/components/editors/corporate-entity-edit-sections';
 	import { LAYOUT_BREAKPOINT } from '$lib/constants';
 	import { resolveDetailSubrouteMode } from '$lib/detail-subroute-mode';
+	import { isFocusModePath } from '$lib/focus-mode';
+	import { setEntityContext } from '$lib/entity-context';
 	import { createIsMobileFlag } from '$lib/use-is-mobile.svelte';
 	import CorporateEntityEditorSwitch from './edit/CorporateEntityEditorSwitch.svelte';
 
@@ -32,11 +34,20 @@
 	let metaDescription = $derived(ce.description?.text || `${ce.name} — ${SITE_NAME}`);
 	let mode = $derived(resolveDetailSubrouteMode(page.url.pathname));
 	let isDetail = $derived(mode === 'detail');
-	let isEdit = $derived(mode === 'edit');
+	let isFocusMode = $derived(isFocusModePath(page.url.pathname));
+
+	setEntityContext({
+		get name() {
+			return ce.name;
+		},
+		get detailHref() {
+			return resolve(`/corporate-entities/${slug}`);
+		}
+	});
 	const isMobileFlag = createIsMobileFlag(LAYOUT_BREAKPOINT);
 	let isMobile = $derived(isMobileFlag.current);
 	let editing = $state<CorporateEntityEditSectionKey | null>(null);
-	let syncEnabled = $derived(!isMobile && !isEdit);
+	let syncEnabled = $derived(!isMobile && !isFocusMode);
 	// Tracks the last URL-derived edit section so local modal state doesn't immediately write it back.
 	let lastUrlEditing = $state<CorporateEntityEditSectionKey | null>(null);
 
@@ -117,7 +128,7 @@
 
 <MetaTags title={ce.name} description={metaDescription} url={page.url.href} />
 
-{#if isEdit}
+{#if isFocusMode}
 	{@render children()}
 {:else}
 	{#snippet actionBar()}

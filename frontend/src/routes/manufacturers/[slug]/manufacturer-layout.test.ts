@@ -83,6 +83,29 @@ describe('manufacturer layout', () => {
 		expect(body).toContain('/manufacturers/williams');
 	});
 
+	it('strips the detail shell on sources subroutes (focus mode)', () => {
+		pageState.url = new URL('http://localhost:5173/manufacturers/williams/sources');
+
+		const { body } = render(Harness, {
+			props: { data: { manufacturer: MOCK_MANUFACTURER } }
+		});
+
+		expect(body).toContain('Child content');
+		expect(body).not.toContain('History');
+		expect(body).not.toContain('Page sections');
+	});
+
+	it('strips the detail shell on edit-history subroutes (focus mode)', () => {
+		pageState.url = new URL('http://localhost:5173/manufacturers/williams/edit-history');
+
+		const { body } = render(Harness, {
+			props: { data: { manufacturer: MOCK_MANUFACTURER } }
+		});
+
+		expect(body).toContain('Child content');
+		expect(body).not.toContain('History');
+	});
+
 	it('renders a direct edit link on the Links sidebar section when authenticated', () => {
 		authState.isAuthenticated = true;
 

@@ -3,9 +3,11 @@
 	import client from '$lib/api/client';
 	import type { components } from '$lib/api/schema';
 	import { auth } from '$lib/auth.svelte';
+	import FocusContentShell from './FocusContentShell.svelte';
 	import InlineDiff from './InlineDiff.svelte';
 	import UserBadge from './UserBadge.svelte';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
+	import { getEntityContext } from '$lib/entity-context';
 	import { isDiffable, formatValue } from './change-display';
 	import SmartDate from './SmartDate.svelte';
 
@@ -13,6 +15,7 @@
 	type FieldChange = components['schemas']['FieldChangeSchema'];
 
 	let { changesets }: { changesets: ChangeSet[] } = $props();
+	const entity = getEntityContext();
 
 	let revertingClaimId = $state<number | null>(null);
 	let revertNote = $state('');
@@ -161,108 +164,106 @@
 	{/if}
 {/snippet}
 
-{#if changesets.length > 0}
-	<section class="edit-history">
-		<h2>Edit History</h2>
-		<ol class="changeset-list">
-			{#each changesets as cs (cs.id)}
-				{#if !isEmptyChangeset(cs)}
-					<li class="changeset">
-						<div class="changeset-header">
-							<UserBadge username={cs.user_display} />
-							<span class="timestamp"><SmartDate iso={cs.created_at} /></span>
-						</div>
-						{#if cs.note}
-							<p class="changeset-note">{cs.note}</p>
-						{/if}
-						<dl class="field-list">
-							{#each cs.changes as change (change.claim_key)}
-								{#if change.is_retracted}
-									{@const info =
-										change.claim_id != null ? retractionLookup.get(change.claim_id) : undefined}
-									<div
-										class="field-row field-row-retraction"
-										class:field-row-diff={isDiffable(change)}
-									>
-										<dt>{change.field_name}</dt>
-										<dd>
-											<span class="reverted-badge">reverted</span>
-											{#if info}
-												by {#if info.user_display}<a href="/users/{info.user_display}"
-														>{info.user_display}</a
-													>{:else}system{/if}
-												on
-												<span class="timestamp"><SmartDate iso={info.created_at} /></span
-												>{#if info.note}:
-													{info.note}{/if}
+<FocusContentShell backHref={entity.detailHref} maxWidth="64rem">
+	{#snippet heading()}
+		<h1>Edit History</h1>
+	{/snippet}
+
+	{#if changesets.length > 0}
+		<section class="edit-history">
+			<ol class="changeset-list">
+				{#each changesets as cs (cs.id)}
+					{#if !isEmptyChangeset(cs)}
+						<li class="changeset">
+							<div class="changeset-header">
+								<UserBadge username={cs.user_display} />
+								<span class="timestamp"><SmartDate iso={cs.created_at} /></span>
+							</div>
+							{#if cs.note}
+								<p class="changeset-note">{cs.note}</p>
+							{/if}
+							<dl class="field-list">
+								{#each cs.changes as change (change.claim_key)}
+									{#if change.is_retracted}
+										{@const info =
+											change.claim_id != null ? retractionLookup.get(change.claim_id) : undefined}
+										<div
+											class="field-row field-row-retraction"
+											class:field-row-diff={isDiffable(change)}
+										>
+											<dt>{change.field_name}</dt>
+											<dd>
+												<span class="reverted-badge">reverted</span>
+												{#if info}
+													by {#if info.user_display}<a href="/users/{info.user_display}"
+															>{info.user_display}</a
+														>{:else}system{/if}
+													on
+													<span class="timestamp"><SmartDate iso={info.created_at} /></span
+													>{#if info.note}:
+														{info.note}{/if}
+												{/if}
+											</dd>
+											{#if isDiffable(change)}
+												<dd>
+													<InlineDiff oldValue={change.old_value} newValue={change.new_value} />
+												</dd>
+											{:else}
+												<dd>
+													{#if change.old_value !== null && change.old_value !== undefined}
+														<span class="old-value">{formatValue(change.old_value)}</span>
+														<span class="arrow">&rarr;</span>
+													{/if}
+													<span class="old-value">{formatValue(change.new_value)}</span>
+												</dd>
 											{/if}
-										</dd>
-										{#if isDiffable(change)}
+										</div>
+									{:else if isDiffable(change)}
+										<div class="field-row field-row-diff">
+											<dt>{change.field_name}</dt>
 											<dd>
 												<InlineDiff oldValue={change.old_value} newValue={change.new_value} />
 											</dd>
-										{:else}
+											{@render revertControls(change)}
+										</div>
+									{:else}
+										<div class="field-row">
+											<dt>{change.field_name}</dt>
 											<dd>
 												{#if change.old_value !== null && change.old_value !== undefined}
 													<span class="old-value">{formatValue(change.old_value)}</span>
 													<span class="arrow">&rarr;</span>
 												{/if}
-												<span class="old-value">{formatValue(change.new_value)}</span>
+												<span class="new-value">{formatValue(change.new_value)}</span>
 											</dd>
-										{/if}
-									</div>
-								{:else if isDiffable(change)}
-									<div class="field-row field-row-diff">
-										<dt>{change.field_name}</dt>
-										<dd>
-											<InlineDiff oldValue={change.old_value} newValue={change.new_value} />
-										</dd>
-										{@render revertControls(change)}
-									</div>
-								{:else}
-									<div class="field-row">
-										<dt>{change.field_name}</dt>
-										<dd>
-											{#if change.old_value !== null && change.old_value !== undefined}
-												<span class="old-value">{formatValue(change.old_value)}</span>
-												<span class="arrow">&rarr;</span>
-											{/if}
-											<span class="new-value">{formatValue(change.new_value)}</span>
-										</dd>
-										{@render revertControls(change)}
-									</div>
-								{/if}
-							{/each}
-							<!-- Show retractions that couldn't be matched to an original change -->
-							{#each cs.retractions ?? [] as retraction (retraction.claim_key)}
-								{#if !matchedRetractionIds.has(retraction.claim_id)}
-									<div class="field-row field-row-retraction">
-										<dt>{retraction.field_name}</dt>
-										<dd>
-											<span class="reverted-badge">reverted</span>
-											<span class="old-value">{formatValue(retraction.old_value)}</span>
-										</dd>
-									</div>
-								{/if}
-							{/each}
-						</dl>
-					</li>
-				{/if}
-			{/each}
-		</ol>
-	</section>
-{:else}
-	<p class="no-history">No edit history yet.</p>
-{/if}
+											{@render revertControls(change)}
+										</div>
+									{/if}
+								{/each}
+								<!-- Show retractions that couldn't be matched to an original change -->
+								{#each cs.retractions ?? [] as retraction (retraction.claim_key)}
+									{#if !matchedRetractionIds.has(retraction.claim_id)}
+										<div class="field-row field-row-retraction">
+											<dt>{retraction.field_name}</dt>
+											<dd>
+												<span class="reverted-badge">reverted</span>
+												<span class="old-value">{formatValue(retraction.old_value)}</span>
+											</dd>
+										</div>
+									{/if}
+								{/each}
+							</dl>
+						</li>
+					{/if}
+				{/each}
+			</ol>
+		</section>
+	{:else}
+		<p class="no-history">No edit history yet.</p>
+	{/if}
+</FocusContentShell>
 
 <style>
-	h2 {
-		font-size: var(--font-size-3);
-		font-weight: 600;
-		color: var(--color-text-primary);
-		margin-bottom: var(--size-3);
-	}
-
 	.changeset-list {
 		list-style: none;
 		padding: 0;

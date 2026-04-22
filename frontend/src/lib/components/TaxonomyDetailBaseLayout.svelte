@@ -17,6 +17,8 @@
 	} from '$lib/components/editors/edit-action-context';
 	import type { SectionEditorHandle } from '$lib/components/editors/editor-contract';
 	import { resolveDetailSubrouteMode } from '$lib/detail-subroute-mode';
+	import { isFocusModePath } from '$lib/focus-mode';
+	import { setEntityContext } from '$lib/entity-context';
 	import { createIsMobileFlag } from '$lib/use-is-mobile.svelte';
 
 	type SectionDef = EditSectionDef<TKey> & { usesSectionEditorForm: boolean };
@@ -80,12 +82,21 @@
 	let metaDescription = $derived(profile.description.text || `${profile.name} — ${SITE_NAME}`);
 	let mode = $derived(resolveDetailSubrouteMode(page.url.pathname));
 	let isDetail = $derived(mode === 'detail');
-	let isEdit = $derived(mode === 'edit');
+	let isFocusMode = $derived(isFocusModePath(page.url.pathname));
 	const isMobileFlag = createIsMobileFlag(LAYOUT_BREAKPOINT);
 	let isMobile = $derived(isMobileFlag.current);
 	let editing = $state<TKey | null>(null);
-	let syncEnabled = $derived(!isMobile && !isEdit);
+	let syncEnabled = $derived(!isMobile && !isFocusMode);
 	let lastUrlEditing = $state<TKey | null>(null);
+
+	setEntityContext({
+		get name() {
+			return profile.name;
+		},
+		get detailHref() {
+			return resolveHref(`${basePath}/${slug}`);
+		}
+	});
 
 	$effect(() => {
 		auth.load();
@@ -180,7 +191,7 @@
 
 <MetaTags title={profile.name} description={metaDescription} url={page.url.href} />
 
-{#if isEdit}
+{#if isFocusMode}
 	{@render children()}
 {:else}
 	{#snippet actionBar()}

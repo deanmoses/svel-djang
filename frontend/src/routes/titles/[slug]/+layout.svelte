@@ -19,6 +19,8 @@
 	import { getMenuItemAction, type EditSectionMenuItem } from '$lib/components/edit-section-menu';
 	import { LAYOUT_BREAKPOINT } from '$lib/constants';
 	import { resolveDetailSubrouteMode } from '$lib/detail-subroute-mode';
+	import { isFocusModePath } from '$lib/focus-mode';
+	import { setEntityContext } from '$lib/entity-context';
 	import {
 		combinedSectionsFor,
 		type CombinedSectionKey
@@ -43,8 +45,17 @@
 	});
 
 	let mode = $derived(resolveDetailSubrouteMode(page.url.pathname));
-	let isEdit = $derived(mode === 'edit');
 	let isDetail = $derived(mode === 'detail');
+	let isFocusMode = $derived(isFocusModePath(page.url.pathname));
+
+	setEntityContext({
+		get name() {
+			return title.name;
+		},
+		get detailHref() {
+			return resolve(`/titles/${slug}`);
+		}
+	});
 
 	// Mobile detection — matches TwoColumnLayout breakpoint (LAYOUT_BREAKPOINT)
 	const isMobileFlag = createIsMobileFlag(LAYOUT_BREAKPOINT);
@@ -82,7 +93,7 @@
 
 	let sections = $derived(combinedSectionsFor(!!md));
 	let editing = $state<CombinedSectionKey | null>(null);
-	let syncEnabled = $derived(!isMobile && !isEdit);
+	let syncEnabled = $derived(!isMobile && !isFocusMode);
 	// Tracks the last URL-derived edit section so local modal state doesn't immediately write it back.
 	let lastUrlEditing = $state<CombinedSectionKey | null>(null);
 
@@ -178,7 +189,7 @@
 	imageAlt={heroImage ? `${title.name} pinball machine` : undefined}
 />
 
-{#if isEdit}
+{#if isFocusMode}
 	{@render children()}
 {:else}
 	{#if title.needs_review}
@@ -186,14 +197,12 @@
 	{/if}
 
 	{#snippet actionBar()}
-		{#if !isEdit}
-			<PageActionBar
-				detailHref={isDetail ? undefined : resolve(`/titles/${slug}`)}
-				editSections={editSectionsForBar}
-				historyHref={resolve(`/titles/${slug}/edit-history`)}
-				sourcesHref={resolve(`/titles/${slug}/sources`)}
-			/>
-		{/if}
+		<PageActionBar
+			detailHref={isDetail ? undefined : resolve(`/titles/${slug}`)}
+			editSections={editSectionsForBar}
+			historyHref={resolve(`/titles/${slug}/edit-history`)}
+			sourcesHref={resolve(`/titles/${slug}/sources`)}
+		/>
 	{/snippet}
 
 	{#snippet main()}
@@ -353,7 +362,7 @@
 		sidebarDesktopOnly={isDetail}
 		{actionBar}
 		{main}
-		sidebar={isEdit ? undefined : sidebar}
+		{sidebar}
 	/>
 
 	<SectionEditorHost bind:editingKey={editing} {sections} {switcherItems}>

@@ -19,6 +19,8 @@
 	import { LAYOUT_BREAKPOINT } from '$lib/constants';
 	import { modelHasTitleOwnedIdentity } from '$lib/catalog-rules';
 	import { resolveDetailSubrouteMode } from '$lib/detail-subroute-mode';
+	import { isFocusModePath } from '$lib/focus-mode';
+	import { setEntityContext } from '$lib/entity-context';
 	import { modelEditActionContext } from '$lib/components/editors/edit-action-context';
 	import { createIsMobileFlag } from '$lib/use-is-mobile.svelte';
 	import MediaEditor from '$lib/components/editors/MediaEditor.svelte';
@@ -33,11 +35,20 @@
 	});
 
 	let mode = $derived(resolveDetailSubrouteMode(page.url.pathname));
-	let isEdit = $derived(mode === 'edit');
 	// isDetail still drives (a) the "Reader" back-link in PageActionBar,
 	// and (b) whether the sidebar is desktop-only — on sub-routes the sidebar
 	// is shown on mobile too because the main column no longer duplicates it.
 	let isDetail = $derived(mode === 'detail');
+	let isFocusMode = $derived(isFocusModePath(page.url.pathname));
+
+	setEntityContext({
+		get name() {
+			return model.name;
+		},
+		get detailHref() {
+			return resolve(`/models/${slug}`);
+		}
+	});
 
 	// Mobile detection — matches TwoColumnLayout breakpoint (LAYOUT_BREAKPOINT)
 	const isMobileFlag = createIsMobileFlag(LAYOUT_BREAKPOINT);
@@ -89,7 +100,7 @@
 	let availableSections = $derived(modelSectionsFor(modelHasTitleOwnedIdentity(model)));
 
 	let editing = $state<ModelEditSectionKey | null>(null);
-	let syncEnabled = $derived(!isMobile && !isEdit);
+	let syncEnabled = $derived(!isMobile && !isFocusMode);
 	// Tracks the last URL-derived edit section so local modal state doesn't immediately write it back.
 	let lastUrlEditing = $state<ModelEditSectionKey | null>(null);
 
@@ -192,18 +203,16 @@
 	imageAlt={model.hero_image_url ? `${model.name} pinball machine` : undefined}
 />
 
-{#if isEdit}
+{#if isFocusMode}
 	{@render children()}
 {:else}
 	{#snippet actionBar()}
-		{#if !isEdit}
-			<PageActionBar
-				detailHref={isDetail ? undefined : resolve(`/models/${slug}`)}
-				editSections={auth.isAuthenticated ? editSections : undefined}
-				historyHref={resolve(`/models/${slug}/edit-history`)}
-				sourcesHref={resolve(`/models/${slug}/sources`)}
-			/>
-		{/if}
+		<PageActionBar
+			detailHref={isDetail ? undefined : resolve(`/models/${slug}`)}
+			editSections={auth.isAuthenticated ? editSections : undefined}
+			historyHref={resolve(`/models/${slug}/edit-history`)}
+			sourcesHref={resolve(`/models/${slug}/sources`)}
+		/>
 	{/snippet}
 
 	{#snippet main()}
@@ -367,7 +376,7 @@
 		sidebarDesktopOnly={isDetail}
 		{actionBar}
 		{main}
-		sidebar={isEdit ? undefined : sidebar}
+		{sidebar}
 	/>
 
 	<SectionEditorHost
