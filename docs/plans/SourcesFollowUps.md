@@ -6,24 +6,6 @@ Ordered by rough ROI.
 
 ---
 
-## Drop the prefetch fallback in `_serialize_model_detail`
-
-**Problem.** [machine_models.py:346-361](../../backend/apps/catalog/api/machine_models.py#L346-L361) reads `active_claims` off the prefetched model, and if missing, reconstructs the prefetch queryset inline — with a `Case/When` priority annotation that duplicates the logic in [`claims_prefetch()`](../../backend/apps/provenance/helpers.py). If the priority tiebreak rule in `claims_prefetch()` ever changes, this fallback will silently diverge.
-
-**Why it matters.** Silent divergence between two places computing "what does a winning claim look like" is exactly the bug that will show up in production months later as "sometimes the wrong source wins." The fallback is defensive coding against a contract violation — and the right response to a contract violation is a loud failure, not a silent patch.
-
-**Shape.** Remove the fallback block. If `active_claims` isn't prefetched, the function should raise (or return, but fail loudly). The callers of `_serialize_model_detail` should always prefetch.
-
-**Starting points:**
-
-- [backend/apps/catalog/api/machine_models.py:346-361](../../backend/apps/catalog/api/machine_models.py#L346-L361) — the fallback to remove
-- [backend/apps/provenance/helpers.py](../../backend/apps/provenance/helpers.py) — the canonical prefetch to rely on
-- `grep -n "_serialize_model_detail" backend/apps/catalog/api/machine_models.py` — call sites to verify all prefetch claims before calling
-
-**Risk.** Low. If tests pass, callers are doing the right thing. If they don't, we've found a real bug.
-
----
-
 ## Update `WebApiDesign.md` with the reads-vs-writes namespace split
 
 **Problem.** [docs/WebApiDesign.md](../WebApiDesign.md) formalizes the reads-under-`/api/pages/` vs resources-under-`/api/` split, but says nothing about **where write endpoints for resource concepts belong**. This refactor established a convention — resource-style mutations live under a namespaced router like `/api/provenance/claims/{id}/revert/`, not under `/api/pages/`. That decision isn't written down anywhere, so the next person designing a write endpoint will re-derive it (or not).

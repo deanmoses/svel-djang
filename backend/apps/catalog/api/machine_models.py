@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from django.db.models import Case, F, IntegerField, Prefetch, Q, Value, When
+from django.db.models import F, Prefetch, Q
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
@@ -338,19 +338,9 @@ def _serialize_model_detail(pm) -> dict:
 
     active_claims = getattr(pm, "active_claims", None)
     if active_claims is None:
-        active_claims = list(
-            pm.claims.filter(is_active=True)
-            .exclude(source__is_enabled=False)
-            .select_related("source", "user")
-            .annotate(
-                effective_priority=Case(
-                    When(source__isnull=False, then=F("source__priority")),
-                    When(user__isnull=False, then=F("user__profile__priority")),
-                    default=Value(0),
-                    output_field=IntegerField(),
-                )
-            )
-            .order_by("claim_key", "-effective_priority", "-created_at")
+        raise RuntimeError(
+            "_serialize_model_detail requires claims_prefetch() on the queryset; "
+            "active_claims attribute missing."
         )
 
     all_media = getattr(pm, "all_media", None) or []
