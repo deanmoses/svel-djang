@@ -60,7 +60,11 @@ from .helpers import (
     _serialize_credit,
     _serialize_title_machine,
 )
-from .machine_models import MachineModelDetailSchema
+from .machine_models import (
+    MachineModelDetailSchema,
+    _model_detail_qs,
+    _serialize_model_detail,
+)
 from .schemas import (
     BlockingReferrerSchema,
     CreditSchema,
@@ -570,11 +574,6 @@ def _serialize_title_detail(title) -> dict:
     # For single-model titles with no variants, include full model detail inline.
     model_detail = None
     if len(machines) == 1 and not machines[0].get("variants"):
-        from .machine_models import (
-            _model_detail_qs,
-            _serialize_model_detail,
-        )
-
         pm = _model_detail_qs().get(slug=machines[0]["slug"])
         model_detail = _serialize_model_detail(pm)
 
@@ -1032,11 +1031,6 @@ def create_model(request, title_slug: str, data: ModelCreateSchema):
     titles can legitimately share a model name (e.g. "Pro"). Slug
     uniqueness is global — the ``/models/{slug}`` URL pattern requires it.
     """
-    # Deferred to avoid the circular import that would result from putting
-    # the model create endpoint next to _model_detail_qs / _serialize_model_detail
-    # at module load time.
-    from .machine_models import _model_detail_qs, _serialize_model_detail
-
     check_and_record(request.user, CREATE_RATE_LIMIT_SPEC)
 
     title = get_object_or_404(Title.objects.active(), slug=title_slug)
