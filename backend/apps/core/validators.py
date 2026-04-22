@@ -5,13 +5,14 @@ from __future__ import annotations
 from typing import Any
 
 from django.core.exceptions import ValidationError
+from django.db.models import Model
 
 
-def bulk_create_validated(
-    model: Any,
-    objs: list[Any],
+def bulk_create_validated[M: Model](
+    model: type[M],
+    objs: list[M],
     **kwargs: Any,
-) -> Any:
+) -> list[M]:
     """Like ``model.objects.bulk_create()`` but runs mojibake validation first.
 
     Checks every field that has ``validate_no_mojibake`` in its validators
@@ -31,7 +32,7 @@ def bulk_create_validated(
                 value = getattr(obj, field.attname, None)
                 if value:
                     validate_no_mojibake(value)
-    return model.objects.bulk_create(objs, **kwargs)
+    return model._default_manager.bulk_create(objs, **kwargs)
 
 
 def validate_no_mojibake(value: object) -> None:
