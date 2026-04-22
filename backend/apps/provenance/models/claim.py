@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -335,7 +337,7 @@ class Claim(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True, db_default=Now())
 
-    objects = ClaimManager()
+    objects: ClassVar[ClaimManager] = ClaimManager()
 
     class Meta:
         indexes = [

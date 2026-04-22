@@ -18,14 +18,6 @@ repos:
       - id: mixed-line-ending
         args: ['--fix=lf']
 
-  # Secret detection
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.5.0
-    hooks:
-      - id: detect-secrets
-        args: ['--baseline', '.secrets.baseline']
-        exclude: '(pnpm-lock\.yaml|uv\.lock)$'
-
   # Local hooks (use system Node to avoid nodeenv/Node 24 incompatibility)
   - repo: local
     hooks:
@@ -49,18 +41,35 @@ repos:
       # always run the identical binary (avoids platform formatting drift).
       # pass_filenames: false so ruff checks all backend files every time,
       # catching formatting issues from earlier commits too.
+      # check --fix and format are combined into a single uv invocation to
+      # avoid paying uv's cold-start cost twice.
       - id: ruff
-        name: ruff (legacy alias)
-        entry: uv run --directory backend ruff check --fix .
+        name: ruff check + format
+        entry: bash -c 'cd backend && uv run ruff check --fix . && uv run ruff format .'
         language: system
         files: ^backend/
         pass_filenames: false
-      - id: ruff-format
-        name: ruff format
-        entry: uv run --directory backend ruff format .
+      # Static type checking via basedpyright. A baseline at
+      # backend/.basedpyright/baseline.json captures known-accepted findings
+      # from the initial adoption; the hook only fails on *new* errors.
+      # Regenerate with `cd backend && uv run basedpyright --writebaseline`.
+      - id: basedpyright
+        name: basedpyright
+        entry: bash -c 'cd backend && uv run basedpyright'
         language: system
-        files: ^backend/
+        files: ^backend/.*\.py$
         pass_filenames: false
+
+  # Secret detection
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: '(pnpm-lock\.yaml|uv\.lock)$'
+
+  - repo: local
+    hooks:
       # Auto-regenerate agent docs when source or build script changes
       - id: agent-docs-regen
         name: regenerate agent docs

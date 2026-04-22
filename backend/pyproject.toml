@@ -20,7 +20,9 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "basedpyright>=1.39.3",
     "beautifulsoup4>=4.12",
+    "django-types>=0.23.0",
     "pytest>=8.3",
     "pytest-django>=4.9",
     "requests>=2.32",
@@ -89,3 +91,19 @@ section-order = ["future", "standard-library", "third-party", "first-party", "lo
 quote-style = "double"
 indent-style = "space"
 line-ending = "lf"
+
+[tool.basedpyright]
+pythonVersion = "3.14"
+typeCheckingMode = "standard"
+include = ["apps", "config", "tests", "conftest.py", "manage.py"]
+exclude = [
+    "**/__pycache__",
+    "**/migrations",
+    ".venv",
+    "media",
+]
+reportMissingTypeStubs = false
+# Django models always redeclare an inner `class Meta:` in subclasses, which
+# basedpyright flags as an incompatible override. This is universal Django
+# idiom; the rule is a false positive here.
+reportIncompatibleVariableOverride = false

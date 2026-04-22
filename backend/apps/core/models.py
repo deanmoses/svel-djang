@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar, Self, TypeVar
 
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -169,8 +169,11 @@ class EntityStatus(models.TextChoices):
     DELETED = "deleted", "Deleted"
 
 
-class CatalogQuerySet(models.QuerySet):
-    def active(self):
+_CatalogModel = TypeVar("_CatalogModel", bound="EntityStatusMixin")
+
+
+class CatalogQuerySet(models.QuerySet[_CatalogModel]):
+    def active(self) -> CatalogQuerySet[_CatalogModel]:
         """Return entities considered live in the catalog.
 
         Includes ``status='active'`` and ``status IS NULL`` (transitional:
@@ -183,7 +186,21 @@ class CatalogQuerySet(models.QuerySet):
         )
 
 
-CatalogManager = models.Manager.from_queryset(CatalogQuerySet)
+# `Manager.from_queryset` is a runtime factory that returns an untyped class,
+# so basedpyright cannot see the queryset methods (e.g. `.active()`) that it
+# copies onto the manager. The TYPE_CHECKING shim below declares the manager
+# as a generic subclass of both Manager and the queryset, so `.active()` is
+# visible *and* the per-subclass type binding (`Manufacturer.objects` →
+# `CatalogManager[Manufacturer]`) carries through via django-types' descriptor.
+if TYPE_CHECKING:
+
+    class CatalogManager(
+        models.Manager[_CatalogModel],
+        CatalogQuerySet[_CatalogModel],
+    ):
+        pass
+else:
+    CatalogManager = models.Manager.from_queryset(CatalogQuerySet)
 
 
 def active_status_q(relation: str) -> models.Q:
@@ -217,7 +234,12 @@ class EntityStatusMixin(models.Model):
         blank=True,
     )
 
-    objects = CatalogManager()
+    # `ClassVar[CatalogManager[Self]]` gets us both halves: the custom manager
+    # type (so `.active()` is visible) and per-subclass model binding (so
+    # `Manufacturer.objects` types as `CatalogManager[Manufacturer]`, not
+    # `CatalogManager[EntityStatusMixin]`). Without `Self`, django-types'
+    # default descriptor strips the custom manager class.
+    objects: ClassVar[CatalogManager[Self]] = CatalogManager()
 
     class Meta:
         abstract = True
