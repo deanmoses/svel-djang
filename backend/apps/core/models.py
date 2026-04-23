@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import ClassVar, Self, TypeVar
+from typing import Any, ClassVar, Self, TypeVar
 
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -110,13 +110,13 @@ class License(TimeStampedModel):
     def __str__(self) -> str:
         return self.short_name
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:  # noqa: ANN401 - matches Model.save's overloaded signature
         if not self.slug:
             self.slug = unique_slug(self, self.short_name, "license")
         super().save(*args, **kwargs)
 
 
-def unique_slug(obj, source: str, fallback: str = "item") -> str:
+def unique_slug(obj: models.Model, source: str, fallback: str = "item") -> str:
     """Generate a unique slug with counter disambiguation.
 
     Appends a counter suffix (-2, -3, …) until the slug is unique within
@@ -125,7 +125,8 @@ def unique_slug(obj, source: str, fallback: str = "item") -> str:
     base = slugify(source) or fallback
     slug = base
     counter = 2
-    while type(obj).objects.filter(slug=slug).exclude(pk=obj.pk).exists():
+    manager = type(obj)._default_manager
+    while manager.filter(slug=slug).exclude(pk=obj.pk).exists():
         slug = f"{base}-{counter}"
         counter += 1
     return slug
@@ -247,7 +248,7 @@ def status_valid() -> models.CheckConstraint:
 # ---------------------------------------------------------------------------
 
 
-class MarkdownField(models.TextField):
+class MarkdownField(models.TextField[str, str]):
     """A TextField containing markdown with ``[[entity:slug]]`` links.
 
     The system introspects models for MarkdownField instances to:
@@ -260,7 +261,8 @@ class MarkdownField(models.TextField):
 
     default_validators = [_validate_no_mojibake]
 
-    def deconstruct(self):
+    # Django's migration protocol; see Field.deconstruct.
+    def deconstruct(self) -> Any:  # noqa: ANN401
         name, _path, args, kwargs = super().deconstruct()
         return name, "django.db.models.TextField", args, kwargs
 
@@ -289,7 +291,9 @@ def get_claim_fields(model_class: type[models.Model]) -> dict[str, str]:
 
     FK fields are included — the resolver handles slug lookup automatically.
     """
-    per_model_exempt = getattr(model_class, "claims_exempt", frozenset())
+    per_model_exempt: frozenset[str] = getattr(
+        model_class, "claims_exempt", frozenset()
+    )
     fields: dict[str, str] = {}
     for f in model_class._meta.get_fields():
         if not isinstance(f, models.Field):
@@ -483,7 +487,7 @@ class RecordReference(models.Model):
             models.Index(fields=["source_type", "source_id"]),  # Cleanup on delete
         ]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (
             f"{self.source_type.model}:{self.source_id}"
             f" \u2192 {self.target_type.model}:{self.target_id}"
@@ -497,7 +501,9 @@ def register_reference_cleanup(*model_classes: type[models.Model]) -> None:
     ``[[type:ref]]`` markdown links (i.e. any model passed to ``sync_references``).
     """
 
-    def _cleanup_references(sender, instance, **kwargs):
+    def _cleanup_references(
+        sender: type[models.Model], instance: models.Model, **kwargs: object
+    ) -> None:
         ct = ContentType.objects.get_for_model(sender)
         RecordReference.objects.filter(source_type=ct, source_id=instance.pk).delete()
 

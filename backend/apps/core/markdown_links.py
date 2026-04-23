@@ -24,16 +24,49 @@ from __future__ import annotations
 import re
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, cast
+from typing import Any, Protocol
 
 from django.core.exceptions import ValidationError
-
-if TYPE_CHECKING:
-    from django.core.exceptions import ValidationErrorMessageArg
-else:
-    ValidationErrorMessageArg = object
 from django.db import models, transaction
 from django.db.models import Q
+
+from apps.core.schemas import LinkTargetSchema
+
+
+class FormatLinkCallback(Protocol):
+    """Custom per-link-type renderer for ``[[type:id:N]]`` markers.
+
+    ``obj`` is the resolved model instance (concrete type varies per link
+    type; ``None`` when the target no longer exists). ``index`` is the
+    1-based position of this unique ID in the rendered text; duplicate
+    markers for the same ID share an index. ``base_url`` is prepended to
+    relative URLs; ``plain_text`` switches to a text-only rendering.
+    """
+
+    def __call__(
+        self,
+        obj: Any,  # noqa: ANN401 - concrete model type varies per link type
+        index: int,
+        base_url: str,
+        plain_text: bool,
+    ) -> str: ...
+
+
+class CollectMetadataCallback(Protocol):
+    """Per-link-type metadata collector for ``[[type:id:N]]`` markers.
+
+    Called once per unique resolved object by ``_render_by_id`` when
+    ``metadata_out`` is provided. The returned dict is appended to
+    ``metadata_out``; its shape is link-type-specific and core never
+    inspects it.
+    """
+
+    def __call__(
+        self,
+        obj: Any,  # noqa: ANN401 - concrete model type varies per link type
+        index: int,
+    ) -> dict[str, Any]: ...
+
 
 # ---------------------------------------------------------------------------
 # LinkType dataclass
@@ -67,15 +100,11 @@ class LinkType:
     get_label: Callable[[Any], str] | None = None  # override for irregular label
     select_related: tuple[str, ...] = ()
     prefetch_related: tuple[str, ...] = ()
-    # Optional custom renderer: (obj_or_None, 1-based_index, base_url, plain_text) -> str
     # When set, _render_by_id() uses this instead of _format_link(). Indices are
     # assigned by unique ID in order of first appearance (duplicate markers share
     # the same index).
-    format_link: Callable[[Any, int, str, bool], str] | None = None
-    # Optional metadata collector: (obj, 1-based_index) -> dict
-    # Called once per unique resolved object when metadata_out is provided.
-    # The returned dicts are appended to the metadata_out list.
-    collect_metadata: Callable[[Any, int], dict] | None = None
+    format_link: FormatLinkCallback | None = None
+    collect_metadata: CollectMetadataCallback | None = None
 
     # --- Authoring format (slug-based types only) ---
     # Custom lookup for authoring format: (model_class, raw_values) -> {key: obj}
@@ -91,7 +120,8 @@ class LinkType:
     autocomplete_search_fields: tuple[str, ...] = ()
     autocomplete_ordering: tuple[str, ...] = ()
     autocomplete_select_related: tuple[str, ...] = ()
-    autocomplete_serialize: Callable[[Any], dict] | None = None
+    # `Any` input: concrete obj type varies per registered link type (idiom #3).
+    autocomplete_serialize: Callable[[Any], LinkTargetSchema] | None = None
 
     # --- Runtime toggle (evaluated at usage time, not registration time) ---
     is_enabled: Callable[[], bool] = field(default=lambda: True)
@@ -211,7 +241,7 @@ def render_all_links(
     text: str,
     base_url: str = "",
     plain_text: bool = False,
-    metadata_out: list[dict] | None = None,
+    metadata_out: list[dict[str, Any]] | None = None,
 ) -> str:
     """Convert all [[type:ref]] links in text to markdown links.
 
@@ -266,7 +296,7 @@ def _render_by_id(
     pattern: re.Pattern[str],
     base_url: str = "",
     plain_text: bool = False,
-    metadata_out: list[dict] | None = None,
+    metadata_out: list[dict[str, Any]] | None = None,
 ) -> str:
     """Render [[type:id:N]] or [[type:N]] links by batch PK lookup."""
     matches = list(pattern.finditer(text))
@@ -367,7 +397,7 @@ def convert_authoring_to_storage(content: str) -> str:
         content = _convert_to_storage(content, lt, pats["authoring"], errors)
 
     if errors:
-        raise ValidationError(cast(list[ValidationErrorMessageArg], errors))
+        raise ValidationError(errors)
     return content
 
 

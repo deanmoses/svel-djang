@@ -8,32 +8,16 @@ from __future__ import annotations
 
 from django.db.models import Q
 from django.http import HttpRequest
-from ninja import Router, Schema
+from ninja import Router
 from ninja.errors import HttpError
 
 from apps.core.markdown_links import get_autocomplete_types, get_link_type
-
-# ---------------------------------------------------------------------------
-# Schemas
-# ---------------------------------------------------------------------------
+from apps.core.schemas import (
+    LinkTargetsResponseSchema,
+    LinkTypeSchema,
+)
 
 AUTOCOMPLETE_RESULT_LIMIT = 20
-
-
-class LinkTypeSchema(Schema):
-    name: str
-    label: str
-    description: str
-    flow: str
-
-
-class LinkTargetSchema(Schema):
-    ref: str
-    label: str
-
-
-class LinkTargetsResponseSchema(Schema):
-    results: list[LinkTargetSchema]
 
 
 # ---------------------------------------------------------------------------
@@ -54,7 +38,7 @@ def search_link_targets(
     request: HttpRequest,
     type: str,
     q: str = "",
-) -> dict[str, list[dict[str, str]]]:
+) -> LinkTargetsResponseSchema:
     """Search within a link type for autocomplete results."""
     lt = get_link_type(type)
     if lt is None or not lt.is_enabled() or not lt.autocomplete_serialize:
@@ -83,7 +67,7 @@ def search_link_targets(
         qs = qs.filter(q_filter)
 
     results = [lt.autocomplete_serialize(obj) for obj in qs[:AUTOCOMPLETE_RESULT_LIMIT]]
-    return {"results": results}
+    return LinkTargetsResponseSchema(results=results)
 
 
 routers = [

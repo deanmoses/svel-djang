@@ -6,7 +6,7 @@ We recently introduced mypy and grandfathered in a lot of exceptions in backend/
 
 ## Status
 
-Steps 1–5 complete. Step 6+ undone.
+Steps 1–6 complete. Step 7+ undone.
 
 ## Running mypy
 
@@ -193,25 +193,66 @@ Removed the override entirely. Measured fallout in two passes:
 
 The override block at the old `pyproject.toml:136` is gone. If a future Ninja endpoint regresses, the failure will surface as an `untyped-decorator` error against the baseline rather than being silently relaxed.
 
-## Step 6: `citation/api` and `provenance/api`
+## Step 6: `core/*` + `conftest.py` - DONE
 
-Same pattern as Step 2 — helpers first, endpoints after, `make api-gen` between batches. Smaller scopes (38 + 15 entries); should go quickly after Step 2's muscle memory.
+Typed the shared helpers imported across every app before the per-app steps, so later steps don't stub around untyped imports.
 
-## Step 7: `catalog/resolve/*`
+- `apps/core/models.py` — annotated `save`, `unique_slug`, `MarkdownField.deconstruct`, `get_claim_fields`, `RecordReference.__str__`, `_cleanup_references`; parameterized `MarkdownField(models.TextField[str, str])`. `deconstruct` returns `Any` with a one-line comment pointing at Django's `Field.deconstruct` protocol — the 4-tuple is Django's, not ours. `unique_slug` uses `type(obj)._default_manager` instead of `.objects` (per the introspection idiom).
+- `apps/core/markdown_links.py` — parameterized the four `dict` generics, dropped the `ValidationErrorMessageArg` TYPE*CHECKING dance (the symbol isn't in `django.core.exceptions` at runtime \_or* in django-stubs; `ValidationError` accepts `list[str]` directly).
+- `apps/core/licensing.py` — introduced `_LicenseSeed` TypedDict for the canonical license seed rows (all 22 rows share the same field shape), `SourceFieldLicenseMap = dict[tuple[int, str], License | None]` type alias named once at module top and reused, typed `resolve_effective_license(claim: Claim, ...)`.
+- `apps/core/tests/test_markdown_links.py` — `list[dict]` → `list[dict[str, Any]]`.
+- `conftest.py` — removed the `persons`/`roles` variable shadowing (the `bulk_create` return was unused; the re-fetch is the one callers consume).
+
+Baseline: 375 → 353.
+
+**Deferred:** `apps/core/markdown.py:95` (`Match` type-arg) and `apps/core/entity_types.py:46` (`type-abstract`) are in the baseline but out of Step 6 scope as stated.
+
+## Step 7: `catalog/api` tail
+
+The taxonomy-adjacent endpoint files (franchises, themes, gameplay_features, corporate_entities) each have ~7 entries in the same shape as Step 2.2 files. Same pattern as Step 2 — helpers first, endpoints after, `make api-gen` between batches.
+
+Scope (~46 entries): `franchises.py` (8), `themes.py` (7), `gameplay_features.py` (7), `corporate_entities.py` (7), `page_endpoints.py` (4), `taxonomy.py` (2), `machine_models.py` (1), plus foundational `catalog/models/*` (6) and `catalog/claims.py` (4) which are callees of these endpoints.
+
+## Step 8: `citation/api`
+
+Same pattern as Step 2 — helpers first, endpoints after, `make api-gen` between batches. Should go quickly after Step 2's muscle memory.
+
+Scope (~45 entries): `citation/api.py` (38) plus foundational `citation/url_extraction.py` (7).
+
+## Step 9: `provenance/api`
+
+Same pattern as Step 2 — helpers first, endpoints after, `make api-gen` between batches.
+
+Scope (19 entries): `provenance/api.py` (15) plus foundational `provenance/models/claim.py` (4).
+
+## Step 10: `catalog/resolve/*`
 
 Refactor tuple-heavy resolver code into `dataclass` / `TypedDict` where state is being unpacked inconsistently. Apply the idioms above for remaining `attr-defined` / `union-attr` noise.
 
-## Step 8: Ingestion and management commands
+Scope (~44 entries): `_relationships.py` (18), `_entities.py` (10), `__init__.py` (7), `_helpers.py` (5), `_media.py` (4).
+
+## Step 11: `media/*`
+
+Its own app, not a "tail." Same pattern as Step 2 — helpers first, endpoints after, `make api-gen` between batches.
+
+Scope (~38 entries): `media/admin.py` (12), `media/api.py` (9), `media/apps.py` (8), `media/processing.py` (6), `media/tests/*` (3).
+
+## Step 12: Ingestion and management commands
+
+These are last. The ingestion code may be completely rewritten, so refactoring for mypy could be a waste; I'm okay leaving the mypy errors grandfathered in.
 
 Grouped because they share patterns (external I/O, command runners, bare dicts from JSON parsing):
 
-- [catalog/management/commands/ingest_pinbase.py](backend/apps/catalog/management/commands/ingest_pinbase.py) (47 — #2 hotspot)
+- [catalog/management/commands/ingest_pinbase.py](backend/apps/catalog/management/commands/ingest_pinbase.py) (45 — #1 hotspot)
 - [catalog/ingestion/opdb/adapter.py](backend/apps/catalog/ingestion/opdb/adapter.py) (30)
 - [catalog/ingestion/ipdb/adapter.py](backend/apps/catalog/ingestion/ipdb/adapter.py) (20)
-- [catalog/management/commands/validate_catalog.py](backend/apps/catalog/management/commands/validate_catalog.py) (17)
-- remaining ingestion + media tail
-
-Ordering of Steps 6 / 7 / 8 is not fixed; re-plan when Steps 3–5 are complete.
+- [catalog/management/commands/validate_catalog.py](backend/apps/catalog/management/commands/validate_catalog.py) (13)
+- [catalog/ingestion/wikidata_sparql.py](backend/apps/catalog/ingestion/wikidata_sparql.py) (12)
+- [catalog/ingestion/fandom_wiki.py](backend/apps/catalog/ingestion/fandom_wiki.py) (10)
+- [catalog/ingestion/apply.py](backend/apps/catalog/ingestion/apply.py) (4)
+- [catalog/ingestion/opdb/records.py](backend/apps/catalog/ingestion/opdb/records.py) (3)
+- [catalog/ingestion/bulk_utils.py](backend/apps/catalog/ingestion/bulk_utils.py) (3)
+- Adapter tests land with their subjects: [catalog/tests/test_opdb_adapter.py](backend/apps/catalog/tests/test_opdb_adapter.py) (7), [test_ipdb_adapter.py](backend/apps/catalog/tests/test_ipdb_adapter.py) (6).
 
 ## Process
 

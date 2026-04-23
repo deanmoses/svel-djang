@@ -2,10 +2,32 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
     from apps.core.models import License
+    from apps.provenance.models import Claim
+
+
+# Prefetched (source_id, field_name) → license lookup, built once per request
+# by build_source_field_license_map() to avoid N+1 queries when resolving
+# effective licenses for many claims.
+type SourceFieldLicenseMap = dict[tuple[int, str], License | None]
+
+
+class _LicenseSeed(TypedDict):
+    slug: str
+    name: str
+    spdx_id: str | None
+    short_name: str
+    url: str
+    allows_display: bool
+    requires_attribution: bool
+    restricts_commercial: bool
+    allows_derivatives: bool
+    requires_share_alike: bool
+    permissiveness_rank: int
+
 
 # Maps Constance CONTENT_DISPLAY_POLICY choices to minimum permissiveness_rank.
 DISPLAY_POLICY_RANKS: dict[str, int] = {
@@ -41,7 +63,7 @@ def is_displayable(license_obj: License | None) -> bool:
 IMAGE_FIELDS = frozenset({"opdb.images", "ipdb.image_urls", "image_urls"})
 
 
-def build_source_field_license_map() -> dict[tuple[int, str], License | None]:
+def build_source_field_license_map() -> SourceFieldLicenseMap:
     """Prefetch all SourceFieldLicense rows into a lookup dict.
 
     Returns {(source_id, field_name): license_obj}.
@@ -66,7 +88,7 @@ def ensure_licenses() -> int:
     return created
 
 
-_CANONICAL_LICENSES = [
+_CANONICAL_LICENSES: list[_LicenseSeed] = [
     # Public Domain & CC0
     {
         "slug": "public-domain",
@@ -363,8 +385,8 @@ _CANONICAL_LICENSES = [
 
 
 def resolve_effective_license(
-    claim,
-    sfl_map: dict[tuple[int, str], License | None] | None = None,
+    claim: Claim,
+    sfl_map: SourceFieldLicenseMap | None = None,
 ) -> License | None:
     """Resolve the effective license for a claim.
 

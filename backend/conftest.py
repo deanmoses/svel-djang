@@ -13,7 +13,7 @@ def credit_targets(db):
 
     Returns a dict keyed by slug for convenient ``.pk`` access in tests.
     """
-    persons = Person.objects.bulk_create(
+    Person.objects.bulk_create(
         [
             Person(name="Pat Lawlor", slug="pat-lawlor"),
             Person(name="John Youssi", slug="john-youssi"),
@@ -22,7 +22,7 @@ def credit_targets(db):
         unique_fields=["slug"],
         update_fields=["name"],
     )
-    roles = CreditRole.objects.bulk_create(
+    CreditRole.objects.bulk_create(
         [
             CreditRole(name="Design", slug="design"),
             CreditRole(name="Art", slug="art"),

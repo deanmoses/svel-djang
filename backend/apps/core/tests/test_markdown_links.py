@@ -1,5 +1,7 @@
 """Tests for the markdown link registry, conversion, and reference syncing."""
 
+from typing import Any
+
 import pytest
 
 from apps.core.markdown_links import (
@@ -309,7 +311,7 @@ class TestMetadataCollection:
             citation_source=citation_source_with_links, locator="p. 42"
         )
         text = f"Cited.[[cite:{ci.pk}]]"
-        metadata: list[dict] = []
+        metadata: list[dict[str, Any]] = []
         render_all_links(text, metadata_out=metadata)
         assert len(metadata) == 1
         entry = metadata[0]
@@ -327,7 +329,7 @@ class TestMetadataCollection:
     def test_metadata_deduplicated_by_pk(self, citation_instance):
         pk = citation_instance.pk
         text = f"First.[[cite:{pk}]] Second.[[cite:{pk}]]"
-        metadata: list[dict] = []
+        metadata: list[dict[str, Any]] = []
         render_all_links(text, metadata_out=metadata)
         assert len(metadata) == 1
         assert metadata[0]["id"] == pk
@@ -342,7 +344,7 @@ class TestMetadataCollection:
             citation_source=citation_source, locator="p. 20"
         )
         text = f"First.[[cite:{ci1.pk}]] Second.[[cite:{ci2.pk}]]"
-        metadata: list[dict] = []
+        metadata: list[dict[str, Any]] = []
         render_all_links(text, metadata_out=metadata)
         assert len(metadata) == 2
         assert metadata[0]["index"] == 1
@@ -359,6 +361,6 @@ class TestMetadataCollection:
     def test_no_metadata_for_entity_links(self, manufacturer):
         """Only link types with collect_metadata produce metadata."""
         text = f"See [[manufacturer:id:{manufacturer.pk}]]"
-        metadata: list[dict] = []
+        metadata: list[dict[str, Any]] = []
         render_all_links(text, metadata_out=metadata)
         assert len(metadata) == 0
