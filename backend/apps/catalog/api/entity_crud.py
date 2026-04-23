@@ -18,7 +18,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Any
 
-from django.db.models import Q
+from django.db.models import Model, Q
 from django.shortcuts import get_object_or_404
 from ninja import Router, Schema
 from ninja.responses import Status
@@ -278,7 +278,7 @@ def register_entity_create(
     serialize_detail: SerializeFn,
     response_schema: type[Schema],
     parent_field: str | None = None,
-    parent_model: Any = None,
+    parent_model: type[Model] | None = None,
     route_suffix: str = "",
     scope_filter_builder: Callable[[Any], Q] | None = None,
     include_deleted_name_check: bool = False,
@@ -369,7 +369,9 @@ def register_entity_create(
         assert parent_model is not None
 
         def _create_parented(request, parent_slug: str, data: TaxonomyCreateSchema):
-            parent = get_object_or_404(parent_model.objects.active(), slug=parent_slug)
+            # django-stubs doesn't expose .objects on abstract type[Model], and
+            # the concrete manager here adds a custom .active() filter.
+            parent = get_object_or_404(parent_model.objects.active(), slug=parent_slug)  # type: ignore[attr-defined]
             return _do_create(request, data, parent=parent)
 
         path = f"/{{parent_slug}}/{route_suffix}/"

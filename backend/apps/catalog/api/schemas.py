@@ -17,12 +17,16 @@ class Ref(Schema):
 
 
 class ClaimPatchSchema(Schema):
+    # ``fields`` maps claim-field name → new value. Values are polymorphic per
+    # field (str, int, bool, slug string for FK-backed claims, None) and are
+    # validated downstream by ``validate_claim_value``; no fixed TypedDict.
     fields: dict[str, Any]
     note: str = ""
     citation: EditCitationInput | None = None
 
 
 class HierarchyClaimPatchSchema(Schema):
+    # See ClaimPatchSchema.fields — polymorphic per claim field, validated downstream.
     fields: dict[str, Any] = {}
     parents: list[str] | None = None
     aliases: list[str] | None = None
@@ -31,6 +35,7 @@ class HierarchyClaimPatchSchema(Schema):
 
 
 class CorporateEntityClaimPatchSchema(Schema):
+    # See ClaimPatchSchema.fields — polymorphic per claim field, validated downstream.
     fields: dict[str, Any] = {}
     aliases: list[str] | None = None
     note: str = ""
@@ -48,6 +53,7 @@ class CreditInput(Schema):
 
 
 class ModelClaimPatchSchema(Schema):
+    # See ClaimPatchSchema.fields — polymorphic per claim field, validated downstream.
     fields: dict[str, Any] = {}
     themes: list[str] | None = None
     tags: list[str] | None = None
