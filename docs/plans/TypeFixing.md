@@ -191,6 +191,8 @@ A one-shot audit converges on "this chunk is done" only until the next PR re-int
 
 **If you do opt into mypy cleanup, sanity-check the baseline sync output.** After running the sync command, open [`backend/mypy-baseline.txt`](../../backend/mypy-baseline.txt) and confirm it is still one mypy error per line, with no summary/footer text like `Found 738 errors...` and no truncated lines. The sync tool only sees stdout; if mypy's output format changes or summary text leaks into the stream, you can end up with a malformed baseline file that fails the next lint run.
 
+**Sync via `mypy`, not `dmypy`.** CI runs [`scripts/mypy`](../../scripts/mypy) (plain mypy), while the pre-commit hook runs [`scripts/dmypy`](../../scripts/dmypy) (the daemon). The two tools emit subtly different output — notably, `mypy` emits `See https://.../missing-imports` notes for every `import-untyped` error, while `dmypy` sometimes omits them (e.g. for function-scoped imports). If you pipe `dmypy`'s output into `mypy-baseline sync`, the resulting baseline will drop notes that `mypy` still emits, and CI will fail with `+1` new note even though the pre-commit hook was green locally. Always sync with `uv run --directory backend mypy --config-file pyproject.toml . | uv run --directory backend mypy-baseline sync --ignore '.*--install-types.*'`.
+
 **What the ratchet actually locks in.** Honest accounting:
 
 | Smell                             | Covered by ratchet? | Mechanism                                              |
