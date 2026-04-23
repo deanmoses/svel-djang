@@ -21,7 +21,7 @@ from typing import NamedTuple
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
-from django.db.models import Count, Q
+from django.db.models import Count, Model, Q
 from django.db.models.functions import Lower
 
 from apps.catalog.models import (
@@ -265,7 +265,7 @@ def check_orphan_claims(result: ValidationResult) -> None:
         if model_class is None:
             ct_counts[f"unknown-ct-{ct_id}"] += 1
             continue
-        if not model_class.objects.filter(pk=obj_id).exists():
+        if not model_class._default_manager.filter(pk=obj_id).exists():
             ct_counts[ct.model] += 1
 
     total = sum(ct_counts.values())
@@ -295,6 +295,8 @@ def check_unresolved_fk_claims(result: ValidationResult) -> None:
         target_model = field.related_model
         if target_model is None:
             continue
+        assert isinstance(target_model, type)
+        assert issubclass(target_model, Model)
         lookup_key = fk_lookups_map.get(field_name, "slug")
 
         # Get winning claim values for this field (one per object+claim_key).
@@ -305,7 +307,9 @@ def check_unresolved_fk_claims(result: ValidationResult) -> None:
         active_values = {c.value for c in winners}
 
         # Get all valid lookup keys.
-        valid_keys = set(target_model.objects.values_list(lookup_key, flat=True))
+        valid_keys = set(
+            target_model._default_manager.values_list(lookup_key, flat=True)
+        )
 
         unresolved = set()
         for v in active_values:
@@ -361,7 +365,7 @@ class _M2mCheck(NamedTuple):
 
     field_name: str
     pk_key: str
-    model_class: type
+    model_class: type[Model]
 
 
 def check_unresolved_m2m_claims(result: ValidationResult) -> None:
@@ -375,7 +379,7 @@ def check_unresolved_m2m_claims(result: ValidationResult) -> None:
     ]
 
     for check in checks:
-        valid_pks = set(check.model_class.objects.values_list("pk", flat=True))
+        valid_pks = set(check.model_class._default_manager.values_list("pk", flat=True))
 
         missing: set = set()
         for claim in _winning_claims(ct, check.field_name):

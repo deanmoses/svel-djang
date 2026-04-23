@@ -136,8 +136,10 @@ def validate_claim_value(
 
     field = model_class._meta.get_field(field_name)
 
-    # FK fields are validated in batch by validate_fk_claims_batch.
-    if field.is_relation:
+    # FK fields and reverse relations are validated elsewhere (or not at all).
+    # Narrowing to Field also rules out ForeignObjectRel, which lacks
+    # validators/blank/to_python/choices.
+    if not isinstance(field, models.Field) or field.is_relation:
         return value
 
     # Mojibake check — subsumes the old step-0 check in bulk_assert_claims.
@@ -404,9 +406,9 @@ def validate_relationship_claims_batch(
 
         refs = {ref for _, ref in group}
         existing = set(
-            target_model.objects.filter(**{f"{lookup_field}__in": refs}).values_list(
-                lookup_field, flat=True
-            )
+            target_model._default_manager.filter(
+                **{f"{lookup_field}__in": refs}
+            ).values_list(lookup_field, flat=True)
         )
 
         for claim, ref in group:

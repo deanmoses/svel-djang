@@ -90,7 +90,9 @@ def _resolve_fk_generic(
     if lookup is not None:
         result = lookup.get(key)
     else:
-        result = target_model.objects.filter(**{lookup_key: key}).first()
+        assert isinstance(target_model, type)
+        assert issubclass(target_model, models.Model)
+        result = target_model._default_manager.filter(**{lookup_key: key}).first()
     if not result:
         logger.warning("Unmatched %s claim value: %r", field_name, value)
     return result
@@ -111,8 +113,11 @@ def build_fk_info(
             target_model = f.related_model
             if target_model is None:
                 continue
+            assert isinstance(target_model, type)
+            assert issubclass(target_model, models.Model)
             info.lookups[attr] = {
-                getattr(obj, lookup_key): obj for obj in target_model.objects.all()
+                getattr(obj, lookup_key): obj
+                for obj in target_model._default_manager.all()
             }
     return info
 

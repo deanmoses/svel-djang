@@ -10,6 +10,8 @@ import logging
 from dataclasses import dataclass
 from typing import NamedTuple
 
+from django.db.models import Model
+
 from apps.provenance.models import Claim
 
 from .._alias_registry import AliasType, discover_alias_types
@@ -66,7 +68,7 @@ class M2MFieldSpec:
 
     field_name: str  # claim field_name (also the value dict key): "theme", "tag"
     m2m_attr: str  # model attribute: "themes", "tags", "gameplay_features"
-    target_model: type  # Theme, Tag, GameplayFeature
+    target_model: type[Model]  # Theme, Tag, GameplayFeature
 
 
 M2M_FIELDS: dict[str, M2MFieldSpec] = {
@@ -111,7 +113,7 @@ def _resolve_machine_model_m2m(
             winners_by_model.setdefault(claim.object_id, []).append(claim)
 
     # Valid PKs for existence check against stale claims.
-    valid_pks = set(spec.target_model.objects.values_list("pk", flat=True))
+    valid_pks = set(spec.target_model._default_manager.values_list("pk", flat=True))
 
     # Desired PKs from winning claims.
     desired_by_model: dict[int, set[int]] = {}
@@ -138,13 +140,15 @@ def _resolve_machine_model_m2m(
         all_model_ids = model_ids
     else:
         all_model_ids = set(MachineModel.objects.values_list("pk", flat=True))
-    through = getattr(MachineModel, spec.m2m_attr).through
-    target_col = spec.target_model._meta.model_name + "_id"
+    through: type[Model] = getattr(MachineModel, spec.m2m_attr).through
+    target_model_name = spec.target_model._meta.model_name
+    assert target_model_name is not None
+    target_col = target_model_name + "_id"
 
     existing_by_model: dict[int, set[int]] = {}
-    for row in through.objects.filter(machinemodel_id__in=all_model_ids).values_list(
-        "machinemodel_id", target_col
-    ):
+    for row in through._default_manager.filter(
+        machinemodel_id__in=all_model_ids
+    ).values_list("machinemodel_id", target_col):
         existing_by_model.setdefault(row[0], set()).add(row[1])
 
     # Diff and apply.
@@ -161,18 +165,18 @@ def _resolve_machine_model_m2m(
             )
 
     # Build a lookup for deletions.
-    for row in through.objects.filter(machinemodel_id__in=all_model_ids).values_list(
-        "pk", "machinemodel_id", target_col
-    ):
+    for row in through._default_manager.filter(
+        machinemodel_id__in=all_model_ids
+    ).values_list("pk", "machinemodel_id", target_col):
         pk, model_id, fk_id = row
         desired = desired_by_model.get(model_id, set())
         if fk_id not in desired:
             to_delete_pks.append(pk)
 
     if to_delete_pks:
-        through.objects.filter(pk__in=to_delete_pks).delete()
+        through._default_manager.filter(pk__in=to_delete_pks).delete()
     if to_create:
-        through.objects.bulk_create(to_create, batch_size=2000)
+        through._default_manager.bulk_create(to_create, batch_size=2000)
 
 
 # ------------------------------------------------------------------
