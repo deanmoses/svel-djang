@@ -127,7 +127,7 @@ if [ -n "$STAGED_ALL" ]; then
           changed=1
         fi
         # Ensure file ends with exactly one newline
-        if [ -s "$file" ] && [ "$(tail -c 1 "$file" | xxd -p)" != "0a" ]; then
+        if [ -s "$file" ] && [ "$(tail -c 1 "$file" | od -An -tx1 | tr -d ' ')" != "0a" ]; then
           printf '\n' >> "$file"
           changed=1
         fi
