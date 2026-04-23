@@ -20,8 +20,8 @@ if TYPE_CHECKING:
     from .citation_instance import CitationInstance
 
 
-class _ExistingClaimRow(NamedTuple):
-    """Partial Claim row cached during ``bulk_assert_claims`` diffing.
+class ExistingClaimRow(NamedTuple):
+    """Partial Claim row cached during claim diffing.
 
     Fetched via ``values_list`` to avoid JSONField deserialization cost on
     large sources. Field order matches the ``values_list`` column order.
@@ -198,7 +198,7 @@ class ClaimManager(models.Manager):
         # Use values_list to avoid full ORM object instantiation — on large
         # sources (40-50k+ claims) the overhead of JSONField deserialization
         # on full Claim objects causes multi-minute stalls on SQLite.
-        existing: dict[ClaimIdentity, _ExistingClaimRow] = {}
+        existing: dict[ClaimIdentity, ExistingClaimRow] = {}
         for row in self.filter(source=source, is_active=True).values_list(
             "pk",
             "content_type_id",
@@ -211,7 +211,7 @@ class ClaimManager(models.Manager):
             "license_id",
         ):
             pk, ct_id, obj_id, ck, val, cit, nr, nrn, lic_id = row
-            existing[ClaimIdentity(ct_id, obj_id, ck)] = _ExistingClaimRow(
+            existing[ClaimIdentity(ct_id, obj_id, ck)] = ExistingClaimRow(
                 value=val,
                 citation=cit,
                 needs_review=nr,

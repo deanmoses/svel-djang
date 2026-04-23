@@ -7,7 +7,6 @@ Auto-discovered via the ``routers`` list convention in config/api.py.
 from __future__ import annotations
 
 from dataclasses import asdict
-from typing import TypedDict, cast
 
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
@@ -20,7 +19,7 @@ from ninja.security import django_auth
 from ninja.throttling import AuthRateThrottle
 from pydantic import field_validator
 
-from .extraction import ExtractionMatch, classify_input, extract_isbn, normalize_isbn
+from .extraction import classify_input, extract_isbn, normalize_isbn
 from .extractors import EXTRACTORS, recognize_url
 from .models import CitationSource, CitationSourceLink
 from .url_extraction import extract_url
@@ -217,24 +216,6 @@ class ExtractResponseSchema(Schema):
     error: str | None = None
     confidence: str = ""
     source_api: str = ""
-
-
-class _ExtractDraftDict(TypedDict):
-    name: str
-    source_type: str
-    author: str
-    publisher: str
-    year: int | None
-    isbn: str | None
-    url: str | None
-
-
-class _ExtractResponseDict(TypedDict, total=False):
-    match: ExtractionMatch
-    draft: _ExtractDraftDict
-    error: str
-    confidence: str
-    source_api: str
 
 
 # ---------------------------------------------------------------------------
@@ -510,17 +491,13 @@ def extract_citation_source(request, data: ExtractRequestSchema):
     else:
         raise HttpError(422, "Unsupported input")
 
-    resp: _ExtractResponseDict = {}
-    if result.match:
-        resp["match"] = result.match
-    if result.draft:
-        resp["draft"] = cast(_ExtractDraftDict, asdict(result.draft))
-    if result.error:
-        resp["error"] = result.error
-    resp["confidence"] = result.confidence
-    resp["source_api"] = result.source_api
-
-    return resp
+    return ExtractResponseSchema(
+        match=ExtractMatchSchema(**result.match) if result.match else None,
+        draft=ExtractDraftSchema(**asdict(result.draft)) if result.draft else None,
+        error=result.error,
+        confidence=result.confidence,
+        source_api=result.source_api,
+    )
 
 
 # ---------------------------------------------------------------------------

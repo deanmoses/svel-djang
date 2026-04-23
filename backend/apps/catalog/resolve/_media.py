@@ -10,7 +10,7 @@ from typing import NamedTuple, cast
 from django.contrib.contenttypes.models import ContentType
 
 from apps.core.models import MediaSupported
-from apps.core.types import EntityKey
+from apps.core.types import ClaimIdentity, EntityKey
 from apps.media.models import EntityMedia, MediaAsset
 from apps.provenance.models import Claim
 from apps.provenance.typing import HasEffectivePriority
@@ -18,14 +18,6 @@ from apps.provenance.typing import HasEffectivePriority
 from ._helpers import _annotate_priority
 
 logger = logging.getLogger(__name__)
-
-
-class ClaimWinnerKey(NamedTuple):
-    """Dedup key for the first-winner-per-(entity, claim_key) pass."""
-
-    content_type_id: int
-    object_id: int
-    claim_key: str
 
 
 class CtInfo(NamedTuple):
@@ -95,9 +87,9 @@ def resolve_media_attachments(
     # Winner per (content_type_id, object_id, claim_key).
     # Keep priority + created_at for primary enforcement.
     winners_by_entity: dict[EntityKey, list[Claim]] = {}
-    seen: set[ClaimWinnerKey] = set()
+    seen: set[ClaimIdentity] = set()
     for claim in claims:
-        key = ClaimWinnerKey(claim.content_type_id, claim.object_id, claim.claim_key)
+        key = ClaimIdentity(claim.content_type_id, claim.object_id, claim.claim_key)
         if key not in seen:
             seen.add(key)
             entity_key = EntityKey(claim.content_type_id, claim.object_id)

@@ -28,7 +28,13 @@ from django.db import models, transaction
 from django.utils import timezone
 
 from apps.core.types import ClaimIdentity, EntityKey
-from apps.provenance.models import ChangeSet, Claim, IngestRun, Source
+from apps.provenance.models import (
+    ChangeSet,
+    Claim,
+    ExistingClaimRow,
+    IngestRun,
+    Source,
+)
 from apps.provenance.validation import validate_claims_batch
 
 logger = logging.getLogger(__name__)
@@ -51,22 +57,6 @@ class RetractEntry(NamedTuple):
     pk: int
     content_type_id: int
     object_id: int
-
-
-class _ExistingClaimRow(NamedTuple):
-    """Partial Claim row cached during ``_diff_claims`` diffing.
-
-    Fetched via ``values_list`` to avoid JSONField deserialization cost on
-    large sources. Field order matches the ``values_list`` column order.
-    """
-
-    # ``value`` is the raw JSONField payload — scalar, dict, list, or null.
-    value: object
-    citation: str
-    needs_review: bool
-    needs_review_notes: str
-    license_id: int | None
-    pk: int
 
 
 # ---------------------------------------------------------------------------
@@ -654,7 +644,7 @@ def _diff_claims(
     for c in valid_claims:
         by_ct[c.content_type_id].add(c.object_id)
 
-    existing: dict[ClaimIdentity, _ExistingClaimRow] = {}
+    existing: dict[ClaimIdentity, ExistingClaimRow] = {}
     for ct_id, obj_ids in by_ct.items():
         for row in Claim.objects.filter(
             source=source,
@@ -673,7 +663,7 @@ def _diff_claims(
             "license_id",
         ):
             pk, ct, oid, ck, val, cit, nr, nrn, lic_id = row
-            existing[ClaimIdentity(ct, oid, ck)] = _ExistingClaimRow(
+            existing[ClaimIdentity(ct, oid, ck)] = ExistingClaimRow(
                 value=val,
                 citation=cit,
                 needs_review=nr,
