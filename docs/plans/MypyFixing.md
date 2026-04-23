@@ -6,7 +6,7 @@ We recently introduced mypy and grandfathered in a lot of exceptions in backend/
 
 ## Status
 
-Steps 1–2 complete. Step 3.1 complete. Step 3.2 is next.
+Steps 1–3 complete. Step 4 (tech-debt cleanup) or Step 5 (decorator relaxation) is next.
 
 ## Running mypy
 
@@ -79,6 +79,24 @@ When a helper transitions from returning `dict` to returning `Schema`, but the c
   - Either way, tightening the shared callback type or callee return ripples into every untyped consumer, ballooning the current step's scope.
 - **Flag the wrapper as tech debt.** A comment naming the later step that will remove the bridge keeps the intent visible. Don't silently leave the `.model_dump()` / `.model_validate()` hop in place once the boundary is tightened.
 
+### Idiom for Pydantic response unions: structural discrimination is required
+
+When typing a Ninja response slot as a union of Schemas (`response={422: SchemaA | SchemaB}`), Pydantic smart-mode union dispatch is **structural**, not intent-based. Two schemas that share a required field subset will mis-route bodies in both directions:
+
+- A body with only the shared fields matches whichever arm covers the rest via defaults — so the "minimal" body is serialized as the "rich" schema, with the rich schema's default values leaking into the wire response.
+- A body with extra fields matches whichever arm treats extras permissively (the Pydantic default) — so the "rich" body is serialized as the "minimal" schema, **silently dropping the extra fields from the wire response**.
+
+Both failure modes pass mypy, pass OpenAPI generation, and pass tests that don't assert on the full response body. They surface as frontend classifier bugs (wrong `kind` branch) or as lost data in the 422 body.
+
+Two tools make dispatch deterministic; apply both on every union of response schemas with shared fields:
+
+- **Mark the distinguishing field as required (no default) on the richer schema.** A body lacking the field then fails validation against the rich arm, forcing the minimal arm.
+- **Set `model_config = ConfigDict(extra="forbid")` on the minimal schema.** A body carrying extras then fails validation against the minimal arm, forcing the rich arm.
+
+Before landing a union, verify dispatch with `TypeAdapter(A | B).validate_python(body)` for every real body shape the endpoint emits. The baseline and test suite will not catch it. `{"detail": "…"}` alone is ambiguous; fix it before shipping.
+
+See [schemas.py:SoftDeleteBlockedSchema](backend/apps/catalog/api/schemas.py) / `AlreadyDeletedSchema` / `PersonSoftDeleteBlockedSchema` for the canonical example (Step 3.2).
+
 ### Idiom for narrowing optional FK fields
 
 `obj.fk_id is not None` (column read, no DB hit) and `obj.fk is not None` (related-object dereference, may hit the DB) **are not equivalent**. Don't swap one for the other to satisfy mypy.
@@ -117,7 +135,7 @@ Typing these first means the step 2.2 sweep collects `no-untyped-call` reduction
 
 Baseline: 710 → 377 (~47% reduction). Commit: `e7b8204f`.
 
-## Step 3: close out `catalog/api`
+## Step 3: close out `catalog/api` - DONE
 
 Order: Schema-return conversion (3.1) before error-schema swap (3.2) because 3.1 is unblocked while 3.2 needs a design decision. Step 4 (tech-debt cleanup) is independent and can land any time. Step 5 (decorator-relaxation narrowing) is the final milestone and is gated on Step 3.
 
@@ -127,23 +145,15 @@ Step 1's deferred work. Two bridges in [titles.py](backend/apps/catalog/api/titl
 
 **Done when:** `_serialize_model_detail` returns `MachineModelDetailSchema`, the two `model_validate` wrappers are gone from titles.py, `./scripts/mypy` stays clean, and frontend typecheck passes.
 
-### Step 3.2: Swap `422` / `404` dict responses to shared error schemas
+### Step 3.2: Swap `422` / `404` dict responses to shared error schemas - DONE
 
-`ErrorDetailSchema` and `SoftDeleteBlockedSchema` are defined in [schemas.py](backend/apps/catalog/api/schemas.py) (commit `e7b8204f`) but not yet referenced. Sites to update:
+Delete endpoints now type 422 as a union of `SoftDeleteBlockedSchema | AlreadyDeletedSchema` (or `PersonSoftDeleteBlockedSchema | AlreadyDeletedSchema` for `delete_person`); restore endpoints use `ErrorDetailSchema` for 422 / 404.
 
-- [entity_crud.py:238](backend/apps/catalog/api/entity_crud.py#L238), [:276](backend/apps/catalog/api/entity_crud.py#L276)
-- [machine_models.py:1036](backend/apps/catalog/api/machine_models.py#L1036), [:1079](backend/apps/catalog/api/machine_models.py#L1079)
-- [people.py:399](backend/apps/catalog/api/people.py#L399), [:459](backend/apps/catalog/api/people.py#L459)
-- [titles.py:1148](backend/apps/catalog/api/titles.py#L1148), [:1195](backend/apps/catalog/api/titles.py#L1195) (these use `422: dict[str, Any]`, lazy-`Any` placeholders to clear)
+**Design decisions resolved:**
 
-**Precondition: `SoftDeleteBlockedSchema` doesn't fit `delete_person`.** That endpoint returns `active_credit_count`, not `active_children_count` (Credits aren't lifecycle children — see the `_active_credit_count` docstring in [people.py](backend/apps/catalog/api/people.py)). Resolve before the swap by either:
-
-- Generalizing the schema field to `active_referrer_count: int` and updating the `delete_model` / `entity_crud._delete` payloads to match, or
-- Keeping `SoftDeleteBlockedSchema` as-is for the cascade-child case and adding `PersonSoftDeleteBlockedSchema` for the credit case.
-
-The frontend's [delete-flow.ts classifier](frontend/src/lib/delete-flow.ts) keys off `blocked_by` being a present array; any rename needs a coordinated frontend change.
-
-**Done when:** no `catalog/api` endpoint declares `422: dict` / `404: dict` / `422: dict[str, Any]`, `./scripts/mypy` stays clean, frontend typecheck passes.
+- **Kept two blocked schemas, not one generalized field.** `SoftDeleteBlockedSchema.active_children_count` and `PersonSoftDeleteBlockedSchema.active_credit_count` measure genuinely different things (cascade-owned children vs. Credits referentially joined to active Models/Series). Collapsing to `active_referrer_count` would have unified only the wire field name — the pre-walker query logic is inherently different and not consolidatable, and the generic PROTECT-walker path is already shared via `execute_soft_delete`. A rename would also have touched `PersonDeletePreviewSchema.active_credit_count`, widening the blast radius beyond 422 bodies.
+- **Introduced `AlreadyDeletedSchema` as the second union arm.** The "already soft-deleted" 422 has only `detail` (no `blocked_by`), which the frontend's [delete-flow.ts classifier](frontend/src/lib/delete-flow.ts) relies on to fall through to `form_error` instead of `blocked`. A distinct class alone is **not sufficient** — Pydantic smart-union dispatch is structural, so `{"detail": "…"}` matches whichever arm has defaults covering the missing fields, and `{"detail": "…", "blocked_by": […]}` matches whichever arm treats extras permissively. Correct dispatch required making `blocked_by` required (no default) on `SoftDeleteBlockedSchema` / `PersonSoftDeleteBlockedSchema`, **and** `model_config = ConfigDict(extra="forbid")` on `AlreadyDeletedSchema`. See the "Pydantic response unions need structural discrimination" idiom above. Named `AlreadyDeletedSchema` rather than reusing `ErrorDetailSchema` so the union is self-documenting at the call site.
+- **No inheritance between error schemas.** Pydantic subclassing doesn't affect union dispatch (structural) or openapi-typescript output (duplicates fields, no TS subtyping). No backend code processes these polymorphically; no frontend code either. Inheritance would be a type-gesture only.
 
 ## Step 4: Clean up tech debt from the Step 2 signature sweep
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from ninja import Schema
+from pydantic import ConfigDict
 
 from apps.provenance.schemas import EditCitationInput
 
@@ -105,12 +106,45 @@ class SoftDeleteBlockedSchema(Schema):
     ``blocked_by`` is empty (list, not null) when the block comes from an
     active-children count rather than PROTECT referrers — the frontend's
     delete-flow classifier relies on ``blocked_by`` being present as an array
-    to recognise a blocked outcome.
+    to recognise a blocked outcome. Required (no default) so that Pydantic
+    union dispatch against :class:`AlreadyDeletedSchema` routes bare-``detail``
+    bodies to the latter instead of filling an empty default here.
     """
 
     detail: str
-    blocked_by: list[BlockingReferrerSchema] = []
+    blocked_by: list[BlockingReferrerSchema]
     active_children_count: int = 0
+
+
+class AlreadyDeletedSchema(Schema):
+    """422 response from a delete endpoint when the entity is already soft-deleted.
+
+    Paired with :class:`SoftDeleteBlockedSchema` / :class:`PersonSoftDeleteBlockedSchema`
+    in a union on the 422 slot: ``blocked_by`` is absent here, so the frontend's
+    delete-flow classifier falls through to ``form_error`` rather than ``blocked``.
+    ``extra='forbid'`` forces Pydantic union dispatch to reject bodies carrying
+    ``blocked_by`` and route them to the blocked-schema arm instead.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    detail: str
+
+
+class PersonSoftDeleteBlockedSchema(Schema):
+    """422 response from Person delete when active credits block.
+
+    Separate from :class:`SoftDeleteBlockedSchema` because Credits are
+    referential, not lifecycle-owned children: the count is computed by
+    joining Credit to its active parent Model/Series rather than walking an
+    FK back from the child (see ``_active_credit_count`` in people.py).
+    ``blocked_by`` is required for the same union-dispatch reason as
+    :class:`SoftDeleteBlockedSchema`.
+    """
+
+    detail: str
+    blocked_by: list[BlockingReferrerSchema]
+    active_credit_count: int = 0
 
 
 class ModelDeleteSchema(Schema):

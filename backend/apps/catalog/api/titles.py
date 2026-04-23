@@ -80,12 +80,15 @@ from .machine_models import (
     _serialize_model_detail,
 )
 from .schemas import (
+    AlreadyDeletedSchema,
     BlockingReferrerSchema,
     CreditSchema,
+    ErrorDetailSchema,
     GameplayFeatureSchema,
     ModelCreateSchema,
     Ref,
     SeriesRefSchema,
+    SoftDeleteBlockedSchema,
     ThemeSchema,
     TitleMachineSchema,
 )
@@ -1136,7 +1139,10 @@ def title_delete_preview(request: HttpRequest, slug: str) -> TitleDeletePreviewS
 @titles_router.post(
     "/{slug}/delete/",
     auth=django_auth,
-    response={200: TitleDeleteResponseSchema, 422: dict[str, Any]},
+    response={
+        200: TitleDeleteResponseSchema,
+        422: SoftDeleteBlockedSchema | AlreadyDeletedSchema,
+    },
     tags=["private"],
 )
 def delete_title(
@@ -1183,7 +1189,11 @@ def delete_title(
 @titles_router.post(
     "/{slug}/restore/",
     auth=django_auth,
-    response={200: TitleDetailSchema, 422: dict[str, Any], 404: dict[str, Any]},
+    response={
+        200: TitleDetailSchema,
+        422: ErrorDetailSchema,
+        404: ErrorDetailSchema,
+    },
     tags=["private"],
 )
 def restore_title(

@@ -76,7 +76,9 @@ from .helpers import (
     _serialize_uploaded_media,
 )
 from .schemas import (
+    AlreadyDeletedSchema,
     CreditSchema,
+    ErrorDetailSchema,
     FranchiseRefSchema,
     GameplayFeatureSchema,
     ModelClaimPatchSchema,
@@ -88,6 +90,7 @@ from .schemas import (
     Ref,
     RewardTypeSchema,
     SeriesRefSchema,
+    SoftDeleteBlockedSchema,
     ThemeSchema,
     TitleMachineSchema,
 )
@@ -1034,7 +1037,10 @@ def model_delete_preview(request: HttpRequest, slug: str) -> dict[str, Any]:
 @models_router.post(
     "/{slug}/delete/",
     auth=django_auth,
-    response={200: ModelDeleteResponseSchema, 422: dict},
+    response={
+        200: ModelDeleteResponseSchema,
+        422: SoftDeleteBlockedSchema | AlreadyDeletedSchema,
+    },
     tags=["private"],
 )
 def delete_model(
@@ -1077,7 +1083,11 @@ def delete_model(
 @models_router.post(
     "/{slug}/restore/",
     auth=django_auth,
-    response={200: MachineModelDetailSchema, 422: dict, 404: dict},
+    response={
+        200: MachineModelDetailSchema,
+        422: ErrorDetailSchema,
+        404: ErrorDetailSchema,
+    },
     tags=["private"],
 )
 def restore_model(

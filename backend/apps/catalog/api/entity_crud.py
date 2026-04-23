@@ -43,7 +43,12 @@ from .entity_create import (
     validate_name,
     validate_slug_format,
 )
-from .schemas import BlockingReferrerSchema
+from .schemas import (
+    AlreadyDeletedSchema,
+    BlockingReferrerSchema,
+    ErrorDetailSchema,
+    SoftDeleteBlockedSchema,
+)
 from .soft_delete import (
     SoftDeleteBlockedError,
     count_entity_changesets,
@@ -239,7 +244,10 @@ def register_entity_delete_restore(
     router.post(
         "/{slug}/delete/",
         auth=django_auth,
-        response={200: TaxonomyDeleteResponseSchema, 422: dict},
+        response={
+            200: TaxonomyDeleteResponseSchema,
+            422: SoftDeleteBlockedSchema | AlreadyDeletedSchema,
+        },
         tags=["private"],
     )(_delete)
 
@@ -277,7 +285,11 @@ def register_entity_delete_restore(
     router.post(
         "/{slug}/restore/",
         auth=django_auth,
-        response={200: response_schema, 422: dict, 404: dict},
+        response={
+            200: response_schema,
+            422: ErrorDetailSchema,
+            404: ErrorDetailSchema,
+        },
         tags=["private"],
     )(_restore)
 

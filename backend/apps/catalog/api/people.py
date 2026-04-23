@@ -48,12 +48,15 @@ from .helpers import (
     _serialize_uploaded_media,
 )
 from .schemas import (
+    AlreadyDeletedSchema,
     ClaimPatchSchema,
+    ErrorDetailSchema,
     PersonCreateSchema,
     PersonDeletePreviewSchema,
     PersonDeleteResponseSchema,
     PersonDeleteSchema,
     PersonRestoreSchema,
+    PersonSoftDeleteBlockedSchema,
     RelatedTitleSchema,
 )
 from .soft_delete import (
@@ -396,7 +399,10 @@ def person_delete_preview(request: HttpRequest, slug: str) -> dict[str, Any]:
 @people_router.post(
     "/{slug}/delete/",
     auth=django_auth,
-    response={200: PersonDeleteResponseSchema, 422: dict},
+    response={
+        200: PersonDeleteResponseSchema,
+        422: PersonSoftDeleteBlockedSchema | AlreadyDeletedSchema,
+    },
     tags=["private"],
 )
 def delete_person(
@@ -456,7 +462,11 @@ def delete_person(
 @people_router.post(
     "/{slug}/restore/",
     auth=django_auth,
-    response={200: PersonDetailSchema, 422: dict, 404: dict},
+    response={
+        200: PersonDetailSchema,
+        422: ErrorDetailSchema,
+        404: ErrorDetailSchema,
+    },
     tags=["private"],
 )
 def restore_person(
