@@ -62,7 +62,11 @@ class Command(BaseCommand):
             help="SPARQL query timeout in seconds (default: 15).",
         )
 
-    def handle(self, *args: object, **options: Any) -> None:
+    def handle(
+        self,
+        *args: object,
+        **options: Any,  # noqa: ANN401 - argparse-driven Django command kwargs
+    ) -> None:
         dump_path = options["dump"]
         from_dump = options["from_dump"]
 
@@ -186,7 +190,10 @@ def _collect_manufacturer_claims(
     claims: list[Claim] = []
     citation = wm.citation_url
 
-    def add(field_name: str, value: object) -> None:
+    def add(
+        field_name: str,
+        value: Any,  # noqa: ANN401 - claim value is arbitrary JSON
+    ) -> None:
         if value is not None and value != "":
             claims.append(
                 Claim(

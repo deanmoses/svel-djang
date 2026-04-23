@@ -36,7 +36,11 @@ class Command(BaseCommand):
             help="Validate plan without writing to the database.",
         )
 
-    def handle(self, *args: object, **options: Any) -> None:
+    def handle(
+        self,
+        *args: object,
+        **options: Any,  # noqa: ANN401 - argparse-driven Django command kwargs
+    ) -> None:
         ipdb_path = options["ipdb"]
 
         records = parse_ipdb_records(ipdb_path)

@@ -151,7 +151,7 @@ def validate_cross_entity_wikilinks(export_dir: Path, stdout, stderr) -> None:
 
     from django.apps import apps
 
-    linkable_models: dict[str, Any] = {}
+    linkable_models: dict[str, type[LinkableModel]] = {}
     for model in apps.get_models():
         if issubclass(model, LinkableModel) and hasattr(model, "slug"):
             model_name = model._meta.model_name

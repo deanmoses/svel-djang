@@ -82,7 +82,10 @@ class Command(BaseCommand):
             help=f"Local directory to download into (default: {_DEFAULT_DEST}).",
         )
 
-    def handle(self, **options: Any) -> None:
+    def handle(
+        self,
+        **options: Any,  # noqa: ANN401 - argparse-driven Django command kwargs
+    ) -> None:
         base_url = options["url"].rstrip("/")
         dest = options["dest"]
 

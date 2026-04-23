@@ -48,7 +48,12 @@ class IpdbRecord:
 
     @classmethod
     def from_raw(cls, d: dict[str, Any]) -> IpdbRecord:
-        """Map raw JSON keys to Python field names. Key mapping only."""
+        """Map raw JSON keys to Python field names. Key mapping only.
+
+        ``d`` is the parsed IPDB JSON dict — fields are heterogeneous
+        (string/int/list/null per IPDB schema), so the value type stays
+        ``Any`` rather than enumerating the upstream schema here.
+        """
         return cls(
             ipdb_id=d["IpdbId"],  # KeyError if missing = drift detection
             title=d.get("Title", "Unknown"),

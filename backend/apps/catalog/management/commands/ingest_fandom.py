@@ -113,7 +113,11 @@ class Command(BaseCommand):
             help="Load manufacturers JSON from this file instead of fetching live.",
         )
 
-    def handle(self, *args: object, **options: Any) -> None:
+    def handle(
+        self,
+        *args: object,
+        **options: Any,  # noqa: ANN401 - argparse-driven Django command kwargs
+    ) -> None:
         verbosity = options["verbosity"]
         b, r = "\033[1m", "\033[0m"
         dim, undim = "\033[2m", "\033[22m"
@@ -536,7 +540,10 @@ def _collect_manufacturer_claims(
     claims: list[Claim] = []
     citation = fm.citation_url
 
-    def add(field_name: str, value: object) -> None:
+    def add(
+        field_name: str,
+        value: Any,  # noqa: ANN401 - claim value is arbitrary JSON
+    ) -> None:
         if value is not None and value != "":
             claims.append(
                 Claim(

@@ -65,7 +65,11 @@ class Command(BaseCommand):
             "runs in dry-run mode and rolls back all changes.",
         )
 
-    def handle(self, *args: object, **options: Any) -> None:
+    def handle(
+        self,
+        *args: object,
+        **options: Any,  # noqa: ANN401 - argparse-driven Django command kwargs
+    ) -> None:
         write = options["write"]
         ipdb_path = options["ipdb"]
         opdb_path = options["opdb"]

@@ -38,7 +38,10 @@ class Command(BaseCommand):
             help="Run ingest_all without --write (rolls back changes).",
         )
 
-    def handle(self, **options: Any) -> None:
+    def handle(
+        self,
+        **options: Any,  # noqa: ANN401 - argparse-driven Django command kwargs
+    ) -> None:
         dest = options["dest"]
         write = not options["dry_run"]
 

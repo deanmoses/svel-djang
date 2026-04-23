@@ -13,7 +13,11 @@ from apps.catalog.resolve import resolve_machine_models
 class Command(BaseCommand):
     help = "Re-resolve all catalog entities from their active claims."
 
-    def handle(self, *args: Any, **options: Any) -> None:
+    def handle(
+        self,
+        *args: object,
+        **options: Any,  # noqa: ANN401 - argparse-driven Django command kwargs
+    ) -> None:
         # Silence per-query SQL logging — bulk_update generates huge CASE WHEN
         # statements that produce tens of MB of debug output.
         logging.getLogger("django.db.backends").setLevel(logging.WARNING)

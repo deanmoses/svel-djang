@@ -39,7 +39,9 @@ class CatalogConfig(AppConfig):
         from apps.core.markdown_links import LinkType, register
         from apps.core.models import LinkableModel
 
-        def _default_serialize(obj: Any) -> dict[str, str]:
+        def _default_serialize(
+            obj: Any,  # noqa: ANN401 - matches LinkType.autocomplete_serialize callback contract
+        ) -> dict[str, str]:
             return {"ref": obj.slug, "label": str(obj.name)}
 
         for model in apps.get_app_config("catalog").get_models():

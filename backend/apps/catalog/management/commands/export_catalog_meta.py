@@ -34,7 +34,10 @@ class CatalogEntry(NamedTuple):
 class Command(BaseCommand):
     help = "Generate frontend/src/lib/api/catalog-meta.ts from linkable models."
 
-    def handle(self, **options: Any) -> None:
+    def handle(
+        self,
+        **options: Any,  # noqa: ANN401 - argparse-driven Django command kwargs
+    ) -> None:
         catalog_meta: list[CatalogEntry] = []
         media_categories: dict[str, list[str]] = {}
 

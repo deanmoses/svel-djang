@@ -36,6 +36,7 @@ from apps.catalog.ingestion.bulk_utils import (
 )
 from apps.catalog.ingestion.constants import IPDB_SKIP_MANUFACTURER_IDS
 from apps.catalog.ingestion.ipdb.features import (
+    GameplayFeaturePair,
     extract_ipdb_gameplay_features,
     extract_ipdb_reward_types,
     load_mpu_to_system_slug,
@@ -260,7 +261,7 @@ def build_ipdb_plan(
     # Collect queues for deferred processing.
     credit_queue: list[CreditQueueEntry] = []
     theme_queue: list[tuple[dict, list[str]]] = []  # (target_kwargs, [slugs])
-    gameplay_feature_queue: list[tuple[dict, list[tuple[str, int | None]]]] = []
+    gameplay_feature_queue: list[tuple[dict, list[GameplayFeaturePair]]] = []
     reward_type_queue: list[tuple[dict, list[str]]] = []
     unmatched_feature_terms: list[str] = []
     unknown_mpu_strings: set[str] = set()
@@ -879,7 +880,7 @@ def _process_themes(
 
 
 def _process_gameplay_features(
-    queue: list[tuple[dict, list[tuple[str, int | None]]]],
+    queue: list[tuple[dict, list[GameplayFeaturePair]]],
     plan: IngestPlan,
     feature_slug_to_pk: dict[str, int],
 ) -> None:

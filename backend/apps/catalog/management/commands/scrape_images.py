@@ -63,7 +63,11 @@ MANUAL_IMAGES: dict[str, list[str]] = {
 
 
 def _has_images(extra_data: dict[str, object]) -> bool:
-    """Check if extra_data already contains usable image URLs."""
+    """Check if extra_data already contains usable image URLs.
+
+    ``extra_data`` is a free-form JSONField payload — the value side is
+    deliberately ``object`` and narrowed via ``isinstance`` per access.
+    """
     for key in ("image_urls", "ipdb.image_urls"):
         if extra_data.get(key):
             return True
@@ -164,7 +168,11 @@ class Command(BaseCommand):
             help="Preview what would be scraped without saving.",
         )
 
-    def handle(self, *args: object, **options: Any) -> None:
+    def handle(
+        self,
+        *args: object,
+        **options: Any,  # noqa: ANN401 - argparse-driven Django command kwargs
+    ) -> None:
         year_min = options["year_min"]
         dry_run = options["dry_run"]
 

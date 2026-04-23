@@ -91,6 +91,8 @@ class PlannedEntityCreate:
     """
 
     model_class: type[models.Model]
+    # kwargs are spread into ``model_class(**kwargs)`` — schema varies per
+    # model class, so the value type is genuinely heterogeneous.
     kwargs: dict[str, Any]
     handle: str
     handle_refs: dict[str, str] = field(default_factory=dict)
@@ -116,7 +118,8 @@ class PlannedClaimAssert:
     """
 
     field_name: str
-    value: Any = None
+    # ``value`` is the raw JSONField payload — scalar, dict, list, or null.
+    value: Any = None  # noqa: ANN401 - claim value is arbitrary JSON
     claim_key: str = ""
     citation: str = ""
     content_type_id: int | None = None
@@ -127,6 +130,8 @@ class PlannedClaimAssert:
     license_id: int | None = None
     # Deferred relationship claim identity:
     relationship_namespace: str = ""
+    # identity values mix PKs (int) and tag values (str/bool) per the
+    # relationship's claim-key schema; truly heterogeneous.
     identity: dict[str, Any] = field(default_factory=dict)
     identity_refs: dict[str, str] = field(default_factory=dict)
 

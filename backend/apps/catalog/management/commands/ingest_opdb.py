@@ -40,7 +40,11 @@ class Command(BaseCommand):
             help="Validate and diff without writing to the database.",
         )
 
-    def handle(self, *args: object, **options: Any) -> None:
+    def handle(
+        self,
+        *args: object,
+        **options: Any,  # noqa: ANN401 - argparse-driven Django command kwargs
+    ) -> None:
         opdb_path = options["opdb"]
         dry_run = options["dry_run"]
 
