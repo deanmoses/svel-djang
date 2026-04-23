@@ -3,28 +3,13 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import Any, TypedDict, cast
+from typing import cast
 
 from django.db import models
 from django.db.models import Case, F, IntegerField, Prefetch, QuerySet, Value, When
 
 from .models import CitationInstance, Claim
-
-
-class SourceRow(TypedDict):
-    """Serialized per-claim entry matching ``ClaimSchema`` in schemas.py."""
-
-    source_name: str | None
-    source_slug: str | None
-    user_display: str | None
-    field_name: str
-    # Claim values are arbitrary JSON (scalar, dict, list, null) by design;
-    # the schema serializes them as ``object`` for the same reason.
-    value: Any
-    citation: str
-    created_at: str
-    is_winner: bool
-    changeset_note: str | None
+from .schemas import ClaimSchema
 
 
 def claims_prefetch(
@@ -86,30 +71,30 @@ def citation_instances(claim: Claim) -> list[CitationInstance]:
     return cast(list[CitationInstance], instances)
 
 
-def build_sources(claims: Iterable[Claim]) -> list[SourceRow]:
+def build_sources(claims: Iterable[Claim]) -> list[ClaimSchema]:
     """Serialize pre-fetched active claims into the sources list format.
 
     Claims should be ordered by claim_key, -priority, -created_at. The first
     claim seen per claim_key is marked as the winner.
     """
     winners: set[str] = set()
-    sources: list[SourceRow] = []
+    sources: list[ClaimSchema] = []
     for claim in claims:
         is_winner = claim.claim_key not in winners
         if is_winner:
             winners.add(claim.claim_key)
         sources.append(
-            {
-                "source_name": claim.source.name if claim.source else None,
-                "source_slug": claim.source.slug if claim.source else None,
-                "user_display": claim.user.username if claim.user else None,
-                "field_name": claim.field_name,
-                "value": claim.value,
-                "citation": claim.citation,
-                "created_at": claim.created_at.isoformat(),
-                "is_winner": is_winner,
-                "changeset_note": claim.changeset.note if claim.changeset else None,
-            }
+            ClaimSchema(
+                source_name=claim.source.name if claim.source else None,
+                source_slug=claim.source.slug if claim.source else None,
+                user_display=claim.user.username if claim.user else None,
+                field_name=claim.field_name,
+                value=claim.value,
+                citation=claim.citation,
+                created_at=claim.created_at.isoformat(),
+                is_winner=is_winner,
+                changeset_note=claim.changeset.note if claim.changeset else None,
+            )
         )
-    sources.sort(key=lambda c: c["created_at"], reverse=True)
+    sources.sort(key=lambda c: c.created_at, reverse=True)
     return sources

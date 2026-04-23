@@ -29,7 +29,12 @@ from .entity_resolution import batch_resolve_entities
 from .evidence import build_cited_changesets
 from .helpers import active_claims, build_sources, claims_prefetch
 from .history import build_edit_history
-from .schemas import ClaimSchema, FieldChangeSchema, RetractionSchema
+from .schemas import (
+    ChangeSetSchema,
+    ClaimSchema,
+    FieldChangeSchema,
+    RetractionSchema,
+)
 
 
 class ChangeSetSummarySchema(Schema):
@@ -99,17 +104,6 @@ class SourcesPageSchema(Schema):
     evidence: list[CitedChangeSetSchema]
 
 
-class ChangeSetSchema(Schema):
-    """A grouped edit session with per-field diffs."""
-
-    id: int
-    user_display: str | None = None
-    note: str
-    created_at: str
-    changes: list[FieldChangeSchema]
-    retractions: list[RetractionSchema] = []
-
-
 type ErrorPayload = dict[str, str]
 
 
@@ -150,17 +144,7 @@ def edit_history_page(
     except ValueError:
         return Status(404, {"detail": f"Unknown entity type: {entity_type}"})
     entity = get_object_or_404(model_class, slug=slug)
-    return [
-        ChangeSetSchema(
-            id=row["id"],
-            user_display=row["user_display"],
-            note=row["note"],
-            created_at=row["created_at"],
-            changes=[FieldChangeSchema(**c) for c in row["changes"]],
-            retractions=[RetractionSchema(**r) for r in row["retractions"]],
-        )
-        for row in build_edit_history(entity)
-    ]
+    return build_edit_history(entity)
 
 
 @pages_router.get(
@@ -188,7 +172,7 @@ def sources_page(
         model_class._default_manager.prefetch_related(claims_prefetch()), slug=slug
     )
     claims = active_claims(entity)
-    sources = [ClaimSchema(**source) for source in build_sources(claims)]
+    sources = build_sources(claims)
     evidence = [
         CitedChangeSetSchema(
             id=row["id"],

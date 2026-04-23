@@ -35,6 +35,17 @@ class RetractionSchema(Schema):
     old_value: object
 
 
+class ChangeSetSchema(Schema):
+    """A grouped edit session with per-field diffs."""
+
+    id: int
+    user_display: str | None = None
+    note: str
+    created_at: str
+    changes: list[FieldChangeSchema]
+    retractions: list[RetractionSchema] = []
+
+
 class ClaimSchema(Schema):
     """A single per-field claim as surfaced to the Sources UI."""
 
