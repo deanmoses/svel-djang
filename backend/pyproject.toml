@@ -92,7 +92,6 @@ ignore = [
 "apps/catalog/ingestion/**" = ["ANN401"]
 "apps/catalog/management/**" = ["ANN401"]
 "apps/catalog/tests/**" = ["ANN401"]  # tests stay grandfathered; source is clean
-"config/**" = ["ANN401"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["apps", "config"]

@@ -1,7 +1,7 @@
 import os
 import sys
 from pathlib import Path
-from typing import Any
+from typing import NamedTuple
 
 import dj_database_url
 import django_stubs_ext
@@ -230,11 +230,21 @@ DISPLAY_POLICY_CHOICES = (
     ("licensed-only", "✅ Show Only Licensed Content — no OPDB or IPDB images"),
 )
 
-CONSTANCE_CONFIG: dict[str, Any] = {
-    "CONTENT_DISPLAY_POLICY": (
-        "licensed-only",
-        "Controls which content is shown based on license status",
-        str,
+
+# django-constance expects each CONSTANCE_CONFIG value to be a tuple of
+# (default, help_text, field_type_or_name). It unpacks positionally, which is
+# why this is a NamedTuple rather than a TypedDict.
+class ConstanceSpec(NamedTuple):
+    default: object
+    help_text: str
+    field: type | str
+
+
+CONSTANCE_CONFIG: dict[str, ConstanceSpec] = {
+    "CONTENT_DISPLAY_POLICY": ConstanceSpec(
+        default="licensed-only",
+        help_text="Controls which content is shown based on license status",
+        field=str,
     ),
 }
 
@@ -245,10 +255,10 @@ CONSTANCE_ADDITIONAL_FIELDS = {
     ],
 }
 
-CONSTANCE_CONFIG["CONTENT_DISPLAY_POLICY"] = (
-    "licensed-only",
-    "Controls which content is shown based on license status",
-    "display_policy_select",
+CONSTANCE_CONFIG["CONTENT_DISPLAY_POLICY"] = ConstanceSpec(
+    default="licensed-only",
+    help_text="Controls which content is shown based on license status",
+    field="display_policy_select",
 )
 
 CONSTANCE_CONFIG_FIELDSETS = (("Content Display", ("CONTENT_DISPLAY_POLICY",)),)

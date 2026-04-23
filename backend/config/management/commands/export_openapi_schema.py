@@ -21,7 +21,7 @@ class Command(BaseCommand):
             help="Output file path (default: backend/openapi.json)",
         )
 
-    def handle(self, *args: object, **options: Any) -> None:
+    def handle(self, *args: object, **options: Any) -> None:  # noqa: ANN401 — argparse-driven options schema owned by Django
         schema = api.get_openapi_schema()
         output_path = Path(options["output"])
         output_path.write_text(json.dumps(schema, indent=2))
