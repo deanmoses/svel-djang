@@ -586,12 +586,7 @@ def _serialize_title_detail(title: Title) -> TitleDetailSchema:
     model_detail: MachineModelDetailSchema | None = None
     if len(machines) == 1 and not machines[0].variants:
         pm = _model_detail_qs().get(slug=machines[0].slug)
-        # Bridge: `_serialize_model_detail` still returns dict; re-validate
-        # into the Schema until step 2 (machine_models.py) converts it to
-        # return MachineModelDetailSchema directly.
-        model_detail = MachineModelDetailSchema.model_validate(
-            _serialize_model_detail(pm)
-        )
+        model_detail = _serialize_model_detail(pm)
 
     description = _build_rich_text(title, "description", active_claims(title))
 
@@ -1095,11 +1090,7 @@ def create_model(
     )
 
     pm = get_object_or_404(_model_detail_qs(), slug=slug)
-    # Bridge: see _serialize_title_detail for why the model_validate hop is
-    # here. Remove when step 2 tightens _serialize_model_detail's return type.
-    return Status(
-        201, MachineModelDetailSchema.model_validate(_serialize_model_detail(pm))
-    )
+    return Status(201, _serialize_model_detail(pm))
 
 
 # ---------------------------------------------------------------------------

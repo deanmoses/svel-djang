@@ -324,8 +324,8 @@ def _serialize_model_list(
     }
 
 
-def _serialize_model_detail(pm: MachineModel) -> dict[str, Any]:
-    """Serialize a MachineModel into the detail response dict.
+def _serialize_model_detail(pm: MachineModel) -> MachineModelDetailSchema:
+    """Serialize a MachineModel into the detail response schema.
 
     Expects *pm* to have been fetched with prefetch_related for credits
     (with select_related("person")) and claims (to_attr="active_claims").
@@ -347,27 +347,27 @@ def _serialize_model_detail(pm: MachineModel) -> dict[str, Any]:
     variant_features = _extract_variant_features(pm.extra_data or {})
 
     variants = [
-        {
-            "name": v.name,
-            "slug": v.slug,
-            "year": v.year,
-            "variant_features": _extract_variant_features(v.extra_data or {}),
-        }
+        VariantSchema(
+            name=v.name,
+            slug=v.slug,
+            year=v.year,
+            variant_features=_extract_variant_features(v.extra_data or {}),
+        )
         for v in pm.variants.all()
     ]
 
     # Build sibling variants: other variants of the same parent.
-    variant_siblings: list[dict[str, Any]] = []
+    variant_siblings: list[VariantSchema] = []
     if pm.variant_of_id is not None:
         parent = pm.variant_of
         assert parent is not None  # narrowed by variant_of_id check above
         variant_siblings = [
-            {
-                "name": sib.name,
-                "slug": sib.slug,
-                "year": sib.year,
-                "variant_features": _extract_variant_features(sib.extra_data or {}),
-            }
+            VariantSchema(
+                name=sib.name,
+                slug=sib.slug,
+                year=sib.year,
+                variant_features=_extract_variant_features(sib.extra_data or {}),
+            )
             for sib in parent.variants.all()
             if sib.pk != pm.pk
         ]
@@ -385,134 +385,135 @@ def _serialize_model_detail(pm: MachineModel) -> dict[str, Any]:
         else None
     )
 
-    return {
-        "name": pm.name,
-        "slug": pm.slug,
-        "description": description,
-        "manufacturer": {"name": mfr.name, "slug": mfr.slug} if mfr else None,
-        "corporate_entity": (
-            {"name": pm.corporate_entity.name, "slug": pm.corporate_entity.slug}
+    return MachineModelDetailSchema(
+        name=pm.name,
+        slug=pm.slug,
+        description=description,
+        manufacturer=Ref(name=mfr.name, slug=mfr.slug) if mfr else None,
+        corporate_entity=(
+            Ref(name=pm.corporate_entity.name, slug=pm.corporate_entity.slug)
             if pm.corporate_entity
             else None
         ),
-        "year": pm.year,
-        "month": pm.month,
-        "technology_generation": (
-            {
-                "name": pm.technology_generation.name,
-                "slug": pm.technology_generation.slug,
-            }
+        year=pm.year,
+        month=pm.month,
+        technology_generation=(
+            Ref(
+                name=pm.technology_generation.name,
+                slug=pm.technology_generation.slug,
+            )
             if pm.technology_generation
             else None
         ),
-        "technology_subgeneration": (
-            {"name": subgen.name, "slug": subgen.slug} if subgen else None
+        technology_subgeneration=(
+            Ref(name=subgen.name, slug=subgen.slug) if subgen else None
         ),
-        "display_type": (
-            {"name": pm.display_type.name, "slug": pm.display_type.slug}
+        display_type=(
+            Ref(name=pm.display_type.name, slug=pm.display_type.slug)
             if pm.display_type
             else None
         ),
-        "player_count": pm.player_count,
-        "themes": [{"name": t.name, "slug": t.slug} for t in pm.themes.all()],
-        "production_quantity": pm.production_quantity,
-        "system": (
-            {"name": pm.system.name, "slug": pm.system.slug} if pm.system else None
+        player_count=pm.player_count,
+        themes=[ThemeSchema(name=t.name, slug=t.slug) for t in pm.themes.all()],
+        production_quantity=pm.production_quantity,
+        system=(Ref(name=pm.system.name, slug=pm.system.slug) if pm.system else None),
+        flipper_count=pm.flipper_count,
+        ipdb_id=pm.ipdb_id,
+        opdb_id=pm.opdb_id,
+        pinside_id=pm.pinside_id,
+        ipdb_rating=float(pm.ipdb_rating) if pm.ipdb_rating is not None else None,
+        pinside_rating=(
+            float(pm.pinside_rating) if pm.pinside_rating is not None else None
         ),
-        "flipper_count": pm.flipper_count,
-        "ipdb_id": pm.ipdb_id,
-        "opdb_id": pm.opdb_id,
-        "pinside_id": pm.pinside_id,
-        "ipdb_rating": float(pm.ipdb_rating) if pm.ipdb_rating is not None else None,
-        "pinside_rating": float(pm.pinside_rating)
-        if pm.pinside_rating is not None
-        else None,
-        "abbreviations": [a.value for a in pm.abbreviations.all()],
-        "extra_data": pm.extra_data or {},
-        "credits": credits,
-        "thumbnail_url": thumbnail_url,
-        "hero_image_url": hero_image_url,
-        "image_attribution": image_attribution,
-        "uploaded_media": uploaded_media,
-        "variant_features": variant_features,
-        "variants": variants,
-        "variant_of": (
-            {
-                "name": pm.variant_of.name,
-                "slug": pm.variant_of.slug,
-                "year": pm.variant_of.year,
-            }
+        abbreviations=[a.value for a in pm.abbreviations.all()],
+        extra_data=pm.extra_data or {},
+        credits=credits,
+        thumbnail_url=thumbnail_url,
+        hero_image_url=hero_image_url,
+        image_attribution=image_attribution,
+        uploaded_media=uploaded_media,
+        variant_features=variant_features,
+        variants=variants,
+        variant_of=(
+            ModelRefSchema(
+                name=pm.variant_of.name,
+                slug=pm.variant_of.slug,
+                year=pm.variant_of.year,
+            )
             if pm.variant_of
             else None
         ),
-        "variant_siblings": variant_siblings,
-        "converted_from": (
-            {
-                "name": pm.converted_from.name,
-                "slug": pm.converted_from.slug,
-                "year": pm.converted_from.year,
-            }
+        variant_siblings=variant_siblings,
+        converted_from=(
+            ModelRefSchema(
+                name=pm.converted_from.name,
+                slug=pm.converted_from.slug,
+                year=pm.converted_from.year,
+            )
             if pm.converted_from
             else None
         ),
-        "conversions": [
-            {"name": c.name, "slug": c.slug, "year": c.year}
+        conversions=[
+            ModelRefSchema(name=c.name, slug=c.slug, year=c.year)
             for c in pm.conversions.all()
         ],
-        "remake_of": (
-            {
-                "name": pm.remake_of.name,
-                "slug": pm.remake_of.slug,
-                "year": pm.remake_of.year,
-            }
+        remake_of=(
+            ModelRefSchema(
+                name=pm.remake_of.name,
+                slug=pm.remake_of.slug,
+                year=pm.remake_of.year,
+            )
             if pm.remake_of
             else None
         ),
-        "remakes": [
-            {"name": r.name, "slug": r.slug, "year": r.year} for r in pm.remakes.all()
+        remakes=[
+            ModelRefSchema(name=r.name, slug=r.slug, year=r.year)
+            for r in pm.remakes.all()
         ],
-        "title": ({"name": pm.title.name, "slug": pm.title.slug} if pm.title else None),
-        "cabinet": (
-            {"name": pm.cabinet.name, "slug": pm.cabinet.slug} if pm.cabinet else None
+        title=(Ref(name=pm.title.name, slug=pm.title.slug) if pm.title else None),
+        cabinet=(
+            Ref(name=pm.cabinet.name, slug=pm.cabinet.slug) if pm.cabinet else None
         ),
-        "game_format": (
-            {"name": pm.game_format.name, "slug": pm.game_format.slug}
+        game_format=(
+            Ref(name=pm.game_format.name, slug=pm.game_format.slug)
             if pm.game_format
             else None
         ),
-        "display_subtype": (
-            {"name": pm.display_subtype.name, "slug": pm.display_subtype.slug}
+        display_subtype=(
+            Ref(name=pm.display_subtype.name, slug=pm.display_subtype.slug)
             if pm.display_subtype
             else None
         ),
-        "gameplay_features": [
-            {
-                "name": t.gameplayfeature.name,
-                "slug": t.gameplayfeature.slug,
-                "count": t.count,
-            }
+        gameplay_features=[
+            GameplayFeatureSchema(
+                name=t.gameplayfeature.name,
+                slug=t.gameplayfeature.slug,
+                count=t.count,
+            )
             for t in pm.machinemodelgameplayfeature_set.all()
         ],
-        "tags": [{"name": t.name, "slug": t.slug} for t in pm.tags.all()],
-        "reward_types": [
-            {"name": rt.name, "slug": rt.slug} for rt in pm.reward_types.all()
+        tags=[Ref(name=t.name, slug=t.slug) for t in pm.tags.all()],
+        reward_types=[
+            RewardTypeSchema(name=rt.name, slug=rt.slug) for rt in pm.reward_types.all()
         ],
-        "franchise": (
-            {"name": pm.title.franchise.name, "slug": pm.title.franchise.slug}
+        franchise=(
+            FranchiseRefSchema(
+                name=pm.title.franchise.name, slug=pm.title.franchise.slug
+            )
             if pm.title and pm.title.franchise
             else None
         ),
-        "series": (
-            {"name": pm.title.series.name, "slug": pm.title.series.slug}
+        series=(
+            SeriesRefSchema(name=pm.title.series.name, slug=pm.title.series.slug)
             if pm.title and pm.title.series
             else None
         ),
-        "title_models": [
+        title_models=[
             _serialize_title_machine(sibling, min_rank=min_rank)
             for sibling in (pm.title.machine_models.all() if pm.title else [])
             if sibling.variant_of_id is None
         ],
-    }
+    )
 
 
 def _model_detail_qs() -> QuerySet[MachineModel]:
@@ -928,7 +929,7 @@ _SELF_REF_FIELDS = frozenset({"variant_of", "converted_from", "remake_of"})
 )
 def patch_model_claims(
     request: HttpRequest, slug: str, data: ModelClaimPatchSchema
-) -> dict[str, Any]:
+) -> MachineModelDetailSchema:
     """Assert per-field claims from the authenticated user, then re-resolve the model."""
     pm = get_object_or_404(
         MachineModel.objects.active().prefetch_related(
@@ -1081,7 +1082,7 @@ def delete_model(
 )
 def restore_model(
     request: HttpRequest, slug: str, data: ModelRestoreSchema
-) -> dict[str, Any] | Status[dict[str, Any]]:
+) -> MachineModelDetailSchema | Status[dict[str, Any]]:
     """Write a fresh ``status=active`` claim on a soft-deleted Model.
 
     This is the "Restore" path (distinct from Undo, which inverts a specific

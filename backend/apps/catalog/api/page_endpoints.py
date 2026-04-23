@@ -116,7 +116,7 @@ def manufacturer_detail_page(request: HttpRequest, slug: str) -> dict[str, Any]:
 
 
 @pages_router.get("/model/{slug}", response=MachineModelDetailSchema)
-def model_detail_page(request: HttpRequest, slug: str) -> dict[str, Any]:
+def model_detail_page(request: HttpRequest, slug: str) -> MachineModelDetailSchema:
     pm = get_object_or_404(_model_detail_qs(), slug=slug)
     return _serialize_model_detail(pm)
 

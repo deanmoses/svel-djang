@@ -6,7 +6,7 @@ We recently introduced mypy and grandfathered in a lot of exceptions in backend/
 
 ## Status
 
-Steps 1–2 complete. Step 3 is next.
+Steps 1–2 complete. Step 3.1 complete. Step 3.2 is next.
 
 ## Running mypy
 
@@ -38,6 +38,8 @@ In a Django + Ninja app, the Ninja `Schema` (Pydantic v2) is the canonical data 
   - **Cached-endpoint return type:** `get_cached_response()` returns `HttpResponse | None`, so the endpoint's return annotation must be `HttpResponse | list[dict[str, Any]]` (not just the list). Mixing `return response` (HttpResponse) and `return result` (list) in one function otherwise fails mypy.
 
 `TypedDict` is the fallback for code that can't or won't use Pydantic. In a Ninja app, Pydantic is already present — use it.
+
+**Flipping a serializer's return from `dict` to Schema requires updating every caller's return annotation too.** Endpoint funcs typed `-> dict[str, Any]` that `return _serialize_foo(...)` must flip to `-> FooSchema`. Mypy catches one or two; grep `_serialize_foo` across the package to find the rest in one pass.
 
 ### Idiom for `Any`: four categories, only one is valid
 
@@ -119,7 +121,7 @@ Baseline: 710 → 377 (~47% reduction). Commit: `e7b8204f`.
 
 Order: Schema-return conversion (3.1) before error-schema swap (3.2) because 3.1 is unblocked while 3.2 needs a design decision. Step 4 (tech-debt cleanup) is independent and can land any time. Step 5 (decorator-relaxation narrowing) is the final milestone and is gated on Step 3.
 
-### Step 3.1: Convert `_serialize_model_detail` to return Schema
+### Step 3.1: Convert `_serialize_model_detail` to return Schema - DONE
 
 Step 1's deferred work. Two bridges in [titles.py](backend/apps/catalog/api/titles.py) still read `MachineModelDetailSchema.model_validate(_serialize_model_detail(pm))`; they must be removed, not left to rot. `_serialize_model_detail` is currently typed `-> dict[str, Any]` as a minimal-touch unblock. Flip the return to the Schema, drop the two `model_validate` wrappers in titles.py, and re-run `make api-gen` + frontend check.
 
