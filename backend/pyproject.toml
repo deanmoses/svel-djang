@@ -88,7 +88,6 @@ ignore = [
 "**/__init__.py" = ["F401"]  # re-exports from barrel modules are the whole point of __init__.py
 # ANN401 grandfathering
 "apps/catalog/**" = ["ANN401"]
-"apps/core/**" = ["ANN401"]
 "apps/provenance/**" = ["ANN401"]
 "config/**" = ["ANN401"]
 

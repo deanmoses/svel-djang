@@ -47,7 +47,6 @@ apps/core/markdown_links.py:0: error: Missing type arguments for generic type "d
 apps/core/markdown_links.py:0: error: Missing type arguments for generic type "dict"  [type-arg]
 apps/core/markdown_links.py:0: error: Missing type arguments for generic type "dict"  [type-arg]
 apps/core/markdown_links.py:0: error: Missing type arguments for generic type "dict"  [type-arg]
-apps/core/markdown_links.py:0: error: Function is missing a type annotation for one or more parameters  [no-untyped-def]
 apps/provenance/validation.py:0: error: Item "ForeignObjectRel" of "Field[Any, Any] | ForeignObjectRel" has no attribute "validators"  [union-attr]
 apps/provenance/validation.py:0: error: Item "ForeignObjectRel" of "Field[Any, Any] | ForeignObjectRel" has no attribute "blank"  [union-attr]
 apps/provenance/validation.py:0: error: Item "ForeignObjectRel" of "Field[Any, Any] | ForeignObjectRel" has no attribute "to_python"  [union-attr]
@@ -94,12 +93,6 @@ apps/media/admin.py:0: error: Function is missing a type annotation  [no-untyped
 apps/media/admin.py:0: error: Function is missing a type annotation  [no-untyped-def]
 apps/media/admin.py:0: error: Function is missing a type annotation  [no-untyped-def]
 apps/core/markdown.py:0: error: Missing type arguments for generic type "Match"  [type-arg]
-apps/core/markdown.py:0: error: Function is missing a type annotation for one or more parameters  [no-untyped-def]
-apps/core/markdown.py:0: error: Incompatible types in assignment (expression has type "list[dict[str, Any]]", target has type "str")  [assignment]
-apps/core/markdown.py:0: error: Incompatible return value type (got "dict[str, str]", expected "dict[str, str | list[dict[str, Any]]]")  [return-value]
-apps/core/markdown.py:0: note: "dict" is invariant -- see https://mypy.readthedocs.io/en/stable/common_issues.html#variance
-apps/core/markdown.py:0: note: Consider using "Mapping" instead, which is covariant in the value type
-apps/core/markdown.py:0: note: Perhaps you need a type annotation for "result"? Suggestion: "dict[str, str | list[dict[str, Any]]]"
 apps/core/entity_types.py:0: error: Only concrete class can be given where "type[LinkableModel]" is expected  [type-abstract]
 apps/catalog/resolve/_helpers.py:0: error: Function is missing a type annotation  [no-untyped-def]
 apps/catalog/resolve/_helpers.py:0: error: Function is missing a type annotation for one or more parameters  [no-untyped-def]
