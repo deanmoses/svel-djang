@@ -2,6 +2,11 @@
 
 ## Context
 
+This planning doc predates the February 2026 backend split that replaced
+`apps.machines` with `apps.catalog` and `apps.provenance`. The concepts below
+are still broadly relevant, but the live implementation now lives in those two
+apps rather than a single `backend/apps/machines` module.
+
 Building an interactive pinball database for The Flip museum. Data is coming from many sources, including:
 
 - **Existing online pinball databases**: OPDB, possibly IPDB, and possibly Pinside
@@ -15,7 +20,7 @@ Two-layer model inspired by CRDTs.
 - **Layer 1** is a stream of per-field **claims** from multiple sources.
 - **Layer 2** is a **resolved Model** table — a materialized view derived by merging claims with priority-based conflict resolution. The Flip adjudicates conflicts and adds original research with per-fact citations.
 
-## Models (`backend/apps/machines/models.py`)
+## Models (`backend/apps/catalog/models/` and `backend/apps/provenance/models/`)
 
 ### Source
 
@@ -127,7 +132,7 @@ Unique together: `(model, person, role)`.
 
 The importer splits IPDB's comma-separated credit strings (e.g., `"Larry DeMar, Pat Lawlor"`) into individual Person records via `get_or_create`.
 
-## Resolution logic (`backend/apps/machines/resolve.py`)
+## Resolution logic (`backend/apps/catalog/resolve/` and `backend/apps/provenance/entity_resolution.py`)
 
 A `resolve_model(model)` function that:
 
@@ -141,7 +146,7 @@ Also a `resolve_all()` for batch re-resolution after a scrape.
 
 The resolution logic is tested independently in `test_resolve.py`: set up claims from multiple sources with different priorities, verify the resolved PinballModel has the right values.
 
-## Django Admin (`backend/apps/machines/admin.py`)
+## Django Admin (`backend/apps/catalog/admin.py` and `backend/apps/provenance/admin.py`)
 
 - **SourceAdmin**: list_display (name, source_type, priority), list_filter (source_type)
 - **ClaimAdmin**: list_display (model, field_name, value_truncated, source, is_active, created_at), list_filter (source, is_active, field_name), search (model\_\_name, field_name), readonly created_at. Override `save_model()` to route through `ClaimManager.assert_claim()` so admin creates respect the superseding invariant.
@@ -151,16 +156,19 @@ The resolution logic is tested independently in `test_resolve.py`: set up claims
 - **DesignCreditInline**: TabularInline on PinballModel, extra=1
 - **ClaimInline**: TabularInline on PinballModel, readonly, collapsed, shows active claims with source and citation
 
-## API (`backend/apps/machines/api.py`)
+## API (`backend/apps/catalog/api/`, `backend/apps/provenance/api.py`, and `backend/config/api.py`)
 
-Wire separate routers into `backend/config/api.py`:
+Routers are now autodiscovered from each app's `api` module via
+`backend/config/api.py`. The catalog app exports its routers from
+`backend/apps/catalog/api/__init__.py`.
 
 ```python
-from apps.machines.api import models_router, manufacturers_router, people_router, sources_router
-api.add_router("/models/", models_router)
-api.add_router("/manufacturers/", manufacturers_router)
-api.add_router("/people/", people_router)
-api.add_router("/sources/", sources_router)
+routers = [
+    ("/models/", models_router),
+    ("/titles/", titles_router),
+    ("/manufacturers/", manufacturers_router),
+    ("/people/", people_router),
+]
 ```
 
 Define explicit Ninja `Schema` classes for all request/response payloads (not `ModelSchema` — we want control over what's exposed). Key schemas: `PinballModelListSchema` (slim, for list view), `PinballModelDetailSchema` (full, with credits + provenance + extra_data), `ManufacturerSchema`, `PersonSchema`, `ClaimSchema`.
