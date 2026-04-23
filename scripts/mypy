@@ -37,14 +37,25 @@ set -eu
 # mypy-baseline.txt, and baselined errors appear as "new". Ignoring passed
 # paths keeps the output format consistent across every entry point.
 #
-# `--ignore 'mypy --install-types'` drops one specific note that mypy emits
-# but dmypy doesn't (the "or run mypy --install-types" suggestion chained
-# after any import-untyped error). Targeting this one line keeps mypy and
-# dmypy output matching the baseline, without suppressing the genuinely
-# useful diagnostic notes mypy attaches to errors (type-suggestion hints,
-# "-> None" recommendations, variance explanations, etc.).
+# `--ignore` drops the three environment-dependent notes that mypy attaches
+# to `import-untyped` errors:
+#
+#   * `(or run "mypy --install-types" ...)` — emitted by mypy, omitted by
+#     dmypy for function-scoped imports.
+#   * `Hint: "python3 -m pip install types-*"` — emitted only when the
+#     missing stub package is on PyPI, so it flips on/off with the installed
+#     stubs on each machine.
+#   * `See https://...missing-imports` — emitted by mypy (and sometimes
+#     dmypy) per import-untyped error, but which sites get the note varies
+#     across mypy versions and whether the stubs are already installed.
+#
+# The underlying `import-untyped` errors stay baselined; only these three
+# accompanying hint notes are filtered, so mypy/dmypy/local/CI all agree on
+# what the baseline should contain. Other notes (type suggestions, "-> None"
+# recommendations, variance explanations, etc.) still pass through.
 uv run --directory backend mypy --config-file pyproject.toml . \
-    | uv run --directory backend mypy-baseline filter --ignore '.*--install-types.*'
+    | uv run --directory backend mypy-baseline filter \
+        --ignore '.*--install-types.*' '.*pip install types-.*' '.*missing-imports.*'
 statuses=("${PIPESTATUS[@]}")
 mypy_status=${statuses[0]}
 filter_status=${statuses[1]}
