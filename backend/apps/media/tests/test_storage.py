@@ -61,9 +61,11 @@ class TestUploadToStorage:
         mock_storage = MagicMock()
         mock_storage.save.return_value = "media/abc/thumb_renamed"
 
-        with patch("apps.media.storage.get_media_storage", return_value=mock_storage):
-            with pytest.raises(RuntimeError, match="Storage key mismatch"):
-                upload_to_storage("media/abc/thumb", b"data", "image/webp")
+        with (
+            patch("apps.media.storage.get_media_storage", return_value=mock_storage),
+            pytest.raises(RuntimeError, match="Storage key mismatch"),
+        ):
+            upload_to_storage("media/abc/thumb", b"data", "image/webp")
 
         mock_storage.delete.assert_called_once_with("media/abc/thumb_renamed")
 

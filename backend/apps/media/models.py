@@ -7,12 +7,10 @@ import uuid as uuid_lib
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 from django.db import models
 
-from django.core.exceptions import ValidationError
-
 from apps.core.models import MediaSupported, TimeStampedModel, field_not_blank
-
 
 # ---------------------------------------------------------------------------
 # MediaAsset

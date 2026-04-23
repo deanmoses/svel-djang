@@ -39,7 +39,7 @@ exclude = [
     ".venv",
     "__pycache__",
     "*/migrations/*",
-    "media",
+    "/media",  # MEDIA_ROOT at backend/media — anchored so apps/media/ is still linted
     ".pytest_cache",
     ".mypy_cache",
     ".ruff_cache",
@@ -110,8 +110,8 @@ explicit_package_bases = true
 exclude = [
     "migrations/",
     "\\.venv/",
-    "media/",
-    "cache/",
+    "^media/",  # MEDIA_ROOT at backend/media — anchored so apps/media/ is still type-checked
+    "^cache/",
 ]
 warn_unused_ignores = true
 warn_redundant_casts = true

@@ -9,10 +9,10 @@ from django.test import Client
 
 from apps.catalog.claims import build_media_attachment_claim
 from apps.catalog.resolve import resolve_media_attachments
+from apps.catalog.tests.conftest import make_machine_model
 from apps.media.models import EntityMedia, MediaAsset, MediaRendition
 from apps.media.storage import build_storage_key
 from apps.provenance.models import Claim
-from apps.catalog.tests.conftest import make_machine_model
 
 User = get_user_model()
 

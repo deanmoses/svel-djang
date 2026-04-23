@@ -14,7 +14,6 @@ from django.db import IntegrityError
 
 from apps.media.models import EntityMedia, MediaAsset, MediaRendition
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

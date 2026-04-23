@@ -9,9 +9,9 @@ from django.contrib.contenttypes.models import ContentType
 
 from apps.catalog.api.helpers import _extract_image_attribution, _extract_image_urls
 from apps.catalog.models import MachineModel
+from apps.catalog.tests.conftest import make_machine_model
 from apps.media.models import EntityMedia, MediaAsset
 from apps.media.storage import build_public_url, build_storage_key
-from apps.catalog.tests.conftest import make_machine_model
 
 User = get_user_model()
 

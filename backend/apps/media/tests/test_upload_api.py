@@ -9,8 +9,8 @@ import pytest
 from django.contrib.auth.models import User
 from django.test import Client
 
-from apps.media.models import MediaAsset, MediaRendition
 from apps.catalog.tests.conftest import make_machine_model
+from apps.media.models import MediaAsset, MediaRendition
 
 # All upload tests use InMemoryStorage — no filesystem, no S3.
 _TEST_STORAGE = {

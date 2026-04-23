@@ -12,9 +12,9 @@ from django.contrib.contenttypes.models import ContentType
 
 from apps.catalog.claims import build_media_attachment_claim
 from apps.catalog.models import MachineModel
+from apps.catalog.tests.conftest import make_machine_model
 from apps.media.models import EntityMedia, MediaAsset
 from apps.provenance.models import Claim, Source
-from apps.catalog.tests.conftest import make_machine_model
 
 User = get_user_model()
 
@@ -103,7 +103,7 @@ class TestBuildMediaAttachmentClaim:
         assert value["exists"] is True
 
     def test_null_category_allowed(self, machine_model, asset):
-        claim_key, value = build_media_attachment_claim(
+        _claim_key, value = build_media_attachment_claim(
             machine_model, asset.pk, category=None
         )
         assert value["category"] is None
@@ -123,7 +123,7 @@ class TestBuildMediaAttachmentClaim:
             build_media_attachment_claim(theme, asset.pk)
 
     def test_retraction(self, machine_model, asset):
-        claim_key, value = build_media_attachment_claim(
+        _claim_key, value = build_media_attachment_claim(
             machine_model, asset.pk, exists=False
         )
         assert value["exists"] is False

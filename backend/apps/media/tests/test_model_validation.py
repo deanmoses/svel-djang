@@ -7,7 +7,6 @@ from django.core.exceptions import ValidationError
 
 from apps.media.models import EntityMedia, MediaAsset
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

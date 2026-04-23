@@ -19,13 +19,12 @@ from apps.catalog.claims import build_media_attachment_claim
 from apps.catalog.resolve import resolve_media_attachments
 from apps.core.entity_types import get_linkable_model
 from apps.core.models import MediaSupported
-from apps.provenance.models import Claim
 from apps.media.constants import (
     ALLOWED_IMAGE_EXTENSIONS,
+    DISPLAY_MAX_DIMENSION,
     MAX_IMAGE_FILE_SIZE,
     MAX_UPLOADS_PER_HOUR,
     THUMB_MAX_DIMENSION,
-    DISPLAY_MAX_DIMENSION,
 )
 from apps.media.models import EntityMedia, MediaAsset, MediaRendition
 from apps.media.processing import (
@@ -41,6 +40,7 @@ from apps.media.storage import (
     delete_from_storage,
     upload_to_storage,
 )
+from apps.provenance.models import Claim
 
 logger = logging.getLogger(__name__)
 
@@ -125,7 +125,7 @@ def _resolve_entity(entity_type: str, slug: str):
     try:
         model_class = get_linkable_model(entity_type)
     except ValueError:
-        raise HttpError(404, f"Unknown entity_type '{entity_type}'.")
+        raise HttpError(404, f"Unknown entity_type '{entity_type}'.") from None
 
     if not issubclass(model_class, MediaSupported):
         raise HttpError(400, f"{entity_type} does not support media attachments.")
@@ -185,13 +185,13 @@ def upload_media(
             is_primary=is_primary,
         )
     except ValueError as exc:
-        raise HttpError(400, str(exc))
+        raise HttpError(400, str(exc)) from exc
 
     # --- Validate image ---
     try:
         validate_image(data)
     except InvalidImageError as exc:
-        raise HttpError(400, f"Invalid image: {exc}")
+        raise HttpError(400, f"Invalid image: {exc}") from exc
 
     # --- Process ---
     try:
@@ -199,7 +199,7 @@ def upload_media(
         thumb = generate_rendition(data, THUMB_MAX_DIMENSION)
         display = generate_rendition(data, DISPLAY_MAX_DIMENSION)
     except InvalidImageError as exc:
-        raise HttpError(400, f"Image processing failed: {exc}")
+        raise HttpError(400, f"Image processing failed: {exc}") from exc
 
     # --- Build storage keys ---
     asset_uuid = uuid_lib.uuid4()
@@ -223,7 +223,7 @@ def upload_media(
             "Storage upload failed, cleaning up %d keys", len(uploaded_keys)
         )
         delete_from_storage(uploaded_keys)
-        raise HttpError(500, "Storage upload failed.")
+        raise HttpError(500, "Storage upload failed.") from None
 
     # --- Create DB rows ---
     try:
@@ -276,7 +276,7 @@ def upload_media(
     except Exception:
         logger.exception("DB transaction failed, cleaning up storage keys")
         delete_from_storage(uploaded_keys)
-        raise HttpError(500, "Failed to save media records.")
+        raise HttpError(500, "Failed to save media records.") from None
 
     _incr_rate_limit(request.user.id)
 
@@ -309,7 +309,7 @@ def detach_media(request, body: MediaAssetRefIn):
     try:
         asset = MediaAsset.objects.get(uuid=body.asset_uuid)
     except MediaAsset.DoesNotExist, ValidationError:
-        raise HttpError(404, "Media asset not found.")
+        raise HttpError(404, "Media asset not found.") from None
 
     if not EntityMedia.objects.filter(
         content_type=ct,
@@ -357,7 +357,7 @@ def set_primary(request, body: MediaAssetRefIn):
     try:
         asset = MediaAsset.objects.get(uuid=body.asset_uuid)
     except MediaAsset.DoesNotExist, ValidationError:
-        raise HttpError(404, "Media asset not found.")
+        raise HttpError(404, "Media asset not found.") from None
 
     em = EntityMedia.objects.filter(
         content_type=ct,

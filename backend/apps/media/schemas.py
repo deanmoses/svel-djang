@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 from ninja import Schema
 
 
@@ -18,7 +16,7 @@ class UploadedMediaSchema(Schema):
     """A media attachment as surfaced on catalog detail endpoints."""
 
     asset_uuid: str
-    category: Optional[str] = None
+    category: str | None = None
     is_primary: bool
-    uploaded_by_username: Optional[str] = None
+    uploaded_by_username: str | None = None
     renditions: MediaRenditionsSchema
