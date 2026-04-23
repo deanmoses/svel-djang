@@ -47,15 +47,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/session-start-remote.sh"
-          },
-          {
-            "type": "command",
-            "command": "cd backend && uv sync"
-          },
-          {
-            "type": "command",
-            "command": "cd backend && uv run python manage.py migrate --no-input || true"
+            "command": "bash .claude/hooks/session-start-backend.sh"
           },
           {
             "type": "command",
