@@ -17,6 +17,7 @@ import sys
 from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import NamedTuple
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
@@ -355,34 +356,52 @@ def check_unresolved_credit_claims(result: ValidationResult) -> None:
             result.warn(f"  {s!r}")
 
 
+class _M2mCheck(NamedTuple):
+    """Config for scanning one M2M claim field for missing target PKs."""
+
+    field_name: str
+    pk_key: str
+    model_class: type
+
+
 def check_unresolved_m2m_claims(result: ValidationResult) -> None:
     """Theme/tag/gameplay_feature claims referencing PKs that don't exist."""
     ct = ContentType.objects.get_for_model(MachineModel)
 
-    checks: list[tuple[str, str, type]] = [
-        ("theme", "theme", Theme),
-        ("tag", "tag", Tag),
-        ("gameplay_feature", "gameplay_feature", GameplayFeature),
+    checks: list[_M2mCheck] = [
+        _M2mCheck("theme", "theme", Theme),
+        _M2mCheck("tag", "tag", Tag),
+        _M2mCheck("gameplay_feature", "gameplay_feature", GameplayFeature),
     ]
 
-    for field_name, pk_key, model_class in checks:
-        valid_pks = set(model_class.objects.values_list("pk", flat=True))
+    for check in checks:
+        valid_pks = set(check.model_class.objects.values_list("pk", flat=True))
 
         missing: set = set()
-        for claim in _winning_claims(ct, field_name):
+        for claim in _winning_claims(ct, check.field_name):
             val = claim.value
             if not isinstance(val, dict):
                 continue
-            ref = val.get(pk_key)
+            ref = val.get(check.pk_key)
             if ref is not None and ref not in valid_pks:
                 missing.add(ref)
 
         if missing:
-            result.warn(f"{len(missing)} {field_name} claim(s) reference missing PKs")
+            result.warn(
+                f"{len(missing)} {check.field_name} claim(s) reference missing PKs"
+            )
             for s in sorted(missing)[:5]:
                 result.warn(f"  {s!r}")
             if len(missing) > 5:
                 result.warn(f"  ... and {len(missing) - 5} more")
+
+
+class _CreditKey(NamedTuple):
+    """Identity of a materialized credit row: (model, person, role) PKs."""
+
+    model_pk: int
+    person_pk: int
+    role_pk: int
 
 
 def check_credits_without_matching_claims(result: ValidationResult) -> None:
@@ -390,7 +409,7 @@ def check_credits_without_matching_claims(result: ValidationResult) -> None:
     ct = ContentType.objects.get_for_model(MachineModel)
 
     # Build set of (model_pk, person_pk, role_pk) from active credit claims.
-    claimed: set[tuple[int, int, int]] = set()
+    claimed: set[_CreditKey] = set()
     for claim in Claim.objects.filter(
         content_type=ct, is_active=True, field_name="credit"
     ):
@@ -400,11 +419,12 @@ def check_credits_without_matching_claims(result: ValidationResult) -> None:
         person_pk = val.get("person")
         role_pk = val.get("role")
         if person_pk is not None and role_pk is not None:
-            claimed.add((claim.object_id, person_pk, role_pk))
+            claimed.add(_CreditKey(claim.object_id, person_pk, role_pk))
 
     stale_count = 0
     for credit in Credit.objects.filter(model__isnull=False):
-        if (credit.model_id, credit.person_id, credit.role_id) not in claimed:
+        key = _CreditKey(credit.model_id, credit.person_id, credit.role_id)
+        if key not in claimed:
             stale_count += 1
 
     if stale_count:

@@ -42,6 +42,7 @@ Dump format written by ``fetch_manufacturer_sparql()`` (and read by ``--from-dum
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import NamedTuple
 
 import requests
 
@@ -406,15 +407,13 @@ def parse_manufacturer_sparql_results(data: dict) -> list[WikidataManufacturer]:
         if not wm.description:
             wm.description = binding.get("manufacturerDescription", {}).get("value", "")
         if wm.year_start is None:
-            year, _, _ = parse_wikidata_date(
+            wm.year_start = parse_wikidata_date(
                 binding.get("inception", {}).get("value"), precision=None
-            )
-            wm.year_start = year
+            ).year
         if wm.year_end is None:
-            year, _, _ = parse_wikidata_date(
+            wm.year_end = parse_wikidata_date(
                 binding.get("dissolution", {}).get("value"), precision=None
-            )
-            wm.year_end = year
+            ).year
         if wm.country is None:
             wm.country = binding.get("countryLabel", {}).get("value") or None
         if wm.headquarters is None:
@@ -427,14 +426,30 @@ def parse_manufacturer_sparql_results(data: dict) -> list[WikidataManufacturer]:
     return sorted(manufacturers.values(), key=lambda m: m.name.lower())
 
 
+class WikidataDate(NamedTuple):
+    """Parsed Wikidata date components (any may be ``None``).
+
+    ``None`` on ``year`` marks the whole date as absent (precision too coarse
+    or unparseable); ``None`` on ``month``/``day`` reflects the precision
+    level of the source value.
+    """
+
+    year: int | None
+    month: int | None
+    day: int | None
+
+
+_EMPTY_DATE = WikidataDate(None, None, None)
+
+
 def parse_wikidata_date(
     date_str: str | None,
     precision: int | None,
-) -> tuple[int | None, int | None, int | None]:
+) -> WikidataDate:
     """Parse a Wikidata date string into (year, month, day) integer components.
 
-    Returns ``(None, None, None)`` if the date is absent or precision is too
-    coarse (decade or broader).
+    Returns ``WikidataDate(None, None, None)`` if the date is absent or
+    precision is too coarse (decade or broader).
 
     Precision rules:
     - precision < PRECISION_YEAR (decade+): ``(None, None, None)``
@@ -443,7 +458,7 @@ def parse_wikidata_date(
     - precision >= PRECISION_DAY or None: ``(year, month, day)``
     """
     if not date_str:
-        return None, None, None
+        return _EMPTY_DATE
 
     # Wikidata dates look like "+1951-10-15T00:00:00Z" or "-0044-01-01T00:00:00Z".
     raw = date_str.lstrip("+")
@@ -455,7 +470,7 @@ def parse_wikidata_date(
 
     parts = date_part.split("-")
     if len(parts) < 1:
-        return None, None, None
+        return _EMPTY_DATE
 
     try:
         year = int(parts[0])
@@ -464,15 +479,15 @@ def parse_wikidata_date(
         month = int(parts[1]) if len(parts) > 1 else None
         day = int(parts[2]) if len(parts) > 2 else None
     except ValueError, IndexError:
-        return None, None, None
+        return _EMPTY_DATE
 
     if precision is not None and precision < PRECISION_YEAR:
-        return None, None, None
+        return _EMPTY_DATE
     if precision == PRECISION_YEAR:
-        return year, None, None
+        return WikidataDate(year, None, None)
     if precision == PRECISION_MONTH:
-        return year, month, None
-    return year, month, day
+        return WikidataDate(year, month, None)
+    return WikidataDate(year, month, day)
 
 
 def _run_sparql(query: str, timeout: int) -> dict:

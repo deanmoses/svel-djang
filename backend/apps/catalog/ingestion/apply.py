@@ -27,6 +27,7 @@ from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils import timezone
 
+from apps.core.types import ClaimIdentity, EntityKey
 from apps.provenance.models import ChangeSet, Claim, IngestRun, Source
 from apps.provenance.validation import validate_claims_batch
 
@@ -50,6 +51,22 @@ class RetractEntry(NamedTuple):
     pk: int
     content_type_id: int
     object_id: int
+
+
+class _ExistingClaimRow(NamedTuple):
+    """Partial Claim row cached during ``_diff_claims`` diffing.
+
+    Fetched via ``values_list`` to avoid JSONField deserialization cost on
+    large sources. Field order matches the ``values_list`` column order.
+    """
+
+    # ``value`` is the raw JSONField payload — scalar, dict, list, or null.
+    value: object
+    citation: str
+    needs_review: bool
+    needs_review_notes: str
+    license_id: int | None
+    pk: int
 
 
 # ---------------------------------------------------------------------------
@@ -454,8 +471,8 @@ def _apply_dry_run(plan: IngestPlan, report: RunReport) -> RunReport:
 
 def _create_entities(
     entities: list[PlannedEntityCreate],
-) -> dict[str, tuple[int, int]]:
-    """Bulk-create entities.  Returns ``{handle: (pk, content_type_id)}``.
+) -> dict[str, EntityKey]:
+    """Bulk-create entities.  Returns ``{handle: EntityKey(ct_id, pk)}``.
 
     Processes entities in list order, batching consecutive entries of the
     same model class.  Between batches, ``handle_refs`` on upcoming
@@ -468,7 +485,7 @@ def _create_entities(
     if not entities:
         return {}
 
-    handle_map: dict[str, tuple[int, int]] = {}
+    handle_map: dict[str, EntityKey] = {}
 
     # Group consecutive entities of the same model class into batches.
     # A batch is flushed when the model class changes OR when an entity's
@@ -498,22 +515,21 @@ def _create_entities(
             # Resolve handle_refs into kwargs before instantiation.
             resolved_kwargs = entity.kwargs.copy()
             for kwarg_name, ref_handle in entity.handle_refs.items():
-                ref_pk, _ = handle_map[ref_handle]
-                resolved_kwargs[kwarg_name] = ref_pk
+                resolved_kwargs[kwarg_name] = handle_map[ref_handle].object_id
             pairs.append((entity, model_class(**resolved_kwargs)))
 
         instances = [inst for _, inst in pairs]
         model_class.objects.bulk_create(instances)
         ct_id = ContentType.objects.get_for_model(model_class).pk
         for entity, instance in pairs:
-            handle_map[entity.handle] = (instance.pk, ct_id)
+            handle_map[entity.handle] = EntityKey(ct_id, instance.pk)
 
     return handle_map
 
 
 def _patch_handles(
     assertions: list[PlannedClaimAssert],
-    handle_map: dict[str, tuple[int, int]],
+    handle_map: dict[str, EntityKey],
 ) -> None:
     """Resolve temporary handles to real PKs after entity creation.
 
@@ -534,12 +550,13 @@ def _patch_handles(
     for pca in assertions:
         if pca.handle is not None:
             # handle validity already checked by _validate_assertion_targets
-            pca.object_id, pca.content_type_id = handle_map[pca.handle]
+            entity_key = handle_map[pca.handle]
+            pca.content_type_id = entity_key.content_type_id
+            pca.object_id = entity_key.object_id
         if pca.relationship_namespace:
             resolved_identity = dict(pca.identity)
             for key, ref_handle in pca.identity_refs.items():
-                ref_pk, _ = handle_map[ref_handle]
-                resolved_identity[key] = ref_pk
+                resolved_identity[key] = handle_map[ref_handle].object_id
             pca.claim_key, pca.value = build_relationship_claim(
                 pca.relationship_namespace, resolved_identity
             )
@@ -553,7 +570,7 @@ def _build_claims(
 
     Last-write-wins per ``(content_type_id, object_id, claim_key)``.
     """
-    seen: dict[tuple[int, int, str], Claim] = {}
+    seen: dict[ClaimIdentity, Claim] = {}
     for pca in assertions:
         claim_key = pca.claim_key or pca.field_name
         claim = Claim(
@@ -572,7 +589,7 @@ def _build_claims(
         object_id = pca.object_id
         assert content_type_id is not None
         assert object_id is not None
-        seen[(content_type_id, object_id, claim_key)] = claim
+        seen[ClaimIdentity(content_type_id, object_id, claim_key)] = claim
     return list(seen.values())
 
 
@@ -631,7 +648,7 @@ def _diff_claims(
     for c in valid_claims:
         by_ct[c.content_type_id].add(c.object_id)
 
-    existing: dict[tuple[int, int, str], tuple] = {}
+    existing: dict[ClaimIdentity, _ExistingClaimRow] = {}
     for ct_id, obj_ids in by_ct.items():
         for row in Claim.objects.filter(
             source=source,
@@ -650,25 +667,31 @@ def _diff_claims(
             "license_id",
         ):
             pk, ct, oid, ck, val, cit, nr, nrn, lic_id = row
-            existing[(ct, oid, ck)] = (val, cit, nr, nrn, lic_id, pk)
+            existing[ClaimIdentity(ct, oid, ck)] = _ExistingClaimRow(
+                value=val,
+                citation=cit,
+                needs_review=nr,
+                needs_review_notes=nrn,
+                license_id=lic_id,
+                pk=pk,
+            )
 
     to_create: list[Claim] = []
     superseded_ids: list[int] = []
 
     for claim in valid_claims:
-        key = (claim.content_type_id, claim.object_id, claim.claim_key)
+        key = ClaimIdentity(claim.content_type_id, claim.object_id, claim.claim_key)
         old = existing.get(key)
         if old:
-            old_val, old_cit, old_nr, old_nrn, old_lic_id, old_pk = old
             if (
-                old_val == claim.value
-                and old_cit == claim.citation
-                and old_nr == claim.needs_review
-                and old_nrn == claim.needs_review_notes
-                and old_lic_id == claim.license_id
+                old.value == claim.value
+                and old.citation == claim.citation
+                and old.needs_review == claim.needs_review
+                and old.needs_review_notes == claim.needs_review_notes
+                and old.license_id == claim.license_id
             ):
                 continue
-            superseded_ids.append(old_pk)
+            superseded_ids.append(old.pk)
         to_create.append(claim)
 
     return to_create, superseded_ids
@@ -683,15 +706,16 @@ def _process_retractions(
     if not retractions:
         return []
 
-    retract_keys = {
-        (r.content_type_id, r.object_id, r.claim_key): r for r in retractions
+    retract_keys: dict[ClaimIdentity, PlannedClaimRetract] = {
+        ClaimIdentity(r.content_type_id, r.object_id, r.claim_key): r
+        for r in retractions
     }
 
     by_ct: dict[int, set[int]] = defaultdict(set)
-    for ct_id, obj_id, _ in retract_keys:
-        by_ct[ct_id].add(obj_id)
+    for identity in retract_keys:
+        by_ct[identity.content_type_id].add(identity.object_id)
 
-    found: dict[tuple[int, int, str], int] = {}
+    found: dict[ClaimIdentity, int] = {}
     for ct_id, obj_ids in by_ct.items():
         for pk, c_ct, c_oid, c_ck in Claim.objects.filter(
             source=source,
@@ -699,7 +723,7 @@ def _process_retractions(
             content_type_id=ct_id,
             object_id__in=obj_ids,
         ).values_list("pk", "content_type_id", "object_id", "claim_key"):
-            key = (c_ct, c_oid, c_ck)
+            key = ClaimIdentity(c_ct, c_oid, c_ck)
             if key in retract_keys:
                 found[key] = pk
 
@@ -707,7 +731,7 @@ def _process_retractions(
     for key in retract_keys:
         pk = found.get(key)
         if pk is not None:
-            retract_entries.append(RetractEntry(pk, key[0], key[1]))
+            retract_entries.append(RetractEntry(pk, key.content_type_id, key.object_id))
         else:
             r = retract_keys[key]
             report.warnings.append(
@@ -738,16 +762,16 @@ def _persist(
         return
 
     # One ChangeSet per affected entity.
-    affected: set[tuple[int, int]] = set()
+    affected: set[EntityKey] = set()
     for claim in to_create:
-        affected.add((claim.content_type_id, claim.object_id))
+        affected.add(EntityKey(claim.content_type_id, claim.object_id))
     for entry in retract_entries:
-        affected.add((entry.content_type_id, entry.object_id))
+        affected.add(EntityKey(entry.content_type_id, entry.object_id))
 
     entity_list = sorted(affected)
     changesets = [ChangeSet(ingest_run=run) for _ in entity_list]
     ChangeSet.objects.bulk_create(changesets)
-    entity_to_cs: dict[tuple[int, int], ChangeSet] = dict(
+    entity_to_cs: dict[EntityKey, ChangeSet] = dict(
         zip(entity_list, changesets, strict=True),
     )
 
@@ -757,7 +781,9 @@ def _persist(
 
     # Assign changeset and bulk-create new claims.
     for claim in to_create:
-        claim.changeset_id = entity_to_cs[(claim.content_type_id, claim.object_id)].pk
+        claim.changeset_id = entity_to_cs[
+            EntityKey(claim.content_type_id, claim.object_id)
+        ].pk
 
     if to_create:
         Claim.objects.bulk_create(to_create, batch_size=2000)
@@ -766,7 +792,7 @@ def _persist(
     if retract_entries:
         retract_by_cs: dict[int, list[int]] = defaultdict(list)
         for entry in retract_entries:
-            cs = entity_to_cs[(entry.content_type_id, entry.object_id)]
+            cs = entity_to_cs[EntityKey(entry.content_type_id, entry.object_id)]
             retract_by_cs[cs.pk].append(entry.pk)
 
         for cs_pk, pks in retract_by_cs.items():

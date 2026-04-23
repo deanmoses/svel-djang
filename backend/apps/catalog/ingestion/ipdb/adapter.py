@@ -19,6 +19,7 @@ import json
 import logging
 from dataclasses import dataclass
 from html import unescape
+from typing import NamedTuple
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import CommandError
@@ -116,6 +117,18 @@ class MatchResult:
 
     model: MachineModel
     record: IpdbRecord
+
+
+class CreditQueueEntry(NamedTuple):
+    """A credit extracted from one IPDB record, pending person resolution.
+
+    ``target`` is the ``{"content_type_id", "object_id"}`` kwargs dict that
+    identifies the MachineModel receiving the credit claim.
+    """
+
+    target: dict[str, int]
+    name: str
+    role_slug: str
 
 
 # ---------------------------------------------------------------------------
@@ -245,7 +258,7 @@ def build_ipdb_plan(
     plan.records_matched = len(match_results)
 
     # Collect queues for deferred processing.
-    credit_queue: list[tuple[dict, str, str]] = []  # (target_kwargs, name, role_slug)
+    credit_queue: list[CreditQueueEntry] = []
     theme_queue: list[tuple[dict, list[str]]] = []  # (target_kwargs, [slugs])
     gameplay_feature_queue: list[tuple[dict, list[tuple[str, int | None]]]] = []
     reward_type_queue: list[tuple[dict, list[str]]] = []
@@ -297,7 +310,7 @@ def build_ipdb_plan(
             if not raw:
                 continue
             for name in parse_credit_string(raw):
-                credit_queue.append((target, name, role))
+                credit_queue.append(CreditQueueEntry(target, name, role))
 
         # Queue themes.
         if mr.record.theme:
@@ -691,7 +704,7 @@ def _process_corporate_entity(
 
 
 def _process_credits(
-    credit_queue: list[tuple[dict, str, str]],
+    credit_queue: list[CreditQueueEntry],
     plan: IngestPlan,
     ct_person: int,
     ct_mm: int,
@@ -707,8 +720,8 @@ def _process_credits(
     seen_names: set[str] = set()
     new_person_handles: dict[str, str] = {}  # lower_name → handle
 
-    for _, name, _ in credit_queue:
-        key = name.lower()
+    for entry in credit_queue:
+        key = entry.name.lower()
         if key in seen_names:
             continue
         seen_names.add(key)
@@ -726,18 +739,18 @@ def _process_credits(
             )
         else:
             # New person — plan creation.
-            slug = generate_unique_slug(name, person_slugs)
+            slug = generate_unique_slug(entry.name, person_slugs)
             handle = f"person:{slug}"
             new_person_handles[key] = handle
             plan.entities.append(
                 PlannedEntityCreate(
                     model_class=Person,
-                    kwargs={"name": name, "slug": slug, "status": "active"},
+                    kwargs={"name": entry.name, "slug": slug, "status": "active"},
                     handle=handle,
                 )
             )
             plan.assertions.append(
-                PlannedClaimAssert(field_name="name", value=name, handle=handle)
+                PlannedClaimAssert(field_name="name", value=entry.name, handle=handle)
             )
             plan.assertions.append(
                 PlannedClaimAssert(field_name="slug", value=slug, handle=handle)
@@ -747,11 +760,13 @@ def _process_credits(
             )
 
     # Build credit relationship claims.
-    for mm_target, name, role in credit_queue:
-        key = name.lower()
-        role_pk = role_slug_to_pk.get(role.strip().lower())
+    for entry in credit_queue:
+        key = entry.name.lower()
+        role_pk = role_slug_to_pk.get(entry.role_slug.strip().lower())
         if role_pk is None:
-            logger.warning("Credit role slug not found in DB (skipping): %s", role)
+            logger.warning(
+                "Credit role slug not found in DB (skipping): %s", entry.role_slug
+            )
             continue
 
         person_handle = new_person_handles.get(key)
@@ -763,7 +778,7 @@ def _process_credits(
                     relationship_namespace="credit",
                     identity={"role": role_pk},
                     identity_refs={"person": person_handle},
-                    **mm_target,
+                    **entry.target,
                 )
             )
         else:
@@ -778,7 +793,7 @@ def _process_credits(
                     field_name="credit",
                     claim_key=claim_key,
                     value=value,
-                    **mm_target,
+                    **entry.target,
                 )
             )
 
