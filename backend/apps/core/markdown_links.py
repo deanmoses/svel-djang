@@ -81,7 +81,7 @@ class LinkType:
     # Custom lookup for authoring format: (model_class, raw_values) -> {key: obj}
     # Default for slug-based types: filter(**{slug_field + "__in": values})
     authoring_lookup: (
-        Callable[[type[models.Model], list[str]], dict[str, Any]] | None
+        Callable[[type[models.Model], list[str]], dict[str, models.Model]] | None
     ) = None
     # Custom key derivation for storage-to-authoring: (obj) -> authoring_key
     # Default: getattr(obj, slug_field)
@@ -111,14 +111,14 @@ class LinkType:
 
         return apps.get_model(self.model_path)
 
-    def resolve_url(self, obj: Any) -> str:
+    def resolve_url(self, obj: models.Model) -> str:
         """Resolve the URL for a linked object."""
         if self.get_url:
             return self.get_url(obj)
         value = getattr(obj, self.url_field)
         return self.url_pattern.format(**{self.url_field: value})
 
-    def resolve_label(self, obj: Any) -> str:
+    def resolve_label(self, obj: models.Model) -> str:
         """Resolve the display label for a linked object."""
         if self.get_label:
             return self.get_label(obj)
@@ -245,7 +245,9 @@ def render_all_links(
     return text
 
 
-def _format_link(lt: LinkType, obj: Any | None, base_url: str, plain_text: bool) -> str:
+def _format_link(
+    lt: LinkType, obj: models.Model | None, base_url: str, plain_text: bool
+) -> str:
     """Format a single resolved link as markdown or plain text."""
     if obj is None:
         return "[broken link]" if plain_text else "*[broken link]*"
@@ -325,7 +327,7 @@ def _render_by_slug(
 
     if lt.slug_field is None:
         raise ValueError(f"LinkType '{lt.name}' is not slug-based")
-    by_key: dict[str, Any]
+    by_key: dict[str, models.Model]
     if lt.authoring_lookup:
         by_key = lt.authoring_lookup(model, raw_values)
     else:
@@ -385,7 +387,7 @@ def _convert_to_storage(
 
     if lt.slug_field is None:
         raise ValueError(f"LinkType '{lt.name}' is not slug-based")
-    by_key: dict[str, Any]
+    by_key: dict[str, models.Model]
     if lt.authoring_lookup:
         by_key = lt.authoring_lookup(model, raw_values)
     else:
@@ -558,7 +560,9 @@ def sync_references(source: models.Model, content: str) -> None:
 # ---------------------------------------------------------------------------
 
 
-def prepare_markdown_claim_value(field_name: str, value, model_class) -> Any:
+def prepare_markdown_claim_value(
+    field_name: str, value: object, model_class: type[models.Model]
+) -> object:
     """Convert authoring-format links to storage format if the field is a MarkdownField.
 
     Intended as the single integration point for all write paths (admin,

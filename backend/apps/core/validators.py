@@ -2,16 +2,22 @@
 
 from __future__ import annotations
 
+from collections.abc import Collection
 from typing import Any
 
 from django.core.exceptions import ValidationError
-from django.db.models import Model
+from django.db.models import Field, Model
 
 
 def bulk_create_validated[M: Model](
     model: type[M],
     objs: list[M],
-    **kwargs: Any,
+    *,
+    batch_size: int | None = None,
+    ignore_conflicts: bool = False,
+    update_conflicts: bool = False,
+    update_fields: Collection[str] | None = None,
+    unique_fields: Collection[str] | None = None,
 ) -> list[M]:
     """Like ``model.objects.bulk_create()`` but runs mojibake validation first.
 
@@ -19,12 +25,10 @@ def bulk_create_validated[M: Model](
     and raises ``ValidationError`` if any value contains encoding corruption.
     Use this in ingestion commands instead of bare ``bulk_create()``.
     """
-    checked_fields: list[Any] = [
+    checked_fields: list[Field[Any, Any]] = [
         f
         for f in model._meta.get_fields()
-        if hasattr(f, "validators")
-        and hasattr(f, "attname")
-        and validate_no_mojibake in f.validators
+        if isinstance(f, Field) and validate_no_mojibake in f.validators
     ]
     if checked_fields:
         for obj in objs:
@@ -32,7 +36,14 @@ def bulk_create_validated[M: Model](
                 value = getattr(obj, field.attname, None)
                 if value:
                     validate_no_mojibake(value)
-    return model._default_manager.bulk_create(objs, **kwargs)
+    return model._default_manager.bulk_create(
+        objs,
+        batch_size=batch_size,
+        ignore_conflicts=ignore_conflicts,
+        update_conflicts=update_conflicts,
+        update_fields=update_fields,
+        unique_fields=unique_fields,
+    )
 
 
 def validate_no_mojibake(value: object) -> None:

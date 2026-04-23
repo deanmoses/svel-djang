@@ -13,12 +13,15 @@ class CoreConfig(AppConfig):
         config_updated.connect(_on_constance_updated)
 
 
+# Constance's config_updated signal passes arbitrary value types (whatever the
+# changed setting holds — str, int, bool, etc.) and reserves the right to add
+# keyword arguments, so this is a framework-owned callback surface.
 def _on_constance_updated(
-    sender: Any,
+    sender: Any,  # noqa: ANN401 — constance signal sender
     key: str,
-    old_value: Any,
-    new_value: Any,
-    **kwargs: Any,
+    old_value: Any,  # noqa: ANN401 — constance setting value, arbitrary type
+    new_value: Any,  # noqa: ANN401 — constance setting value, arbitrary type
+    **kwargs: Any,  # noqa: ANN401 — Django signal framework passthrough
 ) -> None:
     """Invalidate API caches when Constance settings change."""
     if key == "CONTENT_DISPLAY_POLICY":

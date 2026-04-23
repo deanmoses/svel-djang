@@ -8,6 +8,7 @@ import re
 from typing import Any
 
 import nh3
+from django.db import models
 from django.utils.safestring import mark_safe
 from markdown_it import MarkdownIt
 
@@ -130,6 +131,9 @@ def fenced_code_ranges(content: str) -> list[tuple[int, int]]:
     ]
 
 
+# ``metadata_out`` dicts are free-form: each link type's ``collect_metadata``
+# callback defines its own key set and core never inspects them, so a TypedDict
+# would lock in a shape core has no business enforcing.
 def render_markdown_html(
     text: str | None, metadata_out: list[dict[str, Any]] | None = None
 ) -> str:
@@ -159,7 +163,11 @@ def render_markdown_html(
     return mark_safe(_convert_task_list_items(safe_html))  # noqa: S308 — HTML sanitized by nh3
 
 
-def render_markdown_fields(obj) -> dict[str, str | list[dict[str, Any]]]:
+# Return value mixes rendered HTML strings and free-form metadata dicts
+# (see ``render_markdown_html`` note); callers spread this into API payloads.
+def render_markdown_fields(
+    obj: models.Model,
+) -> dict[str, str | list[dict[str, Any]]]:
     """Return ``{field}_html`` rendered values for all MarkdownField instances on *obj*.
 
     Designed for use with ``**`` spread in API serialization dicts::
@@ -172,7 +180,7 @@ def render_markdown_fields(obj) -> dict[str, str | list[dict[str, Any]]]:
     """
     from apps.core.models import get_markdown_fields
 
-    result = {}
+    result: dict[str, str | list[dict[str, Any]]] = {}
     for field in get_markdown_fields(type(obj)):
         citations: list[dict[str, Any]] = []
         result[f"{field}_html"] = render_markdown_html(
