@@ -9,7 +9,7 @@ the claim field names that changed, then invalidates cached endpoint data.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, NamedTuple, cast
 
 from django.db import transaction
 
@@ -26,6 +26,27 @@ logger = logging.getLogger(__name__)
 # Dispatch tables — built lazily to avoid import-time model access
 # ---------------------------------------------------------------------------
 
+
+class ParentDispatchSpec(NamedTuple):
+    """Entry in the parent-hierarchy dispatch table."""
+
+    model: type
+    claim_field_prefix: str | None
+
+
+class CustomDispatchSpec(NamedTuple):
+    """Entry in the custom-resolver dispatch table.
+
+    Each entry specifies which model type it applies to, which
+    ``resolve_all_*`` function to call, and which keyword argument
+    receives the scoped ID set.
+    """
+
+    entity_model: type
+    resolver_function_name: str
+    id_kwarg_name: str
+
+
 _alias_dispatch: dict[str, type] | None = None
 
 
@@ -39,39 +60,38 @@ def _get_alias_dispatch() -> dict[str, type]:
     return _alias_dispatch
 
 
-_parent_dispatch: dict[str, tuple[type, str | None]] | None = None
+_parent_dispatch: dict[str, ParentDispatchSpec] | None = None
 
 
-def _get_parent_dispatch() -> dict[str, tuple[type, str | None]]:
-    """field_name → (model, claim_field_prefix) for _resolve_parents()."""
+def _get_parent_dispatch() -> dict[str, ParentDispatchSpec]:
+    """field_name → ParentDispatchSpec for _resolve_parents()."""
     global _parent_dispatch
     if _parent_dispatch is None:
         from ..models import GameplayFeature, Theme
 
         _parent_dispatch = {
-            "theme_parent": (Theme, None),
-            "gameplay_feature_parent": (GameplayFeature, "gameplay_feature"),
+            "theme_parent": ParentDispatchSpec(Theme, None),
+            "gameplay_feature_parent": ParentDispatchSpec(
+                GameplayFeature, "gameplay_feature"
+            ),
         }
     return _parent_dispatch
 
 
-_custom_dispatch: dict[str, tuple[type, str, str]] | None = None
+_custom_dispatch: dict[str, CustomDispatchSpec] | None = None
 
 
-def _get_custom_dispatch() -> dict[str, tuple[type, str, str]]:
-    """field_name → (entity_model, resolver_function_name, id_kwarg_name).
-
-    Each entry specifies which model type it applies to, which
-    ``resolve_all_*`` function to call, and which keyword argument
-    receives the scoped ID set.
-    """
+def _get_custom_dispatch() -> dict[str, CustomDispatchSpec]:
+    """field_name → CustomDispatchSpec for entity-specific resolvers."""
     global _custom_dispatch
     if _custom_dispatch is None:
         from ..models import CorporateEntity, Title
 
         _custom_dispatch = {
-            "abbreviation": (Title, "resolve_all_title_abbreviations", "model_ids"),
-            "location": (
+            "abbreviation": CustomDispatchSpec(
+                Title, "resolve_all_title_abbreviations", "model_ids"
+            ),
+            "location": CustomDispatchSpec(
                 CorporateEntity,
                 "resolve_all_corporate_entity_locations",
                 "entity_ids",
@@ -161,24 +181,29 @@ def _resolve_non_machine_model(
     if rel_fields is not None:
         for fn in rel_fields:
             if fn in parent_dispatch:
-                model, prefix = parent_dispatch[fn]
-                if model is entity_type:
-                    _resolve_parents(model, claim_field_prefix=prefix)
+                spec = parent_dispatch[fn]
+                if spec.model is entity_type:
+                    _resolve_parents(
+                        spec.model, claim_field_prefix=spec.claim_field_prefix
+                    )
     else:
-        for _fn, (model, prefix) in parent_dispatch.items():
-            if model is entity_type:
-                _resolve_parents(model, claim_field_prefix=prefix)
+        for spec in parent_dispatch.values():
+            if spec.model is entity_type:
+                _resolve_parents(spec.model, claim_field_prefix=spec.claim_field_prefix)
 
     # --- Custom resolvers (abbreviation, location) ---
     custom_dispatch = _get_custom_dispatch()
     if rel_fields is not None:
         for fn in rel_fields:
-            if fn in custom_dispatch and custom_dispatch[fn][0] is entity_type:
+            if (
+                fn in custom_dispatch
+                and custom_dispatch[fn].entity_model is entity_type
+            ):
                 _call_custom_resolver(custom_dispatch[fn], entity.pk)
     else:
-        for _fn, spec in custom_dispatch.items():
-            if spec[0] is entity_type:
-                _call_custom_resolver(spec, entity.pk)
+        for custom_spec in custom_dispatch.values():
+            if custom_spec.entity_model is entity_type:
+                _call_custom_resolver(custom_spec, entity.pk)
 
     # --- Media attachments ---
     from apps.core.models import MediaSupported
@@ -195,10 +220,9 @@ def _resolve_non_machine_model(
     resolve_entity(entity)
 
 
-def _call_custom_resolver(spec: tuple[type, str, str], entity_pk: int) -> None:
+def _call_custom_resolver(spec: CustomDispatchSpec, entity_pk: int) -> None:
     """Call a custom resolver by name with scoped IDs."""
     from . import _relationships
 
-    _model, func_name, id_kwarg = spec
-    func = getattr(_relationships, func_name)
-    func(**{id_kwarg: {entity_pk}})
+    func = getattr(_relationships, spec.resolver_function_name)
+    func(**{spec.id_kwarg_name: {entity_pk}})

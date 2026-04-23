@@ -334,6 +334,8 @@ def _apply_resolution(
     pm: MachineModel,
     winners: dict[str, Claim],
     claim_fields: dict[str, str],
+    # field_defaults values are Django field defaults — scalars, None, or
+    # callable output; see ``_helpers.get_field_defaults``.
     field_defaults: dict[str, Any],
     fk_info: FKInfo,
     sfl_map: dict | None = None,

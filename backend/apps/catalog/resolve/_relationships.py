@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+from typing import NamedTuple
 
 from apps.provenance.models import Claim
 
@@ -33,6 +34,25 @@ from ..models import (
 from ._helpers import _annotate_priority
 
 logger = logging.getLogger(__name__)
+
+
+# ------------------------------------------------------------------
+# Shared tuple shapes
+# ------------------------------------------------------------------
+
+
+class ClaimDedupKey(NamedTuple):
+    """Dedup key when picking first-winner-per-claim_key for an entity."""
+
+    object_id: int
+    claim_key: str
+
+
+class CreditAssignment(NamedTuple):
+    """A (person, role) pair materialised into a Credit row."""
+
+    person_id: int
+    role_id: int
 
 
 # ------------------------------------------------------------------
@@ -83,9 +103,9 @@ def _resolve_machine_model_m2m(
 
     # Pick winner per (object_id, claim_key).
     winners_by_model: dict[int, list[Claim]] = {}
-    seen: set[tuple[int, str]] = set()
+    seen: set[ClaimDedupKey] = set()
     for claim in claims:
-        key = (claim.object_id, claim.claim_key)
+        key = ClaimDedupKey(claim.object_id, claim.claim_key)
         if key not in seen:
             seen.add(key)
             winners_by_model.setdefault(claim.object_id, []).append(claim)
@@ -192,9 +212,9 @@ def resolve_all_gameplay_features(
 
     # Pick winner per (object_id, claim_key).
     winners_by_model: dict[int, list[Claim]] = {}
-    seen: set[tuple[int, str]] = set()
+    seen: set[ClaimDedupKey] = set()
     for claim in claims:
-        key = (claim.object_id, claim.claim_key)
+        key = ClaimDedupKey(claim.object_id, claim.claim_key)
         if key not in seen:
             seen.add(key)
             winners_by_model.setdefault(claim.object_id, []).append(claim)
@@ -321,16 +341,16 @@ def resolve_all_credits(
     )
 
     winners_by_model: dict[int, list[Claim]] = {}
-    seen: set[tuple[int, str]] = set()
+    seen: set[ClaimDedupKey] = set()
     for claim in credit_claims:
-        key = (claim.object_id, claim.claim_key)
+        key = ClaimDedupKey(claim.object_id, claim.claim_key)
         if key not in seen:
             seen.add(key)
             winners_by_model.setdefault(claim.object_id, []).append(claim)
 
-    desired_by_model: dict[int, set[tuple[int, int]]] = {}
+    desired_by_model: dict[int, set[CreditAssignment]] = {}
     for model_id, claims_list in winners_by_model.items():
-        desired: set[tuple[int, int]] = set()
+        desired: set[CreditAssignment] = set()
         for claim in claims_list:
             val = claim.value
             if not val.get("exists", True):
@@ -351,17 +371,17 @@ def resolve_all_credits(
                     model_id,
                 )
                 continue
-            desired.add((person_pk, role_pk))
+            desired.add(CreditAssignment(person_pk, role_pk))
         desired_by_model[model_id] = desired
 
     if model_ids is not None:
         all_model_ids = model_ids
     else:
         all_model_ids = set(MachineModel.objects.values_list("pk", flat=True))
-    existing_by_model: dict[int, set[tuple[int, int]]] = {}
+    existing_by_model: dict[int, set[CreditAssignment]] = {}
     dc_qs = Credit.objects.filter(model_id__in=all_model_ids)
     for dc in dc_qs.values_list("model_id", "person_id", "role_id"):
-        existing_by_model.setdefault(dc[0], set()).add((dc[1], dc[2]))
+        existing_by_model.setdefault(dc[0], set()).add(CreditAssignment(dc[1], dc[2]))
 
     to_create: list[Credit] = []
     to_delete_pks: list[int] = []
@@ -370,9 +390,13 @@ def resolve_all_credits(
         desired = desired_by_model.get(model_id, set())
         existing = existing_by_model.get(model_id, set())
 
-        for person_id, role_id in desired - existing:
+        for assignment in desired - existing:
             to_create.append(
-                Credit(model_id=model_id, person_id=person_id, role_id=role_id)
+                Credit(
+                    model_id=model_id,
+                    person_id=assignment.person_id,
+                    role_id=assignment.role_id,
+                )
             )
 
     for dc in Credit.objects.filter(model_id__in=all_model_ids).values_list(
@@ -380,7 +404,7 @@ def resolve_all_credits(
     ):
         pk, model_id, person_id, role_id = dc
         desired = desired_by_model.get(model_id, set())
-        if (person_id, role_id) not in desired:
+        if CreditAssignment(person_id, role_id) not in desired:
             to_delete_pks.append(pk)
 
     if to_delete_pks:
@@ -413,9 +437,9 @@ def resolve_all_title_abbreviations(
     )
 
     winners_by_title: dict[int, list[Claim]] = {}
-    seen: set[tuple[int, str]] = set()
+    seen: set[ClaimDedupKey] = set()
     for claim in abbr_claims:
-        key = (claim.object_id, claim.claim_key)
+        key = ClaimDedupKey(claim.object_id, claim.claim_key)
         if key not in seen:
             seen.add(key)
             winners_by_title.setdefault(claim.object_id, []).append(claim)
@@ -511,9 +535,9 @@ def resolve_all_model_abbreviations(
     )
 
     winners_by_model: dict[int, list[Claim]] = {}
-    seen: set[tuple[int, str]] = set()
+    seen: set[ClaimDedupKey] = set()
     for claim in abbr_claims:
-        key = (claim.object_id, claim.claim_key)
+        key = ClaimDedupKey(claim.object_id, claim.claim_key)
         if key not in seen:
             seen.add(key)
             winners_by_model.setdefault(claim.object_id, []).append(claim)
@@ -603,9 +627,9 @@ def _resolve_aliases(
 
     # Pick winners per (object_id, claim_key).
     winners_by_parent: dict[int, list[Claim]] = {}
-    seen: set[tuple[int, str]] = set()
+    seen: set[ClaimDedupKey] = set()
     for claim in claims_qs:
-        key = (claim.object_id, claim.claim_key)
+        key = ClaimDedupKey(claim.object_id, claim.claim_key)
         if key not in seen:
             seen.add(key)
             winners_by_parent.setdefault(claim.object_id, []).append(claim)
@@ -734,9 +758,9 @@ def _resolve_parents(parent_model, *, claim_field_prefix: str | None = None) -> 
 
     # Pick winners per (object_id, claim_key).
     winners_by_child: dict[int, list[Claim]] = {}
-    seen: set[tuple[int, str]] = set()
+    seen: set[ClaimDedupKey] = set()
     for claim in claims_qs:
-        key = (claim.object_id, claim.claim_key)
+        key = ClaimDedupKey(claim.object_id, claim.claim_key)
         if key not in seen:
             seen.add(key)
             winners_by_child.setdefault(claim.object_id, []).append(claim)

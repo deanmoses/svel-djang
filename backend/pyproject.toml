@@ -91,7 +91,6 @@ ignore = [
 "apps/catalog/signals.py" = ["ANN401"]
 "apps/catalog/ingestion/**" = ["ANN401"]
 "apps/catalog/management/**" = ["ANN401"]
-"apps/catalog/resolve/**" = ["ANN401"]
 "apps/catalog/tests/**" = ["ANN401"]  # tests stay grandfathered; source is clean
 "apps/provenance/**" = ["ANN401"]
 "config/**" = ["ANN401"]

@@ -44,7 +44,9 @@ class FKInfo:
     """FK field metadata and pre-fetched lookups for bulk resolution."""
 
     fk_fields: set[str] = field(default_factory=set)
-    lookups: dict[str, dict[str, Any]] = field(default_factory=dict)
+    # {attr: {lookup_value: related_instance}} — inner dict maps the claim's
+    # string payload (typically slug) to the fully-fetched target model row.
+    lookups: dict[str, dict[str, models.Model]] = field(default_factory=dict)
 
 
 # ------------------------------------------------------------------
@@ -56,8 +58,8 @@ def _resolve_fk_generic(
     model_class: type[models.Model],
     field_name: str,
     value,
-    lookup: dict[str, Any] | None = None,
-) -> Any | None:
+    lookup: dict[str, models.Model] | None = None,
+) -> models.Model | None:
     """Resolve a claim value to an FK instance by introspecting the Django field.
 
     Uses ``slug`` as the default lookup key on the target model.  Models can
@@ -198,7 +200,14 @@ def get_field_defaults(
     model_class: type[models.Model],
     direct_fields: dict[str, str],
 ) -> dict[str, Any]:
-    """Compute reset values for direct fields by inspecting Django model metadata."""
+    """Compute reset values for direct fields by inspecting Django model metadata.
+
+    The returned values are ``dict[str, Any]`` because Django field defaults
+    are genuinely heterogeneous — any Python scalar, ``None``, or the return
+    of an arbitrary callable.  Narrowing further would require per-field
+    type variance that callers don't need.
+    """
+    # Values are Django field defaults — scalars, None, or callable output.
     defaults: dict[str, Any] = {}
     for attr in direct_fields.values():
         field = model_class._meta.get_field(attr)
