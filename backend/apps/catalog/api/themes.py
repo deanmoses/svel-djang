@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from django.db.models import F, Prefetch
+from typing import Any
+
+from django.db.models import F, Prefetch, QuerySet
+from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
@@ -61,7 +64,7 @@ class ThemeDetailSchema(Schema):
 # ---------------------------------------------------------------------------
 
 
-def _detail_qs():
+def _detail_qs() -> QuerySet[Theme]:
     return Theme.objects.active().prefetch_related(
         Prefetch("parents", queryset=Theme.objects.active()),
         Prefetch("children", queryset=Theme.objects.active()),
@@ -77,7 +80,7 @@ def _detail_qs():
     )
 
 
-def _serialize_detail(theme) -> dict:
+def _serialize_detail(theme: Theme) -> dict[str, Any]:
     min_rank = get_minimum_display_rank()
     return {
         "name": theme.name,
@@ -104,7 +107,7 @@ themes_router = Router(tags=["themes"])
 
 @themes_router.get("/", response=list[ThemeListSchema])
 @decorate_view(cache_control(no_cache=True))
-def list_themes(request):
+def list_themes(request: HttpRequest) -> list[ThemeListSchema]:
     themes = list(
         Theme.objects.active().prefetch_related(
             Prefetch("parents", queryset=Theme.objects.active()),
@@ -122,13 +125,13 @@ def list_themes(request):
     )
     themes.sort(key=lambda t: (-counts.get(t.pk, 0), t.name.lower()))
     return [
-        {
-            "name": t.name,
-            "slug": t.slug,
-            "aliases": [a.value for a in t.aliases.all()],
-            "title_count": counts.get(t.pk, 0),
-            "parent_slugs": [p.slug for p in t.parents.all()],
-        }
+        ThemeListSchema(
+            name=t.name,
+            slug=t.slug,
+            aliases=[a.value for a in t.aliases.all()],
+            title_count=counts.get(t.pk, 0),
+            parent_slugs=[p.slug for p in t.parents.all()],
+        )
         for t in themes
     ]
 
@@ -139,7 +142,9 @@ def list_themes(request):
     response=ThemeDetailSchema,
     tags=["private"],
 )
-def patch_theme_claims(request, slug: str, data: HierarchyClaimPatchSchema):
+def patch_theme_claims(
+    request: HttpRequest, slug: str, data: HierarchyClaimPatchSchema
+) -> dict[str, Any]:
     """Assert per-field claims from the authenticated user, then re-resolve."""
     if not data.fields and data.parents is None and data.aliases is None:
         raise_form_error("No changes provided.")

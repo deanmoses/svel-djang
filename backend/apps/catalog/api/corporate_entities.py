@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from typing import cast
+from typing import Any, cast
 
-from django.db.models import Count, F, Prefetch, Q
+from django.db.models import Count, F, Prefetch, Q, QuerySet
+from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
@@ -74,7 +75,7 @@ class CorporateEntityDetailSchema(Schema):
 # ---------------------------------------------------------------------------
 
 
-def _detail_qs():
+def _detail_qs() -> QuerySet[CorporateEntity]:
     return (
         CorporateEntity.objects.active()
         .select_related("manufacturer")
@@ -98,7 +99,7 @@ def _detail_qs():
     )
 
 
-def _serialize_detail(ce) -> dict:
+def _serialize_detail(ce: CorporateEntity) -> dict[str, Any]:
     return {
         "name": ce.name,
         "slug": ce.slug,
@@ -121,7 +122,9 @@ corporate_entities_router = Router(tags=["corporate-entities"])
 
 @corporate_entities_router.get("/", response=list[CorporateEntityListSchema])
 @decorate_view(cache_control(no_cache=True))
-def list_corporate_entities(request):
+def list_corporate_entities(
+    request: HttpRequest,
+) -> list[CorporateEntityListSchema]:
     qs = (
         CorporateEntity.objects.active()
         .select_related("manufacturer")
@@ -142,18 +145,15 @@ def list_corporate_entities(request):
         .order_by("manufacturer__name", "year_start")
     )
     return [
-        {
-            "name": ce.name,
-            "slug": ce.slug,
-            "manufacturer": {
-                "name": ce.manufacturer.name,
-                "slug": ce.manufacturer.slug,
-            },
-            "year_start": ce.year_start,
-            "year_end": ce.year_end,
-            "model_count": cast(HasModelCount, ce).model_count,
-            "locations": _serialize_locations(ce),
-        }
+        CorporateEntityListSchema(
+            name=ce.name,
+            slug=ce.slug,
+            manufacturer=Ref(name=ce.manufacturer.name, slug=ce.manufacturer.slug),
+            year_start=ce.year_start,
+            year_end=ce.year_end,
+            model_count=cast(HasModelCount, ce).model_count,
+            locations=_serialize_locations(ce),
+        )
         for ce in qs
     ]
 
@@ -165,8 +165,8 @@ def list_corporate_entities(request):
     tags=["private"],
 )
 def patch_corporate_entity_claims(
-    request, slug: str, data: CorporateEntityClaimPatchSchema
-):
+    request: HttpRequest, slug: str, data: CorporateEntityClaimPatchSchema
+) -> dict[str, Any]:
     """Assert per-field claims from the authenticated user, then re-resolve."""
     if not data.fields and data.aliases is None:
         raise_form_error("No changes provided.")

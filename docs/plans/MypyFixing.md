@@ -6,7 +6,7 @@ We recently introduced mypy and grandfathered in a lot of exceptions in backend/
 
 ## Status
 
-Steps 1–6 complete. Step 7+ undone.
+Steps 1–7 complete. Step 8+ undone.
 
 ## Running mypy
 
@@ -207,11 +207,26 @@ Baseline: 375 → 353.
 
 **Deferred:** `apps/core/markdown.py:95` (`Match` type-arg) and `apps/core/entity_types.py:46` (`type-abstract`) are in the baseline but out of Step 6 scope as stated.
 
-## Step 7: `catalog/api` tail
+## Step 7: `catalog/api` tail - DONE
 
-The taxonomy-adjacent endpoint files (franchises, themes, gameplay_features, corporate_entities) each have ~7 entries in the same shape as Step 2.2 files. Same pattern as Step 2 — helpers first, endpoints after, `make api-gen` between batches.
+The taxonomy-adjacent endpoint files (franchises, themes, gameplay_features, corporate_entities) each had ~7 entries in the same shape as Step 2.2 files. Callees typed first (`catalog/models/*` M2M fields with explicit `ManyToManyField[_To, _Through]` parameters; `catalog/claims.py` `build_relationship_claim` / `build_media_attachment_claim`), then endpoints.
 
-Scope (~46 entries): `franchises.py` (8), `themes.py` (7), `gameplay_features.py` (7), `corporate_entities.py` (7), `page_endpoints.py` (4), `taxonomy.py` (2), `machine_models.py` (1), plus foundational `catalog/models/*` (6) and `catalog/claims.py` (4) which are callees of these endpoints.
+Two new named types landed alongside the type-arg fixes:
+
+- `IdentityPart = str | int | None` on `make_claim_key` in [apps/provenance/models/claim.py](backend/apps/provenance/models/claim.py) — re-exported through `apps.provenance.models`. Replaces inline `str | int | None` at every identity-part call site.
+- `RelationshipClaim = tuple[str, JsonBody]` in [apps/catalog/claims.py](backend/apps/catalog/claims.py) — the `(claim_key, value_dict)` pair returned by both relationship-claim builders. `JsonBody` (already in `apps/core/types.py`) is the right alias for the JSON-shaped value dict.
+
+The two `Cannot infer type of lambda` entries on `taxonomy.py`'s `_register_*` wrappers are pre-existing (noted in Step 1) and still deferred.
+
+Baseline: 353 → 310.
+
+## Step 7.1: return-Schema follow-ups surfaced by Step 7
+
+Not required for a baseline count reduction — these satisfy `disallow_untyped_defs` today — but they're the "return Schema, not dict" idiom's remaining package-wide debt. Land after Step 7, independent of Step 8+.
+
+- **Widen `SerializeFn` in [apps/catalog/api/entity_crud.py](backend/apps/catalog/api/entity_crud.py) from `Callable[[Any], dict[str, Any]]` to `Callable[[Any], Schema]` (or equivalent).** Every `_serialize_*_detail` in the taxonomy-adjacent endpoints (franchises, themes, gameplay*features, corporate_entities — and the older Step 2.2 files: manufacturers, systems, series, locations, people, machine_models) is still typed `-> dict[str, Any]` solely because of this shared callback signature. Flipping it unblocks flipping each `\_serialize*_*detail`to return its`FooDetailSchema`, plus the matching endpoint `-> dict[str, Any]`returns. Expect a grep-sweep at every`\_serialize*_\_detail`definition +`register_entity_create`/`register_entity_delete_restore` call. Mypy will catch most of the ripple; the Schema/dict boundary idiom applies to any residual untyped consumer.
+- **`serialize_blocking_referrer` → `BlockingReferrerSchema`.** [apps/catalog/api/soft_delete.py:67](backend/apps/catalog/api/soft_delete.py#L67) currently returns `dict[str, object]`; `BlockingReferrerSchema` already exists at [apps/catalog/api/schemas.py:88](backend/apps/catalog/api/schemas.py#L88). Direct swap; callers iterate over the list into the `list[BlockingReferrerSchema]` response field already, so the change is local.
+- **`ValidationError.to_response_body` → Schema or TypedDict.** [apps/catalog/api/edit_claims.py:88](backend/apps/catalog/api/edit_claims.py#L88) returns `dict[str, object]` with a small fixed shape (`message`, `field_errors`, `form_errors`). Unclear whether this is wire-bound (Ninja response) or programmatic; audit before choosing Schema vs TypedDict.
 
 ## Step 8: `citation/api`
 

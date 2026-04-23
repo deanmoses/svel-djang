@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from django.db.models import Prefetch
+from typing import Any
+
+from django.db.models import Prefetch, QuerySet
+from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
@@ -62,7 +65,7 @@ class GameplayFeatureDetailSchema(Schema):
 # ---------------------------------------------------------------------------
 
 
-def _detail_qs():
+def _detail_qs() -> QuerySet[GameplayFeature]:
     return GameplayFeature.objects.active().prefetch_related(
         Prefetch("parents", queryset=GameplayFeature.objects.active()),
         Prefetch("children", queryset=GameplayFeature.objects.active()),
@@ -72,7 +75,7 @@ def _detail_qs():
     )
 
 
-def _serialize_detail(feature) -> dict:
+def _serialize_detail(feature: GameplayFeature) -> dict[str, Any]:
     return {
         "name": feature.name,
         "slug": feature.slug,
@@ -95,7 +98,9 @@ gameplay_features_router = Router(tags=["gameplay-features"])
 
 @gameplay_features_router.get("/", response=list[GameplayFeatureListSchema])
 @decorate_view(cache_control(no_cache=True))
-def list_gameplay_features(request):
+def list_gameplay_features(
+    request: HttpRequest,
+) -> list[GameplayFeatureListSchema]:
     features = list(
         GameplayFeature.objects.active().prefetch_related(
             Prefetch("children", queryset=GameplayFeature.objects.active()),
@@ -115,13 +120,13 @@ def list_gameplay_features(request):
     features.sort(key=lambda f: (-counts.get(f.pk, 0), f.name.lower()))
 
     return [
-        {
-            "name": f.name,
-            "slug": f.slug,
-            "aliases": [a.value for a in f.aliases.all()],
-            "title_count": counts.get(f.pk, 0),
-            "parent_slugs": [p.slug for p in f.parents.all()],
-        }
+        GameplayFeatureListSchema(
+            name=f.name,
+            slug=f.slug,
+            aliases=[a.value for a in f.aliases.all()],
+            title_count=counts.get(f.pk, 0),
+            parent_slugs=[p.slug for p in f.parents.all()],
+        )
         for f in features
     ]
 
@@ -132,7 +137,9 @@ def list_gameplay_features(request):
     response=GameplayFeatureDetailSchema,
     tags=["private"],
 )
-def patch_gameplay_feature_claims(request, slug: str, data: HierarchyClaimPatchSchema):
+def patch_gameplay_feature_claims(
+    request: HttpRequest, slug: str, data: HierarchyClaimPatchSchema
+) -> dict[str, Any]:
     """Assert per-field claims from the authenticated user, then re-resolve."""
     if not data.fields and data.parents is None and data.aliases is None:
         raise_form_error("No changes provided.")

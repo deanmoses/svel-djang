@@ -7,12 +7,19 @@ import from this module rather than constructing claim_keys directly.
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Mapping
 from typing import NamedTuple
 
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
-from apps.provenance.models import make_claim_key
+from apps.core.types import JsonBody
+from apps.provenance.models import IdentityPart, make_claim_key
+
+# A (claim_key, value_dict) pair ready to write as a relationship Claim row.
+# claim_key is the canonical compound string; value_dict is the JSONField
+# payload — identity fields plus "exists", optionally "category"/"is_primary".
+RelationshipClaim = tuple[str, JsonBody]
 
 # ---------------------------------------------------------------------------
 # Relationship schema registry
@@ -150,9 +157,9 @@ def get_all_namespace_keys() -> dict[str, list[str]]:
 
 def build_relationship_claim(
     field_name: str,
-    identity: dict,
+    identity: Mapping[str, IdentityPart],
     exists: bool = True,
-) -> tuple[str, dict]:
+) -> RelationshipClaim:
     """Return ``(claim_key, value)`` for a relationship claim.
 
     ``identity`` contains the identity fields for this relationship, e.g.,
@@ -182,7 +189,7 @@ def build_relationship_claim(
         identity_parts = {literal.identity_key: identity[literal.value_key]}
 
     claim_key = make_claim_key(field_name, **identity_parts)
-    value = {**identity, "exists": exists}
+    value: JsonBody = {**identity, "exists": exists}
     return claim_key, value
 
 
@@ -193,7 +200,7 @@ def build_media_attachment_claim(
     category: str | None = None,
     is_primary: bool = False,
     exists: bool = True,
-) -> tuple[str, dict]:
+) -> RelationshipClaim:
     """Return ``(claim_key, value)`` for a ``media_attachment`` claim.
 
     Validates *category* against the entity's ``MEDIA_CATEGORIES`` before
@@ -229,7 +236,7 @@ def build_media_attachment_claim(
 
 def make_authoritative_scope(
     model_class: type[models.Model],
-    object_ids,
+    object_ids: Iterable[int],
 ) -> set[tuple[int, int]]:
     """Build an authoritative_scope set from a model class and object IDs.
 

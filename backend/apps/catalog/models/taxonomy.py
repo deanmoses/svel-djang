@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.db.models.functions import Lower
@@ -18,6 +20,11 @@ from apps.core.models import (
     status_valid,
 )
 from apps.core.validators import validate_no_mojibake
+
+if TYPE_CHECKING:
+    from .machine_model import MachineModel
+    from .person import Credit
+    from .series import Series
 
 __all__ = [
     "Cabinet",
@@ -320,13 +327,15 @@ class CreditRole(CatalogModel, EntityStatusMixin, SluggedModel, TimeStampedModel
     display_order = models.PositiveSmallIntegerField(default=0)
     description = MarkdownField(blank=True)
 
-    machine_models = models.ManyToManyField(
-        "MachineModel",
-        through="Credit",
-        through_fields=("role", "model"),
-        related_name="+",
+    machine_models: models.ManyToManyField[MachineModel, Credit] = (
+        models.ManyToManyField(
+            "MachineModel",
+            through="Credit",
+            through_fields=("role", "model"),
+            related_name="+",
+        )
     )
-    series_credited = models.ManyToManyField(
+    series_credited: models.ManyToManyField[Series, Credit] = models.ManyToManyField(
         "Series",
         through="Credit",
         through_fields=("role", "series"),

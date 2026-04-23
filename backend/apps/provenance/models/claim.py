@@ -19,6 +19,11 @@ from .source import Source
 if TYPE_CHECKING:
     from .citation_instance import CitationInstance
 
+type IdentityPart = str | int | None
+"""One value in a claim_key's identity-parts mapping: an entity-reference PK
+(``int``), a literal key like an alias value (``str``), or ``None``
+(serialized as the literal ``"null"`` in the key)."""
+
 
 class ExistingClaimRow(NamedTuple):
     """Partial Claim row cached during claim diffing.
@@ -41,7 +46,7 @@ def _escape_claim_value(s: str) -> str:
     return s.replace("%", "%25").replace("|", "%7C").replace(":", "%3A")
 
 
-def make_claim_key(field_name: str, **identity_parts: str | int | None) -> str:
+def make_claim_key(field_name: str, **identity_parts: IdentityPart) -> str:
     """Build a canonical claim_key from field_name and sorted identity parts.
 
     For scalar claims, call with just field_name (returns field_name unchanged).

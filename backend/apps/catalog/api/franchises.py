@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from typing import cast
+from typing import Any, cast
 
-from django.db.models import Count, Prefetch, Q
+from django.db.models import Count, Prefetch, Q, QuerySet
+from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
@@ -53,7 +54,7 @@ franchises_router = Router(tags=["franchises"])
 
 @franchises_router.get("/", response=list[FranchiseListSchema])
 @decorate_view(cache_control(no_cache=True))
-def list_franchises(request):
+def list_franchises(request: HttpRequest) -> list[FranchiseListSchema]:
     """Return every franchise with title count (no pagination)."""
     qs = (
         Franchise.objects.active()
@@ -61,16 +62,16 @@ def list_franchises(request):
         .order_by("-title_count", "name")
     )
     return [
-        {
-            "name": f.name,
-            "slug": f.slug,
-            "title_count": cast(HasTitleCount, f).title_count,
-        }
+        FranchiseListSchema(
+            name=f.name,
+            slug=f.slug,
+            title_count=cast(HasTitleCount, f).title_count,
+        )
         for f in qs
     ]
 
 
-def _franchise_titles_qs():
+def _franchise_titles_qs() -> QuerySet[Title]:
     return (
         Title.objects.active()
         .annotate(
@@ -93,13 +94,13 @@ def _franchise_titles_qs():
     )
 
 
-def _franchise_detail_qs():
+def _franchise_detail_qs() -> QuerySet[Franchise]:
     return Franchise.objects.active().prefetch_related(
         Prefetch("titles", queryset=_franchise_titles_qs()), claims_prefetch()
     )
 
 
-def _serialize_franchise_detail(franchise: Franchise) -> dict:
+def _serialize_franchise_detail(franchise: Franchise) -> dict[str, Any]:
     min_rank = get_minimum_display_rank()
     return {
         "name": franchise.name,
@@ -119,7 +120,9 @@ def _serialize_franchise_detail(franchise: Franchise) -> dict:
     response=FranchiseDetailSchema,
     tags=["private"],
 )
-def patch_franchise_claims(request, slug: str, data: ClaimPatchSchema):
+def patch_franchise_claims(
+    request: HttpRequest, slug: str, data: ClaimPatchSchema
+) -> dict[str, Any]:
     """Assert per-field claims from the authenticated user, then re-resolve."""
     franchise = get_object_or_404(Franchise.objects.active(), slug=slug)
     specs = plan_scalar_field_claims(Franchise, data.fields, entity=franchise)

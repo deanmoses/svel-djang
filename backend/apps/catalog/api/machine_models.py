@@ -16,6 +16,7 @@ from ninja.responses import Status
 from ninja.security import django_auth
 
 from apps.core.licensing import get_minimum_display_rank
+from apps.core.types import JsonBody
 from apps.media.helpers import all_media, primary_media
 from apps.media.models import EntityMedia
 from apps.media.schemas import UploadedMediaSchema
@@ -171,7 +172,7 @@ class MachineModelDetailSchema(Schema):
     pinside_rating: float | None = None
     description: RichTextSchema = RichTextSchema()
     abbreviations: list[str] = []
-    extra_data: dict
+    extra_data: JsonBody
     credits: list[CreditSchema]
     thumbnail_url: str | None = None
     hero_image_url: str | None = None

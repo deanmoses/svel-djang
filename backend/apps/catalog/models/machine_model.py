@@ -25,7 +25,15 @@ from apps.core.validators import validate_no_mojibake
 __all__ = ["MachineModel", "ModelAbbreviation"]
 
 if TYPE_CHECKING:
+    from .gameplay_feature import GameplayFeature, MachineModelGameplayFeature
     from .person import Credit
+    from .taxonomy import (
+        MachineModelRewardType,
+        MachineModelTag,
+        RewardType,
+        Tag,
+    )
+    from .theme import MachineModelTheme, Theme
 
 # Range constants — referenced by both field validators and Meta.constraints.
 # Module-level so they're accessible inside class Meta (nested class scoping).
@@ -201,28 +209,32 @@ class MachineModel(
             MaxValueValidator(PLAYER_COUNT_MAX),
         ],
     )
-    themes = models.ManyToManyField(
+    themes: models.ManyToManyField[Theme, MachineModelTheme] = models.ManyToManyField(
         "Theme",
         through="MachineModelTheme",
         blank=True,
         related_name="machine_models",
         help_text="Resolved theme tags (materialized from relationship claims).",
     )
-    gameplay_features = models.ManyToManyField(
+    gameplay_features: models.ManyToManyField[
+        GameplayFeature, MachineModelGameplayFeature
+    ] = models.ManyToManyField(
         "GameplayFeature",
         through="MachineModelGameplayFeature",
         blank=True,
         related_name="machine_models",
         help_text="Gameplay features (materialized from relationship claims).",
     )
-    reward_types = models.ManyToManyField(
-        "RewardType",
-        through="MachineModelRewardType",
-        blank=True,
-        related_name="machine_models",
-        help_text="Reward types (materialized from relationship claims).",
+    reward_types: models.ManyToManyField[RewardType, MachineModelRewardType] = (
+        models.ManyToManyField(
+            "RewardType",
+            through="MachineModelRewardType",
+            blank=True,
+            related_name="machine_models",
+            help_text="Reward types (materialized from relationship claims).",
+        )
     )
-    tags = models.ManyToManyField(
+    tags: models.ManyToManyField[Tag, MachineModelTag] = models.ManyToManyField(
         "Tag",
         through="MachineModelTag",
         blank=True,
