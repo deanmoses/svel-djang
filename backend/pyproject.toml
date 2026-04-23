@@ -68,6 +68,7 @@ select = [
     "ISC",    # flake8-implicit-str-concat
     "RUF100", # unused-noqa
     "RUF059", # unused-unpacked-variable
+    "ANN401", # no Any/object in annotations
 ]
 ignore = [
     "E501",  # Line too long — handled by formatter
@@ -85,6 +86,13 @@ ignore = [
 "apps/*/management/commands/*.py" = ["T20", "S603", "S607", "B904"]  # print, subprocess, raise-from in commands
 "scripts/*.py" = ["T201"]
 "**/__init__.py" = ["F401"]  # re-exports from barrel modules are the whole point of __init__.py
+# ANN401 grandfathering
+"apps/accounts/**" = ["ANN401"]
+"apps/catalog/**" = ["ANN401"]
+"apps/citation/**" = ["ANN401"]
+"apps/core/**" = ["ANN401"]
+"apps/provenance/**" = ["ANN401"]
+"config/**" = ["ANN401"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["apps", "config"]
