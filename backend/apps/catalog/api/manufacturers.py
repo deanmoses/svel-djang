@@ -46,7 +46,7 @@ from .helpers import (
 from .schemas import (
     ClaimPatchSchema,
     CorporateEntityLocationSchema,
-    FacetRef,
+    Ref,
     RelatedTitleSchema,
 )
 from .titles import _dedup_facet_refs
@@ -58,11 +58,11 @@ class ManufacturerGridSchema(Schema):
     model_count: int = 0
     thumbnail_url: str | None = None
     search_text: str | None = None
-    locations: list[FacetRef] = []
+    locations: list[Ref] = []
     year_min: int | None = None
     year_max: int | None = None
-    persons: list[FacetRef] = []
-    tech_generations: list[FacetRef] = []
+    persons: list[Ref] = []
+    tech_generations: list[Ref] = []
 
 
 class ManufacturerSchema(Schema):
@@ -206,7 +206,7 @@ def _manufacturer_qs():
 
 
 def _build_location_refs(entities) -> list[dict]:
-    """Build location FacetRefs for each location and all its ancestors.
+    """Build location Refs for each location and all its ancestors.
 
     Uses location_path as the slug so refs are globally unique and stable.
     """

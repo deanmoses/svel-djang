@@ -28,7 +28,7 @@ from apps.provenance.rate_limits import (
     DELETE_RATE_LIMIT_SPEC,
     check_and_record,
 )
-from apps.provenance.schemas import EditCitationInput, RichTextSchema
+from apps.provenance.schemas import EditCitationInput, ReviewLinkSchema, RichTextSchema
 
 from ..cache import TITLES_ALL_KEY, get_cached_response, set_cached_response
 from ..models import (
@@ -70,9 +70,9 @@ from .machine_models import (
 from .schemas import (
     BlockingReferrerSchema,
     CreditSchema,
-    FacetRef,
     GameplayFeatureSchema,
     ModelCreateSchema,
+    Ref,
     SeriesRefSchema,
     ThemeSchema,
     TitleMachineSchema,
@@ -95,46 +95,41 @@ class TitleListSchema(Schema):
     slug: str
     abbreviations: list[str] = []
     model_count: int = 0
-    manufacturer: FacetRef | None = None
+    manufacturer: Ref | None = None
     year: int | None = None
     thumbnail_url: str | None = None
     # Facet data — aggregated from non-variant models
-    tech_generations: list[FacetRef] = []
-    display_types: list[FacetRef] = []
+    tech_generations: list[Ref] = []
+    display_types: list[Ref] = []
     player_counts: list[int] = []
-    systems: list[FacetRef] = []
-    themes: list[FacetRef] = []
-    gameplay_features: list[FacetRef] = []
-    reward_types: list[FacetRef] = []
-    persons: list[FacetRef] = []
-    franchise: FacetRef | None = None
-    series: FacetRef | None = None
+    systems: list[Ref] = []
+    themes: list[Ref] = []
+    gameplay_features: list[Ref] = []
+    reward_types: list[Ref] = []
+    persons: list[Ref] = []
+    franchise: Ref | None = None
+    series: Ref | None = None
     year_min: int | None = None
     year_max: int | None = None
     ipdb_rating_max: float | None = None
 
 
-class ReviewLinkSchema(Schema):
-    label: str
-    url: str
-
-
 class AgreedSpecsSchema(Schema):
     """Spec fields where all child models of a title agree on the value."""
 
-    technology_generation: FacetRef | None = None
-    technology_subgeneration: FacetRef | None = None
-    display_type: FacetRef | None = None
+    technology_generation: Ref | None = None
+    technology_subgeneration: Ref | None = None
+    display_type: Ref | None = None
     player_count: int | None = None
     flipper_count: int | None = None
-    system: FacetRef | None = None
-    cabinet: FacetRef | None = None
-    game_format: FacetRef | None = None
-    display_subtype: FacetRef | None = None
+    system: Ref | None = None
+    cabinet: Ref | None = None
+    game_format: Ref | None = None
+    display_subtype: Ref | None = None
     themes: list[ThemeSchema] = []
     gameplay_features: list[GameplayFeatureSchema] = []
-    reward_types: list[FacetRef] = []
-    tags: list[FacetRef] = []
+    reward_types: list[Ref] = []
+    tags: list[Ref] = []
     production_quantity: str | None = None
 
 
@@ -143,8 +138,8 @@ class CrossTitleLinkSchema(Schema):
     a specific model under the current title."""
 
     relation: str
-    other_title: FacetRef
-    source_model: FacetRef
+    other_title: Ref
+    source_model: Ref
 
 
 class AggregatedMediaSchema(Schema):
@@ -155,7 +150,7 @@ class AggregatedMediaSchema(Schema):
     is_primary: bool
     uploaded_by_username: str | None = None
     renditions: MediaRenditionsSchema
-    source_model: FacetRef
+    source_model: Ref
 
 
 class TitleDetailSchema(Schema):
@@ -169,7 +164,7 @@ class TitleDetailSchema(Schema):
     needs_review_notes: str = ""
     review_links: list[ReviewLinkSchema] = []
     hero_image_url: str | None = None
-    franchise: FacetRef | None = None
+    franchise: Ref | None = None
     machines: list[TitleMachineSchema]
     series: SeriesRefSchema | None = None
     credits: list[CreditSchema] = []

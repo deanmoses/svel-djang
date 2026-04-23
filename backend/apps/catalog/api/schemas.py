@@ -236,11 +236,6 @@ class FranchiseRefSchema(Schema):
     slug: str
 
 
-class FacetRef(Schema):
-    slug: str
-    name: str
-
-
 class CreditSchema(Schema):
     person: Ref
     role: str

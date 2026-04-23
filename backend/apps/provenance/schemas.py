@@ -79,6 +79,13 @@ class AttributionSchema(Schema):
     attribution_text: str | None = None
 
 
+class ReviewLinkSchema(Schema):
+    """A link out to an external page relevant to a needs-review item."""
+
+    label: str
+    url: str
+
+
 class InlineCitationLinkSchema(Schema):
     """A link attached to a citation source."""
 

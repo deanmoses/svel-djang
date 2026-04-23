@@ -23,6 +23,7 @@ from apps.citation.models import CitationSource
 
 from .models import CitationInstance
 from .page_endpoints import pages_router
+from .schemas import ReviewLinkSchema
 
 
 class SourceSchema(Schema):
@@ -32,11 +33,6 @@ class SourceSchema(Schema):
     priority: int
     url: str
     description: str
-
-
-class ReviewLinkSchema(Schema):
-    label: str
-    url: str
 
 
 class ReviewClaimSchema(Schema):

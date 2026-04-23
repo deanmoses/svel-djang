@@ -38,6 +38,7 @@ from .manufacturers import manufacturers_router
 from .schemas import (
     CorporateEntityClaimPatchSchema,
     CorporateEntityLocationSchema,
+    Ref,
     RelatedTitleSchema,
 )
 
@@ -46,15 +47,10 @@ from .schemas import (
 # ---------------------------------------------------------------------------
 
 
-class ManufacturerRef(Schema):
-    name: str
-    slug: str
-
-
 class CorporateEntityListSchema(Schema):
     name: str
     slug: str
-    manufacturer: ManufacturerRef
+    manufacturer: Ref
     year_start: int | None = None
     year_end: int | None = None
     model_count: int = 0
@@ -65,7 +61,7 @@ class CorporateEntityDetailSchema(Schema):
     name: str
     slug: str
     description: RichTextSchema = RichTextSchema()
-    manufacturer: ManufacturerRef
+    manufacturer: Ref
     year_start: int | None = None
     year_end: int | None = None
     aliases: list[str] = []
