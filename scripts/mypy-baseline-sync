@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Regenerates backend/mypy-baseline.txt from a COLD mypy cache.
+#
+# Why this exists
+# ---------------
+# `mypy-baseline sync` is only as accurate as the mypy output it consumes.
+# Mypy's incremental cache re-emits `note:` diagnostics (e.g. "See https://…
+# missing-imports", "Hint: python3 -m pip install types-requests") at every
+# file that transitively re-hits a cached `import-untyped` error, even though
+# the error itself is deduped to its first import site. On a warm cache you
+# get extra phantom notes; on a cold cache (which is what CI always runs) you
+# don't.
+#
+# If you sync against a warm cache, the baseline picks up notes CI will never
+# see. CI then reports them as `fixed: N` and the ratchet fails — even though
+# nothing actually changed. Learned the hard way; see PR #233.
+#
+# So: always clear the cache before syncing. `./scripts/mypy` (the everyday
+# check) deliberately does NOT clear the cache — it's called from editor
+# integrations and pre-commit hooks where speed matters more than absolute
+# parity with CI note-emission. Only the sync path needs cold state.
+
+set -eu
+
+rm -rf backend/.mypy_cache
+
+uv run --directory backend mypy --config-file pyproject.toml . \
+    | uv run --directory backend mypy-baseline sync --ignore '.*--install-types.*'
