@@ -18,7 +18,11 @@ User = get_user_model()
 
 
 class WorkOSBackend:
-    def authenticate(self, request: HttpRequest | None, **kwargs: Any) -> None:
+    def authenticate(
+        self,
+        request: HttpRequest | None,
+        **credentials: Any,  # noqa: ANN401 - Django auth backends receive framework-defined credentials.
+    ) -> None:
         return None
 
     def get_user(self, user_id: int) -> AbstractBaseUser | None:
