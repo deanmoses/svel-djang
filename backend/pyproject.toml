@@ -89,7 +89,6 @@ ignore = [
 # ANN401 grandfathering
 "apps/catalog/**" = ["ANN401"]
 "apps/citation/**" = ["ANN401"]
-"apps/core/**" = ["ANN401"]
 "apps/provenance/**" = ["ANN401"]
 "config/**" = ["ANN401"]
 
