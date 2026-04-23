@@ -7,7 +7,7 @@ Nothing about storage paths is stored in the database.
 from __future__ import annotations
 
 import logging
-from typing import Any, cast
+from typing import Any, NamedTuple, cast
 from uuid import UUID
 
 from django.conf import settings
@@ -67,11 +67,17 @@ def upload_to_storage(storage_key: str, data: bytes, content_type: str) -> None:
         raise RuntimeError(msg)
 
 
-_MAGIC_SIGNATURES: list[tuple[bytes, int, str]] = [
-    (b"\xff\xd8\xff", 0, "image/jpeg"),
-    (b"\x89PNG", 0, "image/png"),
-    (b"WEBP", 8, "image/webp"),  # RIFF....WEBP
-    (b"ftypavif", 4, "image/avif"),  # ISOBMFF ftyp box
+class MagicSignature(NamedTuple):
+    signature: bytes
+    offset: int
+    mime_type: str
+
+
+_MAGIC_SIGNATURES: list[MagicSignature] = [
+    MagicSignature(b"\xff\xd8\xff", 0, "image/jpeg"),
+    MagicSignature(b"\x89PNG", 0, "image/png"),
+    MagicSignature(b"WEBP", 8, "image/webp"),  # RIFF....WEBP
+    MagicSignature(b"ftypavif", 4, "image/avif"),  # ISOBMFF ftyp box
 ]
 
 
@@ -82,9 +88,9 @@ def sniff_image_content_type(data: bytes) -> str | None:
     media serving view where extensionless storage keys prevent
     Django's default Content-Type guessing.
     """
-    for signature, offset, mime_type in _MAGIC_SIGNATURES:
-        if data[offset : offset + len(signature)] == signature:
-            return mime_type
+    for sig in _MAGIC_SIGNATURES:
+        if data[sig.offset : sig.offset + len(sig.signature)] == sig.signature:
+            return sig.mime_type
     return None
 
 
