@@ -56,6 +56,10 @@
           {
             "type": "command",
             "command": "cd frontend && pnpm install"
+          },
+          {
+            "type": "command",
+            "command": "uvx pre-commit install"
           }
         ]
       }
