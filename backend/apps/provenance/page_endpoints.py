@@ -15,6 +15,7 @@ from datetime import datetime
 
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
+from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
@@ -23,6 +24,7 @@ from ninja.responses import Status
 
 from apps.core.entity_types import get_linkable_model
 
+from .entity_resolution import EntityKey, EntityRef, batch_resolve_entities
 from .evidence import build_cited_changesets
 from .helpers import active_claims, build_sources, claims_prefetch
 from .history import build_edit_history
@@ -107,6 +109,9 @@ class ChangeSetSchema(Schema):
     retractions: list[RetractionSchema] = []
 
 
+type ErrorPayload = dict[str, str]
+
+
 def _parse_aware_datetime(value: str) -> datetime | None:
     """Parse an ISO datetime string, ensuring timezone awareness."""
     from django.utils import timezone as tz
@@ -128,18 +133,23 @@ pages_router = Router(tags=["private"])
     response={200: list[ChangeSetSchema], 404: dict},
 )
 @decorate_view(cache_control(no_cache=True))
-def edit_history_page(request, entity_type: str, slug: str):
+def edit_history_page(
+    request: HttpRequest,
+    entity_type: str,
+    slug: str,
+) -> list[ChangeSetSchema] | Status[ErrorPayload]:
     """Return changeset-grouped edit history for any catalog entity.
 
     Accepts soft-deleted entities so the provenance record remains
     inspectable after deletion — matches ``sources_page``.
     """
+    _ = request
     try:
         model_class = get_linkable_model(entity_type)
     except ValueError:
         return Status(404, {"detail": f"Unknown entity type: {entity_type}"})
     entity = get_object_or_404(model_class, slug=slug)
-    return build_edit_history(entity)
+    return [ChangeSetSchema(**row) for row in build_edit_history(entity)]
 
 
 @pages_router.get(
@@ -147,7 +157,11 @@ def edit_history_page(request, entity_type: str, slug: str):
     response={200: SourcesPageSchema, 404: dict},
 )
 @decorate_view(cache_control(no_cache=True))
-def sources_page(request, entity_type: str, slug: str):
+def sources_page(
+    request: HttpRequest,
+    entity_type: str,
+    slug: str,
+) -> SourcesPageSchema | Status[ErrorPayload]:
     """Return the sources page model: grouped claims + cited evidence.
 
     Accepts soft-deleted entities so the provenance record remains
@@ -158,34 +172,40 @@ def sources_page(request, entity_type: str, slug: str):
     except ValueError:
         return Status(404, {"detail": f"Unknown entity type: {entity_type}"})
 
+    _ = request
     entity = get_object_or_404(
-        model_class.objects.prefetch_related(claims_prefetch()), slug=slug
+        model_class._default_manager.prefetch_related(claims_prefetch()), slug=slug
     )
     claims = active_claims(entity)
-    return {
-        "sources": build_sources(claims),
-        "evidence": build_cited_changesets(claims),
-    }
+    sources = [ClaimSchema(**source) for source in build_sources(claims)]
+    evidence = [
+        CitedChangeSetSchema(**changeset)
+        for changeset in build_cited_changesets(claims)
+    ]
+    return SourcesPageSchema(
+        sources=sources,
+        evidence=evidence,
+    )
 
 
 @pages_router.get("/changesets/", response=ChangeSetListSchema)
 @decorate_view(cache_control(no_cache=True))
 def list_changes(
-    request,
+    request: HttpRequest,
     entity_type: str = "",
     after: str = "",
     before: str = "",
     include_ingest: bool = False,
     cursor: str = "",
     limit: int = 50,
-):
+) -> ChangeSetListSchema:
     """Global feed of edits across all entities."""
     from django.db.models import Prefetch
 
-    from .entity_resolution import batch_resolve_entities
     from .models import ChangeSet, Claim
     from .pagination import cursor_paginate
 
+    _ = request
     limit = max(1, min(limit, 100))
 
     qs = ChangeSet.objects.select_related(
@@ -215,7 +235,7 @@ def list_changes(
         try:
             model_class = get_linkable_model(entity_type)
         except ValueError:
-            return {"items": [], "next_cursor": None}
+            return ChangeSetListSchema(items=[], next_cursor=None)
         ct = ContentType.objects.get_for_model(model_class)
         qs = qs.filter(
             Q(claims__content_type_id=ct.pk)
@@ -234,21 +254,23 @@ def list_changes(
     changesets, next_cursor = cursor_paginate(qs, cursor, limit)
 
     # Batch-resolve entity metadata.
-    entity_refs: list[dict] = []
-    cs_entity_map: dict[int, tuple[int, int]] = {}
+    entity_refs: list[EntityRef] = []
+    cs_entity_map: dict[int, EntityKey] = {}
     for cs in changesets:
         claims = cs.claims.all()
         retracted = cs.retracted_claims.all()
         first = next(iter(claims), None) or next(iter(retracted), None)
         if first:
+            assert cs.pk is not None
             key = (first.content_type_id, first.object_id)
             cs_entity_map[cs.pk] = key
             entity_refs.append({"content_type_id": key[0], "object_id": key[1]})
 
     resolved = batch_resolve_entities(entity_refs)
 
-    items = []
+    items: list[ChangeSetSummarySchema] = []
     for cs in changesets:
+        assert cs.pk is not None
         ref = cs_entity_map.get(cs.pk)
         if not ref:
             continue
@@ -261,35 +283,36 @@ def list_changes(
         retractions_count = len(retracted)
 
         items.append(
-            {
-                "id": cs.pk,
-                "user_display": cs.user.username if cs.user else None,
-                "is_ingest": cs.ingest_run_id is not None,
-                "source_name": (
-                    cs.ingest_run.source.name if cs.ingest_run_id else None
-                ),
-                "note": cs.note,
-                "created_at": cs.created_at.isoformat(),
-                "changes_count": len(claims) + retractions_count,
-                "retractions_count": retractions_count,
-                "entity_href": meta["href"],
-                "entity_name": meta["name"],
-                "entity_type_label": meta["type_label"],
-            }
+            ChangeSetSummarySchema(
+                id=cs.pk,
+                user_display=cs.user.username if cs.user else None,
+                is_ingest=cs.ingest_run_id is not None,
+                source_name=cs.ingest_run.source.name if cs.ingest_run_id else None,
+                note=cs.note,
+                created_at=cs.created_at.isoformat(),
+                changes_count=len(claims) + retractions_count,
+                retractions_count=retractions_count,
+                entity_href=meta["href"],
+                entity_name=meta["name"],
+                entity_type_label=meta["type_label"],
+            )
         )
 
-    return {"items": items, "next_cursor": next_cursor}
+    return ChangeSetListSchema(items=items, next_cursor=next_cursor)
 
 
 @pages_router.get(
     "/changesets/{changeset_id}/",
     response={200: ChangeSetDetailSchema, 404: dict},
 )
-def change_detail(request, changeset_id: int):
+def change_detail(
+    request: HttpRequest,
+    changeset_id: int,
+) -> ChangeSetDetailSchema | Status[ErrorPayload]:
     """Detail view for a single changeset with full field diffs."""
-    from .entity_resolution import batch_resolve_entities
     from .models import ChangeSet, Claim
 
+    _ = request
     cs = get_object_or_404(
         ChangeSet.objects.select_related("user", "ingest_run__source").prefetch_related(
             "claims", "retracted_claims"
@@ -307,7 +330,8 @@ def change_detail(request, changeset_id: int):
     obj_id = first.object_id
 
     # Resolve entity metadata.
-    meta_map = batch_resolve_entities([{"content_type_id": ct_id, "object_id": obj_id}])
+    entity_refs: list[EntityRef] = [{"content_type_id": ct_id, "object_id": obj_id}]
+    meta_map = batch_resolve_entities(entity_refs)
     meta = meta_map.get((ct_id, obj_id))
     if not meta:
         return Status(404, {"detail": "Entity no longer exists."})
@@ -326,11 +350,11 @@ def change_detail(request, changeset_id: int):
         history_claims = []
 
     # Group by claim_key for O(1) lookup.
-    by_key: dict[str, list] = defaultdict(list)
+    by_key: dict[str, list[Claim]] = defaultdict(list)
     for c in history_claims:
         by_key[c.claim_key].append(c)
 
-    changes = []
+    changes: list[FieldChangeSchema] = []
     for claim in claims:
         old_value = None
         chain = by_key.get(claim.claim_key, [])
@@ -342,35 +366,36 @@ def change_detail(request, changeset_id: int):
                 old_value = c.value
                 break
         changes.append(
-            {
-                "field_name": claim.field_name,
-                "claim_key": claim.claim_key,
-                "old_value": old_value,
-                "new_value": claim.value,
-            }
+            FieldChangeSchema(
+                field_name=claim.field_name,
+                claim_key=claim.claim_key,
+                old_value=old_value,
+                new_value=claim.value,
+            )
         )
 
     retractions = [
-        {
-            "claim_id": c.pk,
-            "field_name": c.field_name,
-            "claim_key": c.claim_key,
-            "old_value": c.value,
-        }
+        RetractionSchema(
+            claim_id=c.pk,
+            field_name=c.field_name,
+            claim_key=c.claim_key,
+            old_value=c.value,
+        )
         for c in retracted
     ]
 
     ingest_run = cs.ingest_run
-    return {
-        "id": cs.pk,
-        "user_display": cs.user.username if cs.user else None,
-        "is_ingest": ingest_run is not None,
-        "source_name": ingest_run.source.name if ingest_run is not None else None,
-        "note": cs.note,
-        "created_at": cs.created_at.isoformat(),
-        "entity_href": meta["href"],
-        "entity_name": meta["name"],
-        "entity_type_label": meta["type_label"],
-        "changes": changes,
-        "retractions": retractions,
-    }
+    assert cs.pk is not None
+    return ChangeSetDetailSchema(
+        id=cs.pk,
+        user_display=cs.user.username if cs.user else None,
+        is_ingest=ingest_run is not None,
+        source_name=ingest_run.source.name if ingest_run is not None else None,
+        note=cs.note,
+        created_at=cs.created_at.isoformat(),
+        entity_href=meta["href"],
+        entity_name=meta["name"],
+        entity_type_label=meta["type_label"],
+        changes=changes,
+        retractions=retractions,
+    )

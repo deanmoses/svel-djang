@@ -20,7 +20,7 @@ Today the only way these get found is by humans reading PRs. That doesn't scale 
 
 Use ripgrep to find every instance of each smell, fix it, ship it. This is an execution plan, not a triage exercise — you are not producing a list for someone else to review. Apply the fix defined under each smell. The reviewer (human + AI) looks at the resulting PRs, not an intermediate candidate list.
 
-Two smells need judgment: #1 ("is this one of the four legitimate-exception shapes?") and #5 ("are these tuple-shape occurrences semantically the same thing, or just happen to share a shape?"). The other four are mechanical.
+Two smells need judgment: #1 ("is this one of the legitimate exception shapes?") and #5 ("are these tuple-shape occurrences semantically the same thing, or just happen to share a shape?"). The other four are mechanical.
 
 The plan has three phases: **Phase 0** is a one-time infrastructure PR that flips ANN401 on globally and absorbs the current-state flood. **Phase 1** is the iterative chunk work — sessions pick a chunk, clear the six smells, flip the ratchet. **Phase 2** is the ratchet mechanics itself, invoked inside each chunk's final PR.
 
@@ -29,6 +29,8 @@ The plan has three phases: **Phase 0** is a one-time infrastructure PR that flip
 **Pick a unit that fits in one session.** A unit is any chunk that the session can clear end-to-end and ratchet at the finish line — an app, a subdirectory within an app, or a single module. First session: pilot on something small (`apps/accounts/`, `apps/citation/`, or `apps/media/`) to calibrate. If the chosen chunk is too big to finish, drop to a smaller one on the next run. The plan is re-entrant: different sessions can pick different chunks; they add up.
 
 **One chunk = one PR.** All six smells for the chunk land in a single PR, together with the Phase 2 ratchet edit. The PR's CI passing is the proof the chunk is clean.
+
+**Shared helper fallout is allowed.** If tightening a helper in chunk A turns an untyped call in a directly-adjacent caller into a real mypy error, fix the caller in the same PR even if that caller lives just outside the nominal chunk. This is the same principle as the cross-chunk NamedTuple caller updates: don't leave the typed helper half-adopted. Keep the spillover narrow and on the same type flow; don't use it as an excuse to absorb unrelated cleanup.
 
 **Size check before you start.** Before committing any work, run all six greps against the chunk and sum the hits across smells #1, #3, #4, #5, #6 (ignore #2 — it's cheap). If the total exceeds ~60 items, drop down to a subdirectory (e.g. `apps/catalog/resolve/` instead of `apps/catalog/`) before starting. This is the main knob for keeping the PR reviewable.
 
@@ -45,6 +47,8 @@ rg -n --type py ':\s*(Any|object)\b' backend/apps/accounts/ \
 
 Should return zero hits, or only lines carrying `# noqa: ANN401` with a reason. If it returns unexplained hits, you're not done.
 
+**Worktrees need real local deps for repo-wide verify.** If you're working in a git worktree, make sure the worktree's frontend has its own installed `node_modules` before relying on `make lint && make test`. Reusing another checkout's `node_modules` via symlink may be enough for lint, but Vitest/Vite module resolution can still break because package paths resolve back through the original checkout. Prefer a real install in the worktree (offline if the store is already populated).
+
 **Skip nothing silently.** Only smells #1, #3, and #6 have legitimate exceptions. Mark skipped hits so future grep passes can tell "triaged, legitimate" from "untriaged":
 
 - **Smells #1 and #3** — ANN401 fires on these. Add `# noqa: ANN401` with a one-line reason.
@@ -52,7 +56,7 @@ Should return zero hits, or only lines carrying `# noqa: ANN401` with a reason. 
 - **Smell #2** has no legitimate exceptions. Every hit gets fixed.
 - **Smells #4 and #5** either get rewritten or the shape is genuinely fine as a plain tuple and the smell doesn't fire for it.
 
-**Promotion threshold for smell #1.** If the raw grep for smell #1 returns >100 hits in the chosen chunk, or you find yourself spending more than an hour deciding whether individual hits are legitimate, stop and build a narrow AST helper that filters the four framework-boundary shapes and does attribute-profile matching. Below that, don't build the tool.
+**Promotion threshold for smell #1.** If the raw grep for smell #1 returns >100 hits in the chosen chunk, or you find yourself spending more than an hour deciding whether individual hits are legitimate, stop and build a narrow AST helper that filters the framework-boundary exception shapes and does attribute-profile matching. Below that, don't build the tool.
 
 (The two numeric thresholds in this plan measure different things: the ~60-item size check above triggers a chunk-size drop before you start, combining hits across all smells; the 100-item smell-#1 threshold here triggers tool-building for smell #1 specifically. They're independent.)
 
@@ -115,8 +119,10 @@ If the body accesses attributes not in the table, infer the type directly — us
 
 **Skip only these legitimate cases** (leave the `Any` annotation, add a `# noqa: ANN401` with a one-line reason):
 
+The principle is "framework-owned callback surface, not application-owned data model." If a third-party framework defines an open-ended callback signature and your code is implementing that protocol rather than narrowing it, preserve the broad annotation instead of inventing a fake concrete type.
+
 - `**kwargs: Any` / `**options: Any` in Django management-command `handle()` methods (argparse-driven)
-- `**kwargs: Any` in Django signal receivers (framework contract)
+- `**kwargs: Any` in framework callback hooks where the framework owns the keyword schema (for example Django signal receivers or auth-backend `authenticate(..., **credentials)`)
 - Django-Ninja dispatch parameters where a schema validates the real shape at runtime
 - pytest fixture parameters typed to accept whatever the test file passes in
 
@@ -180,6 +186,8 @@ A one-shot audit converges on "this chunk is done" only until the next PR re-int
 **Ruff-only ratchet.** The ratchet mechanism is a single edit: replace the chunk's broad `per-file-ignores` glob with a narrower test-only glob (or remove it entirely if tests are also clean). ANN401 is already globally on from Phase 0; the per-file ignore is the only thing suppressing it in the chunk.
 
 **No mypy ratchet.** The six smells produce valid-but-weak annotations, not mypy errors. `dict[str, Any]` is fine mypy, `cast(Any, ...)` is fine mypy, `tuple[int, int, int]` is fine mypy. Mypy has its own separate backlog (captured in [`backend/mypy-baseline.txt`](../../backend/mypy-baseline.txt): `attr-defined`, `union-attr`, `no-any-return`, etc.) — those are real type errors, not smells. Conflating the two would balloon chunk scope onto every mypy error in the directory, not just the six smells this plan targets. Mypy-baseline cleanup is orthogonal adjacent work a session can opt into but is not part of this plan's required scope.
+
+**If you do opt into mypy cleanup, sanity-check the baseline sync output.** After running the sync command, open [`backend/mypy-baseline.txt`](../../backend/mypy-baseline.txt) and confirm it is still one mypy error per line, with no summary/footer text like `Found 738 errors...` and no truncated lines. The sync tool only sees stdout; if mypy's output format changes or summary text leaks into the stream, you can end up with a malformed baseline file that fails the next lint run.
 
 **What the ratchet actually locks in.** Honest accounting:
 

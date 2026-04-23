@@ -4,16 +4,29 @@ from __future__ import annotations
 
 import logging
 import secrets
+from datetime import datetime
+from typing import Protocol
 
 from django.conf import settings
 from django.contrib.auth import get_user_model, login, logout
+from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth.models import User as DjangoUser
 from django.db.models import Count, Max
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
+from django.http import (
+    HttpRequest,
+    HttpResponse,
+    HttpResponseBadRequest,
+    HttpResponseRedirect,
+)
 from django.shortcuts import get_object_or_404
 from django.utils.http import url_has_allowed_host_and_scheme
 from ninja import Router, Schema
 
-from apps.provenance.entity_resolution import batch_resolve_entities
+from apps.provenance.entity_resolution import (
+    EntityKey,
+    EntityRef,
+    batch_resolve_entities,
+)
 from apps.provenance.models import ChangeSet, Claim
 
 from .models import UserProfile
@@ -65,6 +78,19 @@ class UserProfileSchema(Schema):
     recent_edits: list[UserChangeSetSchema]
 
 
+class WorkOSUser(Protocol):
+    id: str
+    email: str
+    email_verified: bool
+    first_name: str | None
+    last_name: str | None
+
+
+class EntityContributionRow(EntityRef):
+    edit_count: int
+    last_edited_at: datetime
+
+
 # ── Helpers ──────────────────────────────────────────────────────────
 
 
@@ -79,11 +105,11 @@ def _generate_username(email: str) -> str:
     return username
 
 
-def _get_profile(user) -> UserProfile:
+def _get_profile(user: DjangoUser) -> UserProfile:
     return UserProfile.objects.get(user=user)
 
 
-def get_or_create_django_user(workos_user):
+def get_or_create_django_user(workos_user: WorkOSUser) -> DjangoUser:
     """Match or create a Django User from a WorkOS user profile.
 
     Matching priority:
@@ -128,23 +154,25 @@ def get_or_create_django_user(workos_user):
 
 
 @auth_router.get("/me/", response=AuthStatusSchema)
-def auth_me(request):
+def auth_me(request: HttpRequest) -> AuthStatusSchema:
     """Return current session's authentication state.
 
     Always succeeds (no auth required). Returns is_authenticated=False for
     anonymous users.
     """
-    if request.user.is_authenticated:
-        return {
-            "is_authenticated": True,
-            "id": request.user.id,
-            "username": request.user.username,
-        }
-    return {"is_authenticated": False}
+    user = request.user
+    if isinstance(user, DjangoUser):
+        return AuthStatusSchema(
+            is_authenticated=True,
+            id=user.id,
+            username=user.username,
+        )
+    assert isinstance(user, AnonymousUser)
+    return AuthStatusSchema(is_authenticated=False)
 
 
 @auth_router.get("/login/", url_name="workos_login", include_in_schema=False)
-def auth_login(request):
+def auth_login(request: HttpRequest) -> HttpResponse:
     """Redirect to WorkOS AuthKit hosted login UI."""
     if not settings.WORKOS_API_KEY or not settings.WORKOS_CLIENT_ID:
         return HttpResponse(
@@ -178,7 +206,7 @@ def auth_login(request):
 
 
 @auth_router.get("/callback/", url_name="workos_callback", include_in_schema=False)
-def auth_callback(request):
+def auth_callback(request: HttpRequest) -> HttpResponse:
     """Handle the OAuth callback from WorkOS."""
     code = request.GET.get("code")
     state = request.GET.get("state")
@@ -206,24 +234,25 @@ def auth_callback(request):
 
 
 @auth_router.post("/logout/", response=AuthStatusSchema)
-def auth_logout(request):
+def auth_logout(request: HttpRequest) -> AuthStatusSchema:
     """End the current session."""
     logout(request)
-    return {"is_authenticated": False}
+    return AuthStatusSchema(is_authenticated=False)
 
 
 @user_page_router.get(
     "/{username}/", response={200: UserProfileSchema, 404: _ErrorSchema}
 )
-def user_profile_page(request, username: str):
+def user_profile_page(request: HttpRequest, username: str) -> UserProfileSchema:
     """Page model for the user profile page: contribution history."""
+    _ = request
     user = get_object_or_404(User, username=username)
     profile = _get_profile(user)
 
     edit_count = ChangeSet.objects.filter(user=user).count()
     member_since = profile.created_at.isoformat()
 
-    entity_rows = list(
+    raw_entity_rows = list(
         Claim.objects.filter(user=user, changeset__isnull=False)
         .values("content_type_id", "object_id")
         .annotate(
@@ -233,21 +262,35 @@ def user_profile_page(request, username: str):
         .order_by("-last_edited_at")
     )
 
+    entity_rows: list[EntityContributionRow] = []
+    for row in raw_entity_rows:
+        last_edited_at = row["last_edited_at"]
+        if not isinstance(last_edited_at, datetime):
+            continue
+        entity_rows.append(
+            {
+                "content_type_id": int(row["content_type_id"]),
+                "object_id": int(row["object_id"]),
+                "edit_count": int(row["edit_count"]),
+                "last_edited_at": last_edited_at,
+            }
+        )
+
     resolved = batch_resolve_entities(entity_rows)
 
-    entities_edited = []
+    entities_edited: list[EntityContributionSchema] = []
     for row in entity_rows:
         meta = resolved.get((row["content_type_id"], row["object_id"]))
         if not meta:
             continue
         entities_edited.append(
-            {
-                "entity_href": meta["href"],
-                "entity_name": meta["name"],
-                "entity_type_label": meta["type_label"],
-                "edit_count": row["edit_count"],
-                "last_edited_at": row["last_edited_at"].isoformat(),
-            }
+            EntityContributionSchema(
+                entity_href=meta["href"],
+                entity_name=meta["name"],
+                entity_type_label=meta["type_label"],
+                edit_count=row["edit_count"],
+                last_edited_at=row["last_edited_at"].isoformat(),
+            )
         )
 
     recent_changesets = (
@@ -256,20 +299,22 @@ def user_profile_page(request, username: str):
         .order_by("-created_at")[:50]
     )
 
-    cs_entity_refs: list[dict] = []
-    cs_first_claim: dict[int, tuple[int, int]] = {}
+    cs_entity_refs: list[EntityRef] = []
+    cs_first_claim: dict[int, EntityKey] = {}
     for cs in recent_changesets:
         prefetched_claims = cs.claims.all()
         if prefetched_claims:
             c = prefetched_claims[0]
+            assert cs.pk is not None
             key = (c.content_type_id, c.object_id)
             cs_first_claim[cs.pk] = key
             cs_entity_refs.append({"content_type_id": key[0], "object_id": key[1]})
 
     cs_resolved = batch_resolve_entities(cs_entity_refs)
 
-    recent_edits = []
+    recent_edits: list[UserChangeSetSchema] = []
     for cs in recent_changesets:
+        assert cs.pk is not None
         ref = cs_first_claim.get(cs.pk)
         if not ref:
             continue
@@ -277,23 +322,23 @@ def user_profile_page(request, username: str):
         if not meta:
             continue
         recent_edits.append(
-            {
-                "id": cs.pk,
-                "note": cs.note,
-                "created_at": cs.created_at.isoformat(),
-                "entity_href": meta["href"],
-                "entity_name": meta["name"],
-                "entity_type_label": meta["type_label"],
-            }
+            UserChangeSetSchema(
+                id=cs.pk,
+                note=cs.note,
+                created_at=cs.created_at.isoformat(),
+                entity_href=meta["href"],
+                entity_name=meta["name"],
+                entity_type_label=meta["type_label"],
+            )
         )
 
-    return {
-        "username": user.username,
-        "member_since": member_since,
-        "edit_count": edit_count,
-        "entities_edited": entities_edited,
-        "recent_edits": recent_edits,
-    }
+    return UserProfileSchema(
+        username=user.username,
+        member_since=member_since,
+        edit_count=edit_count,
+        entities_edited=entities_edited,
+        recent_edits=recent_edits,
+    )
 
 
 routers = [
