@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from django.db.models import F, Prefetch, QuerySet
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
@@ -80,22 +78,23 @@ def _detail_qs() -> QuerySet[Theme]:
     )
 
 
-def _serialize_detail(theme: Theme) -> dict[str, Any]:
+def _serialize_detail(theme: Theme) -> ThemeDetailSchema:
     min_rank = get_minimum_display_rank()
-    return {
-        "name": theme.name,
-        "slug": theme.slug,
-        "description": _build_rich_text(theme, "description", active_claims(theme)),
-        "aliases": [a.value for a in theme.aliases.all()],
-        "parents": [{"name": t.name, "slug": t.slug} for t in theme.parents.all()],
-        "children": [
-            {"name": t.name, "slug": t.slug} for t in theme.children.order_by("name")
+    return ThemeDetailSchema(
+        name=theme.name,
+        slug=theme.slug,
+        description=_build_rich_text(theme, "description", active_claims(theme)),
+        aliases=[a.value for a in theme.aliases.all()],
+        parents=[ThemeSchema(name=t.name, slug=t.slug) for t in theme.parents.all()],
+        children=[
+            ThemeSchema(name=t.name, slug=t.slug)
+            for t in theme.children.order_by("name")
         ],
-        "machines": [
+        machines=[
             _serialize_title_machine(pm, min_rank=min_rank)
             for pm in theme.machine_models.all()
         ],
-    }
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -144,7 +143,7 @@ def list_themes(request: HttpRequest) -> list[ThemeListSchema]:
 )
 def patch_theme_claims(
     request: HttpRequest, slug: str, data: HierarchyClaimPatchSchema
-) -> dict[str, Any]:
+) -> ThemeDetailSchema:
     """Assert per-field claims from the authenticated user, then re-resolve."""
     if not data.fields and data.parents is None and data.aliases is None:
         raise_form_error("No changes provided.")

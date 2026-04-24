@@ -9,8 +9,6 @@ Auto-discovered via the ``routers`` list convention in config/api.py.
 
 from __future__ import annotations
 
-from typing import Any
-
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 from ninja import Router
@@ -110,7 +108,9 @@ def title_detail_page(request: HttpRequest, slug: str) -> TitleDetailSchema:
 
 
 @pages_router.get("/manufacturer/{slug}", response=ManufacturerDetailSchema)
-def manufacturer_detail_page(request: HttpRequest, slug: str) -> dict[str, Any]:
+def manufacturer_detail_page(
+    request: HttpRequest, slug: str
+) -> ManufacturerDetailSchema:
     mfr = get_object_or_404(_manufacturer_qs(), slug=slug)
     return _serialize_manufacturer_detail(mfr)
 
@@ -127,43 +127,47 @@ def model_detail_page(request: HttpRequest, slug: str) -> MachineModelDetailSche
 
 
 @pages_router.get("/person/{slug}", response=PersonDetailSchema)
-def person_detail_page(request: HttpRequest, slug: str) -> dict[str, Any]:
+def person_detail_page(request: HttpRequest, slug: str) -> PersonDetailSchema:
     person = get_object_or_404(_person_qs(), slug=slug)
     return _serialize_person_detail(person)
 
 
 @pages_router.get("/series/{slug}", response=SeriesDetailSchema)
-def series_detail_page(request: HttpRequest, slug: str) -> dict[str, Any]:
+def series_detail_page(request: HttpRequest, slug: str) -> SeriesDetailSchema:
     s = get_object_or_404(_series_detail_qs(), slug=slug)
     return _serialize_series_detail(s)
 
 
 @pages_router.get("/corporate-entity/{slug}", response=CorporateEntityDetailSchema)
-def corporate_entity_detail_page(request: HttpRequest, slug: str) -> dict[str, Any]:
+def corporate_entity_detail_page(
+    request: HttpRequest, slug: str
+) -> CorporateEntityDetailSchema:
     ce = get_object_or_404(_corp_entity_detail_qs(), slug=slug)
     return _serialize_corp_entity_detail(ce)
 
 
 @pages_router.get("/gameplay-feature/{slug}", response=GameplayFeatureDetailSchema)
-def gameplay_feature_detail_page(request: HttpRequest, slug: str) -> dict[str, Any]:
+def gameplay_feature_detail_page(
+    request: HttpRequest, slug: str
+) -> GameplayFeatureDetailSchema:
     gf = get_object_or_404(_gf_detail_qs(), slug=slug)
     return _serialize_gf_detail(gf)
 
 
 @pages_router.get("/franchise/{slug}", response=FranchiseDetailSchema)
-def franchise_detail_page(request: HttpRequest, slug: str) -> dict[str, Any]:
+def franchise_detail_page(request: HttpRequest, slug: str) -> FranchiseDetailSchema:
     f = get_object_or_404(_franchise_detail_qs(), slug=slug)
     return _serialize_franchise_detail(f)
 
 
 @pages_router.get("/theme/{slug}", response=ThemeDetailSchema)
-def theme_detail_page(request: HttpRequest, slug: str) -> dict[str, Any]:
+def theme_detail_page(request: HttpRequest, slug: str) -> ThemeDetailSchema:
     theme = get_object_or_404(_theme_detail_qs(), slug=slug)
     return _serialize_theme_detail(theme)
 
 
 @pages_router.get("/system/{slug}", response=SystemDetailSchema)
-def system_detail_page(request: HttpRequest, slug: str) -> dict[str, Any]:
+def system_detail_page(request: HttpRequest, slug: str) -> SystemDetailSchema:
     system = get_object_or_404(_system_detail_qs(), slug=slug)
     return _serialize_system_detail(system)
 

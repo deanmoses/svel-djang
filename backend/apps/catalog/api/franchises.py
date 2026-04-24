@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import cast
 
 from django.db.models import Count, Prefetch, Q, QuerySet
 from django.http import HttpRequest
@@ -100,18 +100,18 @@ def _franchise_detail_qs() -> QuerySet[Franchise]:
     )
 
 
-def _serialize_franchise_detail(franchise: Franchise) -> dict[str, Any]:
+def _serialize_franchise_detail(franchise: Franchise) -> FranchiseDetailSchema:
     min_rank = get_minimum_display_rank()
-    return {
-        "name": franchise.name,
-        "slug": franchise.slug,
-        "description": _build_rich_text(
+    return FranchiseDetailSchema(
+        name=franchise.name,
+        slug=franchise.slug,
+        description=_build_rich_text(
             franchise, "description", active_claims(franchise)
         ),
-        "titles": [
+        titles=[
             _serialize_title_ref(t, min_rank=min_rank) for t in franchise.titles.all()
         ],
-    }
+    )
 
 
 @franchises_router.patch(
@@ -122,7 +122,7 @@ def _serialize_franchise_detail(franchise: Franchise) -> dict[str, Any]:
 )
 def patch_franchise_claims(
     request: HttpRequest, slug: str, data: ClaimPatchSchema
-) -> dict[str, Any]:
+) -> FranchiseDetailSchema:
     """Assert per-field claims from the authenticated user, then re-resolve."""
     franchise = get_object_or_404(Franchise.objects.active(), slug=slug)
     specs = plan_scalar_field_claims(Franchise, data.fields, entity=franchise)

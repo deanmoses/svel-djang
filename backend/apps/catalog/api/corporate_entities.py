@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import cast
 
 from django.db.models import Count, F, Prefetch, Q, QuerySet
 from django.http import HttpRequest
@@ -99,18 +99,18 @@ def _detail_qs() -> QuerySet[CorporateEntity]:
     )
 
 
-def _serialize_detail(ce: CorporateEntity) -> dict[str, Any]:
-    return {
-        "name": ce.name,
-        "slug": ce.slug,
-        "description": _build_rich_text(ce, "description", active_claims(ce)),
-        "manufacturer": {"name": ce.manufacturer.name, "slug": ce.manufacturer.slug},
-        "year_start": ce.year_start,
-        "year_end": ce.year_end,
-        "aliases": [a.value for a in ce.aliases.all()],
-        "locations": _serialize_locations(ce),
-        "titles": _collect_titles(ce.models.all()),
-    }
+def _serialize_detail(ce: CorporateEntity) -> CorporateEntityDetailSchema:
+    return CorporateEntityDetailSchema(
+        name=ce.name,
+        slug=ce.slug,
+        description=_build_rich_text(ce, "description", active_claims(ce)),
+        manufacturer=Ref(name=ce.manufacturer.name, slug=ce.manufacturer.slug),
+        year_start=ce.year_start,
+        year_end=ce.year_end,
+        aliases=[a.value for a in ce.aliases.all()],
+        locations=_serialize_locations(ce),
+        titles=_collect_titles(ce.models.all()),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -166,7 +166,7 @@ def list_corporate_entities(
 )
 def patch_corporate_entity_claims(
     request: HttpRequest, slug: str, data: CorporateEntityClaimPatchSchema
-) -> dict[str, Any]:
+) -> CorporateEntityDetailSchema:
     """Assert per-field claims from the authenticated user, then re-resolve."""
     if not data.fields and data.aliases is None:
         raise_form_error("No changes provided.")

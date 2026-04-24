@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from django.db.models import Prefetch, QuerySet
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
@@ -75,18 +73,22 @@ def _detail_qs() -> QuerySet[GameplayFeature]:
     )
 
 
-def _serialize_detail(feature: GameplayFeature) -> dict[str, Any]:
-    return {
-        "name": feature.name,
-        "slug": feature.slug,
-        "description": _build_rich_text(feature, "description", active_claims(feature)),
-        "aliases": [a.value for a in feature.aliases.all()],
-        "parents": [{"name": p.name, "slug": p.slug} for p in feature.parents.all()],
-        "children": [
-            {"name": c.name, "slug": c.slug} for c in feature.children.order_by("name")
+def _serialize_detail(feature: GameplayFeature) -> GameplayFeatureDetailSchema:
+    return GameplayFeatureDetailSchema(
+        name=feature.name,
+        slug=feature.slug,
+        description=_build_rich_text(feature, "description", active_claims(feature)),
+        aliases=[a.value for a in feature.aliases.all()],
+        parents=[
+            GameplayFeatureSchema(name=p.name, slug=p.slug)
+            for p in feature.parents.all()
         ],
-        "uploaded_media": _serialize_uploaded_media(all_media(feature)),
-    }
+        children=[
+            GameplayFeatureSchema(name=c.name, slug=c.slug)
+            for c in feature.children.order_by("name")
+        ],
+        uploaded_media=_serialize_uploaded_media(all_media(feature)),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -139,7 +141,7 @@ def list_gameplay_features(
 )
 def patch_gameplay_feature_claims(
     request: HttpRequest, slug: str, data: HierarchyClaimPatchSchema
-) -> dict[str, Any]:
+) -> GameplayFeatureDetailSchema:
     """Assert per-field claims from the authenticated user, then re-resolve."""
     if not data.fields and data.parents is None and data.aliases is None:
         raise_form_error("No changes provided.")

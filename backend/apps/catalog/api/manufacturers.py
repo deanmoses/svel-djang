@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from dataclasses import dataclass, field
 from typing import Any, cast
 
 from django.db.models import Count, F, Max, Min, Prefetch, Q, QuerySet
@@ -114,15 +115,22 @@ class ManufacturerDetailSchema(Schema):
 # ---------------------------------------------------------------------------
 
 
-def _serialize_manufacturer_detail(mfr: Manufacturer) -> dict[str, Any]:
-    """Serialize a Manufacturer into the detail response dict.
+@dataclass
+class _PersonAccum:
+    """Per-person bookkeeping while walking credits in the detail serializer."""
+
+    name: str
+    roles: set[str] = field(default_factory=set)
+
+
+def _serialize_manufacturer_detail(mfr: Manufacturer) -> ManufacturerDetailSchema:
+    """Serialize a Manufacturer into the detail response schema.
 
     Expects *mfr* to have been fetched with prefetch_related for entities,
     non_variant_models, credits, and claims (to_attr="active_claims").
     """
-
     # Collect persons with roles and compute year range across entities.
-    person_roles: dict[str, dict[str, Any]] = {}  # slug -> {name, roles set}
+    person_roles: dict[str, _PersonAccum] = {}
     year_starts: list[int] = []
     year_ends: list[int] = []
 
@@ -135,47 +143,43 @@ def _serialize_manufacturer_detail(mfr: Manufacturer) -> dict[str, Any]:
             for credit in m.credits.all():
                 p = credit.person
                 if p.slug not in person_roles:
-                    person_roles[p.slug] = {
-                        "name": p.name,
-                        "slug": p.slug,
-                        "roles": set(),
-                    }
+                    person_roles[p.slug] = _PersonAccum(name=p.name)
                 if credit.role:
-                    person_roles[p.slug]["roles"].add(credit.role.name)
+                    person_roles[p.slug].roles.add(credit.role.name)
 
     persons = sorted(
         (
-            {"name": v["name"], "slug": v["slug"], "roles": sorted(v["roles"])}
-            for v in person_roles.values()
+            ManufacturerPersonSchema(
+                name=accum.name, slug=slug, roles=sorted(accum.roles)
+            )
+            for slug, accum in person_roles.items()
         ),
-        key=lambda p: p["name"],
+        key=lambda p: p.name,
     )
 
-    return {
-        "name": mfr.name,
-        "slug": mfr.slug,
-        "description": _build_rich_text(mfr, "description", active_claims(mfr)),
-        "year_start": min(year_starts) if year_starts else None,
-        "year_end": max(year_ends) if year_ends else None,
-        "logo_url": mfr.logo_url,
-        "website": mfr.website,
-        "entities": [
-            {
-                "name": e.name,
-                "slug": e.slug,
-                "year_start": e.year_start,
-                "year_end": e.year_end,
-                "locations": _serialize_locations(e),
-            }
+    return ManufacturerDetailSchema(
+        name=mfr.name,
+        slug=mfr.slug,
+        description=_build_rich_text(mfr, "description", active_claims(mfr)),
+        year_start=min(year_starts) if year_starts else None,
+        year_end=max(year_ends) if year_ends else None,
+        logo_url=mfr.logo_url,
+        website=mfr.website,
+        entities=[
+            CorporateEntitySchema(
+                name=e.name,
+                slug=e.slug,
+                year_start=e.year_start,
+                year_end=e.year_end,
+                locations=_serialize_locations(e),
+            )
             for e in mfr.entities.all()
         ],
-        "titles": _collect_titles(
-            m for e in mfr.entities.all() for m in e.models.all()
-        ),
-        "systems": [{"name": s.name, "slug": s.slug} for s in mfr.systems.all()],
-        "persons": persons,
-        "uploaded_media": _serialize_uploaded_media(all_media(mfr)),
-    }
+        titles=_collect_titles(m for e in mfr.entities.all() for m in e.models.all()),
+        systems=[SystemSchema(name=s.name, slug=s.slug) for s in mfr.systems.all()],
+        persons=persons,
+        uploaded_media=_serialize_uploaded_media(all_media(mfr)),
+    )
 
 
 def _manufacturer_qs() -> QuerySet[Manufacturer]:
@@ -469,7 +473,7 @@ def list_all_manufacturers(
 )
 def patch_manufacturer_claims(
     request: HttpRequest, slug: str, data: ClaimPatchSchema
-) -> dict[str, Any]:
+) -> ManufacturerDetailSchema:
     """Assert per-field claims from the authenticated user, then re-resolve."""
     mfr = get_object_or_404(Manufacturer.objects.active(), slug=slug)
 

@@ -108,15 +108,15 @@ class PersonDetailSchema(Schema):
 # ---------------------------------------------------------------------------
 
 
-def _serialize_person_detail(person: Person) -> dict[str, Any]:
-    """Serialize a Person into the detail response dict.
+def _serialize_person_detail(person: Person) -> PersonDetailSchema:
+    """Serialize a Person into the detail response schema.
 
     Expects *person* to have been fetched with prefetch_related for credits
     (select_related model, model__title, model__manufacturer) and claims
     (to_attr="active_claims").
     """
     min_rank = get_minimum_display_rank()
-    titles: dict[str, dict[str, Any]] = {}
+    titles: dict[str, PersonTitleSchema] = {}
     for c in person.credits.all():
         if c.model is None or c.model.title is None:
             continue
@@ -126,44 +126,44 @@ def _serialize_person_detail(person: Person) -> dict[str, Any]:
             thumbnail_url = _extract_image_urls(
                 c.model.extra_data or {}, min_rank=min_rank
             )[0]
-            titles[key] = {
-                "name": title.name,
-                "slug": title.slug,
-                "year": c.model.year,
-                "manufacturer_name": (
+            titles[key] = PersonTitleSchema(
+                name=title.name,
+                slug=title.slug,
+                year=c.model.year,
+                manufacturer_name=(
                     c.model.corporate_entity.manufacturer.name
                     if c.model.corporate_entity
                     and c.model.corporate_entity.manufacturer
                     else None
                 ),
-                "thumbnail_url": thumbnail_url,
-                "roles": [],
-            }
-        elif titles[key]["thumbnail_url"] is None:
+                thumbnail_url=thumbnail_url,
+                roles=[],
+            )
+        elif titles[key].thumbnail_url is None:
             thumbnail_url = _extract_image_urls(
                 c.model.extra_data or {}, min_rank=min_rank
             )[0]
             if thumbnail_url:
-                titles[key]["thumbnail_url"] = thumbnail_url
+                titles[key].thumbnail_url = thumbnail_url
         role_display = c.role.name
-        if role_display not in titles[key]["roles"]:
-            titles[key]["roles"].append(role_display)
-    return {
-        "name": person.name,
-        "slug": person.slug,
-        "description": _build_rich_text(person, "description", active_claims(person)),
-        "birth_year": person.birth_year,
-        "birth_month": person.birth_month,
-        "birth_day": person.birth_day,
-        "death_year": person.death_year,
-        "death_month": person.death_month,
-        "death_day": person.death_day,
-        "birth_place": person.birth_place,
-        "nationality": person.nationality,
-        "photo_url": person.photo_url,
-        "titles": list(titles.values()),
-        "uploaded_media": _serialize_uploaded_media(all_media(person)),
-    }
+        if role_display not in titles[key].roles:
+            titles[key].roles.append(role_display)
+    return PersonDetailSchema(
+        name=person.name,
+        slug=person.slug,
+        description=_build_rich_text(person, "description", active_claims(person)),
+        birth_year=person.birth_year,
+        birth_month=person.birth_month,
+        birth_day=person.birth_day,
+        death_year=person.death_year,
+        death_month=person.death_month,
+        death_day=person.death_day,
+        birth_place=person.birth_place,
+        nationality=person.nationality,
+        photo_url=person.photo_url,
+        titles=list(titles.values()),
+        uploaded_media=_serialize_uploaded_media(all_media(person)),
+    )
 
 
 def _person_qs() -> QuerySet[Person]:
@@ -272,7 +272,7 @@ def list_all_people(
 )
 def patch_person_claims(
     request: HttpRequest, slug: str, data: ClaimPatchSchema
-) -> dict[str, Any]:
+) -> PersonDetailSchema:
     """Assert per-field claims from the authenticated user, then re-resolve."""
     person = get_object_or_404(Person.objects.active(), slug=slug)
 
@@ -299,7 +299,7 @@ def patch_person_claims(
 )
 def create_person(
     request: HttpRequest, data: PersonCreateSchema
-) -> Status[dict[str, Any]]:
+) -> Status[PersonDetailSchema]:
     """Create a new Person from a user-supplied name and slug.
 
     Mirrors ``create_title``: writes a user ChangeSet with ``action=create``
@@ -474,7 +474,7 @@ def delete_person(
 )
 def restore_person(
     request: HttpRequest, slug: str, data: PersonRestoreSchema
-) -> dict[str, Any] | Status[dict[str, Any]]:
+) -> PersonDetailSchema | Status[dict[str, Any]]:
     """Write a fresh ``status=active`` claim on a soft-deleted Person.
 
     Shares the ``create`` rate-limit bucket (Restore is semantically a

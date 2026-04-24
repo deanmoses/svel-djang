@@ -29,7 +29,7 @@ def test_scope_filter_builder_requires_parent_field():
             router,
             Theme,
             detail_qs=lambda: Theme.objects.all(),
-            serialize_detail=lambda _t: {},
+            serialize_detail=lambda _t: DummySchema(),
             response_schema=DummySchema,  # dummy; never reached
             scope_filter_builder=lambda _p: Q(),
         )
@@ -43,7 +43,7 @@ def test_parented_without_parent_model_still_raises():
             router,
             Theme,
             detail_qs=lambda: Theme.objects.all(),
-            serialize_detail=lambda _t: {},
+            serialize_detail=lambda _t: DummySchema(),
             response_schema=DummySchema,
             parent_field="parent",
         )

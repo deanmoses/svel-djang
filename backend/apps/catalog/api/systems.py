@@ -104,9 +104,9 @@ def _system_detail_qs() -> QuerySet[System]:
     )
 
 
-def _serialize_system_detail(system: System) -> dict[str, Any]:
+def _serialize_system_detail(system: System) -> SystemDetailSchema:
     min_rank = get_minimum_display_rank()
-    titles: dict[str, dict[str, Any]] = {}
+    titles: dict[str, RelatedTitleSchema] = {}
     for m in system.machine_models.all():
         if m.title is None:
             continue
@@ -120,51 +120,52 @@ def _serialize_system_detail(system: System) -> dict[str, Any]:
                 if m.corporate_entity and m.corporate_entity.manufacturer
                 else None
             )
-            titles[key] = {
-                "name": m.title.name,
-                "slug": m.title.slug,
-                "year": m.year,
-                "manufacturer_name": mfr.name if mfr else None,
-                "thumbnail_url": thumbnail_url,
-            }
-        elif titles[key]["thumbnail_url"] is None:
+            titles[key] = RelatedTitleSchema(
+                name=m.title.name,
+                slug=m.title.slug,
+                year=m.year,
+                manufacturer_name=mfr.name if mfr else None,
+                thumbnail_url=thumbnail_url,
+            )
+        elif titles[key].thumbnail_url is None:
             thumbnail_url = _extract_image_urls(m.extra_data or {}, min_rank=min_rank)[
                 0
             ]
             if thumbnail_url:
-                titles[key]["thumbnail_url"] = thumbnail_url
+                titles[key].thumbnail_url = thumbnail_url
 
-    sibling_systems = []
+    sibling_systems: list[SiblingSystemSchema] = []
     if system.manufacturer:
-        sibling_systems = list(
-            System.objects.active()
+        sibling_systems = [
+            SiblingSystemSchema(name=row["name"], slug=row["slug"])
+            for row in System.objects.active()
             .filter(manufacturer=system.manufacturer)
             .exclude(pk=system.pk)
             .annotate(latest_year=Max("machine_models__year"))
             .order_by(F("latest_year").desc(nulls_last=True), "name")
             .values("name", "slug")
-        )
+        ]
 
-    return {
-        "name": system.name,
-        "slug": system.slug,
-        "description": _build_rich_text(system, "description", active_claims(system)),
-        "manufacturer": (
-            {"name": system.manufacturer.name, "slug": system.manufacturer.slug}
+    return SystemDetailSchema(
+        name=system.name,
+        slug=system.slug,
+        description=_build_rich_text(system, "description", active_claims(system)),
+        manufacturer=(
+            Ref(name=system.manufacturer.name, slug=system.manufacturer.slug)
             if system.manufacturer
             else None
         ),
-        "technology_subgeneration": (
-            {
-                "name": system.technology_subgeneration.name,
-                "slug": system.technology_subgeneration.slug,
-            }
+        technology_subgeneration=(
+            Ref(
+                name=system.technology_subgeneration.name,
+                slug=system.technology_subgeneration.slug,
+            )
             if system.technology_subgeneration
             else None
         ),
-        "titles": list(titles.values()),
-        "sibling_systems": sibling_systems,
-    }
+        titles=list(titles.values()),
+        sibling_systems=sibling_systems,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -210,7 +211,7 @@ def list_all_systems(request: HttpRequest) -> list[dict[str, Any]]:
 )
 def patch_system_claims(
     request: HttpRequest, slug: str, data: ClaimPatchSchema
-) -> dict[str, Any]:
+) -> SystemDetailSchema:
     """Assert per-field claims from the authenticated user, then re-resolve."""
     system = get_object_or_404(System.objects.active(), slug=slug)
     specs = plan_scalar_field_claims(System, data.fields, entity=system)
@@ -236,7 +237,7 @@ def patch_system_claims(
 )
 def create_system(
     request: HttpRequest, data: SystemCreateSchema
-) -> Status[dict[str, Any]]:
+) -> Status[SystemDetailSchema]:
     """Create a new System.
 
     Required fields: ``name``, ``slug``, ``manufacturer_slug``. Optional

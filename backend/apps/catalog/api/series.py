@@ -94,17 +94,17 @@ def _series_detail_qs() -> QuerySet[Series]:
     )
 
 
-def _serialize_series_detail(series: Series) -> dict[str, Any]:
+def _serialize_series_detail(series: Series) -> SeriesDetailSchema:
     min_rank = get_minimum_display_rank()
-    return {
-        "name": series.name,
-        "slug": series.slug,
-        "description": _build_rich_text(series, "description", active_claims(series)),
-        "titles": [
+    return SeriesDetailSchema(
+        name=series.name,
+        slug=series.slug,
+        description=_build_rich_text(series, "description", active_claims(series)),
+        titles=[
             _serialize_title_ref(t, min_rank=min_rank) for t in series.titles.all()
         ],
-        "credits": [_serialize_credit(c) for c in series.credits.all()],
-    }
+        credits=[_serialize_credit(c) for c in series.credits.all()],
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -162,7 +162,7 @@ def list_series(request: HttpRequest) -> list[dict[str, Any]]:
 )
 def patch_series_claims(
     request: HttpRequest, slug: str, data: ClaimPatchSchema
-) -> dict[str, Any]:
+) -> SeriesDetailSchema:
     """Assert per-field claims from the authenticated user, then re-resolve."""
     series = get_object_or_404(Series.objects.active(), slug=slug)
     specs = plan_scalar_field_claims(Series, data.fields, entity=series)

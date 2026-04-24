@@ -112,7 +112,7 @@ class TaxonomyDeleteResponseSchema(Schema):
 
 
 DetailQsFn = Callable[[], Any]
-SerializeFn = Callable[[Any], dict[str, Any]]
+SerializeFn = Callable[[Any], Schema]
 
 
 def register_entity_delete_restore(
@@ -248,7 +248,7 @@ def register_entity_delete_restore(
 
     def _restore(
         request: HttpRequest, slug: str, data: TaxonomyRestoreSchema
-    ) -> dict[str, Any] | Status[Any]:
+    ) -> Schema | Status[Any]:
         check_and_record(request.user, CREATE_RATE_LIMIT_SPEC)
 
         # Bypass .active() — we're looking for soft-deleted rows.

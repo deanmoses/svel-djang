@@ -203,10 +203,7 @@ def _register_delete_restore(  # noqa: UP047
         router,
         model_cls,
         detail_qs=lambda cls=model_cls: _taxonomy_detail_qs(cls),
-        # ``register_entity_delete_restore`` still takes dict-returning
-        # serializers (shared with untyped callers in step 2 modules). Wrap
-        # until that signature is tightened to ``Callable[[Any], Schema]``.
-        serialize_detail=lambda obj: _serialize_taxonomy(obj).model_dump(),
+        serialize_detail=_serialize_taxonomy,
         response_schema=TaxonomySchema,
         child_related_name=child_related_name,
         parent_field=parent_field,
@@ -225,9 +222,7 @@ def _register_create(  # noqa: UP047
         router,
         model_cls,
         detail_qs=lambda cls=model_cls: _taxonomy_detail_qs(cls),
-        # See _register_delete_restore above for why the ``.model_dump()``
-        # hop is here.
-        serialize_detail=lambda obj: _serialize_taxonomy(obj).model_dump(),
+        serialize_detail=_serialize_taxonomy,
         response_schema=TaxonomySchema,
         parent_field=parent_field,
         parent_model=parent_model,
@@ -720,7 +715,7 @@ register_entity_delete_restore(
     credit_roles_router,
     CreditRole,
     detail_qs=_credit_role_detail_qs,
-    serialize_detail=lambda obj: _serialize_credit_role_detail(obj).model_dump(),
+    serialize_detail=_serialize_credit_role_detail,
     response_schema=CreditRoleDetailSchema,
 )
 
@@ -735,9 +730,7 @@ register_entity_create(
     credit_roles_router,
     CreditRole,
     detail_qs=_credit_role_detail_qs,
-    serialize_detail=lambda obj: _serialize_credit_role_detail_no_people(
-        obj
-    ).model_dump(),
+    serialize_detail=_serialize_credit_role_detail_no_people,
     response_schema=CreditRoleDetailSchema,
 )
 
