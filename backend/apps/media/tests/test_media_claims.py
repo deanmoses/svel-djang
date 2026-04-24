@@ -637,8 +637,11 @@ class TestResolverValidation:
         _resolve_media(machine_model)
         assert EntityMedia.objects.count() == 0
 
-    def test_non_media_supported_entity_skipped(self, db, asset, source):
-        """Claim on a non-MediaSupported entity doesn't materialize."""
+    def test_non_media_supported_entity_rejected(self, db, asset, source):
+        """Writing a ``media_attachment`` claim on a non-MediaSupported entity
+        is rejected at the write path, not silently ignored at resolve time."""
+        from django.core.exceptions import ValidationError
+
         from apps.catalog.models import Theme
         from apps.provenance.models import make_claim_key
 
@@ -650,16 +653,11 @@ class TestResolverValidation:
             "is_primary": False,
             "exists": True,
         }
-        Claim.objects.assert_claim(
-            theme,
-            "media_attachment",
-            value,
-            source=source,
-            claim_key=claim_key,
-        )
-
-        ct = ContentType.objects.get_for_model(Theme)
-        from apps.catalog.resolve import resolve_media_attachments
-
-        resolve_media_attachments(content_type_id=ct.id, subject_ids={theme.pk})
-        assert EntityMedia.objects.count() == 0
+        with pytest.raises(ValidationError, match="media_attachment"):
+            Claim.objects.assert_claim(
+                theme,
+                "media_attachment",
+                value,
+                source=source,
+                claim_key=claim_key,
+            )
