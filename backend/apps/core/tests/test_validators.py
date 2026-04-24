@@ -158,19 +158,20 @@ class TestMojibakeBulkAssertClaims:
         mfr = Manufacturer.objects.create(name="Williams", slug="williams")
         ct_id = ContentType.objects.get_for_model(mfr).pk
 
+        from apps.catalog.claims import build_relationship_claim
         from apps.provenance.models import Claim
 
+        claim_key, value = build_relationship_claim(
+            "manufacturer_alias",
+            {"alias_value": "GÃ¶ttlieb", "alias_display": "GÃ¶ttlieb"},
+        )
         pending = [
             Claim(
                 content_type_id=ct_id,
                 object_id=mfr.pk,
                 field_name="manufacturer_alias",
-                claim_key="manufacturer_alias|alias_value:garbled",
-                value={
-                    "alias_value": "GÃ¶ttlieb",
-                    "alias_display": "GÃ¶ttlieb",
-                    "exists": True,
-                },
+                claim_key=claim_key,
+                value=value,
             ),
         ]
         # Should NOT raise — alias values are exempt from mojibake validation

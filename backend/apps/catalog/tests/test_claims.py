@@ -107,3 +107,91 @@ class TestRelationshipNamespaces:
         ns = get_relationship_namespaces()
         assert "credit" in ns
         assert "theme" in ns
+
+
+# ---------------------------------------------------------------------------
+# Registry invariants
+# ---------------------------------------------------------------------------
+
+
+class TestEagerAliasDiscovery:
+    """Alias schemas are registered eagerly during ``CatalogConfig.ready()``.
+
+    Pin the contract that every alias namespace is queryable the moment
+    Django finishes startup, without any resolver-path call required to
+    trigger discovery.
+    """
+
+    def test_theme_alias_registered_without_prior_resolver_access(self):
+        from apps.provenance.validation import get_relationship_schema
+
+        assert get_relationship_schema("theme_alias") is not None
+
+
+class TestMediaAttachmentValidSubjectsPin:
+    """``media_attachment.valid_subjects`` is derived from ``apps.get_models()``.
+
+    Pin the expected set so a new ``MediaSupported`` subclass (or the
+    removal of an existing one) fails in CI rather than silently drifting.
+    Update this test when the set genuinely changes.
+    """
+
+    def test_expected_subjects(self):
+        from apps.catalog.models import (
+            GameplayFeature,
+            MachineModel,
+            Manufacturer,
+            Person,
+        )
+        from apps.provenance.validation import get_relationship_schema
+
+        schema = get_relationship_schema("media_attachment")
+        assert schema is not None
+        assert schema.valid_subjects == frozenset(
+            {GameplayFeature, MachineModel, Manufacturer, Person}
+        )
+
+
+class TestBuildRelationshipClaimCanonicalKey:
+    """``build_relationship_claim`` output agrees with ``make_claim_key``.
+
+    Write-path validation rejects any relationship claim whose ``claim_key``
+    doesn't match ``make_claim_key`` composed from the value's identity
+    fields. This test pins that every registered schema round-trips cleanly
+    through ``build_relationship_claim`` into the canonical key form, so a
+    refactor of either composition can't silently start failing validation
+    on every production write.
+    """
+
+    def test_every_schema_produces_canonical_claim_key(self, db):
+        from apps.provenance.models import IdentityPart
+        from apps.provenance.validation import get_all_relationship_schemas
+
+        for namespace, schema in get_all_relationship_schemas().items():
+            identity_kwargs: dict[str, IdentityPart] = {}
+            for spec in schema.value_keys:
+                if spec.identity is None:
+                    continue
+                # No current identity spec uses scalar_type=bool, so int|str
+                # covers every case. If that ever changes, extend here.
+                if spec.scalar_type is int:
+                    identity_kwargs[spec.name] = 1
+                elif spec.scalar_type is str:
+                    identity_kwargs[spec.name] = "x"
+                else:
+                    raise AssertionError(
+                        f"identity spec {namespace}.{spec.name} has "
+                        f"unexpected scalar_type {spec.scalar_type!r}"
+                    )
+
+            claim_key, _value = build_relationship_claim(
+                namespace, identity_kwargs, exists=True
+            )
+            expected_parts = {
+                spec.identity: identity_kwargs[spec.name]
+                for spec in schema.value_keys
+                if spec.identity is not None
+            }
+            assert claim_key == make_claim_key(namespace, **expected_parts), (
+                f"build_relationship_claim/make_claim_key drift on {namespace!r}"
+            )

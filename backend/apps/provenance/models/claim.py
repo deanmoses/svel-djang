@@ -107,14 +107,16 @@ class ClaimManager(models.Manager):
         if not claim_key:
             claim_key = field_name
 
-        # Classify and validate. Direct claims get scalar/FK validation.
-        # Relationship and extra-data claims pass through. Unrecognized
-        # claims are rejected outright.
+        # Classify and validate. DIRECT claims get scalar/FK validation.
+        # RELATIONSHIP claims get shape validation. EXTRA claims pass through.
+        # UNRECOGNIZED claims are rejected outright.
         from apps.provenance.validation import (
             DIRECT,
+            RELATIONSHIP,
             UNRECOGNIZED,
             classify_claim,
             validate_claim_value,
+            validate_single_relationship_claim,
         )
 
         model_class = type(subject)
@@ -125,6 +127,13 @@ class ClaimManager(models.Manager):
             )
         if ct_result == DIRECT:
             value = validate_claim_value(field_name, value, model_class)
+        elif ct_result == RELATIONSHIP:
+            validate_single_relationship_claim(
+                subject_model=model_class,
+                field_name=field_name,
+                claim_key=claim_key,
+                value=value,
+            )
 
         ct = ContentType.objects.get_for_model(subject)
         with transaction.atomic():

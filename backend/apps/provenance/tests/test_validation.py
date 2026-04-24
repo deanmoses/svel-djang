@@ -346,28 +346,34 @@ class TestClassifyClaim:
         """Undotted unknown field on model with extra_data → EXTRA."""
         assert classify_claim(MachineModel, "manufacturer", "", "williams") == EXTRA
 
-    def test_relationship_convention_enforced(self):
-        """Every relationship namespace produces a RELATIONSHIP claim.
+    def test_every_registered_namespace_classifies_as_relationship(self):
+        """Integration check: registry and classifier agree.
 
-        This turns the structural convention into a tested invariant: if
-        build_relationship_claim ever stops producing compound claim_key
-        or dict values with 'exists', this test breaks.
+        Two properties in one walk:
+        (1) ``build_relationship_claim`` accepts every namespace surfaced by
+            ``get_all_namespace_keys()`` — drift between the two helpers
+            surfaces as a ``ValueError`` here.
+        (2) ``classify_claim`` returns ``RELATIONSHIP`` for every registered
+            namespace (when not shadowed by a DIRECT field on the subject).
+
+        The claim_key / value *contract* — canonical key shape, required
+        ``exists``, dict payload — is pinned by ``TestBuildRelationshipClaim
+        CanonicalKey`` in ``test_claims.py`` and by the rejection-mode tests
+        below, not by the classifier (which is registry-driven and does not
+        inspect ``claim_key`` or ``value``).
         """
         from apps.catalog.claims import build_relationship_claim, get_all_namespace_keys
 
-        # Build a minimal identity dict for each namespace.
         for namespace, keys in get_all_namespace_keys().items():
             identity = dict.fromkeys(keys, "test-value")
             claim_key, value = build_relationship_claim(namespace, identity)
 
-            # Determine a model class that hosts this namespace. For the
-            # purpose of this test, the model doesn't matter — what matters
-            # is that the claim_key/value structure classifies as RELATIONSHIP
-            # on any model (since field_name won't be in get_claim_fields).
+            # MachineModel isn't in every namespace's valid_subjects, but
+            # classify_claim is subject-agnostic for RELATIONSHIP routing —
+            # wrong-subject is the validator's concern, not the classifier's.
             result = classify_claim(MachineModel, namespace, claim_key, value)
             assert result == RELATIONSHIP, (
-                f"Namespace {namespace!r} classified as {result!r}, expected RELATIONSHIP. "
-                f"claim_key={claim_key!r}, value={value!r}"
+                f"Namespace {namespace!r} classified as {result!r}, expected RELATIONSHIP."
             )
 
 
@@ -630,3 +636,396 @@ class TestValidateClaimsBatchRelationships:
         valid, rejected = validate_claims_batch([good_scalar, good_rel, bad_rel])
         assert rejected == 1
         assert len(valid) == 2
+
+    @pytest.mark.parametrize(
+        "mode",
+        [
+            "wrong-subject",
+            "missing-exists",
+            "unknown-key",
+            "default-claim-key",
+        ],
+    )
+    def test_shape_rejection_propagates_through_batch(
+        self, model, credit_targets, mode
+    ):
+        """One parametrized test pinning the batch-path glue for shape rejections.
+
+        Each mode exercises a different rule in ``validate_single_relationship_claim``
+        (wrong-subject, missing exists, unknown keys, non-canonical claim_key).
+        Alongside each bad claim we include a *valid* companion claim, which
+        pins the property that the batch loop continues past a rejection
+        rather than aborting — the single-validator tests can't verify that,
+        and the pre-existing FK-existence batch test exercises a different
+        rejection path.
+        """
+        pat_pk = credit_targets["persons"]["pat-lawlor"].pk
+        design_pk = credit_targets["roles"]["design"].pk
+        good_claim_key = f"credit|person:{pat_pk}|role:{design_pk}"
+        good_value = {"person": pat_pk, "role": design_pk, "exists": True}
+
+        good = Claim.for_object(
+            model, field_name="credit", value=good_value, claim_key=good_claim_key
+        )
+
+        if mode == "wrong-subject":
+            # Route a "credit" claim at a Title, which isn't in credit.valid_subjects.
+            from apps.catalog.models import Title
+
+            title = Title.objects.create(name="T", slug="t")
+            bad = Claim.for_object(
+                title,
+                field_name="credit",
+                value=good_value,
+                claim_key=good_claim_key,
+            )
+        elif mode == "missing-exists":
+            bad = Claim.for_object(
+                model,
+                field_name="credit",
+                value={"person": pat_pk, "role": design_pk},
+                claim_key=good_claim_key,
+            )
+        elif mode == "unknown-key":
+            bad = Claim.for_object(
+                model,
+                field_name="credit",
+                value={**good_value, "bogus": 1},
+                claim_key=good_claim_key,
+            )
+        elif mode == "default-claim-key":
+            # Caller forgot to pass claim_key → defaulted to field_name.
+            bad = Claim.for_object(
+                model,
+                field_name="credit",
+                value=good_value,
+                claim_key="credit",
+            )
+        else:
+            raise AssertionError(f"unhandled mode {mode!r}")
+
+        valid, rejected_count = validate_claims_batch([good, bad])
+
+        assert rejected_count == 1
+        # The malformed claim is absent from ``valid``, the good one is present.
+        valid_ids = {id(c) for c in valid}
+        assert id(bad) not in valid_ids
+        assert id(good) in valid_ids
+
+
+# ---------------------------------------------------------------------------
+# validate_single_relationship_claim — shape-rejection rules
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+class TestValidateSingleRelationshipClaim:
+    """Direct coverage of each shape-rejection rule in validator order.
+
+    The batch-path integration tests below exercise the same rules through
+    ``validate_claims_batch`` so both entry points are covered.
+    """
+
+    @pytest.fixture
+    def model(self):
+        return make_machine_model(name="Test", slug="test")
+
+    @pytest.fixture
+    def canonical(self, credit_targets):
+        pat_pk = credit_targets["persons"]["pat-lawlor"].pk
+        design_pk = credit_targets["roles"]["design"].pk
+        return {
+            "person_pk": pat_pk,
+            "role_pk": design_pk,
+            "value": {"person": pat_pk, "role": design_pk, "exists": True},
+            "claim_key": f"credit|person:{pat_pk}|role:{design_pk}",
+        }
+
+    def _validate(self, **kwargs):
+        from apps.provenance.validation import validate_single_relationship_claim
+
+        return validate_single_relationship_claim(**kwargs)
+
+    def test_valid_claim_passes(self, model, canonical):
+        # Sanity baseline — if this ever fails the other rejection tests are
+        # meaningless.
+        self._validate(
+            subject_model=MachineModel,
+            field_name="credit",
+            claim_key=canonical["claim_key"],
+            value=canonical["value"],
+        )
+
+    def test_wrong_subject_rejected(self, canonical):
+        with pytest.raises(ValidationError, match="not valid on Title"):
+            self._validate(
+                subject_model=Title,
+                field_name="credit",
+                claim_key=canonical["claim_key"],
+                value=canonical["value"],
+            )
+
+    def test_non_dict_value_rejected(self):
+        with pytest.raises(ValidationError, match="must be a dict"):
+            self._validate(
+                subject_model=MachineModel,
+                field_name="credit",
+                claim_key="credit",
+                value="not a dict",
+            )
+
+    def test_missing_exists_rejected(self, canonical):
+        value = {"person": canonical["person_pk"], "role": canonical["role_pk"]}
+        with pytest.raises(ValidationError, match="missing required 'exists'"):
+            self._validate(
+                subject_model=MachineModel,
+                field_name="credit",
+                claim_key=canonical["claim_key"],
+                value=value,
+            )
+
+    def test_non_bool_exists_rejected(self, canonical):
+        value = {**canonical["value"], "exists": "true"}
+        with pytest.raises(ValidationError, match="'exists' must be bool"):
+            self._validate(
+                subject_model=MachineModel,
+                field_name="credit",
+                claim_key=canonical["claim_key"],
+                value=value,
+            )
+
+    def test_missing_required_key_rejected(self, canonical):
+        value = {"person": canonical["person_pk"], "exists": True}
+        with pytest.raises(ValidationError, match="missing required key 'role'"):
+            self._validate(
+                subject_model=MachineModel,
+                field_name="credit",
+                claim_key=canonical["claim_key"],
+                value=value,
+            )
+
+    def test_wrong_scalar_type_required_key_rejected(self, canonical):
+        value = {**canonical["value"], "person": "not-an-int"}
+        with pytest.raises(ValidationError, match="'person' must be int"):
+            self._validate(
+                subject_model=MachineModel,
+                field_name="credit",
+                claim_key=canonical["claim_key"],
+                value=value,
+            )
+
+    def test_bool_as_int_rejected(self, canonical):
+        # `isinstance(True, int)` is True; the `type(v) is T` rule rejects it.
+        value = {**canonical["value"], "person": True}
+        with pytest.raises(ValidationError, match="'person' must be int"):
+            self._validate(
+                subject_model=MachineModel,
+                field_name="credit",
+                claim_key=canonical["claim_key"],
+                value=value,
+            )
+
+    def test_wrong_scalar_type_optional_key_rejected(self, credit_targets):
+        # `gameplay_feature.count` is optional + nullable int.
+        from apps.catalog.models import GameplayFeature
+
+        gf = GameplayFeature.objects.create(name="Multiball", slug="multiball")
+        with pytest.raises(ValidationError, match="'count' must be int"):
+            self._validate(
+                subject_model=MachineModel,
+                field_name="gameplay_feature",
+                claim_key=f"gameplay_feature|gameplay_feature:{gf.pk}",
+                value={"gameplay_feature": gf.pk, "count": "5", "exists": True},
+            )
+
+    def test_nullable_optional_accepts_none(self):
+        from apps.catalog.models import GameplayFeature
+
+        gf = GameplayFeature.objects.create(name="Multiball", slug="multiball")
+        self._validate(
+            subject_model=MachineModel,
+            field_name="gameplay_feature",
+            claim_key=f"gameplay_feature|gameplay_feature:{gf.pk}",
+            value={"gameplay_feature": gf.pk, "count": None, "exists": True},
+        )
+
+    def test_non_nullable_optional_rejects_none(self):
+        # `media_attachment.is_primary` is optional, non-nullable bool.
+        # Schema-only check — no DB row needed; the validator operates on
+        # the (namespace, subject_model, claim_key, value) tuple.
+        with pytest.raises(ValidationError, match="'is_primary' may not be null"):
+            self._validate(
+                subject_model=MachineModel,
+                field_name="media_attachment",
+                claim_key="media_attachment|media_asset:1",
+                value={
+                    "media_asset": 1,
+                    "is_primary": None,
+                    "exists": True,
+                },
+            )
+
+    def test_unknown_key_rejected(self, canonical):
+        value = {**canonical["value"], "bogus": 1}
+        with pytest.raises(ValidationError, match="unknown keys"):
+            self._validate(
+                subject_model=MachineModel,
+                field_name="credit",
+                claim_key=canonical["claim_key"],
+                value=value,
+            )
+
+    def test_unknown_key_rejected_on_retraction(self, canonical):
+        # Retractions aren't carved out from shape rules (only FK existence).
+        value = {**canonical["value"], "exists": False, "bogus": 1}
+        with pytest.raises(ValidationError, match="unknown keys"):
+            self._validate(
+                subject_model=MachineModel,
+                field_name="credit",
+                claim_key=canonical["claim_key"],
+                value=value,
+            )
+
+    def test_default_claim_key_rejected(self, canonical):
+        # Caller passes no claim_key → assert_claim defaults to field_name;
+        # the canonical form is the compound key.
+        with pytest.raises(ValidationError, match="not canonical"):
+            self._validate(
+                subject_model=MachineModel,
+                field_name="credit",
+                claim_key="credit",
+                value=canonical["value"],
+            )
+
+    def test_mismatched_claim_key_rejected(self, canonical):
+        wrong = f"credit|person:99999|role:{canonical['role_pk']}"
+        with pytest.raises(ValidationError, match="not canonical"):
+            self._validate(
+                subject_model=MachineModel,
+                field_name="credit",
+                claim_key=wrong,
+                value=canonical["value"],
+            )
+
+
+# ---------------------------------------------------------------------------
+# assert_claim — shape rejection end-to-end
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+class TestAssertClaimRelationshipShape:
+    """``assert_claim`` routes RELATIONSHIP claims through the shape validator."""
+
+    @pytest.fixture
+    def model(self):
+        return make_machine_model(name="Test", slug="test")
+
+    @pytest.fixture
+    def source(self):
+        return Source.objects.create(
+            name="Test Source", source_type="database", priority=50
+        )
+
+    def test_malformed_payload_on_extra_data_model_rejected(self, model, source):
+        # Before the classifier change, a credit claim missing "exists" on a
+        # model with extra_data would fall through to EXTRA and silently land.
+        # Now it routes to RELATIONSHIP and the validator rejects it.
+        with pytest.raises(ValidationError, match="missing required 'exists'"):
+            Claim.objects.assert_claim(
+                model,
+                "credit",
+                {"person": 1, "role": 1},  # no "exists"
+                source=source,
+                claim_key="credit|person:1|role:1",
+            )
+
+    def test_default_claim_key_rejected(self, model, source, credit_targets):
+        pat_pk = credit_targets["persons"]["pat-lawlor"].pk
+        design_pk = credit_targets["roles"]["design"].pk
+        with pytest.raises(ValidationError, match="not canonical"):
+            # No claim_key= → assert_claim defaults it to field_name.
+            Claim.objects.assert_claim(
+                model,
+                "credit",
+                {"person": pat_pk, "role": design_pk, "exists": True},
+                source=source,
+            )
+
+    def test_wrong_subject_rejected(self, source):
+        title = Title.objects.create(name="T", slug="t")
+        with pytest.raises(ValidationError, match="not valid on Title"):
+            Claim.objects.assert_claim(
+                title,
+                "credit",
+                {"person": 1, "role": 1, "exists": True},
+                source=source,
+                claim_key="credit|person:1|role:1",
+            )
+
+
+# ---------------------------------------------------------------------------
+# register_relationship_schema — invariants
+# ---------------------------------------------------------------------------
+
+
+class TestRegisterRelationshipSchemaGuards:
+    """Registration-time invariants fail at startup, not at write time."""
+
+    def test_non_required_identity_rejected(self):
+        from django.core.exceptions import ImproperlyConfigured
+
+        from apps.provenance.validation import (
+            ValueKeySpec,
+            _relationship_schemas,
+            register_relationship_schema,
+        )
+
+        with pytest.raises(
+            ImproperlyConfigured, match="identity keys must be required"
+        ):
+            register_relationship_schema(
+                namespace="_test_bad_identity",
+                value_keys=(
+                    ValueKeySpec(
+                        name="x",
+                        scalar_type=int,
+                        required=False,
+                        identity="x",
+                    ),
+                ),
+                valid_subjects=frozenset({Theme}),
+            )
+        # Pin "raise before insert" — a future refactor that inserts and
+        # then validates would pass the exception assertion but pollute the
+        # registry across tests.
+        assert "_test_bad_identity" not in _relationship_schemas
+
+    def test_collision_with_direct_field_rejected(self):
+        from django.core.exceptions import ImproperlyConfigured
+
+        from apps.provenance.validation import (
+            ValueKeySpec,
+            _relationship_schemas,
+            register_relationship_schema,
+        )
+
+        # ``name`` is a concrete claim field on Theme — collision guard fires.
+        existing = _relationship_schemas.get("name")
+        with pytest.raises(ImproperlyConfigured, match="collides with a concrete"):
+            register_relationship_schema(
+                namespace="name",
+                value_keys=(
+                    ValueKeySpec(
+                        name="x",
+                        scalar_type=int,
+                        required=True,
+                        identity="x",
+                    ),
+                ),
+                valid_subjects=frozenset({Theme}),
+            )
+        # Same "raise before insert" invariant. Compared against any
+        # pre-existing entry (there shouldn't be one) to stay robust if a
+        # future catalog namespace happens to be called "name".
+        assert _relationship_schemas.get("name") == existing

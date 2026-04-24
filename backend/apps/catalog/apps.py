@@ -10,10 +10,10 @@ class CatalogConfig(AppConfig):
 
     def ready(self) -> None:
         from . import signals
-        from .claims import register_relationship_targets
+        from .claims import register_catalog_relationship_schemas
 
         signals.connect()
-        register_relationship_targets()
+        register_catalog_relationship_schemas()
         self._register_link_types()
         self._register_reference_cleanup()
 
