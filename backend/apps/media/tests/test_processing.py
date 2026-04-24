@@ -6,6 +6,7 @@ Pure unit tests — no database, no Django models, no storage.
 from __future__ import annotations
 
 from io import BytesIO
+from typing import Any
 
 import pytest
 from PIL import Image
@@ -43,7 +44,7 @@ def create_test_image(
     """Create test image bytes in the given format."""
     image = Image.new(mode, (width, height), color=color)
     buf = BytesIO()
-    save_kwargs: dict = {"format": fmt}
+    save_kwargs: dict[str, Any] = {"format": fmt}
     if fmt == "JPEG" and mode not in ("RGB", "L"):
         image = image.convert("RGB")
     image.save(buf, **save_kwargs)

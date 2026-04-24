@@ -10,12 +10,12 @@ class MediaConfig(AppConfig):
     name = "apps.media"
     verbose_name = "Media"
 
-    def ready(self):
+    def ready(self) -> None:
         _register_heif()
         _check_avif()
 
 
-def _register_heif():
+def _register_heif() -> None:
     try:
         from pillow_heif import register_heif_opener
 
@@ -24,7 +24,7 @@ def _register_heif():
         logger.warning("HEIF support unavailable; HEIC uploads will fail.")
 
 
-def _check_avif():
+def _check_avif() -> None:
     from PIL import features
 
     if not features.check("avif"):

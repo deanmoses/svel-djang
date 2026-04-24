@@ -4,13 +4,16 @@ from __future__ import annotations
 
 import logging
 import uuid as uuid_lib
+from functools import partial
 from pathlib import PurePosixPath
 from typing import cast
 
+from django.contrib.auth.models import AnonymousUser, User
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.http import HttpRequest
 from ninja import File, Form, Router, Schema, Status, UploadedFile
 from ninja.errors import HttpError
 from ninja.security import django_auth
@@ -113,7 +116,19 @@ class MediaAssetRefIn(Schema):
     asset_uuid: str
 
 
-def _resolve_entity(entity_type: str, slug: str):
+def _authed_user(request: HttpRequest) -> User:
+    """Narrow ``request.user`` to ``User``.
+
+    All endpoints in this module use ``auth=django_auth``, so ``AnonymousUser``
+    is unreachable at runtime. Twin of ``apps.citation.api._authed_user`` —
+    when a custom User model lands (see ``docs/plans/types/UserModel.md``),
+    both should consolidate into a shared helper.
+    """
+    assert not isinstance(request.user, AnonymousUser)
+    return request.user
+
+
+def _resolve_entity(entity_type: str, slug: str) -> tuple[ContentType, MediaSupported]:
     """Resolve entity_type + slug to (ContentType, entity instance).
 
     ``entity_type`` is the canonical hyphenated public identifier declared
@@ -130,7 +145,10 @@ def _resolve_entity(entity_type: str, slug: str):
     if not issubclass(model_class, MediaSupported):
         raise HttpError(400, f"{entity_type} does not support media attachments.")
 
-    entity = model_class.objects.filter(slug=slug).first()
+    # `_default_manager` rather than `.objects`: `type[<LinkableModel & MediaSupported>]`
+    # is an abstract intersection, and `.objects` is attached only to concrete
+    # subclasses by Django's metaclass. (Introspection idiom.)
+    entity = model_class._default_manager.filter(slug=slug).first()
     if entity is None:
         raise HttpError(400, f"{entity_type} '{slug}' not found.")
 
@@ -140,16 +158,17 @@ def _resolve_entity(entity_type: str, slug: str):
 
 @media_router.post("/upload/", response=UploadOut, auth=django_auth)
 def upload_media(
-    request,
+    request: HttpRequest,
     file: File[UploadedFile],
     entity_type: Form[str],
     slug: Form[str],
     category: Form[str | None] = None,
     is_primary: Form[bool] = False,
-):
+) -> UploadOut:
     """Upload an image and create MediaAsset + MediaRendition rows."""
+    user = _authed_user(request)
     # --- Rate limit ---
-    _check_rate_limit(request.user.id)
+    _check_rate_limit(user.id)
 
     # --- Validate file extension ---
     original_filename = file.name or "upload"
@@ -237,7 +256,7 @@ def upload_media(
                 byte_size=len(original.data),
                 width=original.width,
                 height=original.height,
-                uploaded_by=request.user,
+                uploaded_by=user,
             )
 
             renditions_data = [
@@ -266,7 +285,7 @@ def upload_media(
                 entity,
                 "media_attachment",
                 claim_value,
-                user=request.user,
+                user=user,
                 claim_key=claim_key,
             )
             resolve_media_attachments(
@@ -278,7 +297,7 @@ def upload_media(
         delete_from_storage(uploaded_keys)
         raise HttpError(500, "Failed to save media records.") from None
 
-    _incr_rate_limit(request.user.id)
+    _incr_rate_limit(user.id)
 
     return UploadOut(
         asset_uuid=str(asset_uuid),
@@ -302,8 +321,9 @@ def upload_media(
 
 
 @media_router.post("/detach/", response={200: None}, auth=django_auth)
-def detach_media(request, body: MediaAssetRefIn):
+def detach_media(request: HttpRequest, body: MediaAssetRefIn) -> Status[None]:
     """Detach a media asset from an entity by asserting an exists=False claim."""
+    user = _authed_user(request)
     ct, entity = _resolve_entity(body.entity_type, body.slug)
 
     try:
@@ -333,7 +353,7 @@ def detach_media(request, body: MediaAssetRefIn):
             entity,
             "media_attachment",
             claim_value,
-            user=request.user,
+            user=user,
             claim_key=claim_key,
         )
         resolve_media_attachments(
@@ -343,15 +363,16 @@ def detach_media(request, body: MediaAssetRefIn):
         asset.delete()
         if storage_keys:
             transaction.on_commit(
-                lambda keys=storage_keys: _delete_media_storage_after_commit(keys)
+                partial(_delete_media_storage_after_commit, storage_keys)
             )
 
     return Status(200, None)
 
 
 @media_router.post("/set-primary/", response={200: None}, auth=django_auth)
-def set_primary(request, body: MediaAssetRefIn):
+def set_primary(request: HttpRequest, body: MediaAssetRefIn) -> Status[None]:
     """Set a media asset as primary for its category on an entity."""
+    user = _authed_user(request)
     ct, entity = _resolve_entity(body.entity_type, body.slug)
 
     try:
@@ -378,7 +399,7 @@ def set_primary(request, body: MediaAssetRefIn):
             entity,
             "media_attachment",
             claim_value,
-            user=request.user,
+            user=user,
             claim_key=claim_key,
         )
         resolve_media_attachments(

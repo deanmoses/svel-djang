@@ -248,12 +248,14 @@ class TestUploadValidation:
         assert resp.status_code == 400
         assert "not allowed" in resp.json()["detail"].lower()
 
-    def test_oversized_file(self, client, machine_model):
+    def test_oversized_file(self, client, machine_model, monkeypatch):
         from apps.media.constants import MAX_IMAGE_FILE_SIZE
 
         file = _create_test_image()
         # Patch read to return oversized data
-        file.read = lambda *a, **kw: b"\x00" * (MAX_IMAGE_FILE_SIZE + 1)
+        monkeypatch.setattr(
+            file, "read", lambda *a, **kw: b"\x00" * (MAX_IMAGE_FILE_SIZE + 1)
+        )
         resp = _post_upload(client, machine_model, file=file)
         assert resp.status_code == 400
         assert "size" in resp.json()["detail"].lower()

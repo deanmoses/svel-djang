@@ -252,13 +252,15 @@ Same pattern as Step 2 — helpers first, endpoints after, `make api-gen` betwee
 
 See [ResolveHardening.md](ResolveHardening.md). Multi-PR sequence that tightens the claim-value contract across the write path, registry, read-path types, and resolver reads. Typing motivation is one of several — the reasoning wins justify the sequence independently — but baseline reduction still counts here: ~44 mypy entries in `catalog/resolve/*` clear across Steps 3–4, plus downstream subscript-flip entries in Step 5.
 
-## Step 11: `media/*`
+## Step 11: `media/*` - DONE
 
-Same pattern as Step 2 — helpers first, endpoints after, `make api-gen` between batches.
+Same pattern as Step 2 — helpers first, endpoints after, `make api-gen` between batches. See [MediaTyping.md](MediaTyping.md) for the up-front type catalog and per-step decisions.
 
-Scope (~38 entries): `media/admin.py` (12), `media/api.py` (9), `media/apps.py` (8), `media/processing.py` (6), `media/tests/*` (3).
+Scope landed (~39 entries cleared): `admin.py` (12), `api.py` (9), `apps.py` (8), `processing.py` (6), `tests/*` (4). Two helpers added to `api.py`: `_authed_user` (twin of [citation/api.py](../../../backend/apps/citation/api.py)'s, deduped when [UserModel.md](UserModel.md) lands) and a tightened `_resolve_entity` returning `tuple[ContentType, MediaSupported]` via `_default_manager`.
 
-Plan to be written at [MediaTyping.md](MediaTyping.md)
+Inline-admin LSP note: django-stubs declares conflicting `obj` types on `BaseModelAdmin.has_*_permission` (child) vs `InlineModelAdmin.has_*_permission` (parent), so `MediaRenditionInline.has_*_permission` uses `obj: Any = None` — flagged in-file as idiom #3.
+
+Baseline: 261 → 222.
 
 ## Step 12: Ingestion and management commands
 

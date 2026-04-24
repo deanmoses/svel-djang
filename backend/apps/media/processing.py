@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from io import BytesIO
+from typing import Any
 
 from PIL import Image, ImageOps, UnidentifiedImageError
 
@@ -60,7 +61,9 @@ def _choose_original_format(pillow_format: str | None, mode: str) -> str:
 def _encode(image: Image.Image, fmt: ImageFormat) -> ProcessedImage:
     """Encode a PIL Image to bytes using the given format settings."""
     buf = BytesIO()
-    save_kwargs: dict = {"format": fmt.extension.upper()}
+    # Pillow's image.save(**kwargs) accepts a heterogeneous kwargs space
+    # (format: str, quality: int, optimize: bool); idiom #3 (3rd-party API).
+    save_kwargs: dict[str, Any] = {"format": fmt.extension.upper()}
     # Pillow uses "JPEG" not "JPG".
     if save_kwargs["format"] == "JPG":
         save_kwargs["format"] = "JPEG"
@@ -135,13 +138,12 @@ def process_original(data: bytes) -> ProcessedImage:
     - GIF: silently takes first frame.
     - No resize.
     """
-    image = Image.open(BytesIO(data))
-    original_format = image.format
+    opened = Image.open(BytesIO(data))
+    original_format = opened.format
 
     # EXIF orientation correction (also strips EXIF).
-    transposed = ImageOps.exif_transpose(image)
-    if transposed is not None:
-        image = transposed
+    transposed = ImageOps.exif_transpose(opened)
+    image: Image.Image = transposed if transposed is not None else opened
 
     # Determine target format.
     target_format = _choose_original_format(original_format, image.mode)
@@ -161,12 +163,11 @@ def generate_rendition(data: bytes, max_dimension: int) -> ProcessedImage:
     - Resize via LANCZOS resampling (no upscale).
     - Always outputs WebP.
     """
-    image = Image.open(BytesIO(data))
+    opened = Image.open(BytesIO(data))
 
     # EXIF orientation correction.
-    transposed = ImageOps.exif_transpose(image)
-    if transposed is not None:
-        image = transposed
+    transposed = ImageOps.exif_transpose(opened)
+    image: Image.Image = transposed if transposed is not None else opened
 
     # Downscale only — don't upscale small images.
     if image.size[0] > max_dimension or image.size[1] > max_dimension:

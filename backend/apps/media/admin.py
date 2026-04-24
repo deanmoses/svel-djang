@@ -1,9 +1,12 @@
+from typing import Any
+
 from django.contrib import admin
+from django.http import HttpRequest
 
 from .models import MediaAsset, MediaRendition
 
 
-class MediaRenditionInline(admin.TabularInline):
+class MediaRenditionInline(admin.TabularInline[MediaRendition, MediaAsset]):
     model = MediaRendition
     extra = 0
     readonly_fields = (
@@ -18,18 +21,35 @@ class MediaRenditionInline(admin.TabularInline):
         "updated_at",
     )
 
-    def has_add_permission(self, request, obj=None):
+    # django-stubs declares conflicting `obj` types on
+    # BaseModelAdmin.has_*_permission (child) vs InlineModelAdmin.has_*_permission
+    # (parent), so a concrete annotation here triggers an LSP override error from
+    # whichever side it doesn't match. `Any` is the only signature that satisfies
+    # both. Idiom #3 (3rd-party API constraint).
+    def has_add_permission(
+        self,
+        request: HttpRequest,
+        obj: Any = None,  # noqa: ANN401
+    ) -> bool:
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(
+        self,
+        request: HttpRequest,
+        obj: Any = None,  # noqa: ANN401
+    ) -> bool:
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(
+        self,
+        request: HttpRequest,
+        obj: Any = None,  # noqa: ANN401
+    ) -> bool:
         return False
 
 
 @admin.register(MediaAsset)
-class MediaAssetAdmin(admin.ModelAdmin):
+class MediaAssetAdmin(admin.ModelAdmin[MediaAsset]):
     """Read-only inspection view. MediaAssets are created by the upload API."""
 
     list_display = (
@@ -57,18 +77,22 @@ class MediaAssetAdmin(admin.ModelAdmin):
     )
     inlines = [MediaRenditionInline]
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(
+        self, request: HttpRequest, obj: MediaAsset | None = None
+    ) -> bool:
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(
+        self, request: HttpRequest, obj: MediaAsset | None = None
+    ) -> bool:
         return False
 
 
 @admin.register(MediaRendition)
-class MediaRenditionAdmin(admin.ModelAdmin):
+class MediaRenditionAdmin(admin.ModelAdmin[MediaRendition]):
     """Read-only inspection view. MediaRenditions are created by the upload API."""
 
     list_display = ("asset", "rendition_type", "uuid", "is_ready")
@@ -88,11 +112,15 @@ class MediaRenditionAdmin(admin.ModelAdmin):
         "updated_at",
     )
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(
+        self, request: HttpRequest, obj: MediaRendition | None = None
+    ) -> bool:
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(
+        self, request: HttpRequest, obj: MediaRendition | None = None
+    ) -> bool:
         return False
