@@ -204,6 +204,8 @@ class PersonAlias(AliasBase):
     external sources (e.g. "Keith Johnson" → "Keith P. Johnson").
     """
 
+    alias_claim_field = "person_alias"
+
     person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name="aliases")
 
     class Meta(AliasBase.Meta):

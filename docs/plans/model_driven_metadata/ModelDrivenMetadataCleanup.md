@@ -9,7 +9,7 @@ Bring existing model-driven metadata patterns to the canonical conventions in [M
 1. **Consistency as a copy-target.** Right now, a new contributor can copy `claim_fk_lookups` (untyped ad-hoc `getattr`) or `MEDIA_CATEGORIES` (`ClassVar`-typed, mixin-discovered) and propagate whichever inconsistency they happened to encounter. After this cleanup, any existing class attr is a valid template.
 2. **Warm-up for the spec work.** The `AliasBase` upgrade and the Cluster 3 `_meta`-walk replacements exercise the same machinery (explicit identity attr, `ready()`-time discovery, parity tests) that `CatalogRelationshipSpec` needs — on a much smaller blast radius.
 
-## Shape 2 typing sweep
+## Shape 2 typing sweep — _landed_
 
 Existing Shape 2 class attrs that work correctly but lack `ClassVar[...]` typing. Each is a one-line edit.
 
@@ -39,9 +39,17 @@ Confirmed by grep across `backend/apps/` before the sweep landed:
 
 Every consumer uses `getattr(model_class, "attr", default)` with a default matching the annotated type — no shadowing, no drift risk. No base class declares any of the four opt-in attrs, so subclass declarations are the only source of truth.
 
-### `entity_type` typing — separate sub-item
+### `entity_type` typing — separate sub-item, _blocked on shape decision_
 
-`entity_type` (LinkableModel's public identifier, listed in the umbrella as "already in the codebase") is also untyped today. It's Shape 2, same pattern, but has a bigger blast radius than the one-liners above: add `ClassVar[str]` to the base annotation on `LinkableModel`, then touch every concrete subclass assignment. Keep it as its own cleanup item rather than folding it into the table — the "one-line edit" framing doesn't fit. No consumer-side changes here either.
+`entity_type` (LinkableModel's public identifier, listed in the umbrella as "already in the codebase") is also untyped today. It's Shape 2, same pattern, but has a bigger blast radius than the one-liners above: annotate the base on `LinkableModel` and touch every concrete subclass assignment.
+
+**Open question before implementation:** what's the right annotation? The `frozenset[str]` follow-up on `soft_delete_*` established the rule of matching annotations to semantics, not RHS literal shape. `entity_type` values are a closed set (`"theme"`, `"tag"`, `"gameplay-feature"`, `"machine-model"`, …), not arbitrary strings. Three options:
+
+- **`ClassVar[str]`** — matches the RHS literal; cheapest; undertypes, per the `soft_delete_*` lesson.
+- **`ClassVar[Literal[...]]`** per subclass — strongest typing; lets callers refine on `entity_type`; but each subclass carries its own narrow `Literal` annotation, which is verbose.
+- **`ClassVar[EntityType]`** where `EntityType = Literal[...]` or `Enum` at module level — declare the closed set once, reuse the alias everywhere.
+
+Decide before starting. Implementing `ClassVar[str]` and redoing it would repeat the exact mistake the follow-up commit fixed. No consumer-side changes regardless of choice.
 
 ### Optional: `MEDIA_CATEGORIES` readiness validator
 
@@ -49,25 +57,17 @@ Not strictly required, but a `ready()`-time validator asserting every concrete `
 
 ## Shape 3 upgrades
 
-### `AliasBase` — explicit identity attr
+### `AliasBase` — explicit identity attr — _landed_
 
-**Priority item — don't defer.** [ModelDrivenCatalogRelationshipMetadata.md](ModelDrivenCatalogRelationshipMetadata.md) puts alias models **out of scope** for `CatalogRelationshipSpec` because they're a separate axis with a different consumer shape. That's the correct architectural split, not a concession — but it does mean `_alias_registry.py` stays as the authoritative alias mechanism indefinitely, so the `verbose_name` derivation won't be swept up by any future spec work. This cleanup is how the fragility gets removed; nothing else will do it.
+Previously `_alias_registry.py` derived the claim namespace from `_meta.verbose_name` (`f"{verbose_name.replace(' ', '_')}_alias"`) — the "silver" fragility flagged in the Shape 3 ranking, since changing a model's `verbose_name` would silently shift the claim namespace. The upgrade:
 
-Currently `_alias_registry.py` derives the claim namespace from `_meta.verbose_name`:
+1. `AliasBase` declares `alias_claim_field: ClassVar[str]` (base annotation, no default) and each of the seven concrete subclasses assigns the explicit value (`"theme_alias"`, `"person_alias"`, etc.). Same "base annotates, subclasses assign" pattern as `MEDIA_CATEGORIES`.
+2. `AliasBase.__init_subclass__` enforces the declaration at class-creation time — a forgetful or empty-string subclass raises `TypeError` at import, before any discovery walk runs. `discover_alias_types()` can therefore do direct `cls.alias_claim_field` access and trust the annotation.
+3. `apps.check_models_ready()` runs at the top of `discover_alias_types()` to guard the `lru_cache` against a too-early call (the function walks `__subclasses__()` and reads `_meta`).
 
-```python
-verbose_name = parent_model._meta.verbose_name
-claim_field = f"{verbose_name.replace(' ', '_')}_alias"
-```
+Parity test in `test_resolve_dispatch.py` asserts the full `{(parent_model, claim_field)}` set of seven tuples — catches both typos in the claim_field string and right-value-wrong-class misdeclarations. New `AliasBase` subclasses fail the test and force intentional review.
 
-This is the fragility flagged as "silver" in the Shape 3 ranking — changing a model's `verbose_name` silently changes the claim namespace. Upgrade:
-
-1. Add an explicit class attr to each `AliasBase` subclass: `alias_claim_field: ClassVar[str] = "theme_alias"` (or whatever the current derived value is).
-2. Update `discover_alias_types()` to read the explicit attr instead of deriving from `verbose_name`.
-3. Add `apps.check_apps_ready()` at the top of `_build_map()` (currently relies on a docstring note).
-4. Optional: add a `ready()`-time validator asserting every concrete `AliasBase` subclass declares the attr.
-
-**Caveat.** `claim_field` strings may have runtime consumers beyond `_alias_registry.py` that parse or match on them. Grep before committing to this as a small change — the value might flow into claim keys, serializer output, or frontend code. If so, the upgrade is still correct (explicit > derived) but the blast radius is larger than one file.
+**Grep-audit result (safe).** Beyond `_alias_registry.py`, the derived strings appear as literals in `resolve/_relationships.py` (per-parent `resolve_*_aliases` functions), `management/commands/ingest_pinbase.py`, `api/themes.py`, and tests. Every existing literal matches the derived value 1:1 — the upgrade only makes the derivation explicit; no string values change, and nothing reaches the frontend.
 
 ### `core/entity_types.py` — cosmetic alignment
 
@@ -77,9 +77,16 @@ Currently uses a module-level `_ENTITY_TYPE_MAP: dict | None = None` with a `glo
 
 Two hand-maintained lists that are one `_meta` / app-registry walk away from being derived. Both are Shape 1 (no spec, no class attr).
 
-### Cache-invalidation signal list
+### Cache-invalidation signal list — _landed_
 
-Currently `catalog/signals.py` hand-lists eight models whose saves should bust the `/all/` cache. All eight are `CatalogModel` / `LinkableModel` subclasses plus two through-rows (`CorporateEntityLocation`, `Credit`). Upgrade: iterate the app registry at `ready()` time, filter to `CatalogModel` subclasses (plus any explicitly-marked through-models), connect signals in a loop. Parity test asserts the derived set matches the expected set for the current model landscape.
+Previously `catalog/signals.py` hand-listed eight models whose saves should bust the `/all/` cache. The upgrade replaced the list with an app-registry walk at `ready()` time: concrete `CatalogModel` subclasses plus three explicit extras (`Location`, `CorporateEntityLocation`, `Credit`). A parity test in `test_api_cache.py` pins the derived 22-model set so new `CatalogModel` additions fire the test and get reviewed intentionally.
+
+Lessons worth retaining for future `_meta`-walk work:
+
+- **Blanket inclusion beats opt-in markers** for correctness-critical paths. An alternative design — add `bust_all_cache_on_save: ClassVar[bool]` and let models opt in — would have recreated the exact drift surface the walk was eliminating. Fail-safe-by-construction is the right default: new entity → automatic freshness, at the cost of some over-invalidation on models that happen not to be embedded in `/all/` payloads (a cache-hit-rate cost, not a correctness cost).
+- **Widening from 8 → 22 was a bug fix, not a behavior regression.** The old list was missing taxonomy models (`Theme`, `Tag`, `GameplayFeature`, `RewardType`, `Series`, `Franchise`, etc.) that _are_ embedded in `/all/` payloads; edits to them via admin or outside the claims pipeline produced stale responses. That's exactly the drift the walk was designed to catch.
+- **The parity test's hardcoded expected set is the point.** It pins the derived output so new models fire the test and force intentional review. Don't collapse the expected set into the same walk as production — that would make the test assert `x == x`.
+- **Document the coverage gaps in code, not just PR discussion.** `MachineModel*` through-rows and `AliasBase` subclasses aren't covered by this signal path because they're populated by the claims resolver (which calls `invalidate_all()` directly via `transaction.on_commit`). A comment in `signals.py` explains this so future maintainers can find the answer to "why isn't `MachineModelTheme` in here?" without having to git-blame.
 
 ### `_SOURCE_FIELDS` in `citation/seeding.py`
 
@@ -99,13 +106,19 @@ This is not _required_ before `CatalogRelationshipSpec` lands — the spec PR co
 
 ## Sequencing
 
-Rough ordering; not commit-level:
+### Landed
 
-1. Shape 2 typing sweep (table) — fastest and lowest-risk, no behavior change.
-2. `entity_type` typing — same pattern as (1) but bigger blast radius; natural follow-up.
-3. Cache-invalidation signal list `_meta` walk — small, mechanical, proves out the parity-test pattern. (`_SOURCE_FIELDS` deferred to `CitationSourceSpec` work.)
-4. `AliasBase` upgrade — priority; audit callers first, upgrade identity attr second, add readiness guard last.
-5. Resolver signature standardization — independent cleanup; can land any time before `CatalogRelationshipSpec` implementation.
-6. `entity_types.py` cosmetic — last, optional.
+1. Shape 2 typing sweep (table) — including the `frozenset[str]` follow-up for `soft_delete_*`.
+2. Cache-invalidation signal list `_meta` walk — including parity test and coverage-gap comment.
+3. `AliasBase` explicit-identity-attr upgrade.
+
+### Next
+
+1. **`entity_type` typing** — blocked on shape decision (see "Open question" in that section).
+
+### Remaining
+
+1. Resolver signature standardization — independent cleanup; can land any time before `CatalogRelationshipSpec` implementation.
+2. `entity_types.py` cosmetic — optional.
 
 None of these have hard dependencies on the new spec work. They can land before or alongside it; the value is that new-spec contributors have a clean, consistent landscape to copy from.

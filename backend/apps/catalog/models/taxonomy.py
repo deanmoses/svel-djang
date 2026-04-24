@@ -251,6 +251,8 @@ class MachineModelRewardType(TimeStampedModel):
 class RewardTypeAlias(AliasBase):
     """An alternate name for a RewardType, used for matching/search."""
 
+    alias_claim_field = "reward_type_alias"
+
     reward_type = models.ForeignKey(
         RewardType, on_delete=models.CASCADE, related_name="aliases"
     )

@@ -90,6 +90,8 @@ class LocationAlias(AliasBase):
     from IPDB/OPDB (e.g., ``"Vienne-le-Ch\ufffdteau"``).
     """
 
+    alias_claim_field = "location_alias"
+
     location = models.ForeignKey(
         Location, on_delete=models.CASCADE, related_name="aliases"
     )

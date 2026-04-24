@@ -5,7 +5,12 @@ import pytest
 from apps.catalog._alias_registry import discover_alias_types
 from apps.catalog.claims import _get_literal_schemas, build_relationship_claim
 from apps.catalog.models import (
+    CorporateEntity,
+    GameplayFeature,
+    Location,
     Manufacturer,
+    Person,
+    RewardType,
     TechnologyGeneration,
     Theme,
     Title,
@@ -57,17 +62,39 @@ class TestDiscoverAliasTypes:
         assert len(result) == 7
 
     def test_known_types_present(self):
-        field_names = {fn for _, fn in discover_alias_types()}
-        expected = {
-            "theme_alias",
-            "manufacturer_alias",
-            "person_alias",
-            "gameplay_feature_alias",
-            "reward_type_alias",
-            "corporate_entity_alias",
-            "location_alias",
+        # Full (parent_model, claim_field) tuples — catches typos AND
+        # misdeclarations like the right claim_field on the wrong class.
+        assert set(discover_alias_types()) == {
+            (Theme, "theme_alias"),
+            (Manufacturer, "manufacturer_alias"),
+            (Person, "person_alias"),
+            (GameplayFeature, "gameplay_feature_alias"),
+            (RewardType, "reward_type_alias"),
+            (CorporateEntity, "corporate_entity_alias"),
+            (Location, "location_alias"),
         }
-        assert field_names == expected
+
+    def test_subclass_without_alias_claim_field_fails_at_creation(self):
+        """AliasBase.__init_subclass__ must fire at class definition, not
+        defer to discovery. Regression guard: ``_meta.abstract`` is unreliable
+        inside ``__init_subclass__`` (Django rewrites it post-hoc), and a
+        previous version's abstract short-circuit silently skipped the check.
+        """
+        from django.db import models
+
+        from apps.core.models import AliasBase
+
+        with pytest.raises(TypeError, match="alias_claim_field"):
+
+            class BrokenAlias(AliasBase):
+                theme = models.ForeignKey(
+                    Theme,
+                    on_delete=models.CASCADE,
+                    related_name="broken_aliases_test",
+                )
+
+                class Meta(AliasBase.Meta):
+                    app_label = "catalog"
 
 
 class TestLiteralSchemasAutoPopulated:

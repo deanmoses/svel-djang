@@ -84,6 +84,8 @@ class MachineModelTheme(TimeStampedModel):
 class ThemeAlias(AliasBase):
     """An alternate name for a Theme, used for matching/search."""
 
+    alias_claim_field = "theme_alias"
+
     theme = models.ForeignKey(Theme, on_delete=models.CASCADE, related_name="aliases")
 
     class Meta(AliasBase.Meta):

@@ -112,6 +112,8 @@ class ManufacturerAlias(AliasBase):
     from external sources.
     """
 
+    alias_claim_field = "manufacturer_alias"
+
     manufacturer = models.ForeignKey(
         Manufacturer, on_delete=models.CASCADE, related_name="aliases"
     )
@@ -216,6 +218,8 @@ class CorporateEntityAlias(AliasBase):
     """An alternate name for a CorporateEntity, used to match alternative spellings
     from external sources.
     """
+
+    alias_claim_field = "corporate_entity_alias"
 
     corporate_entity = models.ForeignKey(
         CorporateEntity, on_delete=models.CASCADE, related_name="aliases"

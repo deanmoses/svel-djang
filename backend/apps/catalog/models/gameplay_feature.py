@@ -108,6 +108,8 @@ class MachineModelGameplayFeature(TimeStampedModel):
 class GameplayFeatureAlias(AliasBase):
     """An alternate name for a GameplayFeature, used for matching/search."""
 
+    alias_claim_field = "gameplay_feature_alias"
+
     feature = models.ForeignKey(
         GameplayFeature, on_delete=models.CASCADE, related_name="aliases"
     )
