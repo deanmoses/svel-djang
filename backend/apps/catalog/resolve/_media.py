@@ -15,6 +15,7 @@ from apps.media.models import EntityMedia, MediaAsset
 from apps.provenance.models import Claim
 from apps.provenance.typing import HasEffectivePriority
 
+from ._claim_values import MediaAttachmentClaimValue
 from ._helpers import _annotate_priority
 
 logger = logging.getLogger(__name__)
@@ -140,7 +141,7 @@ def resolve_media_attachments(
 
         desired: dict[int, tuple[str | None, bool]] = {}
         for claim in claims_list:
-            val = claim.value
+            val = cast(MediaAttachmentClaimValue, claim.value)
             if not val.get("exists", True):
                 continue
 

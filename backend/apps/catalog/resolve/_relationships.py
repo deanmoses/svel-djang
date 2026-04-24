@@ -7,8 +7,9 @@ Includes both single-object and bulk variants for each relationship type.
 from __future__ import annotations
 
 import logging
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import NamedTuple
+from typing import NamedTuple, cast
 
 from django.db.models import Model
 
@@ -32,6 +33,14 @@ from ..models import (
     Theme,
     Title,
     TitleAbbreviation,
+)
+from ._claim_values import (
+    AbbreviationClaimValue,
+    AliasClaimValue,
+    CreditClaimValue,
+    GameplayFeatureClaimValue,
+    LocationClaimValue,
+    ParentClaimValue,
 )
 from ._helpers import _annotate_priority
 
@@ -120,11 +129,11 @@ def _resolve_machine_model_m2m(
     for model_id, claims_list in winners_by_model.items():
         desired: set[int] = set()
         for claim in claims_list:
-            val = claim.value
+            val = cast(Mapping[str, object], claim.value)
             if not val.get("exists", True):
                 continue
             target_pk = val.get(spec.field_name)
-            if target_pk not in valid_pks:
+            if type(target_pk) is not int or target_pk not in valid_pks:
                 logger.warning(
                     "Unresolved %s pk %r in claim (model pk=%s)",
                     spec.field_name,
@@ -231,7 +240,7 @@ def resolve_all_gameplay_features(
     for mid, claims_list in winners_by_model.items():
         desired: dict[int, int | None] = {}
         for claim in claims_list:
-            val = claim.value
+            val = cast(GameplayFeatureClaimValue, claim.value)
             if not val.get("exists", True):
                 continue
             feature_pk = val.get("gameplay_feature")
@@ -356,7 +365,7 @@ def resolve_all_credits(
     for model_id, claims_list in winners_by_model.items():
         desired: set[CreditAssignment] = set()
         for claim in claims_list:
-            val = claim.value
+            val = cast(CreditClaimValue, claim.value)
             if not val.get("exists", True):
                 continue
             person_pk = val.get("person")
@@ -452,7 +461,7 @@ def resolve_all_title_abbreviations(
     for title_id, claims_list in winners_by_title.items():
         desired: set[str] = set()
         for claim in claims_list:
-            val = claim.value
+            val = cast(AbbreviationClaimValue, claim.value)
             if not val.get("exists", True):
                 continue
             desired.add(val["value"])
@@ -550,7 +559,7 @@ def resolve_all_model_abbreviations(
     for model_id, claims_list in winners_by_model.items():
         desired: set[str] = set()
         for claim in claims_list:
-            val = claim.value
+            val = cast(AbbreviationClaimValue, claim.value)
             if not val.get("exists", True):
                 continue
             desired.add(val["value"])
@@ -644,7 +653,7 @@ def _resolve_aliases(
     for parent_id, claims_list in winners_by_parent.items():
         desired: dict[str, str] = {}
         for claim in claims_list:
-            val = claim.value
+            val = cast(AliasClaimValue, claim.value)
             if not val.get("exists", True):
                 continue
             alias_val = val.get("alias_value", "")
@@ -775,7 +784,7 @@ def _resolve_parents(parent_model, *, claim_field_prefix: str | None = None) -> 
     for child_id, claims_list in winners_by_child.items():
         desired: set[int] = set()
         for claim in claims_list:
-            val = claim.value
+            val = cast(ParentClaimValue, claim.value)
             if not val.get("exists", True):
                 continue
             parent_pk = val.get("parent")
@@ -877,7 +886,7 @@ def resolve_all_corporate_entity_locations(
 
     desired: dict[int, set[int]] = defaultdict(set)
     for row in active_claims:
-        val = row["value"] or {}
+        val = cast(LocationClaimValue, row["value"] or {})
         if not val.get("exists", True):
             continue
         loc_pk = val.get("location")
