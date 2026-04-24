@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Any, NoReturn, cast
+from typing import Any, NoReturn, TypedDict, cast
 
 from django.contrib.auth.models import AbstractBaseUser, AnonymousUser, User
 from django.core.exceptions import ValidationError
@@ -56,6 +56,14 @@ class ClaimSpec:
     claim_key: str = ""
 
 
+class StructuredErrorBody(TypedDict):
+    """JSON body for a 422 structured-validation response (nested under ``detail`` by the handler)."""
+
+    message: str
+    field_errors: dict[str, str]
+    form_errors: list[str]
+
+
 class StructuredValidationError(Exception):
     """Validation error with separate field-level and form-level messages.
 
@@ -85,7 +93,7 @@ class StructuredValidationError(Exception):
         self.form_errors = form_errors or []
         super().__init__(message)
 
-    def to_response_body(self) -> dict[str, object]:
+    def to_response_body(self) -> StructuredErrorBody:
         return {
             "message": self.message,
             "field_errors": self.field_errors,

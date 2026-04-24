@@ -224,7 +224,6 @@ Baseline: 353 → 310.
 
 Remaining "return Schema, not dict" debt in `catalog/api`. No baseline impact — drift cleanup on files that already satisfy `disallow_untyped_defs`.
 
-- **`ValidationError.to_response_body` → Schema or TypedDict.** [apps/catalog/api/edit_claims.py:88](backend/apps/catalog/api/edit_claims.py#L88) returns `dict[str, object]` with a small fixed shape (`message`, `field_errors`, `form_errors`). Unclear whether this is wire-bound (Ninja response) or programmatic; audit before choosing Schema vs TypedDict.
 - **Restructure the accumulator-then-mutate pattern in `_serialize_system_detail` and `_serialize_person_detail`.** Both helpers build a `dict[str, SomeSchema]` and then mutate the Schema instances in place (`titles[key].thumbnail_url = ...`, `titles[key].roles.append(...)`) as more data arrives in the loop. Pydantic v2 allows this (no `validate_assignment`), but it's off-idiom — pydantic models are usually treated as immutable after construction. Build mutable state (dataclass or plain dict) during accumulation, then construct the Schema once at the end.
 
 ## Step 8: `citation/api`
