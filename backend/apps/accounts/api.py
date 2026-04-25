@@ -22,6 +22,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.http import url_has_allowed_host_and_scheme
 from ninja import Router, Schema
 
+from apps.core.schemas import ErrorDetailSchema
 from apps.core.types import EntityKey
 from apps.provenance.entity_resolution import batch_resolve_entities
 from apps.provenance.models import ChangeSet, Claim
@@ -44,10 +45,6 @@ class AuthStatusSchema(Schema):
     is_authenticated: bool
     id: int | None = None
     username: str | None = None
-
-
-class _ErrorSchema(Schema):
-    detail: str
 
 
 class EntityContributionSchema(Schema):
@@ -240,7 +237,7 @@ def auth_logout(request: HttpRequest) -> AuthStatusSchema:
 
 
 @user_page_router.get(
-    "/{username}/", response={200: UserProfileSchema, 404: _ErrorSchema}
+    "/{username}/", response={200: UserProfileSchema, 404: ErrorDetailSchema}
 )
 def user_profile_page(request: HttpRequest, username: str) -> UserProfileSchema:
     """Page model for the user profile page: contribution history."""

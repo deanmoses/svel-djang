@@ -8,7 +8,6 @@ from functools import partial
 from pathlib import PurePosixPath
 from typing import cast
 
-from django.contrib.auth.models import AnonymousUser, User
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
@@ -20,6 +19,7 @@ from ninja.security import django_auth
 
 from apps.catalog.claims import build_media_attachment_claim
 from apps.catalog.resolve import resolve_media_attachments
+from apps.core.api_helpers import authed_user
 from apps.core.entity_types import get_linkable_model
 from apps.media.constants import (
     ALLOWED_IMAGE_EXTENSIONS,
@@ -115,18 +115,6 @@ class MediaAssetRefIn(Schema):
     asset_uuid: str
 
 
-def _authed_user(request: HttpRequest) -> User:
-    """Narrow ``request.user`` to ``User``.
-
-    All endpoints in this module use ``auth=django_auth``, so ``AnonymousUser``
-    is unreachable at runtime. Twin of ``apps.citation.api._authed_user`` —
-    when a custom User model lands (see ``docs/plans/types/UserModel.md``),
-    both should consolidate into a shared helper.
-    """
-    assert not isinstance(request.user, AnonymousUser)
-    return request.user
-
-
 def _resolve_entity(entity_type: str, slug: str) -> tuple[ContentType, MediaSupported]:
     """Resolve entity_type + slug to (ContentType, entity instance).
 
@@ -165,7 +153,7 @@ def upload_media(
     is_primary: Form[bool] = False,
 ) -> UploadOut:
     """Upload an image and create MediaAsset + MediaRendition rows."""
-    user = _authed_user(request)
+    user = authed_user(request)
     # --- Rate limit ---
     _check_rate_limit(user.id)
 
@@ -322,7 +310,7 @@ def upload_media(
 @media_router.post("/detach/", response={200: None}, auth=django_auth)
 def detach_media(request: HttpRequest, body: MediaAssetRefIn) -> Status[None]:
     """Detach a media asset from an entity by asserting an exists=False claim."""
-    user = _authed_user(request)
+    user = authed_user(request)
     ct, entity = _resolve_entity(body.entity_type, body.slug)
 
     try:
@@ -371,7 +359,7 @@ def detach_media(request: HttpRequest, body: MediaAssetRefIn) -> Status[None]:
 @media_router.post("/set-primary/", response={200: None}, auth=django_auth)
 def set_primary(request: HttpRequest, body: MediaAssetRefIn) -> Status[None]:
     """Set a media asset as primary for its category on an entity."""
-    user = _authed_user(request)
+    user = authed_user(request)
     ct, entity = _resolve_entity(body.entity_type, body.slug)
 
     try:

@@ -17,18 +17,6 @@ class Ref(Schema):
     slug: str
 
 
-class ErrorDetailSchema(Schema):
-    """Plain 422 / 404 / 409 error body: just a ``detail`` string.
-
-    The shared shape used for non-structured failures across catalog endpoints.
-    Structured 422s (with ``field_errors`` / ``form_errors``) come from
-    :class:`apps.catalog.api.edit_claims.StructuredValidationError` and have
-    their own wire format; this schema covers the simpler "detail only" case.
-    """
-
-    detail: str
-
-
 class ClaimPatchSchema(Schema):
     # ``fields`` maps claim-field name → new value. Values are polymorphic per
     # field (str, int, bool, slug string for FK-backed claims, None) and are

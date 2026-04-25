@@ -1,8 +1,20 @@
-"""Shared Ninja schemas for the core app."""
+"""Shared Ninja schemas reused across apps."""
 
 from __future__ import annotations
 
 from ninja import Schema
+
+
+class ErrorDetailSchema(Schema):
+    """Plain 422 / 404 / 409 / 403 error body: just a ``detail`` string.
+
+    The shared shape used for non-structured failures across endpoints.
+    Structured 422s (with ``field_errors`` / ``form_errors``) come from
+    :class:`apps.catalog.api.edit_claims.StructuredValidationError` and have
+    their own wire format; this schema covers the simpler "detail only" case.
+    """
+
+    detail: str
 
 
 class LinkTypeSchema(Schema):

@@ -16,6 +16,7 @@ from ninja.responses import Status
 from ninja.security import django_auth
 
 from apps.core.licensing import get_minimum_display_rank
+from apps.core.schemas import ErrorDetailSchema
 from apps.core.types import JsonBody
 from apps.media.helpers import all_media, primary_media
 from apps.media.models import EntityMedia
@@ -81,7 +82,6 @@ from .schemas import (
     AlreadyDeletedSchema,
     CreditSchema,
     EditOptionItem,
-    ErrorDetailSchema,
     FranchiseRefSchema,
     GameplayFeatureSchema,
     ModelClaimPatchSchema,
