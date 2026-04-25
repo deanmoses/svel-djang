@@ -10,7 +10,6 @@ from collections.abc import Sequence
 from dataclasses import asdict
 from typing import Protocol, cast
 
-from django.contrib.auth.models import AnonymousUser, User
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, models, transaction
 from django.db.models import Exists, OuterRef, Q, QuerySet
@@ -22,6 +21,8 @@ from ninja.responses import Status
 from ninja.security import django_auth
 from ninja.throttling import AuthRateThrottle
 from pydantic import field_validator
+
+from apps.core.api_helpers import authed_user
 
 from .extraction import classify_input, extract_isbn, normalize_isbn
 from .extractors import EXTRACTORS, Recognition, recognize_url
@@ -219,17 +220,6 @@ class ExtractResponseSchema(Schema):
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-
-
-def _authed_user(request: HttpRequest) -> User:
-    """Narrow ``request.user`` to ``User``.
-
-    All mutating endpoints in this module use ``auth=django_auth``, so
-    ``AnonymousUser`` is unreachable at runtime. The tripwire goes away
-    once a custom User model lands; see ``docs/plans/UserModel.md``.
-    """
-    assert not isinstance(request.user, AnonymousUser)
-    return request.user
 
 
 class _HasChildren(Protocol):
@@ -435,7 +425,7 @@ def create_citation_source(
     request: HttpRequest, data: CitationSourceCreateSchema
 ) -> Status[CitationSourceDetailSchema]:
     """Create a new Citation Source, optionally with an initial link."""
-    user = _authed_user(request)
+    user = authed_user(request)
     parent = None
     if data.parent_id is not None:
         parent = get_object_or_404(CitationSource, pk=data.parent_id)
@@ -592,7 +582,7 @@ def update_citation_source(
     request: HttpRequest, source_id: int, data: CitationSourceUpdateSchema
 ) -> CitationSourceDetailSchema:
     """Partially update a Citation Source."""
-    user = _authed_user(request)
+    user = authed_user(request)
     source = get_object_or_404(CitationSource, pk=source_id)
     fields = data.model_dump(exclude_unset=True)
     if not fields:
@@ -626,7 +616,7 @@ def create_citation_source_link(
     request: HttpRequest, source_id: int, data: CitationSourceLinkCreateSchema
 ) -> Status[CitationSourceLinkSchema]:
     """Create a link on a Citation Source."""
-    user = _authed_user(request)
+    user = authed_user(request)
     source = get_object_or_404(CitationSource, pk=source_id)
     link = CitationSourceLink(
         citation_source=source,
@@ -655,7 +645,7 @@ def update_citation_source_link(
     data: CitationSourceLinkUpdateSchema,
 ) -> CitationSourceLinkSchema:
     """Partially update a link on a Citation Source."""
-    user = _authed_user(request)
+    user = authed_user(request)
     link = get_object_or_404(
         CitationSourceLink, pk=link_id, citation_source_id=source_id
     )

@@ -6,7 +6,7 @@ We recently introduced mypy and grandfathered in a lot of exceptions in backend/
 
 ## Status
 
-Steps 1–7 complete. Step 8+ undone.
+Steps 1–11 complete. Step 12 and Step 7.1 remain open.
 
 ## Running mypy
 
@@ -234,29 +234,33 @@ Scope landed: `citation/api.py` (38 → 0), `citation/url_extraction.py` (7 → 
 
 - **`citation/models.py`** — dropped the `has_children: bool` class-level annotation on `CitationSource`. It was a lie: `has_children` only exists on rows from the search queryset's `.annotate(has_children=Exists(...))`. Replaced with a narrow `_HasChildren` Protocol in `api.py` and `cast(_HasChildren, s).has_children` at the one read site (same pattern as the `Has*` protocols in [catalog/api/\_typing.py](../../../backend/apps/catalog/api/_typing.py)).
 - **`citation/extractors.py`** — `Recognition`'s four loose `child_id` / `child_name` / `child_skip_locator` fields were tightened into a nested `RecognitionChild | None`. The dataclass now encodes the runtime invariant (child fields are either all present or all absent) in the type, eliminating an `assert rec.child_name is not None` at the consumer and a defensive `rec.child_name or ""` fallback in `url_extraction.py`. Two test mocks flipped from `MagicMock(child_id=…)` to real `Recognition` / `RecognitionChild` instances.
-- **`_authed_user(request: HttpRequest) -> User`** — new endpoint-local helper that narrows `request.user` with `assert not isinstance(request.user, AnonymousUser)`. No `cast(User, ...)` needed because django-stubs types `HttpRequest.user` as `User | AnonymousUser` when `AUTH_USER_MODEL` resolves to `auth.User`. When a custom User model lands (see [docs/plans/UserModel.md](UserModel.md)), the helper will need a cast re-added — flagged in the docstring.
+- **`_authed_user(request: HttpRequest) -> User`** — new endpoint-local helper that narrows `request.user` with `assert not isinstance(request.user, AnonymousUser)`. No `cast(User, ...)` needed because django-stubs types `HttpRequest.user` as `User | AnonymousUser` when `AUTH_USER_MODEL` resolves to `auth.User`. Originally added per-app; consolidated to [apps.core.api_helpers.authed_user](../../../backend/apps/core/api_helpers.py) in Step 9.3. When a custom User model lands (see [docs/plans/UserModel.md](UserModel.md)), the helper will need a cast re-added — flagged in the docstring.
 
 Baseline: 310 → 261.
 
-## Step 9: `provenance`
+## Step 9: `provenance` - DONE
 
-Scope (19 entries): `provenance/api.py` (15) plus foundational `provenance/models/claim.py` (4).
+Scope (19 entries): `provenance/api.py` (15) plus foundational `provenance/models/claim.py` (4). Sequenced callee-before-caller (9.1 → 9.5) with three prep sub-steps to lay a clean substrate.
 
-### Step 9.1: `provenance/api`
+- **9.1** — renamed `_base.py` → `base.py` across catalog/provenance; converted `apps/media/models.py` to a package.
+- **9.2** — relocated `MediaSupported` to `apps/media/models/base.py` and lifted it to `ClaimControlledModel`.
+- **9.3** — consolidated `ErrorDetailSchema` and `authed_user` into `apps/core/{schemas,api_helpers}.py`.
+- **9.4** — parameterised `ClaimManager(Manager["Claim"])`; typed `assert_claim` and `Claim.for_object` (4 entries).
+- **9.5** — typed 5 `provenance/api.py` endpoints; `revert_claim` → `204 None`; flipped media `detach_media` / `set_primary` to `204` (11 entries). `list_review_claims` retained in baseline (4 entries) pending LinkableModel workstream.
 
-Same pattern as Step 2 — helpers first, endpoints after, `make api-gen` between batches.
+Baseline: 222 → 161.
 
-## Step 9.2: `provenance/models`
-
-## Step 10: `catalog/resolve/*`
+## Step 10: `catalog/resolve/*` - DONE
 
 See [ResolveHardening.md](ResolveHardening.md). Multi-PR sequence that tightens the claim-value contract across the write path, registry, read-path types, and resolver reads. Typing motivation is one of several — the reasoning wins justify the sequence independently — but baseline reduction still counts here: ~44 mypy entries in `catalog/resolve/*` clear across Steps 3–4, plus downstream subscript-flip entries in Step 5.
+
+Scope landed: no `apps/catalog/resolve/*` entries remain in `backend/mypy-baseline.txt`.
 
 ## Step 11: `media/*` - DONE
 
 Same pattern as Step 2 — helpers first, endpoints after, `make api-gen` between batches. See [MediaTyping.md](MediaTyping.md) for the up-front type catalog and per-step decisions.
 
-Scope landed (~39 entries cleared): `admin.py` (12), `api.py` (9), `apps.py` (8), `processing.py` (6), `tests/*` (4). Two helpers added to `api.py`: `_authed_user` (twin of [citation/api.py](../../../backend/apps/citation/api.py)'s, deduped when [UserModel.md](UserModel.md) lands) and a tightened `_resolve_entity` returning `tuple[ContentType, MediaSupported]` via `_default_manager`.
+Scope landed (~39 entries cleared): `admin.py` (12), `api.py` (9), `apps.py` (8), `processing.py` (6), `tests/*` (4). Two helpers added to `api.py`: `_authed_user` (originally added per-app; consolidated to [apps.core.api_helpers.authed_user](../../../backend/apps/core/api_helpers.py) in Step 9.3 alongside `ErrorDetailSchema`) and a tightened `_resolve_entity` returning `tuple[ContentType, MediaSupported]` via `_default_manager`.
 
 Inline-admin LSP note: django-stubs declares conflicting `obj` types on `BaseModelAdmin.has_*_permission` (child) vs `InlineModelAdmin.has_*_permission` (parent), so `MediaRenditionInline.has_*_permission` uses `obj: Any = None` — flagged in-file as idiom #3.
 

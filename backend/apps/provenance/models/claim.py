@@ -13,10 +13,15 @@ from django.db.models.functions import Now
 from apps.core.models import field_not_blank
 from apps.core.types import ClaimIdentity
 
+from .base import ClaimControlledModel
 from .changeset import ChangeSet
 from .source import Source
 
 if TYPE_CHECKING:
+    from django.contrib.auth.models import User
+
+    from apps.core.models import License
+
     from .citation_instance import CitationInstance
 
 type IdentityPart = str | int | None
@@ -65,18 +70,18 @@ def make_claim_key(field_name: str, **identity_parts: IdentityPart) -> str:
     return "|".join(parts)
 
 
-class ClaimManager(models.Manager):
+class ClaimManager(models.Manager["Claim"]):
     def assert_claim(
         self,
-        subject,
+        subject: ClaimControlledModel,
         field_name: str,
-        value,
+        value: object,
         citation: str = "",
         *,
         source: Source | None = None,
-        user=None,
+        user: User | None = None,
         claim_key: str = "",
-        license=None,
+        license: License | None = None,
         changeset: ChangeSet | None = None,
     ) -> Claim:
         """Create a claim, deactivating any existing active claim for the same claim_key+author.
@@ -447,7 +452,13 @@ class Claim(models.Model):
 
     @classmethod
     def for_object(
-        cls, obj, *, field_name: str, value, claim_key: str = "", **kwargs
+        cls,
+        obj: ClaimControlledModel,
+        *,
+        field_name: str,
+        value: object,
+        claim_key: str = "",
+        **kwargs: object,
     ) -> Claim:
         """Construct an unsaved Claim for a model instance.
 

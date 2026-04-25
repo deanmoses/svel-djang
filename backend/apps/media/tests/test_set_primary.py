@@ -98,7 +98,7 @@ class TestSetPrimaryEndpoint:
             content_type="application/json",
         )
 
-        assert resp.status_code == 200
+        assert resp.status_code == 204
         em = EntityMedia.objects.get(asset=asset)
         assert em.is_primary is True
 
@@ -123,7 +123,7 @@ class TestSetPrimaryEndpoint:
             content_type="application/json",
         )
 
-        assert resp.status_code == 200
+        assert resp.status_code == 204
         assert EntityMedia.objects.get(asset=asset_b).is_primary is True
         assert EntityMedia.objects.get(asset=asset_a).is_primary is False
 
@@ -153,7 +153,7 @@ class TestSetPrimaryEndpoint:
             content_type="application/json",
         )
 
-        assert resp.status_code == 200
+        assert resp.status_code == 204
         # Playfield primary unchanged
         assert EntityMedia.objects.get(asset=playfield).is_primary is True
 
@@ -174,7 +174,7 @@ class TestSetPrimaryEndpoint:
             content_type="application/json",
         )
 
-        assert resp.status_code == 200
+        assert resp.status_code == 204
         assert EntityMedia.objects.get(asset=asset).is_primary is True
 
     def test_auth_required(self, anon_client, machine_model, user):

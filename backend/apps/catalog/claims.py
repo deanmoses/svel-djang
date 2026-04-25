@@ -58,8 +58,7 @@ def register_catalog_relationship_schemas() -> None:
         Theme,
         Title,
     )
-    from apps.core.models import MediaSupported
-    from apps.media.models import MediaAsset
+    from apps.media.models import MediaAsset, MediaSupported
 
     from ._alias_registry import discover_alias_types
 
@@ -334,7 +333,7 @@ def build_media_attachment_claim(
     All code paths that create ``media_attachment`` claims should use this
     helper so that category validation happens exactly once.
     """
-    from apps.core.models import MediaSupported
+    from apps.media.models import MediaSupported
 
     model_class = type(entity)
     if not issubclass(model_class, MediaSupported):

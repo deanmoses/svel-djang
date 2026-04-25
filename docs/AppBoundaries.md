@@ -23,7 +23,7 @@ ____________________________
 ```
 
 - `core` and `accounts` depend on nothing
-- `citation`, `provenance`, and `media.{models,storage,processing,schemas}` are peer-isolated (must not depend on each other)
+- `citation`, `provenance`, and `media.{storage,processing,schemas}` are peer-isolated (must not depend on each other). `media.models` is permitted one targeted dependency on `provenance.models` for `ClaimControlledModel` only — `media_attachment` is a claim field, so any `MediaSupported` entity is by construction a `ClaimControlledModel`; the inheritance encodes that structural commitment as a compile-time guarantee. The rest of `media.models` (concrete `MediaAsset` / `MediaRendition` / `EntityMedia`) does not reach into provenance.
 - `provenance` depends on `citation` but `citation` does not depend on `provenance`
 - `catalog` uses the full middle tier
 - `media.api` depends on `catalog` and `provenance`: upload handlers write `media_attachment` claims through catalog's relationship-claim registry and persist `Claim` rows directly. This is a structural consequence of `media_attachment` being a catalog-registered relationship type whose target happens to live in media; splitting it out would require extracting the whole relationship-claim machinery into a neutral app

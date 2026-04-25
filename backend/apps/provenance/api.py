@@ -11,6 +11,7 @@ import re
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db.models import Q
+from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
@@ -20,8 +21,10 @@ from ninja.responses import Status
 from ninja.security import django_auth
 
 from apps.citation.models import CitationSource
+from apps.core.api_helpers import authed_user
+from apps.core.schemas import ErrorDetailSchema
 
-from .models import CitationInstance, ClaimControlledModel
+from .models import CitationInstance, ClaimControlledModel, Source
 from .page_endpoints import pages_router
 from .schemas import CitationLinkSchema, ReviewLinkSchema
 
@@ -61,9 +64,7 @@ review_router = Router(tags=["review", "private"])
 
 @sources_router.get("/", response=list[SourceSchema])
 @decorate_view(cache_control(no_cache=True))
-def list_sources(request):
-    from .models import Source
-
+def list_sources(request: HttpRequest) -> list[Source]:
     return list(Source.objects.all())
 
 
@@ -131,7 +132,10 @@ def list_review_claims(request):
                 "value": claim.value,
                 "needs_review_notes": claim.needs_review_notes,
                 "created_at": claim.created_at.isoformat(),
-                "subject_type": claim.content_type.model_class().entity_type,
+                # ``model_class()`` is ``type[Model] | None`` and ``.entity_type``
+                # belongs to the deferred LinkableModel contract tracked in
+                # docs/plans/types/MypyFixing.md. Cleared when that lands.
+                "subject_type": claim.content_type.model_class().entity_type,  # type: ignore[union-attr]
                 "subject_name": subject_name,
                 "subject_slug": subject_slug,
                 "title_slug": title_slug,
@@ -152,6 +156,10 @@ class UndoChangeSetSchema(Schema):
     note: str = ""
 
 
+class UndoResultSchema(Schema):
+    changeset_id: int
+
+
 claims_router = Router(tags=["claims", "private"])
 changesets_router = Router(tags=["changesets", "private"])
 
@@ -159,9 +167,16 @@ changesets_router = Router(tags=["changesets", "private"])
 @claims_router.post(
     "/{claim_id}/revert/",
     auth=django_auth,
-    response={200: dict, 403: dict, 404: dict, 422: dict},
+    response={
+        204: None,
+        403: ErrorDetailSchema,
+        404: ErrorDetailSchema,
+        422: ErrorDetailSchema,
+    },
 )
-def revert_claim(request, claim_id: int, data: RevertNoteSchema):
+def revert_claim(
+    request: HttpRequest, claim_id: int, data: RevertNoteSchema
+) -> Status[None] | Status[ErrorDetailSchema]:
     """Revert (deactivate) a single user claim and re-resolve its entity.
 
     The claim carries its own entity reference (``content_type`` +
@@ -173,31 +188,41 @@ def revert_claim(request, claim_id: int, data: RevertNoteSchema):
     from .models import Claim
     from .revert import RevertError, execute_revert
 
+    user = authed_user(request)
     try:
         claim = Claim.objects.select_related("content_type").get(pk=claim_id)
     except Claim.DoesNotExist:
-        return Status(404, {"detail": "Claim not found."})
+        return Status(404, ErrorDetailSchema(detail="Claim not found."))
 
     try:
         entity = claim.content_type.get_object_for_this_type(pk=claim.object_id)
     except ObjectDoesNotExist:
-        return Status(404, {"detail": "Entity for this claim no longer exists."})
+        return Status(
+            404, ErrorDetailSchema(detail="Entity for this claim no longer exists.")
+        )
 
     # By construction, any entity carrying a Claim is a ClaimControlledModel.
     assert isinstance(entity, ClaimControlledModel)
     try:
-        execute_revert(entity, claim_id=claim_id, user=request.user, note=data.note)
+        execute_revert(entity, claim_id=claim_id, user=user, note=data.note)
     except RevertError as exc:
-        return Status(exc.status_code, {"detail": str(exc)})
-    return {"ok": True}
+        return Status(exc.status_code, ErrorDetailSchema(detail=str(exc)))
+    return Status(204, None)
 
 
 @changesets_router.post(
     "/{changeset_id}/undo/",
     auth=django_auth,
-    response={200: dict, 403: dict, 404: dict, 422: dict},
+    response={
+        200: UndoResultSchema,
+        403: ErrorDetailSchema,
+        404: ErrorDetailSchema,
+        422: ErrorDetailSchema,
+    },
 )
-def undo_changeset(request, changeset_id: int, data: UndoChangeSetSchema):
+def undo_changeset(
+    request: HttpRequest, changeset_id: int, data: UndoChangeSetSchema
+) -> UndoResultSchema | Status[ErrorDetailSchema]:
     """Atomically invert a DELETE ChangeSet (restore a soft-deleted tree).
 
     This powers the post-delete Undo toast. Scoped to delete ChangeSets
@@ -206,16 +231,17 @@ def undo_changeset(request, changeset_id: int, data: UndoChangeSetSchema):
     from .models import ChangeSet
     from .revert import UndoError, execute_undo_changeset
 
+    user = authed_user(request)
     try:
         changeset = ChangeSet.objects.get(pk=changeset_id)
     except ChangeSet.DoesNotExist:
-        return Status(404, {"detail": "ChangeSet not found."})
+        return Status(404, ErrorDetailSchema(detail="ChangeSet not found."))
 
     try:
-        new_cs = execute_undo_changeset(changeset, user=request.user, note=data.note)
+        new_cs = execute_undo_changeset(changeset, user=user, note=data.note)
     except UndoError as exc:
-        return Status(exc.status_code, {"detail": str(exc)})
-    return {"ok": True, "changeset_id": new_cs.pk}
+        return Status(exc.status_code, ErrorDetailSchema(detail=str(exc)))
+    return UndoResultSchema(changeset_id=new_cs.pk)
 
 
 citation_instances_router = Router(tags=["citation-instances", "private"])
@@ -236,8 +262,8 @@ class CitationInstanceSchema(Schema):
     auth=django_auth,
 )
 def list_citation_instances(
-    request, source: int | None = None, claim: int | None = None
-):
+    request: HttpRequest, source: int | None = None, claim: int | None = None
+) -> list[CitationInstanceSchema]:
     """List Citation Instances, filtered by source and/or claim."""
     if source is None and claim is None:
         raise HttpError(422, "Provide ?source= or ?claim= filter.")
@@ -250,14 +276,14 @@ def list_citation_instances(
     qs = qs.order_by("-created_at")
 
     return [
-        {
-            "id": ci.pk,
-            "citation_source_id": ci.citation_source_id,
-            "citation_source_name": ci.citation_source.name,
-            "claim_id": ci.claim_id,
-            "locator": ci.locator,
-            "created_at": ci.created_at.isoformat(),
-        }
+        CitationInstanceSchema(
+            id=ci.pk,
+            citation_source_id=ci.citation_source_id,
+            citation_source_name=ci.citation_source.name,
+            claim_id=ci.claim_id,
+            locator=ci.locator,
+            created_at=ci.created_at.isoformat(),
+        )
         for ci in qs
     ]
 
@@ -274,9 +300,11 @@ class BatchCitationInstanceOut(Schema):
 
 @citation_instances_router.get(
     "/batch/",
-    response={200: list[BatchCitationInstanceOut], 422: dict},
+    response={200: list[BatchCitationInstanceOut], 422: ErrorDetailSchema},
 )
-def batch_citation_instances(request, ids: str = ""):
+def batch_citation_instances(
+    request: HttpRequest, ids: str = ""
+) -> list[BatchCitationInstanceOut]:
     """Return citation instances by ID for tooltip rendering."""
     if not ids.strip():
         return []
@@ -296,18 +324,18 @@ def batch_citation_instances(request, ids: str = ""):
     )
 
     return [
-        {
-            "id": ci.pk,
-            "source_name": ci.citation_source.name,
-            "source_type": ci.citation_source.source_type,
-            "author": ci.citation_source.author,
-            "year": ci.citation_source.year,
-            "locator": ci.locator,
-            "links": [
-                {"url": link.url, "label": link.label}
+        BatchCitationInstanceOut(
+            id=ci.pk,
+            source_name=ci.citation_source.name,
+            source_type=ci.citation_source.source_type,
+            author=ci.citation_source.author,
+            year=ci.citation_source.year,
+            locator=ci.locator,
+            links=[
+                CitationLinkSchema(url=link.url, label=link.label)
                 for link in ci.citation_source.links.all()
             ],
-        }
+        )
         for ci in qs
     ]
 
@@ -319,10 +347,12 @@ class CitationInstanceCreateIn(Schema):
 
 @citation_instances_router.post(
     "/",
-    response={201: CitationInstanceSchema},
+    response={201: CitationInstanceSchema, 422: ErrorDetailSchema},
     auth=django_auth,
 )
-def create_citation_instance(request, data: CitationInstanceCreateIn):
+def create_citation_instance(
+    request: HttpRequest, data: CitationInstanceCreateIn
+) -> Status[CitationInstanceSchema]:
     """Create a new CitationInstance for use in ``[[cite:N]]`` markers."""
     source = get_object_or_404(CitationSource, pk=data.citation_source_id)
 
@@ -340,14 +370,14 @@ def create_citation_instance(request, data: CitationInstanceCreateIn):
 
     return Status(
         201,
-        {
-            "id": instance.pk,
-            "citation_source_id": instance.citation_source_id,
-            "citation_source_name": source.name,
-            "claim_id": None,
-            "locator": instance.locator,
-            "created_at": instance.created_at.isoformat(),
-        },
+        CitationInstanceSchema(
+            id=instance.pk,
+            citation_source_id=instance.citation_source_id,
+            citation_source_name=source.name,
+            claim_id=None,
+            locator=instance.locator,
+            created_at=instance.created_at.isoformat(),
+        ),
     )
 
 

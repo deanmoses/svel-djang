@@ -121,7 +121,7 @@ class TestDetachEndpoint:
             content_type="application/json",
         )
 
-        assert resp.status_code == 200
+        assert resp.status_code == 204
         assert not EntityMedia.objects.filter(asset=asset).exists()
         assert not MediaAsset.objects.filter(pk=asset.pk).exists()
         assert not MediaRendition.objects.filter(asset_id=asset.pk).exists()
@@ -156,7 +156,7 @@ class TestDetachEndpoint:
                 content_type="application/json",
             )
 
-        assert resp.status_code == 200
+        assert resp.status_code == 204
         assert deleted_keys == [
             sorted(
                 build_storage_key(asset.uuid, rendition_type)
@@ -196,7 +196,7 @@ class TestDetachEndpoint:
                 content_type="application/json",
             )
 
-        assert resp.status_code == 200
+        assert resp.status_code == 204
         assert delete_attempts == [
             sorted(
                 build_storage_key(asset.uuid, rendition_type)
@@ -245,7 +245,7 @@ class TestDetachEndpoint:
                 content_type="application/json",
             )
 
-        assert resp.status_code == 200
+        assert resp.status_code == 204
         assert deleted_keys == [
             sorted(
                 build_storage_key(asset.uuid, rendition_type)

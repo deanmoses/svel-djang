@@ -762,7 +762,7 @@ def _write_claims_in_changeset(
     entity: ClaimControlledModel,
     specs: list[ClaimSpec],
     *,
-    user: AbstractBaseUser,
+    user: User,
     changeset: ChangeSet,
 ) -> list[Claim]:
     """Assert claims on *entity* inside an already-open *changeset*.
@@ -839,13 +839,12 @@ def execute_claims(
     # AnonymousUser``. Both the cast and the tripwire go away once we
     # introduce a custom User model — see docs/plans/UserModel.md.
     assert not isinstance(user, AnonymousUser)
+    auth_user = cast(User, user)
     try:
         with transaction.atomic():
-            cs = ChangeSet.objects.create(
-                user=cast(User, user), action=action, note=note
-            )
+            cs = ChangeSet.objects.create(user=auth_user, action=action, note=note)
             created_claims = _write_claims_in_changeset(
-                entity, specs, user=user, changeset=cs
+                entity, specs, user=auth_user, changeset=cs
             )
             _attach_citation(created_claims, citation)
             field_names = list({s.field_name for s in specs})
@@ -891,18 +890,17 @@ def execute_multi_entity_claims(
     # AnonymousUser``. Both the cast and the tripwire go away once we
     # introduce a custom User model — see docs/plans/UserModel.md.
     assert not isinstance(user, AnonymousUser)
+    auth_user = cast(User, user)
     try:
         with transaction.atomic():
-            cs = ChangeSet.objects.create(
-                user=cast(User, user), action=action, note=note
-            )
+            cs = ChangeSet.objects.create(user=auth_user, action=action, note=note)
             all_created: list[Claim] = []
             per_entity_fields: list[tuple[ClaimControlledModel, list[str]]] = []
             for entity, specs in entries:
                 if not specs:
                     continue
                 created = _write_claims_in_changeset(
-                    entity, specs, user=user, changeset=cs
+                    entity, specs, user=auth_user, changeset=cs
                 )
                 all_created.extend(created)
                 per_entity_fields.append((entity, list({s.field_name for s in specs})))

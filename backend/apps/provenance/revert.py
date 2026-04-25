@@ -65,6 +65,9 @@ def execute_revert(
 
     if target.source_id is not None:
         raise RevertError("Source-attributed claims cannot be reverted.")
+    # source_id XOR user_id is enforced by ``provenance_claim_source_xor_user``;
+    # the source_id check above implies user_id is set.
+    assert target.user_id is not None
 
     if not target.is_active:
         raise RevertError("This claim is already inactive.")
@@ -195,6 +198,11 @@ def execute_undo_changeset(
                 # claim from the same user for the same claim_key, so the
                 # field falls back to their prior value rather than dropping
                 # to the source default. Mirrors execute_revert() semantics.
+                # Skip any source-authored claims defensively — predecessor
+                # restoration is a user-edit concept; the DB XOR constraint
+                # makes ``user_id`` non-null whenever ``source_id`` is null.
+                if claim.user_id is None:
+                    continue
                 predecessor = (
                     Claim.objects.filter(
                         content_type_id=claim.content_type_id,

@@ -9,9 +9,8 @@ from typing import NamedTuple, cast
 
 from django.contrib.contenttypes.models import ContentType
 
-from apps.core.models import MediaSupported
 from apps.core.types import ClaimIdentity, EntityKey
-from apps.media.models import EntityMedia, MediaAsset
+from apps.media.models import EntityMedia, MediaAsset, MediaSupported
 from apps.provenance.models import Claim
 from apps.provenance.typing import HasEffectivePriority
 

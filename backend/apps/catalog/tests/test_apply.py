@@ -156,6 +156,7 @@ def test_explicit_retraction(test_source):
     claim = Claim.objects.get(source=test_source, field_name="description")
     assert claim.is_active is False
     assert claim.retracted_by_changeset is not None
+    assert claim.retracted_by_changeset.ingest_run is not None
     assert claim.retracted_by_changeset.ingest_run.source == test_source
 
 

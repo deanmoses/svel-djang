@@ -28,6 +28,7 @@ from ninja.security import django_auth
 
 from apps.catalog.models import CatalogModel
 from apps.catalog.naming import normalize_catalog_name
+from apps.core.schemas import ErrorDetailSchema
 from apps.provenance.models import ChangeSetAction
 from apps.provenance.rate_limits import (
     CREATE_RATE_LIMIT_SPEC,
@@ -47,7 +48,6 @@ from .entity_create import (
 from .schemas import (
     AlreadyDeletedSchema,
     BlockingReferrerSchema,
-    ErrorDetailSchema,
     SoftDeleteBlockedSchema,
 )
 from .soft_delete import (

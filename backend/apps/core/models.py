@@ -416,29 +416,6 @@ class LinkableModel(models.Model):
 
 
 # ---------------------------------------------------------------------------
-# MediaSupported mixin (media attachment target registration)
-# ---------------------------------------------------------------------------
-
-
-class MediaSupported(models.Model):
-    """Mixin marking a model as a valid target for media attachments.
-
-    Any model that inherits this mixin can have EntityMedia rows pointing
-    at it via GenericFK. EntityMedia.clean() rejects content types that
-    are not MediaSupported.
-
-    Subclasses should set ``MEDIA_CATEGORIES`` to the list of allowed
-    category strings for that entity type (e.g. ``["backglass", "playfield"]``).
-    An empty list means the entity supports media but has no category vocabulary.
-    """
-
-    MEDIA_CATEGORIES: ClassVar[list[str]] = []
-
-    class Meta:
-        abstract = True
-
-
-# ---------------------------------------------------------------------------
 # Generic link tracking
 # ---------------------------------------------------------------------------
 

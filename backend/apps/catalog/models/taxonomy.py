@@ -18,7 +18,7 @@ from apps.core.models import (
 )
 from apps.core.validators import validate_no_mojibake
 
-from ._base import CatalogModel
+from .base import CatalogModel
 
 if TYPE_CHECKING:
     from .machine_model import MachineModel

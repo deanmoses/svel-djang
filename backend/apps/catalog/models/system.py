@@ -14,7 +14,7 @@ from apps.core.models import (
 )
 from apps.core.validators import validate_no_mojibake
 
-from ._base import CatalogModel
+from .base import CatalogModel
 
 __all__ = ["System", "SystemMpuString"]
 

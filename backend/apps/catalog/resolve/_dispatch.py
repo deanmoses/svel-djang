@@ -203,7 +203,7 @@ def _resolve_non_machine_model(
                 _call_custom_resolver(custom_spec, entity.pk)
 
     # --- Media attachments ---
-    from apps.core.models import MediaSupported
+    from apps.media.models import MediaSupported
 
     if isinstance(entity, MediaSupported) and (
         rel_fields is None or "media_attachment" in rel_fields

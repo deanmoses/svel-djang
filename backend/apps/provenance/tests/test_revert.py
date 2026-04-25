@@ -86,7 +86,7 @@ class TestRevertScalar:
         client.force_login(user)
         resp = _revert(client, claim.pk, "Wrong year")
 
-        assert resp.status_code == 200
+        assert resp.status_code == 204
         claim.refresh_from_db()
         assert claim.is_active is False
         assert claim.retracted_by_changeset is not None
@@ -102,7 +102,7 @@ class TestRevertScalar:
         client.force_login(user)
         resp = _revert(client, claim.pk, "Removing year")
 
-        assert resp.status_code == 200
+        assert resp.status_code == 204
         pm.refresh_from_db()
         # year default is None on MachineModel
         assert pm.year is None
@@ -120,7 +120,7 @@ class TestRevertPredecessor:
 
         client.force_login(user)
         resp = _revert(client, claim.pk, "Wrong year")
-        assert resp.status_code == 200
+        assert resp.status_code == 204
 
         pm.refresh_from_db()
         assert pm.year == 2001
@@ -144,7 +144,7 @@ class TestRevertPredecessor:
 
         client.force_login(user)
         resp = _revert(client, second_claim.pk, "Undo")
-        assert resp.status_code == 200
+        assert resp.status_code == 204
 
         pm.refresh_from_db()
         # First claim was retracted so it's not re-activated; field drops to default.
@@ -203,7 +203,7 @@ class TestRevertNonWinning:
         client.force_login(user)
         resp = _revert(client, claim.pk, "Not needed")
 
-        assert resp.status_code == 200
+        assert resp.status_code == 204
         pm.refresh_from_db()
         assert pm.year == 1998  # unchanged
 
@@ -219,7 +219,7 @@ class TestRevertAuth:
         claim = _get_active_claim(pm, "year", user)
         client.force_login(user)
         resp = _revert(client, claim.pk, "My mistake")
-        assert resp.status_code == 200
+        assert resp.status_code == 204
 
     def test_revert_others_below_threshold_returns_403(self, client, user, pm, db):
         """Users with <5 edits cannot revert another user's claims."""
@@ -244,7 +244,7 @@ class TestRevertAuth:
 
         client.force_login(other)
         resp = _revert(client, claim.pk, "Correcting year")
-        assert resp.status_code == 200
+        assert resp.status_code == 204
 
     def test_unauthenticated_returns_401(self, client, pm):
         resp = _revert(client, 999, "nope")
@@ -342,7 +342,7 @@ class TestRevertMultiUser:
         client.force_login(user)
         resp = _revert(client, claim.pk, "Wrong")
 
-        assert resp.status_code == 200
+        assert resp.status_code == 204
         pm.refresh_from_db()
         # User profile default priority (10000) beats IPDB source (10),
         # so charlie's claim wins.

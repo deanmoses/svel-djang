@@ -18,6 +18,7 @@ from ninja.security import django_auth
 from apps.catalog.naming import normalize_catalog_name
 from apps.core.licensing import get_minimum_display_rank
 from apps.core.models import active_status_q
+from apps.core.schemas import ErrorDetailSchema
 from apps.media.helpers import all_media
 from apps.media.schemas import UploadedMediaSchema
 from apps.provenance.helpers import active_claims, claims_prefetch
@@ -50,7 +51,6 @@ from .helpers import (
 from .schemas import (
     AlreadyDeletedSchema,
     ClaimPatchSchema,
-    ErrorDetailSchema,
     PersonCreateSchema,
     PersonDeletePreviewSchema,
     PersonDeleteResponseSchema,

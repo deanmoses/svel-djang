@@ -12,7 +12,6 @@ from django.db.models.functions import Lower
 from apps.core.models import (
     AliasBase,
     MarkdownField,
-    MediaSupported,
     SluggedModel,
     TimeStampedModel,
     field_not_blank,
@@ -20,8 +19,9 @@ from apps.core.models import (
     status_valid,
 )
 from apps.core.validators import validate_no_mojibake
+from apps.media.models import MediaSupported
 
-from ._base import CatalogModel
+from .base import CatalogModel
 
 __all__ = ["GameplayFeature", "GameplayFeatureAlias", "MachineModelGameplayFeature"]
 

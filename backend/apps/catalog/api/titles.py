@@ -30,6 +30,7 @@ from ninja.security import django_auth
 from apps.catalog.naming import MAX_CATALOG_NAME_LENGTH, normalize_catalog_name
 from apps.core.licensing import get_minimum_display_rank
 from apps.core.models import active_status_q
+from apps.core.schemas import ErrorDetailSchema
 from apps.media.helpers import all_media
 from apps.media.schemas import MediaRenditionsSchema
 from apps.media.storage import build_public_url, build_storage_key
@@ -83,7 +84,6 @@ from .schemas import (
     AlreadyDeletedSchema,
     BlockingReferrerSchema,
     CreditSchema,
-    ErrorDetailSchema,
     GameplayFeatureSchema,
     ModelCreateSchema,
     Ref,

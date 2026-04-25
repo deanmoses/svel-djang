@@ -726,9 +726,11 @@ def _process_retractions(
 
     retract_entries: list[RetractEntry] = []
     for key in retract_keys:
-        pk = found.get(key)
-        if pk is not None:
-            retract_entries.append(RetractEntry(pk, key.content_type_id, key.object_id))
+        found_pk = found.get(key)
+        if found_pk is not None:
+            retract_entries.append(
+                RetractEntry(found_pk, key.content_type_id, key.object_id)
+            )
         else:
             r = retract_keys[key]
             report.warnings.append(
