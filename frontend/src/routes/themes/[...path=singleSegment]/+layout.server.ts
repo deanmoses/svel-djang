@@ -5,7 +5,7 @@ import type { LayoutServerLoad } from './$types';
 export const load: LayoutServerLoad = async ({ fetch, url, params }) => {
   const client = createServerClient(fetch, url);
   const { data, response } = await client.GET('/api/pages/theme/{slug}', {
-    params: { path: { slug: params.slug } },
+    params: { path: { slug: params.path } },
   });
 
   if (!data) {

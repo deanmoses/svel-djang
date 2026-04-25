@@ -10,6 +10,8 @@ class CoreConfig(AppConfig):
     def ready(self) -> None:
         from constance.signals import config_updated
 
+        from apps.core import checks  # noqa: F401 — registers system checks
+
         config_updated.connect(_on_constance_updated)
 
 

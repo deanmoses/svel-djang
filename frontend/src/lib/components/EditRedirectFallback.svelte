@@ -19,13 +19,16 @@
 
   let {
     basePath,
+    path,
     defaultSegment,
   }: {
     basePath: string;
+    /** See TaxonomyDetailBaseLayout's `path` prop. */
+    path?: string;
     defaultSegment: string;
   } = $props();
 
-  let slug = $derived(page.params.slug);
+  let slug = $derived(path ?? page.params.slug);
   const isMobileFlag = createIsMobileFlag(LAYOUT_BREAKPOINT);
   let isMobile = $derived<boolean | null>(isMobileFlag.current);
 

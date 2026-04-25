@@ -52,7 +52,7 @@ For public SSR pages, `+page.server.ts` or `+layout.server.ts` should be the def
 
 ### Route directory naming
 
-A `src/routes/[slug]/` directory name is the **plural** of the backend's `entity_type` string — e.g. `corporate-entities/` for `entity_type="corporate-entity"`. The rule and the generated canonical list are in [EntityNaming.md](EntityNaming.md). Parity is test-enforced, so CI catches a wrong name.
+An entity's `src/routes/<plural>/` directory is the **plural** of the backend's `entity_type` string — e.g. `corporate-entities/` for `entity_type="corporate-entity"`. Inside that directory, the dynamic segment is per-entity: legacy entities use `[slug]/`, while newer ones (Location, themes) use `[...path]/` (typically with a `singleSegment` param matcher to keep single-segment URL guarantees). `[...path]/` is the canonical shape going forward — it accommodates multi-segment public IDs without re-architecting the route. The rule and the generated canonical list are in [EntityNaming.md](EntityNaming.md). Parity is test-enforced, so CI catches a wrong name.
 
 ## Implementing SSR Routes
 

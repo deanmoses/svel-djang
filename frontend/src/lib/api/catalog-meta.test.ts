@@ -1,8 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { CATALOG_META, type CatalogEntityKey } from './catalog-meta';
 
-// Maps SvelteKit route directory → CATALOG_META key. Every [slug]/ route
-// that corresponds to a registry entity must be listed here.
+// Maps SvelteKit route directory → CATALOG_META key. Every entity route
+// directory (whose dynamic segment is either `[slug]/` or `[...path]/`,
+// optionally with a param matcher like `[...path=singleSegment]/`) that
+// corresponds to a registry entity must be listed here.
 const ROUTE_DIR_TO_KEY: Record<string, CatalogEntityKey> = {
   titles: 'title',
   models: 'model',
@@ -28,15 +30,22 @@ const ROUTE_DIR_TO_KEY: Record<string, CatalogEntityKey> = {
 // Route directories that intentionally do NOT map to a CATALOG_META entry.
 // Add to this list when introducing a route that should not be registry-managed.
 const UNMAPPED_ROUTE_DIRS = new Set([
-  'locations', // uses [...path] catch-all, not slug-based
+  'locations', // multi-segment [...path] catch-all, not yet in CATALOG_META
 ]);
 
+// Match either `[slug]` or `[...whatever]` (with or without a param matcher).
+const ENTITY_ROUTE_RE = /\/src\/routes\/([^/]+)\/(?:\[slug\]|\[\.\.\.[^\]]+\])/;
+
+// Broad glob over every route file; filtering to entity-shaped paths happens
+// in JS via ENTITY_ROUTE_RE so we don't have to enumerate matcher suffixes
+// (e.g. `[...path=singleSegment]`) in the glob pattern itself.
+const ALL_ROUTE_FILES = import.meta.glob('/src/routes/**/+*', { eager: false });
+
 describe('catalog-meta vs route tree', () => {
-  it('every [slug]/ route directory is either mapped or explicitly unmapped', async () => {
-    const routes = import.meta.glob('/src/routes/*/[slug]/+*', { eager: false });
+  it('every entity route directory is either mapped or explicitly unmapped', async () => {
     const routeDirs = new Set(
-      Object.keys(routes)
-        .map((p) => p.match(/\/src\/routes\/([^/]+)\/\[slug\]/)?.[1])
+      Object.keys(ALL_ROUTE_FILES)
+        .map((p) => p.match(ENTITY_ROUTE_RE)?.[1])
         .filter((d): d is string => typeof d === 'string'),
     );
 
@@ -86,15 +95,24 @@ describe('catalog-meta vs route tree', () => {
   // requirement is ~10 lines of boilerplate per entity; the cost of forgetting
   // is an invisible UX gap (see credit-role, missing for an unknown period).
   describe.each(['edit-history', 'sources'])('%s subroute', (subroute) => {
-    const files = import.meta.glob('/src/routes/*/[slug]/*/+page.*', { eager: false });
+    // Resolve each entity's dynamic segment (`[slug]` vs `[...<param>]`) by
+    // peeking at any route file under its plural.
+    const dynSeg = (plural: string): string => {
+      const re = new RegExp(`^/src/routes/${plural}/(\\[[^\\]]+\\])/`);
+      for (const p of Object.keys(ALL_ROUTE_FILES)) {
+        const m = p.match(re);
+        if (m) return m[1];
+      }
+      return '[slug]'; // fall back; the assertions below will fail informatively
+    };
 
     it.each(Object.keys(CATALOG_META) as CatalogEntityKey[])(
       '%s has +page.server.ts and +page.svelte',
       (key) => {
         const plural = CATALOG_META[key].entity_type_plural;
-        const base = `/src/routes/${plural}/[slug]/${subroute}`;
-        expect(files).toHaveProperty(`${base}/+page.server.ts`);
-        expect(files).toHaveProperty(`${base}/+page.svelte`);
+        const base = `/src/routes/${plural}/${dynSeg(plural)}/${subroute}`;
+        expect(ALL_ROUTE_FILES).toHaveProperty(`${base}/+page.server.ts`);
+        expect(ALL_ROUTE_FILES).toHaveProperty(`${base}/+page.svelte`);
       },
     );
   });

@@ -367,6 +367,12 @@ class LinkableModel(models.Model):
 
     entity_type: ClassVar[str]  # required on concrete subclasses
     entity_type_plural: ClassVar[str]  # required on concrete subclasses
+    # Name of the field exposing the entity's public identifier (the segment
+    # after ``entity_type_plural`` in its URL). Defaults to ``slug``; subclasses
+    # whose public identifier lives elsewhere (e.g. Location's ``location_path``)
+    # override this. The field must be ``unique=True`` — enforced by the
+    # ``linkable_models`` system check in ``apps.core.checks``.
+    public_id_field: ClassVar[str] = "slug"
     # ``name`` and ``slug`` are declared per-concrete-subclass (different
     # max_length / validators per entity); these instance-level annotations
     # let ``type[LinkableModel]`` introspection code read ``.name`` / ``.slug``
@@ -413,6 +419,19 @@ class LinkableModel(models.Model):
         cls.link_url_pattern = f"/{entity_type_plural}/{{slug}}"
         # Collision detection happens lazily in get_linkable_model's map
         # builder, not here, to avoid depending on import order.
+
+    def get_absolute_url(self) -> str:
+        # ``link_url_pattern`` uses ``{slug}`` as its format placeholder for
+        # historical reasons. The substituted value is whatever ``public_id``
+        # returns — for Location that's a multi-segment ``location_path``.
+        return self.link_url_pattern.format(slug=self.public_id)
+
+    @property
+    def public_id(self) -> str:
+        """The public identifier segment (e.g. slug, or Location's location_path)."""
+        value = getattr(self, self.public_id_field)
+        assert isinstance(value, str)
+        return value
 
 
 # ---------------------------------------------------------------------------

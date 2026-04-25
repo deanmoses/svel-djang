@@ -36,6 +36,7 @@
     parentLabel,
     basePath,
     parentHref,
+    path,
     sections,
     editor: editorSnippet,
     immediateEditor,
@@ -50,6 +51,13 @@
     parentLabel: string;
     /** Used to construct this entity's own sub-route URLs (edit, sources, etc.). */
     basePath: string;
+    /**
+     * Public-id segment(s) of the current entity's URL — the value following
+     * `basePath`. When omitted, falls back to `page.params.slug` for entities
+     * still on the legacy `[slug]/` route shape. New `[...path]/`-shaped routes
+     * pass `page.params.path` explicitly.
+     */
+    path?: string;
     /**
      * Optional override for the parent-link href shown in the page header.
      * Defaults to `basePath`. Use this when the entity's list page lives at
@@ -77,7 +85,7 @@
     children: Snippet;
   } = $props();
 
-  let slug = $derived(page.params.slug);
+  let slug = $derived(path ?? page.params.slug);
 
   let metaDescription = $derived(profile.description.text || `${profile.name} — ${SITE_NAME}`);
   let mode = $derived(resolveDetailSubrouteMode(page.url.pathname));

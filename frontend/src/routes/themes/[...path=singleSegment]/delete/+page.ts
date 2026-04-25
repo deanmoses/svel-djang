@@ -8,7 +8,7 @@ export type DeletePreview = TaxonomyDeletePreviewSchema;
 export const load: PageLoad = ({ fetch, params }) =>
   loadDeletePreview<DeletePreview>({
     fetch,
-    slug: params.slug,
+    slug: params.path,
     apiPath: 'themes',
     notFoundRedirect: resolve('/themes'),
   });

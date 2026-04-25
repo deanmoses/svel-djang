@@ -36,7 +36,7 @@ describe('themes detail SSR route', () => {
     const result = await load({
       fetch,
       url: new URL('http://localhost:5173/themes/medieval'),
-      params: { slug: 'medieval' },
+      params: { path: 'medieval' },
     } as unknown as Parameters<typeof load>[0]);
 
     expect(result).toEqual({ theme: MOCK_DATA });
@@ -52,7 +52,7 @@ describe('themes detail SSR route', () => {
       load({
         fetch,
         url: new URL('http://localhost:5173/themes/nonexistent'),
-        params: { slug: 'nonexistent' },
+        params: { path: 'nonexistent' },
       } as unknown as Parameters<typeof load>[0]),
     ).rejects.toMatchObject({ status: 404 });
   });

@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import { page } from '$app/state';
   import TaxonomyEditSectionLayoutBase from '$lib/components/TaxonomyEditSectionLayoutBase.svelte';
   import {
     defaultHierarchicalTaxonomySectionSegment,
@@ -15,6 +16,7 @@
 
 <TaxonomyEditSectionLayoutBase
   basePath="/themes"
+  path={page.params.path}
   {sections}
   defaultSegment={defaultHierarchicalTaxonomySectionSegment()}
 >

@@ -23,12 +23,15 @@
 
   let {
     basePath,
+    path,
     sections,
     defaultSegment,
     editor,
     immediateEditor,
   }: {
     basePath: string;
+    /** See TaxonomyDetailBaseLayout's `path` prop. */
+    path?: string;
     sections: SectionDef[];
     defaultSegment: string;
     editor: Snippet<[TKey, EditorCallbacks]>;
@@ -41,7 +44,7 @@
     immediateEditor?: Snippet;
   } = $props();
 
-  let slug = $derived(page.params.slug);
+  let slug = $derived(path ?? page.params.slug);
   let sectionSegment = $derived(page.params.section);
   let section = $derived(
     sectionSegment ? sections.find((s) => s.segment === sectionSegment) : undefined,
