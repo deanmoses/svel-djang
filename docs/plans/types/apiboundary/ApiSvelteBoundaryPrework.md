@@ -11,10 +11,6 @@ otherwise touch 13+ wrapper files and two duplicate 148-line layout
 files that this prework removes. Doing them first turns those files
 from "rename surface" into "files that don't exist anymore."
 
-The third is a one-line backend verification, scope-independent of
-the others, listed here because it's a quick win that won't be
-undone either way.
-
 ## Replace `saveClaims` callback prop with `claimsPath` prop
 
 Both [HierarchicalTaxonomyEditorSwitch.svelte](../../../../frontend/src/lib/components/editors/HierarchicalTaxonomyEditorSwitch.svelte)
@@ -104,16 +100,3 @@ Combined with the `claimsPath`-prop refactor above, eliminates:
 - 2× `save-*-claims.ts` files (subsumed by `claimsPath`).
 - The wrapper-file location asymmetry resolves naturally (no
   wrappers).
-
-## Verify `{ fields: {}, note: '' }` default-injection
-
-`saveSimpleTaxonomyClaims` merges defaults for `fields` and `note`
-even though `SimpleTaxonomySectionPatchBody` marks them optional.
-Preserved verbatim from the original wrappers in commit `28dbad2a0`.
-
-Confirm with the backend whether `ClaimPatchSchema` truly accepts
-them as missing. If yes, the defaults are unreachable and can be
-deleted. If no, the body type is wrong and needs fixing.
-
-Independent of the two structural refactors above. Listed here
-because it's a quick win that won't be undone either way.
