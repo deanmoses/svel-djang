@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import Page from '$lib/components/Page.svelte';
 
   let { children } = $props();

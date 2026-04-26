@@ -55,13 +55,13 @@ The TS transform therefore never needs to touch op IDs in client call sites. If 
 #### Tooling
 
 - **Python side**: libcst — preserves comments and formatting; built for codemods. Add as a dev dependency: `cd backend && uv add --dev libcst`.
-- **TS side**: ts-morph — wraps the TS compiler API; first-class import-management APIs. Add as a dev dependency: `cd frontend && pnpm add -D ts-morph tsx`. Run scripts via `pnpm tsx`.
+- **TS side**: plain string-based scripts. ts-morph would have given us scope-aware rewriting and import-block management, but neither buys us much here: the `components['schemas']['Name']` pattern is unambiguous (no scoping concerns), no existing named-import blocks need merging into (greenfield, confirmed below), and `pnpm check` is a strong oracle — any miscompile from a botched edit surfaces immediately as a type error. Write the scripts as plain Node `.mjs` so there's no extra toolchain hop. No new frontend dev dependencies needed.
 
 Scripts live in the language-native trees, not at repo root, so each toolchain only knows about its own:
 
 - `backend/scripts/codemod/rename_schemas.py` — libcst transform.
-- `frontend/scripts/codemod/sweep-indexed-access.ts` — PR 0's TS transform.
-- `frontend/scripts/codemod/rename-import-specifiers.ts` — PR 1+'s TS transform.
+- `frontend/scripts/codemod/sweep-indexed-access.mjs` — PR 0's TS transform.
+- `frontend/scripts/codemod/rename-import-specifiers.mjs` — PR 1+'s TS transform.
 - `frontend/scripts/codemod/rename-table.json` — shared `{"OldName": "NewName"}` map. Living in `frontend/` is mildly arbitrary (the Python script reads it too), but it co-locates with the larger of the two consumers and avoids inventing a new top-level dir. Python script reads it via a relative path.
 
 Commit scripts and the JSON map so reviewers can re-run the transform after rebasing past other work.
@@ -70,21 +70,25 @@ Commit scripts and the JSON map so reviewers can re-run the transform after reba
 
 **Goal**: every `components['schemas']['XSchema']` indexed-access reference in `frontend/src/**` becomes a named import + bare-name use. No Python or OpenAPI changes; `schema.d.ts` is regenerated only to confirm `--root-types` aliases exist for every schema (already on, [frontend/package.json:20](../../../../frontend/package.json#L20)).
 
-**Script behavior** (`sweep-indexed-access.ts`):
+**Script behavior** (`sweep-indexed-access.mjs`):
 
-1. Find every `components['schemas']['Name']` reference in `frontend/src/**/*.{ts,svelte}`. Skip `frontend/src/lib/api/client.ts` (the only legitimate consumer of indexed access).
-2. For each unique `Name` referenced in a file, add it to a `import type { … } from '$lib/api/schema'` block — create if absent, merge into existing if present, sort specifiers, dedupe.
+1. Find every `components[<q>schemas<q>][<q>Name<q>]` reference (where `<q>` is `'` or `"`) in `frontend/src/**/*.{ts,svelte,svelte.ts}`. Skip `frontend/src/lib/api/client.ts` (the only legitimate consumer of indexed access). Empirically every real-source occurrence today uses single quotes — the double-quote form only appears in generated `schema.d.ts` — but accepting both costs nothing and prevents a silent miss.
+2. For each unique `Name` referenced in a file, add it to a `import type { … } from '$lib/api/schema'` block. No existing named-import blocks today (confirmed below), so this just creates a new block; the script still needs to dedupe across multiple references to the same `Name` within one file.
 3. Rewrite the indexed-access reference to bare `Name`.
-4. If no other code in the file references `components`, remove the now-unused `import type { components } from '$lib/api/schema'` import.
+4. If, after the rewrites, the file no longer contains a word-boundary match for `components` outside the import line itself, remove `components` from the import specifier list. **Specifier-level, not line-level**: one file ([frontend/src/lib/components/editors/save-claims-shared.ts](../../../../frontend/src/lib/components/editors/save-claims-shared.ts)) has `import type { components, paths } from '$lib/api/schema'` — it must become `import type { paths } from '$lib/api/schema'`, not be deleted. Drop the whole line only when `components` was the sole specifier.
+5. **Insertion point** for the new `import type { … } from '$lib/api/schema'`: after the last existing import in the script block / file. Prettier reorders imports anyway, so exact placement matters less than producing a syntactically valid file for the type-checker to consume.
+6. **Idempotence**: re-running the script on a fully-converted tree is a no-op (no indexed-access matches → no rewrites). This makes "rebase, re-run, commit" safe.
 
-**Scope today**: ~853 indexed-access call sites across ~86 files (verified via grep). Zero files currently use named imports from `$lib/api/schema` — confirmed greenfield, no pre-existing import blocks to merge against in this PR. The merge logic still needs to exist for multi-schema-per-file consumers within PR 0 itself.
+For `.svelte` files, transform only the contents of `<script lang="ts">…</script>` blocks (markup never references generated types). Every `.svelte` file in the repo uses `lang="ts"`. `.svelte.ts` files are plain TypeScript and are transformed as-is.
+
+**Scope today**: ~853 indexed-access call sites across ~86 files (verified via grep). Zero files currently use named imports from `$lib/api/schema` — confirmed greenfield. There are 5+ `.svelte.ts` files in `frontend/src/lib/`; the file glob includes them.
 
 **Verification**:
 
 - `pnpm check` passes (no type drift).
 - `pnpm lint` passes.
 - `pnpm test` passes.
-- `grep -r "components\['schemas'\]" frontend/src --include="*.ts" --include="*.svelte" | grep -v "lib/api/client.ts"` returns zero matches.
+- `grep -rE "components\[[\"']schemas" frontend/src --include="*.ts" --include="*.svelte" | grep -v "lib/api/client.ts"` returns zero matches. (Both quote styles, all three file extensions covered by the include patterns since `*.ts` matches `*.svelte.ts`.)
 
 **Why this is one PR, not split per area**: the codemod is mechanical and easier to review as a single sweep. Splitting by route/area would force humans to track which files were converted and which still use indexed access — extra cognitive load for no review benefit.
 
@@ -96,8 +100,8 @@ After PR 0, every consumer uses named imports. Each per-app PR follows this loop
 
 1. **Python rename** (`backend/scripts/codemod/rename_schemas.py`, scoped to one app's entries from `rename-table.json`).
 2. **`make api-gen`** — regenerates `frontend/src/lib/api/schema.d.ts`.
-3. **TS rename** (`frontend/scripts/codemod/rename-import-specifiers.ts`, same JSON scope) — rewrites import specifiers and any in-code references.
-4. **Format**: `cd backend && uv run ruff format .` + `cd frontend && pnpm format`. libcst and ts-morph emit valid but noisy whitespace; without this the diffs are polluted and the pre-commit hook would rewrite the files anyway.
+3. **TS rename** (`frontend/scripts/codemod/rename-import-specifiers.mjs`, same JSON scope) — rewrites import specifiers and any in-code references.
+4. **Format**: `cd backend && uv run ruff format .` + `cd frontend && pnpm format`. Both libcst (Python) and the string-based TS rewrites can leave noisy whitespace; without this the diffs are polluted and the pre-commit hook would rewrite the files anyway.
 5. **Verify** (see _Iterate until tests pass_ below).
 6. Only then commit.
 
@@ -109,12 +113,12 @@ The rename table is what's per-app; the file scope isn't.
 
 ##### TS transform scope
 
-Walks `frontend/src/**/*.{ts,svelte}` (excluding `client.ts`). For each `OldName → NewName` in the PR's scope:
+Walks `frontend/src/**/*.{ts,svelte,svelte.ts}` (excluding `client.ts`). For each `OldName → NewName` in the PR's scope:
 
-1. In every file that imports `OldName` from `$lib/api/schema`, replace the specifier with `NewName` (preserving sort order in the import block).
-2. Replace every in-code reference to `OldName` with `NewName`.
+1. In every file that imports `OldName` from `$lib/api/schema`, replace the specifier with `NewName`.
+2. Replace every in-code word-boundary reference to `OldName` with `NewName`.
 
-After PR 0, no indexed-access dedupe logic is needed — every relevant reference is already a named import. Much simpler than the original combined transform.
+After PR 0, no indexed-access dedupe logic is needed — every relevant reference is already a named import. The transform is `s/\bOldName\b/NewName/g` plus rewriting specifiers in the `import type { … } from '$lib/api/schema'` block, so it's plain string-based like PR 0's script. Format step (`pnpm format`) handles import-specifier sort order; the codemod doesn't need to.
 
 #### Iterate until tests pass
 

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import '../app.css';
   import { page } from '$app/state';
   import SiteShell from '$lib/components/SiteShell.svelte';
