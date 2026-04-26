@@ -86,13 +86,13 @@ from .machine_models import (
 )
 from .schemas import (
     AlreadyDeletedSchema,
-    BlockingReferrerSchema,
     CreateSchema,
     CreditSchema,
     GameplayFeatureSchema,
     Ref,
     SoftDeleteBlockedSchema,
     TitleClaimPatchSchema,
+    TitleDeletePreviewSchema,
     TitleMachineSchema,
 )
 from .soft_delete import (
@@ -190,14 +190,6 @@ class TitleDetailSchema(Schema):
     related_titles: list[CrossTitleLinkSchema] = []
     media: list[AggregatedMediaSchema] = []
     model_detail: MachineModelDetailSchema | None = None
-
-
-class TitleDeletePreviewSchema(Schema):
-    title_name: str
-    title_slug: str
-    active_model_count: int
-    changeset_count: int
-    blocked_by: list[BlockingReferrerSchema] = []
 
 
 class TitleDeleteResponseSchema(Schema):
@@ -1098,8 +1090,8 @@ def title_delete_preview(request: HttpRequest, slug: str) -> TitleDeletePreviewS
         0 if plan.is_blocked else count_entity_changesets(*plan.entities_to_delete)
     )
     return TitleDeletePreviewSchema(
-        title_name=title.name,
-        title_slug=title.slug,
+        name=title.name,
+        slug=title.slug,
         active_model_count=len(model_pks),
         changeset_count=changeset_count,
         blocked_by=[serialize_blocking_referrer(b) for b in plan.blockers],

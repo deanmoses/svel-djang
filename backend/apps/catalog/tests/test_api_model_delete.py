@@ -306,10 +306,9 @@ class TestDeletePreview:
         resp = _get_preview(client, "mm-pro")
         assert resp.status_code == 200
         body = resp.json()
-        assert body["model_name"] == m.name
-        assert body["model_slug"] == "mm-pro"
-        assert body["title_name"] == "Medieval Madness"
-        assert body["title_slug"] == "mm"
+        assert body["name"] == m.name
+        assert body["slug"] == "mm-pro"
+        assert body["parent"] == {"name": "Medieval Madness", "slug": "mm"}
         assert body["changeset_count"] >= 1
         assert body["blocked_by"] == []
 

@@ -406,8 +406,8 @@ def person_delete_preview(request: HttpRequest, slug: str) -> PersonDeletePrevie
     is_blocked = plan.is_blocked or active_credits > 0
     changeset_count = 0 if is_blocked else count_entity_changesets(person)
     return PersonDeletePreviewSchema(
-        person_name=person.name,
-        person_slug=person.slug,
+        name=person.name,
+        slug=person.slug,
         changeset_count=changeset_count,
         active_credit_count=active_credits,
         blocked_by=[serialize_blocking_referrer(b) for b in plan.blockers],

@@ -133,25 +133,62 @@ class PersonSoftDeleteBlockedSchema(Schema):
     active_credit_count: int = 0
 
 
-class ModelDeletePreviewSchema(Schema):
-    model_name: str
-    model_slug: str
-    title_name: str
-    title_slug: str
+class DeletePreviewBase(Schema):
+    """Common shape for every entity delete-preview response.
+
+    ``blocked_by`` lists active PROTECT referrers from the generic
+    soft-delete walker. Subclasses extend this with entity-specific count
+    fields whose semantics the generic shape can't express — typically
+    either (a) a blocker count that lives outside ``blocked_by`` because
+    the relationship isn't a PROTECT FK the walker can see, or (b) a
+    cascade-impact count surfaced so the UI can warn what else will be
+    deleted. Those fields are deliberately not collapsed into a single
+    shared name: same int shape can mean very different things to the
+    consuming UI.
+    """
+
+    name: str
+    slug: str
     changeset_count: int
     blocked_by: list[BlockingReferrerSchema] = []
 
 
-class PersonDeletePreviewSchema(Schema):
-    person_name: str
-    person_slug: str
-    changeset_count: int
+class ParentedDeletePreviewSchema(DeletePreviewBase):
+    """Delete-preview for entities that nest under another entity.
+
+    ``parent`` is optional at this level because some subclasses (taxonomy)
+    cover both leaf and parented entities through the same shape. Subclasses
+    that always have a parent tighten the field to required.
+    """
+
+    parent: Ref | None = None
+
+
+class ModelDeletePreviewSchema(ParentedDeletePreviewSchema):
+    # Every MachineModel has a Title parent — tighten the base's optional
+    # ``parent`` to required so the wire contract matches the producer.
+    parent: Ref
+
+
+class TaxonomyDeletePreviewSchema(ParentedDeletePreviewSchema):
+    # 0 on leaf entities; non-zero only for parents (tech-gen, display-type)
+    # whose active children would block the delete.
+    active_children_count: int = 0
+
+
+class PersonDeletePreviewSchema(DeletePreviewBase):
     # Count of Credits whose parent Model or Series is still active.
     # When non-zero the UI refuses the delete (see people.py:delete_person);
     # Credit rows are owned children of Model/Series so the generic
     # soft-delete walker doesn't see them.
     active_credit_count: int
-    blocked_by: list[BlockingReferrerSchema] = []
+
+
+class TitleDeletePreviewSchema(DeletePreviewBase):
+    # Cascade impact, NOT a blocker — Title delete cascades into its active
+    # MachineModels (see titles.py:delete_title). Surfaced so the UI can
+    # warn "this will also delete N machines."
+    active_model_count: int
 
 
 class DeleteResponseSchema(Schema):

@@ -431,9 +431,9 @@ class TestDisplaySubtypeRestoreRequiresActiveParent:
 
 @pytest.mark.django_db
 class TestParentedDeletePreviewBreadcrumb:
-    """Preview must surface ``parent_name``/``parent_slug`` for subgen and
-    subtype so the delete confirmation UI can render the breadcrumb without
-    a second round-trip. Parentless entities return null for both."""
+    """Preview must surface ``parent`` (Ref) for subgen and subtype so the
+    delete confirmation UI can render the breadcrumb without a second
+    round-trip. Parentless entities return null."""
 
     def test_subgeneration_preview_includes_parent(self, client, user, db):
         parent = TechnologyGeneration.objects.create(
@@ -446,8 +446,7 @@ class TestParentedDeletePreviewBreadcrumb:
         resp = client.get(f"/api/technology-subgenerations/{sub.slug}/delete-preview/")
         assert resp.status_code == 200
         body = resp.json()
-        assert body["parent_name"] == parent.name
-        assert body["parent_slug"] == parent.slug
+        assert body["parent"] == {"name": parent.name, "slug": parent.slug}
 
     def test_parentless_preview_has_null_parent(self, client, user, db):
         tag = Tag.objects.create(name="Widebody", slug="widebody", status="active")
@@ -455,8 +454,7 @@ class TestParentedDeletePreviewBreadcrumb:
         resp = client.get(f"/api/tags/{tag.slug}/delete-preview/")
         assert resp.status_code == 200
         body = resp.json()
-        assert body["parent_name"] is None
-        assert body["parent_slug"] is None
+        assert body["parent"] is None
 
 
 # ── Delete blocked by active M2M referrer ────────────────────────────

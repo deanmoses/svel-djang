@@ -296,8 +296,8 @@ class TestDeletePreview:
         resp = _get_preview(client, "pat-lawlor")
         assert resp.status_code == 200
         body = resp.json()
-        assert body["person_name"] == p.name
-        assert body["person_slug"] == "pat-lawlor"
+        assert body["name"] == p.name
+        assert body["slug"] == "pat-lawlor"
         assert body["active_credit_count"] == 0
         assert body["changeset_count"] >= 1
         assert body["blocked_by"] == []

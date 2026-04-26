@@ -8,10 +8,10 @@ response schema) are injected as callables so the same helpers can wire
 routes for taxonomy entities *and* the richer Theme / GameplayFeature /
 Series / Franchise / System schemas without duplicating code.
 
-Create / delete / restore inputs use the shared ``CreateSchema`` and
-``ChangeSetInputSchema`` from the catalog/provenance schema modules; only
-the preview shape (``TaxonomyDeletePreviewSchema``) is entity-specific to
-this module — the response uses the shared ``DeleteResponseSchema``.
+All wire schemas used here — ``CreateSchema``, ``ChangeSetInputSchema``,
+``TaxonomyDeletePreviewSchema``, ``DeleteResponseSchema`` — live in the
+shared catalog/provenance schema modules. This module owns no schemas of
+its own.
 """
 
 from __future__ import annotations
@@ -48,10 +48,11 @@ from .entity_create import (
 )
 from .schemas import (
     AlreadyDeletedSchema,
-    BlockingReferrerSchema,
     CreateSchema,
     DeleteResponseSchema,
+    Ref,
     SoftDeleteBlockedSchema,
+    TaxonomyDeletePreviewSchema,
 )
 from .soft_delete import (
     SoftDeleteBlockedError,
@@ -60,24 +61,6 @@ from .soft_delete import (
     plan_soft_delete,
     serialize_blocking_referrer,
 )
-
-# ---------------------------------------------------------------------------
-# Schemas
-# ---------------------------------------------------------------------------
-
-
-class TaxonomyDeletePreviewSchema(Schema):
-    name: str
-    slug: str
-    changeset_count: int
-    blocked_by: list[BlockingReferrerSchema] = []
-    # 0 on leaf entities; non-zero only for parents (tech-gen, display-type)
-    # whose active children would block the delete.
-    active_children_count: int = 0
-    # Populated on subgen/subtype so the UI can show a parent breadcrumb.
-    parent_name: str | None = None
-    parent_slug: str | None = None
-
 
 # ---------------------------------------------------------------------------
 # Registrars
@@ -126,21 +109,18 @@ def register_entity_delete_restore[ModelT: CatalogModel, SchemaT: Schema](
         is_blocked = plan.is_blocked or active_children > 0
         changeset_count = 0 if is_blocked else count_entity_changesets(obj)
 
-        parent_name: str | None = None
-        parent_slug: str | None = None
+        parent_ref: Ref | None = None
         if parent_field is not None:
             parent = getattr(obj, parent_field)
-            parent_name = parent.name
-            parent_slug = parent.slug
+            parent_ref = Ref(name=parent.name, slug=parent.slug)
 
         return TaxonomyDeletePreviewSchema(
             name=obj.name,
             slug=obj.slug,
+            parent=parent_ref,
             changeset_count=changeset_count,
             blocked_by=[serialize_blocking_referrer(b) for b in plan.blockers],
             active_children_count=active_children,
-            parent_name=parent_name,
-            parent_slug=parent_slug,
         )
 
     _delete_preview.__name__ = f"{entity_label.lower()}_delete_preview"

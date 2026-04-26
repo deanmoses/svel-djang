@@ -31,13 +31,13 @@
 
 <DeletePage
   entityLabel="Model"
-  entityName={preview.model_name}
+  entityName={preview.name}
   {slug}
   submit={submitDelete}
   cancelHref={`/models/${slug}`}
-  redirectAfterDelete={`/titles/${preview.title_slug}`}
+  redirectAfterDelete={`/titles/${preview.parent.slug}`}
   editHistoryHref={`/models/${slug}/edit-history`}
-  parentBreadcrumb={{ text: preview.title_name, href: `/titles/${preview.title_slug}` }}
+  parentBreadcrumb={{ text: preview.parent.name, href: `/titles/${preview.parent.slug}` }}
   {blocked}
   {impact}
 />

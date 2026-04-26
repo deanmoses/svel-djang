@@ -38,7 +38,7 @@
 
 <DeletePage
   entityLabel="Title"
-  entityName={preview.title_name}
+  entityName={preview.name}
   {slug}
   submit={submitDelete}
   cancelHref={`/titles/${slug}`}

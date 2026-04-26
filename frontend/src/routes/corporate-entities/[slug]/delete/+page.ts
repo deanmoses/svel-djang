@@ -14,9 +14,8 @@ export const load: PageLoad = async ({ fetch, params }) => {
     }
   }
 
-  // The preview already carries parent_name / parent_slug because the CE
-  // registrar was wired with parent_field="manufacturer" — no separate
-  // detail fetch needed.
+  // The preview already carries `parent` because the CE registrar was
+  // wired with parent_field="manufacturer" — no separate detail fetch needed.
   const res = await fetch(`/api/corporate-entities/${params.slug}/delete-preview/`);
   if (res.status === 404) {
     throw redirect(302, resolve('/corporate-entities'));

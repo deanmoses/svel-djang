@@ -11,10 +11,10 @@
   let blockedReferrers = $derived(preview.blocked_by ?? []);
 
   let parentBreadcrumb = $derived<ParentBreadcrumb | undefined>(
-    preview.parent_name && preview.parent_slug
+    preview.parent
       ? {
-          text: preview.parent_name,
-          href: `/technology-generations/${preview.parent_slug}`,
+          text: preview.parent.name,
+          href: `/technology-generations/${preview.parent.slug}`,
         }
       : undefined,
   );

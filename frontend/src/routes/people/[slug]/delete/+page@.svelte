@@ -18,7 +18,7 @@
     activeCreditCount > 0
       ? {
           kind: 'message',
-          lead: `${preview.person_name} is credited on ${pluralize(
+          lead: `${preview.name} is credited on ${pluralize(
             activeCreditCount,
             'active machine',
           )}. Remove those credits from the machine(s) before deleting this person.`,
@@ -43,7 +43,7 @@
 
 <DeletePage
   entityLabel="Person"
-  entityName={preview.person_name}
+  entityName={preview.name}
   {slug}
   submit={submitDelete}
   cancelHref={`/people/${slug}`}

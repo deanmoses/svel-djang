@@ -1022,10 +1022,9 @@ def model_delete_preview(request: HttpRequest, slug: str) -> ModelDeletePreviewS
     plan = plan_soft_delete(pm)
     changeset_count = 0 if plan.is_blocked else count_entity_changesets(pm)
     return ModelDeletePreviewSchema(
-        model_name=pm.name,
-        model_slug=pm.slug,
-        title_name=pm.title.name,
-        title_slug=pm.title.slug,
+        name=pm.name,
+        slug=pm.slug,
+        parent=Ref(name=pm.title.name, slug=pm.title.slug),
         changeset_count=changeset_count,
         blocked_by=[serialize_blocking_referrer(b) for b in plan.blockers],
     )

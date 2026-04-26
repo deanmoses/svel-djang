@@ -42,12 +42,12 @@
   {slug}
   submit={submitDelete}
   cancelHref={`/corporate-entities/${slug}`}
-  redirectAfterDelete={preview.parent_slug
-    ? `/manufacturers/${preview.parent_slug}`
+  redirectAfterDelete={preview.parent
+    ? `/manufacturers/${preview.parent.slug}`
     : '/corporate-entities'}
   editHistoryHref={`/corporate-entities/${slug}/edit-history`}
-  parentBreadcrumb={preview.parent_slug && preview.parent_name
-    ? { text: preview.parent_name, href: `/manufacturers/${preview.parent_slug}` }
+  parentBreadcrumb={preview.parent
+    ? { text: preview.parent.name, href: `/manufacturers/${preview.parent.slug}` }
     : undefined}
   {blocked}
   {impact}
