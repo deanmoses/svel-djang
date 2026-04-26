@@ -75,6 +75,23 @@ inaccuracy and as wrong types if a future consumer narrows on
 the declared 422 shape. Worth fixing for contract honesty; not
 urgent.
 
+## Try `--immutable` for openapi-typescript
+
+Marks every generated property and array `readonly`. Defensive
+default for response types the frontend should never mutate; useful
+for catching accidental mutation of API data.
+
+**Empirical impact.** Tried alongside the other generator flags and
+backed out: 341 svelte-check errors across 151 files. Almost all are
+request-body construction sites that spread typed response objects
+into mutable shapes, plus a handful of array-method calls on
+`readonly` arrays. The friction is real and concentrated.
+
+If revisited, ship as its own PR: the fix pattern is mostly mechanical
+(add `readonly` to local types or copy arrays before mutation), but
+the volume means a dedicated review pass. Skip entirely if the safety
+benefit doesn't justify the churn.
+
 ## Split schema per-tag
 
 If after the boundary work lands, `frontend/src/lib/api/schema.d.ts`
