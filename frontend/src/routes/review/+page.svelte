@@ -1,5 +1,6 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
+  import Page from '$lib/components/Page.svelte';
   import PageHeader from '$lib/components/PageHeader.svelte';
   import { pageTitle } from '$lib/constants';
   import { resolveHref } from '$lib/utils';
@@ -12,10 +13,12 @@
   <title>{pageTitle('Claims Review')}</title>
 </svelte:head>
 
-<article>
-  <PageHeader title="Claims Needing Review" --page-header-title-mb="var(--size-2)">
-    <p class="subtitle">{claims.length} claim{claims.length !== 1 ? 's' : ''} flagged for review</p>
-  </PageHeader>
+<Page width="extra-wide">
+  <PageHeader
+    title="Claims Needing Review"
+    subtitle={`${claims.length} claim${claims.length !== 1 ? 's' : ''} flagged for review`}
+    --page-header-title-mb="var(--size-2)"
+  />
 
   {#if claims.length === 0}
     <p class="empty">No claims need review.</p>
@@ -62,18 +65,9 @@
       {/each}
     </ul>
   {/if}
-</article>
+</Page>
 
 <style>
-  article {
-    max-width: 64rem;
-  }
-
-  .subtitle {
-    font-size: var(--font-size-1);
-    color: var(--color-text-muted);
-  }
-
   .empty {
     color: var(--color-text-muted);
     font-size: var(--font-size-2);

@@ -1,6 +1,8 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import HeroHeader from '$lib/components/HeroHeader.svelte';
+  import type { Crumb } from '$lib/components/Breadcrumb.svelte';
+  import Page from '$lib/components/Page.svelte';
   import TwoColumnLayout from '$lib/components/TwoColumnLayout.svelte';
 
   type MetaItem = { text: string; href?: string };
@@ -11,6 +13,7 @@
     heroImageUrl = null,
     heroImageAlt = '',
     parentLink = null,
+    breadcrumbs = null,
     metaItems = [],
     aliases = [],
     sidebarDesktopOnly = false,
@@ -22,6 +25,8 @@
     heroImageUrl?: string | null;
     heroImageAlt?: string;
     parentLink?: ParentLink | null;
+    /** Breadcrumb trail. Mutually exclusive with `parentLink`. */
+    breadcrumbs?: Crumb[] | null;
     metaItems?: MetaItem[];
     aliases?: string[];
     /**
@@ -37,10 +42,28 @@
     main: Snippet;
     sidebar?: Snippet;
   } = $props();
+
+  if (import.meta.env.DEV) {
+    $effect(() => {
+      if (parentLink && breadcrumbs) {
+        console.warn(
+          'RecordDetailShell: parentLink and breadcrumbs are mutually exclusive; breadcrumbs wins',
+        );
+      }
+    });
+  }
 </script>
 
-<article>
-  <HeroHeader {name} {heroImageUrl} {heroImageAlt} {parentLink} {metaItems} {aliases} />
+<Page width="extra-wide">
+  <HeroHeader
+    {name}
+    {heroImageUrl}
+    {heroImageAlt}
+    {parentLink}
+    {breadcrumbs}
+    {metaItems}
+    {aliases}
+  />
 
   {#if actionBar}
     {@render actionBar()}
@@ -65,7 +88,7 @@
   {:else}
     {@render mainContent()}
   {/if}
-</article>
+</Page>
 
 <style>
   /* Hide sidebar on mobile for the detail reader — the page body duplicates it. */

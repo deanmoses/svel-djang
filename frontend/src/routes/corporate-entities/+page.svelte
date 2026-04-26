@@ -2,7 +2,9 @@
   import { resolve } from '$app/paths';
   import client from '$lib/api/client';
   import { createAsyncLoader } from '$lib/async-loader.svelte';
+  import Page from '$lib/components/Page.svelte';
   import PageHeader from '$lib/components/PageHeader.svelte';
+  import StatusMessage from '$lib/components/StatusMessage.svelte';
   import { pageTitle } from '$lib/constants';
   import { formatYearRange } from '$lib/utils';
 
@@ -16,15 +18,15 @@
   <title>{pageTitle('Corporate Entities')}</title>
 </svelte:head>
 
-<article>
+<Page width="wide">
   <PageHeader title="Corporate Entities" />
 
   {#if entities.loading}
-    <p class="status">Loading...</p>
+    <StatusMessage variant="loading">Loading...</StatusMessage>
   {:else if entities.error}
-    <p class="status error">Failed to load corporate entities.</p>
+    <StatusMessage variant="error">Failed to load corporate entities.</StatusMessage>
   {:else if entities.data.length === 0}
-    <p class="status">No corporate entities found.</p>
+    <StatusMessage variant="empty">No corporate entities found.</StatusMessage>
   {:else}
     <ul class="entity-list">
       {#each entities.data as entity (entity.slug)}
@@ -45,13 +47,9 @@
       {/each}
     </ul>
   {/if}
-</article>
+</Page>
 
 <style>
-  article {
-    max-width: 56rem;
-  }
-
   .entity-list {
     list-style: none;
     padding: 0;
@@ -100,16 +98,5 @@
     color: var(--color-text-muted);
     min-width: 6rem;
     text-align: right;
-  }
-
-  .status {
-    font-size: var(--font-size-2);
-    color: var(--color-text-muted);
-    padding: var(--size-8) 0;
-    text-align: center;
-  }
-
-  .status.error {
-    color: var(--color-error);
   }
 </style>

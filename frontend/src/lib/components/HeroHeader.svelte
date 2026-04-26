@@ -1,9 +1,12 @@
 <script lang="ts">
+  import Breadcrumb, { type Crumb } from '$lib/components/Breadcrumb.svelte';
+
   let {
     name,
     heroImageUrl = null,
     heroImageAlt = '',
     parentLink = null,
+    breadcrumbs = null,
     metaItems = [],
     aliases = [],
     aliasLabel = 'Also known as',
@@ -12,14 +15,31 @@
     heroImageUrl?: string | null;
     heroImageAlt?: string;
     parentLink?: { text: string; href: string } | null;
+    /**
+     * When set, renders a breadcrumb trail in place of the kicker. Mutually
+     * exclusive with `parentLink`.
+     */
+    breadcrumbs?: Crumb[] | null;
     metaItems?: Array<{ text: string; href?: string }>;
     aliases?: string[];
     aliasLabel?: string;
   } = $props();
+
+  if (import.meta.env.DEV) {
+    $effect(() => {
+      if (parentLink && breadcrumbs) {
+        console.warn(
+          'HeroHeader: parentLink and breadcrumbs are mutually exclusive; breadcrumbs wins',
+        );
+      }
+    });
+  }
 </script>
 
 {#snippet content()}
-  {#if parentLink}
+  {#if breadcrumbs}
+    <Breadcrumb crumbs={breadcrumbs} current={name} />
+  {:else if parentLink}
     <a class="kicker" href={parentLink.href}>{parentLink.text}</a>
   {/if}
   <h1>{name}</h1>

@@ -71,7 +71,7 @@ routers = [
     ("/display-subtypes/", display_subtypes_router),
     ("/game-formats/", game_formats_router),
     ("/gameplay-features/", gameplay_features_router),
-    ("/locations/", locations_router),
+    ("/pages/locations/", locations_router),
     ("/reward-types/", reward_types_router),
     ("/tags/", tags_router),
     ("/technology-subgenerations/", technology_subgenerations_router),

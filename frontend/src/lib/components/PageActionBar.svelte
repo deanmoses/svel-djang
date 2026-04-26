@@ -9,8 +9,8 @@
     editSections?: EditSectionMenuItem[];
     /** Multiple labeled edit dropdowns (e.g. single-model title: "Edit Title" + "Edit Model"). Supersedes editSections/editHref. */
     editDropdowns?: EditSectionDropdown[];
-    historyHref: string;
-    sourcesHref: string;
+    historyHref?: string;
+    sourcesHref?: string;
   };
 
   let {
@@ -37,10 +37,14 @@
     {:else if editHref}
       <a href={editHref}>Edit</a>
     {/if}
-    <a href={historyHref}>History</a>
-    <ActionMenu label="Tools">
-      <a class="tools-item" href={sourcesHref} role="menuitem">Sources</a>
-    </ActionMenu>
+    {#if historyHref}
+      <a href={historyHref}>History</a>
+    {/if}
+    {#if sourcesHref}
+      <ActionMenu label="Tools">
+        <a class="tools-item" href={sourcesHref} role="menuitem">Sources</a>
+      </ActionMenu>
+    {/if}
   </div>
 </nav>
 

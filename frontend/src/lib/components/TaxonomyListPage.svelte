@@ -3,8 +3,10 @@
   generics="T extends { slug: string; name: string; aliases?: string[]; title_count?: number }"
 >
   import type { Snippet } from 'svelte';
+  import Page from './Page.svelte';
   import PageHeader from './PageHeader.svelte';
   import SearchBox from './SearchBox.svelte';
+  import StatusMessage from './StatusMessage.svelte';
   import NoResultsCreatePrompt from './NoResultsCreatePrompt.svelte';
   import EditSectionMenu from './EditSectionMenu.svelte';
   import type { EditSectionMenuItem } from './edit-section-menu';
@@ -117,28 +119,25 @@
   <link rel="preload" as="fetch" href={endpoint} crossorigin="anonymous" />
 </svelte:head>
 
-<article>
-  <div class="page-head">
-    <div class="page-head-title">
-      <PageHeader {title} --page-header-title-mb="0">
-        {#if headerSnippet}
-          {@render headerSnippet()}
-        {:else if subtitle}
-          <p class="subtitle">{subtitle}</p>
-        {/if}
-      </PageHeader>
-    </div>
-    {#if showActionMenu}
-      <div class="page-actions">
-        <EditSectionMenu items={actionItems} />
-      </div>
+{#snippet actionsSnippet()}
+  <EditSectionMenu items={actionItems} />
+{/snippet}
+
+<Page>
+  <PageHeader
+    {title}
+    subtitle={headerSnippet ? undefined : subtitle}
+    actions={showActionMenu ? actionsSnippet : undefined}
+  >
+    {#if headerSnippet}
+      {@render headerSnippet()}
     {/if}
-  </div>
+  </PageHeader>
 
   {#if loading}
-    <p class="status">Loading...</p>
+    <StatusMessage variant="loading">Loading...</StatusMessage>
   {:else if error}
-    <p class="status error">Failed to load {entityLabel}.</p>
+    <StatusMessage variant="error">Failed to load {entityLabel}.</StatusMessage>
   {:else}
     {#if showSearch}
       <SearchBox bind:value={searchQuery} placeholder={`Search ${entityLabel}...`} />
@@ -149,7 +148,7 @@
     {/if}
 
     {#if items.length === 0}
-      <p class="status">No {entityLabel} found.</p>
+      <StatusMessage variant="empty">No {entityLabel} found.</StatusMessage>
     {:else if filteredItems.length === 0}
       {#if createHref && auth.isAuthenticated && searchQuery.trim() !== ''}
         <NoResultsCreatePrompt
@@ -158,7 +157,7 @@
           createHref={`${createHref}?name=${encodeURIComponent(searchQuery.trim())}`}
         />
       {:else}
-        <p class="status">No matching {entityLabel}.</p>
+        <StatusMessage variant="empty">No matching {entityLabel}.</StatusMessage>
       {/if}
     {:else if listSnippet}
       {@render listSnippet(filteredItems)}
@@ -183,35 +182,9 @@
       </ul>
     {/if}
   {/if}
-</article>
+</Page>
 
 <style>
-  article {
-    max-width: 48rem;
-  }
-
-  .subtitle {
-    font-size: var(--font-size-2);
-    color: var(--color-text-muted);
-    margin-top: var(--size-2);
-  }
-
-  .page-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: var(--size-4);
-  }
-
-  .page-head-title {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .page-actions {
-    flex-shrink: 0;
-  }
-
   .item-list {
     list-style: none;
     padding: 0;
@@ -241,16 +214,5 @@
     font-size: var(--font-size-1);
     color: var(--color-text-muted);
     flex-shrink: 0;
-  }
-
-  .status {
-    font-size: var(--font-size-2);
-    color: var(--color-text-muted);
-    padding: var(--size-8) 0;
-    text-align: center;
-  }
-
-  .status.error {
-    color: var(--color-error);
   }
 </style>

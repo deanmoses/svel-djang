@@ -54,23 +54,11 @@ class LocationAncestorRef(Schema):
     location_path: str
 
 
-class LocationIndexCountry(Schema):
-    name: str
-    slug: str
-    location_path: str
-    manufacturer_count: int = 0
-    children: list[LocationChildRef] = []
-
-
-class LocationIndexSchema(Schema):
-    countries: list[LocationIndexCountry]
-
-
 class LocationDetailSchema(Schema):
     name: str
     slug: str
     location_path: str
-    location_type: str
+    location_type: str | None = None
     manufacturer_count: int = 0
     ancestors: list[LocationAncestorRef] = []
     children: list[LocationChildRef] = []
@@ -236,37 +224,32 @@ def _get_manufacturers_for_pks(pks: Iterable[int]) -> list[LocationManufacturerS
 # Router
 # ---------------------------------------------------------------------------
 
-locations_router = Router(tags=["locations"])
-
-
-@locations_router.get("/", response=LocationIndexSchema)
-@decorate_view(cache_control(no_cache=True))
-def list_locations(request: HttpRequest) -> LocationIndexSchema:
-    """Return all countries with their direct children and manufacturer counts."""
-    nodes, children_index = _get_location_tree()
-
-    countries: list[LocationIndexCountry] = []
-    for country_path in sorted(
-        children_index.get(None, []), key=lambda p: nodes[p].name
-    ):
-        country = nodes[country_path]
-        children = _children_of(country_path, nodes, children_index)
-        countries.append(
-            LocationIndexCountry(
-                name=country.name,
-                slug=country.slug,
-                location_path=country_path,
-                manufacturer_count=len(country.manufacturer_pks),
-                children=[_to_child_ref(c) for c in children],
-            )
-        )
-
-    return LocationIndexSchema(countries=countries)
+locations_router = Router(tags=["private"])
 
 
 def _get_location_detail(location_path: str) -> LocationDetailSchema:
-    """Shared implementation for all location detail endpoints."""
+    """Shared implementation for all location detail endpoints.
+
+    Empty ``location_path`` returns the global root view: all countries as
+    children, all manufacturers (across every country) as the main payload.
+    """
     nodes, children_index = _get_location_tree()
+
+    if location_path == "":
+        children = _children_of(None, nodes, children_index)
+        global_pks: frozenset[int] = frozenset().union(
+            *(n.manufacturer_pks for n in children)
+        )
+        return LocationDetailSchema(
+            name="",
+            slug="",
+            location_path="",
+            location_type=None,
+            manufacturer_count=len(global_pks),
+            ancestors=[],
+            children=[_to_child_ref(c) for c in children],
+            manufacturers=_get_manufacturers_for_pks(global_pks),
+        )
 
     node = nodes.get(location_path)
     if not node:
@@ -291,8 +274,15 @@ def _get_location_detail(location_path: str) -> LocationDetailSchema:
 
 
 # Ninja's path converter syntax doesn't support Django's <path:...> wildcard,
-# so we define explicit routes for each supported hierarchy depth (1–4 segments).
-# Pindata's maximum depth is 4 (e.g. france/idf/essonne/marcoussis).
+# so we define explicit routes for each supported hierarchy depth (root + 1–4
+# segments). Pindata's maximum depth is 4 (e.g. france/idf/essonne/marcoussis).
+
+
+@locations_router.get("/", response=LocationDetailSchema)
+@decorate_view(cache_control(no_cache=True))
+def get_location_root(request: HttpRequest) -> LocationDetailSchema:
+    """Return the global root: all countries as children, all manufacturers."""
+    return _get_location_detail("")
 
 
 @locations_router.get("/{s1}", response=LocationDetailSchema)

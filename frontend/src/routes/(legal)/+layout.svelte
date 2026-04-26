@@ -1,16 +1,16 @@
 <script>
+  import Page from '$lib/components/Page.svelte';
+
   let { children } = $props();
 </script>
 
-<article class="prose">
-  {@render children()}
-</article>
+<Page>
+  <div class="prose">
+    {@render children()}
+  </div>
+</Page>
 
 <style>
-  .prose {
-    max-width: 48rem;
-  }
-
   .prose :global(h1) {
     font-size: var(--font-size-7);
     font-weight: 700;

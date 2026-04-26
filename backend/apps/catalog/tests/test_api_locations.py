@@ -1,7 +1,9 @@
 """Tests for the locations browsing API.
 
 Fixtures use Location + CorporateEntityLocation directly (bypassing claims)
-for speed. The URL structure mirrors location_path: /api/locations/{path}.
+for speed. The URL structure mirrors location_path:
+``/api/pages/locations/{path}``. The empty path (``/api/pages/locations/``)
+returns the global root view.
 """
 
 import pytest
@@ -70,37 +72,41 @@ def manufacturers(db, locations):
 
 
 # ---------------------------------------------------------------------------
-# Index
+# Root (global) view
 # ---------------------------------------------------------------------------
 
 
-class TestLocationsIndex:
-    def test_lists_countries(self, client, manufacturers):
-        resp = client.get("/api/locations/")
+class TestLocationsRoot:
+    def test_returns_detail_shape(self, client, manufacturers):
+        resp = client.get("/api/pages/locations/")
         assert resp.status_code == 200
-        names = {c["name"] for c in resp.json()["countries"]}
+        data = resp.json()
+        assert data["name"] == ""
+        assert data["slug"] == ""
+        assert data["location_path"] == ""
+        assert data["location_type"] is None
+        assert data["ancestors"] == []
+
+    def test_children_are_countries(self, client, manufacturers):
+        resp = client.get("/api/pages/locations/")
+        names = {c["name"] for c in resp.json()["children"]}
         assert "USA" in names
         assert "Netherlands" in names
 
     def test_country_has_manufacturer_count(self, client, manufacturers):
-        resp = client.get("/api/locations/")
-        usa = next(c for c in resp.json()["countries"] if c["slug"] == "usa")
+        resp = client.get("/api/pages/locations/")
+        usa = next(c for c in resp.json()["children"] if c["slug"] == "usa")
         assert usa["manufacturer_count"] == 3
 
-    def test_country_has_children(self, client, manufacturers):
-        resp = client.get("/api/locations/")
-        usa = next(c for c in resp.json()["countries"] if c["slug"] == "usa")
-        # USA has one state child: Illinois
-        child_names = {c["name"] for c in usa["children"]}
-        assert "Illinois" in child_names
+    def test_global_manufacturer_count_is_union(self, client, manufacturers):
+        resp = client.get("/api/pages/locations/")
+        # 3 in USA + 1 in Netherlands = 4 distinct manufacturers worldwide
+        assert resp.json()["manufacturer_count"] == 4
 
-    def test_stateless_city_on_country(self, client, manufacturers):
-        resp = client.get("/api/locations/")
-        nl = next(c for c in resp.json()["countries"] if c["slug"] == "netherlands")
-        assert nl["manufacturer_count"] == 1
-        # Netherlands → Reuver is a direct child (no subdivision in between)
-        child_names = {c["name"] for c in nl["children"]}
-        assert "Reuver" in child_names
+    def test_global_manufacturers_payload(self, client, manufacturers):
+        resp = client.get("/api/pages/locations/")
+        names = {m["name"] for m in resp.json()["manufacturers"]}
+        assert names == {"Williams", "Gottlieb", "Stern", "Dutch Pinball"}
 
 
 # ---------------------------------------------------------------------------
@@ -110,7 +116,7 @@ class TestLocationsIndex:
 
 class TestCountryDetail:
     def test_returns_country(self, client, manufacturers):
-        resp = client.get("/api/locations/usa")
+        resp = client.get("/api/pages/locations/usa")
         assert resp.status_code == 200
         data = resp.json()
         assert data["name"] == "USA"
@@ -118,22 +124,22 @@ class TestCountryDetail:
         assert data["manufacturer_count"] == 3
 
     def test_includes_manufacturers(self, client, manufacturers):
-        resp = client.get("/api/locations/usa")
+        resp = client.get("/api/pages/locations/usa")
         mfr_names = {m["name"] for m in resp.json()["manufacturers"]}
         assert mfr_names == {"Williams", "Gottlieb", "Stern"}
 
     def test_includes_children(self, client, manufacturers):
-        resp = client.get("/api/locations/usa")
+        resp = client.get("/api/pages/locations/usa")
         child_names = {c["name"] for c in resp.json()["children"]}
         assert "Illinois" in child_names
 
     def test_404_for_unknown(self, client, db):
-        assert client.get("/api/locations/atlantis").status_code == 404
+        assert client.get("/api/pages/locations/atlantis").status_code == 404
 
 
 class TestSubdivisionDetail:
     def test_returns_state(self, client, manufacturers):
-        resp = client.get("/api/locations/usa/il")
+        resp = client.get("/api/pages/locations/usa/il")
         assert resp.status_code == 200
         data = resp.json()
         assert data["name"] == "Illinois"
@@ -141,14 +147,14 @@ class TestSubdivisionDetail:
         assert data["manufacturer_count"] == 3
 
     def test_includes_ancestor_chain(self, client, manufacturers):
-        resp = client.get("/api/locations/usa/il")
+        resp = client.get("/api/pages/locations/usa/il")
         data = resp.json()
         # Ancestors should include USA
         ancestor_names = {a["name"] for a in data["ancestors"]}
         assert "USA" in ancestor_names
 
     def test_includes_cities(self, client, manufacturers):
-        resp = client.get("/api/locations/usa/il")
+        resp = client.get("/api/pages/locations/usa/il")
         child_names = {c["name"] for c in resp.json()["children"]}
         assert "Chicago" in child_names
         assert "Elk Grove Village" in child_names
@@ -165,17 +171,17 @@ class TestSubdivisionDetail:
         _make_mfr_at("Beta", "beta", zephyr)
         _make_mfr_at("Gamma", "gamma", albany)
 
-        resp = client.get("/api/locations/usa/il")
+        resp = client.get("/api/pages/locations/usa/il")
         child_names = [c["name"] for c in resp.json()["children"]]
         assert child_names.index("Zephyr") < child_names.index("Albany")
 
     def test_404_for_unknown(self, client, manufacturers):
-        assert client.get("/api/locations/usa/tx").status_code == 404
+        assert client.get("/api/pages/locations/usa/tx").status_code == 404
 
 
 class TestCityDetail:
     def test_returns_city_with_state(self, client, manufacturers):
-        resp = client.get("/api/locations/usa/il/chicago")
+        resp = client.get("/api/pages/locations/usa/il/chicago")
         assert resp.status_code == 200
         data = resp.json()
         assert data["name"] == "Chicago"
@@ -183,22 +189,22 @@ class TestCityDetail:
         assert data["manufacturer_count"] == 2
 
     def test_includes_ancestor_chain(self, client, manufacturers):
-        resp = client.get("/api/locations/usa/il/chicago")
+        resp = client.get("/api/pages/locations/usa/il/chicago")
         ancestor_names = {a["name"] for a in resp.json()["ancestors"]}
         assert "USA" in ancestor_names
         assert "Illinois" in ancestor_names
 
     def test_city_includes_correct_manufacturers(self, client, manufacturers):
-        resp = client.get("/api/locations/usa/il/chicago")
+        resp = client.get("/api/pages/locations/usa/il/chicago")
         mfr_names = {m["name"] for m in resp.json()["manufacturers"]}
         assert mfr_names == {"Williams", "Gottlieb"}
 
     def test_404_for_unknown_city(self, client, manufacturers):
-        assert client.get("/api/locations/usa/il/springfield").status_code == 404
+        assert client.get("/api/pages/locations/usa/il/springfield").status_code == 404
 
     def test_city_directly_under_country(self, client, manufacturers):
         """City with no subdivision (Netherlands → Reuver)."""
-        resp = client.get("/api/locations/netherlands/reuver")
+        resp = client.get("/api/pages/locations/netherlands/reuver")
         assert resp.status_code == 200
         data = resp.json()
         assert data["name"] == "Reuver"
@@ -217,8 +223,8 @@ class TestLocationsCacheInvalidation:
     def test_index_refreshes_when_location_added(self, client, db, locations):
         _make_mfr_at("Williams", "williams", locations["chicago"])
 
-        initial = client.get("/api/locations/")
-        usa = next(c for c in initial.json()["countries"] if c["slug"] == "usa")
+        initial = client.get("/api/pages/locations/")
+        usa = next(c for c in initial.json()["children"] if c["slug"] == "usa")
         assert usa["manufacturer_count"] == 1
 
         # Add another manufacturer to a new city — cache should invalidate
@@ -227,24 +233,24 @@ class TestLocationsCacheInvalidation:
         )
         _make_mfr_at("Bally", "bally", new_city)
 
-        refreshed = client.get("/api/locations/")
+        refreshed = client.get("/api/pages/locations/")
         usa_refreshed = next(
-            c for c in refreshed.json()["countries"] if c["slug"] == "usa"
+            c for c in refreshed.json()["children"] if c["slug"] == "usa"
         )
         assert usa_refreshed["manufacturer_count"] == 2
 
     def test_index_refreshes_when_location_name_changes(self, client, db, locations):
         _make_mfr_at("Williams", "williams", locations["chicago"])
-        initial = client.get("/api/locations/")
-        usa = next(c for c in initial.json()["countries"] if c["slug"] == "usa")
+        initial = client.get("/api/pages/locations/")
+        usa = next(c for c in initial.json()["children"] if c["slug"] == "usa")
         assert usa["name"] == "USA"
 
         # Rename the country — cache should invalidate
         locations["usa"].name = "United States"
         locations["usa"].save()
 
-        refreshed = client.get("/api/locations/")
+        refreshed = client.get("/api/pages/locations/")
         usa_refreshed = next(
-            c for c in refreshed.json()["countries"] if c["slug"] == "usa"
+            c for c in refreshed.json()["children"] if c["slug"] == "usa"
         )
         assert usa_refreshed["name"] == "United States"
