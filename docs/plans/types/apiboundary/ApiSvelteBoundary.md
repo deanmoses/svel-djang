@@ -157,6 +157,17 @@ PR 0 is also revertible — it's a pure import-style change with no semantic eff
 
 Two component names in the OpenAPI doc don't come from explicit Ninja schemas. They need source-side fixes alongside (or before) the renames. Each is a separate small PR — neither is a Python class rename and neither fits the codemod machinery.
 
+#### Status
+
+| Step                                                | Status                                                                |
+| --------------------------------------------------- | --------------------------------------------------------------------- |
+| `Input` ghost fix (`NamedPageNumberPagination`)     | DONE                                                                  |
+| `JsonBody` ghost fix                                | TODO                                                                  |
+| PR 0 (TS-side indexed-access → named-imports sweep) | TODO                                                                  |
+| PR 1+ (per-app schema renames via codemod)          | TODO — STOP and check with the user before running the rename codemod |
+
+When picking this up in a fresh session: read this plan top-to-bottom, then `git log refactor/api-renaming` to see what's already landed, then start at the next TODO.
+
 #### `JsonBody` — single call site
 
 `JsonBody` only enters OpenAPI via [backend/apps/catalog/api/machine_models.py:178](../../../../backend/apps/catalog/api/machine_models.py#L178): `extra_data: JsonBody` on `MachineModelDetailSchema`. The other `JsonBody` uses (`apps/catalog/resolve/`, `apps/catalog/claims.py`) are internal Python and never reach OpenAPI.

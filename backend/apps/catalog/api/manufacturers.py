@@ -12,11 +12,12 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
-from ninja.pagination import PageNumberPagination, paginate
+from ninja.pagination import paginate
 from ninja.security import django_auth
 
 from apps.core.licensing import get_minimum_display_rank
 from apps.core.models import active_status_q
+from apps.core.pagination import NamedPageNumberPagination
 from apps.core.schemas import ValidationErrorSchema
 from apps.media.helpers import all_media
 from apps.media.schemas import UploadedMediaSchema
@@ -238,7 +239,7 @@ manufacturers_router = Router(tags=["manufacturers"])
 
 
 @manufacturers_router.get("/", response=list[ManufacturerSchema])
-@paginate(PageNumberPagination, page_size=DEFAULT_PAGE_SIZE)
+@paginate(NamedPageNumberPagination, page_size=DEFAULT_PAGE_SIZE)
 def list_manufacturers(request: HttpRequest) -> list[ManufacturerSchema]:
     return [
         ManufacturerSchema(

@@ -12,13 +12,14 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
-from ninja.pagination import PageNumberPagination, paginate
+from ninja.pagination import paginate
 from ninja.responses import Status
 from ninja.security import django_auth
 
 from apps.catalog.naming import normalize_catalog_name
 from apps.core.licensing import get_minimum_display_rank
 from apps.core.models import active_status_q
+from apps.core.pagination import NamedPageNumberPagination
 from apps.core.schemas import (
     ErrorDetailSchema,
     RateLimitErrorSchema,
@@ -208,7 +209,7 @@ people_router = Router(tags=["people"])
 
 
 @people_router.get("/", response=list[PersonSchema])
-@paginate(PageNumberPagination, page_size=DEFAULT_PAGE_SIZE)
+@paginate(NamedPageNumberPagination, page_size=DEFAULT_PAGE_SIZE)
 def list_people(request: HttpRequest) -> list[PersonSchema]:
     return [
         PersonSchema(

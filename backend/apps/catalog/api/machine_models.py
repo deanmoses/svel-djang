@@ -11,11 +11,12 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
-from ninja.pagination import PageNumberPagination, paginate
+from ninja.pagination import paginate
 from ninja.responses import Status
 from ninja.security import django_auth
 
 from apps.core.licensing import get_minimum_display_rank
+from apps.core.pagination import NamedPageNumberPagination
 from apps.core.schemas import (
     ErrorDetailSchema,
     RateLimitErrorSchema,
@@ -586,7 +587,7 @@ models_router = Router(tags=["models"])
 
 
 @models_router.get("/", response=list[MachineModelListSchema])
-@paginate(PageNumberPagination, page_size=DEFAULT_PAGE_SIZE)
+@paginate(NamedPageNumberPagination, page_size=DEFAULT_PAGE_SIZE)
 def list_models(
     request: HttpRequest,
     manufacturer: str = "",
