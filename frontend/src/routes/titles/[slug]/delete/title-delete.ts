@@ -10,7 +10,6 @@ import type { components } from '$lib/api/schema';
 
 export type DeletePreview = components['schemas']['TitleDeletePreviewSchema'];
 export type DeleteResponse = components['schemas']['TitleDeleteResponseSchema'];
-export type BlockingReferrer = components['schemas']['BlockingReferrerSchema'];
 
 export type { DeleteOutcome } from '$lib/delete-flow';
 

@@ -1,7 +1,8 @@
 <script lang="ts">
   import { resolveHref } from '$lib/utils';
+  import type { components } from '$lib/api/schema';
 
-  type Ref = { name: string; slug: string };
+  type Ref = components['schemas']['Ref'];
 
   let {
     basePath,
