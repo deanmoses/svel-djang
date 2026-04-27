@@ -1,115 +1,95 @@
 # Model-Driven Metadata
 
+## Goal: make the system as model-agnostic as possible
+
+The project has accumulated model-specific knowledge in subsystems that have no business knowing which catalog model they're dealing with. It shows up across every layer: the claims and provenance core, the URL/href layer, the API surface, the media pipeline, validation, and substantial portions of the frontend.
+
+The signature is uniform: explicit `if isinstance(entity, X)` / `entity_type == "y"` branches; hardcoded field names that happen to be right for most models but not all (`slug`, `name`); parallel hand-maintained registries that enumerate the same model set Django already knows about; and pairs of files that are 95% identical with the model import at the top doing the only real work.
+
+Every new catalog model pays this tax. Adding one means touching the provenance core, adding a write router, wiring an edit-history loader, wiring a sources loader, adding a delete-flow submitter, editing several enumerating registries, building a frontend section registry, building an editor switch, and laying out a route tree — most of which is mechanical reproduction of the previous model's setup.
+
+The cost compounds, and the code that should be most stable — the provenance core, the link layer, the media pipeline — keeps growing branches where it shouldn't. We need those systems to be hardened and easy to reason about.
+
 ## Principle: the model is the source of truth
 
-**The Django model is the source of truth. Derive metadata from Django introspection whenever possible; declare only the minimum that Django can't express — and declare it as a class attribute on the model itself.**
+The goal is to encode as much of the knowledge that varies as possible **into the Django models themselves**. The models are the source of truth. Derive metadata from Django introspection whenever possible; declare only the minimum that Django can't express.
 
-Consequence: parallel hand-maintained registries for things Django already knows are an anti-pattern. When we encounter one, the fix is to replace it with introspection + (at most) a small class-level attr on the owning model.
+## Desired end state
 
-This principle is the umbrella. It applies to _any_ purpose — claim serialization, link/URL construction, resolver dispatch, media behavior, frontend edit affordances, validation — not just claims. What it does **not** permit is a single grab-bag class attr that accumulates everything; that would just relocate the drift surface onto the model.
+- **The provenance and claims core is fully model-agnostic.** The resolver, the FK lookup machinery, the materialization path, `execute_claims`, the page-level edit-history and sources endpoints, the validation pipeline — none of them contain per-model branches. They read declarations off the model and act accordingly.
+- **The URL/href and routing layer is fully model-agnostic.** Link construction reads the model's declared URL pattern; route lookups go through `entity_type` + `public_id`; nothing hardcodes `slug` as the URL key.
+- **Most of the frontend is model-agnostic.** Shared CRUD components, editor base components, edit-history page, sources page, delete flow, and create flow operate against generic API contracts keyed on `entity_type` and `public_id`. Per-model files exist only where there are **legitimate UI differences** — a hierarchy needs a parent picker, curated divisions need a divisions editor, a thumbnail needs an uploader. Everything else collapses into the shared layer.
+- **Adding a new catalog model is a declaration, not a code expansion.** A new model declares its ClassVars, registers in the entity-type registry, exposes a write router that calls shared factories, and provides a frontend section registry plus any genuinely model-specific editor components. The provenance plumbing, URL layer, edit-history / sources / delete endpoints, and the bulk of the frontend route tree all light up automatically.
 
-### Why
+## Smells
 
-Every registry that duplicates model metadata becomes a drift surface. Adding a new catalog model today touches many places because we maintain parallel views of what's already on the model. The current inventory, grouped analytically into four clusters, lives in [ModelDrivenMetadataViolations.md](ModelDrivenMetadataViolations.md).
+### Code-shape smells
 
-## One axis, one typed spec
+- a specific catalog model name (`Theme`, `Location`, `Manufacturer`, `CorporateEntity`, etc.) appears in shared infrastructure (`apps/provenance/`, `apps/core/`, shared frontend components) outside docstring or example contexts. `grep -rn "Theme\|Location" backend/apps/provenance/ backend/apps/core/` returning hits is the diagnostic. Common flavors:
+  - **Branching on type.** `isinstance(entity, X)` / `entity_type == "y"` to choose behavior. Hidden form: a `dict` keyed on model class or entity-type string used as a dispatch table.
+  - **Model-named functions in shared code.** `build_theme_url`, `resolve_location_path`, `serialize_manufacturer_for_history`. The shared function should take `model` or `entity_type` as a parameter; the model-named version is the smell.
+  - **Direct model imports.** `from apps.catalog.models import Theme` inside a shared module that's supposed to work for every catalog model.
+- a hand-maintained list, set, dict, or constant enumerates the same model set Django already knows about. Examples: signal lists that subscribe handlers to "every catalog model", cache-invalidation registries, frontend route-dir skip lists, `_SOURCE_FIELDS`-style per-model field maps. The fix is `__subclasses__()` walk + (at most) a marker base class.
+- per-model API files in `apps/catalog/api/` contain bespoke handler bodies that replicate logic already in another model's file. If two write-router files diff mostly in their model imports, the shared logic hasn't been extracted to a factory yet.
+- per-model frontend route trees contain page logic instead of thin wrappers around shared components — a `+page.svelte` that does anything more than pass `path` / `entity_type` to a shared component is suspicious.
+- a hardcoded field name (e.g. `slug`) in shared code where the right answer is a declared ClassVar (e.g. `public_id_field`). The signature is "this works for every model except the one that breaks the convention."
 
-The rule: each orthogonal concern gets its own **typed, narrowly-scoped** class attr. A concern earns a spec when it is consumed by a well-defined subsystem (the claim resolver, the link builder, the media pipeline, etc.) and has a stable shape.
+### Test-shape smells
 
-### Already in the codebase
+- the parameterized test suite that walks the entity-type registry has a per-model skip list (e.g. `UNMAPPED_ROUTE_DIRS` in `catalog-meta.test.ts`). Every entry in such a list is an admission of an unfixed gap.
+- per-model test files duplicate the same provenance/URL/CRUD assertions across models with only the model import changed. The generic suite should cover those; per-model tests should only cover genuine UI/semantic differences.
 
-- `claim_fk_lookups` — per-model FK lookup override ("use `slug`, not `pk`").
-- `MEDIA_CATEGORIES` — media-supported models only.
-- `entity_type` — `LinkableModel` public identifier.
+### Process and tooling smells
 
-### Evaluated and deferred
+- adding a new catalog model produces a PR that diffs `apps/provenance/`, `apps/core/`, or shared frontend components. The diff to those layers should be zero; if it isn't, a generic seam is missing.
+- a bug fix has to be applied N times — once per model — instead of once in shared infrastructure. "I fixed this for Theme, now let me apply the same fix to Location and Manufacturer" is the diagnostic.
+- a missing or malformed model declaration only surfaces at first request, not at startup. `manage.py check` should catch it; if it doesn't, the system check for that axis is missing.
+- [ModelDrivenMetadataViolations.md](ModelDrivenMetadataViolations.md) is non-empty. Its size is a direct measurement of distance from the goal.
 
-#### Catalog Relationships
+## Design patterns
 
-`CatalogRelationshipSpec` — move catalog through-model relationship metadata onto the model classes. Deferred pending a second independent consumer.
+The toolkit for moving knowledge onto models. The patterns are in order of increasing commitment. **Pick the smallest one that fits**; don't reach for a typed spec when a `_meta` walk will do.
 
-The acute wins the spec was built to capture — silent-data-loss fixes on the provenance write path, consolidation of `_entity_ref_targets` + `_literal_schemas` + `_relationship_target_registry` into one unified registry, and the identity-vs-`UniqueConstraint` cross-check at startup — are being landed by [ProvenanceValidationTightening.md](../types/ProvenanceValidationTightening.md) as a hand-maintained unified registry. That registry's shape is deliberately spec-compatible: if/when this axis is revived, the migration is mechanical (replace the 17-line registration function body with a walk over a `ClaimThroughModel` marker base that builds the same schema objects from model-declared specs).
+### Pattern: `_meta` walk
 
-By the four-test bar in "Avoiding axis drift" below, CRS doesn't clear today. Current consumers (`classify_claim`, `validate_single_relationship_claim`, `validate_relationship_claims_batch`, `build_relationship_claim`, plus the materialization resolvers) all live on the same backend pipeline — same subsystem, same release cadence. Revisit when frontend edit metadata is actually being built, not hypothetical: different subsystem, different cadence, clears ≥2 consumers unambiguously.
-
-Design as of the deferral: [ModelDrivenCatalogRelationshipMetadata.md](ModelDrivenCatalogRelationshipMetadata.md) (status note on that doc explains what landed in PVT instead).
-
-### Evaluated and deferred
-
-#### Citation Sources
-
-A `CitationSourceSpec` was considered for unifying citation-source-family metadata (IPDB, OPDB, Fandom). Deferred — revisit when a 3rd structured-parser source family is imminent. Two reasons, detailed in [ModelDrivenCitationSourceMetadata.md](ModelDrivenCitationSourceMetadata.md):
-
-- **Not the same shape as `CatalogRelationshipSpec`.** Citation source families aren't models; they're rows in `CitationSource` with per-family behavior (a URL regex and a callable builder). The right pattern is a class-per-family behavior registry with a sidecar data table, not model-owned metadata. It reuses the Shape 3 machinery but isn't an instance of this doc's umbrella principle.
-- **Scale doesn't warrant it yet.** Only 2 structured-parser source families exist today (IPDB, OPDB), and the backend extractor registry already absorbed part of the drift surface. A field audit against the ≥2-consumers rule shrinks the spec to `identifier_key` + `display_name` + URL-recogniser methods — real but narrow ROI.
-
-### Possible future axes
-
-- `edit_spec` — if/when frontend edit metadata outgrows derivation from `CatalogRelationshipSpec`.
-- `link_spec` — if URL construction needs more than `entity_type` + slug.
-- `media_attachment_spec` — would live in `apps.media`, not catalog. `EntityMedia`'s polymorphic `content_type` + `object_id` attachment doesn't fit `CatalogRelationshipSpec` (different app, different shape); give it its own axis in the media app if and when it earns one.
-
-### Avoiding axis drift
-
-Two failure modes to guard against: within-spec drift (a single spec grows grab-bag fields) and across-spec drift (a model accumulates so many specs that the _set of declarations_ is itself the drift surface).
-
-**Within-spec drift.** If you want to add a field to an existing spec, ask whether the consumer is the same subsystem the spec was built for. If not, it's a new axis and deserves its own attr. If a field could plausibly live in two specs, put it in the narrower one and let the broader consumer read through.
-
-**Across-spec drift — when a new axis is justified.** "One axis, one spec" prevents grab-bag specs but says nothing about axis count. A model carrying six orthogonal specs still accumulates six things-to-remember-when-adding-a-model; the failure mode just moved. A new Shape 3 axis must pass all four tests:
-
-1. **≥2 genuinely independent consumers.** "Validator + dispatcher in the same resolution pipeline" does not count — same subsystem, same read path, same cadence of change. "Backend claim resolver + frontend edit metadata" does — different subsystems, different release cycles.
-2. **Orthogonal to existing axes.** No field overlap; different question answered. If a proposed field could plausibly live on an existing axis, it belongs there — or the slicing between axes is wrong and needs rethinking before adding another.
-3. **Stable shape.** The field set converges as consumers grow, not diverges. If each new consumer adds a field, it's a grab bag in slow motion.
-4. **Alternative explicitly considered.** Before a Shape 3 spec, confirm Shape 1 (pure `_meta` walk) and Shape 2 (single-purpose class attr) genuinely can't do it. Shape 2 handles more than you'd guess.
-
-Meta-norm: no model carries a spec it doesn't apply to. Absence is default; declaration is opt-in per axis.
-
-**Profile objects.** A related temptation: when frontend editing or page behavior gets complicated, it can look attractive to define a per-entity **profile object** that bundles API names, edit affordances, relationship sections, etc. into one UI-facing structure. That is fine _only_ if the profile is a derived view composed from the underlying specs + `_meta`, and stays a narrow UI/API concern. It must not become a second hand-maintained catalog registry. Defer introducing any such layer until the duplication it would eliminate is real, not speculative.
-
-## How derivation works
-
-### Derivation shapes
-
-There are three derivation shapes, in increasing structure. Pick the smallest one that fits; don't reach for a typed spec when a `_meta` walk will do.
-
-| Need                                                 | Shape             | Canonical example                                            |
-| ---------------------------------------------------- | ----------------- | ------------------------------------------------------------ |
-| Filter or transform of fields Django already exposes | Shape 1           | [`get_claim_fields`](../../backend/apps/core/models.py#L281) |
-| One datum per model, one consumer                    | Shape 2           | `MEDIA_CATEGORIES`                                           |
-| Structured metadata, multiple consumers              | Shape 3           | `CatalogRelationshipSpec`                                    |
-| Metadata consumed outside Python                     | Shape 3 + codegen | `catalog-meta.ts` generator                                  |
-
-### Shape 1 — Pure `_meta` walks (optional class-attr inputs)
-
-When the answer is a filter or transform of information Django already carries. May also read small Shape 2 class attrs as per-model inputs (`claims_exempt` is the canonical case). Common idioms:
+**When to use it.** The answer is a filter or transform of information Django already carries. Common idioms:
 
 - **Field shape** (name, type, nullability, unique, default) → `_meta.get_field(name)`.
 - **FK target + lookup** → `field.related_model` + convention ("pk" unless overridden).
 - **M2M through-models** → `Model.m2m_attr.through` or explicit `through="..."` declarations.
 - **Reverse relations** → `_meta.get_fields()` / attribute access.
 
-Canonical example in the codebase: [`get_claim_fields(model)`](../../backend/apps/core/models.py#L281) — walks `_meta.get_fields()`, filters by field type and per-model `claims_exempt`, returns a dict. No registry, no caching (cheap enough to recompute), no base class. Hand-maintained lists like the cache-invalidation signal list and `_SOURCE_FIELDS` are the natural targets for this shape.
+Canonical example in the codebase: [`get_claim_fields(model)`](../../backend/apps/core/models.py) — walks `_meta.get_fields()`, filters by field type and per-model `claims_exempt`, returns a dict. No registry, no caching (cheap enough to recompute), no base class. Hand-maintained lists like the cache-invalidation signal list and `_SOURCE_FIELDS` are the natural targets for this pattern.
 
-### Shape 2 — Single-purpose class attr, ad-hoc read
+A `_meta` walk can also read ClassVars inherited from a [base class / mixin](#pattern-base-class--mixin) as per-model inputs — `claims_exempt` declared on `ClaimControlledModel` is the canonical case, used as a filter input by `get_claim_fields` above.
 
-When one extra datum per model is enough and a single consumer reads it directly. Template:
+### Pattern: base class / mixin
 
-```python
-class Location(CatalogModel):
-    claim_fk_lookups: ClassVar[dict[str, str]] = {"parent": "location_path"}
-```
+**When to use it.** The default home for any ClassVar that customizes per-model behavior. The base declares the ClassVar with a default and (optionally) shared methods; subclasses inherit and override the ClassVar where needed. Discovery is `__subclasses__()` of the base — no hand-maintained list of who participates.
 
-Consumers do `getattr(model, "claim_fk_lookups", {})`. Minimal ceremony, good for narrow needs (`MEDIA_CATEGORIES`, `claim_fk_lookups`, `claims_exempt`). **Not appropriate when multiple subsystems consume the same metadata** — that's the Shape 3 case.
+This pattern covers the full range, from "marker base with one ClassVar and zero methods" to "behavior-providing mixin." The minimum is just: a typed default declared on a base, so the model class itself is the contract, not a `getattr` call in the consumer. (The opposite shape — bare ClassVar on a subclass, read via `getattr` — is the [field-on-model antipattern](#antipattern-field-on-model).)
+
+Examples in the codebase:
+
+- **`LinkableModel`**: provides `get_absolute_url()`, the `public_id` property, and a default `link_url_pattern` derivation; subclasses declare `entity_type`, `entity_type_plural`, `public_id_field`.
+- **`ClaimControlledModel`**: provides claim-related machinery shared across catalog models; the natural home for `claims_exempt`, `claim_fk_lookups`, and `immutable_after_create` ClassVars (with defaults of `frozenset()` / `{}` / `frozenset()` respectively), letting every claim-controlled model be reasoned about generically.
+- **`AliasBase`**: provides alias-table conventions; subclasses declare the FK to their owning entity.
+- **`MediaSupported`**: marker base whose only job is to host `MEDIA_CATEGORIES` declarations and let the media pipeline enumerate participants.
+
+Use [base class / mixin](#pattern-base-class--mixin) whenever the [`_meta` walk](#pattern-_meta-walk) isn't enough. Use [typed spec](#pattern-typed-spec) instead when the metadata is structured data consumed by multiple independent subsystems and you need startup-time validation. The two compose: `LinkableModel` uses [base class / mixin](#pattern-base-class--mixin), and [`core/entity_types.py`](../../backend/apps/core/entity_types.py) is a [typed spec](#pattern-typed-spec) registry built by walking `LinkableModel.__subclasses__()`.
 
 Rules:
 
-- Always use `ClassVar[...]` typing on the attr.
-- Default via `getattr(..., default)` so models don't have to opt in.
-- No registry, no discovery helper — consumers read per-model on demand.
+- Keep the base narrow: one capability per base. `LinkableModel` doesn't try to also be the claim-control base; that's a separate mixin.
+- Avoid grab-bag bases that bundle several unrelated capabilities. If a model would inherit only to get one of three orthogonal capabilities, split the base.
 
-### Shape 3 — Typed spec + registry-via-introspection
+The cross-cutting rules in [Rules of thumb](#rules-of-thumb) — _Base annotates, subclasses assign_; _Hoist to the smallest base that captures the audience_; _Enforce at startup, not at first request_ — also apply to this pattern.
 
-When a structured piece of metadata is consumed by multiple subsystems, or when its absence should fail at startup rather than at first request. This is the pattern proposed for `CatalogRelationshipSpec`.
+### Pattern: typed spec
+
+**When to use it.** A concern earns a typed spec when it's consumed by multiple subsystems, when its absence should fail at startup rather than at first request, or when it has a stable shape worth declaring once and validating centrally. Each orthogonal concern gets its own typed, narrowly-scoped class attr.
+
+**Shape.** Typed `ClassVar[Spec]` on the model + introspection registry over an abstract base. Proposed for `CatalogRelationshipSpec`.
 
 #### Why one typed spec object and not N separate class attrs
 
@@ -135,20 +115,37 @@ Rank-ordering the existing "correct examples" surfaced inconsistencies; this is 
 #### Existing examples, ranked
 
 - **Gold — [`core/entity_types.py`](../../backend/apps/core/entity_types.py)** — class attr + subclass walk + cache + `check_apps_ready()` + duplicate validation + typed return + tight API. Closest template to copy.
-- **Silver — [`_alias_registry.py`](../../backend/apps/catalog/_alias_registry.py)** — same shape, cleaner caching (`lru_cache`), `NamedTuple` return. But derives identity from `_meta.verbose_name` (fragile) and lacks the explicit `check_apps_ready()` guard. Copy the `lru_cache` + `NamedTuple` ideas; don't copy the verbose_name convention. Follow-up for when the registry is next touched: replace the verbose_name lookup with an explicit `alias_target: ClassVar[type[Model]]` class attr on each alias model, and add the missing `check_apps_ready()` guard. No full `AliasSpec` axis is warranted — aliases don't have enough metadata to bundle, and the single-consumer Shape 3 machinery already fits; it's just the identity convention that needs fixing. Treat as independent from the `CatalogRelationshipSpec` work.
+- **Silver — [`_alias_registry.py`](../../backend/apps/catalog/_alias_registry.py)** — same shape, cleaner caching (`lru_cache`), `NamedTuple` return. Identity is fragile (derived from `_meta.verbose_name`) and the `check_apps_ready()` guard is missing — copy the caching and return-type ideas, not the identity convention. Planned fix lives in [ModelDrivenMetadataCleanup.md](ModelDrivenMetadataCleanup.md).
 - **Don't copy:** `MEDIA_CATEGORIES` + `MediaSupported` (no discovery helper, no validator); `claim_fk_lookups` (untyped ad-hoc `getattr`); `export_catalog_meta` (different axis — codegen/distribution).
 
 #### Worked example
 
-One Shape 3 spec is proposed, in its own sibling doc holding the concrete dataclass, per-model declarations, and derivation function:
+One typed spec is designed but deferred:
 
 - `CatalogRelationshipSpec` → [ModelDrivenCatalogRelationshipMetadata.md](ModelDrivenCatalogRelationshipMetadata.md) (claim-relationship metadata).
 
-A second candidate (`CitationSourceSpec`) was evaluated and deferred — see "Evaluated and deferred" above.
+A second candidate, `CitationSourceSpec`, was also evaluated and deferred — see [ModelDrivenCitationSourceMetadata.md](ModelDrivenCitationSourceMetadata.md).
 
-## Distribution to non-Python consumers
+#### When to add a new typed spec axis
 
-Shapes 1/2/3 cover how Django exposes model metadata to Python runtime consumers. A separate concern: **how does that metadata reach consumers that can't import Python** — the SvelteKit frontend, the OpenAPI schema, external tools, any sibling service. Codegen is the answer; any of the three shapes can feed it.
+Two failure modes to guard against: within-spec drift (a single spec grows grab-bag fields) and across-spec drift (a model accumulates so many specs that the _set of declarations_ is itself the drift surface).
+
+**Within-spec drift.** If you want to add a field to an existing spec, ask whether the consumer is the same subsystem the spec was built for. If not, it's a new axis and deserves its own attr. If a field could plausibly live in two specs, put it in the narrower one and let the broader consumer read through.
+
+**Across-spec drift — when a new axis is justified.** "One axis, one spec" prevents grab-bag specs but says nothing about axis count. A model carrying six orthogonal specs still accumulates six things-to-remember-when-adding-a-model; the failure mode just moved. A new typed spec axis must pass all four tests:
+
+1. **≥2 genuinely independent consumers.** "Validator + dispatcher in the same resolution pipeline" does not count — same subsystem, same read path, same cadence of change. "Backend claim resolver + frontend edit metadata" does — different subsystems, different release cycles.
+2. **Orthogonal to existing axes.** No field overlap; different question answered. If a proposed field could plausibly live on an existing axis, it belongs there — or the slicing between axes is wrong and needs rethinking before adding another.
+3. **Stable shape.** The field set converges as consumers grow, not diverges. If each new consumer adds a field, it's a grab bag in slow motion.
+4. **Alternative explicitly considered.** Confirm [`_meta` walk](#pattern-_meta-walk) and [base class / mixin](#pattern-base-class--mixin) genuinely can't do it. [Base class / mixin](#pattern-base-class--mixin) handles more than you'd guess.
+
+Meta-norm: no model carries a spec it doesn't apply to. Absence is default; declaration is opt-in per axis.
+
+**Profile objects.** A related temptation: when frontend editing or page behavior gets complicated, it can look attractive to define a per-entity **profile object** that bundles API names, edit affordances, relationship sections, etc. into one UI-facing structure. That is fine _only_ if the profile is a derived view composed from the underlying specs + `_meta`, and stays a narrow UI/API concern. It must not become a second hand-maintained catalog registry. Defer introducing any such layer until the duplication it would eliminate is real, not speculative.
+
+### Pattern: codegen
+
+**When to use it.** Model metadata needs to reach consumers that can't import Python — the SvelteKit frontend, the OpenAPI schema, external tools, any sibling service. The patterns above cover Python runtime consumers; codegen extends any of them to non-Python consumers.
 
 The canonical example already in the codebase: `export_catalog_meta` generates `frontend/src/lib/api/catalog-meta.ts` from Django models. The rules generalize to any upstream shape → any downstream artifact:
 
@@ -157,6 +154,43 @@ The canonical example already in the codebase: `export_catalog_meta` generates `
 - Each generator carries a parity test that fails when the upstream shape drifts from the emitted artifact.
 
 Reuse this pattern when a new spec has to reach another language or runtime. Do not build a parallel hand-maintained schema on the consumer side.
+
+## Antipatterns
+
+### Antipattern: field-on-model
+
+Declaring a ClassVar on a single model subclass and reading it from a generic consumer via `getattr(model, "thing", default)`.
+
+Why it's an antipattern: the contract lives in the consumer's `getattr` — which picks the attribute name, default, and type — not on any class. The system can't:
+
+- enumerate which models opted in (no base to walk via `__subclasses__()`),
+- type-check the declarations (no shared type to conform to),
+- catch typos at startup (a misspelled or absent attribute silently returns the default),
+- evolve the contract without visiting every consumer (rename = grep risk).
+
+The fix is the same in every case: hoist the ClassVar onto the relevant base or mixin with a typed default, so the model class itself is the contract. See [base class / mixin](#pattern-base-class--mixin).
+
+Concrete examples in the current codebase:
+
+- **`claim_fk_lookups`**: declared on `Location` only ([location.py](../../backend/apps/catalog/models/location.py)); read via `getattr(model_class, "claim_fk_lookups", {})` in [resolve/\_helpers.py](../../backend/apps/catalog/resolve/_helpers.py) (two call sites) and [validate_catalog.py](../../backend/apps/catalog/management/commands/validate_catalog.py). Three consumers, none typed; a typo in any of them silently returns `{}`. Belongs on `ClaimControlledModel` as `ClassVar[dict[str, str]] = {}`.
+- **`claims_exempt`**: declared per-model where the model has fields to exempt (e.g. [location.py](../../backend/apps/catalog/models/location.py)); read via `getattr(model_class, "claims_exempt", frozenset())` in [core/models.py](../../backend/apps/core/models.py). Belongs on `ClaimControlledModel` as `ClassVar[frozenset[str]] = frozenset()`.
+- **Wikilink-picker `link_*` attrs** (`link_sort_order`, `link_label`, `link_description`, `link_autocomplete_*`): declared bare on the four ordered linkable types (Title, MachineModel, Manufacturer, Person); read via `getattr(model, "link_*", default)` six times in [catalog/apps.py](../../backend/apps/catalog/apps.py)'s wikilink registration loop. Belong on a new `WikilinkableModel` mixin — see [ModelDrivenWikilinkableMetadata.md](ModelDrivenWikilinkableMetadata.md).
+
+Counter-example showing the right shape: `alias_claim_field` is declared on `AliasBase` in [core/models.py](../../backend/apps/core/models.py) as `ClassVar[str]`, with `__init_subclass__` enforcement in the same file. Consumers in [\_alias_registry.py](../../backend/apps/catalog/_alias_registry.py) read `alias_cls.alias_claim_field` directly — no `getattr` fallback needed because the contract is enforced at the base.
+
+## Rules of thumb
+
+Cross-cutting rules that apply to any work in this space — picking ClassVar shapes, designing registries, choosing where to enforce, writing parity tests. Some are restated in pattern-specific `Rules:` lists above; this section is where the cross-pattern rules live.
+
+- **Semantics over RHS shape.** Pick the collection type that matches the meaning of the attr, not what the literal happens to look like. `soft_delete_*` started as `tuple[str, ...]` because the RHS was a tuple literal; the right type was `frozenset[str]` because order and duplicates are meaningless. Update the literal at the same time as the annotation.
+- **Don't lie about the shape in the annotation.** Consumer-side `getattr(..., default)` defaults must match the annotated type. If the annotation says `frozenset[str]`, the default is `frozenset()`, not `()`. Don't smuggle a mismatched default past the type checker.
+- **Base annotates, subclasses assign.** Annotate the `ClassVar` on the base; concrete subclasses assign values without re-annotating. Canonical examples: `MEDIA_CATEGORIES` on `MediaSupported`, `entity_type` on `LinkableModel`, `alias_claim_field` on `AliasBase`.
+- **Hoist to the smallest base that captures the audience.** A `ClassVar` meaningful for every claim-controlled model belongs on `ClaimControlledModel`, not above or below. Each per-feature doc's "Why this lives on X" section repeats the audience argument.
+- **Blanket inclusion beats opt-in markers** for correctness-critical paths. An opt-in flag like `bust_all_cache_on_save: ClassVar[bool]` would recreate the drift surface a `__subclasses__()` walk is meant to eliminate. Default-on is fail-safe-by-construction.
+- **Parity tests pin derived sets.** When a registry, signal list, or set is derived from a `_meta` walk or `__subclasses__()` walk, the parity test asserts the _expected output_, not `derived == derived`. New models fire the test and get reviewed intentionally.
+- **Enforce at startup, not at first request.** `__init_subclass__` validators or `apps.checks` system checks catch missing or malformed declarations at boot. The check lives where the contract lives.
+- **Document coverage gaps in code, not just PR discussion.** A comment in `signals.py` explains why `MachineModel*` through-rows aren't in the cache-invalidation walk (the claims resolver invalidates directly via `transaction.on_commit`). PR discussion is searchable; code comments are findable.
+- **`Literal[...]` over abstract bases recreates drift.** Considered for `entity_type` and rejected: a base `Literal` union spanning all subclasses must stay in sync with the subclass declarations — exactly the drift surface the model-driven approach eliminates. `__init_subclass__` validation + the registry builder catch typos at import time, which is effectively as early as type-check time for this codebase.
 
 ## Alternatives considered and rejected
 
