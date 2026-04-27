@@ -12,10 +12,12 @@ For all the catalog models that are URL-addressable, we want that capability to 
 
 This doc outlines an architecture that will support a `LinkableModel` that works for ALL URL-addressable models.
 
+The follow-on implementation plan is [LocationCrud.md](LocationCrud.md). It should land after this work and serves as the proof that the abstraction held: Location must be able to use the shared create/restore factories and generic edit-history / sources endpoints while reserving bespoke code only for true hierarchy semantics.
+
 ## The Contracts
 
 - **[`LinkableModel`](#linkablemodel)**: declares URL identity.
-- **[`ClaimControlledModel.immutable_after_create`](ImmutableAfterCreate.md)**: a new capability on `ClaimControlledModel` to block updates on a field. Location neeeds to block re-parenting, since re-parenting would invalidate the materialized `location_path` on the row and every descendant. This gives Location the ability to freeze its `parent` field. This is a pre-condition for this doc; the work lives in [ImmutableAfterCreate.md](ImmutableAfterCreate.md).
+- **[`ClaimControlledModel.immutable_after_create`](ModelDrivenImmutableAfterCreate.md)**: a new capability on `ClaimControlledModel` to block updates on a field. Location needs to block re-parenting, since re-parenting would invalidate the materialized `location_path` on the row and every descendant. This gives Location the ability to freeze its `parent` field. This is a pre-condition for this doc; the work lives in [ModelDrivenImmutableAfterCreate.md](ModelDrivenImmutableAfterCreate.md).
 
 ## LinkableModel
 

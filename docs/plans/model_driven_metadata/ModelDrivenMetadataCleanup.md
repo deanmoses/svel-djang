@@ -15,11 +15,12 @@ Each item has its own per-feature doc with the full design, examples, and step-b
 | 3   | Soft-delete attrs hoist                 | Hoist             | [ModelDrivenSoftDeleteMetadata.md](ModelDrivenSoftDeleteMetadata.md)         | Small              | —          |
 | 4   | `immutable_after_create` (new)          | New behavior      | [ModelDrivenImmutableAfterCreate.md](ModelDrivenImmutableAfterCreate.md)     | Small-medium       | —          |
 | 5   | Linkability (LinkableModel + factories) | Steel thread      | [ModelDrivenLinkability.md](ModelDrivenLinkability.md)                       | Large (in flight)  | #4         |
-| 6   | `WikilinkableModel` mixin               | New mixin + hoist | [ModelDrivenWikilinkableMetadata.md](ModelDrivenWikilinkableMetadata.md)     | Medium             | (after #5) |
-| 7   | `NamedModel` base                       | New base          | [ModelDrivenNamedMetadata.md](ModelDrivenNamedMetadata.md)                   | Large (~14 models) | —          |
-| 8   | Resolver signature standardization      | Cleanup           | (inline below)                                                               | Small              | —          |
+| 6   | Location CRUD validation                | Steel thread      | [LocationCrud.md](LocationCrud.md)                                           | Large              | #5         |
+| 7   | `WikilinkableModel` mixin               | New mixin + hoist | [ModelDrivenWikilinkableMetadata.md](ModelDrivenWikilinkableMetadata.md)     | Medium             | (after #5) |
+| 8   | `NamedModel` base                       | New base          | [ModelDrivenNamedMetadata.md](ModelDrivenNamedMetadata.md)                   | Large (~14 models) | —          |
+| 9   | Resolver signature standardization      | Cleanup           | (inline below)                                                               | Small              | —          |
 
-**Suggested order:** **1 → 2 → 3** (the three small hoists; same recipe — declare ClassVar on base, drop `getattr` in consumer; confidence-building), then **4** (pre-condition for #5), then **5** (the active steel thread), then **6** (uses Linkability outputs), then **7** (broadest reach, lowest urgency, save for after the patterns and tooling are well-exercised). Item **8** is independent and can land any time.
+**Suggested order:** **1 → 2 → 3** (the three small hoists; same recipe — declare ClassVar on base, drop `getattr` in consumer; confidence-building), then **4** (pre-condition for #5), then **5** (the active steel thread), then **6** (proves #5 against Location's multi-segment public ID), then **7** (uses Linkability outputs), then **8** (broadest reach, lowest urgency, save for after the patterns and tooling are well-exercised). Item **9** is independent and can land any time.
 
 ### Resolver signature standardization
 
