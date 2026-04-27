@@ -5,11 +5,11 @@
  * Detach and set-primary use fetch (no progress needed).
  */
 
-import type { UploadOut } from './schema';
+import type { UploadSchema } from './schema';
 import { getCsrfToken } from './client';
 import { parseApiError } from './parse-api-error';
 
-export type UploadResult = UploadOut;
+export type UploadResult = UploadSchema;
 
 // Keep in sync: backend/apps/media/constants.py
 export const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB

@@ -29,7 +29,7 @@ from .page_endpoints import pages_router
 from .schemas import CitationLinkSchema, ReviewLinkSchema
 
 
-class SourceSchema(Schema):
+class CitationSourceSchema(Schema):
     name: str
     slug: str
     source_type: str
@@ -62,7 +62,7 @@ sources_router = Router(tags=["sources", "private"])
 review_router = Router(tags=["review", "private"])
 
 
-@sources_router.get("/", response=list[SourceSchema])
+@sources_router.get("/", response=list[CitationSourceSchema])
 @decorate_view(cache_control(no_cache=True))
 def list_sources(request: HttpRequest) -> list[Source]:
     return list(Source.objects.all())
@@ -288,7 +288,7 @@ def list_citation_instances(
     ]
 
 
-class BatchCitationInstanceOut(Schema):
+class CitationInstanceBatchSchema(Schema):
     id: int
     source_name: str
     source_type: str
@@ -300,11 +300,11 @@ class BatchCitationInstanceOut(Schema):
 
 @citation_instances_router.get(
     "/batch/",
-    response={200: list[BatchCitationInstanceOut], 422: ErrorDetailSchema},
+    response={200: list[CitationInstanceBatchSchema], 422: ErrorDetailSchema},
 )
 def batch_citation_instances(
     request: HttpRequest, ids: str = ""
-) -> list[BatchCitationInstanceOut]:
+) -> list[CitationInstanceBatchSchema]:
     """Return citation instances by ID for tooltip rendering."""
     if not ids.strip():
         return []
@@ -324,7 +324,7 @@ def batch_citation_instances(
     )
 
     return [
-        BatchCitationInstanceOut(
+        CitationInstanceBatchSchema(
             id=ci.pk,
             source_name=ci.citation_source.name,
             source_type=ci.citation_source.source_type,
@@ -340,7 +340,7 @@ def batch_citation_instances(
     ]
 
 
-class CitationInstanceCreateIn(Schema):
+class CitationInstanceCreateSchema(Schema):
     citation_source_id: int
     locator: str = ""
 
@@ -351,7 +351,7 @@ class CitationInstanceCreateIn(Schema):
     auth=django_auth,
 )
 def create_citation_instance(
-    request: HttpRequest, data: CitationInstanceCreateIn
+    request: HttpRequest, data: CitationInstanceCreateSchema
 ) -> Status[CitationInstanceSchema]:
     """Create a new CitationInstance for use in ``[[cite:N]]`` markers."""
     source = get_object_or_404(CitationSource, pk=data.citation_source_id)

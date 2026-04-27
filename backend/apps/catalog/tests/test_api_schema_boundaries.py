@@ -2,7 +2,7 @@
 
 Shared wire shapes should be *defined* in the app that owns the domain
 concept, not in `catalog.api.schemas`. Catalog may still import and compose
-them (e.g. `ClaimPatchSchema.citation: EditCitationInput | None`), so we
+them (e.g. `ClaimPatchSchema.citation: CitationReferenceInputSchema | None`), so we
 check definition site via `__module__` rather than re-export presence.
 """
 
@@ -15,7 +15,7 @@ from config.api import api
 class TestSharedSchemaOwnership:
     def test_provenance_owned_shapes_are_defined_in_provenance(self):
         for name in (
-            "EditCitationInput",
+            "CitationReferenceInputSchema",
             "AttributionSchema",
             "CitationLinkSchema",
             "InlineCitationSchema",
@@ -81,7 +81,7 @@ class TestSharedSchemaOwnership:
     def test_catalog_schemas_does_not_redefine_shared_shapes(self):
         # Catalog may import and compose these, but must not define them.
         shared_names = (
-            "EditCitationInput",
+            "CitationReferenceInputSchema",
             "AttributionSchema",
             "CitationLinkSchema",
             "InlineCitationSchema",

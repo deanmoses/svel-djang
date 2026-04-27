@@ -6,7 +6,7 @@
     createChildByIdentifier,
     type CitationSourceResult,
     type RecognitionResult,
-    type SearchResponse,
+    type CitationSourceSearchResponseSchema,
     type ExtractionDraft,
   } from './citation-types';
   import DropdownHeader from '../DropdownHeader.svelte';
@@ -89,15 +89,15 @@
   // Debounced search (backend handles recognition)
   // -----------------------------------------------------------------------
 
-  const emptyResponse: SearchResponse = { results: [], recognition: null };
+  const emptyResponse: CitationSourceSearchResponseSchema = { results: [], recognition: null };
 
-  const debouncedSearch = createDebouncedSearch<SearchResponse>(
+  const debouncedSearch = createDebouncedSearch<CitationSourceSearchResponseSchema>(
     async (q: string) => {
       if (!q.trim()) return emptyResponse;
       const { data } = await client.GET('/api/citation-sources/search/', {
         params: { query: { q } },
       });
-      return (data as SearchResponse | undefined) ?? emptyResponse;
+      return (data as CitationSourceSearchResponseSchema | undefined) ?? emptyResponse;
     },
     (response) => {
       recognition = response.recognition ?? null;

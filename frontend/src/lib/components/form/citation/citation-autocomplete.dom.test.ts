@@ -48,7 +48,7 @@ function getSearchInput() {
   return screen.getByRole('combobox', { name: /search sources/i }) as HTMLInputElement;
 }
 
-/** Default search mock: returns MOCK_SOURCES wrapped in SearchResponse. */
+/** Default search mock: returns MOCK_SOURCES wrapped in CitationSourceSearchResponseSchema. */
 function mockSearchReturning(results: typeof MOCK_SOURCES, recognition: unknown = null) {
   return Promise.resolve({ data: { results, recognition } });
 }

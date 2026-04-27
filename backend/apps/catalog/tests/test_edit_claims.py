@@ -6,7 +6,7 @@ import pytest
 
 from apps.catalog.api._typing import CreditKey, CreditPkKey
 from apps.catalog.api.edit_claims import (
-    FieldConstraint,
+    FieldConstraintSchema,
     StructuredValidationError,
     _normalize_abbreviations,
     build_credit_claim_specs,
@@ -105,23 +105,23 @@ class TestGetFieldConstraints:
 
     def test_machine_model_constraints(self):
         result = get_field_constraints(MachineModel)
-        assert result["year"] == FieldConstraint(min=1800, max=2100, step=1)
-        assert result["month"] == FieldConstraint(min=1, max=12, step=1)
-        assert result["flipper_count"] == FieldConstraint(min=0, max=20, step=1)
-        assert result["player_count"] == FieldConstraint(min=1, max=20, step=1)
-        assert result["ipdb_rating"] == FieldConstraint(min=0, max=10, step=0.01)
-        assert result["ipdb_id"] == FieldConstraint(min=1, step=1)
+        assert result["year"] == FieldConstraintSchema(min=1800, max=2100, step=1)
+        assert result["month"] == FieldConstraintSchema(min=1, max=12, step=1)
+        assert result["flipper_count"] == FieldConstraintSchema(min=0, max=20, step=1)
+        assert result["player_count"] == FieldConstraintSchema(min=1, max=20, step=1)
+        assert result["ipdb_rating"] == FieldConstraintSchema(min=0, max=10, step=0.01)
+        assert result["ipdb_id"] == FieldConstraintSchema(min=1, step=1)
 
     def test_person_constraints(self):
         result = get_field_constraints(Person)
-        assert result["birth_year"] == FieldConstraint(min=1800, max=2100, step=1)
-        assert result["birth_month"] == FieldConstraint(min=1, max=12, step=1)
-        assert result["birth_day"] == FieldConstraint(min=1, max=31, step=1)
+        assert result["birth_year"] == FieldConstraintSchema(min=1800, max=2100, step=1)
+        assert result["birth_month"] == FieldConstraintSchema(min=1, max=12, step=1)
+        assert result["birth_day"] == FieldConstraintSchema(min=1, max=31, step=1)
 
     def test_corporate_entity_constraints(self):
         result = get_field_constraints(CorporateEntity)
-        assert result["year_start"] == FieldConstraint(min=1800, max=2100, step=1)
-        assert result["year_end"] == FieldConstraint(min=1800, max=2100, step=1)
+        assert result["year_start"] == FieldConstraintSchema(min=1800, max=2100, step=1)
+        assert result["year_end"] == FieldConstraintSchema(min=1800, max=2100, step=1)
 
     def test_excludes_non_numeric_fields(self):
         result = get_field_constraints(MachineModel)

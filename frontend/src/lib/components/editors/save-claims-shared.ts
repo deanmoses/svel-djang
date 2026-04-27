@@ -7,7 +7,7 @@ import client from '$lib/api/client';
 import { parseApiError, type FieldErrors } from '$lib/api/parse-api-error';
 import type {
   ClaimPatchSchema,
-  EditCitationInput,
+  CitationReferenceInputSchema,
   HierarchyClaimPatchSchema,
   paths,
 } from '$lib/api/schema';
@@ -15,7 +15,7 @@ import type {
 /** Metadata that the modal passes through to an editor's save(). */
 export type SaveMeta = {
   note?: string;
-  citation?: EditCitationInput;
+  citation?: CitationReferenceInputSchema;
 };
 
 export type SaveResult =

@@ -35,7 +35,7 @@ from apps.provenance.models import (
     Claim,
     ClaimControlledModel,
 )
-from apps.provenance.schemas import EditCitationInput
+from apps.provenance.schemas import CitationReferenceInputSchema
 from apps.provenance.validation import validate_claim_value
 
 from ..resolve import resolve_after_mutation
@@ -171,7 +171,7 @@ def plan_scalar_field_claims(
     return specs
 
 
-class FieldConstraint(Schema):
+class FieldConstraintSchema(Schema):
     """Numeric validator-derived constraint for a single field.
 
     The endpoint serializes with ``exclude_none=True`` so ``min`` / ``max``
@@ -185,7 +185,7 @@ class FieldConstraint(Schema):
 
 def get_field_constraints(
     model_class: type[db_models.Model],
-) -> dict[str, FieldConstraint]:
+) -> dict[str, FieldConstraintSchema]:
     """Extract min/max/step constraints from numeric claim fields.
 
     Only fields with at least one validator-derived bound are included.
@@ -200,7 +200,7 @@ def get_field_constraints(
         db_models.FloatField,
     )
     editable = get_claim_fields(model_class)
-    constraints: dict[str, FieldConstraint] = {}
+    constraints: dict[str, FieldConstraintSchema] = {}
 
     for field_name in editable:
         field = model_class._meta.get_field(field_name)
@@ -222,7 +222,7 @@ def get_field_constraints(
             step: float | int = float(f"1e-{field.decimal_places}")
         else:
             step = 1
-        constraints[field_name] = FieldConstraint(**bounds, step=step)
+        constraints[field_name] = FieldConstraintSchema(**bounds, step=step)
 
     return constraints
 
@@ -788,7 +788,7 @@ def _write_claims_in_changeset(
 
 def _attach_citation(
     claims: list[Claim],
-    citation: EditCitationInput | None,
+    citation: CitationReferenceInputSchema | None,
 ) -> None:
     """Link each claim in *claims* to a copy of the referenced citation instance."""
     if citation is None:
@@ -817,7 +817,7 @@ def execute_claims(
     user: _RequestUser,
     action: ChangeSetAction = ChangeSetAction.EDIT,
     note: str = "",
-    citation: EditCitationInput | None = None,
+    citation: CitationReferenceInputSchema | None = None,
 ) -> None:
     """Create a ChangeSet + claims atomically, resolve, and invalidate cache.
 
@@ -861,7 +861,7 @@ def execute_multi_entity_claims(
     user: _RequestUser,
     action: ChangeSetAction,
     note: str = "",
-    citation: EditCitationInput | None = None,
+    citation: CitationReferenceInputSchema | None = None,
 ) -> ChangeSet:
     """Write claims spanning multiple entities inside a single ChangeSet.
 

@@ -80,15 +80,15 @@ class CitationSourceParentSchema(Schema):
     name: str
 
 
-class RecognitionSchema(Schema):
+class CitationRecognitionSchema(Schema):
     parent: CitationSourceParentSchema
     child: CitationSourceMatchSchema | None = None
     identifier: str | None = None
 
 
-class SearchResponse(Schema):
+class CitationSourceSearchResponseSchema(Schema):
     results: list[CitationSourceSearchSchema]
-    recognition: RecognitionSchema | None = None
+    recognition: CitationRecognitionSchema | None = None
 
 
 class CitationSourceCreateSchema(Schema):
@@ -196,11 +196,11 @@ class CitationSourceLinkUpdateSchema(Schema):
         return "" if v is None else v
 
 
-class ExtractRequestSchema(Schema):
+class CitationExtractInputSchema(Schema):
     input: str
 
 
-class ExtractDraftSchema(Schema):
+class CitationExtractDraftSchema(Schema):
     name: str
     source_type: str
     author: str
@@ -210,8 +210,8 @@ class ExtractDraftSchema(Schema):
     url: str | None = None
 
 
-class ExtractResponseSchema(Schema):
-    draft: ExtractDraftSchema | None = None
+class CitationExtractResultSchema(Schema):
+    draft: CitationExtractDraftSchema | None = None
     match: CitationSourceMatchSchema | None = None
     error: str | None = None
     confidence: str = ""
@@ -351,7 +351,7 @@ def _is_url(q: str) -> bool:
     return q.startswith("http://") or q.startswith("https://")
 
 
-def _build_recognition(rec: Recognition) -> RecognitionSchema:
+def _build_recognition(rec: Recognition) -> CitationRecognitionSchema:
     """Serialize an extractors.Recognition into the API response shape."""
     child: CitationSourceMatchSchema | None = None
     if rec.child is not None:
@@ -360,7 +360,7 @@ def _build_recognition(rec: Recognition) -> RecognitionSchema:
             name=rec.child.name,
             skip_locator=rec.child.skip_locator,
         )
-    return RecognitionSchema(
+    return CitationRecognitionSchema(
         parent=CitationSourceParentSchema(id=rec.parent_id, name=rec.parent_name),
         child=child,
         identifier=rec.identifier,
@@ -369,10 +369,12 @@ def _build_recognition(rec: Recognition) -> RecognitionSchema:
 
 @citation_sources_router.get(
     "/search/",
-    response=SearchResponse,
+    response=CitationSourceSearchResponseSchema,
     auth=django_auth,
 )
-def search_citation_sources(request: HttpRequest, q: str = "") -> SearchResponse:
+def search_citation_sources(
+    request: HttpRequest, q: str = ""
+) -> CitationSourceSearchResponseSchema:
     """Typeahead search with URL/ISBN recognition.
 
     Returns search results plus optional recognition metadata when the
@@ -380,10 +382,10 @@ def search_citation_sources(request: HttpRequest, q: str = "") -> SearchResponse
     """
     q = q.strip()
     if not q:
-        return SearchResponse(results=[], recognition=None)
+        return CitationSourceSearchResponseSchema(results=[], recognition=None)
 
     # --- Recognition (URL or ISBN) -----------------------------------------
-    recognition: RecognitionSchema | None = None
+    recognition: CitationRecognitionSchema | None = None
     if _is_url(q):
         rec = recognize_url(q)
         if rec is not None:
@@ -411,7 +413,7 @@ def search_citation_sources(request: HttpRequest, q: str = "") -> SearchResponse
         .distinct()
         .order_by("name")[:20]
     )
-    return SearchResponse(
+    return CitationSourceSearchResponseSchema(
         results=[_serialize_search_row(s) for s in qs],
         recognition=recognition,
     )
@@ -500,7 +502,7 @@ class _ExtractThrottle(AuthRateThrottle):
 @citation_sources_router.post(
     "/extract/",
     response={
-        200: ExtractResponseSchema,
+        200: CitationExtractResultSchema,
         422: ErrorDetailSchema,
         429: ErrorDetailSchema,
     },
@@ -508,8 +510,8 @@ class _ExtractThrottle(AuthRateThrottle):
     throttle=[_ExtractThrottle("10/m")],
 )
 def extract_citation_source(
-    request: HttpRequest, data: ExtractRequestSchema
-) -> ExtractResponseSchema:
+    request: HttpRequest, data: CitationExtractInputSchema
+) -> CitationExtractResultSchema:
     """Classify input and look up metadata from external APIs."""
     classified = classify_input(data.input)
     if classified is None:
@@ -523,9 +525,11 @@ def extract_citation_source(
     else:
         raise HttpError(422, "Unsupported input")
 
-    return ExtractResponseSchema(
+    return CitationExtractResultSchema(
         match=CitationSourceMatchSchema(**result.match) if result.match else None,
-        draft=ExtractDraftSchema(**asdict(result.draft)) if result.draft else None,
+        draft=CitationExtractDraftSchema(**asdict(result.draft))
+        if result.draft
+        else None,
         error=result.error,
         confidence=result.confidence,
         source_api=result.source_api,

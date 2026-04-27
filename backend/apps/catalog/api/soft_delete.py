@@ -45,7 +45,7 @@ from django.db import models as db_models
 from apps.catalog.models import CatalogModel
 from apps.core.models import EntityStatusMixin
 from apps.provenance.models import ChangeSet, ChangeSetAction
-from apps.provenance.schemas import EditCitationInput
+from apps.provenance.schemas import CitationReferenceInputSchema
 
 from .edit_claims import ClaimSpec, execute_multi_entity_claims
 from .schemas import BlockingReferrerSchema
@@ -300,7 +300,7 @@ def execute_soft_delete(
     *,
     user: _UserLike,
     note: str = "",
-    citation: EditCitationInput | None = None,
+    citation: CitationReferenceInputSchema | None = None,
 ) -> tuple[ChangeSet | None, list[CatalogModel]]:
     """Soft-delete *root* and all cascade children in one ChangeSet.
 

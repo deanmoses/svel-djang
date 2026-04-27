@@ -1,9 +1,9 @@
 import type {
   CitationSourceChildSchema,
   CitationSourceSearchSchema,
-  ExtractDraftSchema,
-  RecognitionSchema,
-  SearchResponse,
+  CitationExtractDraftSchema,
+  CitationRecognitionSchema,
+  CitationSourceSearchResponseSchema,
 } from '$lib/api/schema';
 import type { createApiClient } from '$lib/api/client';
 
@@ -13,11 +13,11 @@ import type { createApiClient } from '$lib/api/client';
 
 export type CitationSourceResult = CitationSourceSearchSchema;
 export type ChildSource = CitationSourceChildSchema;
-export type RecognitionResult = RecognitionSchema;
-export type { SearchResponse };
+export type RecognitionResult = CitationRecognitionSchema;
+export type { CitationSourceSearchResponseSchema };
 
 /** Draft metadata returned by the extract endpoint (Open Library, etc.). */
-export type ExtractionDraft = ExtractDraftSchema;
+export type ExtractionDraft = CitationExtractDraftSchema;
 
 /** Subset of a search result carried through the state machine after selecting an abstract source. */
 export type ParentContext = {

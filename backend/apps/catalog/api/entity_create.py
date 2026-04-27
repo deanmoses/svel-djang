@@ -32,7 +32,7 @@ from django.db import models as db_models
 from django.db.models import Q
 
 from apps.provenance.models import ChangeSetAction, ClaimControlledModel
-from apps.provenance.schemas import EditCitationInput
+from apps.provenance.schemas import CitationReferenceInputSchema
 
 from .edit_claims import (
     ClaimSpec,
@@ -259,7 +259,7 @@ def create_entity_with_claims(
     claim_specs: list[ClaimSpec],
     user: _UserLike,
     note: str = "",
-    citation: EditCitationInput | None = None,
+    citation: CitationReferenceInputSchema | None = None,
 ) -> ClaimControlledModel:
     """Create a new catalog row + its initial claims atomically.
 

@@ -65,7 +65,7 @@ class ClaimSchema(Schema):
     changeset_note: str | None = None
 
 
-class EditCitationInput(Schema):
+class CitationReferenceInputSchema(Schema):
     """Reference an existing CitationInstance to clone onto a user edit."""
 
     citation_instance_id: int
@@ -75,7 +75,7 @@ class ChangeSetInputSchema(Schema):
     """Base shape for any user-attributed mutation that produces a ChangeSet."""
 
     note: str = ""
-    citation: EditCitationInput | None = None
+    citation: CitationReferenceInputSchema | None = None
 
 
 class AttributionSchema(Schema):
