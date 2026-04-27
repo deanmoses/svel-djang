@@ -21,7 +21,7 @@ from apps.catalog.claims import build_media_attachment_claim
 from apps.catalog.resolve import resolve_media_attachments
 from apps.core.api_helpers import authed_user
 from apps.core.entity_types import get_linkable_model
-from apps.core.schemas import ErrorDetailSchema
+from apps.core.schemas import ErrorDetailSchema, ValidationErrorSchema
 from apps.media.constants import (
     ALLOWED_IMAGE_EXTENSIONS,
     DISPLAY_MAX_DIMENSION,
@@ -312,7 +312,11 @@ def upload_media(
     )
 
 
-@media_router.post("/detach/", response={204: None}, auth=django_auth)
+@media_router.post(
+    "/detach/",
+    response={204: None, 404: ErrorDetailSchema, 422: ValidationErrorSchema},
+    auth=django_auth,
+)
 def detach_media(request: HttpRequest, body: MediaAssetInputSchema) -> Status[None]:
     """Detach a media asset from an entity by asserting an exists=False claim."""
     user = authed_user(request)
@@ -361,7 +365,11 @@ def detach_media(request: HttpRequest, body: MediaAssetInputSchema) -> Status[No
     return Status(204, None)
 
 
-@media_router.post("/set-primary/", response={204: None}, auth=django_auth)
+@media_router.post(
+    "/set-primary/",
+    response={204: None, 404: ErrorDetailSchema, 422: ValidationErrorSchema},
+    auth=django_auth,
+)
 def set_primary(request: HttpRequest, body: MediaAssetInputSchema) -> Status[None]:
     """Set a media asset as primary for its category on an entity."""
     user = authed_user(request)

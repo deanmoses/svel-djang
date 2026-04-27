@@ -194,6 +194,7 @@ Some OpenAPI components don't come from explicit Ninja schema classes — Ninja 
 | PR 2 (medium batch: media + citation + provenance)                 | DONE   |
 | PR 3 (large batch: catalog)                                        | DONE   |
 | PR 4 (`Paged*Schema` ghost fix via `NamedPaginatedResponseSchema`) | DONE   |
+| Boundary tests (`apps/core/tests/test_openapi_boundaries.py`)      | DONE   |
 
 When picking this up in a fresh session: read this plan top-to-bottom, then `git log refactor/api-renaming` to see what's already landed, then start at the next TODO.
 
@@ -231,19 +232,28 @@ After all rename PRs land, the conventions worth pinning will be clearer.
 Likely candidates, to be confirmed against what actually shipped:
 
 - Schema suffix discipline: per
-  [ApiNamingRationalization.md](ApiNamingRationalization.md), no schema name
-  ends in `Schema`, `In`, or `Out`; outputs are bare or use a role suffix
-  (`…Detail`, `…ListItem`, `…GridItem`, `…List`, `…Ref`); inputs use
-  `…Input`, `…Patch`, or `…Create`. The test asserts the negative (no
-  `Schema`/`In`/`Out` suffixes in `components.schemas`) plus a positive
-  check that every name matches one of the allowed role patterns. Target
+  [ApiNamingRationalization.md](ApiNamingRationalization.md), every name in
+  `components.schemas` ends in `Schema`, ends in `Ref`, or equals
+  `JsonBody`; no name ends in `In` or `Out`; and none of the
+  previously-generic names (`Variant`, `Source`, `Stats`, `Recognition`,
+  `Create`, `Input`, `SearchResponse`, bare `Ref`) appear. Target
   `components.schemas`, not Python class names, so dataclasses like
-  `RelationshipSchema` aren't false hits.
-- Schemas live in `schemas.py`, not embedded in endpoint files
-  (`apps/citation/api.py` has 15 inline classes; `apps/accounts/api.py` has
-  4).
-- Every mutating endpoint declares typed 4xx responses (already established
-  by _Type error responses_).
+  `RelationshipSchema` aren't false hits. Verified clean against the
+  current OpenAPI doc (156 names, zero violations).
+- Inline schemas in endpoint files don't grow: regression-style check that
+  counts `class … (Schema)` definitions in `apps/*/api.py` (and
+  `apps/*/api/*.py`) per app and fails if any app's count exceeds today's
+  baseline. Today's baselines: `citation` 15, `accounts` 4, `media` 4,
+  `provenance` 8. Not a migration-forcing test — it pins the convention
+  going forward without requiring the existing inline schemas to move
+  first. New schemas must go in `schemas.py`; the eventual cleanup of the
+  31 existing inline classes is tracked separately.
+- Every mutating endpoint (`POST`/`PATCH`/`DELETE`) declares typed 4xx
+  responses in its OpenAPI definition. `ValidationErrorSchema` and
+  `RateLimitErrorSchema` are wired into the doc, but no test currently
+  asserts that mutating endpoints reference them — write one that iterates
+  paths in the live OpenAPI doc and fails if a mutating operation has no
+  `4xx`-keyed entries under `responses`.
 - (The ESLint `no-restricted-syntax` rule banning `components['schemas']`
   indexed access outside `client.ts` ships **inside PR 0**, not here — see
   [PR 0](#pr-0-ts-side-sweep-indexed-access--named-imports). This section
