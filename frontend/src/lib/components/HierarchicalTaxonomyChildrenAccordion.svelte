@@ -1,7 +1,7 @@
 <script lang="ts">
   import { resolveHref } from '$lib/utils';
   import AccordionSection from '$lib/components/AccordionSection.svelte';
-  import type { Ref } from '$lib/api/schema';
+  import type { EntityRef } from '$lib/api/schema';
 
   let {
     basePath,
@@ -10,7 +10,7 @@
     headingSize,
   }: {
     basePath: string;
-    children: Ref[];
+    children: EntityRef[];
     heading: string;
     headingSize?: string;
   } = $props();

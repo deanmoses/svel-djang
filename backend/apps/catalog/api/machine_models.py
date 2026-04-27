@@ -91,14 +91,14 @@ from .schemas import (
     AlreadyDeletedSchema,
     CreditSchema,
     DeleteResponseSchema,
-    EditOptionItem,
-    GameplayFeatureSchema,
+    EditOptionSchema,
+    EntityRef,
+    GameplayFeatureRef,
     ModelClaimPatchSchema,
     ModelDeletePreviewSchema,
     ModelEditOptionsSchema,
-    Ref,
     SoftDeleteBlockedSchema,
-    TitleMachineSchema,
+    TitleModelSchema,
 )
 from .soft_delete import (
     SoftDeleteBlockedError,
@@ -113,7 +113,7 @@ from .soft_delete import (
 # ---------------------------------------------------------------------------
 
 
-class MachineModelGridSchema(Schema):
+class ModelGridItemSchema(Schema):
     name: str
     slug: str
     year: int | None = None
@@ -125,28 +125,28 @@ class MachineModelGridSchema(Schema):
     title_slug: str | None = None
 
 
-class MachineModelListSchema(Schema):
+class ModelListItemSchema(Schema):
     name: str
     slug: str
-    manufacturer: Ref | None = None
+    manufacturer: EntityRef | None = None
     year: int | None = None
-    technology_generation: Ref | None = None
-    display_type: Ref | None = None
+    technology_generation: EntityRef | None = None
+    display_type: EntityRef | None = None
     ipdb_id: int | None = None
     ipdb_rating: float | None = None
     pinside_rating: float | None = None
-    themes: list[Ref] = []
+    themes: list[EntityRef] = []
     thumbnail_url: str | None = None
 
 
-class VariantSchema(Schema):
+class ModelVariantSchema(Schema):
     name: str
     slug: str
     year: int | None = None
     variant_features: list[str] = []
 
 
-class ModelRefSchema(Schema):
+class ModelRef(Schema):
     """A reference to a machine model with name, slug, and optional year."""
 
     name: str
@@ -154,20 +154,20 @@ class ModelRefSchema(Schema):
     year: int | None = None
 
 
-class MachineModelDetailSchema(Schema):
+class ModelDetailSchema(Schema):
     name: str
     slug: str
-    manufacturer: Ref | None = None
-    corporate_entity: Ref | None = None
+    manufacturer: EntityRef | None = None
+    corporate_entity: EntityRef | None = None
     year: int | None = None
     month: int | None = None
-    technology_generation: Ref | None = None
-    technology_subgeneration: Ref | None = None
-    display_type: Ref | None = None
+    technology_generation: EntityRef | None = None
+    technology_subgeneration: EntityRef | None = None
+    display_type: EntityRef | None = None
     player_count: int | None = None
-    themes: list[Ref] = []
+    themes: list[EntityRef] = []
     production_quantity: str
-    system: Ref | None = None
+    system: EntityRef | None = None
     flipper_count: int | None = None
     ipdb_id: int | None = None
     opdb_id: str | None = None
@@ -183,23 +183,23 @@ class MachineModelDetailSchema(Schema):
     image_attribution: AttributionSchema | None = None
     uploaded_media: list[UploadedMediaSchema] = []
     variant_features: list[str] = []
-    variants: list[VariantSchema] = []
-    title: Ref | None = None
-    cabinet: Ref | None = None
-    game_format: Ref | None = None
-    display_subtype: Ref | None = None
-    gameplay_features: list[GameplayFeatureSchema] = []
-    tags: list[Ref] = []
-    reward_types: list[Ref] = []
-    franchise: Ref | None = None
-    series: Ref | None = None
-    variant_of: ModelRefSchema | None = None
-    variant_siblings: list[VariantSchema] = []
-    converted_from: ModelRefSchema | None = None
-    conversions: list[ModelRefSchema] = []
-    remake_of: ModelRefSchema | None = None
-    remakes: list[ModelRefSchema] = []
-    title_models: list[TitleMachineSchema] = []
+    variants: list[ModelVariantSchema] = []
+    title: EntityRef | None = None
+    cabinet: EntityRef | None = None
+    game_format: EntityRef | None = None
+    display_subtype: EntityRef | None = None
+    gameplay_features: list[GameplayFeatureRef] = []
+    tags: list[EntityRef] = []
+    reward_types: list[EntityRef] = []
+    franchise: EntityRef | None = None
+    series: EntityRef | None = None
+    variant_of: ModelRef | None = None
+    variant_siblings: list[ModelVariantSchema] = []
+    converted_from: ModelRef | None = None
+    conversions: list[ModelRef] = []
+    remake_of: ModelRef | None = None
+    remakes: list[ModelRef] = []
+    title_models: list[TitleModelSchema] = []
 
 
 # ---------------------------------------------------------------------------
@@ -333,7 +333,7 @@ def _serialize_model_list(
     }
 
 
-def _serialize_model_detail(pm: MachineModel) -> MachineModelDetailSchema:
+def _serialize_model_detail(pm: MachineModel) -> ModelDetailSchema:
     """Serialize a MachineModel into the detail response schema.
 
     Expects *pm* to have been fetched with prefetch_related for credits
@@ -356,7 +356,7 @@ def _serialize_model_detail(pm: MachineModel) -> MachineModelDetailSchema:
     variant_features = _extract_variant_features(pm.extra_data or {})
 
     variants = [
-        VariantSchema(
+        ModelVariantSchema(
             name=v.name,
             slug=v.slug,
             year=v.year,
@@ -366,12 +366,12 @@ def _serialize_model_detail(pm: MachineModel) -> MachineModelDetailSchema:
     ]
 
     # Build sibling variants: other variants of the same parent.
-    variant_siblings: list[VariantSchema] = []
+    variant_siblings: list[ModelVariantSchema] = []
     if pm.variant_of_id is not None:
         parent = pm.variant_of
         assert parent is not None  # narrowed by variant_of_id check above
         variant_siblings = [
-            VariantSchema(
+            ModelVariantSchema(
                 name=sib.name,
                 slug=sib.slug,
                 year=sib.year,
@@ -394,20 +394,20 @@ def _serialize_model_detail(pm: MachineModel) -> MachineModelDetailSchema:
         else None
     )
 
-    return MachineModelDetailSchema(
+    return ModelDetailSchema(
         name=pm.name,
         slug=pm.slug,
         description=description,
-        manufacturer=Ref(name=mfr.name, slug=mfr.slug) if mfr else None,
+        manufacturer=EntityRef(name=mfr.name, slug=mfr.slug) if mfr else None,
         corporate_entity=(
-            Ref(name=pm.corporate_entity.name, slug=pm.corporate_entity.slug)
+            EntityRef(name=pm.corporate_entity.name, slug=pm.corporate_entity.slug)
             if pm.corporate_entity
             else None
         ),
         year=pm.year,
         month=pm.month,
         technology_generation=(
-            Ref(
+            EntityRef(
                 name=pm.technology_generation.name,
                 slug=pm.technology_generation.slug,
             )
@@ -415,17 +415,19 @@ def _serialize_model_detail(pm: MachineModel) -> MachineModelDetailSchema:
             else None
         ),
         technology_subgeneration=(
-            Ref(name=subgen.name, slug=subgen.slug) if subgen else None
+            EntityRef(name=subgen.name, slug=subgen.slug) if subgen else None
         ),
         display_type=(
-            Ref(name=pm.display_type.name, slug=pm.display_type.slug)
+            EntityRef(name=pm.display_type.name, slug=pm.display_type.slug)
             if pm.display_type
             else None
         ),
         player_count=pm.player_count,
-        themes=[Ref(name=t.name, slug=t.slug) for t in pm.themes.all()],
+        themes=[EntityRef(name=t.name, slug=t.slug) for t in pm.themes.all()],
         production_quantity=pm.production_quantity,
-        system=(Ref(name=pm.system.name, slug=pm.system.slug) if pm.system else None),
+        system=(
+            EntityRef(name=pm.system.name, slug=pm.system.slug) if pm.system else None
+        ),
         flipper_count=pm.flipper_count,
         ipdb_id=pm.ipdb_id,
         opdb_id=pm.opdb_id,
@@ -444,7 +446,7 @@ def _serialize_model_detail(pm: MachineModel) -> MachineModelDetailSchema:
         variant_features=variant_features,
         variants=variants,
         variant_of=(
-            ModelRefSchema(
+            ModelRef(
                 name=pm.variant_of.name,
                 slug=pm.variant_of.slug,
                 year=pm.variant_of.year,
@@ -454,7 +456,7 @@ def _serialize_model_detail(pm: MachineModel) -> MachineModelDetailSchema:
         ),
         variant_siblings=variant_siblings,
         converted_from=(
-            ModelRefSchema(
+            ModelRef(
                 name=pm.converted_from.name,
                 slug=pm.converted_from.slug,
                 year=pm.converted_from.year,
@@ -463,11 +465,11 @@ def _serialize_model_detail(pm: MachineModel) -> MachineModelDetailSchema:
             else None
         ),
         conversions=[
-            ModelRefSchema(name=c.name, slug=c.slug, year=c.year)
+            ModelRef(name=c.name, slug=c.slug, year=c.year)
             for c in pm.conversions.all()
         ],
         remake_of=(
-            ModelRefSchema(
+            ModelRef(
                 name=pm.remake_of.name,
                 slug=pm.remake_of.slug,
                 year=pm.remake_of.year,
@@ -476,40 +478,43 @@ def _serialize_model_detail(pm: MachineModel) -> MachineModelDetailSchema:
             else None
         ),
         remakes=[
-            ModelRefSchema(name=r.name, slug=r.slug, year=r.year)
-            for r in pm.remakes.all()
+            ModelRef(name=r.name, slug=r.slug, year=r.year) for r in pm.remakes.all()
         ],
-        title=(Ref(name=pm.title.name, slug=pm.title.slug) if pm.title else None),
+        title=(EntityRef(name=pm.title.name, slug=pm.title.slug) if pm.title else None),
         cabinet=(
-            Ref(name=pm.cabinet.name, slug=pm.cabinet.slug) if pm.cabinet else None
+            EntityRef(name=pm.cabinet.name, slug=pm.cabinet.slug)
+            if pm.cabinet
+            else None
         ),
         game_format=(
-            Ref(name=pm.game_format.name, slug=pm.game_format.slug)
+            EntityRef(name=pm.game_format.name, slug=pm.game_format.slug)
             if pm.game_format
             else None
         ),
         display_subtype=(
-            Ref(name=pm.display_subtype.name, slug=pm.display_subtype.slug)
+            EntityRef(name=pm.display_subtype.name, slug=pm.display_subtype.slug)
             if pm.display_subtype
             else None
         ),
         gameplay_features=[
-            GameplayFeatureSchema(
+            GameplayFeatureRef(
                 name=t.gameplayfeature.name,
                 slug=t.gameplayfeature.slug,
                 count=t.count,
             )
             for t in pm.machinemodelgameplayfeature_set.all()
         ],
-        tags=[Ref(name=t.name, slug=t.slug) for t in pm.tags.all()],
-        reward_types=[Ref(name=rt.name, slug=rt.slug) for rt in pm.reward_types.all()],
+        tags=[EntityRef(name=t.name, slug=t.slug) for t in pm.tags.all()],
+        reward_types=[
+            EntityRef(name=rt.name, slug=rt.slug) for rt in pm.reward_types.all()
+        ],
         franchise=(
-            Ref(name=pm.title.franchise.name, slug=pm.title.franchise.slug)
+            EntityRef(name=pm.title.franchise.name, slug=pm.title.franchise.slug)
             if pm.title and pm.title.franchise
             else None
         ),
         series=(
-            Ref(name=pm.title.series.name, slug=pm.title.series.slug)
+            EntityRef(name=pm.title.series.name, slug=pm.title.series.slug)
             if pm.title and pm.title.series
             else None
         ),
@@ -586,7 +591,7 @@ def _model_detail_qs() -> QuerySet[MachineModel]:
 models_router = Router(tags=["models"])
 
 
-@models_router.get("/", response=list[MachineModelListSchema])
+@models_router.get("/", response=list[ModelListItemSchema])
 @paginate(NamedPageNumberPagination, page_size=DEFAULT_PAGE_SIZE)
 def list_models(
     request: HttpRequest,
@@ -713,7 +718,7 @@ def list_recent_models(request: HttpRequest) -> list[ModelRecentSchema]:
     return results
 
 
-@models_router.get("/all/", response=list[MachineModelGridSchema])
+@models_router.get("/all/", response=list[ModelGridItemSchema])
 @decorate_view(cache_control(no_cache=True))
 def list_all_models(
     request: HttpRequest,
@@ -880,8 +885,8 @@ def list_all_models(
 def get_model_edit_options(request: HttpRequest) -> ModelEditOptionsSchema:
     """Return all dropdown options for the MachineModel edit form."""
 
-    def _opts(qs: QuerySet[Any]) -> list[EditOptionItem]:
-        return [EditOptionItem(slug=obj.slug, label=obj.name) for obj in qs]
+    def _opts(qs: QuerySet[Any]) -> list[EditOptionSchema]:
+        return [EditOptionSchema(slug=obj.slug, label=obj.name) for obj in qs]
 
     return ModelEditOptionsSchema(
         themes=_opts(Theme.objects.active().order_by("name")),
@@ -914,7 +919,7 @@ def get_model_edit_options(request: HttpRequest) -> ModelEditOptionsSchema:
         ),
         titles=_opts(Title.objects.active().order_by("name")),
         models=[
-            EditOptionItem(
+            EditOptionSchema(
                 slug=obj.slug,
                 label=f"{obj.name} ({obj.year})" if obj.year else obj.name,
             )
@@ -929,12 +934,12 @@ _SELF_REF_FIELDS = frozenset({"variant_of", "converted_from", "remake_of"})
 @models_router.patch(
     "/{slug}/claims/",
     auth=django_auth,
-    response={200: MachineModelDetailSchema, 422: ValidationErrorSchema},
+    response={200: ModelDetailSchema, 422: ValidationErrorSchema},
     tags=["private"],
 )
 def patch_model_claims(
     request: HttpRequest, slug: str, data: ModelClaimPatchSchema
-) -> MachineModelDetailSchema:
+) -> ModelDetailSchema:
     """Assert per-field claims from the authenticated user, then re-resolve the model."""
     pm = get_object_or_404(
         MachineModel.objects.active().prefetch_related(
@@ -1029,7 +1034,7 @@ def model_delete_preview(request: HttpRequest, slug: str) -> ModelDeletePreviewS
     return ModelDeletePreviewSchema(
         name=pm.name,
         slug=pm.slug,
-        parent=Ref(name=pm.title.name, slug=pm.title.slug),
+        parent=EntityRef(name=pm.title.name, slug=pm.title.slug),
         changeset_count=changeset_count,
         blocked_by=[serialize_blocking_referrer(b) for b in plan.blockers],
     )
@@ -1086,7 +1091,7 @@ def delete_model(
     "/{slug}/restore/",
     auth=django_auth,
     response={
-        200: MachineModelDetailSchema,
+        200: ModelDetailSchema,
         422: ErrorDetailSchema,
         404: ErrorDetailSchema,
         429: RateLimitErrorSchema,
@@ -1095,7 +1100,7 @@ def delete_model(
 )
 def restore_model(
     request: HttpRequest, slug: str, data: ChangeSetInputSchema
-) -> MachineModelDetailSchema | Status[ErrorDetailSchema]:
+) -> ModelDetailSchema | Status[ErrorDetailSchema]:
     """Write a fresh ``status=active`` claim on a soft-deleted Model.
 
     This is the "Restore" path (distinct from Undo, which inverts a specific

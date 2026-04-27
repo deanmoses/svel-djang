@@ -2,9 +2,9 @@
   import client from '$lib/api/client';
   import { createAsyncLoader } from '$lib/async-loader.svelte';
   import TaxonomyListPage from '$lib/components/TaxonomyListPage.svelte';
-  import type { SystemListSchema } from '$lib/api/schema';
+  import type { SystemListItemSchema } from '$lib/api/schema';
 
-  type SystemRow = SystemListSchema;
+  type SystemRow = SystemListItemSchema;
 
   const systems = createAsyncLoader(async () => {
     const { data } = await client.GET('/api/systems/all/');

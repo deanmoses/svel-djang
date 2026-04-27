@@ -38,11 +38,11 @@ from .schemas import (
     CorporateEntityLocationAncestorRef,
     CorporateEntityLocationSchema,
     CreditSchema,
-    Ref,
+    EntityRef,
     RelatedTitleSchema,
-    TitleMachineSchema,
-    TitleMachineVariantSchema,
-    TitleRefSchema,
+    TitleModelSchema,
+    TitleModelVariantSchema,
+    TitleRef,
 )
 
 # ---------------------------------------------------------------------------
@@ -53,7 +53,7 @@ from .schemas import (
 def _serialize_credit(credit: Credit) -> CreditSchema:
     """Serialize a Credit row into a CreditSchema."""
     return CreditSchema(
-        person=Ref(name=credit.person.name, slug=credit.person.slug),
+        person=EntityRef(name=credit.person.name, slug=credit.person.slug),
         role=credit.role.slug,
         role_display=credit.role.name,
         role_sort_order=credit.role.display_order,
@@ -73,7 +73,9 @@ def _first_thumbnail(
     return None
 
 
-def _intersect_facet_sets(models: Iterable[Model], relation_name: str) -> list[Ref]:
+def _intersect_facet_sets(
+    models: Iterable[Model], relation_name: str
+) -> list[EntityRef]:
     """Return the intersection of a slug/name M2M across all *models*.
 
     Each model's related set is collected as ``frozenset((slug, name))``.
@@ -89,12 +91,10 @@ def _intersect_facet_sets(models: Iterable[Model], relation_name: str) -> list[R
     common = sets[0]
     for s in sets[1:]:
         common &= s
-    return [Ref(slug=s, name=n) for s, n in sorted(common)] if common else []
+    return [EntityRef(slug=s, name=n) for s, n in sorted(common)] if common else []
 
 
-def _serialize_title_ref(
-    title: Title, *, min_rank: int | None = None
-) -> TitleRefSchema:
+def _serialize_title_ref(title: Title, *, min_rank: int | None = None) -> TitleRef:
     """Serialize a Title for use in franchise/series listing context.
 
     Expects *title* to have prefetched ``machine_models`` (with
@@ -115,7 +115,7 @@ def _serialize_title_ref(
             else None
         )
         year = first.year
-    return TitleRefSchema(
+    return TitleRef(
         name=title.name,
         slug=title.slug,
         abbreviations=[a.value for a in title.abbreviations.all()],
@@ -454,7 +454,7 @@ def _get_feature_descendant_slugs(slug: str) -> set[str]:
 
 def _serialize_title_machine(
     pm: MachineModel, *, min_rank: int | None = None
-) -> TitleMachineSchema:
+) -> TitleModelSchema:
     """Serialize a MachineModel for use in title/theme/system machine lists."""
     if min_rank is None:
         min_rank = get_minimum_display_rank()
@@ -468,7 +468,7 @@ def _serialize_title_machine(
         else []
     )
     variants = [
-        TitleMachineVariantSchema(
+        TitleModelVariantSchema(
             name=v.name,
             slug=v.slug,
             year=v.year,
@@ -482,11 +482,11 @@ def _serialize_title_machine(
         if pm.corporate_entity and pm.corporate_entity.manufacturer
         else None
     )
-    return TitleMachineSchema(
+    return TitleModelSchema(
         name=pm.name,
         slug=pm.slug,
         year=pm.year,
-        manufacturer=Ref(name=mfr.name, slug=mfr.slug) if mfr else None,
+        manufacturer=EntityRef(name=mfr.name, slug=mfr.slug) if mfr else None,
         technology_generation_name=(
             pm.technology_generation.name if pm.technology_generation else None
         ),

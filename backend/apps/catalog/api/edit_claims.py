@@ -40,7 +40,7 @@ from apps.provenance.validation import validate_claim_value
 
 from ..resolve import resolve_after_mutation
 from ._typing import CreditKey, CreditPkKey
-from .schemas import CreditInput, GameplayFeatureInput
+from .schemas import CreditInputSchema, GameplayFeatureInputSchema
 
 # ``request.user`` is typed as ``AbstractBaseUser | AnonymousUser``; callers
 # narrow at the entry points below before threading into the internal helper.
@@ -534,7 +534,7 @@ def build_gameplay_feature_claim_specs(
 
 def plan_gameplay_feature_claims(
     entity: MachineModel,
-    desired_features: list[GameplayFeatureInput],
+    desired_features: list[GameplayFeatureInputSchema],
 ) -> list[ClaimSpec]:
     """Validate and diff gameplay features (slug + optional count) on a MachineModel.
 
@@ -612,7 +612,7 @@ def plan_abbreviation_claims(
 
 def plan_credit_claims(
     entity: MachineModel,
-    desired_credits: list[CreditInput],
+    desired_credits: list[CreditInputSchema],
 ) -> list[ClaimSpec]:
     """Validate and diff credits (person_slug + role) on a MachineModel.
 

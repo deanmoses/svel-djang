@@ -153,7 +153,7 @@ After PR 0, sequence the remaining rename PRs smallest-first. The original plan 
 
 1. **PR 1 (small batch, 3 renames)** — `config/api.py` + `apps/core/` + the already-shipped pagination touch-up. Renames: `StatsSchema → SiteStatsSchema`, `LinkTargetsResponseSchema → LinkTargetListSchema`, `PaginationParams → PaginationParamsSchema`. Debugs the codemods end-to-end on three modules and three renames.
 2. **PR 2 (medium batch, ~14 renames)** — `media` (4) + `citation` (5) + `provenance` (5). Introduces the `In → Input`, `Out → ∅`, and entity-scoping patterns (`Extract*Schema → CitationExtract*Schema`, `SourceSchema → CitationSourceSchema`, etc.). The provenance `SourceSchema → CitationSourceSchema` collides with `apps.citation.models.CitationSource` already imported in `provenance/api.py`; the `Schema` suffix is what keeps them disambiguated, which is the whole point.
-3. **PR 3 (large batch, ~25 renames)** — `catalog`. The bulk of the work. Includes role-suffix decisions (`PersonSchema → PersonListItemSchema`), embedded sub-shape renames (`SystemSchema → ManufacturerSystemSchema`), the `Machine → Model` purge (`MachineModelDetailSchema → ModelDetailSchema`, `TitleMachineSchema → TitleModelSchema`, etc.), and the `*Ref`-exception strip-throughs (`TitleRefSchema → TitleRef`, `ModelRefSchema → ModelRef`, `Ref → EntityRef`, `GameplayFeatureSchema → GameplayFeatureRef`). **Run `Ref → EntityRef` in dry-run first** — it's the only 3-character target and the most identifier-collision-prone rename in the table; eyeball the diff before letting it land.
+3. **PR 3 (large batch, ~25 renames)** — `catalog`. The bulk of the work. Includes role-suffix decisions (`PersonSchema → PersonListItemSchema`), embedded sub-shape renames (`SystemSchema → ManufacturerSystemSchema`), the `Machine → Model` purge (`MachineModelDetailSchema → ModelDetailSchema`, `TitleMachineSchema → TitleModelSchema`, etc.), and the `*Ref`-exception strip-throughs (`TitleRefSchema → TitleRef`, `ModelRefSchema → ModelRef`, `Ref → EntityRef`, `GameplayFeatureSchema → GameplayFeatureRef`). **Run `Ref → EntityRef` in dry-run first** — it's the only 3-character target and the most identifier-collision-prone rename in the table; eyeball the diff before letting it land. Known false-positive: 2 string-literal hits in [frontend/src/lib/components/form/markdown-textarea-citation.dom.test.ts](../../../../frontend/src/lib/components/form/markdown-textarea-citation.dom.test.ts) (`'Ref '` and `` `Ref [[cite:…]]` `` as user-typed search text in a test fixture) will be rewritten to `EntityRef`; revert those post-codemod.
 4. **PR 4 (`Paged*Schema` ghost fix)** — non-codemod PR. Introduces `NamedPaginatedResponseSchema` (mirrors `NamedPageNumberPagination`) so the four Ninja-auto-named wrappers get stable names: `PagedTitleListSchema → TitleListSchema`, `PagedMachineModelListSchema → ModelListSchema`, `PagedPersonSchema → PersonListSchema`, `PagedManufacturerSchema → ManufacturerListSchema`. Must come **after** PR 3 since the wrapper-slot names (`TitleListSchema`, `ModelListSchema`) are only freed once the row schemas have moved to `…ListItemSchema`.
 
 If a batch reveals a script defect, revert just that PR — three PRs still gives reasonable bisect granularity, and PR 1's tiny surface catches script-development bugs before PR 2/3 expose them at scale.
@@ -186,14 +186,14 @@ Some OpenAPI components don't come from explicit Ninja schema classes — Ninja 
 
 #### Status
 
-| Step                                                               | Status                                                                |
-| ------------------------------------------------------------------ | --------------------------------------------------------------------- |
-| `Input` ghost fix (`NamedPageNumberPagination`)                    | DONE                                                                  |
-| PR 0 (TS-side indexed-access → named-imports sweep)                | DONE                                                                  |
-| PR 1 (small batch: config + core + pagination touch-up)            | TODO — STOP and check with the user before running the rename codemod |
-| PR 2 (medium batch: media + citation + provenance)                 | TODO                                                                  |
-| PR 3 (large batch: catalog)                                        | TODO                                                                  |
-| PR 4 (`Paged*Schema` ghost fix via `NamedPaginatedResponseSchema`) | TODO — runs after PR 3 frees up the wrapper-slot names                |
+| Step                                                               | Status                                                 |
+| ------------------------------------------------------------------ | ------------------------------------------------------ |
+| `Input` ghost fix (`NamedPageNumberPagination`)                    | DONE                                                   |
+| PR 0 (TS-side indexed-access → named-imports sweep)                | DONE                                                   |
+| PR 1 (small batch: config + core + pagination touch-up)            | DONE                                                   |
+| PR 2 (medium batch: media + citation + provenance)                 | DONE                                                   |
+| PR 3 (large batch: catalog)                                        | DONE                                                   |
+| PR 4 (`Paged*Schema` ghost fix via `NamedPaginatedResponseSchema`) | TODO — runs after PR 3 frees up the wrapper-slot names |
 
 When picking this up in a fresh session: read this plan top-to-bottom, then `git log refactor/api-renaming` to see what's already landed, then start at the next TODO.
 

@@ -47,7 +47,7 @@ from .gameplay_features import (
     _serialize_detail as _serialize_gf_detail,
 )
 from .machine_models import (
-    MachineModelDetailSchema,
+    ModelDetailSchema,
     _model_detail_qs,
     _serialize_model_detail,
 )
@@ -115,8 +115,8 @@ def manufacturer_detail_page(
     return _serialize_manufacturer_detail(mfr)
 
 
-@pages_router.get("/model/{slug}", response=MachineModelDetailSchema)
-def model_detail_page(request: HttpRequest, slug: str) -> MachineModelDetailSchema:
+@pages_router.get("/model/{slug}", response=ModelDetailSchema)
+def model_detail_page(request: HttpRequest, slug: str) -> ModelDetailSchema:
     pm = get_object_or_404(_model_detail_qs(), slug=slug)
     return _serialize_model_detail(pm)
 

@@ -57,8 +57,8 @@ from .helpers import (
 from .schemas import (
     AlreadyDeletedSchema,
     ClaimPatchSchema,
-    CreateSchema,
     DeleteResponseSchema,
+    EntityCreateInputSchema,
     PersonDeletePreviewSchema,
     PersonSoftDeleteBlockedSchema,
     RelatedTitleSchema,
@@ -72,7 +72,7 @@ from .soft_delete import (
 )
 
 
-class PersonGridSchema(Schema):
+class PersonGridItemSchema(Schema):
     name: str
     slug: str
     aliases: list[str] = []
@@ -80,7 +80,7 @@ class PersonGridSchema(Schema):
     thumbnail_url: str | None = None
 
 
-class PersonSchema(Schema):
+class PersonListItemSchema(Schema):
     name: str
     slug: str
     credit_count: int = 0
@@ -208,11 +208,11 @@ def _person_qs() -> QuerySet[Person]:
 people_router = Router(tags=["people"])
 
 
-@people_router.get("/", response=list[PersonSchema])
+@people_router.get("/", response=list[PersonListItemSchema])
 @paginate(NamedPageNumberPagination, page_size=DEFAULT_PAGE_SIZE)
-def list_people(request: HttpRequest) -> list[PersonSchema]:
+def list_people(request: HttpRequest) -> list[PersonListItemSchema]:
     return [
-        PersonSchema(
+        PersonListItemSchema(
             name=row["name"], slug=row["slug"], credit_count=row["credit_count"]
         )
         for row in Person.objects.active()
@@ -222,7 +222,7 @@ def list_people(request: HttpRequest) -> list[PersonSchema]:
     ]
 
 
-@people_router.get("/all/", response=list[PersonGridSchema])
+@people_router.get("/all/", response=list[PersonGridItemSchema])
 @decorate_view(cache_control(no_cache=True))
 def list_all_people(
     request: HttpRequest,
@@ -325,7 +325,7 @@ def patch_person_claims(
     tags=["private"],
 )
 def create_person(
-    request: HttpRequest, data: CreateSchema
+    request: HttpRequest, data: EntityCreateInputSchema
 ) -> Status[PersonDetailSchema]:
     """Create a new Person from a user-supplied name and slug.
 

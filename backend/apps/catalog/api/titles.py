@@ -85,20 +85,20 @@ from .helpers import (
     _serialize_title_machine,
 )
 from .machine_models import (
-    MachineModelDetailSchema,
+    ModelDetailSchema,
     _model_detail_qs,
     _serialize_model_detail,
 )
 from .schemas import (
     AlreadyDeletedSchema,
-    CreateSchema,
     CreditSchema,
-    GameplayFeatureSchema,
-    Ref,
+    EntityCreateInputSchema,
+    EntityRef,
+    GameplayFeatureRef,
     SoftDeleteBlockedSchema,
     TitleClaimPatchSchema,
     TitleDeletePreviewSchema,
-    TitleMachineSchema,
+    TitleModelSchema,
 )
 from .soft_delete import (
     SoftDeleteBlockedError,
@@ -113,25 +113,25 @@ from .soft_delete import (
 # ---------------------------------------------------------------------------
 
 
-class TitleListSchema(Schema):
+class TitleListItemSchema(Schema):
     name: str
     slug: str
     abbreviations: list[str] = []
     model_count: int = 0
-    manufacturer: Ref | None = None
+    manufacturer: EntityRef | None = None
     year: int | None = None
     thumbnail_url: str | None = None
     # Facet data — aggregated from non-variant models
-    tech_generations: list[Ref] = []
-    display_types: list[Ref] = []
+    tech_generations: list[EntityRef] = []
+    display_types: list[EntityRef] = []
     player_counts: list[int] = []
-    systems: list[Ref] = []
-    themes: list[Ref] = []
-    gameplay_features: list[Ref] = []
-    reward_types: list[Ref] = []
-    persons: list[Ref] = []
-    franchise: Ref | None = None
-    series: Ref | None = None
+    systems: list[EntityRef] = []
+    themes: list[EntityRef] = []
+    gameplay_features: list[EntityRef] = []
+    reward_types: list[EntityRef] = []
+    persons: list[EntityRef] = []
+    franchise: EntityRef | None = None
+    series: EntityRef | None = None
     year_min: int | None = None
     year_max: int | None = None
     ipdb_rating_max: float | None = None
@@ -140,19 +140,19 @@ class TitleListSchema(Schema):
 class AgreedSpecsSchema(Schema):
     """Spec fields where all child models of a title agree on the value."""
 
-    technology_generation: Ref | None = None
-    technology_subgeneration: Ref | None = None
-    display_type: Ref | None = None
+    technology_generation: EntityRef | None = None
+    technology_subgeneration: EntityRef | None = None
+    display_type: EntityRef | None = None
     player_count: int | None = None
     flipper_count: int | None = None
-    system: Ref | None = None
-    cabinet: Ref | None = None
-    game_format: Ref | None = None
-    display_subtype: Ref | None = None
-    themes: list[Ref] = []
-    gameplay_features: list[GameplayFeatureSchema] = []
-    reward_types: list[Ref] = []
-    tags: list[Ref] = []
+    system: EntityRef | None = None
+    cabinet: EntityRef | None = None
+    game_format: EntityRef | None = None
+    display_subtype: EntityRef | None = None
+    themes: list[EntityRef] = []
+    gameplay_features: list[GameplayFeatureRef] = []
+    reward_types: list[EntityRef] = []
+    tags: list[EntityRef] = []
     production_quantity: str | None = None
 
 
@@ -161,8 +161,8 @@ class CrossTitleLinkSchema(Schema):
     a specific model under the current title."""
 
     relation: str
-    other_title: Ref
-    source_model: Ref
+    other_title: EntityRef
+    source_model: EntityRef
 
 
 class AggregatedMediaSchema(Schema):
@@ -173,7 +173,7 @@ class AggregatedMediaSchema(Schema):
     is_primary: bool
     uploaded_by_username: str | None = None
     renditions: MediaRenditionsSchema
-    source_model: Ref
+    source_model: EntityRef
 
 
 class TitleDetailSchema(Schema):
@@ -187,14 +187,14 @@ class TitleDetailSchema(Schema):
     needs_review_notes: str = ""
     review_links: list[ReviewLinkSchema] = []
     hero_image_url: str | None = None
-    franchise: Ref | None = None
-    machines: list[TitleMachineSchema]
-    series: Ref | None = None
+    franchise: EntityRef | None = None
+    machines: list[TitleModelSchema]
+    series: EntityRef | None = None
     credits: list[CreditSchema] = []
     agreed_specs: AgreedSpecsSchema = AgreedSpecsSchema()
     related_titles: list[CrossTitleLinkSchema] = []
     media: list[AggregatedMediaSchema] = []
-    model_detail: MachineModelDetailSchema | None = None
+    model_detail: ModelDetailSchema | None = None
 
 
 class TitleDeleteResponseSchema(Schema):
@@ -225,22 +225,22 @@ def _assert_title_name_available(name: str, *, exclude_pk: int | None = None) ->
 # ---------------------------------------------------------------------------
 
 
-def _dedup_facet_refs(items: Iterable[tuple[str, str]]) -> list[Ref]:
+def _dedup_facet_refs(items: Iterable[tuple[str, str]]) -> list[EntityRef]:
     """Deduplicate {slug, name} pairs preserving insertion order."""
     seen: set[str] = set()
-    result: list[Ref] = []
+    result: list[EntityRef] = []
     for slug, name in items:
         if slug and slug not in seen:
             seen.add(slug)
-            result.append(Ref(slug=slug, name=name))
+            result.append(EntityRef(slug=slug, name=name))
     return result
 
 
 def _serialize_title_list(
     title: Title, *, min_rank: int | None = None
-) -> TitleListSchema:
+) -> TitleListItemSchema:
     thumbnail_url: str | None = None
-    manufacturer: Ref | None = None
+    manufacturer: EntityRef | None = None
     year: int | None = None
     machines = list(title.machine_models.all())
 
@@ -290,18 +290,18 @@ def _serialize_title_list(
             if first.corporate_entity and first.corporate_entity.manufacturer
             else None
         )
-        manufacturer = Ref(slug=mfr.slug, name=mfr.name) if mfr else None
+        manufacturer = EntityRef(slug=mfr.slug, name=mfr.name) if mfr else None
         year = first.year
 
     # Franchise and Series (both FKs on Title)
-    franchise: Ref | None = None
+    franchise: EntityRef | None = None
     if title.franchise:
-        franchise = Ref(slug=title.franchise.slug, name=title.franchise.name)
-    series: Ref | None = None
+        franchise = EntityRef(slug=title.franchise.slug, name=title.franchise.name)
+    series: EntityRef | None = None
     if title.series:
-        series = Ref(slug=title.series.slug, name=title.series.name)
+        series = EntityRef(slug=title.series.slug, name=title.series.name)
 
-    return TitleListSchema(
+    return TitleListItemSchema(
         name=title.name,
         slug=title.slug,
         abbreviations=[a.value for a in title.abbreviations.all()],
@@ -375,22 +375,22 @@ def _compute_agreed_specs(models: Sequence[MachineModel]) -> AgreedSpecsSchema:
         obj = getattr(m, attr, None)
         return (obj.name, obj.slug) if obj else None
 
-    def _ref_for(attr: str) -> Ref | None:
+    def _ref_for(attr: str) -> EntityRef | None:
         def accessor(m: MachineModel) -> tuple[str, str] | None:
             return _fk_pair(m, attr)
 
         val = _agreed_value(models, accessor)
-        return Ref(name=val[0], slug=val[1]) if val else None
+        return EntityRef(name=val[0], slug=val[1]) if val else None
 
     # Themes: only roll up when every model has the same set.
     theme_sets = [frozenset((t.slug, t.name) for t in m.themes.all()) for m in models]
-    themes: list[Ref] = []
+    themes: list[EntityRef] = []
     if (
         theme_sets
         and all(ts for ts in theme_sets)
         and all(ts == theme_sets[0] for ts in theme_sets)
     ):
-        themes = [Ref(name=n, slug=s) for s, n in sorted(theme_sets[0])]
+        themes = [EntityRef(name=n, slug=s) for s, n in sorted(theme_sets[0])]
 
     # Gameplay features: intersection across all models (with count agreement).
     gf_maps: list[dict[str, tuple[str, int | None]]] = []
@@ -400,7 +400,7 @@ def _compute_agreed_specs(models: Sequence[MachineModel]) -> AgreedSpecsSchema:
             gf_map[t.gameplayfeature.slug] = (t.gameplayfeature.name, t.count)
         gf_maps.append(gf_map)
 
-    gameplay_features: list[GameplayFeatureSchema] = []
+    gameplay_features: list[GameplayFeatureRef] = []
     if gf_maps and all(gf_maps):
         common_slugs = set(gf_maps[0])
         for gf_map in gf_maps[1:]:
@@ -411,7 +411,7 @@ def _compute_agreed_specs(models: Sequence[MachineModel]) -> AgreedSpecsSchema:
                 counts = [gf_map[slug][1] for gf_map in gf_maps]
                 count = counts[0] if all(c == counts[0] for c in counts) else None
                 gameplay_features.append(
-                    GameplayFeatureSchema(slug=slug, name=name, count=count)
+                    GameplayFeatureRef(slug=slug, name=name, count=count)
                 )
 
     pq = _agreed_value(models, lambda m: m.production_quantity or None)
@@ -456,8 +456,8 @@ def _collect_related_titles(
             items.append(
                 CrossTitleLinkSchema(
                     relation=attr,
-                    other_title=Ref(slug=other.title.slug, name=other.title.name),
-                    source_model=Ref(slug=m.slug, name=m.name),
+                    other_title=EntityRef(slug=other.title.slug, name=other.title.name),
+                    source_model=EntityRef(slug=m.slug, name=m.name),
                 )
             )
     return items
@@ -470,7 +470,7 @@ def _collect_aggregated_media(
     the source model each item came from."""
     items: list[AggregatedMediaSchema] = []
     for m in models:
-        source_ref = Ref(slug=m.slug, name=m.name)
+        source_ref = EntityRef(slug=m.slug, name=m.name)
         for em in all_media(m):
             items.append(
                 AggregatedMediaSchema(
@@ -523,7 +523,9 @@ def _serialize_title_detail(title: Title) -> TitleDetailSchema:
     model_objs = list(title.machine_models.all())
     machines = [_serialize_title_machine(pm, min_rank=min_rank) for pm in model_objs]
     series = (
-        Ref(name=title.series.name, slug=title.series.slug) if title.series else None
+        EntityRef(name=title.series.name, slug=title.series.slug)
+        if title.series
+        else None
     )
     review_links = _build_review_links(title) if title.needs_review else []
 
@@ -558,7 +560,7 @@ def _serialize_title_detail(title: Title) -> TitleDetailSchema:
     media = _collect_aggregated_media(model_objs)
 
     # For single-model titles with no variants, include full model detail inline.
-    model_detail: MachineModelDetailSchema | None = None
+    model_detail: ModelDetailSchema | None = None
     if len(machines) == 1 and not machines[0].variants:
         pm = _model_detail_qs().get(slug=machines[0].slug)
         model_detail = _serialize_model_detail(pm)
@@ -577,7 +579,7 @@ def _serialize_title_detail(title: Title) -> TitleDetailSchema:
         review_links=review_links,
         hero_image_url=hero_image_url,
         franchise=(
-            Ref(slug=title.franchise.slug, name=title.franchise.name)
+            EntityRef(slug=title.franchise.slug, name=title.franchise.name)
             if title.franchise
             else None
         ),
@@ -648,9 +650,9 @@ def _detail_qs() -> QuerySet[Title]:
 titles_router = Router(tags=["titles"])
 
 
-@titles_router.get("/", response=list[TitleListSchema])
+@titles_router.get("/", response=list[TitleListItemSchema])
 @paginate(NamedPageNumberPagination, page_size=DEFAULT_PAGE_SIZE)
-def list_titles(request: HttpRequest, display: str = "") -> list[TitleListSchema]:
+def list_titles(request: HttpRequest, display: str = "") -> list[TitleListItemSchema]:
     qs = Title.objects.active().annotate(
         model_count=Count(
             "machine_models",
@@ -669,7 +671,7 @@ def list_titles(request: HttpRequest, display: str = "") -> list[TitleListSchema
     return [_serialize_title_list(t, min_rank=min_rank) for t in qs]
 
 
-@titles_router.get("/all/", response=list[TitleListSchema])
+@titles_router.get("/all/", response=list[TitleListItemSchema])
 @decorate_view(cache_control(no_cache=True))
 def list_all_titles(request: HttpRequest) -> HttpResponse:
     """Return every title with facet data for client-side filtering.
@@ -973,7 +975,9 @@ def patch_title_claims(
     },
     tags=["private"],
 )
-def create_title(request: HttpRequest, data: CreateSchema) -> Status[TitleDetailSchema]:
+def create_title(
+    request: HttpRequest, data: EntityCreateInputSchema
+) -> Status[TitleDetailSchema]:
     """Create a new Title from a user-supplied name and slug.
 
     Writes a user ChangeSet with ``action=create`` and three claims — name,
@@ -1011,15 +1015,15 @@ def create_title(request: HttpRequest, data: CreateSchema) -> Status[TitleDetail
     "/{title_slug}/models/",
     auth=django_auth,
     response={
-        201: MachineModelDetailSchema,
+        201: ModelDetailSchema,
         422: ValidationErrorSchema,
         429: RateLimitErrorSchema,
     },
     tags=["private"],
 )
 def create_model(
-    request: HttpRequest, title_slug: str, data: CreateSchema
-) -> Status[MachineModelDetailSchema]:
+    request: HttpRequest, title_slug: str, data: EntityCreateInputSchema
+) -> Status[ModelDetailSchema]:
     """Create a new MachineModel under an existing Title.
 
     Writes a user ChangeSet with ``action=create`` and four claims — name,

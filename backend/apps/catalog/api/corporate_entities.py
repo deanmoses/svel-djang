@@ -40,7 +40,7 @@ from .manufacturers import manufacturers_router
 from .schemas import (
     CorporateEntityClaimPatchSchema,
     CorporateEntityLocationSchema,
-    Ref,
+    EntityRef,
     RelatedTitleSchema,
 )
 
@@ -49,10 +49,10 @@ from .schemas import (
 # ---------------------------------------------------------------------------
 
 
-class CorporateEntityListSchema(Schema):
+class CorporateEntityListItemSchema(Schema):
     name: str
     slug: str
-    manufacturer: Ref
+    manufacturer: EntityRef
     year_start: int | None = None
     year_end: int | None = None
     model_count: int = 0
@@ -63,7 +63,7 @@ class CorporateEntityDetailSchema(Schema):
     name: str
     slug: str
     description: RichTextSchema = RichTextSchema()
-    manufacturer: Ref
+    manufacturer: EntityRef
     year_start: int | None = None
     year_end: int | None = None
     aliases: list[str] = []
@@ -105,7 +105,7 @@ def _serialize_detail(ce: CorporateEntity) -> CorporateEntityDetailSchema:
         name=ce.name,
         slug=ce.slug,
         description=_build_rich_text(ce, "description", active_claims(ce)),
-        manufacturer=Ref(name=ce.manufacturer.name, slug=ce.manufacturer.slug),
+        manufacturer=EntityRef(name=ce.manufacturer.name, slug=ce.manufacturer.slug),
         year_start=ce.year_start,
         year_end=ce.year_end,
         aliases=[a.value for a in ce.aliases.all()],
@@ -121,11 +121,11 @@ def _serialize_detail(ce: CorporateEntity) -> CorporateEntityDetailSchema:
 corporate_entities_router = Router(tags=["corporate-entities"])
 
 
-@corporate_entities_router.get("/", response=list[CorporateEntityListSchema])
+@corporate_entities_router.get("/", response=list[CorporateEntityListItemSchema])
 @decorate_view(cache_control(no_cache=True))
 def list_corporate_entities(
     request: HttpRequest,
-) -> list[CorporateEntityListSchema]:
+) -> list[CorporateEntityListItemSchema]:
     qs = (
         CorporateEntity.objects.active()
         .select_related("manufacturer")
@@ -146,10 +146,12 @@ def list_corporate_entities(
         .order_by("manufacturer__name", "year_start")
     )
     return [
-        CorporateEntityListSchema(
+        CorporateEntityListItemSchema(
             name=ce.name,
             slug=ce.slug,
-            manufacturer=Ref(name=ce.manufacturer.name, slug=ce.manufacturer.slug),
+            manufacturer=EntityRef(
+                name=ce.manufacturer.name, slug=ce.manufacturer.slug
+            ),
             year_start=ce.year_start,
             year_end=ce.year_end,
             model_count=cast(HasModelCount, ce).model_count,

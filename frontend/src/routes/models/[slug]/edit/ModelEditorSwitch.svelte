@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { MachineModelDetailSchema } from '$lib/api/schema';
+  import type { ModelDetailSchema } from '$lib/api/schema';
   import type { SectionEditorHandle } from '$lib/components/editors/editor-contract';
   import type { ModelEditSectionKey } from '$lib/components/editors/model-edit-sections';
   import BasicsEditor from '$lib/components/editors/BasicsEditor.svelte';
@@ -12,7 +12,7 @@
   import { saveModelClaims } from '$lib/components/editors/save-model-claims';
   import TechnologyEditor from '$lib/components/editors/TechnologyEditor.svelte';
 
-  type ModelDetail = MachineModelDetailSchema;
+  type ModelDetail = ModelDetailSchema;
 
   let {
     sectionKey,

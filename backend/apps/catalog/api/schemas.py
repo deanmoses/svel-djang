@@ -10,14 +10,14 @@ from pydantic import ConfigDict
 from apps.provenance.schemas import ChangeSetInputSchema
 
 
-class Ref(Schema):
+class EntityRef(Schema):
     """A reference to a named entity with a slug."""
 
     name: str
     slug: str
 
 
-class CreateSchema(ChangeSetInputSchema):
+class EntityCreateInputSchema(ChangeSetInputSchema):
     """Base shape for catalog entity create operations."""
 
     name: str
@@ -44,12 +44,12 @@ class CorporateEntityClaimPatchSchema(ChangeSetInputSchema):
     aliases: list[str] | None = None
 
 
-class GameplayFeatureInput(Schema):
+class GameplayFeatureInputSchema(Schema):
     slug: str
     count: int | None = None
 
 
-class CreditInput(Schema):
+class CreditInputSchema(Schema):
     person_slug: str
     role: str
 
@@ -60,8 +60,8 @@ class ModelClaimPatchSchema(ChangeSetInputSchema):
     themes: list[str] | None = None
     tags: list[str] | None = None
     reward_types: list[str] | None = None
-    gameplay_features: list[GameplayFeatureInput] | None = None
-    credits: list[CreditInput] | None = None
+    gameplay_features: list[GameplayFeatureInputSchema] | None = None
+    credits: list[CreditInputSchema] | None = None
     abbreviations: list[str] | None = None
 
 
@@ -133,7 +133,7 @@ class PersonSoftDeleteBlockedSchema(Schema):
     active_credit_count: int = 0
 
 
-class DeletePreviewBase(Schema):
+class DeletePreviewBaseSchema(Schema):
     """Common shape for every entity delete-preview response.
 
     ``blocked_by`` lists active PROTECT referrers from the generic
@@ -153,18 +153,18 @@ class DeletePreviewBase(Schema):
     blocked_by: list[BlockingReferrerSchema] = []
 
 
-class ModelDeletePreviewSchema(DeletePreviewBase):
-    parent: Ref
+class ModelDeletePreviewSchema(DeletePreviewBaseSchema):
+    parent: EntityRef
 
 
-class TaxonomyDeletePreviewSchema(DeletePreviewBase):
-    parent: Ref | None = None
+class TaxonomyDeletePreviewSchema(DeletePreviewBaseSchema):
+    parent: EntityRef | None = None
     # 0 on leaf entities; non-zero only for parents (tech-gen, display-type)
     # whose active children would block the delete.
     active_children_count: int = 0
 
 
-class PersonDeletePreviewSchema(DeletePreviewBase):
+class PersonDeletePreviewSchema(DeletePreviewBaseSchema):
     # Count of Credits whose parent Model or Series is still active.
     # When non-zero the UI refuses the delete (see people.py:delete_person);
     # Credit rows are owned children of Model/Series so the generic
@@ -172,7 +172,7 @@ class PersonDeletePreviewSchema(DeletePreviewBase):
     active_credit_count: int
 
 
-class TitleDeletePreviewSchema(DeletePreviewBase):
+class TitleDeletePreviewSchema(DeletePreviewBaseSchema):
     # Cascade impact, NOT a blocker — Title delete cascades into its active
     # MachineModels (see titles.py:delete_title). Surfaced so the UI can
     # warn "this will also delete N machines."
@@ -194,31 +194,31 @@ class DeleteResponseSchema(Schema):
     affected_slugs: list[str]
 
 
-class EditOptionItem(Schema):
+class EditOptionSchema(Schema):
     slug: str
     label: str
 
 
 class ModelEditOptionsSchema(Schema):
-    themes: list[EditOptionItem]
-    tags: list[EditOptionItem]
-    reward_types: list[EditOptionItem]
-    gameplay_features: list[EditOptionItem]
-    technology_generations: list[EditOptionItem]
-    technology_subgenerations: list[EditOptionItem]
-    display_types: list[EditOptionItem]
-    display_subtypes: list[EditOptionItem]
-    cabinets: list[EditOptionItem]
-    game_formats: list[EditOptionItem]
-    systems: list[EditOptionItem]
-    corporate_entities: list[EditOptionItem]
-    people: list[EditOptionItem]
-    credit_roles: list[EditOptionItem]
-    titles: list[EditOptionItem]
-    models: list[EditOptionItem]
+    themes: list[EditOptionSchema]
+    tags: list[EditOptionSchema]
+    reward_types: list[EditOptionSchema]
+    gameplay_features: list[EditOptionSchema]
+    technology_generations: list[EditOptionSchema]
+    technology_subgenerations: list[EditOptionSchema]
+    display_types: list[EditOptionSchema]
+    display_subtypes: list[EditOptionSchema]
+    cabinets: list[EditOptionSchema]
+    game_formats: list[EditOptionSchema]
+    systems: list[EditOptionSchema]
+    corporate_entities: list[EditOptionSchema]
+    people: list[EditOptionSchema]
+    credit_roles: list[EditOptionSchema]
+    titles: list[EditOptionSchema]
+    models: list[EditOptionSchema]
 
 
-class TitleMachineVariantSchema(Schema):
+class TitleModelVariantSchema(Schema):
     """A variant of a machine model, shown nested under its parent."""
 
     name: str
@@ -227,16 +227,16 @@ class TitleMachineVariantSchema(Schema):
     thumbnail_url: str | None = None
 
 
-class TitleMachineSchema(Schema):
+class TitleModelSchema(Schema):
     """A machine model shown in a list context (title detail, theme detail, etc.)."""
 
     name: str
     slug: str
     year: int | None = None
-    manufacturer: Ref | None = None
+    manufacturer: EntityRef | None = None
     technology_generation_name: str | None = None
     thumbnail_url: str | None = None
-    variants: list[TitleMachineVariantSchema] = []
+    variants: list[TitleModelVariantSchema] = []
 
 
 class RelatedTitleSchema(Schema):
@@ -249,7 +249,7 @@ class RelatedTitleSchema(Schema):
     thumbnail_url: str | None = None
 
 
-class TitleRefSchema(Ref):
+class TitleRef(EntityRef):
     abbreviations: list[str] = []
     model_count: int = 0
     manufacturer_name: str | None = None  # display-only, no paired slug
@@ -257,12 +257,12 @@ class TitleRefSchema(Ref):
     thumbnail_url: str | None = None
 
 
-class GameplayFeatureSchema(Ref):
+class GameplayFeatureRef(EntityRef):
     count: int | None = None
 
 
 class CreditSchema(Schema):
-    person: Ref
+    person: EntityRef
     role: str
     role_display: str
     role_sort_order: int

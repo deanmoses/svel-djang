@@ -26,14 +26,14 @@ from .helpers import (
     _build_rich_text,
     _serialize_title_ref,
 )
-from .schemas import ClaimPatchSchema, TitleRefSchema
+from .schemas import ClaimPatchSchema, TitleRef
 
 # ---------------------------------------------------------------------------
 # Schemas
 # ---------------------------------------------------------------------------
 
 
-class FranchiseListSchema(Schema):
+class FranchiseListItemSchema(Schema):
     name: str
     slug: str
     title_count: int = 0
@@ -43,7 +43,7 @@ class FranchiseDetailSchema(Schema):
     name: str
     slug: str
     description: RichTextSchema = RichTextSchema()
-    titles: list[TitleRefSchema]
+    titles: list[TitleRef]
 
 
 # ---------------------------------------------------------------------------
@@ -53,9 +53,9 @@ class FranchiseDetailSchema(Schema):
 franchises_router = Router(tags=["franchises"])
 
 
-@franchises_router.get("/", response=list[FranchiseListSchema])
+@franchises_router.get("/", response=list[FranchiseListItemSchema])
 @decorate_view(cache_control(no_cache=True))
-def list_franchises(request: HttpRequest) -> list[FranchiseListSchema]:
+def list_franchises(request: HttpRequest) -> list[FranchiseListItemSchema]:
     """Return every franchise with title count (no pagination)."""
     qs = (
         Franchise.objects.active()
@@ -63,7 +63,7 @@ def list_franchises(request: HttpRequest) -> list[FranchiseListSchema]:
         .order_by("-title_count", "name")
     )
     return [
-        FranchiseListSchema(
+        FranchiseListItemSchema(
             name=f.name,
             slug=f.slug,
             title_count=cast(HasTitleCount, f).title_count,

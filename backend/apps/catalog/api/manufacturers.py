@@ -51,32 +51,32 @@ from .helpers import (
 from .schemas import (
     ClaimPatchSchema,
     CorporateEntityLocationSchema,
-    Ref,
+    EntityRef,
     RelatedTitleSchema,
 )
 from .titles import _dedup_facet_refs
 
 
-class ManufacturerGridSchema(Schema):
+class ManufacturerGridItemSchema(Schema):
     name: str
     slug: str
     model_count: int = 0
     thumbnail_url: str | None = None
     search_text: str | None = None
-    locations: list[Ref] = []
+    locations: list[EntityRef] = []
     year_min: int | None = None
     year_max: int | None = None
-    persons: list[Ref] = []
-    tech_generations: list[Ref] = []
+    persons: list[EntityRef] = []
+    tech_generations: list[EntityRef] = []
 
 
-class ManufacturerSchema(Schema):
+class ManufacturerListItemSchema(Schema):
     name: str
     slug: str
     model_count: int = 0
 
 
-class CorporateEntitySchema(Schema):
+class ManufacturerCorporateEntitySchema(Schema):
     name: str
     slug: str
     year_start: int | None
@@ -84,7 +84,7 @@ class CorporateEntitySchema(Schema):
     locations: list[CorporateEntityLocationSchema]
 
 
-class SystemSchema(Schema):
+class ManufacturerSystemSchema(Schema):
     name: str
     slug: str
 
@@ -105,9 +105,9 @@ class ManufacturerDetailSchema(Schema):
     headquarters: str | None = None
     logo_url: str | None = None
     website: str = ""
-    entities: list[CorporateEntitySchema]
+    entities: list[ManufacturerCorporateEntitySchema]
     titles: list[RelatedTitleSchema]
-    systems: list[SystemSchema]
+    systems: list[ManufacturerSystemSchema]
     persons: list[ManufacturerPersonSchema] = []
     uploaded_media: list[UploadedMediaSchema] = []
 
@@ -168,7 +168,7 @@ def _serialize_manufacturer_detail(mfr: Manufacturer) -> ManufacturerDetailSchem
         logo_url=mfr.logo_url,
         website=mfr.website,
         entities=[
-            CorporateEntitySchema(
+            ManufacturerCorporateEntitySchema(
                 name=e.name,
                 slug=e.slug,
                 year_start=e.year_start,
@@ -178,7 +178,10 @@ def _serialize_manufacturer_detail(mfr: Manufacturer) -> ManufacturerDetailSchem
             for e in mfr.entities.all()
         ],
         titles=_collect_titles(m for e in mfr.entities.all() for m in e.models.all()),
-        systems=[SystemSchema(name=s.name, slug=s.slug) for s in mfr.systems.all()],
+        systems=[
+            ManufacturerSystemSchema(name=s.name, slug=s.slug)
+            for s in mfr.systems.all()
+        ],
         persons=persons,
         uploaded_media=_serialize_uploaded_media(all_media(mfr)),
     )
@@ -238,11 +241,11 @@ def _build_location_refs(
 manufacturers_router = Router(tags=["manufacturers"])
 
 
-@manufacturers_router.get("/", response=list[ManufacturerSchema])
+@manufacturers_router.get("/", response=list[ManufacturerListItemSchema])
 @paginate(NamedPageNumberPagination, page_size=DEFAULT_PAGE_SIZE)
-def list_manufacturers(request: HttpRequest) -> list[ManufacturerSchema]:
+def list_manufacturers(request: HttpRequest) -> list[ManufacturerListItemSchema]:
     return [
-        ManufacturerSchema(
+        ManufacturerListItemSchema(
             name=row["name"], slug=row["slug"], model_count=row["model_count"]
         )
         for row in Manufacturer.objects.active()
@@ -257,7 +260,7 @@ def list_manufacturers(request: HttpRequest) -> list[ManufacturerSchema]:
     ]
 
 
-@manufacturers_router.get("/all/", response=list[ManufacturerGridSchema])
+@manufacturers_router.get("/all/", response=list[ManufacturerGridItemSchema])
 @decorate_view(cache_control(no_cache=True))
 def list_all_manufacturers(
     request: HttpRequest,

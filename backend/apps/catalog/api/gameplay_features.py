@@ -32,8 +32,8 @@ from .helpers import (
     _serialize_uploaded_media,
 )
 from .schemas import (
+    EntityRef,
     HierarchyClaimPatchSchema,
-    Ref,
 )
 
 # ---------------------------------------------------------------------------
@@ -41,7 +41,7 @@ from .schemas import (
 # ---------------------------------------------------------------------------
 
 
-class GameplayFeatureListSchema(Schema):
+class GameplayFeatureListItemSchema(Schema):
     name: str
     slug: str
     aliases: list[str] = []
@@ -54,8 +54,8 @@ class GameplayFeatureDetailSchema(Schema):
     slug: str
     description: RichTextSchema = RichTextSchema()
     aliases: list[str] = []
-    parents: list[Ref] = []
-    children: list[Ref] = []
+    parents: list[EntityRef] = []
+    children: list[EntityRef] = []
     uploaded_media: list[UploadedMediaSchema] = []
 
 
@@ -80,9 +80,10 @@ def _serialize_detail(feature: GameplayFeature) -> GameplayFeatureDetailSchema:
         slug=feature.slug,
         description=_build_rich_text(feature, "description", active_claims(feature)),
         aliases=[a.value for a in feature.aliases.all()],
-        parents=[Ref(name=p.name, slug=p.slug) for p in feature.parents.all()],
+        parents=[EntityRef(name=p.name, slug=p.slug) for p in feature.parents.all()],
         children=[
-            Ref(name=c.name, slug=c.slug) for c in feature.children.order_by("name")
+            EntityRef(name=c.name, slug=c.slug)
+            for c in feature.children.order_by("name")
         ],
         uploaded_media=_serialize_uploaded_media(all_media(feature)),
     )
@@ -95,11 +96,11 @@ def _serialize_detail(feature: GameplayFeature) -> GameplayFeatureDetailSchema:
 gameplay_features_router = Router(tags=["gameplay-features"])
 
 
-@gameplay_features_router.get("/", response=list[GameplayFeatureListSchema])
+@gameplay_features_router.get("/", response=list[GameplayFeatureListItemSchema])
 @decorate_view(cache_control(no_cache=True))
 def list_gameplay_features(
     request: HttpRequest,
-) -> list[GameplayFeatureListSchema]:
+) -> list[GameplayFeatureListItemSchema]:
     features = list(
         GameplayFeature.objects.active().prefetch_related(
             Prefetch("children", queryset=GameplayFeature.objects.active()),
@@ -119,7 +120,7 @@ def list_gameplay_features(
     features.sort(key=lambda f: (-counts.get(f.pk, 0), f.name.lower()))
 
     return [
-        GameplayFeatureListSchema(
+        GameplayFeatureListItemSchema(
             name=f.name,
             slug=f.slug,
             aliases=[a.value for a in f.aliases.all()],

@@ -52,9 +52,9 @@ from .entity_create import (
 )
 from .schemas import (
     AlreadyDeletedSchema,
-    CreateSchema,
     DeleteResponseSchema,
-    Ref,
+    EntityCreateInputSchema,
+    EntityRef,
     SoftDeleteBlockedSchema,
     TaxonomyDeletePreviewSchema,
 )
@@ -113,10 +113,10 @@ def register_entity_delete_restore[ModelT: CatalogModel, SchemaT: Schema](
         is_blocked = plan.is_blocked or active_children > 0
         changeset_count = 0 if is_blocked else count_entity_changesets(obj)
 
-        parent_ref: Ref | None = None
+        parent_ref: EntityRef | None = None
         if parent_field is not None:
             parent = getattr(obj, parent_field)
-            parent_ref = Ref(name=parent.name, slug=parent.slug)
+            parent_ref = EntityRef(name=parent.name, slug=parent.slug)
 
         return TaxonomyDeletePreviewSchema(
             name=obj.name,
@@ -304,7 +304,7 @@ def register_entity_create[ModelT: CatalogModel, SchemaT: Schema](
 
     def _do_create(
         request: HttpRequest,
-        data: CreateSchema,
+        data: EntityCreateInputSchema,
         parent: CatalogModel | None = None,
     ) -> Status[Any]:
         check_and_record(request.user, CREATE_RATE_LIMIT_SPEC)
@@ -354,7 +354,7 @@ def register_entity_create[ModelT: CatalogModel, SchemaT: Schema](
         assert parent_model is not None
 
         def _create_parented(
-            request: HttpRequest, parent_slug: str, data: CreateSchema
+            request: HttpRequest, parent_slug: str, data: EntityCreateInputSchema
         ) -> Status[Any]:
             parent = get_object_or_404(parent_model.objects.active(), slug=parent_slug)
             return _do_create(request, data, parent=parent)
@@ -372,7 +372,9 @@ def register_entity_create[ModelT: CatalogModel, SchemaT: Schema](
         )(_create_parented)
     else:
 
-        def _create_unparented(request: HttpRequest, data: CreateSchema) -> Status[Any]:
+        def _create_unparented(
+            request: HttpRequest, data: EntityCreateInputSchema
+        ) -> Status[Any]:
             return _do_create(request, data)
 
         _create_unparented.__name__ = f"{entity_label.lower()}_create"

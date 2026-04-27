@@ -45,8 +45,8 @@ from .helpers import (
 )
 from .schemas import (
     ClaimPatchSchema,
-    CreateSchema,
-    Ref,
+    EntityCreateInputSchema,
+    EntityRef,
     RelatedTitleSchema,
 )
 
@@ -55,14 +55,14 @@ from .schemas import (
 # ---------------------------------------------------------------------------
 
 
-class SystemListSchema(Schema):
+class SystemListItemSchema(Schema):
     name: str
     slug: str
-    manufacturer: Ref | None = None
+    manufacturer: EntityRef | None = None
     model_count: int = 0
 
 
-class SystemCreateSchema(CreateSchema):
+class SystemCreateSchema(EntityCreateInputSchema):
     manufacturer_slug: str
 
 
@@ -70,10 +70,10 @@ class SystemDetailSchema(Schema):
     name: str
     slug: str
     description: RichTextSchema = RichTextSchema()
-    manufacturer: Ref | None = None
-    technology_subgeneration: Ref | None = None
+    manufacturer: EntityRef | None = None
+    technology_subgeneration: EntityRef | None = None
     titles: list[RelatedTitleSchema]
-    sibling_systems: list[Ref] = []
+    sibling_systems: list[EntityRef] = []
 
 
 # ---------------------------------------------------------------------------
@@ -141,10 +141,10 @@ def _serialize_system_detail(system: System) -> SystemDetailSchema:
         for a in accum.values()
     ]
 
-    sibling_systems: list[Ref] = []
+    sibling_systems: list[EntityRef] = []
     if system.manufacturer:
         sibling_systems = [
-            Ref(name=row["name"], slug=row["slug"])
+            EntityRef(name=row["name"], slug=row["slug"])
             for row in System.objects.active()
             .filter(manufacturer=system.manufacturer)
             .exclude(pk=system.pk)
@@ -158,12 +158,12 @@ def _serialize_system_detail(system: System) -> SystemDetailSchema:
         slug=system.slug,
         description=_build_rich_text(system, "description", active_claims(system)),
         manufacturer=(
-            Ref(name=system.manufacturer.name, slug=system.manufacturer.slug)
+            EntityRef(name=system.manufacturer.name, slug=system.manufacturer.slug)
             if system.manufacturer
             else None
         ),
         technology_subgeneration=(
-            Ref(
+            EntityRef(
                 name=system.technology_subgeneration.name,
                 slug=system.technology_subgeneration.slug,
             )
@@ -182,9 +182,9 @@ def _serialize_system_detail(system: System) -> SystemDetailSchema:
 systems_router = Router(tags=["systems"])
 
 
-@systems_router.get("/all/", response=list[SystemListSchema])
+@systems_router.get("/all/", response=list[SystemListItemSchema])
 @decorate_view(cache_control(no_cache=True))
-def list_all_systems(request: HttpRequest) -> list[SystemListSchema]:
+def list_all_systems(request: HttpRequest) -> list[SystemListItemSchema]:
     """Return every system with machine count (no pagination)."""
     qs = (
         System.objects.active()
@@ -199,11 +199,11 @@ def list_all_systems(request: HttpRequest) -> list[SystemListSchema]:
         .order_by("name")
     )
     return [
-        SystemListSchema(
+        SystemListItemSchema(
             name=s.name,
             slug=s.slug,
             manufacturer=(
-                Ref(name=s.manufacturer.name, slug=s.manufacturer.slug)
+                EntityRef(name=s.manufacturer.name, slug=s.manufacturer.slug)
                 if s.manufacturer
                 else None
             ),

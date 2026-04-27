@@ -31,7 +31,7 @@ from .helpers import (
 from .schemas import (
     ClaimPatchSchema,
     CreditSchema,
-    TitleRefSchema,
+    TitleRef,
 )
 
 # ---------------------------------------------------------------------------
@@ -39,7 +39,7 @@ from .schemas import (
 # ---------------------------------------------------------------------------
 
 
-class SeriesListSchema(Schema):
+class SeriesListItemSchema(Schema):
     name: str
     slug: str
     description: RichTextSchema = RichTextSchema()
@@ -51,7 +51,7 @@ class SeriesDetailSchema(Schema):
     name: str
     slug: str
     description: RichTextSchema = RichTextSchema()
-    titles: list[TitleRefSchema]
+    titles: list[TitleRef]
     credits: list[CreditSchema] = []
 
 
@@ -115,9 +115,9 @@ def _serialize_series_detail(series: Series) -> SeriesDetailSchema:
 series_router = Router(tags=["series"])
 
 
-@series_router.get("/", response=list[SeriesListSchema])
+@series_router.get("/", response=list[SeriesListItemSchema])
 @decorate_view(cache_control(no_cache=True))
-def list_series(request: HttpRequest) -> list[SeriesListSchema]:
+def list_series(request: HttpRequest) -> list[SeriesListItemSchema]:
     """Return all series with title count and thumbnail."""
     qs = (
         Series.objects.active()
@@ -135,7 +135,7 @@ def list_series(request: HttpRequest) -> list[SeriesListSchema]:
         )
     )
     min_rank = get_minimum_display_rank()
-    result: list[SeriesListSchema] = []
+    result: list[SeriesListItemSchema] = []
     for s in qs:
         thumb = None
         for title in s.titles.all():
@@ -147,7 +147,7 @@ def list_series(request: HttpRequest) -> list[SeriesListSchema]:
             if thumb:
                 break
         result.append(
-            SeriesListSchema(
+            SeriesListItemSchema(
                 name=s.name,
                 slug=s.slug,
                 description=_build_rich_text(s, "description"),

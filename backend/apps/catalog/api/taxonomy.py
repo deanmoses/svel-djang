@@ -41,10 +41,10 @@ from .entity_crud import (
     register_entity_delete_restore,
 )
 from .helpers import _build_rich_text, _extract_image_urls, _serialize_title_machine
-from .people import PersonGridSchema
+from .people import PersonGridItemSchema
 from .schemas import (
     ClaimPatchSchema,
-    TitleMachineSchema,
+    TitleModelSchema,
 )
 
 # ---------------------------------------------------------------------------
@@ -64,11 +64,11 @@ class TaxonomyWithTitleCountSchema(TaxonomySchema):
     title_count: int = 0
 
 
-class DisplayTypeListSchema(TaxonomyWithTitleCountSchema):
+class DisplayTypeListItemSchema(TaxonomyWithTitleCountSchema):
     subtypes: list[TaxonomyWithTitleCountSchema] = []
 
 
-class TechnologyGenerationListSchema(TaxonomyWithTitleCountSchema):
+class TechnologyGenerationListItemSchema(TaxonomyWithTitleCountSchema):
     subgenerations: list[TaxonomyWithTitleCountSchema] = []
 
 
@@ -246,11 +246,13 @@ def _register_create(  # noqa: UP047
 technology_generations_router = Router(tags=["technology-generations"])
 
 
-@technology_generations_router.get("/", response=list[TechnologyGenerationListSchema])
+@technology_generations_router.get(
+    "/", response=list[TechnologyGenerationListItemSchema]
+)
 @decorate_view(cache_control(no_cache=True))
 def list_technology_generations(
     request: HttpRequest,
-) -> list[TechnologyGenerationListSchema]:
+) -> list[TechnologyGenerationListItemSchema]:
     gens = list(TechnologyGeneration.objects.active())
     subgens = list(TechnologySubgeneration.objects.active())
 
@@ -268,7 +270,7 @@ def list_technology_generations(
     gens.sort(key=lambda g: (g.display_order, g.name.lower()))
 
     return [
-        TechnologyGenerationListSchema(
+        TechnologyGenerationListItemSchema(
             **_serialize_taxonomy(g).model_dump(),
             title_count=gen_counts.get(g.pk, 0),
             subgenerations=[
@@ -336,9 +338,9 @@ def patch_technology_generation(
 display_types_router = Router(tags=["display-types"])
 
 
-@display_types_router.get("/", response=list[DisplayTypeListSchema])
+@display_types_router.get("/", response=list[DisplayTypeListItemSchema])
 @decorate_view(cache_control(no_cache=True))
-def list_display_types(request: HttpRequest) -> list[DisplayTypeListSchema]:
+def list_display_types(request: HttpRequest) -> list[DisplayTypeListItemSchema]:
     types = list(DisplayType.objects.active())
     subtypes = list(DisplaySubtype.objects.active())
 
@@ -356,7 +358,7 @@ def list_display_types(request: HttpRequest) -> list[DisplayTypeListSchema]:
     types.sort(key=lambda t: (t.display_order, t.name.lower()))
 
     return [
-        DisplayTypeListSchema(
+        DisplayTypeListItemSchema(
             **_serialize_taxonomy(t).model_dump(),
             title_count=type_counts.get(t.pk, 0),
             subtypes=[
@@ -479,7 +481,7 @@ def patch_game_format(
 
 
 class RewardTypeDetailSchema(TaxonomySchema):
-    machines: list[TitleMachineSchema] = []
+    machines: list[TitleModelSchema] = []
 
 
 reward_types_router = Router(tags=["reward-types"])
@@ -566,13 +568,13 @@ def patch_tag(
 
 
 class CreditRoleDetailSchema(TaxonomySchema):
-    people: list[PersonGridSchema] = []
+    people: list[PersonGridItemSchema] = []
 
 
 credit_roles_router = Router(tags=["credit-roles"])
 
 
-def _credit_role_people(cr: CreditRole) -> list[PersonGridSchema]:
+def _credit_role_people(cr: CreditRole) -> list[PersonGridItemSchema]:
     """Rank Persons by distinct active Titles credited in *cr*.
 
     Titles roll up all MachineModels (parent + variants) so a person credited
@@ -634,7 +636,7 @@ def _credit_role_people(cr: CreditRole) -> list[PersonGridSchema]:
     }
 
     min_rank = get_minimum_display_rank()
-    out: list[PersonGridSchema] = []
+    out: list[PersonGridItemSchema] = []
     for pid in person_ids:
         person = people_by_id.get(pid)
         if person is None:
@@ -647,7 +649,7 @@ def _credit_role_people(cr: CreditRole) -> list[PersonGridSchema]:
             if t:
                 thumbnail = t
         out.append(
-            PersonGridSchema(
+            PersonGridItemSchema(
                 name=person.name,
                 slug=person.slug,
                 aliases=[a.value for a in person.aliases.all()],

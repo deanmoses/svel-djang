@@ -34,7 +34,7 @@ class TestSharedSchemaOwnership:
         # to ``ChangeSetInputSchema``, so it lives in catalog. Pin against a
         # future move into provenance, which would force provenance to import
         # catalog vocabulary.
-        cls = catalog_schemas.CreateSchema
+        cls = catalog_schemas.EntityCreateInputSchema
         assert cls.__module__ == "apps.catalog.api.schemas"
 
     def test_media_owned_shapes_are_defined_in_media(self):
@@ -72,8 +72,8 @@ class TestSharedSchemaOwnership:
             for name, comp in components.items()
             if frozenset(comp.get("properties", {})) == create_input_shape
         }
-        assert create_matches == {"CreateSchema"}, (
-            "Expected only CreateSchema to have shape "
+        assert create_matches == {"EntityCreateInputSchema"}, (
+            "Expected only EntityCreateInputSchema to have shape "
             "{name, slug, note, citation}; "
             f"found {sorted(create_matches)}"
         )

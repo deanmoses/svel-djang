@@ -30,9 +30,9 @@ from .helpers import (
     _serialize_title_machine,
 )
 from .schemas import (
+    EntityRef,
     HierarchyClaimPatchSchema,
-    Ref,
-    TitleMachineSchema,
+    TitleModelSchema,
 )
 
 # ---------------------------------------------------------------------------
@@ -40,7 +40,7 @@ from .schemas import (
 # ---------------------------------------------------------------------------
 
 
-class ThemeListSchema(Schema):
+class ThemeListItemSchema(Schema):
     name: str
     slug: str
     aliases: list[str] = []
@@ -53,9 +53,9 @@ class ThemeDetailSchema(Schema):
     slug: str
     description: RichTextSchema = RichTextSchema()
     aliases: list[str] = []
-    parents: list[Ref] = []
-    children: list[Ref] = []
-    machines: list[TitleMachineSchema]
+    parents: list[EntityRef] = []
+    children: list[EntityRef] = []
+    machines: list[TitleModelSchema]
 
 
 # ---------------------------------------------------------------------------
@@ -86,9 +86,9 @@ def _serialize_detail(theme: Theme) -> ThemeDetailSchema:
         slug=theme.slug,
         description=_build_rich_text(theme, "description", active_claims(theme)),
         aliases=[a.value for a in theme.aliases.all()],
-        parents=[Ref(name=t.name, slug=t.slug) for t in theme.parents.all()],
+        parents=[EntityRef(name=t.name, slug=t.slug) for t in theme.parents.all()],
         children=[
-            Ref(name=t.name, slug=t.slug) for t in theme.children.order_by("name")
+            EntityRef(name=t.name, slug=t.slug) for t in theme.children.order_by("name")
         ],
         machines=[
             _serialize_title_machine(pm, min_rank=min_rank)
@@ -104,9 +104,9 @@ def _serialize_detail(theme: Theme) -> ThemeDetailSchema:
 themes_router = Router(tags=["themes"])
 
 
-@themes_router.get("/", response=list[ThemeListSchema])
+@themes_router.get("/", response=list[ThemeListItemSchema])
 @decorate_view(cache_control(no_cache=True))
-def list_themes(request: HttpRequest) -> list[ThemeListSchema]:
+def list_themes(request: HttpRequest) -> list[ThemeListItemSchema]:
     themes = list(
         Theme.objects.active().prefetch_related(
             Prefetch("parents", queryset=Theme.objects.active()),
@@ -124,7 +124,7 @@ def list_themes(request: HttpRequest) -> list[ThemeListSchema]:
     )
     themes.sort(key=lambda t: (-counts.get(t.pk, 0), t.name.lower()))
     return [
-        ThemeListSchema(
+        ThemeListItemSchema(
             name=t.name,
             slug=t.slug,
             aliases=[a.value for a in t.aliases.all()],
