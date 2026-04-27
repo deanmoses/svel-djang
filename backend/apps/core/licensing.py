@@ -1,18 +1,10 @@
-"""Licensing helpers for display threshold and effective license resolution."""
+"""License policy helpers: display threshold, rank lookup, canonical seeding."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypedDict
+from typing import TypedDict
 
-if TYPE_CHECKING:
-    from apps.core.models import License
-    from apps.provenance.models import Claim
-
-
-# Prefetched (source_id, field_name) → license lookup, built once per request
-# by build_source_field_license_map() to avoid N+1 queries when resolving
-# effective licenses for many claims.
-type SourceFieldLicenseMap = dict[tuple[int, str], License | None]
+from apps.core.models import License
 
 
 class _LicenseSeed(TypedDict):
@@ -59,27 +51,8 @@ def is_displayable(license_obj: License | None) -> bool:
     return effective_rank(license_obj) >= get_minimum_display_rank()
 
 
-# Image field names that get license metadata denormalized into extra_data.
-IMAGE_FIELDS = frozenset({"opdb.images", "ipdb.image_urls", "image_urls"})
-
-
-def build_source_field_license_map() -> SourceFieldLicenseMap:
-    """Prefetch all SourceFieldLicense rows into a lookup dict.
-
-    Returns {(source_id, field_name): license_obj}.
-    """
-    from apps.provenance.models import SourceFieldLicense
-
-    return {
-        (sfl.source_id, sfl.field_name): sfl.license
-        for sfl in SourceFieldLicense.objects.select_related("license").all()
-    }
-
-
 def ensure_licenses() -> int:
     """Create canonical license records if they don't exist. Returns count created."""
-    from apps.core.models import License
-
     created = 0
     for data in _CANONICAL_LICENSES:
         _, was_created = License.objects.get_or_create(slug=data["slug"], defaults=data)
@@ -382,26 +355,3 @@ _CANONICAL_LICENSES: list[_LicenseSeed] = [
         "permissiveness_rank": 0,
     },
 ]
-
-
-def resolve_effective_license(
-    claim: Claim,
-    sfl_map: SourceFieldLicenseMap | None = None,
-) -> License | None:
-    """Resolve the effective license for a claim.
-
-    Resolution order:
-    1. claim.license (per-claim override)
-    2. SourceFieldLicense for (claim.source, claim.field_name)
-    3. claim.source.default_license (source-wide default)
-    4. None (unknown)
-    """
-    if claim.license_id:
-        return claim.license
-    if claim.source_id:
-        if sfl_map is not None:
-            sfl_license = sfl_map.get((claim.source_id, claim.field_name))
-            if sfl_license:
-                return sfl_license
-        return claim.source.default_license if claim.source else None
-    return None

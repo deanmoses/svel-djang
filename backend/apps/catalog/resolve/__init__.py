@@ -13,13 +13,12 @@ from typing import Any
 from django.core.management.base import OutputWrapper
 from django.utils import timezone
 
-from apps.core.licensing import (
-    IMAGE_FIELDS,
+from apps.core.types import JsonBody
+from apps.provenance.licensing import (
     SourceFieldLicenseMap,
     build_source_field_license_map,
     resolve_effective_license,
 )
-from apps.core.types import JsonBody
 from apps.provenance.models import Claim, ClaimControlledModel
 
 from ..claims import get_relationship_namespaces
@@ -68,6 +67,11 @@ from ._relationships import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Claim field_names whose values are images. License metadata for these
+# fields gets denormalized into extra_data so the API can filter by
+# permissiveness_rank without joining back through claims.
+IMAGE_FIELDS = frozenset({"opdb.images", "ipdb.image_urls", "image_urls"})
 
 
 def resolve_model(machine_model: MachineModel) -> MachineModel:

@@ -1,4 +1,5 @@
 import pytest
+from constance.signals import config_updated
 from django.core.cache import cache
 
 from apps.catalog.cache import MODELS_ALL_KEY, TITLES_ALL_KEY
@@ -122,6 +123,41 @@ class TestCacheInvalidatingModelsParity:
             Title,
         }
         assert set(_cache_invalidating_models()) == expected
+
+
+class TestPolicyChangeInvalidation:
+    """Changing CONTENT_DISPLAY_POLICY busts cached /all/ payloads, since the
+    rendered content depends on the active display threshold."""
+
+    @pytest.fixture(autouse=True)
+    def _clear_cache(self):
+        cache.clear()
+        yield
+        cache.clear()
+
+    def test_policy_change_invalidates_cache(self, client, machine_model):
+        client.get("/api/models/all/")
+        assert cache.get(MODELS_ALL_KEY) is not None
+
+        config_updated.send(
+            sender=None,
+            key="CONTENT_DISPLAY_POLICY",
+            old_value="licensed-only",
+            new_value="show-all",
+        )
+        assert cache.get(MODELS_ALL_KEY) is None
+
+    def test_unrelated_key_change_does_not_invalidate(self, client, machine_model):
+        client.get("/api/models/all/")
+        assert cache.get(MODELS_ALL_KEY) is not None
+
+        config_updated.send(
+            sender=None,
+            key="SOME_OTHER_KEY",
+            old_value="a",
+            new_value="b",
+        )
+        assert cache.get(MODELS_ALL_KEY) is not None
 
 
 class TestConditionalGet:

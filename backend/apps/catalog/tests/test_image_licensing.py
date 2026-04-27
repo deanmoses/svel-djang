@@ -6,8 +6,8 @@ from apps.catalog.api.helpers import _extract_image_urls
 from apps.catalog.models import Title
 from apps.catalog.resolve import resolve_model
 from apps.catalog.tests.conftest import make_machine_model
-from apps.core.licensing import resolve_effective_license
 from apps.core.models import License
+from apps.provenance.licensing import resolve_effective_license
 from apps.provenance.models import Claim, Source, SourceFieldLicense
 
 
@@ -79,7 +79,7 @@ class TestEffectiveLicenseResolution:
         claim = Claim.objects.assert_claim(title, "description", "text", source=opdb)
         claim.source = opdb
 
-        from apps.core.licensing import build_source_field_license_map
+        from apps.provenance.licensing import build_source_field_license_map
 
         sfl_map = build_source_field_license_map()
         lic = resolve_effective_license(claim, sfl_map)
