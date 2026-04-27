@@ -650,8 +650,12 @@ def _detail_qs() -> QuerySet[Title]:
 titles_router = Router(tags=["titles"])
 
 
+class TitleListPagination(NamedPageNumberPagination):
+    response_name = "TitleListSchema"
+
+
 @titles_router.get("/", response=list[TitleListItemSchema])
-@paginate(NamedPageNumberPagination, page_size=DEFAULT_PAGE_SIZE)
+@paginate(TitleListPagination, page_size=DEFAULT_PAGE_SIZE)
 def list_titles(request: HttpRequest, display: str = "") -> list[TitleListItemSchema]:
     qs = Title.objects.active().annotate(
         model_count=Count(

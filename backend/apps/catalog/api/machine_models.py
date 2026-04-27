@@ -591,8 +591,12 @@ def _model_detail_qs() -> QuerySet[MachineModel]:
 models_router = Router(tags=["models"])
 
 
+class ModelListPagination(NamedPageNumberPagination):
+    response_name = "ModelListSchema"
+
+
 @models_router.get("/", response=list[ModelListItemSchema])
-@paginate(NamedPageNumberPagination, page_size=DEFAULT_PAGE_SIZE)
+@paginate(ModelListPagination, page_size=DEFAULT_PAGE_SIZE)
 def list_models(
     request: HttpRequest,
     manufacturer: str = "",

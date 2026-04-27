@@ -186,14 +186,14 @@ Some OpenAPI components don't come from explicit Ninja schema classes — Ninja 
 
 #### Status
 
-| Step                                                               | Status                                                 |
-| ------------------------------------------------------------------ | ------------------------------------------------------ |
-| `Input` ghost fix (`NamedPageNumberPagination`)                    | DONE                                                   |
-| PR 0 (TS-side indexed-access → named-imports sweep)                | DONE                                                   |
-| PR 1 (small batch: config + core + pagination touch-up)            | DONE                                                   |
-| PR 2 (medium batch: media + citation + provenance)                 | DONE                                                   |
-| PR 3 (large batch: catalog)                                        | DONE                                                   |
-| PR 4 (`Paged*Schema` ghost fix via `NamedPaginatedResponseSchema`) | TODO — runs after PR 3 frees up the wrapper-slot names |
+| Step                                                               | Status |
+| ------------------------------------------------------------------ | ------ |
+| `Input` ghost fix (`NamedPageNumberPagination`)                    | DONE   |
+| PR 0 (TS-side indexed-access → named-imports sweep)                | DONE   |
+| PR 1 (small batch: config + core + pagination touch-up)            | DONE   |
+| PR 2 (medium batch: media + citation + provenance)                 | DONE   |
+| PR 3 (large batch: catalog)                                        | DONE   |
+| PR 4 (`Paged*Schema` ghost fix via `NamedPaginatedResponseSchema`) | DONE   |
 
 When picking this up in a fresh session: read this plan top-to-bottom, then `git log refactor/api-renaming` to see what's already landed, then start at the next TODO.
 

@@ -208,8 +208,12 @@ def _person_qs() -> QuerySet[Person]:
 people_router = Router(tags=["people"])
 
 
+class PersonListPagination(NamedPageNumberPagination):
+    response_name = "PersonListSchema"
+
+
 @people_router.get("/", response=list[PersonListItemSchema])
-@paginate(NamedPageNumberPagination, page_size=DEFAULT_PAGE_SIZE)
+@paginate(PersonListPagination, page_size=DEFAULT_PAGE_SIZE)
 def list_people(request: HttpRequest) -> list[PersonListItemSchema]:
     return [
         PersonListItemSchema(

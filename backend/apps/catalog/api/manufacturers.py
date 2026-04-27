@@ -241,8 +241,12 @@ def _build_location_refs(
 manufacturers_router = Router(tags=["manufacturers"])
 
 
+class ManufacturerListPagination(NamedPageNumberPagination):
+    response_name = "ManufacturerListSchema"
+
+
 @manufacturers_router.get("/", response=list[ManufacturerListItemSchema])
-@paginate(NamedPageNumberPagination, page_size=DEFAULT_PAGE_SIZE)
+@paginate(ManufacturerListPagination, page_size=DEFAULT_PAGE_SIZE)
 def list_manufacturers(request: HttpRequest) -> list[ManufacturerListItemSchema]:
     return [
         ManufacturerListItemSchema(
