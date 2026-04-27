@@ -62,7 +62,7 @@ class LinkTargetSchema(Schema):
     label: str
 
 
-class LinkTargetsResponseSchema(Schema):
+class LinkTargetListSchema(Schema):
     """Response body for ``/link-types/targets/``."""
 
     results: list[LinkTargetSchema]

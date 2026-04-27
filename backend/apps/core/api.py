@@ -13,7 +13,7 @@ from ninja.errors import HttpError
 
 from apps.core.markdown_links import get_autocomplete_types, get_link_type
 from apps.core.schemas import (
-    LinkTargetsResponseSchema,
+    LinkTargetListSchema,
     LinkTypeSchema,
 )
 
@@ -33,12 +33,12 @@ def list_link_types(request: HttpRequest) -> list[dict[str, str]]:
     return get_autocomplete_types()
 
 
-@link_types_router.get("/targets/", response=LinkTargetsResponseSchema)
+@link_types_router.get("/targets/", response=LinkTargetListSchema)
 def search_link_targets(
     request: HttpRequest,
     type: str,
     q: str = "",
-) -> LinkTargetsResponseSchema:
+) -> LinkTargetListSchema:
     """Search within a link type for autocomplete results."""
     lt = get_link_type(type)
     if lt is None or not lt.is_enabled() or not lt.autocomplete_serialize:
@@ -67,7 +67,7 @@ def search_link_targets(
         qs = qs.filter(q_filter)
 
     results = [lt.autocomplete_serialize(obj) for obj in qs[:AUTOCOMPLETE_RESULT_LIMIT]]
-    return LinkTargetsResponseSchema(results=results)
+    return LinkTargetListSchema(results=results)
 
 
 routers = [

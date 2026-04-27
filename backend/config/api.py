@@ -20,14 +20,14 @@ api = NinjaAPI(
 # (health checks, stats for the homepage, etc.) use tags=["private"].
 
 
-class StatsSchema(Schema):
+class SiteStatsSchema(Schema):
     titles: int
     models: int
     manufacturers: int
     people: int
 
 
-@api.get("/stats", response=StatsSchema, tags=["private"])
+@api.get("/stats", response=SiteStatsSchema, tags=["private"])
 def stats(request: HttpRequest) -> dict[str, int]:
     with connection.cursor() as cursor:
         cursor.execute(

@@ -1,0 +1,59 @@
+{
+  "StatsSchema": "SiteStatsSchema",
+  "LinkTargetsResponseSchema": "LinkTargetListSchema",
+  "PaginationParams": "PaginationParamsSchema",
+
+  "AttachmentMetaOut": "AttachmentMetaSchema",
+  "MediaAssetRefIn": "MediaAssetInputSchema",
+  "RenditionUrlsOut": "RenditionUrlsSchema",
+  "UploadOut": "UploadSchema",
+
+  "ExtractDraftSchema": "CitationExtractDraftSchema",
+  "ExtractRequestSchema": "CitationExtractInputSchema",
+  "ExtractResponseSchema": "CitationExtractResultSchema",
+  "RecognitionSchema": "CitationRecognitionSchema",
+  "SearchResponse": "CitationSourceSearchResponseSchema",
+
+  "BatchCitationInstanceOut": "CitationInstanceBatchSchema",
+  "CitationInstanceCreateIn": "CitationInstanceCreateSchema",
+  "EditCitationInput": "CitationReferenceInputSchema",
+  "SourceSchema": "CitationSourceSchema",
+  "FieldConstraint": "FieldConstraintSchema",
+
+  "CreateSchema": "EntityCreateInputSchema",
+  "CreditInput": "CreditInputSchema",
+  "DeletePreviewBase": "DeletePreviewBaseSchema",
+  "EditOptionItem": "EditOptionSchema",
+  "GameplayFeatureSchema": "GameplayFeatureRef",
+  "Ref": "EntityRef",
+  "TitleRefSchema": "TitleRef",
+
+  "TitleListSchema": "TitleListItemSchema",
+  "TitleMachineSchema": "TitleModelSchema",
+  "TitleMachineVariantSchema": "TitleModelVariantSchema",
+
+  "MachineModelDetailSchema": "ModelDetailSchema",
+  "MachineModelGridSchema": "ModelGridItemSchema",
+  "MachineModelListSchema": "ModelListItemSchema",
+  "ModelRefSchema": "ModelRef",
+  "VariantSchema": "ModelVariantSchema",
+
+  "PersonSchema": "PersonListItemSchema",
+  "PersonGridSchema": "PersonGridItemSchema",
+
+  "CorporateEntityListSchema": "CorporateEntityListItemSchema",
+  "CorporateEntitySchema": "ManufacturerCorporateEntitySchema",
+  "ManufacturerGridSchema": "ManufacturerGridItemSchema",
+  "ManufacturerSchema": "ManufacturerListItemSchema",
+  "SystemSchema": "ManufacturerSystemSchema",
+
+  "SystemListSchema": "SystemListItemSchema",
+
+  "DisplayTypeListSchema": "DisplayTypeListItemSchema",
+  "FranchiseListSchema": "FranchiseListItemSchema",
+  "GameplayFeatureInput": "GameplayFeatureInputSchema",
+  "GameplayFeatureListSchema": "GameplayFeatureListItemSchema",
+  "SeriesListSchema": "SeriesListItemSchema",
+  "TechnologyGenerationListSchema": "TechnologyGenerationListItemSchema",
+  "ThemeListSchema": "ThemeListItemSchema"
+}
