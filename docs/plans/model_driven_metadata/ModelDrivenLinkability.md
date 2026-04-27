@@ -234,6 +234,12 @@ type DeleteEndpoint = {
 
 Drops both `as never` casts, makes new delete endpoints visible to typed callers automatically.
 
+### Tighten `parseApiError` to accept the schema error union
+
+[`parse-api-error.ts:21`](../../../frontend/src/lib/api/parse-api-error.ts#L21) takes `error: unknown` and re-discriminates the body by runtime shape checks (`'detail' in error`, `typeof detail === 'string'`, …). Every typed-client caller already has `error` narrowed to the declared error-response union (`ErrorDetailSchema | ValidationErrorSchema` for most endpoints), so the `unknown` parameter widens the type away and forces the function to redo work the type system already did.
+
+Replace the parameter type with the schema union (or a discriminated union derived from it) so the runtime checks become exhaustiveness checks against the schema, not shape-sniffing. Touches every save/delete/create flow that calls `parseApiError`, so size it as its own PR rather than bundling.
+
 ### Normalize parent-segment naming in nested-create routes
 
 Three nested-create routes use three different parent param names:

@@ -1,12 +1,13 @@
 /**
  * Media API client — upload, detach, and set-primary.
  *
- * Upload uses XMLHttpRequest for progress events.
- * Detach and set-primary use fetch (no progress needed).
+ * Upload is hand-rolled on XMLHttpRequest for progress events
+ * (openapi-fetch can't expose them). Detach and set-primary go
+ * through the typed client.
  */
 
 import type { UploadSchema } from './schema';
-import { getCsrfToken } from './client';
+import client, { getCsrfToken } from './client';
 import { parseApiError } from './parse-api-error';
 
 export type UploadResult = UploadSchema;
@@ -88,38 +89,26 @@ export function uploadMedia(
 }
 
 // ---------------------------------------------------------------------------
-// Detach + set-primary (fetch, shared request shape)
+// Detach + set-primary (typed client)
 // ---------------------------------------------------------------------------
 
+type MediaActionEndpoint = '/api/media/detach/' | '/api/media/set-primary/';
+
 async function mediaAction(
-  endpoint: string,
+  endpoint: MediaActionEndpoint,
   entityType: string,
   publicId: string,
   assetUuid: string,
 ): Promise<void> {
-  const token = getCsrfToken();
-  const resp = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { 'X-CSRFToken': token } : {}),
-    },
-    body: JSON.stringify({
+  const { error, response } = await client.POST(endpoint, {
+    body: {
       entity_type: entityType,
       public_id: publicId,
       asset_uuid: assetUuid,
-    }),
+    },
   });
-  if (!resp.ok) {
-    let message = `Request failed (${resp.status})`;
-    try {
-      const body = await resp.json();
-      const parsed = parseApiError(body).message;
-      if (parsed) message = parsed;
-    } catch {
-      // ignore parse errors
-    }
-    throw new Error(message);
+  if (!response.ok) {
+    throw new Error(error ? parseApiError(error).message : `Request failed (${response.status})`);
   }
 }
 
