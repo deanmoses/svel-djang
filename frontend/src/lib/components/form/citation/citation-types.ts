@@ -3,7 +3,6 @@ import type {
   CitationSourceSearchSchema,
   CitationExtractDraftSchema,
   CitationRecognitionSchema,
-  CitationSourceSearchResponseSchema,
 } from '$lib/api/schema';
 import type { createApiClient } from '$lib/api/client';
 
@@ -14,7 +13,6 @@ import type { createApiClient } from '$lib/api/client';
 export type CitationSourceResult = CitationSourceSearchSchema;
 export type ChildSource = CitationSourceChildSchema;
 export type RecognitionResult = CitationRecognitionSchema;
-export type { CitationSourceSearchResponseSchema };
 
 /** Draft metadata returned by the extract endpoint (Open Library, etc.). */
 export type ExtractionDraft = CitationExtractDraftSchema;

@@ -6,9 +6,9 @@
     createChildByIdentifier,
     type CitationSourceResult,
     type RecognitionResult,
-    type CitationSourceSearchResponseSchema,
     type ExtractionDraft,
   } from './citation-types';
+  import type { CitationSourceSearchResponseSchema } from '$lib/api/schema';
   import DropdownHeader from '../DropdownHeader.svelte';
   import DropdownItem from '../DropdownItem.svelte';
   import DropdownSearchInput from '../DropdownSearchInput.svelte';

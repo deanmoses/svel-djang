@@ -9,7 +9,6 @@ import client from '$lib/api/client';
 import type { CatalogEntityKey } from '$lib/api/catalog-meta';
 import type { FieldConstraintSchema } from '$lib/api/schema';
 
-export type { FieldConstraintSchema };
 export type FieldConstraints = Record<string, FieldConstraintSchema>;
 
 const cache = new Map<string, FieldConstraints>();
