@@ -93,11 +93,8 @@ class LinkType:
     slug_field: str | None = None
 
     # --- Rendering ---
-    url_pattern: str = ""  # URL pattern like "/manufacturers/{slug}"
-    url_field: str = "slug"  # model field to get the URL value
+    url_pattern: str = ""  # URL pattern like "/manufacturers/{public_id}"
     label_field: str = "name"  # model field for link text (simple cases)
-    get_url: Callable[[Any], str] | None = None  # override for irregular URL
-    get_label: Callable[[Any], str] | None = None  # override for irregular label
     select_related: tuple[str, ...] = ()
     prefetch_related: tuple[str, ...] = ()
     # When set, _render_by_id() uses this instead of _format_link(). Indices are
@@ -105,16 +102,6 @@ class LinkType:
     # the same index).
     format_link: FormatLinkCallback | None = None
     collect_metadata: CollectMetadataCallback | None = None
-
-    # --- Authoring format (slug-based types only) ---
-    # Custom lookup for authoring format: (model_class, raw_values) -> {key: obj}
-    # Default for slug-based types: filter(**{slug_field + "__in": values})
-    authoring_lookup: (
-        Callable[[type[models.Model], list[str]], dict[str, models.Model]] | None
-    ) = None
-    # Custom key derivation for storage-to-authoring: (obj) -> authoring_key
-    # Default: getattr(obj, slug_field)
-    get_authoring_key: Callable[[Any], str] | None = None
 
     # --- Autocomplete ---
     autocomplete_search_fields: tuple[str, ...] = ()
@@ -142,16 +129,16 @@ class LinkType:
         return apps.get_model(self.model_path)
 
     def resolve_url(self, obj: models.Model) -> str:
-        """Resolve the URL for a linked object."""
-        if self.get_url:
-            return self.get_url(obj)
-        value = getattr(obj, self.url_field)
-        return self.url_pattern.format(**{self.url_field: value})
+        """Resolve the URL for a linked object.
+
+        Slug-based link types are always ``LinkableModel`` subclasses, which
+        expose a ``public_id`` property — that's the value substituted into
+        ``url_pattern``'s ``{public_id}`` placeholder.
+        """
+        return self.url_pattern.format(public_id=obj.public_id)  # type: ignore[attr-defined]
 
     def resolve_label(self, obj: models.Model) -> str:
         """Resolve the display label for a linked object."""
-        if self.get_label:
-            return self.get_label(obj)
         return str(getattr(obj, self.label_field, obj))
 
 
@@ -357,14 +344,10 @@ def _render_by_slug(
 
     if lt.slug_field is None:
         raise ValueError(f"LinkType '{lt.name}' is not slug-based")
-    by_key: dict[str, models.Model]
-    if lt.authoring_lookup:
-        by_key = lt.authoring_lookup(model, raw_values)
-    else:
-        qs = model.objects.filter(**{f"{lt.slug_field}__in": raw_values})
-        if lt.select_related:
-            qs = qs.select_related(*lt.select_related)
-        by_key = {getattr(obj, lt.slug_field): obj for obj in qs}
+    qs = model.objects.filter(**{f"{lt.slug_field}__in": raw_values})
+    if lt.select_related:
+        qs = qs.select_related(*lt.select_related)
+    by_key: dict[str, models.Model] = {getattr(obj, lt.slug_field): obj for obj in qs}
 
     result = text
     for match in reversed(matches):
@@ -417,12 +400,8 @@ def _convert_to_storage(
 
     if lt.slug_field is None:
         raise ValueError(f"LinkType '{lt.name}' is not slug-based")
-    by_key: dict[str, models.Model]
-    if lt.authoring_lookup:
-        by_key = lt.authoring_lookup(model, raw_values)
-    else:
-        qs = model.objects.filter(**{f"{lt.slug_field}__in": raw_values})
-        by_key = {getattr(obj, lt.slug_field): obj for obj in qs}
+    qs = model.objects.filter(**{f"{lt.slug_field}__in": raw_values})
+    by_key: dict[str, models.Model] = {getattr(obj, lt.slug_field): obj for obj in qs}
 
     result = content
     for match in reversed(matches):
@@ -475,10 +454,7 @@ def _convert_to_authoring(
         obj_id = int(match.group(1))
         obj = by_id.get(obj_id)
         if obj:
-            if lt.get_authoring_key:
-                key = lt.get_authoring_key(obj)
-            else:
-                key = getattr(obj, lt.slug_field)
+            key = getattr(obj, lt.slug_field)
             result = (
                 result[: match.start()] + f"[[{lt.name}:{key}]]" + result[match.end() :]
             )

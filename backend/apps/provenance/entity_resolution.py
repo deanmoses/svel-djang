@@ -26,10 +26,10 @@ def resolve_entity_href(
 ) -> str | None:
     """Build the frontend URL for a catalog entity from its link_url_pattern."""
     pattern = getattr(model_class, "link_url_pattern", None)
-    slug = getattr(entity, "slug", None)
-    if not isinstance(pattern, str) or not isinstance(slug, str):
+    public_id = getattr(entity, "public_id", None)
+    if not isinstance(pattern, str) or not isinstance(public_id, str):
         return None
-    return pattern.format(slug=slug)
+    return pattern.format(public_id=public_id)
 
 
 def batch_resolve_entities(

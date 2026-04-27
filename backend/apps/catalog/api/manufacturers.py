@@ -475,16 +475,16 @@ def list_all_manufacturers(
 
 
 @manufacturers_router.patch(
-    "/{slug}/claims/",
+    "/{public_id:path}/claims/",
     auth=django_auth,
     response={200: ManufacturerDetailSchema, 422: ValidationErrorSchema},
     tags=["private"],
 )
 def patch_manufacturer_claims(
-    request: HttpRequest, slug: str, data: ClaimPatchSchema
+    request: HttpRequest, public_id: str, data: ClaimPatchSchema
 ) -> ManufacturerDetailSchema:
     """Assert per-field claims from the authenticated user, then re-resolve."""
-    mfr = get_object_or_404(Manufacturer.objects.active(), slug=slug)
+    mfr = get_object_or_404(Manufacturer.objects.active(), slug=public_id)
 
     specs = plan_scalar_field_claims(Manufacturer, data.fields, entity=mfr)
 

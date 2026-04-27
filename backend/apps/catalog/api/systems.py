@@ -214,16 +214,16 @@ def list_all_systems(request: HttpRequest) -> list[SystemListItemSchema]:
 
 
 @systems_router.patch(
-    "/{slug}/claims/",
+    "/{public_id:path}/claims/",
     auth=django_auth,
     response={200: SystemDetailSchema, 422: ValidationErrorSchema},
     tags=["private"],
 )
 def patch_system_claims(
-    request: HttpRequest, slug: str, data: ClaimPatchSchema
+    request: HttpRequest, public_id: str, data: ClaimPatchSchema
 ) -> SystemDetailSchema:
     """Assert per-field claims from the authenticated user, then re-resolve."""
-    system = get_object_or_404(System.objects.active(), slug=slug)
+    system = get_object_or_404(System.objects.active(), slug=public_id)
     specs = plan_scalar_field_claims(System, data.fields, entity=system)
 
     execute_claims(

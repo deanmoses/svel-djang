@@ -136,19 +136,19 @@ def list_themes(request: HttpRequest) -> list[ThemeListItemSchema]:
 
 
 @themes_router.patch(
-    "/{slug}/claims/",
+    "/{public_id:path}/claims/",
     auth=django_auth,
     response={200: ThemeDetailSchema, 422: ValidationErrorSchema},
     tags=["private"],
 )
 def patch_theme_claims(
-    request: HttpRequest, slug: str, data: HierarchyClaimPatchSchema
+    request: HttpRequest, public_id: str, data: HierarchyClaimPatchSchema
 ) -> ThemeDetailSchema:
     """Assert per-field claims from the authenticated user, then re-resolve."""
     if not data.fields and data.parents is None and data.aliases is None:
         raise_form_error("No changes provided.")
 
-    theme = get_object_or_404(Theme.objects.active(), slug=slug)
+    theme = get_object_or_404(Theme.objects.active(), slug=public_id)
 
     specs = validate_scalar_fields(Theme, data.fields, entity=theme)
 

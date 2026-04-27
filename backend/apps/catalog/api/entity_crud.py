@@ -102,8 +102,14 @@ def register_entity_delete_restore[ModelT: CatalogModel, SchemaT: Schema](
     friendly = model_cls.entity_type.replace("-", " ")
     friendly_sentence = friendly.capitalize()
 
-    def _delete_preview(request: HttpRequest, slug: str) -> TaxonomyDeletePreviewSchema:
-        obj = get_object_or_404(model_cls.objects.active(), slug=slug)
+    public_id_field = model_cls.public_id_field
+
+    def _delete_preview(
+        request: HttpRequest, public_id: str
+    ) -> TaxonomyDeletePreviewSchema:
+        obj = get_object_or_404(
+            model_cls.objects.active(), **{public_id_field: public_id}
+        )
         plan = plan_soft_delete(obj)
 
         active_children = 0
@@ -116,11 +122,11 @@ def register_entity_delete_restore[ModelT: CatalogModel, SchemaT: Schema](
         parent_ref: EntityRef | None = None
         if parent_field is not None:
             parent = getattr(obj, parent_field)
-            parent_ref = EntityRef(name=parent.name, slug=parent.slug)
+            parent_ref = EntityRef(name=parent.name, slug=parent.public_id)
 
         return TaxonomyDeletePreviewSchema(
             name=obj.name,
-            slug=obj.slug,
+            slug=obj.public_id,
             parent=parent_ref,
             changeset_count=changeset_count,
             blocked_by=[serialize_blocking_referrer(b) for b in plan.blockers],
@@ -129,18 +135,20 @@ def register_entity_delete_restore[ModelT: CatalogModel, SchemaT: Schema](
 
     _delete_preview.__name__ = f"{entity_label.lower()}_delete_preview"
     router.get(
-        "/{slug}/delete-preview/",
+        "/{public_id:path}/delete-preview/",
         auth=django_auth,
         response=TaxonomyDeletePreviewSchema,
         tags=["private"],
     )(_delete_preview)
 
     def _delete(
-        request: HttpRequest, slug: str, data: ChangeSetInputSchema
+        request: HttpRequest, public_id: str, data: ChangeSetInputSchema
     ) -> DeleteResponseSchema | Status[SoftDeleteBlockedSchema | AlreadyDeletedSchema]:
         check_and_record(request.user, DELETE_RATE_LIMIT_SPEC)
 
-        obj = get_object_or_404(model_cls.objects.active(), slug=slug)
+        obj = get_object_or_404(
+            model_cls.objects.active(), **{public_id_field: public_id}
+        )
 
         if child_related_name is not None:
             active_children = getattr(obj, child_related_name).active().count()
@@ -191,7 +199,7 @@ def register_entity_delete_restore[ModelT: CatalogModel, SchemaT: Schema](
 
     _delete.__name__ = f"{entity_label.lower()}_delete"
     router.post(
-        "/{slug}/delete/",
+        "/{public_id:path}/delete/",
         auth=django_auth,
         response={
             200: DeleteResponseSchema,
@@ -202,12 +210,12 @@ def register_entity_delete_restore[ModelT: CatalogModel, SchemaT: Schema](
     )(_delete)
 
     def _restore(
-        request: HttpRequest, slug: str, data: ChangeSetInputSchema
+        request: HttpRequest, public_id: str, data: ChangeSetInputSchema
     ) -> SchemaT | Status[ErrorDetailSchema]:
         check_and_record(request.user, CREATE_RATE_LIMIT_SPEC)
 
         # Bypass .active() — we're looking for soft-deleted rows.
-        obj = get_object_or_404(model_cls, slug=slug)
+        obj = get_object_or_404(model_cls, **{public_id_field: public_id})
         if obj.status != "deleted":
             return Status(
                 422, ErrorDetailSchema(detail=f"{friendly_sentence} is not deleted.")
@@ -229,12 +237,12 @@ def register_entity_delete_restore[ModelT: CatalogModel, SchemaT: Schema](
             citation=data.citation,
         )
 
-        refreshed = get_object_or_404(detail_qs(), slug=slug)
+        refreshed = get_object_or_404(detail_qs(), **{public_id_field: public_id})
         return serialize_detail(refreshed)
 
     _restore.__name__ = f"{entity_label.lower()}_restore"
     router.post(
-        "/{slug}/restore/",
+        "/{public_id:path}/restore/",
         auth=django_auth,
         response={
             200: response_schema,
@@ -263,8 +271,9 @@ def register_entity_create[ModelT: CatalogModel, SchemaT: Schema](
 
     When *parent_field* is None, mounts ``POST /`` on the entity's own
     router. Otherwise all three parent-related args must be supplied
-    together and the route mounts at ``POST /{parent_slug}/<route_suffix>/``
-    on the *parent's* router — mirroring the Title → Model nesting.
+    together and the route mounts at
+    ``POST /{parent_public_id:path}/<route_suffix>/`` on the *parent's*
+    router — mirroring the Title → Model nesting.
 
     FK claim values are stored as the parent's slug string, matching the
     shipped convention (see titles.py:1091 and the ``claim_fk_lookups``
@@ -353,15 +362,22 @@ def register_entity_create[ModelT: CatalogModel, SchemaT: Schema](
     if parented:
         assert parent_model is not None
 
+        parent_public_id_field = parent_model.public_id_field
+
         def _create_parented(
-            request: HttpRequest, parent_slug: str, data: EntityCreateInputSchema
+            request: HttpRequest,
+            parent_public_id: str,
+            data: EntityCreateInputSchema,
         ) -> Status[Any]:
-            parent = get_object_or_404(parent_model.objects.active(), slug=parent_slug)
+            parent = get_object_or_404(
+                parent_model.objects.active(),
+                **{parent_public_id_field: parent_public_id},
+            )
             return _do_create(request, data, parent=parent)
 
         _create_parented.__name__ = f"{entity_label.lower()}_create"
         router.post(
-            f"/{{parent_slug}}/{route_suffix}/",
+            f"/{{parent_public_id:path}}/{route_suffix}/",
             auth=django_auth,
             response={
                 201: response_schema,

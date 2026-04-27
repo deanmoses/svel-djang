@@ -116,16 +116,16 @@ def _serialize_franchise_detail(franchise: Franchise) -> FranchiseDetailSchema:
 
 
 @franchises_router.patch(
-    "/{slug}/claims/",
+    "/{public_id:path}/claims/",
     auth=django_auth,
     response={200: FranchiseDetailSchema, 422: ValidationErrorSchema},
     tags=["private"],
 )
 def patch_franchise_claims(
-    request: HttpRequest, slug: str, data: ClaimPatchSchema
+    request: HttpRequest, public_id: str, data: ClaimPatchSchema
 ) -> FranchiseDetailSchema:
     """Assert per-field claims from the authenticated user, then re-resolve."""
-    franchise = get_object_or_404(Franchise.objects.active(), slug=slug)
+    franchise = get_object_or_404(Franchise.objects.active(), slug=public_id)
     specs = plan_scalar_field_claims(Franchise, data.fields, entity=franchise)
 
     execute_claims(

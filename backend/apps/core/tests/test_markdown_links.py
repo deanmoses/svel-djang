@@ -79,12 +79,12 @@ class TestLinkRegistry:
         lt = get_link_type("manufacturer")
         assert lt is not None
         assert lt.slug_field == "slug"
-        assert lt.url_pattern == "/manufacturers/{slug}"
+        assert lt.url_pattern == "/manufacturers/{public_id}"
 
     def test_system_registered(self):
         lt = get_link_type("system")
         assert lt is not None
-        assert lt.url_pattern == "/systems/{slug}"
+        assert lt.url_pattern == "/systems/{public_id}"
 
     def test_enabled_link_types_non_empty(self):
         types = get_enabled_link_types()

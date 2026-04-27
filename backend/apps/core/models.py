@@ -416,15 +416,12 @@ class LinkableModel(models.Model):
         # Derive link_url_pattern from entity_type_plural. This hook fires
         # once at class creation, so entity_type_plural must be a class-body
         # literal; post-hoc assignment will not re-derive link_url_pattern.
-        cls.link_url_pattern = f"/{entity_type_plural}/{{slug}}"
+        cls.link_url_pattern = f"/{entity_type_plural}/{{public_id}}"
         # Collision detection happens lazily in get_linkable_model's map
         # builder, not here, to avoid depending on import order.
 
     def get_absolute_url(self) -> str:
-        # ``link_url_pattern`` uses ``{slug}`` as its format placeholder for
-        # historical reasons. The substituted value is whatever ``public_id``
-        # returns — for Location that's a multi-segment ``location_path``.
-        return self.link_url_pattern.format(slug=self.public_id)
+        return self.link_url_pattern.format(public_id=self.public_id)
 
     @property
     def public_id(self) -> str:
