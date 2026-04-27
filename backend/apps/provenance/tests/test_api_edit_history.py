@@ -1,4 +1,4 @@
-"""Tests for GET /api/pages/edit-history/{entity_type}/{slug}/ endpoint."""
+"""Tests for GET /api/pages/edit-history/{entity_type}/{public_id}/ endpoint."""
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -187,7 +187,7 @@ class TestEditHistoryOrdering:
 @pytest.mark.django_db
 class TestEditHistorySoftDeleted:
     def test_soft_deleted_entity_still_returns_history(self, client, user, pm):
-        """Soft-delete is soft: audit trail remains inspectable by slug.
+        """Soft-delete is soft: audit trail remains inspectable by public_id.
 
         Policy: provenance surfaces intentionally use the default manager
         (not ``.active()``) so deleted entities keep their history visible

@@ -920,20 +920,21 @@ def list_all_titles(request: HttpRequest) -> HttpResponse:
 
 
 @titles_router.patch(
-    "/{slug}/claims/",
+    "/{path:public_id}/claims/",
     auth=django_auth,
     response={200: TitleDetailSchema, 422: ValidationErrorSchema},
     tags=["private"],
 )
 def patch_title_claims(
-    request: HttpRequest, slug: str, data: TitleClaimPatchSchema
+    request: HttpRequest, public_id: str, data: TitleClaimPatchSchema
 ) -> TitleDetailSchema:
     """Assert title-owned claims and return the refreshed title detail."""
     if not data.fields and data.abbreviations is None:
         raise_form_error("No changes provided.")
 
     title = get_object_or_404(
-        Title.objects.active().prefetch_related("abbreviations"), slug=slug
+        Title.objects.active().prefetch_related("abbreviations"),
+        **{Title.public_id_field: public_id},
     )
 
     # Name collisions are not DB-enforced (title names are not unique), so
@@ -965,7 +966,7 @@ def patch_title_claims(
         citation=data.citation,
     )
 
-    title = get_object_or_404(_detail_qs(), slug=title.slug)
+    title = get_object_or_404(_detail_qs(), **{Title.public_id_field: title.public_id})
     return _serialize_title_detail(title)
 
 
@@ -1011,12 +1012,12 @@ def create_title(
         citation=data.citation,
     )
 
-    created = get_object_or_404(_detail_qs(), slug=slug)
+    created = get_object_or_404(_detail_qs(), **{Title.public_id_field: slug})
     return Status(201, _serialize_title_detail(created))
 
 
 @titles_router.post(
-    "/{title_slug}/models/",
+    "/{path:title_public_id}/models/",
     auth=django_auth,
     response={
         201: ModelDetailSchema,
@@ -1026,7 +1027,7 @@ def create_title(
     tags=["private"],
 )
 def create_model(
-    request: HttpRequest, title_slug: str, data: EntityCreateInputSchema
+    request: HttpRequest, title_public_id: str, data: EntityCreateInputSchema
 ) -> Status[ModelDetailSchema]:
     """Create a new MachineModel under an existing Title.
 
@@ -1038,11 +1039,13 @@ def create_model(
     Rate-limited per user; shares the ``create`` bucket with Title Create.
     Staff bypass. Name collisions are scoped to the parent Title: two
     titles can legitimately share a model name (e.g. "Pro"). Slug
-    uniqueness is global — the ``/models/{slug}`` URL pattern requires it.
+    uniqueness is global — the ``/models/{public_id}`` URL pattern requires it.
     """
     check_and_record(request.user, CREATE_RATE_LIMIT_SPEC)
 
-    title = get_object_or_404(Title.objects.active(), slug=title_slug)
+    title = get_object_or_404(
+        Title.objects.active(), **{Title.public_id_field: title_public_id}
+    )
 
     name = validate_name(data.name, max_length=MAX_CATALOG_NAME_LENGTH)
     slug = validate_slug_format(data.slug)
@@ -1068,17 +1071,17 @@ def create_model(
             ClaimSpec(field_name="name", value=name),
             ClaimSpec(field_name="slug", value=slug),
             ClaimSpec(field_name="status", value="active"),
-            # Title is a FK; the claim value is the parent's slug, matching
-            # the convention used by ingest (MODEL_CLAIM_FIELDS["title"] ←
-            # entry["title_slug"]).
-            ClaimSpec(field_name="title", value=title.slug),
+            # Title FK claim value uses the parent's public_id (defaults to
+            # slug for slug-keyed models). Shape matches ingest's
+            # MODEL_CLAIM_FIELDS["title"] ← entry["title_slug"] convention.
+            ClaimSpec(field_name="title", value=title.public_id),
         ],
         user=request.user,
         note=data.note,
         citation=data.citation,
     )
 
-    pm = get_object_or_404(_model_detail_qs(), slug=slug)
+    pm = get_object_or_404(_model_detail_qs(), **{MachineModel.public_id_field: slug})
     return Status(201, _serialize_model_detail(pm))
 
 
@@ -1088,19 +1091,23 @@ def create_model(
 
 
 @titles_router.get(
-    "/{slug}/delete-preview/",
+    "/{path:public_id}/delete-preview/",
     auth=django_auth,
     response=TitleDeletePreviewSchema,
     tags=["private"],
 )
-def title_delete_preview(request: HttpRequest, slug: str) -> TitleDeletePreviewSchema:
+def title_delete_preview(
+    request: HttpRequest, public_id: str
+) -> TitleDeletePreviewSchema:
     """Return the impact summary used by the delete confirmation screen.
 
     Includes counts for active child models and user ChangeSets that touch
     the title or any of its active models, plus any blocking referrers so
     the UI can refuse the action before it's attempted.
     """
-    title = get_object_or_404(Title.objects.active(), slug=slug)
+    title = get_object_or_404(
+        Title.objects.active(), **{Title.public_id_field: public_id}
+    )
     plan = plan_soft_delete(title)
     # All entities in the plan are the ones we'd hide. Exclude the root Title
     # when counting Models; the response calls each out separately.
@@ -1120,7 +1127,7 @@ def title_delete_preview(request: HttpRequest, slug: str) -> TitleDeletePreviewS
 
 
 @titles_router.post(
-    "/{slug}/delete/",
+    "/{path:public_id}/delete/",
     auth=django_auth,
     response={
         200: TitleDeleteResponseSchema,
@@ -1130,7 +1137,7 @@ def title_delete_preview(request: HttpRequest, slug: str) -> TitleDeletePreviewS
     tags=["private"],
 )
 def delete_title(
-    request: HttpRequest, slug: str, data: ChangeSetInputSchema
+    request: HttpRequest, public_id: str, data: ChangeSetInputSchema
 ) -> TitleDeleteResponseSchema | Status[SoftDeleteBlockedSchema | AlreadyDeletedSchema]:
     """Soft-delete a Title and cascade to its active MachineModels.
 
@@ -1142,7 +1149,9 @@ def delete_title(
     """
     check_and_record(request.user, DELETE_RATE_LIMIT_SPEC)
 
-    title = get_object_or_404(Title.objects.active(), slug=slug)
+    title = get_object_or_404(
+        Title.objects.active(), **{Title.public_id_field: public_id}
+    )
     try:
         changeset, deleted = execute_soft_delete(
             title, user=request.user, note=data.note, citation=data.citation
@@ -1171,7 +1180,7 @@ def delete_title(
 
 
 @titles_router.post(
-    "/{slug}/restore/",
+    "/{path:public_id}/restore/",
     auth=django_auth,
     response={
         200: TitleDetailSchema,
@@ -1182,7 +1191,7 @@ def delete_title(
     tags=["private"],
 )
 def restore_title(
-    request: HttpRequest, slug: str, data: ChangeSetInputSchema
+    request: HttpRequest, public_id: str, data: ChangeSetInputSchema
 ) -> TitleDetailSchema | Status[ErrorDetailSchema]:
     """Write a fresh ``status=active`` claim on a soft-deleted Title.
 
@@ -1195,7 +1204,7 @@ def restore_title(
     check_and_record(request.user, CREATE_RATE_LIMIT_SPEC)
 
     # Bypass .active() — we're looking for soft-deleted titles.
-    title = get_object_or_404(Title, slug=slug)
+    title = get_object_or_404(Title, **{Title.public_id_field: public_id})
     if title.status != "deleted":
         return Status(422, ErrorDetailSchema(detail="Title is not deleted."))
 
@@ -1208,5 +1217,5 @@ def restore_title(
         citation=data.citation,
     )
 
-    refreshed = get_object_or_404(_detail_qs(), slug=slug)
+    refreshed = get_object_or_404(_detail_qs(), **{Title.public_id_field: public_id})
     return _serialize_title_detail(refreshed)

@@ -25,12 +25,16 @@ describe('saveSimpleTaxonomyClaims', () => {
   it('PATCHes the supplied claims endpoint with the merged body', async () => {
     PATCH.mockResolvedValueOnce({ data: { slug: 'widebody' }, error: undefined });
 
-    const result = await saveSimpleTaxonomyClaims('/api/cabinets/{slug}/claims/', 'wide-body', {
-      fields: { slug: 'widebody' },
-    });
+    const result = await saveSimpleTaxonomyClaims(
+      '/api/cabinets/{public_id}/claims/',
+      'wide-body',
+      {
+        fields: { slug: 'widebody' },
+      },
+    );
 
-    expect(PATCH).toHaveBeenCalledWith('/api/cabinets/{slug}/claims/', {
-      params: { path: { slug: 'wide-body' } },
+    expect(PATCH).toHaveBeenCalledWith('/api/cabinets/{public_id}/claims/', {
+      params: { path: { public_id: 'wide-body' } },
       body: { fields: { slug: 'widebody' }, note: '' },
     });
     expect(invalidateAll).toHaveBeenCalledTimes(1);
@@ -40,7 +44,7 @@ describe('saveSimpleTaxonomyClaims', () => {
   it('falls back to the original slug when the response omits one', async () => {
     PATCH.mockResolvedValueOnce({ data: undefined, error: undefined });
 
-    const result = await saveSimpleTaxonomyClaims('/api/tags/{slug}/claims/', 'arcade', {
+    const result = await saveSimpleTaxonomyClaims('/api/tags/{public_id}/claims/', 'arcade', {
       fields: {},
     });
 
@@ -55,7 +59,7 @@ describe('saveSimpleTaxonomyClaims', () => {
       },
     });
 
-    const result = await saveSimpleTaxonomyClaims('/api/series/{slug}/claims/', 'foo', {
+    const result = await saveSimpleTaxonomyClaims('/api/series/{public_id}/claims/', 'foo', {
       fields: { slug: 'other' },
     });
 
@@ -66,14 +70,14 @@ describe('saveSimpleTaxonomyClaims', () => {
   it('forwards the citation field when supplied', async () => {
     PATCH.mockResolvedValueOnce({ data: { slug: 'foo' }, error: undefined });
 
-    await saveSimpleTaxonomyClaims('/api/franchises/{slug}/claims/', 'foo', {
+    await saveSimpleTaxonomyClaims('/api/franchises/{public_id}/claims/', 'foo', {
       fields: { name: 'Foo' },
       note: 'rename',
       citation: { citation_instance_id: 42 },
     });
 
-    expect(PATCH).toHaveBeenCalledWith('/api/franchises/{slug}/claims/', {
-      params: { path: { slug: 'foo' } },
+    expect(PATCH).toHaveBeenCalledWith('/api/franchises/{public_id}/claims/', {
+      params: { path: { public_id: 'foo' } },
       body: {
         fields: { name: 'Foo' },
         note: 'rename',
@@ -93,12 +97,16 @@ describe('saveHierarchicalTaxonomyClaims', () => {
   it('PATCHes the supplied claims endpoint with the merged body', async () => {
     PATCH.mockResolvedValueOnce({ data: { slug: 'medieval' }, error: undefined });
 
-    const result = await saveHierarchicalTaxonomyClaims('/api/themes/{slug}/claims/', 'medieval', {
-      fields: { name: 'Medieval' },
-    });
+    const result = await saveHierarchicalTaxonomyClaims(
+      '/api/themes/{public_id}/claims/',
+      'medieval',
+      {
+        fields: { name: 'Medieval' },
+      },
+    );
 
-    expect(PATCH).toHaveBeenCalledWith('/api/themes/{slug}/claims/', {
-      params: { path: { slug: 'medieval' } },
+    expect(PATCH).toHaveBeenCalledWith('/api/themes/{public_id}/claims/', {
+      params: { path: { public_id: 'medieval' } },
       body: { fields: { name: 'Medieval' }, note: '' },
     });
     expect(invalidateAll).toHaveBeenCalledTimes(1);
@@ -108,14 +116,18 @@ describe('saveHierarchicalTaxonomyClaims', () => {
   it('forwards parents and aliases when supplied', async () => {
     PATCH.mockResolvedValueOnce({ data: { slug: 'pop-bumper' }, error: undefined });
 
-    await saveHierarchicalTaxonomyClaims('/api/gameplay-features/{slug}/claims/', 'pop-bumper', {
-      parents: ['physical-feature'],
-      aliases: ['Pop'],
-      note: 'rationale',
-    });
+    await saveHierarchicalTaxonomyClaims(
+      '/api/gameplay-features/{public_id}/claims/',
+      'pop-bumper',
+      {
+        parents: ['physical-feature'],
+        aliases: ['Pop'],
+        note: 'rationale',
+      },
+    );
 
-    expect(PATCH).toHaveBeenCalledWith('/api/gameplay-features/{slug}/claims/', {
-      params: { path: { slug: 'pop-bumper' } },
+    expect(PATCH).toHaveBeenCalledWith('/api/gameplay-features/{public_id}/claims/', {
+      params: { path: { public_id: 'pop-bumper' } },
       body: {
         fields: {},
         note: 'rationale',
@@ -137,9 +149,13 @@ describe('saveHierarchicalTaxonomyClaims', () => {
       },
     });
 
-    const result = await saveHierarchicalTaxonomyClaims('/api/themes/{slug}/claims/', 'medieval', {
-      parents: ['descendant-of-medieval'],
-    });
+    const result = await saveHierarchicalTaxonomyClaims(
+      '/api/themes/{public_id}/claims/',
+      'medieval',
+      {
+        parents: ['descendant-of-medieval'],
+      },
+    );
 
     expect(result).toEqual({
       ok: false,

@@ -5,9 +5,13 @@ Each Django app registers its link types in AppConfig.ready() — core has zero
 imports from other apps.
 
 Link formats:
-- Slug-based (authoring): [[manufacturer:slug]], [[title:slug]]
-- Slug-based (storage): [[manufacturer:id:N]], [[title:id:N]]
-- ID-based (same in both): [[sometype:N]]
+- Public-id-based (authoring): [[manufacturer:burnham], [[location:usa/il/chicago]]
+- Public-id-based (storage):   [[manufacturer:id:N]], [[location:id:N]]
+- ID-based (same in both):     [[sometype:N]]
+
+The authoring key is whichever model field carries URL identity — ``slug`` for
+most models, ``location_path`` for Location, etc. ``LinkType.public_id_field``
+names that field; if it is ``None`` the type is ID-based.
 
 Public API:
 - register(), clear_registry(), LinkType  — registration
@@ -87,15 +91,16 @@ class LinkType:
     label: str = ""  # Human-readable name for type picker (e.g., "Manufacturer")
     description: str = ""  # Brief description (e.g., "Link to a manufacturer")
 
-    # --- Slug-based vs ID-based ---
-    # If set, this type uses [[name:slug]] authoring / [[name:id:N]] storage.
-    # The value is the model field containing the slug (e.g., "slug").
+    # --- Public-id-based vs ID-based ---
+    # If set, this type uses [[name:public_id]] authoring / [[name:id:N]]
+    # storage. The value is the name of the model field carrying URL identity
+    # (e.g. "slug" for most models, "location_path" for Location).
     # If None, this type is ID-based: [[name:N]] same in both formats.
-    slug_field: str | None = None
+    public_id_field: str | None = None
 
     # --- Rendering ---
-    url_pattern: str = ""  # URL pattern like "/manufacturers/{slug}"
-    url_field: str = "slug"  # model field to get the URL value
+    url_pattern: str = ""  # URL pattern like "/manufacturers/{public_id}"
+    url_field: str = "public_id"  # model attr (field or property) to read for the URL
     label_field: str = "name"  # model field for link text (simple cases)
     get_url: Callable[[Any], str] | None = None  # override for irregular URL
     get_label: Callable[[Any], str] | None = None  # override for irregular label
@@ -107,14 +112,14 @@ class LinkType:
     format_link: FormatLinkCallback | None = None
     collect_metadata: CollectMetadataCallback | None = None
 
-    # --- Authoring format (slug-based types only) ---
+    # --- Authoring format (public-id-based types only) ---
     # Custom lookup for authoring format: (model_class, raw_values) -> {key: obj}
-    # Default for slug-based types: filter(**{slug_field + "__in": values})
+    # Default for public-id-based types: filter(**{public_id_field + "__in": values})
     authoring_lookup: (
         Callable[[type[models.Model], list[str]], dict[str, models.Model]] | None
     ) = None
     # Custom key derivation for storage-to-authoring: (obj) -> authoring_key
-    # Default: getattr(obj, slug_field)
+    # Default: getattr(obj, public_id_field)
     get_authoring_key: Callable[[Any], str] | None = None
 
     # --- Autocomplete ---
@@ -176,7 +181,7 @@ def register(link_type: LinkType) -> None:
     _registry[link_type.name] = link_type
     # Compile regex patterns eagerly
     name = re.escape(link_type.name)
-    if link_type.slug_field is not None:
+    if link_type.public_id_field is not None:
         _patterns[link_type.name] = {
             "storage": re.compile(rf"\[\[{name}:id:(\d+)\]\]"),
             "authoring": re.compile(rf"\[\[{name}:(?!id:)([^\]]+)\]\]"),
@@ -223,9 +228,10 @@ def get_autocomplete_types() -> list[dict[str, str]]:
     ]
 
 
-def get_enabled_slug_types() -> list[LinkType]:
-    """Return enabled link types that use slug-based format."""
-    return [lt for lt in get_enabled_link_types() if lt.slug_field is not None]
+def get_enabled_public_id_types() -> list[LinkType]:
+    """Return enabled link types that use the public-id authoring format
+    (i.e. those whose ``public_id_field`` is set; ID-based types excluded)."""
+    return [lt for lt in get_enabled_link_types() if lt.public_id_field is not None]
 
 
 def get_patterns(link_type: LinkType) -> dict[str, re.Pattern[str]]:
@@ -264,11 +270,13 @@ def render_all_links(
     """
     for lt in get_enabled_link_types():
         pats = get_patterns(lt)
-        if lt.slug_field is not None:
+        if lt.public_id_field is not None:
             text = _render_by_id(
                 text, lt, pats["storage"], base_url, plain_text, metadata_out
             )
-            text = _render_by_slug(text, lt, pats["authoring"], base_url, plain_text)
+            text = _render_by_public_id(
+                text, lt, pats["authoring"], base_url, plain_text
+            )
         else:
             text = _render_by_id(
                 text, lt, pats["id"], base_url, plain_text, metadata_out
@@ -341,14 +349,16 @@ def _render_by_id(
     return result
 
 
-def _render_by_slug(
+def _render_by_public_id(
     text: str,
     lt: LinkType,
     pattern: re.Pattern[str],
     base_url: str = "",
     plain_text: bool = False,
 ) -> str:
-    """Render [[type:slug]] links by batch slug lookup (defense-in-depth)."""
+    """Render ``[[type:public_id]]`` links by batch lookup keyed on
+    ``public_id_field`` (defense-in-depth — most authored content is in
+    storage form by save time)."""
     matches = list(pattern.finditer(text))
     if not matches:
         return text
@@ -356,16 +366,16 @@ def _render_by_slug(
     model = lt.get_model()
     raw_values = [m.group(1) for m in matches]
 
-    if lt.slug_field is None:
-        raise ValueError(f"LinkType '{lt.name}' is not slug-based")
+    if lt.public_id_field is None:
+        raise ValueError(f"LinkType '{lt.name}' is not public-id-based")
     by_key: dict[str, models.Model]
     if lt.authoring_lookup:
         by_key = lt.authoring_lookup(model, raw_values)
     else:
-        qs = model.objects.filter(**{f"{lt.slug_field}__in": raw_values})
+        qs = model.objects.filter(**{f"{lt.public_id_field}__in": raw_values})
         if lt.select_related:
             qs = qs.select_related(*lt.select_related)
-        by_key = {getattr(obj, lt.slug_field): obj for obj in qs}
+        by_key = {getattr(obj, lt.public_id_field): obj for obj in qs}
 
     result = text
     for match in reversed(matches):
@@ -384,7 +394,7 @@ def _render_by_slug(
 def convert_authoring_to_storage(content: str) -> str:
     """Convert authoring format links to storage format.
 
-    Only affects slug-based types; ID-based types are already in storage format.
+    Only affects public-id-based types; ID-based types are already in storage format.
 
     Raises:
         ValidationError: If any linked target doesn't exist
@@ -393,7 +403,7 @@ def convert_authoring_to_storage(content: str) -> str:
         return content
 
     errors: list[str] = []
-    for lt in get_enabled_slug_types():
+    for lt in get_enabled_public_id_types():
         pats = get_patterns(lt)
         content = _convert_to_storage(content, lt, pats["authoring"], errors)
 
@@ -408,7 +418,7 @@ def _convert_to_storage(
     pattern: re.Pattern[str],
     errors: list[str],
 ) -> str:
-    """Convert [[type:slug]] to [[type:id:N]] for one link type."""
+    """Convert ``[[type:public_id]]`` to ``[[type:id:N]]`` for one link type."""
     matches = list(pattern.finditer(content))
     if not matches:
         return content
@@ -416,14 +426,14 @@ def _convert_to_storage(
     model = lt.get_model()
     raw_values = [m.group(1) for m in matches]
 
-    if lt.slug_field is None:
-        raise ValueError(f"LinkType '{lt.name}' is not slug-based")
+    if lt.public_id_field is None:
+        raise ValueError(f"LinkType '{lt.name}' is not public-id-based")
     by_key: dict[str, models.Model]
     if lt.authoring_lookup:
         by_key = lt.authoring_lookup(model, raw_values)
     else:
-        qs = model.objects.filter(**{f"{lt.slug_field}__in": raw_values})
-        by_key = {getattr(obj, lt.slug_field): obj for obj in qs}
+        qs = model.objects.filter(**{f"{lt.public_id_field}__in": raw_values})
+        by_key = {getattr(obj, lt.public_id_field): obj for obj in qs}
 
     result = content
     for match in reversed(matches):
@@ -444,12 +454,12 @@ def _convert_to_storage(
 def convert_storage_to_authoring(content: str) -> str:
     """Convert storage format links to authoring format for editing.
 
-    Only affects slug-based types; ID-based types are the same in both formats.
+    Only affects public-id-based types; ID-based types are the same in both formats.
     """
     if not content:
         return content
 
-    for lt in get_enabled_slug_types():
+    for lt in get_enabled_public_id_types():
         pats = get_patterns(lt)
         content = _convert_to_authoring(content, lt, pats["storage"])
     return content
@@ -460,9 +470,9 @@ def _convert_to_authoring(
     lt: LinkType,
     pattern: re.Pattern[str],
 ) -> str:
-    """Convert [[type:id:N]] to [[type:slug]] for one link type."""
-    if lt.slug_field is None:
-        raise ValueError(f"LinkType '{lt.name}' is not slug-based")
+    """Convert ``[[type:id:N]]`` to ``[[type:public_id]]`` for one link type."""
+    if lt.public_id_field is None:
+        raise ValueError(f"LinkType '{lt.name}' is not public-id-based")
     matches = list(pattern.finditer(content))
     if not matches:
         return content
@@ -479,7 +489,7 @@ def _convert_to_authoring(
             if lt.get_authoring_key:
                 key = lt.get_authoring_key(obj)
             else:
-                key = getattr(obj, lt.slug_field)
+                key = getattr(obj, lt.public_id_field)
             result = (
                 result[: match.start()] + f"[[{lt.name}:{key}]]" + result[match.end() :]
             )

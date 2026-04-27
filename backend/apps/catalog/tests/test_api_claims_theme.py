@@ -1,4 +1,4 @@
-"""Smoke tests for PATCH /api/themes/{slug}/claims/."""
+"""Smoke tests for PATCH /api/themes/{public_id}/claims/."""
 
 import json
 

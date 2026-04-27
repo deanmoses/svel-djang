@@ -292,16 +292,18 @@ def list_all_people(
 
 
 @people_router.patch(
-    "/{slug}/claims/",
+    "/{path:public_id}/claims/",
     auth=django_auth,
     response={200: PersonDetailSchema, 422: ValidationErrorSchema},
     tags=["private"],
 )
 def patch_person_claims(
-    request: HttpRequest, slug: str, data: ClaimPatchSchema
+    request: HttpRequest, public_id: str, data: ClaimPatchSchema
 ) -> PersonDetailSchema:
     """Assert per-field claims from the authenticated user, then re-resolve."""
-    person = get_object_or_404(Person.objects.active(), slug=slug)
+    person = get_object_or_404(
+        Person.objects.active(), **{Person.public_id_field: public_id}
+    )
 
     specs = plan_scalar_field_claims(Person, data.fields, entity=person)
 
@@ -375,7 +377,7 @@ def create_person(
         citation=data.citation,
     )
 
-    created = get_object_or_404(_person_qs(), slug=slug)
+    created = get_object_or_404(_person_qs(), **{Person.public_id_field: slug})
     return Status(201, _serialize_person_detail(created))
 
 
@@ -409,14 +411,18 @@ def _active_credit_count(person: Person) -> int:
 
 
 @people_router.get(
-    "/{slug}/delete-preview/",
+    "/{path:public_id}/delete-preview/",
     auth=django_auth,
     response=PersonDeletePreviewSchema,
     tags=["private"],
 )
-def person_delete_preview(request: HttpRequest, slug: str) -> PersonDeletePreviewSchema:
+def person_delete_preview(
+    request: HttpRequest, public_id: str
+) -> PersonDeletePreviewSchema:
     """Return the impact summary used by the delete confirmation screen."""
-    person = get_object_or_404(Person.objects.active(), slug=slug)
+    person = get_object_or_404(
+        Person.objects.active(), **{Person.public_id_field: public_id}
+    )
     plan = plan_soft_delete(person)
     active_credits = _active_credit_count(person)
     is_blocked = plan.is_blocked or active_credits > 0
@@ -431,7 +437,7 @@ def person_delete_preview(request: HttpRequest, slug: str) -> PersonDeletePrevie
 
 
 @people_router.post(
-    "/{slug}/delete/",
+    "/{path:public_id}/delete/",
     auth=django_auth,
     response={
         200: DeleteResponseSchema,
@@ -441,7 +447,7 @@ def person_delete_preview(request: HttpRequest, slug: str) -> PersonDeletePrevie
     tags=["private"],
 )
 def delete_person(
-    request: HttpRequest, slug: str, data: ChangeSetInputSchema
+    request: HttpRequest, public_id: str, data: ChangeSetInputSchema
 ) -> (
     DeleteResponseSchema | Status[PersonSoftDeleteBlockedSchema | AlreadyDeletedSchema]
 ):
@@ -455,7 +461,9 @@ def delete_person(
     """
     check_and_record(request.user, DELETE_RATE_LIMIT_SPEC)
 
-    person = get_object_or_404(Person.objects.active(), slug=slug)
+    person = get_object_or_404(
+        Person.objects.active(), **{Person.public_id_field: public_id}
+    )
 
     active_credits = _active_credit_count(person)
     if active_credits > 0:
@@ -497,7 +505,7 @@ def delete_person(
 
 
 @people_router.post(
-    "/{slug}/restore/",
+    "/{path:public_id}/restore/",
     auth=django_auth,
     response={
         200: PersonDetailSchema,
@@ -508,7 +516,7 @@ def delete_person(
     tags=["private"],
 )
 def restore_person(
-    request: HttpRequest, slug: str, data: ChangeSetInputSchema
+    request: HttpRequest, public_id: str, data: ChangeSetInputSchema
 ) -> PersonDetailSchema | Status[ErrorDetailSchema]:
     """Write a fresh ``status=active`` claim on a soft-deleted Person.
 
@@ -518,7 +526,7 @@ def restore_person(
     check_and_record(request.user, CREATE_RATE_LIMIT_SPEC)
 
     # Bypass .active() — we're looking for soft-deleted people.
-    person = get_object_or_404(Person, slug=slug)
+    person = get_object_or_404(Person, **{Person.public_id_field: public_id})
     if person.status != "deleted":
         return Status(422, ErrorDetailSchema(detail="Person is not deleted."))
 
@@ -531,5 +539,5 @@ def restore_person(
         citation=data.citation,
     )
 
-    refreshed = get_object_or_404(_person_qs(), slug=slug)
+    refreshed = get_object_or_404(_person_qs(), **{Person.public_id_field: public_id})
     return _serialize_person_detail(refreshed)

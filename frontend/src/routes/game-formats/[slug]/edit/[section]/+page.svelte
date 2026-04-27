@@ -8,5 +8,5 @@
 <SimpleTaxonomyEditSectionPage
   {profile}
   basePath="/game-formats"
-  claimsPath={'/api/game-formats/{slug}/claims/'}
+  claimsPath={'/api/game-formats/{public_id}/claims/'}
 />

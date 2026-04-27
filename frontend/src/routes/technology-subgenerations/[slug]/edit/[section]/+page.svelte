@@ -8,5 +8,5 @@
 <SimpleTaxonomyEditSectionPage
   {profile}
   basePath="/technology-subgenerations"
-  claimsPath={'/api/technology-subgenerations/{slug}/claims/'}
+  claimsPath={'/api/technology-subgenerations/{public_id}/claims/'}
 />

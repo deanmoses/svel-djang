@@ -159,16 +159,18 @@ def list_series(request: HttpRequest) -> list[SeriesListItemSchema]:
 
 
 @series_router.patch(
-    "/{slug}/claims/",
+    "/{path:public_id}/claims/",
     auth=django_auth,
     response={200: SeriesDetailSchema, 422: ValidationErrorSchema},
     tags=["private"],
 )
 def patch_series_claims(
-    request: HttpRequest, slug: str, data: ClaimPatchSchema
+    request: HttpRequest, public_id: str, data: ClaimPatchSchema
 ) -> SeriesDetailSchema:
     """Assert per-field claims from the authenticated user, then re-resolve."""
-    series = get_object_or_404(Series.objects.active(), slug=slug)
+    series = get_object_or_404(
+        Series.objects.active(), **{Series.public_id_field: public_id}
+    )
     specs = plan_scalar_field_claims(Series, data.fields, entity=series)
 
     execute_claims(

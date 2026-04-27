@@ -227,7 +227,7 @@ def status_valid() -> models.CheckConstraint:
 
 
 class MarkdownField(models.TextField[str, str]):
-    """A TextField containing markdown with ``[[entity:slug]]`` links.
+    """A TextField containing markdown with ``[[entity:public_id]]`` links.
 
     The system introspects models for MarkdownField instances to:
     - Auto-discover which fields need reference syncing
@@ -260,9 +260,13 @@ class LinkableModel(models.Model):
 
     Subclasses must define:
     - name: CharField
-    - slug: SlugField (unique)
     - entity_type: str — hyphenated canonical public identifier (e.g. 'corporate-entity')
     - entity_type_plural: str — hyphenated canonical plural form (e.g. 'corporate-entities')
+
+    Subclasses may override:
+    - public_id_field: str — name of the field carrying URL identity. Defaults
+      to ``"slug"``. Multi-segment models materialize the path into a
+      ``unique=True`` field and point this at it (Location: ``"location_path"``).
 
     ``entity_type`` and ``entity_type_plural`` together are the linguistic
     identity of a kind of entity — the single source of truth consumed by
@@ -285,16 +289,16 @@ class LinkableModel(models.Model):
 
     entity_type: ClassVar[str]  # required on concrete subclasses
     entity_type_plural: ClassVar[str]  # required on concrete subclasses
-    # ``name`` and ``slug`` are declared per-concrete-subclass (different
-    # max_length / validators per entity); these instance-level annotations
-    # let ``type[LinkableModel]`` introspection code read ``.name`` / ``.slug``
-    # without casting. Django field registration still happens on the concrete
+    public_id_field: ClassVar[str] = "slug"
+    # ``name`` is declared per-concrete-subclass (different max_length /
+    # validators per entity); the instance-level annotation lets
+    # ``type[LinkableModel]`` introspection code read ``.name`` without
+    # casting. Django field registration still happens on the concrete
     # subclasses (where ``= models.CharField(...)`` lives), so ``_meta`` is
     # unaffected — but django-stubs's plugin can't see a field here at the
     # abstract level, so ``_meta.get_field("name")`` on ``type[CatalogModel]``
     # needs ``# type: ignore[misc]`` at the one site that calls it.
     name: str
-    slug: str
     link_url_pattern: ClassVar[str]
 
     class Meta:
@@ -328,9 +332,23 @@ class LinkableModel(models.Model):
         # Derive link_url_pattern from entity_type_plural. This hook fires
         # once at class creation, so entity_type_plural must be a class-body
         # literal; post-hoc assignment will not re-derive link_url_pattern.
-        cls.link_url_pattern = f"/{entity_type_plural}/{{slug}}"
-        # Collision detection happens lazily in get_linkable_model's map
-        # builder, not here, to avoid depending on import order.
+        # ``{public_id}`` resolves at format time to whichever field
+        # ``public_id_field`` names — ``slug`` for most models,
+        # ``location_path`` for Location, etc.
+        cls.link_url_pattern = f"/{entity_type_plural}/{{public_id}}"
+        # Collision detection and ``public_id_field`` resolution happen in
+        # the system check (apps.core.checks), not here, to avoid depending
+        # on Django's _meta being fully wired at __init_subclass__ time.
+
+    def get_absolute_url(self) -> str:
+        """Format ``link_url_pattern`` with this entity's ``public_id``."""
+        return self.link_url_pattern.format(public_id=self.public_id)
+
+    @property
+    def public_id(self) -> str:
+        """Return this entity's URL-identity value (``self.<public_id_field>``)."""
+        value: str = getattr(self, self.public_id_field)
+        return value
 
 
 # ---------------------------------------------------------------------------

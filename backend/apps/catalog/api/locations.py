@@ -273,9 +273,12 @@ def _get_location_detail(location_path: str) -> LocationDetailSchema:
     )
 
 
-# Ninja's path converter syntax doesn't support Django's <path:...> wildcard,
-# so we define explicit routes for each supported hierarchy depth (root + 1–4
-# segments). Pindata's maximum depth is 4 (e.g. france/idf/essonne/marcoussis).
+# Hand-fan-out: one route per supported hierarchy depth (root + 1–4 segments).
+# Pindata's maximum depth is 4 (e.g. france/idf/essonne/marcoussis). Ninja's
+# ``{path:name}`` converter (curly-brace form, inverse of Django's
+# ``<path:name>``) would collapse this to a single route — see
+# ``apps/provenance/page_endpoints.py`` for that pattern. Worth folding when
+# Location's read API moves under the shared detail-page registrar.
 
 
 @locations_router.get("/", response=LocationDetailSchema)

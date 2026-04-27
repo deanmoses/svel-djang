@@ -109,38 +109,41 @@ pages_router = Router(tags=["private"])
 
 
 @pages_router.get(
-    "/edit-history/{entity_type}/{slug}/",
+    "/edit-history/{entity_type}/{path:public_id}/",
     response={200: list[ChangeSetSchema], 404: dict},
 )
 @decorate_view(cache_control(no_cache=True))
 def edit_history_page(
     request: HttpRequest,
     entity_type: str,
-    slug: str,
+    public_id: str,
 ) -> list[ChangeSetSchema] | Status[ErrorPayload]:
     """Return changeset-grouped edit history for any catalog entity.
 
     Accepts soft-deleted entities so the provenance record remains
     inspectable after deletion — matches ``sources_page``.
+
+    The ``:path`` URL converter accepts multi-segment ids without affecting
+    single-segment models (their ``public_id`` simply has no slashes).
     """
     _ = request
     try:
         model_class = get_linkable_model(entity_type)
     except ValueError:
         return Status(404, {"detail": f"Unknown entity type: {entity_type}"})
-    entity = get_object_or_404(model_class, slug=slug)
+    entity = get_object_or_404(model_class, **{model_class.public_id_field: public_id})
     return build_edit_history(entity)
 
 
 @pages_router.get(
-    "/sources/{entity_type}/{slug}/",
+    "/sources/{entity_type}/{path:public_id}/",
     response={200: SourcesPageSchema, 404: dict},
 )
 @decorate_view(cache_control(no_cache=True))
 def sources_page(
     request: HttpRequest,
     entity_type: str,
-    slug: str,
+    public_id: str,
 ) -> SourcesPageSchema | Status[ErrorPayload]:
     """Return the sources page model: grouped claims + cited evidence.
 
@@ -154,7 +157,8 @@ def sources_page(
 
     _ = request
     entity = get_object_or_404(
-        model_class._default_manager.prefetch_related(claims_prefetch()), slug=slug
+        model_class._default_manager.prefetch_related(claims_prefetch()),
+        **{model_class.public_id_field: public_id},
     )
     claims = active_claims(entity)
     sources = build_sources(claims)

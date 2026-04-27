@@ -16,8 +16,8 @@ export async function saveCorporateEntityClaims(
   slug: string,
   body: CorporateEntitySectionPatchBody,
 ): Promise<SaveResult> {
-  const { data, error } = await client.PATCH('/api/corporate-entities/{slug}/claims/', {
-    params: { path: { slug } },
+  const { data, error } = await client.PATCH('/api/corporate-entities/{public_id}/claims/', {
+    params: { path: { public_id: slug } },
     body: { fields: {}, note: '', ...body },
   });
 

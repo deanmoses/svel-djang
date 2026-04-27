@@ -60,7 +60,7 @@ class ProvenanceConfig(AppConfig):
                 model_path="provenance.CitationInstance",
                 label="Citation",
                 description="Cite a source (book, web, magazine)",
-                slug_field=None,
+                public_id_field=None,
                 format_link=_format_citation_link,
                 collect_metadata=_collect_citation_metadata,
                 select_related=("citation_source",),

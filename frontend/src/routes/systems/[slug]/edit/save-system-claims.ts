@@ -7,4 +7,4 @@ import {
 export type { SaveMeta };
 
 export const saveSystemClaims = (slug: string, body: SimpleTaxonomySectionPatchBody) =>
-  saveSimpleTaxonomyClaims('/api/systems/{slug}/claims/', slug, body);
+  saveSimpleTaxonomyClaims('/api/systems/{public_id}/claims/', slug, body);

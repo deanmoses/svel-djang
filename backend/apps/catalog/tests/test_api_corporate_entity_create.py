@@ -1,4 +1,4 @@
-"""Tests for POST /api/manufacturers/{parent_slug}/corporate-entities/.
+"""Tests for POST /api/manufacturers/{parent_public_id}/corporate-entities/.
 
 CE create is parented under Manufacturer and uses the shared
 ``register_entity_create`` with a ``scope_filter_builder`` — sibling CEs

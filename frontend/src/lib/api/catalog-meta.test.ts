@@ -27,9 +27,12 @@ const ROUTE_DIR_TO_KEY: Record<string, CatalogEntityKey> = {
 
 // Route directories that intentionally do NOT map to a CATALOG_META entry.
 // Add to this list when introducing a route that should not be registry-managed.
-const UNMAPPED_ROUTE_DIRS = new Set([
-  'locations', // uses [...path] catch-all, not slug-based
-]);
+const UNMAPPED_ROUTE_DIRS = new Set<string>([]);
+
+// CATALOG_META keys whose frontend routes are deferred. The backend registers
+// these (via LinkableModel) but the SvelteKit routes don't exist yet.
+// See docs/plans/model_driven_metadata/LocationCrud.md for the location plan.
+const DEFERRED_KEYS = new Set<CatalogEntityKey>(['location']);
 
 describe('catalog-meta vs route tree', () => {
   it('every [slug]/ route directory is either mapped or explicitly unmapped', async () => {
@@ -70,6 +73,7 @@ describe('catalog-meta vs route tree', () => {
     // helpers produce URLs that route to nothing.
     const knownKeys = new Set(Object.values(ROUTE_DIR_TO_KEY));
     for (const key of Object.keys(CATALOG_META) as CatalogEntityKey[]) {
+      if (DEFERRED_KEYS.has(key)) continue;
       expect(
         knownKeys,
         `CATALOG_META contains "${key}" but no route directory maps to it. ` +
@@ -88,7 +92,7 @@ describe('catalog-meta vs route tree', () => {
   describe.each(['edit-history', 'sources'])('%s subroute', (subroute) => {
     const files = import.meta.glob('/src/routes/*/[slug]/*/+page.*', { eager: false });
 
-    it.each(Object.keys(CATALOG_META) as CatalogEntityKey[])(
+    it.each((Object.keys(CATALOG_META) as CatalogEntityKey[]).filter((k) => !DEFERRED_KEYS.has(k)))(
       '%s has +page.server.ts and +page.svelte',
       (key) => {
         const plural = CATALOG_META[key].entity_type_plural;

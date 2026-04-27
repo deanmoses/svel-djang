@@ -48,7 +48,7 @@ const UPLOAD_RESULT = {
   },
   attachment: {
     entity_type: 'model',
-    slug: 'test',
+    public_id: 'test',
     category: 'backglass',
     is_primary: false,
   },

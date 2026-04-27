@@ -9,6 +9,6 @@
 <SimpleTaxonomyEditSectionPage
   profile={franchise}
   basePath="/franchises"
-  claimsPath={'/api/franchises/{slug}/claims/'}
+  claimsPath={'/api/franchises/{public_id}/claims/'}
   sections={SIMPLE_TAXONOMY_EDIT_SECTIONS_NO_DISPLAY_ORDER}
 />

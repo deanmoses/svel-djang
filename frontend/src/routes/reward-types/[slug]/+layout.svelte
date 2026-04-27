@@ -9,7 +9,7 @@
   {profile}
   parentLabel="Reward Types"
   basePath="/reward-types"
-  claimsPath={'/api/reward-types/{slug}/claims/'}
+  claimsPath={'/api/reward-types/{public_id}/claims/'}
   deleteHref={`/reward-types/${profile.slug}/delete`}
 >
   {@render children()}

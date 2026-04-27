@@ -30,7 +30,7 @@ class RenditionUrlsSchema(Schema):
 
 class AttachmentMetaSchema(Schema):
     entity_type: str
-    slug: str
+    public_id: str
     category: str | None
     is_primary: bool
 
@@ -48,5 +48,5 @@ class UploadSchema(Schema):
 
 class MediaAssetInputSchema(Schema):
     entity_type: str
-    slug: str
+    public_id: str
     asset_uuid: str

@@ -214,16 +214,18 @@ def list_all_systems(request: HttpRequest) -> list[SystemListItemSchema]:
 
 
 @systems_router.patch(
-    "/{slug}/claims/",
+    "/{path:public_id}/claims/",
     auth=django_auth,
     response={200: SystemDetailSchema, 422: ValidationErrorSchema},
     tags=["private"],
 )
 def patch_system_claims(
-    request: HttpRequest, slug: str, data: ClaimPatchSchema
+    request: HttpRequest, public_id: str, data: ClaimPatchSchema
 ) -> SystemDetailSchema:
     """Assert per-field claims from the authenticated user, then re-resolve."""
-    system = get_object_or_404(System.objects.active(), slug=slug)
+    system = get_object_or_404(
+        System.objects.active(), **{System.public_id_field: public_id}
+    )
     specs = plan_scalar_field_claims(System, data.fields, entity=system)
 
     execute_claims(
@@ -276,7 +278,11 @@ def create_system(
             message="Manufacturer is required.",
             field_errors={"manufacturer_slug": "Manufacturer is required."},
         )
-    manufacturer = Manufacturer.objects.active().filter(slug=manufacturer_slug).first()
+    manufacturer = (
+        Manufacturer.objects.active()
+        .filter(**{Manufacturer.public_id_field: manufacturer_slug})
+        .first()
+    )
     if manufacturer is None:
         raise StructuredValidationError(
             message="Manufacturer not found.",
@@ -309,8 +315,9 @@ def create_system(
             ClaimSpec(field_name="name", value=name),
             ClaimSpec(field_name="slug", value=slug),
             ClaimSpec(field_name="status", value="active"),
-            # FK claim value is the parent's slug string.
-            ClaimSpec(field_name="manufacturer", value=manufacturer.slug),
+            # FK claim value is the parent's public_id (defaults to slug;
+            # path-shaped for models that override ``public_id_field``).
+            ClaimSpec(field_name="manufacturer", value=manufacturer.public_id),
         ],
         user=request.user,
         note=data.note,

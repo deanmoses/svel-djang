@@ -35,14 +35,15 @@ export type HierarchicalTaxonomySectionPatchBody = Partial<
 
 /**
  * Any OpenAPI path whose PATCH operation accepts the flat `ClaimPatchSchema`
- * body and identifies the resource by `slug`. Derived from the schema, so new
+ * body and identifies the resource by `public_id` (which is the slug for
+ * every simple-taxonomy endpoint today). Derived from the schema, so new
  * simple-taxonomy endpoints qualify automatically; hierarchical and
  * entity-specific endpoints (which use richer body schemas) do not.
  */
 export type SimpleTaxonomyClaimsPath = {
   [K in keyof paths]: paths[K] extends {
     patch: {
-      parameters: { path: { slug: string } };
+      parameters: { path: { public_id: string } };
       requestBody: { content: { 'application/json': ClaimsBody } };
     };
   }
@@ -61,7 +62,7 @@ export async function saveSimpleTaxonomyClaims(
   body: SimpleTaxonomySectionPatchBody,
 ): Promise<SaveResult> {
   const { data, error } = await client.PATCH(path, {
-    params: { path: { slug } },
+    params: { path: { public_id: slug } },
     body: { fields: {}, note: '', ...body },
   });
 
@@ -76,13 +77,14 @@ export async function saveSimpleTaxonomyClaims(
 
 /**
  * Any OpenAPI path whose PATCH operation accepts the `HierarchyClaimPatchSchema`
- * body and identifies the resource by `slug`. Mirrors `SimpleTaxonomyClaimsPath`
- * for hierarchical taxonomies (themes, gameplay-features).
+ * body and identifies the resource by `public_id`. Mirrors
+ * `SimpleTaxonomyClaimsPath` for hierarchical taxonomies (themes,
+ * gameplay-features).
  */
 export type HierarchicalTaxonomyClaimsPath = {
   [K in keyof paths]: paths[K] extends {
     patch: {
-      parameters: { path: { slug: string } };
+      parameters: { path: { public_id: string } };
       requestBody: { content: { 'application/json': HierarchyClaimsBody } };
     };
   }
@@ -99,7 +101,7 @@ export async function saveHierarchicalTaxonomyClaims(
   body: HierarchicalTaxonomySectionPatchBody,
 ): Promise<SaveResult> {
   const { data, error } = await client.PATCH(path, {
-    params: { path: { slug } },
+    params: { path: { public_id: slug } },
     body: { fields: {}, note: '', ...body },
   });
 

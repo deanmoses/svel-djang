@@ -4,5 +4,5 @@ import type { DeleteResponseSchema } from '$lib/api/schema';
 export type DeleteResponse = DeleteResponseSchema;
 
 export const submitDelete = createDeleteSubmitter<DeleteResponse>(
-  '/api/corporate-entities/{slug}/delete/',
+  '/api/corporate-entities/{public_id}/delete/',
 );

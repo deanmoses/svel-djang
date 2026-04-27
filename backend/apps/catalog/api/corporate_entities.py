@@ -162,19 +162,21 @@ def list_corporate_entities(
 
 
 @corporate_entities_router.patch(
-    "/{slug}/claims/",
+    "/{path:public_id}/claims/",
     auth=django_auth,
     response={200: CorporateEntityDetailSchema, 422: ValidationErrorSchema},
     tags=["private"],
 )
 def patch_corporate_entity_claims(
-    request: HttpRequest, slug: str, data: CorporateEntityClaimPatchSchema
+    request: HttpRequest, public_id: str, data: CorporateEntityClaimPatchSchema
 ) -> CorporateEntityDetailSchema:
     """Assert per-field claims from the authenticated user, then re-resolve."""
     if not data.fields and data.aliases is None:
         raise_form_error("No changes provided.")
 
-    ce = get_object_or_404(CorporateEntity.objects.active(), slug=slug)
+    ce = get_object_or_404(
+        CorporateEntity.objects.active(), **{CorporateEntity.public_id_field: public_id}
+    )
 
     specs = validate_scalar_fields(CorporateEntity, data.fields, entity=ce)
 
@@ -200,7 +202,7 @@ def patch_corporate_entity_claims(
 # Create / delete / restore wiring
 # ---------------------------------------------------------------------------
 
-# Create is parented: ``POST /api/manufacturers/{parent_slug}/corporate-entities/``
+# Create is parented: ``POST /api/manufacturers/{parent_public_id}/corporate-entities/``
 # mounted on the manufacturer router. Name collisions are scoped per parent —
 # two manufacturers may each own a corporate entity with the same name, but
 # not the same manufacturer.

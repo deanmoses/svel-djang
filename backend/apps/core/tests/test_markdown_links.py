@@ -78,13 +78,13 @@ class TestLinkRegistry:
     def test_manufacturer_registered(self):
         lt = get_link_type("manufacturer")
         assert lt is not None
-        assert lt.slug_field == "slug"
-        assert lt.url_pattern == "/manufacturers/{slug}"
+        assert lt.public_id_field == "slug"
+        assert lt.url_pattern == "/manufacturers/{public_id}"
 
     def test_system_registered(self):
         lt = get_link_type("system")
         assert lt is not None
-        assert lt.url_pattern == "/systems/{slug}"
+        assert lt.url_pattern == "/systems/{public_id}"
 
     def test_enabled_link_types_non_empty(self):
         types = get_enabled_link_types()
@@ -212,7 +212,7 @@ class TestCitationLinkType:
     def test_cite_registered(self):
         lt = get_link_type("cite")
         assert lt is not None
-        assert lt.slug_field is None
+        assert lt.public_id_field is None
         assert lt.format_link is not None
         assert lt.sort_order == 1
 

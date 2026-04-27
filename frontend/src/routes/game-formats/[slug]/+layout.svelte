@@ -9,7 +9,7 @@
   {profile}
   parentLabel="Game Formats"
   basePath="/game-formats"
-  claimsPath={'/api/game-formats/{slug}/claims/'}
+  claimsPath={'/api/game-formats/{public_id}/claims/'}
   deleteHref={`/game-formats/${profile.slug}/delete`}
 >
   {@render children()}

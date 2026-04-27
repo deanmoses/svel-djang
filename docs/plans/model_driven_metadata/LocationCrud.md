@@ -27,6 +27,18 @@ The validation criterion:
 
 ## Backend
 
+### Prerequisite: extend `register_entity_create` with extension hooks
+
+Today's [`register_entity_create`](../../../backend/apps/catalog/api/entity_crud.py) is slug-shaped: it calls `validate_slug_format`, `assert_slug_available`, writes `row_kwargs={"slug": slug}`, and emits a `slug` `ClaimSpec` unconditionally. That works for every shipped model because all default `public_id_field = "slug"`. Location can't plug in without three new keyword-only params on the factory:
+
+- `extra_claim_specs_builder: Callable[[EntityCreateInputSchema, CatalogModel | None], list[ClaimSpec]] | None = None` — appended to the per-create `claim_specs` list. Location uses it to add `location_type` and (for top-level country create) `divisions`.
+- `extra_row_kwargs_builder: Callable[[EntityCreateInputSchema, CatalogModel | None], dict[str, Any]] | None = None` — merged into `row_kwargs` before `create_entity_with_claims`. Location uses it to materialize `location_path` and to set `location_type`.
+- `body_schema: type[Schema] | None = None` — when set, replaces `EntityCreateInputSchema` as the request body type so endpoints can accept extra fields (Location: top-level country needs `divisions`).
+
+All three default to `None`/no-op so the existing 10+ callers stay byte-identical. Add a small unit test that asserts both builders fire with the resolved `parent` (or `None`), and that a builder returning new keys is reflected in the persisted row and claim list.
+
+The slug-availability check (`assert_slug_available(model_cls, slug)`) also needs to become `public_id_field`-aware: when `model_cls.public_id_field != "slug"`, the freshly-built `location_path` is what must be unique, not the bare slug. Either generalize `assert_slug_available` to query on `public_id_field`, or add a parallel `assert_public_id_available` that the factory dispatches to. The latter keeps the slug-shaped helper intact for the common case.
+
 ### Path and type helpers
 
 Add `backend/apps/catalog/services/location_paths.py`:

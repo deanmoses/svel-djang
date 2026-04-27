@@ -5,4 +5,8 @@
   let profile = $derived(data.profile);
 </script>
 
-<SimpleTaxonomyEditSectionPage {profile} basePath="/tags" claimsPath={'/api/tags/{slug}/claims/'} />
+<SimpleTaxonomyEditSectionPage
+  {profile}
+  basePath="/tags"
+  claimsPath={'/api/tags/{public_id}/claims/'}
+/>

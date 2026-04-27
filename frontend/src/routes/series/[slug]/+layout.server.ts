@@ -4,8 +4,8 @@ import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ fetch, url, params }) => {
   const client = createServerClient(fetch, url);
-  const { data, response } = await client.GET('/api/pages/series/{slug}', {
-    params: { path: { slug: params.slug } },
+  const { data, response } = await client.GET('/api/pages/series/{public_id}', {
+    params: { path: { public_id: params.slug } },
   });
 
   if (!data) {

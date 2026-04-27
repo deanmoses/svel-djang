@@ -61,8 +61,8 @@ describe('CorporateEntityBasicsEditor dirty-state contract', () => {
     await user.clear(screen.getByLabelText('Ceased operations'));
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
-    expect(PATCH).toHaveBeenCalledWith('/api/corporate-entities/{slug}/claims/', {
-      params: { path: { slug: 'williams-electronics' } },
+    expect(PATCH).toHaveBeenCalledWith('/api/corporate-entities/{public_id}/claims/', {
+      params: { path: { public_id: 'williams-electronics' } },
       body: { fields: { year_start: null, year_end: null }, note: '' },
     });
     expect(screen.getByTestId('saved-count')).toHaveTextContent('1');

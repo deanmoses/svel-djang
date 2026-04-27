@@ -58,9 +58,9 @@ def _build_claim_review_context(claim) -> tuple[list[dict], str | None]:
     links: list[dict] = []
     value = str(claim.value) if claim.value else ""
 
-    # The claim value is a title slug — look it up.
+    # The claim value is a title's public_id (slug, for Title) — look it up.
     try:
-        title = Title.objects.get(slug=value)
+        title = Title.objects.get(**{Title.public_id_field: value})
     except Title.DoesNotExist:
         return links, None
 
@@ -72,7 +72,7 @@ def _build_claim_review_context(claim) -> tuple[list[dict], str | None]:
         .exclude(opdb_id__isnull=True)
     )
     for rt in related:
-        links.append({"label": rt.name, "url": f"/titles/{rt.slug}"})
+        links.append({"label": rt.name, "url": rt.get_absolute_url()})
         links.append(
             {
                 "label": f"OPDB {rt.opdb_id}",
@@ -80,7 +80,7 @@ def _build_claim_review_context(claim) -> tuple[list[dict], str | None]:
             }
         )
 
-    return links, title.slug
+    return links, title.public_id
 
 
 @review_router.get("/claims/", response=list[ReviewClaimSchema])

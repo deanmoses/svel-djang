@@ -54,8 +54,8 @@ describe('ManufacturerBasicsEditor dirty-state contract', () => {
     await user.clear(screen.getByLabelText('Logo URL'));
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
-    expect(PATCH).toHaveBeenCalledWith('/api/manufacturers/{slug}/claims/', {
-      params: { path: { slug: 'williams' } },
+    expect(PATCH).toHaveBeenCalledWith('/api/manufacturers/{public_id}/claims/', {
+      params: { path: { public_id: 'williams' } },
       body: { fields: { website: null, logo_url: null }, note: '' },
     });
     expect(screen.getByTestId('saved-count')).toHaveTextContent('1');

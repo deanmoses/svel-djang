@@ -24,7 +24,7 @@ describe('saveTitleClaims', () => {
     invalidateAll.mockReset();
   });
 
-  it('PATCHes /api/titles/{slug}/claims/ and invalidates on success', async () => {
+  it('PATCHes /api/titles/{public_id}/claims/ and invalidates on success', async () => {
     PATCH.mockResolvedValue({ data: {}, error: undefined });
     invalidateAll.mockResolvedValue(undefined);
 
@@ -33,8 +33,8 @@ describe('saveTitleClaims', () => {
     });
 
     expect(result).toEqual({ ok: true });
-    expect(PATCH).toHaveBeenCalledWith('/api/titles/{slug}/claims/', {
-      params: { path: { slug: 'addams-family' } },
+    expect(PATCH).toHaveBeenCalledWith('/api/titles/{public_id}/claims/', {
+      params: { path: { public_id: 'addams-family' } },
       body: { fields: { description: 'new text' }, note: '' },
     });
     expect(invalidateAll).toHaveBeenCalledOnce();
@@ -65,8 +65,8 @@ describe('saveTitleClaims', () => {
     const abbreviations = ['TAF'];
     await saveTitleClaims('addams-family', { abbreviations });
 
-    expect(PATCH).toHaveBeenCalledWith('/api/titles/{slug}/claims/', {
-      params: { path: { slug: 'addams-family' } },
+    expect(PATCH).toHaveBeenCalledWith('/api/titles/{public_id}/claims/', {
+      params: { path: { public_id: 'addams-family' } },
       body: { fields: {}, note: '', abbreviations },
     });
   });

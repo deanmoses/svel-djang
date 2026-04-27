@@ -13,6 +13,8 @@ export type DeleteResponse = DeleteResponseSchema;
 
 export type { DeleteOutcome } from '$lib/delete-flow';
 
-export const submitDelete = createDeleteSubmitter<DeleteResponse>('/api/people/{slug}/delete/');
+export const submitDelete = createDeleteSubmitter<DeleteResponse>(
+  '/api/people/{public_id}/delete/',
+);
 
 export { submitUndoDelete, type UndoOutcome } from '$lib/undo-delete';

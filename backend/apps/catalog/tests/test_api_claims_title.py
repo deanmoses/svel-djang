@@ -1,4 +1,4 @@
-"""Tests for PATCH /api/titles/{slug}/claims/."""
+"""Tests for PATCH /api/titles/{public_id}/claims/."""
 
 from __future__ import annotations
 

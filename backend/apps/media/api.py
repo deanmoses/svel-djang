@@ -92,12 +92,16 @@ def _incr_rate_limit(user_id: int) -> None:
         cache.set(key, 1, 3600)
 
 
-def _resolve_entity(entity_type: str, slug: str) -> tuple[ContentType, MediaSupported]:
-    """Resolve entity_type + slug to (ContentType, entity instance).
+def _resolve_entity(
+    entity_type: str, public_id: str
+) -> tuple[ContentType, MediaSupported]:
+    """Resolve ``(entity_type, public_id)`` to ``(ContentType, entity instance)``.
 
     ``entity_type`` is the canonical hyphenated public identifier declared
     on each :class:`CatalogModel` subclass. Concatenated ContentType
-    spellings (``'corporateentity'``) are rejected.
+    spellings (``'corporateentity'``) are rejected. ``public_id`` is the
+    value of whichever field the model declares as ``public_id_field``
+    (defaults to ``slug``).
 
     Returns (content_type, entity) or raises HttpError.
     """
@@ -112,9 +116,11 @@ def _resolve_entity(entity_type: str, slug: str) -> tuple[ContentType, MediaSupp
     # `_default_manager` rather than `.objects`: `type[<LinkableModel & MediaSupported>]`
     # is an abstract intersection, and `.objects` is attached only to concrete
     # subclasses by Django's metaclass. (Introspection idiom.)
-    entity = model_class._default_manager.filter(slug=slug).first()
+    entity = model_class._default_manager.filter(
+        **{model_class.public_id_field: public_id}
+    ).first()
     if entity is None:
-        raise HttpError(400, f"{entity_type} '{slug}' not found.")
+        raise HttpError(400, f"{entity_type} '{public_id}' not found.")
 
     ct = ContentType.objects.get_for_model(model_class)
     return ct, entity
@@ -129,7 +135,7 @@ def upload_media(
     request: HttpRequest,
     file: File[UploadedFile],
     entity_type: Form[str],
-    slug: Form[str],
+    public_id: Form[str],
     category: Form[str | None] = None,
     is_primary: Form[bool] = False,
 ) -> UploadSchema:
@@ -161,7 +167,7 @@ def upload_media(
         raise HttpError(400, f"File exceeds maximum size of {size_mb} MB.")
 
     # --- Resolve entity and validate category ---
-    ct, entity = _resolve_entity(entity_type, slug)
+    ct, entity = _resolve_entity(entity_type, public_id)
     try:
         # Validate category early (asset_pk=0 is a placeholder — only category
         # validation runs here; the real claim is built after asset creation).
@@ -281,7 +287,7 @@ def upload_media(
         ),
         attachment=AttachmentMetaSchema(
             entity_type=entity_type,
-            slug=slug,
+            public_id=public_id,
             category=category,
             is_primary=is_primary,
         ),
@@ -296,7 +302,7 @@ def upload_media(
 def detach_media(request: HttpRequest, body: MediaAssetInputSchema) -> Status[None]:
     """Detach a media asset from an entity by asserting an exists=False claim."""
     user = authed_user(request)
-    ct, entity = _resolve_entity(body.entity_type, body.slug)
+    ct, entity = _resolve_entity(body.entity_type, body.public_id)
 
     try:
         asset = MediaAsset.objects.get(uuid=body.asset_uuid)
@@ -349,7 +355,7 @@ def detach_media(request: HttpRequest, body: MediaAssetInputSchema) -> Status[No
 def set_primary(request: HttpRequest, body: MediaAssetInputSchema) -> Status[None]:
     """Set a media asset as primary for its category on an entity."""
     user = authed_user(request)
-    ct, entity = _resolve_entity(body.entity_type, body.slug)
+    ct, entity = _resolve_entity(body.entity_type, body.public_id)
 
     try:
         asset = MediaAsset.objects.get(uuid=body.asset_uuid)

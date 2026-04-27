@@ -27,8 +27,8 @@ describe('savePersonClaims', () => {
 
     const result = await savePersonClaims('john', { fields: { name: 'Jane' } });
 
-    expect(PATCH).toHaveBeenCalledWith('/api/people/{slug}/claims/', {
-      params: { path: { slug: 'john' } },
+    expect(PATCH).toHaveBeenCalledWith('/api/people/{public_id}/claims/', {
+      params: { path: { public_id: 'john' } },
       body: { fields: { name: 'Jane' }, note: '' },
     });
     expect(invalidateAll).toHaveBeenCalledTimes(1);

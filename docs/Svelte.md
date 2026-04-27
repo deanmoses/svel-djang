@@ -54,6 +54,15 @@ For public SSR pages, `+page.server.ts` or `+layout.server.ts` should be the def
 
 A `src/routes/[slug]/` directory name is the **plural** of the backend's `entity_type` string — e.g. `corporate-entities/` for `entity_type="corporate-entity"`. The rule and the generated canonical list are in [EntityNaming.md](EntityNaming.md). Parity is test-enforced, so CI catches a wrong name.
 
+### `[slug]` vs `[...path]`
+
+Pick the SvelteKit segment shape based on the backend model's `public_id_field`:
+
+- **Single-segment public_id** (`public_id_field = "slug"`, the default) → use `[slug]`. The route param is the slug verbatim and gets passed as `public_id` to the typed client.
+- **Multi-segment public_id** (e.g. Location's `public_id_field = "location_path"`, value `"usa/il/chicago"`) → use `[...path]` catch-all. The backend route is declared with Ninja's `{path:public_id}` converter, which matches both shapes — so the API contract is uniform regardless of segment count.
+
+The `[slug]` directory name is kept even though the backend param is now `public_id`, because the value at every `[slug]` route still _is_ a slug. The naming dissonance is intentional — renaming directories to `[public_id]` would be churn without semantic gain.
+
 ## Implementing SSR Routes
 
 For SSR routes, prefer:
@@ -75,8 +84,8 @@ import { createServerClient } from "$lib/api/server";
 
 export const load: PageServerLoad = async ({ fetch, url, params }) => {
   const client = createServerClient(fetch, url);
-  const { data, response } = await client.GET("/api/pages/title/{slug}", {
-    params: { path: { slug: params.slug } },
+  const { data, response } = await client.GET("/api/pages/title/{public_id}", {
+    params: { path: { public_id: params.slug } },
   });
   // ...
 };

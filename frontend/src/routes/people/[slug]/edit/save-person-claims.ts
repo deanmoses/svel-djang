@@ -14,8 +14,8 @@ export async function savePersonClaims(
   slug: string,
   body: PersonSectionPatchBody,
 ): Promise<SaveResult> {
-  const { data, error } = await client.PATCH('/api/people/{slug}/claims/', {
-    params: { path: { slug } },
+  const { data, error } = await client.PATCH('/api/people/{public_id}/claims/', {
+    params: { path: { public_id: slug } },
     body: { fields: {}, note: '', ...body },
   });
 

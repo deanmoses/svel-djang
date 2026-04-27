@@ -8,5 +8,5 @@
 <SimpleTaxonomyEditSectionPage
   {profile}
   basePath="/cabinets"
-  claimsPath={'/api/cabinets/{slug}/claims/'}
+  claimsPath={'/api/cabinets/{public_id}/claims/'}
 />

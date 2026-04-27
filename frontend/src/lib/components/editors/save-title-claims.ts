@@ -18,8 +18,8 @@ export async function saveTitleClaims(
   slug: string,
   body: TitleSectionPatchBody,
 ): Promise<SaveResult> {
-  const { error } = await client.PATCH('/api/titles/{slug}/claims/', {
-    params: { path: { slug } },
+  const { error } = await client.PATCH('/api/titles/{public_id}/claims/', {
+    params: { path: { public_id: slug } },
     body: { fields: {}, note: '', ...body },
   });
 

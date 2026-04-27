@@ -10,7 +10,7 @@
   parentLabel="Technology Generations"
   basePath="/technology-subgenerations"
   parentHref="/technology-generations"
-  claimsPath={'/api/technology-subgenerations/{slug}/claims/'}
+  claimsPath={'/api/technology-subgenerations/{public_id}/claims/'}
   deleteHref={`/technology-subgenerations/${profile.slug}/delete`}
 >
   {@render children()}

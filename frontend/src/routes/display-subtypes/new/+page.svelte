@@ -12,8 +12,8 @@
   heading={`New subtype in ${parentName}`}
   initialName={data.initialName}
   submit={(body) =>
-    client.POST('/api/display-types/{parent_slug}/subtypes/', {
-      params: { path: { parent_slug: parentSlug } },
+    client.POST('/api/display-types/{parent_public_id}/subtypes/', {
+      params: { path: { parent_public_id: parentSlug } },
       body,
     })}
   detailHref={(slug) => `/display-subtypes/${slug}`}

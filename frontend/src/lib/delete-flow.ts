@@ -2,7 +2,7 @@
  * Generic client shim for catalog soft-delete endpoints.
  *
  * Title, Model, and Person (and every future lifecycle entity) all hit a
- * ``POST /api/{collection}/{slug}/delete/`` endpoint with the same request
+ * ``POST /api/{collection}/{public_id}/delete/`` endpoint with the same request
  * body shape and the same 200 / 422 / 429 response taxonomy. The only
  * per-entity variations are the endpoint path and the typed success body,
  * so this module owns the shared classification and each entity's
@@ -36,7 +36,7 @@ export interface DeleteSubmitOptions {
   citation?: EditCitationSelection | null;
 }
 
-type DeleteEndpoint = `/api/${string}/{slug}/delete/`;
+type DeleteEndpoint = `/api/${string}/{public_id}/delete/`;
 
 export function createDeleteSubmitter<TResponse>(endpoint: DeleteEndpoint) {
   return async (
@@ -50,7 +50,7 @@ export function createDeleteSubmitter<TResponse>(endpoint: DeleteEndpoint) {
     const { data, error, response } = await client.POST(
       endpoint as never,
       {
-        params: { path: { slug } },
+        params: { path: { public_id: slug } },
         body: {
           note: opts.note ?? '',
           citation: buildEditCitationRequest(opts.citation ?? null),

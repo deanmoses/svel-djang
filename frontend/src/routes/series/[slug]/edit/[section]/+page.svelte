@@ -9,6 +9,6 @@
 <SimpleTaxonomyEditSectionPage
   profile={series}
   basePath="/series"
-  claimsPath={'/api/series/{slug}/claims/'}
+  claimsPath={'/api/series/{public_id}/claims/'}
   sections={SIMPLE_TAXONOMY_EDIT_SECTIONS_NO_DISPLAY_ORDER}
 />

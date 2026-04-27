@@ -37,7 +37,7 @@ export class UploadError extends Error {
 export function uploadMedia(
   file: File,
   entityType: string,
-  slug: string,
+  publicId: string,
   opts?: UploadOptions,
   onProgress?: (pct: number) => void,
 ): Promise<UploadResult> {
@@ -45,7 +45,7 @@ export function uploadMedia(
     const form = new FormData();
     form.append('file', file);
     form.append('entity_type', entityType);
-    form.append('slug', slug);
+    form.append('public_id', publicId);
     if (opts?.category) form.append('category', opts.category);
     if (opts?.isPrimary) form.append('is_primary', 'true');
 
@@ -94,7 +94,7 @@ export function uploadMedia(
 async function mediaAction(
   endpoint: string,
   entityType: string,
-  slug: string,
+  publicId: string,
   assetUuid: string,
 ): Promise<void> {
   const token = getCsrfToken();
@@ -106,7 +106,7 @@ async function mediaAction(
     },
     body: JSON.stringify({
       entity_type: entityType,
-      slug: slug,
+      public_id: publicId,
       asset_uuid: assetUuid,
     }),
   });
@@ -123,10 +123,14 @@ async function mediaAction(
   }
 }
 
-export function detachMedia(entityType: string, slug: string, assetUuid: string): Promise<void> {
-  return mediaAction('/api/media/detach/', entityType, slug, assetUuid);
+export function detachMedia(
+  entityType: string,
+  publicId: string,
+  assetUuid: string,
+): Promise<void> {
+  return mediaAction('/api/media/detach/', entityType, publicId, assetUuid);
 }
 
-export function setPrimary(entityType: string, slug: string, assetUuid: string): Promise<void> {
-  return mediaAction('/api/media/set-primary/', entityType, slug, assetUuid);
+export function setPrimary(entityType: string, publicId: string, assetUuid: string): Promise<void> {
+  return mediaAction('/api/media/set-primary/', entityType, publicId, assetUuid);
 }

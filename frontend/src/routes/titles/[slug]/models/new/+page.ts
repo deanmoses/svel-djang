@@ -20,9 +20,9 @@ export const load: PageLoad = async ({ fetch, params }) => {
   // page escapes the parent layout via `+page@.svelte` — SvelteKit does not
   // inherit parent-layout data through a layout reset.
   const api = client;
-  const { data, response } = await api.GET('/api/pages/title/{slug}', {
+  const { data, response } = await api.GET('/api/pages/title/{public_id}', {
     fetch,
-    params: { path: { slug: params.slug } },
+    params: { path: { public_id: params.slug } },
   });
   if (!data) {
     if (response?.status === 404) throw error(404, 'Title not found');

@@ -1,4 +1,4 @@
-"""Tests for MachineModel relationship editing via PATCH /api/models/{slug}/claims/."""
+"""Tests for MachineModel relationship editing via PATCH /api/models/{public_id}/claims/."""
 
 from __future__ import annotations
 

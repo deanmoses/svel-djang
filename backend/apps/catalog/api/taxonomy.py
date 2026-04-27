@@ -178,11 +178,13 @@ def _taxonomy_detail_qs(model_class: type[_TaxM]) -> QuerySet[_TaxM]:  # noqa: U
 def _patch_taxonomy(  # noqa: UP047
     request: HttpRequest,
     model_class: type[_TaxM],
-    slug: str,
+    public_id: str,
     data: ClaimPatchSchema,
 ) -> TaxonomySchema:
     """Shared PATCH handler for all taxonomy entities."""
-    obj = get_object_or_404(model_class.objects.active(), slug=slug)
+    obj = get_object_or_404(
+        model_class.objects.active(), **{model_class.public_id_field: public_id}
+    )
     specs = plan_scalar_field_claims(model_class, data.fields, entity=obj)
 
     execute_claims(
@@ -320,15 +322,15 @@ def _bulk_title_counts_for_subgenerations(
 
 
 @technology_generations_router.patch(
-    "/{slug}/claims/",
+    "/{path:public_id}/claims/",
     auth=django_auth,
     response={200: TaxonomySchema, 422: ValidationErrorSchema},
     tags=["private"],
 )
 def patch_technology_generation(
-    request: HttpRequest, slug: str, data: ClaimPatchSchema
+    request: HttpRequest, public_id: str, data: ClaimPatchSchema
 ) -> TaxonomySchema:
-    return _patch_taxonomy(request, TechnologyGeneration, slug, data)
+    return _patch_taxonomy(request, TechnologyGeneration, public_id, data)
 
 
 # ---------------------------------------------------------------------------
@@ -374,15 +376,15 @@ def list_display_types(request: HttpRequest) -> list[DisplayTypeListItemSchema]:
 
 
 @display_types_router.patch(
-    "/{slug}/claims/",
+    "/{path:public_id}/claims/",
     auth=django_auth,
     response={200: TaxonomySchema, 422: ValidationErrorSchema},
     tags=["private"],
 )
 def patch_display_type(
-    request: HttpRequest, slug: str, data: ClaimPatchSchema
+    request: HttpRequest, public_id: str, data: ClaimPatchSchema
 ) -> TaxonomySchema:
-    return _patch_taxonomy(request, DisplayType, slug, data)
+    return _patch_taxonomy(request, DisplayType, public_id, data)
 
 
 # ---------------------------------------------------------------------------
@@ -393,15 +395,15 @@ technology_subgenerations_router = Router(tags=["technology-subgenerations"])
 
 
 @technology_subgenerations_router.patch(
-    "/{slug}/claims/",
+    "/{path:public_id}/claims/",
     auth=django_auth,
     response={200: TaxonomySchema, 422: ValidationErrorSchema},
     tags=["private"],
 )
 def patch_technology_subgeneration(
-    request: HttpRequest, slug: str, data: ClaimPatchSchema
+    request: HttpRequest, public_id: str, data: ClaimPatchSchema
 ) -> TaxonomySchema:
-    return _patch_taxonomy(request, TechnologySubgeneration, slug, data)
+    return _patch_taxonomy(request, TechnologySubgeneration, public_id, data)
 
 
 # ---------------------------------------------------------------------------
@@ -412,15 +414,15 @@ display_subtypes_router = Router(tags=["display-subtypes"])
 
 
 @display_subtypes_router.patch(
-    "/{slug}/claims/",
+    "/{path:public_id}/claims/",
     auth=django_auth,
     response={200: TaxonomySchema, 422: ValidationErrorSchema},
     tags=["private"],
 )
 def patch_display_subtype(
-    request: HttpRequest, slug: str, data: ClaimPatchSchema
+    request: HttpRequest, public_id: str, data: ClaimPatchSchema
 ) -> TaxonomySchema:
-    return _patch_taxonomy(request, DisplaySubtype, slug, data)
+    return _patch_taxonomy(request, DisplaySubtype, public_id, data)
 
 
 # ---------------------------------------------------------------------------
@@ -437,15 +439,15 @@ def list_cabinets(request: HttpRequest) -> list[TaxonomyWithTitleCountSchema]:
 
 
 @cabinets_router.patch(
-    "/{slug}/claims/",
+    "/{path:public_id}/claims/",
     auth=django_auth,
     response={200: TaxonomySchema, 422: ValidationErrorSchema},
     tags=["private"],
 )
 def patch_cabinet(
-    request: HttpRequest, slug: str, data: ClaimPatchSchema
+    request: HttpRequest, public_id: str, data: ClaimPatchSchema
 ) -> TaxonomySchema:
-    return _patch_taxonomy(request, Cabinet, slug, data)
+    return _patch_taxonomy(request, Cabinet, public_id, data)
 
 
 # ---------------------------------------------------------------------------
@@ -464,15 +466,15 @@ def list_game_formats(request: HttpRequest) -> list[TaxonomyWithTitleCountSchema
 
 
 @game_formats_router.patch(
-    "/{slug}/claims/",
+    "/{path:public_id}/claims/",
     auth=django_auth,
     response={200: TaxonomySchema, 422: ValidationErrorSchema},
     tags=["private"],
 )
 def patch_game_format(
-    request: HttpRequest, slug: str, data: ClaimPatchSchema
+    request: HttpRequest, public_id: str, data: ClaimPatchSchema
 ) -> TaxonomySchema:
-    return _patch_taxonomy(request, GameFormat, slug, data)
+    return _patch_taxonomy(request, GameFormat, public_id, data)
 
 
 # ---------------------------------------------------------------------------
@@ -518,15 +520,17 @@ def list_reward_types(request: HttpRequest) -> list[TaxonomyWithTitleCountSchema
 
 
 @reward_types_router.patch(
-    "/{slug}/claims/",
+    "/{path:public_id}/claims/",
     auth=django_auth,
     response={200: RewardTypeDetailSchema, 422: ValidationErrorSchema},
     tags=["private"],
 )
 def patch_reward_type(
-    request: HttpRequest, slug: str, data: ClaimPatchSchema
+    request: HttpRequest, public_id: str, data: ClaimPatchSchema
 ) -> RewardTypeDetailSchema:
-    obj = get_object_or_404(RewardType.objects.active(), slug=slug)
+    obj = get_object_or_404(
+        RewardType.objects.active(), **{RewardType.public_id_field: public_id}
+    )
     specs = plan_scalar_field_claims(RewardType, data.fields, entity=obj)
 
     execute_claims(
@@ -551,15 +555,15 @@ def list_tags(request: HttpRequest) -> list[TaxonomyWithTitleCountSchema]:
 
 
 @tags_router.patch(
-    "/{slug}/claims/",
+    "/{path:public_id}/claims/",
     auth=django_auth,
     response={200: TaxonomySchema, 422: ValidationErrorSchema},
     tags=["private"],
 )
 def patch_tag(
-    request: HttpRequest, slug: str, data: ClaimPatchSchema
+    request: HttpRequest, public_id: str, data: ClaimPatchSchema
 ) -> TaxonomySchema:
-    return _patch_taxonomy(request, Tag, slug, data)
+    return _patch_taxonomy(request, Tag, public_id, data)
 
 
 # ---------------------------------------------------------------------------
@@ -686,24 +690,18 @@ def list_credit_roles(request: HttpRequest) -> list[TaxonomySchema]:
     ]
 
 
-@credit_roles_router.get("/{slug}", response=CreditRoleDetailSchema)
-@decorate_view(cache_control(no_cache=True))
-def get_credit_role(request: HttpRequest, slug: str) -> CreditRoleDetailSchema:
-    return _serialize_credit_role_detail(
-        get_object_or_404(_credit_role_detail_qs(), slug=slug)
-    )
-
-
 @credit_roles_router.patch(
-    "/{slug}/claims/",
+    "/{path:public_id}/claims/",
     auth=django_auth,
     response={200: CreditRoleDetailSchema, 422: ValidationErrorSchema},
     tags=["private"],
 )
 def patch_credit_role(
-    request: HttpRequest, slug: str, data: ClaimPatchSchema
+    request: HttpRequest, public_id: str, data: ClaimPatchSchema
 ) -> CreditRoleDetailSchema:
-    obj = get_object_or_404(CreditRole.objects.active(), slug=slug)
+    obj = get_object_or_404(
+        CreditRole.objects.active(), **{CreditRole.public_id_field: public_id}
+    )
     specs = plan_scalar_field_claims(CreditRole, data.fields, entity=obj)
 
     execute_claims(
@@ -750,6 +748,21 @@ register_entity_delete_restore(
     serialize_detail=_serialize_credit_role_detail,
     response_schema=CreditRoleDetailSchema,
 )
+
+
+# Bespoke detail GET. Registered AFTER the factory and PATCH/claims routes so
+# its greedy ``{path:public_id}`` doesn't shadow ``/{path:public_id}/claims/``,
+# ``/{path:public_id}/delete-preview/``, etc. — Django's URL resolver picks
+# the first matching pattern, so the more-specific routes have to come first.
+@credit_roles_router.get("/{path:public_id}", response=CreditRoleDetailSchema)
+@decorate_view(cache_control(no_cache=True))
+def get_credit_role(request: HttpRequest, public_id: str) -> CreditRoleDetailSchema:
+    return _serialize_credit_role_detail(
+        get_object_or_404(
+            _credit_role_detail_qs(), **{CreditRole.public_id_field: public_id}
+        )
+    )
+
 
 # Create — parentless entities on their own router.
 _register_create(technology_generations_router, TechnologyGeneration)

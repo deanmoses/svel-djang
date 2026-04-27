@@ -16,8 +16,8 @@ export async function saveManufacturerClaims(
   slug: string,
   body: ManufacturerSectionPatchBody,
 ): Promise<SaveResult> {
-  const { data, error } = await client.PATCH('/api/manufacturers/{slug}/claims/', {
-    params: { path: { slug } },
+  const { data, error } = await client.PATCH('/api/manufacturers/{public_id}/claims/', {
+    params: { path: { public_id: slug } },
     body: { fields: {}, note: '', ...body },
   });
 

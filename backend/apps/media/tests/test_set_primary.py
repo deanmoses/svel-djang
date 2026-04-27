@@ -92,7 +92,7 @@ class TestSetPrimaryEndpoint:
             "/api/media/set-primary/",
             data={
                 "entity_type": "model",
-                "slug": machine_model.slug,
+                "public_id": machine_model.public_id,
                 "asset_uuid": str(asset.uuid),
             },
             content_type="application/json",
@@ -117,7 +117,7 @@ class TestSetPrimaryEndpoint:
             "/api/media/set-primary/",
             data={
                 "entity_type": "model",
-                "slug": machine_model.slug,
+                "public_id": machine_model.public_id,
                 "asset_uuid": str(asset_b.uuid),
             },
             content_type="application/json",
@@ -147,7 +147,7 @@ class TestSetPrimaryEndpoint:
             "/api/media/set-primary/",
             data={
                 "entity_type": "model",
-                "slug": machine_model.slug,
+                "public_id": machine_model.public_id,
                 "asset_uuid": str(new_bg.uuid),
             },
             content_type="application/json",
@@ -168,7 +168,7 @@ class TestSetPrimaryEndpoint:
             "/api/media/set-primary/",
             data={
                 "entity_type": "model",
-                "slug": machine_model.slug,
+                "public_id": machine_model.public_id,
                 "asset_uuid": str(asset.uuid),
             },
             content_type="application/json",
@@ -187,7 +187,7 @@ class TestSetPrimaryEndpoint:
             "/api/media/set-primary/",
             data={
                 "entity_type": "model",
-                "slug": machine_model.slug,
+                "public_id": machine_model.public_id,
                 "asset_uuid": str(asset.uuid),
             },
             content_type="application/json",
@@ -206,7 +206,7 @@ class TestSetPrimaryEndpoint:
             "/api/media/set-primary/",
             data={
                 "entity_type": "model",
-                "slug": machine_model.slug,
+                "public_id": machine_model.public_id,
                 "asset_uuid": str(asset.uuid),
             },
             content_type="application/json",
@@ -219,7 +219,7 @@ class TestSetPrimaryEndpoint:
             "/api/media/set-primary/",
             data={
                 "entity_type": "model",
-                "slug": machine_model.slug,
+                "public_id": machine_model.public_id,
                 "asset_uuid": "00000000-0000-0000-0000-000000000000",
             },
             content_type="application/json",
@@ -232,7 +232,7 @@ class TestSetPrimaryEndpoint:
             "/api/media/set-primary/",
             data={
                 "entity_type": "model",
-                "slug": machine_model.slug,
+                "public_id": machine_model.public_id,
                 "asset_uuid": "not-a-uuid",
             },
             content_type="application/json",

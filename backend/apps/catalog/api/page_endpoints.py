@@ -4,48 +4,52 @@ These endpoints live under /api/pages/ and are tagged "private" so they
 stay out of the public API docs.  They return page-model responses shaped
 for specific SvelteKit SSR routes.
 
+Each detail page is registered through ``register_entity_detail_page``;
+the route segment and lookup field both come from the model
+(``entity_type`` and ``public_id_field``), so adding a new linkable
+entity is a one-line registration here.
+
 Auto-discovered via the ``routers`` list convention in config/api.py.
 """
 
 from __future__ import annotations
 
-from django.http import HttpRequest
-from django.shortcuts import get_object_or_404
 from ninja import Router
 
 from apps.catalog.models import (
     Cabinet,
+    CorporateEntity,
+    CreditRole,
     DisplaySubtype,
     DisplayType,
+    Franchise,
     GameFormat,
+    GameplayFeature,
+    MachineModel,
+    Manufacturer,
+    Person,
+    RewardType,
+    Series,
+    System,
     Tag,
     TechnologyGeneration,
     TechnologySubgeneration,
+    Theme,
+    Title,
 )
 
-from .corporate_entities import (
-    CorporateEntityDetailSchema,
-)
-from .corporate_entities import (
-    _detail_qs as _corp_entity_detail_qs,
-)
-from .corporate_entities import (
-    _serialize_detail as _serialize_corp_entity_detail,
-)
+from .corporate_entities import CorporateEntityDetailSchema
+from .corporate_entities import _detail_qs as _corp_entity_detail_qs
+from .corporate_entities import _serialize_detail as _serialize_corp_entity_detail
+from .entity_detail_page import register_entity_detail_page
 from .franchises import (
     FranchiseDetailSchema,
     _franchise_detail_qs,
     _serialize_franchise_detail,
 )
-from .gameplay_features import (
-    GameplayFeatureDetailSchema,
-)
-from .gameplay_features import (
-    _detail_qs as _gf_detail_qs,
-)
-from .gameplay_features import (
-    _serialize_detail as _serialize_gf_detail,
-)
+from .gameplay_features import GameplayFeatureDetailSchema
+from .gameplay_features import _detail_qs as _gf_detail_qs
+from .gameplay_features import _serialize_detail as _serialize_gf_detail
 from .machine_models import (
     ModelDetailSchema,
     _model_detail_qs,
@@ -56,21 +60,9 @@ from .manufacturers import (
     _manufacturer_qs,
     _serialize_manufacturer_detail,
 )
-from .people import (
-    PersonDetailSchema,
-    _person_qs,
-    _serialize_person_detail,
-)
-from .series import (
-    SeriesDetailSchema,
-    _serialize_series_detail,
-    _series_detail_qs,
-)
-from .systems import (
-    SystemDetailSchema,
-    _serialize_system_detail,
-    _system_detail_qs,
-)
+from .people import PersonDetailSchema, _person_qs, _serialize_person_detail
+from .series import SeriesDetailSchema, _serialize_series_detail, _series_detail_qs
+from .systems import SystemDetailSchema, _serialize_system_detail, _system_detail_qs
 from .taxonomy import (
     CreditRoleDetailSchema,
     RewardTypeDetailSchema,
@@ -82,169 +74,165 @@ from .taxonomy import (
     _serialize_taxonomy,
     _taxonomy_detail_qs,
 )
-from .themes import (
-    ThemeDetailSchema,
-)
-from .themes import (
-    _detail_qs as _theme_detail_qs,
-)
-from .themes import (
-    _serialize_detail as _serialize_theme_detail,
-)
-from .titles import TitleDetailSchema, _detail_qs, _serialize_title_detail
+from .themes import ThemeDetailSchema
+from .themes import _detail_qs as _theme_detail_qs
+from .themes import _serialize_detail as _serialize_theme_detail
+from .titles import TitleDetailSchema, _serialize_title_detail
+from .titles import _detail_qs as _title_detail_qs
 
 pages_router = Router(tags=["private"])
 
 
 # ---------------------------------------------------------------------------
-# Already-converted entities
+# Bespoke-schema entities — each pairs a model with its own detail schema,
+# queryset, and serializer. Listed explicitly (not in a loop) so the
+# factory's ``[ModelT, SchemaT]`` type variables stay enforced at every
+# call site; a ``list[tuple[type, object, object, type]]`` would erase
+# that correlation.
 # ---------------------------------------------------------------------------
 
 
-@pages_router.get("/title/{slug}", response=TitleDetailSchema)
-def title_detail_page(request: HttpRequest, slug: str) -> TitleDetailSchema:
-    title = get_object_or_404(_detail_qs(), slug=slug)
-    return _serialize_title_detail(title)
-
-
-@pages_router.get("/manufacturer/{slug}", response=ManufacturerDetailSchema)
-def manufacturer_detail_page(
-    request: HttpRequest, slug: str
-) -> ManufacturerDetailSchema:
-    mfr = get_object_or_404(_manufacturer_qs(), slug=slug)
-    return _serialize_manufacturer_detail(mfr)
-
-
-@pages_router.get("/model/{slug}", response=ModelDetailSchema)
-def model_detail_page(request: HttpRequest, slug: str) -> ModelDetailSchema:
-    pm = get_object_or_404(_model_detail_qs(), slug=slug)
-    return _serialize_model_detail(pm)
-
-
-# ---------------------------------------------------------------------------
-# Dedicated-router entities
-# ---------------------------------------------------------------------------
-
-
-@pages_router.get("/person/{slug}", response=PersonDetailSchema)
-def person_detail_page(request: HttpRequest, slug: str) -> PersonDetailSchema:
-    person = get_object_or_404(_person_qs(), slug=slug)
-    return _serialize_person_detail(person)
-
-
-@pages_router.get("/series/{slug}", response=SeriesDetailSchema)
-def series_detail_page(request: HttpRequest, slug: str) -> SeriesDetailSchema:
-    s = get_object_or_404(_series_detail_qs(), slug=slug)
-    return _serialize_series_detail(s)
-
-
-@pages_router.get("/corporate-entity/{slug}", response=CorporateEntityDetailSchema)
-def corporate_entity_detail_page(
-    request: HttpRequest, slug: str
-) -> CorporateEntityDetailSchema:
-    ce = get_object_or_404(_corp_entity_detail_qs(), slug=slug)
-    return _serialize_corp_entity_detail(ce)
-
-
-@pages_router.get("/gameplay-feature/{slug}", response=GameplayFeatureDetailSchema)
-def gameplay_feature_detail_page(
-    request: HttpRequest, slug: str
-) -> GameplayFeatureDetailSchema:
-    gf = get_object_or_404(_gf_detail_qs(), slug=slug)
-    return _serialize_gf_detail(gf)
-
-
-@pages_router.get("/franchise/{slug}", response=FranchiseDetailSchema)
-def franchise_detail_page(request: HttpRequest, slug: str) -> FranchiseDetailSchema:
-    f = get_object_or_404(_franchise_detail_qs(), slug=slug)
-    return _serialize_franchise_detail(f)
-
-
-@pages_router.get("/theme/{slug}", response=ThemeDetailSchema)
-def theme_detail_page(request: HttpRequest, slug: str) -> ThemeDetailSchema:
-    theme = get_object_or_404(_theme_detail_qs(), slug=slug)
-    return _serialize_theme_detail(theme)
-
-
-@pages_router.get("/system/{slug}", response=SystemDetailSchema)
-def system_detail_page(request: HttpRequest, slug: str) -> SystemDetailSchema:
-    system = get_object_or_404(_system_detail_qs(), slug=slug)
-    return _serialize_system_detail(system)
-
-
-# ---------------------------------------------------------------------------
-# Taxonomy entities
-# ---------------------------------------------------------------------------
-
-
-@pages_router.get("/tag/{slug}", response=TaxonomySchema)
-def tag_detail_page(request: HttpRequest, slug: str) -> TaxonomySchema:
-    return _serialize_taxonomy(get_object_or_404(_taxonomy_detail_qs(Tag), slug=slug))
-
-
-@pages_router.get("/cabinet/{slug}", response=TaxonomySchema)
-def cabinet_detail_page(request: HttpRequest, slug: str) -> TaxonomySchema:
-    return _serialize_taxonomy(
-        get_object_or_404(_taxonomy_detail_qs(Cabinet), slug=slug)
-    )
-
-
-@pages_router.get("/display-type/{slug}", response=TaxonomySchema)
-def display_type_detail_page(request: HttpRequest, slug: str) -> TaxonomySchema:
-    return _serialize_taxonomy(
-        get_object_or_404(_taxonomy_detail_qs(DisplayType), slug=slug)
-    )
-
-
-@pages_router.get("/display-subtype/{slug}", response=TaxonomySchema)
-def display_subtype_detail_page(request: HttpRequest, slug: str) -> TaxonomySchema:
-    return _serialize_taxonomy(
-        get_object_or_404(_taxonomy_detail_qs(DisplaySubtype), slug=slug)
-    )
-
-
-@pages_router.get("/game-format/{slug}", response=TaxonomySchema)
-def game_format_detail_page(request: HttpRequest, slug: str) -> TaxonomySchema:
-    return _serialize_taxonomy(
-        get_object_or_404(_taxonomy_detail_qs(GameFormat), slug=slug)
-    )
-
-
-@pages_router.get("/technology-generation/{slug}", response=TaxonomySchema)
-def technology_generation_detail_page(
-    request: HttpRequest, slug: str
-) -> TaxonomySchema:
-    return _serialize_taxonomy(
-        get_object_or_404(_taxonomy_detail_qs(TechnologyGeneration), slug=slug)
-    )
-
-
-@pages_router.get("/technology-subgeneration/{slug}", response=TaxonomySchema)
-def technology_subgeneration_detail_page(
-    request: HttpRequest, slug: str
-) -> TaxonomySchema:
-    return _serialize_taxonomy(
-        get_object_or_404(_taxonomy_detail_qs(TechnologySubgeneration), slug=slug)
-    )
+register_entity_detail_page(
+    pages_router,
+    Title,
+    detail_qs=_title_detail_qs,
+    serialize_detail=_serialize_title_detail,
+    response_schema=TitleDetailSchema,
+)
+register_entity_detail_page(
+    pages_router,
+    Manufacturer,
+    detail_qs=_manufacturer_qs,
+    serialize_detail=_serialize_manufacturer_detail,
+    response_schema=ManufacturerDetailSchema,
+)
+register_entity_detail_page(
+    pages_router,
+    MachineModel,
+    detail_qs=_model_detail_qs,
+    serialize_detail=_serialize_model_detail,
+    response_schema=ModelDetailSchema,
+)
+register_entity_detail_page(
+    pages_router,
+    Person,
+    detail_qs=_person_qs,
+    serialize_detail=_serialize_person_detail,
+    response_schema=PersonDetailSchema,
+)
+register_entity_detail_page(
+    pages_router,
+    Series,
+    detail_qs=_series_detail_qs,
+    serialize_detail=_serialize_series_detail,
+    response_schema=SeriesDetailSchema,
+)
+register_entity_detail_page(
+    pages_router,
+    CorporateEntity,
+    detail_qs=_corp_entity_detail_qs,
+    serialize_detail=_serialize_corp_entity_detail,
+    response_schema=CorporateEntityDetailSchema,
+)
+register_entity_detail_page(
+    pages_router,
+    GameplayFeature,
+    detail_qs=_gf_detail_qs,
+    serialize_detail=_serialize_gf_detail,
+    response_schema=GameplayFeatureDetailSchema,
+)
+register_entity_detail_page(
+    pages_router,
+    Franchise,
+    detail_qs=_franchise_detail_qs,
+    serialize_detail=_serialize_franchise_detail,
+    response_schema=FranchiseDetailSchema,
+)
+register_entity_detail_page(
+    pages_router,
+    Theme,
+    detail_qs=_theme_detail_qs,
+    serialize_detail=_serialize_theme_detail,
+    response_schema=ThemeDetailSchema,
+)
+register_entity_detail_page(
+    pages_router,
+    System,
+    detail_qs=_system_detail_qs,
+    serialize_detail=_serialize_system_detail,
+    response_schema=SystemDetailSchema,
+)
+register_entity_detail_page(
+    pages_router,
+    RewardType,
+    detail_qs=_reward_type_detail_qs,
+    serialize_detail=_serialize_reward_type_detail,
+    response_schema=RewardTypeDetailSchema,
+)
+register_entity_detail_page(
+    pages_router,
+    CreditRole,
+    detail_qs=_credit_role_detail_qs,
+    serialize_detail=_serialize_credit_role_detail,
+    response_schema=CreditRoleDetailSchema,
+)
 
 
 # ---------------------------------------------------------------------------
-# Reward type (specialized taxonomy)
+# Taxonomy entities — share queryset builder, serializer, and response
+# schema. Listed explicitly rather than looped so the factory's
+# ``[ModelT, SchemaT]`` type variables stay enforced at each call site;
+# a loop with a union-typed iteration variable widens ``ModelT`` and
+# loses the per-call type binding.
 # ---------------------------------------------------------------------------
 
 
-@pages_router.get("/reward-type/{slug}", response=RewardTypeDetailSchema)
-def reward_type_detail_page(request: HttpRequest, slug: str) -> RewardTypeDetailSchema:
-    rt = get_object_or_404(_reward_type_detail_qs(), slug=slug)
-    return _serialize_reward_type_detail(rt)
-
-
-# ---------------------------------------------------------------------------
-# Credit role (specialized taxonomy: adds ranked people list)
-# ---------------------------------------------------------------------------
-
-
-@pages_router.get("/credit-role/{slug}", response=CreditRoleDetailSchema)
-def credit_role_detail_page(request: HttpRequest, slug: str) -> CreditRoleDetailSchema:
-    cr = get_object_or_404(_credit_role_detail_qs(), slug=slug)
-    return _serialize_credit_role_detail(cr)
+register_entity_detail_page(
+    pages_router,
+    Tag,
+    detail_qs=lambda: _taxonomy_detail_qs(Tag),
+    serialize_detail=_serialize_taxonomy,
+    response_schema=TaxonomySchema,
+)
+register_entity_detail_page(
+    pages_router,
+    Cabinet,
+    detail_qs=lambda: _taxonomy_detail_qs(Cabinet),
+    serialize_detail=_serialize_taxonomy,
+    response_schema=TaxonomySchema,
+)
+register_entity_detail_page(
+    pages_router,
+    DisplayType,
+    detail_qs=lambda: _taxonomy_detail_qs(DisplayType),
+    serialize_detail=_serialize_taxonomy,
+    response_schema=TaxonomySchema,
+)
+register_entity_detail_page(
+    pages_router,
+    DisplaySubtype,
+    detail_qs=lambda: _taxonomy_detail_qs(DisplaySubtype),
+    serialize_detail=_serialize_taxonomy,
+    response_schema=TaxonomySchema,
+)
+register_entity_detail_page(
+    pages_router,
+    GameFormat,
+    detail_qs=lambda: _taxonomy_detail_qs(GameFormat),
+    serialize_detail=_serialize_taxonomy,
+    response_schema=TaxonomySchema,
+)
+register_entity_detail_page(
+    pages_router,
+    TechnologyGeneration,
+    detail_qs=lambda: _taxonomy_detail_qs(TechnologyGeneration),
+    serialize_detail=_serialize_taxonomy,
+    response_schema=TaxonomySchema,
+)
+register_entity_detail_page(
+    pages_router,
+    TechnologySubgeneration,
+    detail_qs=lambda: _taxonomy_detail_qs(TechnologySubgeneration),
+    serialize_detail=_serialize_taxonomy,
+    response_schema=TaxonomySchema,
+)

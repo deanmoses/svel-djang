@@ -13,8 +13,8 @@
   heading={`New model in ${titleName}`}
   initialName=""
   submit={(body) =>
-    client.POST('/api/titles/{title_slug}/models/', {
-      params: { path: { title_slug: titleSlug } },
+    client.POST('/api/titles/{title_public_id}/models/', {
+      params: { path: { title_public_id: titleSlug } },
       body,
     })}
   detailHref={(slug) => `/models/${slug}`}

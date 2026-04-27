@@ -100,8 +100,8 @@ describe('BasicsEditor dirty-state contract', () => {
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
     expect(PATCH).toHaveBeenCalledOnce();
-    expect(PATCH).toHaveBeenCalledWith('/api/models/{slug}/claims/', {
-      params: { path: { slug: 'medieval-madness' } },
+    expect(PATCH).toHaveBeenCalledWith('/api/models/{public_id}/claims/', {
+      params: { path: { public_id: 'medieval-madness' } },
       body: { fields: { title: 'attack-from-mars' }, note: '' },
     });
   });
@@ -121,8 +121,8 @@ describe('BasicsEditor dirty-state contract', () => {
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
     expect(PATCH).toHaveBeenCalledOnce();
-    expect(PATCH).toHaveBeenCalledWith('/api/models/{slug}/claims/', {
-      params: { path: { slug: 'medieval-madness' } },
+    expect(PATCH).toHaveBeenCalledWith('/api/models/{public_id}/claims/', {
+      params: { path: { public_id: 'medieval-madness' } },
       body: { fields: { year: 1998 }, note: '' },
     });
   });

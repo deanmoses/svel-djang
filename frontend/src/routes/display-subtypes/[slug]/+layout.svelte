@@ -10,7 +10,7 @@
   parentLabel="Display Types"
   basePath="/display-subtypes"
   parentHref="/display-types"
-  claimsPath={'/api/display-subtypes/{slug}/claims/'}
+  claimsPath={'/api/display-subtypes/{public_id}/claims/'}
   deleteHref={`/display-subtypes/${profile.slug}/delete`}
 >
   {@render children()}

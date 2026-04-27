@@ -120,7 +120,7 @@ class TestCitedEditEvidence:
     def test_soft_deleted_entity_still_returns_sources(
         self, client, user, title, citation_source
     ):
-        """Soft-delete is soft: sources page remains inspectable by slug.
+        """Soft-delete is soft: sources page remains inspectable by public_id.
 
         Policy: provenance surfaces intentionally use the default manager
         (not ``.active()``) so deleted entities keep their claims and

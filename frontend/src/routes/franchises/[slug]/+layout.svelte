@@ -10,7 +10,7 @@
   profile={franchise}
   parentLabel="Franchises"
   basePath="/franchises"
-  claimsPath={'/api/franchises/{slug}/claims/'}
+  claimsPath={'/api/franchises/{public_id}/claims/'}
   deleteHref={`/franchises/${franchise.slug}/delete`}
   sections={SIMPLE_TAXONOMY_EDIT_SECTIONS_NO_DISPLAY_ORDER}
 >

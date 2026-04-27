@@ -9,7 +9,7 @@
   {profile}
   parentLabel="Tags"
   basePath="/tags"
-  claimsPath={'/api/tags/{slug}/claims/'}
+  claimsPath={'/api/tags/{public_id}/claims/'}
   deleteHref={`/tags/${profile.slug}/delete`}
 >
   {@render children()}

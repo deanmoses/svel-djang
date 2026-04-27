@@ -43,7 +43,7 @@ class CatalogConfig(AppConfig):
         def _default_serialize(
             obj: Any,  # noqa: ANN401 - matches LinkType.autocomplete_serialize callback contract
         ) -> LinkTargetSchema:
-            return LinkTargetSchema(ref=obj.slug, label=str(obj.name))
+            return LinkTargetSchema(ref=obj.public_id, label=str(obj.name))
 
         for model in apps.get_app_config("catalog").get_models():
             if not issubclass(model, LinkableModel) or model._meta.abstract:
@@ -53,7 +53,7 @@ class CatalogConfig(AppConfig):
                 LinkType(
                     name=name,
                     model_path=f"catalog.{model.__name__}",
-                    slug_field="slug",
+                    public_id_field=model.public_id_field,
                     label=getattr(
                         model, "link_label", str(model._meta.verbose_name).title()
                     ),
@@ -63,7 +63,7 @@ class CatalogConfig(AppConfig):
                         f"Link to a {model._meta.verbose_name}",
                     ),
                     url_pattern=model.link_url_pattern,
-                    url_field="slug",
+                    url_field="public_id",
                     label_field="name",
                     sort_order=getattr(model, "link_sort_order", 100),
                     autocomplete_search_fields=getattr(

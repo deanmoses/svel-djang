@@ -14,9 +14,9 @@ export const load: PageLoad = async ({ fetch, params, url }) => {
 
   // Load the parent manufacturer directly — this page escapes the parent
   // layout via `+page@.svelte`, so parent-layout data is not inherited.
-  const { data, response } = await client.GET('/api/pages/manufacturer/{slug}', {
+  const { data, response } = await client.GET('/api/pages/manufacturer/{public_id}', {
     fetch,
-    params: { path: { slug: params.slug } },
+    params: { path: { public_id: params.slug } },
   });
   if (!data) {
     if (response?.status === 404) throw error(404, 'Manufacturer not found');

@@ -12,8 +12,8 @@
   heading={`New subgeneration in ${parentName}`}
   initialName={data.initialName}
   submit={(body) =>
-    client.POST('/api/technology-generations/{parent_slug}/subgenerations/', {
-      params: { path: { parent_slug: parentSlug } },
+    client.POST('/api/technology-generations/{parent_public_id}/subgenerations/', {
+      params: { path: { parent_public_id: parentSlug } },
       body,
     })}
   detailHref={(slug) => `/technology-subgenerations/${slug}`}

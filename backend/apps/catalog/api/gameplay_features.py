@@ -132,19 +132,22 @@ def list_gameplay_features(
 
 
 @gameplay_features_router.patch(
-    "/{slug}/claims/",
+    "/{path:public_id}/claims/",
     auth=django_auth,
     response={200: GameplayFeatureDetailSchema, 422: ValidationErrorSchema},
     tags=["private"],
 )
 def patch_gameplay_feature_claims(
-    request: HttpRequest, slug: str, data: HierarchyClaimPatchSchema
+    request: HttpRequest, public_id: str, data: HierarchyClaimPatchSchema
 ) -> GameplayFeatureDetailSchema:
     """Assert per-field claims from the authenticated user, then re-resolve."""
     if not data.fields and data.parents is None and data.aliases is None:
         raise_form_error("No changes provided.")
 
-    feature = get_object_or_404(GameplayFeature.objects.active(), slug=slug)
+    feature = get_object_or_404(
+        GameplayFeature.objects.active(),
+        **{GameplayFeature.public_id_field: public_id},
+    )
 
     specs = validate_scalar_fields(GameplayFeature, data.fields, entity=feature)
 

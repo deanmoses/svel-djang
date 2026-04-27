@@ -13,6 +13,8 @@ export type DeleteResponse = TitleDeleteResponseSchema;
 
 export type { DeleteOutcome } from '$lib/delete-flow';
 
-export const submitDelete = createDeleteSubmitter<DeleteResponse>('/api/titles/{slug}/delete/');
+export const submitDelete = createDeleteSubmitter<DeleteResponse>(
+  '/api/titles/{public_id}/delete/',
+);
 
 export { submitUndoDelete, type UndoOutcome } from '$lib/undo-delete';

@@ -44,7 +44,7 @@
       sectionKey={key}
       initialData={profile}
       slug={profile.slug}
-      claimsPath={'/api/gameplay-features/{slug}/claims/'}
+      claimsPath={'/api/gameplay-features/{public_id}/claims/'}
       parentOptionsLoader={loadParentOptions}
       parentsLabel="This feature is a type of..."
       bind:editorRef={ref.current}

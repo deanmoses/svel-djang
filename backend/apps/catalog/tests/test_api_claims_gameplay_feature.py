@@ -1,4 +1,4 @@
-"""Tests for PATCH /api/gameplay-features/{slug}/claims/."""
+"""Tests for PATCH /api/gameplay-features/{public_id}/claims/."""
 
 import json
 

@@ -7,7 +7,12 @@ from typing import ClassVar
 from django.db import models
 from django.db.models.functions import Lower, Now
 
-from apps.core.models import EntityStatusMixin, field_not_blank, status_valid
+from apps.core.models import (
+    EntityStatusMixin,
+    LinkableModel,
+    field_not_blank,
+    status_valid,
+)
 from apps.core.validators import validate_no_mojibake
 from apps.provenance.models import ClaimControlledModel
 
@@ -20,7 +25,7 @@ __all__ = [
 ]
 
 
-class Location(EntityStatusMixin, ClaimControlledModel):
+class Location(EntityStatusMixin, ClaimControlledModel, LinkableModel):
     """A canonical geographic location at any level of the hierarchy.
 
     The hierarchy is self-referential: a city's parent is its subdivision,
@@ -31,6 +36,19 @@ class Location(EntityStatusMixin, ClaimControlledModel):
     All display fields (name, location_type, code, description, divisions)
     are claim-controlled — pindata is the authoritative source.
     """
+
+    entity_type: ClassVar[str] = "location"
+    entity_type_plural: ClassVar[str] = "locations"
+    # Location's slug is non-unique (only unique within parent); the
+    # globally-unique URL identity lives on ``location_path``.
+    public_id_field: ClassVar[str] = "location_path"
+    # Suppress Location from the wikilink-picker autocomplete until
+    # WikilinkableModel (see ModelDrivenWikilinkableMetadata.md) makes
+    # picker presentation an explicit opt-in. Existing ``[[location:...]]``
+    # references still render — only authoring through the picker is gated.
+    # ``link_autocomplete_serialize = None`` makes the picker filter in
+    # ``apps.core.markdown_links.get_autocomplete_types`` exclude this type.
+    link_autocomplete_serialize: ClassVar[None] = None
 
     claims_exempt: ClassVar[frozenset[str]] = frozenset({"location_path"})
     claim_fk_lookups: ClassVar[dict[str, str]] = {"parent": "location_path"}

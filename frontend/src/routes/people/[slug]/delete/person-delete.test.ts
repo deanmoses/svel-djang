@@ -22,15 +22,15 @@ describe('person submitDelete', () => {
   // smoke test only verifies that person-delete.ts points the factory at
   // the right endpoint and that the person-specific 422 extras surface on
   // ``outcome.extra``.
-  it('posts to /api/people/{slug}/delete/', async () => {
+  it('posts to /api/people/{public_id}/delete/', async () => {
     POST.mockResolvedValue({
       data: { changeset_id: 42, affected_slugs: ['pat-lawlor'] },
       error: undefined,
       response: new Response(null, { status: 200 }),
     });
     const out = await submitDelete('pat-lawlor');
-    expect(POST).toHaveBeenCalledWith('/api/people/{slug}/delete/', expect.anything());
-    expect(POST.mock.calls[0][1].params.path.slug).toBe('pat-lawlor');
+    expect(POST).toHaveBeenCalledWith('/api/people/{public_id}/delete/', expect.anything());
+    expect(POST.mock.calls[0][1].params.path.public_id).toBe('pat-lawlor');
     expect(out.kind).toBe('ok');
   });
 

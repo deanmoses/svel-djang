@@ -8,5 +8,5 @@
 <SimpleTaxonomyEditSectionPage
   {profile}
   basePath="/reward-types"
-  claimsPath={'/api/reward-types/{slug}/claims/'}
+  claimsPath={'/api/reward-types/{public_id}/claims/'}
 />

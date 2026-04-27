@@ -20,9 +20,12 @@ export async function loadEditHistory(
   slug: string,
 ) {
   const client = createServerClient(event.fetch, event.url);
-  const { data, response } = await client.GET('/api/pages/edit-history/{entity_type}/{slug}/', {
-    params: { path: { entity_type: entityType, slug } },
-  });
+  const { data, response } = await client.GET(
+    '/api/pages/edit-history/{entity_type}/{public_id}/',
+    {
+      params: { path: { entity_type: entityType, public_id: slug } },
+    },
+  );
 
   if (!data) {
     throw error(response.status || 500, 'Failed to load edit history');
@@ -33,8 +36,8 @@ export async function loadEditHistory(
 
 export async function loadSources(event: LoadEvent, entityType: CatalogEntityKey, slug: string) {
   const client = createServerClient(event.fetch, event.url);
-  const { data, response } = await client.GET('/api/pages/sources/{entity_type}/{slug}/', {
-    params: { path: { entity_type: entityType, slug } },
+  const { data, response } = await client.GET('/api/pages/sources/{entity_type}/{public_id}/', {
+    params: { path: { entity_type: entityType, public_id: slug } },
   });
 
   if (!data) {

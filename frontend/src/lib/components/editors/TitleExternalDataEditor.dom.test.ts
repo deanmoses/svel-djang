@@ -64,7 +64,7 @@ describe('TitleExternalDataEditor dirty-state contract', () => {
     expect(screen.getByTestId('dirty-handle')).toHaveTextContent('true');
   });
 
-  it('PATCHes /api/titles/{slug}/claims/ with only the changed field', async () => {
+  it('PATCHes /api/titles/{public_id}/claims/ with only the changed field', async () => {
     const user = userEvent.setup();
     PATCH.mockResolvedValue({ data: {}, error: undefined });
     invalidateAll.mockResolvedValue(undefined);
@@ -79,8 +79,8 @@ describe('TitleExternalDataEditor dirty-state contract', () => {
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
     expect(PATCH).toHaveBeenCalledOnce();
-    expect(PATCH).toHaveBeenCalledWith('/api/titles/{slug}/claims/', {
-      params: { path: { slug: 'addams-family' } },
+    expect(PATCH).toHaveBeenCalledWith('/api/titles/{public_id}/claims/', {
+      params: { path: { public_id: 'addams-family' } },
       body: { fields: { opdb_id: 'G9abc' }, note: '' },
     });
   });

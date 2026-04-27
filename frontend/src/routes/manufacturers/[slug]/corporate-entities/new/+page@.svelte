@@ -9,8 +9,8 @@
   entityLabel="Corporate Entity"
   initialName={data.initialName}
   submit={(body) =>
-    client.POST('/api/manufacturers/{parent_slug}/corporate-entities/', {
-      params: { path: { parent_slug: data.manufacturer.slug } },
+    client.POST('/api/manufacturers/{parent_public_id}/corporate-entities/', {
+      params: { path: { parent_public_id: data.manufacturer.slug } },
       body,
     })}
   detailHref={(slug) => `/corporate-entities/${slug}`}

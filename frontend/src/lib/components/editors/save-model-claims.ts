@@ -41,8 +41,8 @@ export type SectionPatchBody = Partial<
  * Returns `{ ok: true }` on success, or `{ ok: false, error, fieldErrors }` on failure.
  */
 export async function saveModelClaims(slug: string, body: SectionPatchBody): Promise<SaveResult> {
-  const { error } = await client.PATCH('/api/models/{slug}/claims/', {
-    params: { path: { slug } },
+  const { error } = await client.PATCH('/api/models/{public_id}/claims/', {
+    params: { path: { public_id: slug } },
     body: { fields: {}, note: '', ...body },
   });
 

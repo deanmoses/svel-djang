@@ -9,7 +9,7 @@
   {profile}
   parentLabel="Display Types"
   basePath="/display-types"
-  claimsPath={'/api/display-types/{slug}/claims/'}
+  claimsPath={'/api/display-types/{public_id}/claims/'}
   deleteHref={`/display-types/${profile.slug}/delete`}
   createChild={{
     href: `/display-subtypes/new?parent=${profile.slug}`,

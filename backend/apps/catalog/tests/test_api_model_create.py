@@ -1,4 +1,4 @@
-"""Tests for POST /api/titles/{title_slug}/models/.
+"""Tests for POST /api/titles/{title_public_id}/models/.
 
 Model Create mirrors Title Create on the shared ``entity_create`` helpers.
 These tests cover the invariants unique to Model Create — parent Title

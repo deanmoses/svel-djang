@@ -1,4 +1,4 @@
-"""Tests for PATCH /api/models/{slug}/claims/ endpoint."""
+"""Tests for PATCH /api/models/{public_id}/claims/ endpoint."""
 
 import pytest
 from django.contrib.auth import get_user_model

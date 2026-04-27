@@ -50,6 +50,12 @@ export const CATALOG_META = {
     label: 'Gameplay Feature',
     label_plural: 'Gameplay Features',
   },
+  location: {
+    entity_type: 'location',
+    entity_type_plural: 'locations',
+    label: 'Location',
+    label_plural: 'Locations',
+  },
   manufacturer: {
     entity_type: 'manufacturer',
     entity_type_plural: 'manufacturers',

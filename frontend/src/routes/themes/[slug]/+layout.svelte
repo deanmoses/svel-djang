@@ -61,7 +61,7 @@
       sectionKey={key}
       initialData={theme}
       slug={theme.slug}
-      claimsPath={'/api/themes/{slug}/claims/'}
+      claimsPath={'/api/themes/{public_id}/claims/'}
       parentOptionsLoader={loadParentOptions}
       bind:editorRef={ref.current}
       {onsaved}

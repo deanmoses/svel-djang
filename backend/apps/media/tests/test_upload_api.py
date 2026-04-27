@@ -100,7 +100,7 @@ def _post_upload(client, machine_model, file=None, **extra):
     data = {
         "file": file,
         "entity_type": "model",
-        "slug": machine_model.slug,
+        "public_id": machine_model.public_id,
         "category": "backglass",
         "is_primary": "true",
         **extra,
@@ -194,7 +194,7 @@ class TestUploadHappyPath:
 
         attachment = body["attachment"]
         assert attachment["entity_type"] == "model"
-        assert attachment["slug"] == "test-machine"
+        assert attachment["public_id"] == "test-machine"
         assert attachment["category"] == "backglass"
         assert attachment["is_primary"] is True
 
@@ -236,7 +236,7 @@ class TestUploadValidation:
     def test_no_file(self, client, machine_model):
         data = {
             "entity_type": "model",
-            "slug": machine_model.slug,
+            "public_id": machine_model.public_id,
         }
         resp = client.post(UPLOAD_URL, data)
         assert resp.status_code == 422  # ninja validation error
@@ -291,14 +291,16 @@ class TestUploadValidation:
             machine_model,
             file=file,
             entity_type="title",
-            slug="test-title",
+            public_id="test-title",
         )
         assert resp.status_code == 400
         assert "does not support media" in resp.json()["detail"].lower()
 
     def test_entity_not_found(self, client, machine_model):
         file = _create_test_image()
-        resp = _post_upload(client, machine_model, file=file, slug="nonexistent-slug")
+        resp = _post_upload(
+            client, machine_model, file=file, public_id="nonexistent-slug"
+        )
         assert resp.status_code == 400
         assert "not found" in resp.json()["detail"].lower()
 
@@ -333,7 +335,7 @@ class TestUploadAuth:
         data = {
             "file": file,
             "entity_type": "model",
-            "slug": machine_model.slug,
+            "public_id": machine_model.public_id,
         }
         resp = anon_client.post(UPLOAD_URL, data)
         assert resp.status_code == 401

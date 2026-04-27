@@ -33,8 +33,8 @@ describe('saveModelClaims', () => {
     });
 
     expect(result).toEqual({ ok: true });
-    expect(PATCH).toHaveBeenCalledWith('/api/models/{slug}/claims/', {
-      params: { path: { slug: 'medieval-madness' } },
+    expect(PATCH).toHaveBeenCalledWith('/api/models/{public_id}/claims/', {
+      params: { path: { public_id: 'medieval-madness' } },
       body: { fields: { description: 'new text' }, note: '' },
     });
     expect(invalidateAll).toHaveBeenCalledOnce();
@@ -134,8 +134,8 @@ describe('saveModelClaims', () => {
     const credits = [{ person_slug: 'pat-lawlor', role: 'game-design' }];
     await saveModelClaims('medieval-madness', { credits });
 
-    expect(PATCH).toHaveBeenCalledWith('/api/models/{slug}/claims/', {
-      params: { path: { slug: 'medieval-madness' } },
+    expect(PATCH).toHaveBeenCalledWith('/api/models/{public_id}/claims/', {
+      params: { path: { public_id: 'medieval-madness' } },
       body: { fields: {}, note: '', credits },
     });
   });
@@ -149,8 +149,8 @@ describe('saveModelClaims', () => {
       note: 'Corrected per IPDB',
     });
 
-    expect(PATCH).toHaveBeenCalledWith('/api/models/{slug}/claims/', {
-      params: { path: { slug: 'medieval-madness' } },
+    expect(PATCH).toHaveBeenCalledWith('/api/models/{public_id}/claims/', {
+      params: { path: { public_id: 'medieval-madness' } },
       body: { fields: { year: 1997 }, note: 'Corrected per IPDB' },
     });
   });
@@ -165,8 +165,8 @@ describe('saveModelClaims', () => {
       citation,
     });
 
-    expect(PATCH).toHaveBeenCalledWith('/api/models/{slug}/claims/', {
-      params: { path: { slug: 'medieval-madness' } },
+    expect(PATCH).toHaveBeenCalledWith('/api/models/{public_id}/claims/', {
+      params: { path: { public_id: 'medieval-madness' } },
       body: { fields: { year: 1997 }, note: '', citation },
     });
   });
