@@ -30,6 +30,7 @@ from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Q
 
+from apps.core.models import RecordReference, get_markdown_fields
 from apps.core.schemas import LinkTargetSchema
 
 
@@ -505,8 +506,6 @@ def sync_references(source: models.Model, content: str) -> None:
     """
     from django.contrib.contenttypes.models import ContentType
 
-    from apps.core.models import RecordReference
-
     content = content or ""
 
     # Parse all link IDs from content using registered patterns
@@ -604,8 +603,6 @@ def prepare_markdown_claim_value(
     Raises :exc:`~django.core.exceptions.ValidationError` if any linked
     targets don't exist.
     """
-    from apps.core.models import get_markdown_fields
-
     if (
         isinstance(value, str)
         and value

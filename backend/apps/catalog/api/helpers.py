@@ -9,9 +9,7 @@ from django.db.models import Model, Prefetch
 
 from apps.core.licensing import (
     UNKNOWN_LICENSE_RANK,
-    build_source_field_license_map,
     get_minimum_display_rank,
-    resolve_effective_license,
 )
 from apps.core.markdown import render_markdown_field
 from apps.core.markdown_links import convert_storage_to_authoring
@@ -19,6 +17,10 @@ from apps.core.types import JsonData
 from apps.media.models import EntityMedia
 from apps.media.schemas import MediaRenditionsSchema, UploadedMediaSchema
 from apps.media.storage import build_public_url, build_storage_key
+from apps.provenance.licensing import (
+    build_source_field_license_map,
+    resolve_effective_license,
+)
 from apps.provenance.models import Claim
 from apps.provenance.schemas import (
     AttributionSchema,

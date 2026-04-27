@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from constance.signals import config_updated
 from django.db import models
 from django.db.models.signals import post_delete, post_save
 
@@ -15,6 +16,20 @@ def _invalidate_cache(
     **kwargs: Any,  # noqa: ANN401 - Django signal kwargs are framework-owned
 ) -> None:
     invalidate_all()
+
+
+# Constance's config_updated signal passes arbitrary value types (whatever the
+# changed setting holds — str, int, bool, etc.) and reserves the right to add
+# keyword arguments, so this is a framework-owned callback surface.
+def _invalidate_cache_on_policy_change(
+    sender: Any,  # noqa: ANN401 — constance signal sender
+    key: str,
+    old_value: Any,  # noqa: ANN401 — constance setting value, arbitrary type
+    new_value: Any,  # noqa: ANN401 — constance setting value, arbitrary type
+    **kwargs: Any,  # noqa: ANN401 — Django signal framework passthrough
+) -> None:
+    if key == "CONTENT_DISPLAY_POLICY":
+        invalidate_all()
 
 
 def _cache_invalidating_models() -> list[type[models.Model]]:
@@ -53,3 +68,7 @@ def connect() -> None:
         post_delete.connect(
             _invalidate_cache, sender=model, dispatch_uid=f"{uid}_delete"
         )
+    config_updated.connect(
+        _invalidate_cache_on_policy_change,
+        dispatch_uid="invalidate_cache_on_content_display_policy",
+    )

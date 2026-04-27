@@ -13,6 +13,9 @@ from django.db import models
 from django.utils.safestring import mark_safe
 from markdown_it import MarkdownIt
 
+from apps.core.markdown_links import render_all_links
+from apps.core.models import get_markdown_fields
+
 # CommonMark-compliant markdown parser.
 # - linkify: auto-link bare URLs during parsing (structure-aware, won't
 #   linkify inside code blocks or existing links)
@@ -153,8 +156,6 @@ def render_markdown_html(
     if not text:
         return ""
     # Convert [[type:ref]] links to markdown links (before markdown processing)
-    from apps.core.markdown_links import render_all_links
-
     text = render_all_links(text, metadata_out=metadata_out)
     # Convert markdown to HTML (bare URLs are auto-linked during parsing)
     html = _md.render(text)
@@ -203,8 +204,6 @@ def render_markdown_fields(
             **render_markdown_fields(obj),
         }
     """
-    from apps.core.models import get_markdown_fields
-
     result: dict[str, str | list[dict[str, Any]]] = {}
     for field_name in get_markdown_fields(type(obj)):
         citations: list[dict[str, Any]] = []
