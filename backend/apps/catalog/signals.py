@@ -37,7 +37,7 @@ def _cache_invalidating_models() -> list[type[models.Model]]:
 
     Walks the catalog app registry for concrete ``CatalogModel`` subclasses,
     then appends explicit extras: ``Location`` (a catalog entity that predates
-    the ``CatalogModel`` base and inherits only ``EntityStatusMixin``) and the
+    the ``CatalogModel`` base and inherits only ``LifecycleStatusModel``) and the
     two through-rows (``CorporateEntityLocation``, ``Credit``) that surface in
     cached ``/all/`` payloads but aren't top-level entities.
     """
@@ -53,7 +53,7 @@ def _cache_invalidating_models() -> list[type[models.Model]]:
     ]
     extras: list[type[models.Model]] = [Location, CorporateEntityLocation, Credit]
     # Not covered here: MachineModel* through-rows (MachineModelTheme, etc.)
-    # and AliasBase subclasses. Those are written by the claims resolver,
+    # and AliasModel subclasses. Those are written by the claims resolver,
     # which calls invalidate_all() directly via transaction.on_commit (see
     # resolve/_dispatch.py). Direct edits outside the claims pipeline would
     # bypass this signal, but that's a policy violation, not a missed path.

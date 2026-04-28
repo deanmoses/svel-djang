@@ -10,7 +10,7 @@ from typing import NamedTuple, cast
 from django.contrib.contenttypes.models import ContentType
 
 from apps.core.types import ClaimIdentity, EntityKey
-from apps.media.models import EntityMedia, MediaAsset, MediaSupported
+from apps.media.models import EntityMedia, MediaAsset, MediaSupportedModel
 from apps.provenance.models import Claim
 from apps.provenance.typing import HasEffectivePriority
 
@@ -106,7 +106,7 @@ def resolve_media_attachments(
             ct = ContentType.objects.get_for_id(ct_id)
             model_class = ct.model_class()
             is_supported = model_class is not None and issubclass(
-                model_class, MediaSupported
+                model_class, MediaSupportedModel
             )
             categories = (
                 cast(list[str], getattr(model_class, "MEDIA_CATEGORIES", []))
@@ -131,7 +131,7 @@ def resolve_media_attachments(
 
         if not ct_info.is_media_supported:
             logger.warning(
-                "media_attachment claim on non-MediaSupported entity "
+                "media_attachment claim on non-media-supported entity "
                 "(content_type_id=%s, object_id=%s) — skipping",
                 entity_key.content_type_id,
                 entity_key.object_id,

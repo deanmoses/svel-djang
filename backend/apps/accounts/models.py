@@ -1,9 +1,10 @@
 from django.conf import settings
 from django.db import models
-from django.db.models.functions import Now
+
+from apps.core.models import TimeStampedModel
 
 
-class UserProfile(models.Model):
+class UserProfile(TimeStampedModel):
     """Extended profile for each user, tracking contributor priority and metadata."""
 
     user = models.OneToOneField(
@@ -23,7 +24,6 @@ class UserProfile(models.Model):
         default=10000,
         help_text="Claim priority for conflict resolution. Higher beats lower.",
     )
-    created_at = models.DateTimeField(auto_now_add=True, db_default=Now())
 
     class Meta:
         verbose_name = "User Profile"

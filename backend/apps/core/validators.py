@@ -7,6 +7,7 @@ from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.db.models import Field, Model
+from django.utils import timezone
 
 
 def bulk_create_validated[M: Model](
@@ -36,6 +37,25 @@ def bulk_create_validated[M: Model](
                 value = getattr(obj, field.attname, None)
                 if value:
                     validate_no_mojibake(value)
+
+    # Django's auto_now does not fire during bulk_create, so refresh
+    # updated_at manually on TimeStampedModel descendants. When
+    # update_conflicts is in use, also ensure the column is in update_fields
+    # so existing rows get the new value written back.
+    from apps.core.models import TimeStampedModel  # avoid circular import
+
+    if issubclass(model, TimeStampedModel):
+        now = timezone.now()
+        for obj in objs:
+            assert isinstance(obj, TimeStampedModel)
+            obj.updated_at = now
+        if (
+            update_conflicts
+            and update_fields is not None
+            and "updated_at" not in update_fields
+        ):
+            update_fields = [*update_fields, "updated_at"]
+
     return model._default_manager.bulk_create(
         objs,
         batch_size=batch_size,

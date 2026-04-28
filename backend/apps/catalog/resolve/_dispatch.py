@@ -203,9 +203,9 @@ def _resolve_non_machine_model(
                 _call_custom_resolver(custom_spec, entity.pk)
 
     # --- Media attachments ---
-    from apps.media.models import MediaSupported
+    from apps.media.models import MediaSupportedModel
 
-    if isinstance(entity, MediaSupported) and (
+    if isinstance(entity, MediaSupportedModel) and (
         rel_fields is None or "media_attachment" in rel_fields
     ):
         from django.contrib.contenttypes.models import ContentType

@@ -99,7 +99,7 @@ def _resolve_alias_relation(
     """Return ``(alias_model, parent_fk_name)`` if *model_cls* exposes an
     ``aliases`` reverse manager, else ``None``.
 
-    Catalog alias models inherit from :class:`apps.catalog.models.AliasBase`
+    Catalog alias models inherit from :class:`apps.catalog.models.AliasModel`
     (value column + ``related_name="aliases"`` on the parent FK). Using
     ``_meta.related_objects`` instead of ``getattr`` on the class keeps
     the lookup robust across model reloads and avoids hardcoding FK

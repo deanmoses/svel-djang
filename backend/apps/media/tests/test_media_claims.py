@@ -115,7 +115,7 @@ class TestBuildMediaAttachmentClaim:
             )
 
     def test_non_media_supported_entity_raises(self, db, asset):
-        """Theme does not inherit MediaSupported — rejected."""
+        """Theme does not inherit MediaSupportedModel — rejected."""
         from apps.catalog.models import Theme
 
         theme = Theme.objects.create(name="Test Theme", slug="test-theme")
@@ -638,7 +638,7 @@ class TestResolverValidation:
         assert EntityMedia.objects.count() == 0
 
     def test_non_media_supported_entity_rejected(self, db, asset, source):
-        """Writing a ``media_attachment`` claim on a non-MediaSupported entity
+        """Writing a ``media_attachment`` claim on a non-MediaSupportedModel entity
         is rejected at the write path, not silently ignored at resolve time."""
         from django.core.exceptions import ValidationError
 

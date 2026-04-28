@@ -5,8 +5,8 @@ continues to work unchanged.
 """
 
 from .asset import MediaAsset
-from .base import MediaSupported
+from .base import MediaSupportedModel
 from .entity import EntityMedia
 from .rendition import MediaRendition
 
-__all__ = ["EntityMedia", "MediaAsset", "MediaRendition", "MediaSupported"]
+__all__ = ["EntityMedia", "MediaAsset", "MediaRendition", "MediaSupportedModel"]

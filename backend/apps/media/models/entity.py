@@ -10,7 +10,7 @@ from django.db import models
 from apps.core.models import TimeStampedModel
 
 from .asset import MediaAsset
-from .base import MediaSupported
+from .base import MediaSupportedModel
 
 
 class EntityMedia(TimeStampedModel):
@@ -74,7 +74,7 @@ class EntityMedia(TimeStampedModel):
 
     def clean(self) -> None:
         model_class = self.content_type.model_class()
-        if model_class is None or not issubclass(model_class, MediaSupported):
+        if model_class is None or not issubclass(model_class, MediaSupportedModel):
             raise ValidationError(
                 {
                     "content_type": f"Media attachments are not supported for {self.content_type}."

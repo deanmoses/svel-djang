@@ -17,7 +17,7 @@ from apps.core.models import (
 )
 from apps.core.validators import validate_no_mojibake
 
-from .base import AliasBase, CatalogModel
+from .base import AliasModel, CatalogModel
 
 __all__ = ["MachineModelTheme", "Theme", "ThemeAlias"]
 
@@ -81,14 +81,14 @@ class MachineModelTheme(TimeStampedModel):
         return f"{self.machinemodel} → {self.theme}"
 
 
-class ThemeAlias(AliasBase):
+class ThemeAlias(AliasModel, TimeStampedModel):
     """An alternate name for a Theme, used for matching/search."""
 
     alias_claim_field = "theme_alias"
 
     theme = models.ForeignKey(Theme, on_delete=models.CASCADE, related_name="aliases")
 
-    class Meta(AliasBase.Meta):
+    class Meta(AliasModel.Meta):
         constraints = [
             field_not_blank("value"),
             models.UniqueConstraint(

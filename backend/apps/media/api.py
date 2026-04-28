@@ -29,7 +29,12 @@ from apps.media.constants import (
     MAX_UPLOADS_PER_HOUR,
     THUMB_MAX_DIMENSION,
 )
-from apps.media.models import EntityMedia, MediaAsset, MediaRendition, MediaSupported
+from apps.media.models import (
+    EntityMedia,
+    MediaAsset,
+    MediaRendition,
+    MediaSupportedModel,
+)
 from apps.media.processing import (
     InvalidImageError,
     check_codec_support,
@@ -94,7 +99,7 @@ def _incr_rate_limit(user_id: int) -> None:
 
 def _resolve_entity(
     entity_type: str, public_id: str
-) -> tuple[ContentType, MediaSupported]:
+) -> tuple[ContentType, MediaSupportedModel]:
     """Resolve ``(entity_type, public_id)`` to ``(ContentType, entity instance)``.
 
     ``entity_type`` is the canonical hyphenated public identifier declared
@@ -110,10 +115,10 @@ def _resolve_entity(
     except ValueError:
         raise HttpError(404, f"Unknown entity_type '{entity_type}'.") from None
 
-    if not issubclass(model_class, MediaSupported):
+    if not issubclass(model_class, MediaSupportedModel):
         raise HttpError(400, f"{entity_type} does not support media attachments.")
 
-    # `_default_manager` rather than `.objects`: `type[<LinkableModel & MediaSupported>]`
+    # `_default_manager` rather than `.objects`: `type[<LinkableModel & MediaSupportedModel>]`
     # is an abstract intersection, and `.objects` is attached only to concrete
     # subclasses by Django's metaclass. (Introspection idiom.)
     entity = model_class._default_manager.filter(

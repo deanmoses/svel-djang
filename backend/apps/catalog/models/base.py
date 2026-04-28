@@ -1,4 +1,4 @@
-"""CatalogModel and AliasBase abstract bases for catalog entities."""
+"""CatalogModel and AliasModel abstract bases for catalog entities."""
 
 from __future__ import annotations
 
@@ -8,16 +8,15 @@ from django.db import models
 
 from apps.core.models import (
     CatalogManager,
-    EntityStatusMixin,
+    LifecycleStatusModel,
     LinkableModel,
-    TimeStampedModel,
 )
 from apps.provenance.models import ClaimControlledModel
 
-__all__ = ["AliasBase", "CatalogModel"]
+__all__ = ["AliasModel", "CatalogModel"]
 
 
-class AliasBase(TimeStampedModel):
+class AliasModel(models.Model):
     """Abstract base for alias lookup models.
 
     Alias values are stored and compared in lowercase (matching the
@@ -30,13 +29,19 @@ class AliasBase(TimeStampedModel):
     - ``alias_claim_field``: the claim namespace on the parent that carries
       alias values (e.g. ``"theme_alias"``). Enforced at class creation
       via ``__init_subclass__``; read by ``discover_alias_types``.
+
+    ``AliasModel`` does not bundle ``TimeStampedModel``. Row-level
+    timestamps are an independent choice per subclass — the meaningful
+    "when was this asserted" lives on the originating claim, not on the
+    alias row. Existing concrete aliases all inherit ``TimeStampedModel``
+    by convention, but a future alias subclass could opt out.
     """
 
     alias_claim_field: ClassVar[str]
 
     value = models.CharField(max_length=200)
 
-    class Meta(TimeStampedModel.Meta):
+    class Meta:
         abstract = True
         ordering = ["value"]
 
@@ -44,7 +49,7 @@ class AliasBase(TimeStampedModel):
         # NB: we can't gate on ``cls._meta.abstract`` here — Django's ModelBase
         # runs ``__init_subclass__`` with ``abstract`` still inherited as True
         # from the parent, then rewrites it to False for concrete subclasses
-        # later. So this check runs for every AliasBase subclass, concrete or
+        # later. So this check runs for every AliasModel subclass, concrete or
         # not. That's fine: any abstract intermediate can just declare
         # ``alias_claim_field`` for its concrete descendants to inherit.
         super().__init_subclass__(**kwargs)
@@ -58,11 +63,11 @@ class AliasBase(TimeStampedModel):
         return self.value
 
 
-class CatalogModel(LinkableModel, EntityStatusMixin, ClaimControlledModel):
+class CatalogModel(LinkableModel, LifecycleStatusModel, ClaimControlledModel):
     """Abstract marker for top-level catalog entities.
 
     Combines URL-addressability (``LinkableModel``), claim-controlled
-    lifecycle status (``EntityStatusMixin``), and claim-driven display
+    lifecycle status (``LifecycleStatusModel``), and claim-driven display
     fields (``ClaimControlledModel``). Used to distinguish catalog-specific
     code paths (e.g. ``ingest_pinbase``, soft-delete wire format) that must
     not widen to other ``LinkableModel`` subclasses.
@@ -74,15 +79,16 @@ class CatalogModel(LinkableModel, EntityStatusMixin, ClaimControlledModel):
     defines its own ``Meta``.
     """
 
-    # Re-declare ``objects`` here (originally on ``EntityStatusMixin``) so
+    # Re-declare ``objects`` here (originally on ``LifecycleStatusModel``) so
     # ``Self`` rebinds at the catalog level. Without this, mypy resolves
     # ``model_cls.objects.active()`` (where ``model_cls: type[ModelT:
     # CatalogModel]``) by walking the type bound and binds ``Self`` to
-    # ``EntityStatusMixin`` — the class where the descriptor is declared —
+    # ``LifecycleStatusModel`` — the class where the descriptor is declared —
     # rather than ``ModelT``. Runtime is unaffected: same ``CatalogManager``
     # class, Django's ManagerDescriptor rebinds per concrete model anyway.
-    # ``EntityStatusMixin.objects`` stays put so ``Location`` (which uses
-    # the mixin without ``CatalogModel``) keeps its ``.active()`` queryset.
+    # ``LifecycleStatusModel.objects`` stays put so ``Location`` (which uses
+    # ``LifecycleStatusModel`` without ``CatalogModel``) keeps its ``.active()``
+    # queryset.
     objects: ClassVar[CatalogManager[Self]] = CatalogManager()
 
     class Meta:

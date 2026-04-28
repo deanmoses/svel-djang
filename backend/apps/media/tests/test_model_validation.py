@@ -50,7 +50,7 @@ def asset(user):
 
 class TestEntityMediaContentTypeValidation:
     def test_supported_content_type_accepted(self, asset):
-        """MachineModel is MediaSupported, so EntityMedia.clean() passes."""
+        """MachineModel is MediaSupportedModel, so EntityMedia.clean() passes."""
         from apps.catalog.models import MachineModel
 
         ct = ContentType.objects.get_for_model(MachineModel)
@@ -58,7 +58,7 @@ class TestEntityMediaContentTypeValidation:
         em.clean()  # should not raise
 
     def test_unsupported_content_type_rejected(self, asset):
-        """User is not MediaSupported, so EntityMedia.clean() raises."""
+        """User is not MediaSupportedModel, so EntityMedia.clean() raises."""
         ct = ContentType.objects.get_for_model(User)
         em = EntityMedia(asset=asset, content_type=ct, object_id=1)
         with pytest.raises(ValidationError) as exc_info:

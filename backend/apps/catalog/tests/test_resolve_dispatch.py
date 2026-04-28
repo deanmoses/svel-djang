@@ -77,25 +77,25 @@ class TestDiscoverAliasTypes:
         assert set(discover_alias_types()) == expected
 
     def test_subclass_without_alias_claim_field_fails_at_creation(self):
-        """AliasBase.__init_subclass__ must fire at class definition, not
+        """AliasModel.__init_subclass__ must fire at class definition, not
         defer to discovery. Regression guard: ``_meta.abstract`` is unreliable
         inside ``__init_subclass__`` (Django rewrites it post-hoc), and a
         previous version's abstract short-circuit silently skipped the check.
         """
         from django.db import models
 
-        from apps.catalog.models import AliasBase
+        from apps.catalog.models import AliasModel
 
         with pytest.raises(TypeError, match="alias_claim_field"):
 
-            class BrokenAlias(AliasBase):
+            class BrokenAlias(AliasModel):
                 theme = models.ForeignKey(
                     Theme,
                     on_delete=models.CASCADE,
                     related_name="broken_aliases_test",
                 )
 
-                class Meta(AliasBase.Meta):
+                class Meta(AliasModel.Meta):
                     app_label = "catalog"
 
 

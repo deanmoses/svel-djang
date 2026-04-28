@@ -2,7 +2,7 @@
 
 The walker is deliberately decoupled from any specific entity type — it
 classifies each incoming FK by ``on_delete`` and the presence of
-``EntityStatusMixin`` on the referrer. These tests exercise that logic
+``LifecycleStatusModel`` on the referrer. These tests exercise that logic
 through Title and MachineModel because they're the first real callers.
 """
 

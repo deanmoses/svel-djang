@@ -17,9 +17,9 @@ from apps.core.models import (
     status_valid,
 )
 from apps.core.validators import validate_no_mojibake
-from apps.media.models import MediaSupported
+from apps.media.models import MediaSupportedModel
 
-from .base import AliasBase, CatalogModel
+from .base import AliasModel, CatalogModel
 
 __all__ = [
     "CorporateEntity",
@@ -35,7 +35,7 @@ EXTERNAL_ID_MIN = 1
 class Manufacturer(
     CatalogModel,
     SluggedModel,
-    MediaSupported,
+    MediaSupportedModel,
     TimeStampedModel,
 ):
     """A pinball machine brand (user-facing grouping).
@@ -104,7 +104,7 @@ class Manufacturer(
         return self.name
 
 
-class ManufacturerAlias(AliasBase):
+class ManufacturerAlias(AliasModel, TimeStampedModel):
     """An alternate name for a Manufacturer, used to match alternative spellings
     from external sources.
     """
@@ -115,7 +115,7 @@ class ManufacturerAlias(AliasBase):
         Manufacturer, on_delete=models.CASCADE, related_name="aliases"
     )
 
-    class Meta(AliasBase.Meta):
+    class Meta(AliasModel.Meta):
         constraints = [
             field_not_blank("value"),
             models.UniqueConstraint(
@@ -213,7 +213,7 @@ class CorporateEntity(
         return self.name
 
 
-class CorporateEntityAlias(AliasBase):
+class CorporateEntityAlias(AliasModel, TimeStampedModel):
     """An alternate name for a CorporateEntity, used to match alternative spellings
     from external sources.
     """
@@ -224,7 +224,7 @@ class CorporateEntityAlias(AliasBase):
         CorporateEntity, on_delete=models.CASCADE, related_name="aliases"
     )
 
-    class Meta(AliasBase.Meta):
+    class Meta(AliasModel.Meta):
         constraints = [
             field_not_blank("value"),
             models.UniqueConstraint(

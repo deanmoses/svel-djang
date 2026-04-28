@@ -16,11 +16,11 @@ class ClaimControlledModel(models.Model):
     Declares the reverse-accessor to provenance claims and the typed ``slug``
     / ``name`` shape that claim-resolver helpers read generically.  Does NOT
     imply URL-addressability, globally-unique slugs, or status tracking —
-    those are ``LinkableModel`` / ``SluggedModel`` / ``EntityStatusMixin``
+    those are ``LinkableModel`` / ``SluggedModel`` / ``LifecycleStatusModel``
     concerns and are layered in independently at the concrete class.
 
     **Diamond-inheritance constraint — do not weaken without refactoring.**
-    Concrete catalog models combine ``CatalogModel`` and ``MediaSupported``,
+    Concrete catalog models combine ``CatalogModel`` and ``MediaSupportedModel``,
     both of which extend ``ClaimControlledModel``, so this class is reached
     via two abstract paths.  The diamond is safe today only because every
     name-bearing thing here is either a ``GenericRelation`` (routed into

@@ -46,7 +46,7 @@ def search_link_targets(
 
     model = lt.get_model()
 
-    # Use .active() when available (EntityStatusMixin models) to exclude
+    # Use .active() when available (LifecycleStatusModel models) to exclude
     # soft-deleted entities; fall back to .all() for models without it.
     qs = (
         model.objects.active()

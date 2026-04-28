@@ -36,7 +36,7 @@ When the user selects multiple files, the frontend sends one request per file co
 
 ## Adding a New Entity
 
-Adding media support to a new entity type is ~20 lines of wiring across backend and frontend. Inherit the `MediaSupported` mixin, set `MEDIA_CATEGORIES` on the model, add a `GenericRelation`, and wire the existing shared helpers into the entity's API and UI. No new resolver code, no new claim logic, no new storage code.
+Adding media support to a new entity type is ~20 lines of wiring across backend and frontend. Inherit the `MediaSupportedModel` mixin, set `MEDIA_CATEGORIES` on the model, add a `GenericRelation`, and wire the existing shared helpers into the entity's API and UI. No new resolver code, no new claim logic, no new storage code.
 
 ## Follow-Up Work
 

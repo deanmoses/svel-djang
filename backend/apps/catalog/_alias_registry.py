@@ -1,4 +1,4 @@
-"""Alias-type discovery from AliasBase subclasses.
+"""Alias-type discovery from AliasModel subclasses.
 
 Catalog-private. Lives in its own module so ``claims.py`` and ``resolve/``
 can both import it without creating a cycle between them.
@@ -13,11 +13,11 @@ from django.apps import apps
 
 from apps.provenance.models import ClaimControlledModel
 
-from .models import AliasBase
+from .models import AliasModel
 
 
 class AliasType(NamedTuple):
-    """A discovered ``AliasBase`` subclass and the claim field that holds its aliases."""
+    """A discovered ``AliasModel`` subclass and the claim field that holds its aliases."""
 
     parent_model: type[ClaimControlledModel]
     claim_field: str
@@ -25,21 +25,21 @@ class AliasType(NamedTuple):
 
 @functools.lru_cache(maxsize=1)
 def discover_alias_types() -> tuple[AliasType, ...]:
-    """Return an ``AliasType`` per ``AliasBase`` subclass.
+    """Return an ``AliasType`` per ``AliasModel`` subclass.
 
     Must be called after Django's models are loaded. The
     ``@functools.lru_cache(maxsize=1)`` decorator pins the first result,
     so this is both a discovery walk and a process-lifetime cache.
 
     Subclasses are guaranteed to declare ``alias_claim_field`` by
-    ``AliasBase.__init_subclass__`` — the validation lives at class
+    ``AliasModel.__init_subclass__`` — the validation lives at class
     creation, not here.
     """
     apps.check_models_ready()
 
     result: list[AliasType] = []
-    for alias_cls in AliasBase.__subclasses__():
-        # Each AliasBase subclass has exactly one FK to its parent model.
+    for alias_cls in AliasModel.__subclasses__():
+        # Each AliasModel subclass has exactly one FK to its parent model.
         fks = [
             f
             for f in alias_cls._meta.get_fields()

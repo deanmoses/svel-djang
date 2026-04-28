@@ -280,9 +280,9 @@ class TestUploadValidation:
         assert "unknown entity_type" in resp.json()["detail"].lower()
 
     def test_entity_type_not_media_supported(self, client, machine_model):
-        """A real catalog model that doesn't inherit MediaSupported."""
+        """A real catalog model that doesn't inherit MediaSupportedModel."""
         file = _create_test_image()
-        # Title exists in catalog but doesn't inherit MediaSupported
+        # Title exists in catalog but doesn't inherit MediaSupportedModel
         from apps.catalog.models import Title
 
         Title.objects.create(name="Test Title", slug="test-title")

@@ -18,9 +18,9 @@ from apps.core.models import (
     status_valid,
 )
 from apps.core.validators import validate_no_mojibake
-from apps.media.models import MediaSupported
+from apps.media.models import MediaSupportedModel
 
-from .base import AliasBase, CatalogModel
+from .base import AliasModel, CatalogModel
 
 __all__ = ["GameplayFeature", "GameplayFeatureAlias", "MachineModelGameplayFeature"]
 
@@ -28,7 +28,7 @@ __all__ = ["GameplayFeature", "GameplayFeatureAlias", "MachineModelGameplayFeatu
 class GameplayFeature(
     CatalogModel,
     SluggedModel,
-    MediaSupported,
+    MediaSupportedModel,
     TimeStampedModel,
 ):
     """A gameplay mechanism: Flippers, Pop Bumpers, Ramps, Multiball, etc.
@@ -102,7 +102,7 @@ class MachineModelGameplayFeature(TimeStampedModel):
         return label
 
 
-class GameplayFeatureAlias(AliasBase):
+class GameplayFeatureAlias(AliasModel, TimeStampedModel):
     """An alternate name for a GameplayFeature, used for matching/search."""
 
     alias_claim_field = "gameplay_feature_alias"
@@ -111,7 +111,7 @@ class GameplayFeatureAlias(AliasBase):
         GameplayFeature, on_delete=models.CASCADE, related_name="aliases"
     )
 
-    class Meta(AliasBase.Meta):
+    class Meta(AliasModel.Meta):
         constraints = [
             field_not_blank("value"),
             models.UniqueConstraint(

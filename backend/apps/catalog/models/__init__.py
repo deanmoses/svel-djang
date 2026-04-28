@@ -4,7 +4,7 @@ The catalog represents the resolved/materialized view of each entity.
 Field values are derived by resolving claims from the provenance layer.
 """
 
-from .base import AliasBase, CatalogModel
+from .base import AliasModel, CatalogModel
 from .gameplay_feature import (
     GameplayFeature,
     GameplayFeatureAlias,

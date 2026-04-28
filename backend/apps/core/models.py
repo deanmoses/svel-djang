@@ -148,11 +148,11 @@ class EntityStatus(models.TextChoices):
     DELETED = "deleted", "Deleted"
 
 
-_CatalogModel = TypeVar("_CatalogModel", bound="EntityStatusMixin")
+_LifecycleModel = TypeVar("_LifecycleModel", bound="LifecycleStatusModel")
 
 
-class CatalogQuerySet(models.QuerySet[_CatalogModel]):
-    def active(self) -> CatalogQuerySet[_CatalogModel]:
+class CatalogQuerySet(models.QuerySet[_LifecycleModel]):
+    def active(self) -> CatalogQuerySet[_LifecycleModel]:
         """Return entities considered live in the catalog.
 
         Includes ``status='active'`` and ``status IS NULL`` (transitional:
@@ -184,12 +184,17 @@ def active_status_q(relation: str) -> models.Q:
     )
 
 
-class EntityStatusMixin(models.Model):
-    """Abstract mixin adding claim-controlled entity lifecycle status.
+class LifecycleStatusModel(models.Model):
+    """Abstract base adding claim-controlled entity lifecycle status.
 
     Add to all independent catalog entity models (not aliases, through
     models, or abbreviations).  Each concrete subclass must also add
     ``status_valid()`` to its ``Meta.constraints``.
+
+    Today the only states are ``active`` and ``deleted`` (soft delete).
+    Future lifecycle states (e.g. ``draft``, ``archived``) belong on the
+    existing ``status`` field, not a parallel field — this class is the
+    designated home for entity lifecycle.
     """
 
     status = models.CharField(
@@ -202,7 +207,7 @@ class EntityStatusMixin(models.Model):
     # `ClassVar[CatalogManager[Self]]` gets us both halves: the custom manager
     # type (so `.active()` is visible) and per-subclass model binding (so
     # `Manufacturer.objects` types as `CatalogManager[Manufacturer]`, not
-    # `CatalogManager[EntityStatusMixin]`). Without `Self`, django-types'
+    # `CatalogManager[LifecycleStatusModel]`). Without `Self`, django-types'
     # default descriptor strips the custom manager class.
     objects: ClassVar[CatalogManager[Self]] = CatalogManager()
 
@@ -251,12 +256,12 @@ def get_markdown_fields(model: type[models.Model]) -> list[str]:
 
 
 # ---------------------------------------------------------------------------
-# LinkableModel mixin (link target registration)
+# LinkableModel (link target registration)
 # ---------------------------------------------------------------------------
 
 
 class LinkableModel(models.Model):
-    """Mixin marking a model as a publicly addressable entity with a canonical identifier.
+    """Abstract base marking a model as a publicly addressable entity with a canonical identifier.
 
     Subclasses must define:
     - name: CharField

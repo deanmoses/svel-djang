@@ -5,18 +5,19 @@ from __future__ import annotations
 from typing import ClassVar
 
 from django.db import models
-from django.db.models.functions import Lower, Now
+from django.db.models.functions import Lower
 
 from apps.core.models import (
-    EntityStatusMixin,
+    LifecycleStatusModel,
     LinkableModel,
+    TimeStampedModel,
     field_not_blank,
     status_valid,
 )
 from apps.core.validators import validate_no_mojibake
 from apps.provenance.models import ClaimControlledModel
 
-from .base import AliasBase
+from .base import AliasModel
 
 __all__ = [
     "CorporateEntityLocation",
@@ -25,7 +26,9 @@ __all__ = [
 ]
 
 
-class Location(EntityStatusMixin, ClaimControlledModel, LinkableModel):
+class Location(
+    LifecycleStatusModel, TimeStampedModel, ClaimControlledModel, LinkableModel
+):
     """A canonical geographic location at any level of the hierarchy.
 
     The hierarchy is self-referential: a city's parent is its subdivision,
@@ -53,8 +56,6 @@ class Location(EntityStatusMixin, ClaimControlledModel, LinkableModel):
     claims_exempt: ClassVar[frozenset[str]] = frozenset({"location_path"})
     claim_fk_lookups: ClassVar[dict[str, str]] = {"parent": "location_path"}
 
-    created_at = models.DateTimeField(auto_now_add=True, db_default=Now())
-    updated_at = models.DateTimeField(auto_now=True)
     location_path = models.CharField(max_length=500, unique=True)
     slug = models.SlugField(max_length=200)
     name = models.CharField(
@@ -102,7 +103,7 @@ class Location(EntityStatusMixin, ClaimControlledModel, LinkableModel):
         return self.name or self.location_path
 
 
-class LocationAlias(AliasBase):
+class LocationAlias(AliasModel, TimeStampedModel):
     """An alternate name for a Location used to match external source strings.
 
     Intentional mojibake aliases exist to match incorrectly encoded strings
@@ -115,7 +116,7 @@ class LocationAlias(AliasBase):
         Location, on_delete=models.CASCADE, related_name="aliases"
     )
 
-    class Meta(AliasBase.Meta):
+    class Meta(AliasModel.Meta):
         constraints = [
             field_not_blank("value"),
             models.UniqueConstraint(
@@ -126,7 +127,7 @@ class LocationAlias(AliasBase):
         ]
 
 
-class CorporateEntityLocation(models.Model):
+class CorporateEntityLocation(TimeStampedModel):
     """Associates a CorporateEntity with a canonical Location.
 
     One-to-many: a CE can have multiple locations.

@@ -17,7 +17,7 @@ rules (see docs/plans/RecordCreateDelete.md §Cascade Behavior):
   this rule is enforced here, at the application layer, because the DB
   can't see ``status=deleted``.
 
-The walker is generic over any entity with ``EntityStatusMixin``. Title is
+The walker is generic over any entity with ``LifecycleStatusModel``. Title is
 the first caller; Model Delete and the rest will plug in by declaring
 ``soft_delete_cascade_relations`` on their models.
 
@@ -43,7 +43,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models as db_models
 
 from apps.catalog.models import CatalogModel
-from apps.core.models import EntityStatusMixin
+from apps.core.models import LifecycleStatusModel
 from apps.provenance.models import ChangeSet, ChangeSetAction
 from apps.provenance.schemas import CitationReferenceInputSchema
 
@@ -96,7 +96,7 @@ class SoftDeletePlan:
 
 
 def _has_status(model_class: type[db_models.Model]) -> bool:
-    return issubclass(model_class, EntityStatusMixin)
+    return issubclass(model_class, LifecycleStatusModel)
 
 
 def _is_active(entity: db_models.Model) -> bool:
@@ -159,7 +159,7 @@ def _iter_protect_referrers(
 ) -> Iterator[tuple[db_models.Model, str]]:
     """Yield ``(referrer, relation_name)`` for active PROTECT referrers.
 
-    Only referrers whose model has ``EntityStatusMixin`` count — PROTECT
+    Only referrers whose model has ``LifecycleStatusModel`` count — PROTECT
     pointers from owned child rows (aliases, through tables, abbreviations)
     are ignored for soft-delete purposes (they ride with the parent).
     """
@@ -206,7 +206,7 @@ def _iter_usage_blockers(
 
     Each manager name must resolve to a reverse manager that supports
     ``.active()`` (i.e. whose remote model is a ``CatalogQuerySet`` user,
-    via ``EntityStatusMixin``). Yielded referrers are always active.
+    via ``LifecycleStatusModel``). Yielded referrers are always active.
     """
     manager_names: Iterable[str] = getattr(
         type(entity), "soft_delete_usage_blockers", frozenset()
@@ -226,7 +226,7 @@ def plan_soft_delete(root: db_models.Model) -> SoftDeletePlan:
     """
     if not _has_status(type(root)):
         raise TypeError(
-            f"{type(root).__name__} does not use EntityStatusMixin; "
+            f"{type(root).__name__} does not use LifecycleStatusModel; "
             "soft-delete planning is not supported."
         )
 

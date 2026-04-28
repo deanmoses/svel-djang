@@ -395,7 +395,7 @@ def create_person(
 def _active_credit_count(person: Person) -> int:
     """Credits pointing to *person* whose parent Model or Series is active.
 
-    Credit has no ``EntityStatusMixin``, so the generic soft-delete walker
+    Credit has no ``LifecycleStatusModel``, so the generic soft-delete walker
     in :mod:`.soft_delete` skips it entirely — owned-child rows are
     normally assumed to ride with their parent's visibility. But a Credit
     is owned by *Model or Series*, not by Person, and from Person's

@@ -58,7 +58,7 @@ def register_catalog_relationship_schemas() -> None:
         Theme,
         Title,
     )
-    from apps.media.models import MediaAsset, MediaSupported
+    from apps.media.models import MediaAsset, MediaSupportedModel
 
     from ._alias_registry import discover_alias_types
 
@@ -203,7 +203,7 @@ def register_catalog_relationship_schemas() -> None:
         valid_subjects={GameplayFeature},
     )
 
-    # Alias namespaces — one schema per AliasBase subclass.
+    # Alias namespaces — one schema per AliasModel subclass.
     for alias_type in discover_alias_types():
         register_relationship_schema(
             namespace=alias_type.claim_field,
@@ -224,7 +224,7 @@ def register_catalog_relationship_schemas() -> None:
         )
 
     # Media attachment — derived at registration by walking all concrete
-    # ``MediaSupported`` subclasses. ``apps.get_models()`` handles transitive
+    # ``MediaSupportedModel`` subclasses. ``apps.get_models()`` handles transitive
     # subclasses that ``__subclasses__()`` would miss if an intermediate
     # abstract base is ever introduced.
     from django.apps import apps as _apps
@@ -232,7 +232,7 @@ def register_catalog_relationship_schemas() -> None:
     media_subjects: set[type[ClaimControlledModel]] = {
         m
         for m in _apps.get_models()
-        if issubclass(m, MediaSupported) and not m._meta.abstract
+        if issubclass(m, MediaSupportedModel) and not m._meta.abstract
     }
     register_relationship_schema(
         namespace="media_attachment",
@@ -333,10 +333,10 @@ def build_media_attachment_claim(
     All code paths that create ``media_attachment`` claims should use this
     helper so that category validation happens exactly once.
     """
-    from apps.media.models import MediaSupported
+    from apps.media.models import MediaSupportedModel
 
     model_class = type(entity)
-    if not issubclass(model_class, MediaSupported):
+    if not issubclass(model_class, MediaSupportedModel):
         raise ValueError(f"{model_class.__name__} does not support media attachments.")
 
     allowed = model_class.MEDIA_CATEGORIES

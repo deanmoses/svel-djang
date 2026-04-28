@@ -18,7 +18,7 @@ from apps.core.models import (
     status_valid,
 )
 from apps.core.validators import validate_no_mojibake
-from apps.media.models import MediaSupported
+from apps.media.models import MediaSupportedModel
 
 from .base import CatalogModel
 
@@ -48,7 +48,7 @@ EXTERNAL_ID_MIN = 1
 class MachineModel(
     CatalogModel,
     SluggedModel,
-    MediaSupported,
+    MediaSupportedModel,
     TimeStampedModel,
 ):
     """A pinball machine title/design — the resolved/materialized view.

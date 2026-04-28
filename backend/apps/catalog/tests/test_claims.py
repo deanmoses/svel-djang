@@ -131,7 +131,7 @@ class TestEagerAliasDiscovery:
 class TestMediaAttachmentValidSubjectsPin:
     """``media_attachment.valid_subjects`` is derived from ``apps.get_models()``.
 
-    Pin the expected set so a new ``MediaSupported`` subclass (or the
+    Pin the expected set so a new ``MediaSupportedModel`` subclass (or the
     removal of an existing one) fails in CI rather than silently drifting.
     Update this test when the set genuinely changes.
     """

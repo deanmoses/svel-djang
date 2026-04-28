@@ -728,7 +728,7 @@ def _resolve_aliases(
 # ---------------------------------------------------------------------------
 # Alias registry — drives resolve_all_aliases() and dispatch
 # ---------------------------------------------------------------------------
-# Auto-discovered from AliasBase subclasses.  Safe to compute at module level
+# Auto-discovered from AliasModel subclasses.  Safe to compute at module level
 # because this module already imports Django models at the top, so the app
 # registry is guaranteed to be ready.  ``ALIAS_TYPES`` is kept as a public
 # binding (same shape as before) so that existing callers — including the

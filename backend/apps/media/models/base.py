@@ -6,15 +6,15 @@ from typing import ClassVar
 
 from apps.provenance.models import ClaimControlledModel
 
-__all__ = ["MediaSupported"]
+__all__ = ["MediaSupportedModel"]
 
 
-class MediaSupported(ClaimControlledModel):
-    """Mixin marking a model as a valid target for media attachments.
+class MediaSupportedModel(ClaimControlledModel):
+    """Abstract base marking a model as a valid target for media attachments.
 
-    Any model that inherits this mixin can have EntityMedia rows pointing
+    Any model that inherits this base can have EntityMedia rows pointing
     at it via GenericFK. EntityMedia.clean() rejects content types that
-    are not MediaSupported.
+    are not MediaSupportedModel.
 
     Subclasses should set ``MEDIA_CATEGORIES`` to the list of allowed
     category strings for that entity type (e.g. ``["backglass", "playfield"]``).
@@ -22,7 +22,7 @@ class MediaSupported(ClaimControlledModel):
 
     Extends ``ClaimControlledModel`` because ``media_attachment`` is itself a
     claim field (see ``apps.catalog.claims.build_media_attachment_claim``):
-    every ``MediaSupported`` entity is by construction a claim subject.  The
+    every ``MediaSupportedModel`` entity is by construction a claim subject.  The
     inheritance encodes that structural commitment as a compile-time guarantee.
     """
 
