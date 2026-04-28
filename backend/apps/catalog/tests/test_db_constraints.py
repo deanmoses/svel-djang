@@ -108,6 +108,35 @@ class TestUniqueNameConstraints:
             )
 
 
+class TestLocationSiblingSlugUniqueness:
+    def test_duplicate_root_slug_rejected(self, db):
+        Location.objects.create(location_path="usa", slug="usa")
+        with pytest.raises(IntegrityError):
+            Location.objects.create(location_path="usa-2", slug="usa")
+
+    def test_duplicate_sibling_slug_rejected(self, db):
+        usa = Location.objects.create(location_path="usa", slug="usa")
+        Location.objects.create(location_path="usa/chicago", slug="chicago", parent=usa)
+        with pytest.raises(IntegrityError):
+            Location.objects.create(
+                location_path="usa/chicago-2", slug="chicago", parent=usa
+            )
+
+    def test_same_slug_under_different_parents_allowed(self, db):
+        usa = Location.objects.create(location_path="usa", slug="usa")
+        canada = Location.objects.create(location_path="canada", slug="canada")
+        Location.objects.create(
+            location_path="usa/portland", slug="portland", parent=usa
+        )
+        Location.objects.create(
+            location_path="canada/portland", slug="portland", parent=canada
+        )
+
+    def test_same_slug_at_root_and_under_parent_allowed(self, db):
+        usa = Location.objects.create(location_path="usa", slug="usa")
+        Location.objects.create(location_path="usa/usa", slug="usa", parent=usa)
+
+
 # ---------------------------------------------------------------------------
 # Range constraints
 # ---------------------------------------------------------------------------

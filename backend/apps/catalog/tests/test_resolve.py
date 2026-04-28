@@ -538,8 +538,15 @@ class TestResolveEntitySlugConflictGuard:
         editorial = Source.objects.create(
             name="The Flip Editorial", source_type="editorial", priority=100
         )
-        Location.objects.create(location_path="usa/il/springfield", slug="springfield")
-        target = Location.objects.create(location_path="usa/oh/oldslug", slug="oldslug")
+        usa = Location.objects.create(location_path="usa", slug="usa")
+        il = Location.objects.create(location_path="usa/il", slug="il", parent=usa)
+        oh = Location.objects.create(location_path="usa/oh", slug="oh", parent=usa)
+        Location.objects.create(
+            location_path="usa/il/springfield", slug="springfield", parent=il
+        )
+        target = Location.objects.create(
+            location_path="usa/oh/oldslug", slug="oldslug", parent=oh
+        )
 
         Claim.objects.assert_claim(target, "slug", "springfield", source=editorial)
 

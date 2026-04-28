@@ -96,6 +96,16 @@ class Location(CatalogModel, TimeStampedModel):
                 violation_error_message="A location cannot be its own parent.",
                 violation_error_code="cross_field",
             ),
+            models.UniqueConstraint(
+                fields=["parent", "slug"],
+                condition=models.Q(parent__isnull=False),
+                name="catalog_location_unique_slug_per_parent",
+            ),
+            models.UniqueConstraint(
+                fields=["slug"],
+                condition=models.Q(parent__isnull=True),
+                name="catalog_location_unique_slug_at_root",
+            ),
         ]
 
     def __str__(self) -> str:
