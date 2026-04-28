@@ -14,13 +14,13 @@ Run via ``make api-gen`` or directly::
 
 from __future__ import annotations
 
-from collections.abc import Iterator
 from pathlib import Path
 from typing import Any, NamedTuple
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
+from apps.catalog._walks import catalog_app_subclasses
 from apps.catalog.models import CatalogModel
 
 
@@ -41,7 +41,7 @@ class Command(BaseCommand):
         catalog_meta: list[CatalogEntry] = []
         media_categories: dict[str, list[str]] = {}
 
-        for cls in _iter_concrete_subclasses(CatalogModel):  # type: ignore[type-abstract]
+        for cls in catalog_app_subclasses(CatalogModel):
             key = cls.entity_type
             label = str(cls._meta.verbose_name).title()
             label_plural = str(cls._meta.verbose_name_plural).title()
@@ -83,13 +83,3 @@ class Command(BaseCommand):
         )
         output_path.write_text("\n".join(lines))
         self.stdout.write(self.style.SUCCESS(f"Wrote {output_path}"))
-
-
-def _iter_concrete_subclasses(
-    root: type[CatalogModel],
-) -> Iterator[type[CatalogModel]]:
-    for cls in root.__subclasses__():
-        yield from _iter_concrete_subclasses(cls)
-        if cls._meta.abstract:
-            continue
-        yield cls

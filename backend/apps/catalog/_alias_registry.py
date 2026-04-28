@@ -13,6 +13,7 @@ from django.apps import apps
 
 from apps.provenance.models import ClaimControlledModel
 
+from ._walks import catalog_app_subclasses
 from .models import AliasModel
 
 
@@ -38,7 +39,7 @@ def discover_alias_types() -> tuple[AliasType, ...]:
     apps.check_models_ready()
 
     result: list[AliasType] = []
-    for alias_cls in AliasModel.__subclasses__():
+    for alias_cls in catalog_app_subclasses(AliasModel):
         # Each AliasModel subclass has exactly one FK to its parent model.
         fks = [
             f

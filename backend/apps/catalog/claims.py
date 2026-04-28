@@ -223,10 +223,8 @@ def register_catalog_relationship_schemas() -> None:
             valid_subjects={alias_type.parent_model},
         )
 
-    # Media attachment — derived at registration by walking all concrete
-    # ``MediaSupportedModel`` subclasses. ``apps.get_models()`` handles transitive
-    # subclasses that ``__subclasses__()`` would miss if an intermediate
-    # abstract base is ever introduced.
+    # cross-app: walks all apps intentionally — MediaSupportedModel may gain
+    # non-catalog inheritors.
     from django.apps import apps as _apps
 
     media_subjects: set[type[ClaimControlledModel]] = {

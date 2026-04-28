@@ -39,16 +39,10 @@ def _cache_invalidating_models() -> list[type[models.Model]]:
     then appends the two through-rows (``CorporateEntityLocation``, ``Credit``)
     that surface in cached ``/all/`` payloads but aren't top-level entities.
     """
-    from django.apps import apps
-
+    from ._walks import catalog_app_subclasses
     from .models import CatalogModel, CorporateEntityLocation, Credit
 
-    catalog_app = apps.get_app_config("catalog")
-    derived = [
-        m
-        for m in catalog_app.get_models()
-        if issubclass(m, CatalogModel) and not m._meta.abstract
-    ]
+    derived = catalog_app_subclasses(CatalogModel)
     extras: list[type[models.Model]] = [CorporateEntityLocation, Credit]
     # Not covered here: MachineModel* through-rows (MachineModelTheme, etc.)
     # and AliasModel subclasses. Those are written by the claims resolver,

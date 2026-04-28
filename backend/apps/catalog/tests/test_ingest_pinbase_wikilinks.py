@@ -1,4 +1,4 @@
-"""Tests for the AI_DESC_SOURCE_REGISTRY and validate_cross_entity_wikilinks.
+"""Tests for the AI desc source registry and validate_cross_entity_wikilinks.
 
 Locks in that the registry derives Location from CatalogModel walks (no
 manual extras) and that the wikilink validator accepts Location's
@@ -13,7 +13,7 @@ import json
 import pytest
 
 from apps.catalog.management.commands.ingest_pinbase import (
-    AI_DESC_SOURCE_REGISTRY,
+    _ai_desc_source_registry,
     validate_cross_entity_wikilinks,
 )
 from apps.catalog.models import GameplayFeature, Location
@@ -21,11 +21,11 @@ from apps.catalog.models import GameplayFeature, Location
 
 def test_ai_desc_registry_contains_location():
     """The CatalogModel walk picks Location up — no Location-specific extra needed."""
-    assert (Location, "location") in AI_DESC_SOURCE_REGISTRY
+    assert (Location, "location") in _ai_desc_source_registry()
 
 
 def test_ai_desc_registry_entries_are_unique():
-    slugs = [slug for _, slug in AI_DESC_SOURCE_REGISTRY]
+    slugs = [slug for _, slug in _ai_desc_source_registry()]
     assert len(slugs) == len(set(slugs))
 
 

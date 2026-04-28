@@ -34,20 +34,18 @@ class CatalogConfig(AppConfig):
 
     @staticmethod
     def _register_link_types() -> None:
-        from django.apps import apps
-
         from apps.core.markdown_links import LinkType, register
         from apps.core.models import LinkableModel
         from apps.core.schemas import LinkTargetSchema
+
+        from ._walks import catalog_app_subclasses
 
         def _default_serialize(
             obj: Any,  # noqa: ANN401 - matches LinkType.autocomplete_serialize callback contract
         ) -> LinkTargetSchema:
             return LinkTargetSchema(ref=obj.public_id, label=str(obj.name))
 
-        for model in apps.get_app_config("catalog").get_models():
-            if not issubclass(model, LinkableModel) or model._meta.abstract:
-                continue
+        for model in catalog_app_subclasses(LinkableModel):
             name = getattr(model, "link_type_name", model.__name__.lower())
             register(
                 LinkType(
