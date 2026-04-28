@@ -5,11 +5,12 @@ from __future__ import annotations
 from typing import ClassVar
 
 from django.db import models
-from django.db.models.functions import Lower, Now
+from django.db.models.functions import Lower
 
 from apps.core.models import (
     EntityStatusMixin,
     LinkableModel,
+    TimeStampedModel,
     field_not_blank,
     status_valid,
 )
@@ -25,7 +26,9 @@ __all__ = [
 ]
 
 
-class Location(EntityStatusMixin, ClaimControlledModel, LinkableModel):
+class Location(
+    EntityStatusMixin, TimeStampedModel, ClaimControlledModel, LinkableModel
+):
     """A canonical geographic location at any level of the hierarchy.
 
     The hierarchy is self-referential: a city's parent is its subdivision,
@@ -53,8 +56,6 @@ class Location(EntityStatusMixin, ClaimControlledModel, LinkableModel):
     claims_exempt: ClassVar[frozenset[str]] = frozenset({"location_path"})
     claim_fk_lookups: ClassVar[dict[str, str]] = {"parent": "location_path"}
 
-    created_at = models.DateTimeField(auto_now_add=True, db_default=Now())
-    updated_at = models.DateTimeField(auto_now=True)
     location_path = models.CharField(max_length=500, unique=True)
     slug = models.SlugField(max_length=200)
     name = models.CharField(
