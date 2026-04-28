@@ -4,7 +4,13 @@ This plan implements Location create, edit, delete, restore, edit-history, sourc
 
 ## Context
 
-This work should land after [ModelDrivenLinkability.md](ModelDrivenLinkability.md). Linkability establishes the generic URL identity and shared CRUD-factory contracts: `public_id_field`, `public_id`, `:path` route params, page-level edit-history / sources lookup by `(entity_type, public_id)`, and factory support for non-`slug` public IDs.
+This is the second of three sequential plans in the Location-promotion chain:
+
+1. The Location → `CatalogModel` promotion + walk collapse (the small structural prep).
+2. **This plan** — the full Location CRUD surface (write router, frontend, tests).
+3. [ModelDrivenWikilinkableMetadata.md](ModelDrivenWikilinkableMetadata.md) — the wikilink picker mixin (Location stays out by absent inheritance).
+
+Foundational work landed earlier in [ModelDrivenLinkability.md](ModelDrivenLinkability.md): generic URL identity and shared CRUD-factory contracts (`public_id_field`, `public_id`, `:path` route params, page-level edit-history / sources lookup by `(entity_type, public_id)`, and factory support for non-`slug` public IDs).
 
 Location CRUD is the proof that that work actually generalized. Location is the first model that needs a multi-segment `public_id` (`location_path`) and a non-`slug` FK claim lookup (`claim_fk_lookups = {"parent": "location_path"}`). If Location can reach create, restore, edit-history, and sources through the shared factories/endpoints without Location-specific overrides, the Linkability abstraction is doing real work.
 
@@ -17,8 +23,11 @@ The validation criterion:
 
 ## Decisions
 
-- Location inherits `LinkableModel` and declares `entity_type = "location"`, `entity_type_plural = "locations"`, and `public_id_field = "location_path"`.
-- Location declares `immutable_after_create = frozenset({"parent"})`. Re-parenting is not supported because `location_path` encodes ancestry and changing it would require recomputing the whole subtree and every reference.
+- Location is a `CatalogModel` (post chain step 1) and declares `entity_type = "location"`, `entity_type_plural = "locations"`, `public_id_field = "location_path"`, `claim_fk_lookups = {"parent": "location_path"}`, and `claims_exempt = frozenset({"location_path"})` — `location_path` is a derived field written into `row_kwargs` at create time, not through a claim.
+- **Re-parenting and slug-renaming are not supported.** `location_path` is computed from `parent.location_path + slug` and materialized on the row, so changing `parent` _or_ `slug` would invalidate the path on every descendant and every reference. The model-level enforcement (`immutable_after_create = frozenset({"parent", "slug"})`) is deferred per [ModelDrivenLinkability.md](ModelDrivenLinkability.md)'s "Deferred: re-parenting protection" section. **For this PR, the protection is UI- and route-level**:
+  - The Location editor does **not** register `NameEditor` (which edits `name` + `slug` together). Name edits are exposed through a Location-specific section that mutates `name` only, leaving `slug` frozen.
+  - The PATCH-claims route below explicitly rejects `parent`, `slug`, and `location_type` in the body.
+  - When `immutable_after_create` lands later, drop both workarounds and let the model enforce.
 - Top-level Location create always creates a `country`.
 - Child Location create derives `location_type` from the country ancestor's `divisions`, using `country.divisions[parent_depth - 1]`.
 - Name and slug uniqueness are sibling-scoped for children; top-level countries collide at the root scope.
@@ -35,7 +44,7 @@ Today's [`register_entity_create`](../../../backend/apps/catalog/api/entity_crud
 - `extra_row_kwargs_builder: Callable[[EntityCreateInputSchema, CatalogModel | None], dict[str, Any]] | None = None` — merged into `row_kwargs` before `create_entity_with_claims`. Location uses it to materialize `location_path` and to set `location_type`.
 - `body_schema: type[Schema] | None = None` — when set, replaces `EntityCreateInputSchema` as the request body type so endpoints can accept extra fields (Location: top-level country needs `divisions`).
 
-All three default to `None`/no-op so the existing 10+ callers stay byte-identical. Add a small unit test that asserts both builders fire with the resolved `parent` (or `None`), and that a builder returning new keys is reflected in the persisted row and claim list.
+All three default to `None`/no-op so the existing 10+ callers stay byte-identical. Add unit tests that assert each of the three params behaves correctly: `extra_claim_specs_builder` and `extra_row_kwargs_builder` fire with the resolved `parent` (or `None`), their returned keys reach the persisted row / claim list, and `body_schema` replaces the request body type when set (verified via the OpenAPI schema or a request that carries an extra field accepted by `LocationCreateSchema` but rejected by the default `EntityCreateInputSchema`).
 
 The slug-availability check (`assert_slug_available(model_cls, slug)`) also needs to become `public_id_field`-aware: when `model_cls.public_id_field != "slug"`, the freshly-built `location_path` is what must be unique, not the bare slug. Either generalize `assert_slug_available` to query on `public_id_field`, or add a parallel `assert_public_id_available` that the factory dispatches to. The latter keeps the slug-shaped helper intact for the common case.
 
@@ -132,11 +141,11 @@ Add the missing write routes under `frontend/src/routes/locations/`.
 
 Add Location editor wiring:
 
-- `frontend/src/lib/components/editors/location-edit-sections.ts`
+- `frontend/src/lib/components/editors/location-edit-sections.ts` — registers the Location-editable sections. **Do not register `NameEditor`** here; `NameEditor` edits `name` and `slug` together, and `slug` is frozen for Location (see Decisions §"Re-parenting and slug-renaming are not supported"). Provide a Location-specific name section that mutates `name` only.
 - `frontend/src/lib/components/editors/LocationEditorSwitch.svelte`
 - `frontend/src/routes/locations/[...path]/save-location-claims.ts`
 
-The edit menu should not offer parent, slug, or location-type edits.
+The edit menu does **not** offer `parent`, `slug`, or `location_type` edits. `divisions` is editable only on top-level country rows. Other scalars (`name`, `description`, `short_name`, `code`) and aliases edit normally.
 
 ### Child labels
 
@@ -192,12 +201,14 @@ Manual smoke test against `make dev` with a logged-in superuser:
 - Visit edit-history and sources for the new child.
 - Delete the child.
 - Confirm deleting `/locations/usa` is blocked by active corporate-entity location referrers.
-- Confirm existing single-segment entities such as themes and manufacturers still handle edit, edit-history, sources, and delete after the `slug` to `public_id` rename.
+- Confirm existing single-segment entities such as themes and manufacturers still handle edit, edit-history, sources, and delete (regression check for the new `register_entity_create` extension hooks — every existing caller must stay byte-identical because the three new params default to `None`/no-op).
 
 ## Out of Scope
 
+- **Model-level `immutable_after_create` enforcement.** Re-parenting and slug-renaming are blocked at the UI / route level in this PR (see Decisions). The model-level frozen-fields enforcement is its own follow-up; once it lands, drop the UI/route workarounds.
 - Re-parenting Location.
 - Restore UI on deleted-entity pages.
 - Rich divisions editor UI.
 - Undoing a specific past delete `ChangeSet`.
 - Switching generic href consumers to call `entity.get_absolute_url()` directly.
+- Adding Location to the wikilink picker. Location is a `CatalogModel` but explicitly suppressed from the picker (today via the `link_autocomplete_serialize = None` sentinel; replaced in [ModelDrivenWikilinkableMetadata.md](ModelDrivenWikilinkableMetadata.md) by absent `WikilinkableModel` inheritance). Location refs in markdown still render and validate — only the authoring picker excludes them.
