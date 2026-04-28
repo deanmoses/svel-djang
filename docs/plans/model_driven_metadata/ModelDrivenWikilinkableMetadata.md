@@ -58,7 +58,7 @@ description = cls.link_description or f"Link to a {cls._meta.verbose_name}"
 
 Defaults are still mixin-owned (the empty string is the contract), but the materialization is deferred until `_meta` exists. No `getattr` and no consumer-side hardcoding of the fallback string — both lines are unconditional.
 
-Discovery is `WikilinkableModel.__subclasses__()`. No hand-maintained list of who participates; mixing in opts the model into the picker, not mixing in keeps it out.
+Discovery is `apps.get_models()` filtered by `issubclass(WikilinkableModel)` and non-abstract. No hand-maintained list of who participates; mixing in opts the model into the picker, not mixing in keeps it out. The app registry handles abstract intermediates (e.g. `CatalogModel`) that bare `__subclasses__()` would silently drop.
 
 ### MRO diamond on `LinkableModel`
 

@@ -120,7 +120,7 @@ class ClaimThroughModel(models.Model):
         abstract = True
 ```
 
-Every claim-bearing through-model (`MachineModelTheme`, `Credit`, `CorporateEntityLocation`, `ThemeParent`, `GameplayFeatureParent`, etc.) inherits from it. Discovery is a recursive `__subclasses__()` walk filtered for non-abstract — the same pattern [`core/entity_types.py`](../../../backend/apps/core/entity_types.py) uses and the umbrella doc ranks Gold. `ready()` asserts every discovered subclass declares `catalog_relationship_spec`; a subclass without one fails at startup.
+Every claim-bearing through-model (`MachineModelTheme`, `Credit`, `CorporateEntityLocation`, `ThemeParent`, `GameplayFeatureParent`, etc.) inherits from it. Discovery is `apps.get_models()` filtered by `issubclass(ClaimThroughModel)` and non-abstract — the same app-registry pattern [`core/entity_types.py`](../../../backend/apps/core/entity_types.py) uses. `ready()` asserts every discovered subclass declares `catalog_relationship_spec`; a subclass without one fails at startup.
 
 This is a **discovery** ABC, not a **shape taxonomy** ABC. It has no abstract methods, no subtype-specific behavior. The "Abstract base classes" rejection below refers to a different design (taxonomy-by-subclass with shape-enforcing abstract methods), which still stands. The marker base is just the mechanism for asking "which models is this validator responsible for?"
 
