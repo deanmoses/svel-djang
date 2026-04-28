@@ -129,7 +129,7 @@ def get_or_create_django_user(workos_user: WorkOSUser) -> DjangoUser:
             user = matches.get()
             profile = _get_profile(user)
             profile.workos_user_id = workos_user.id
-            profile.save(update_fields=["workos_user_id"])
+            profile.save(update_fields=["workos_user_id", "updated_at"])
             return user
 
     # 3. Create new user
@@ -142,7 +142,7 @@ def get_or_create_django_user(workos_user: WorkOSUser) -> DjangoUser:
     # Profile auto-created by post_save signal
     profile = _get_profile(user)
     profile.workos_user_id = workos_user.id
-    profile.save(update_fields=["workos_user_id"])
+    profile.save(update_fields=["workos_user_id", "updated_at"])
     return user
 
 
