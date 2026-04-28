@@ -48,11 +48,11 @@ Resolution picks a winner per field/claim-key and materializes the result:
 - Scalar winners are coerced to the appropriate field type and set on the model
 - Relationship winners are materialized into M2M tables or dedicated records
 
-## The Rule
+## ALL user-inputted fields MUST be claims-based
 
-**Every catalog field must be claims-based.** This includes scalar fields, foreign keys, relationships, and slugs. The only exempt fields are internal infrastructure: `id`/`uuid`, `created_at`/`updated_at`.
+**Every user-inputted catalog field MUST be claims-based**: scalars, FKs, M2M, slugs, parents, aliases. This includes ingested data that goes into fields that users can input.
 
-If you think a field needs an exception, ask the user first.
+NOT claims-based: **System-generated fields** like `id`/`uuid`, timestamps, derived fields like `Location.location_path = f"{parent.location_path}/{slug}"`.
 
 ## Key Code
 

@@ -39,26 +39,13 @@ The frontend uses **Svelte 5 runes mode** (`runes: true` in compiler options). D
 
 NEVER use `:global` in Svelte component styles without explicit approval from the user. Scoped styles are the default and preferred approach. We rearchitect components rather than use `:global`.
 
-## All Catalog Fields Are Claims-Based — Non-Negotiable
+## ALL User-Inputted Catalog Fields MUST be Claims-Based — Non-Negotiable
 
-**EVERY field on catalog models must go through the claims/provenance system.** Scalars, foreign keys, and relationships — all of them. No exceptions without express approval from the user.
+**Every user-inputted catalog field MUST be claims-based**: scalars, FKs, M2M, slugs, parents, aliases. This includes ingested data that goes into fields that users can input.
 
-The provenance system serves **three purposes simultaneously**:
+**System-generated fields aren't claims-based**: `id`/`uuid`, timestamps, derived fields like `Location.location_path = f"{parent.location_path}/{slug}"`.
 
-1. **Conflict resolution** — When multiple sources assert different values, the highest-priority source wins.
-2. **Audit trail** — Every piece of catalog data has a record of who said it and where it came from, even when only one source exists.
-3. **Future extensibility** — Adding a new source to a claims-based field requires zero migrations. Adding one to a structural field requires re-architecture.
-
-"It only comes from one source today" is **not** a valid reason to bypass claims — that source may not be the only one tomorrow.
-
-**"Structural" is not a valid exemption category.** The only exempt fields are true internal infrastructure: `id`/`uuid`, `created_at`/`updated_at`. Everything else — scalars, FKs, M2M relationships, aliases, hierarchy parents, and slugs — requires claims. Slugs are editorially curated values (e.g. which machine gets `breakout` vs `breakout-2` is an explicit editorial decision) and must be claim-controlled.
-
-**Anti-patterns to avoid:**
-
-- Don't label a field as "structural, not claim-controlled" because only one source contributes it today.
-- Don't skip claims for lookup/matching data like aliases — we still need to know who created them.
-
-If you think a field genuinely needs an exception, **stop and ask the user first.** See [docs/Provenance.md](Provenance.md) for architecture details.
+The test is "could a user input this field?" If yes, claim it. If no, it's system-generated. There is no third category. See [docs/Provenance.md](Provenance.md) for the architecture.
 
 ### Writing ChangeSets — `action` Is Required On User ChangeSets
 
