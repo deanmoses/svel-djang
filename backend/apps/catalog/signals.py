@@ -53,7 +53,7 @@ def _cache_invalidating_models() -> list[type[models.Model]]:
     ]
     extras: list[type[models.Model]] = [Location, CorporateEntityLocation, Credit]
     # Not covered here: MachineModel* through-rows (MachineModelTheme, etc.)
-    # and AliasBase subclasses. Those are written by the claims resolver,
+    # and AliasModel subclasses. Those are written by the claims resolver,
     # which calls invalidate_all() directly via transaction.on_commit (see
     # resolve/_dispatch.py). Direct edits outside the claims pipeline would
     # bypass this signal, but that's a policy violation, not a missed path.

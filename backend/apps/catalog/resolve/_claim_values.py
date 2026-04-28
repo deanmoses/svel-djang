@@ -41,7 +41,7 @@ class AbbreviationClaimValue(TypedDict):
 
 
 class AliasClaimValue(TypedDict):
-    """Payload for ``*_alias`` relationship claims across all AliasBase subjects."""
+    """Payload for ``*_alias`` relationship claims across all AliasModel subjects."""
 
     alias_value: Required[str]
     exists: Required[bool]

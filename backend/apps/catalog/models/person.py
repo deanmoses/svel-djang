@@ -19,7 +19,7 @@ from apps.core.models import (
 from apps.core.validators import validate_no_mojibake
 from apps.media.models import MediaSupported
 
-from .base import AliasBase, CatalogModel
+from .base import AliasModel, CatalogModel
 
 __all__ = ["Credit", "Person", "PersonAlias"]
 
@@ -196,7 +196,7 @@ class Person(
         return self.name
 
 
-class PersonAlias(AliasBase):
+class PersonAlias(AliasModel, TimeStampedModel):
     """An alternate name for a Person, used to match alternative spellings from
     external sources (e.g. "Keith Johnson" → "Keith P. Johnson").
     """
@@ -205,7 +205,7 @@ class PersonAlias(AliasBase):
 
     person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name="aliases")
 
-    class Meta(AliasBase.Meta):
+    class Meta(AliasModel.Meta):
         constraints = [
             field_not_blank("value"),
             models.UniqueConstraint(

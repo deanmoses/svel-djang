@@ -73,7 +73,7 @@ Examples in the codebase:
 
 - **`LinkableModel`**: provides `get_absolute_url()`, the `public_id` property, and a default `link_url_pattern` derivation; subclasses declare `entity_type`, `entity_type_plural`, `public_id_field`.
 - **`ClaimControlledModel`**: provides claim-related machinery shared across catalog models; the home for the landed `claims_exempt` and `claim_fk_lookups` ClassVars (with defaults of `frozenset()` and `{}` respectively), and the planned home for `immutable_after_create`.
-- **`AliasBase`**: provides alias-table conventions; subclasses declare the FK to their owning entity.
+- **`AliasModel`**: provides alias-table conventions; subclasses declare the FK to their owning entity.
 - **`MediaSupported`**: marker base whose only job is to host `MEDIA_CATEGORIES` declarations and let the media pipeline enumerate participants.
 
 Use [base class / mixin](#pattern-base-class--mixin) whenever the [`_meta` walk](#pattern-_meta-walk) isn't enough. Use [typed spec](#pattern-typed-spec) instead when the metadata is structured data consumed by multiple independent subsystems and you need startup-time validation. The two compose: `LinkableModel` uses [base class / mixin](#pattern-base-class--mixin), and [`core/entity_types.py`](../../backend/apps/core/entity_types.py) is a [typed spec](#pattern-typed-spec) registry built by walking `LinkableModel.__subclasses__()`.
@@ -119,7 +119,7 @@ There is no single perfect file to copy. The current best examples are best for 
 - **Best `_meta` walk:** [`get_claim_fields()`](../../backend/apps/provenance/models/introspection.py) — derives claim-controlled fields from Django field metadata, with `ClaimControlledModel.claims_exempt` as the only per-model input.
 - **Best base-ClassVar contract:** [`ClaimControlledModel`](../../backend/apps/provenance/models/base.py) — declares typed defaults for `claims_exempt` and `claim_fk_lookups`; consumers read direct attributes from `type[ClaimControlledModel]`, not `getattr(..., default)`.
 - **Best subclass registry skeleton:** [`core/entity_types.py`](../../backend/apps/core/entity_types.py) — class attr + recursive subclass walk + app-readiness guard + duplicate validation + narrow public lookup API. Still uses a nullable module cache; use `lru_cache(maxsize=1)` for new code.
-- **Best discovery-helper cache:** [`_alias_registry.py`](../../backend/apps/catalog/_alias_registry.py) — subclass walk over `AliasBase`, `lru_cache(maxsize=1)`, typed `NamedTuple` return, and explicit `alias_claim_field` identity enforced by `AliasBase.__init_subclass__`.
+- **Best discovery-helper cache:** [`_alias_registry.py`](../../backend/apps/catalog/_alias_registry.py) — subclass walk over `AliasModel`, `lru_cache(maxsize=1)`, typed `NamedTuple` return, and explicit `alias_claim_field` identity enforced by `AliasModel.__init_subclass__`.
 - **Best runtime schema validator:** [`provenance/validation.py`](../../backend/apps/provenance/validation.py)'s `RelationshipSchema` / `ValueKeySpec` registry — typed frozen schemas, registration-time invariant checks, duplicate-schema rejection, and a small public API. Caveat: it is intentionally hand-registered today, not model-owned metadata; use it for validation shape, not discovery shape.
 
 **Don't copy:** `MEDIA_CATEGORIES` + `MediaSupported` (no discovery helper, no validator); `export_catalog_meta` for runtime metadata (it is a codegen/distribution pattern, not a Python runtime registry).
@@ -183,7 +183,7 @@ Concrete examples in the current codebase:
 Fixed examples that now show the right shape:
 
 - `claims_exempt` and `claim_fk_lookups` are declared on `ClaimControlledModel` in [provenance/models/base.py](../../backend/apps/provenance/models/base.py), and consumers read them directly from `type[ClaimControlledModel]`.
-- `alias_claim_field` is declared on `AliasBase` in [catalog/models/base.py](../../backend/apps/catalog/models/base.py) as `ClassVar[str]`, with `__init_subclass__` enforcement in the same file. Consumers in [\_alias_registry.py](../../backend/apps/catalog/_alias_registry.py) read `alias_cls.alias_claim_field` directly — no `getattr` fallback needed because the contract is enforced at the base.
+- `alias_claim_field` is declared on `AliasModel` in [catalog/models/base.py](../../backend/apps/catalog/models/base.py) as `ClassVar[str]`, with `__init_subclass__` enforcement in the same file. Consumers in [\_alias_registry.py](../../backend/apps/catalog/_alias_registry.py) read `alias_cls.alias_claim_field` directly — no `getattr` fallback needed because the contract is enforced at the base.
 
 ## Rules of thumb
 
@@ -191,7 +191,7 @@ Cross-cutting rules that apply to any work in this space — picking ClassVar sh
 
 - **Semantics over RHS shape.** Pick the collection type that matches the meaning of the attr, not what the literal happens to look like. `soft_delete_*` started as `tuple[str, ...]` because the RHS was a tuple literal; the right type was `frozenset[str]` because order and duplicates are meaningless. Update the literal at the same time as the annotation.
 - **Don't lie about the shape in the annotation.** Consumer-side `getattr(..., default)` defaults must match the annotated type. If the annotation says `frozenset[str]`, the default is `frozenset()`, not `()`. Don't smuggle a mismatched default past the type checker.
-- **Base annotates, subclasses assign.** Annotate the `ClassVar` on the base; concrete subclasses assign values without re-annotating. Canonical examples: `MEDIA_CATEGORIES` on `MediaSupported`, `entity_type` on `LinkableModel`, `alias_claim_field` on `AliasBase`.
+- **Base annotates, subclasses assign.** Annotate the `ClassVar` on the base; concrete subclasses assign values without re-annotating. Canonical examples: `MEDIA_CATEGORIES` on `MediaSupported`, `entity_type` on `LinkableModel`, `alias_claim_field` on `AliasModel`.
 - **Hoist to the smallest base that captures the audience.** A `ClassVar` meaningful for every claim-controlled model belongs on `ClaimControlledModel`, not above or below. Each per-feature doc's "Why this lives on X" section repeats the audience argument.
 - **Blanket inclusion beats opt-in markers** for correctness-critical paths. An opt-in flag like `bust_all_cache_on_save: ClassVar[bool]` would recreate the drift surface a `__subclasses__()` walk is meant to eliminate. Default-on is fail-safe-by-construction.
 - **Parity tests pin derived sets.** When a registry, signal list, or set is derived from a `_meta` walk or `__subclasses__()` walk, the parity test asserts the _expected output_, not `derived == derived`. New models fire the test and get reviewed intentionally.

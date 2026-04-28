@@ -203,7 +203,7 @@ def register_catalog_relationship_schemas() -> None:
         valid_subjects={GameplayFeature},
     )
 
-    # Alias namespaces — one schema per AliasBase subclass.
+    # Alias namespaces — one schema per AliasModel subclass.
     for alias_type in discover_alias_types():
         register_relationship_schema(
             namespace=alias_type.claim_field,

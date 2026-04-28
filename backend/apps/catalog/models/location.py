@@ -17,7 +17,7 @@ from apps.core.models import (
 from apps.core.validators import validate_no_mojibake
 from apps.provenance.models import ClaimControlledModel
 
-from .base import AliasBase
+from .base import AliasModel
 
 __all__ = [
     "CorporateEntityLocation",
@@ -103,7 +103,7 @@ class Location(
         return self.name or self.location_path
 
 
-class LocationAlias(AliasBase):
+class LocationAlias(AliasModel, TimeStampedModel):
     """An alternate name for a Location used to match external source strings.
 
     Intentional mojibake aliases exist to match incorrectly encoded strings
@@ -116,7 +116,7 @@ class LocationAlias(AliasBase):
         Location, on_delete=models.CASCADE, related_name="aliases"
     )
 
-    class Meta(AliasBase.Meta):
+    class Meta(AliasModel.Meta):
         constraints = [
             field_not_blank("value"),
             models.UniqueConstraint(
