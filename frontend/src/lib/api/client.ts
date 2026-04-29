@@ -16,9 +16,17 @@ export function createApiClient(fetchImpl: typeof fetch = fetch, baseUrl = '') {
     },
   });
 
-  // Add CSRF token to mutating requests
   client.use({
     async onRequest({ request }) {
+      // openapi-fetch percent-encodes `/` in path params, breaking Django's `:path`
+      // converter for multi-segment public_ids. `/` is reserved, so `%2F` in pathname is always ours to decode.
+      const url = new URL(request.url);
+      const decoded = url.pathname.replace(/%2[Ff]/g, '/');
+      if (decoded !== url.pathname) {
+        url.pathname = decoded;
+        request = new Request(url, request);
+      }
+
       const method = request.method.toUpperCase();
       if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
         const token = getCsrfToken();
