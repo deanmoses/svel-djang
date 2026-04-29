@@ -42,13 +42,11 @@ from .constants import DEFAULT_PAGE_SIZE
 from .edit_claims import execute_claims, plan_scalar_field_claims
 from .entity_crud import register_entity_create, register_entity_delete_restore
 from .helpers import (
-    _build_rich_text,
-    _collect_titles,
-    _extract_image_urls,
-    _media_prefetch,
-    _serialize_locations,
-    _serialize_uploaded_media,
+    collect_titles,
+    serialize_locations,
 )
+from .images import extract_image_urls, media_prefetch, serialize_uploaded_media
+from .rich_text import build_rich_text
 from .schemas import (
     ClaimPatchSchema,
     CorporateEntityLocationSchema,
@@ -168,7 +166,7 @@ def _serialize_manufacturer_detail(mfr: Manufacturer) -> ManufacturerDetailSchem
     return ManufacturerDetailSchema(
         name=mfr.name,
         slug=mfr.slug,
-        description=_build_rich_text(mfr, "description", active_claims(mfr)),
+        description=build_rich_text(mfr, "description", active_claims(mfr)),
         year_start=min(year_starts) if year_starts else None,
         year_end=max(year_ends) if year_ends else None,
         logo_url=mfr.logo_url,
@@ -179,17 +177,17 @@ def _serialize_manufacturer_detail(mfr: Manufacturer) -> ManufacturerDetailSchem
                 slug=e.slug,
                 year_start=e.year_start,
                 year_end=e.year_end,
-                locations=_serialize_locations(e),
+                locations=serialize_locations(e),
             )
             for e in mfr.entities.all()
         ],
-        titles=_collect_titles(m for e in mfr.entities.all() for m in e.models.all()),
+        titles=collect_titles(m for e in mfr.entities.all() for m in e.models.all()),
         systems=[
             ManufacturerSystemSchema(name=s.name, slug=s.slug)
             for s in mfr.systems.all()
         ],
         persons=persons,
-        uploaded_media=_serialize_uploaded_media(all_media(mfr)),
+        uploaded_media=serialize_uploaded_media(all_media(mfr)),
     )
 
 
@@ -218,7 +216,7 @@ def _manufacturer_qs() -> QuerySet[Manufacturer]:
         ),
         Prefetch("systems", queryset=System.objects.active().order_by("name")),
         claims_prefetch(),
-        _media_prefetch(),
+        media_prefetch(),
     )
 
 
@@ -456,7 +454,7 @@ def list_all_manufacturers(
         tm_id = mfr_thumb_model.get(mfr_id)
         tm = thumb_models.get(tm_id) if tm_id else None
         if tm and tm.extra_data:
-            thumb, _ = _extract_image_urls(tm.extra_data, min_rank=min_rank)
+            thumb, _ = extract_image_urls(tm.extra_data, min_rank=min_rank)
 
         loc_refs_map = mfr_location_refs.get(mfr_id, {})
         locations = [

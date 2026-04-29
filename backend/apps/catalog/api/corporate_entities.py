@@ -33,11 +33,11 @@ from .edit_claims import (
 )
 from .entity_crud import register_entity_create, register_entity_delete_restore
 from .helpers import (
-    _build_rich_text,
-    _collect_titles,
-    _serialize_locations,
+    collect_titles,
+    serialize_locations,
 )
 from .manufacturers import manufacturers_router
+from .rich_text import build_rich_text
 from .schemas import (
     CorporateEntityClaimPatchSchema,
     CorporateEntityLocationSchema,
@@ -106,13 +106,13 @@ def _serialize_detail(ce: CorporateEntity) -> CorporateEntityDetailSchema:
     return CorporateEntityDetailSchema(
         name=ce.name,
         slug=ce.slug,
-        description=_build_rich_text(ce, "description", active_claims(ce)),
+        description=build_rich_text(ce, "description", active_claims(ce)),
         manufacturer=EntityRef(name=ce.manufacturer.name, slug=ce.manufacturer.slug),
         year_start=ce.year_start,
         year_end=ce.year_end,
         aliases=[a.value for a in ce.aliases.all()],
-        locations=_serialize_locations(ce),
-        titles=_collect_titles(ce.models.all()),
+        locations=serialize_locations(ce),
+        titles=collect_titles(ce.models.all()),
     )
 
 
@@ -157,7 +157,7 @@ def list_corporate_entities(
             year_start=ce.year_start,
             year_end=ce.year_end,
             model_count=cast(HasModelCount, ce).model_count,
-            locations=_serialize_locations(ce),
+            locations=serialize_locations(ce),
         )
         for ce in qs
     ]

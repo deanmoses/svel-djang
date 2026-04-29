@@ -78,18 +78,17 @@ from .entity_create import (
     validate_slug_format,
 )
 from .helpers import (
-    _build_rich_text,
-    _extract_image_urls,
     _intersect_facet_sets,
-    _media_prefetch,
-    _serialize_credit,
-    _serialize_title_machine,
+    serialize_credit,
+    serialize_title_machine,
 )
+from .images import extract_image_urls, media_prefetch
 from .machine_models import (
     ModelDetailSchema,
     _model_detail_qs,
     _serialize_model_detail,
 )
+from .rich_text import build_rich_text
 from .schemas import (
     AlreadyDeletedSchema,
     CreditSchema,
@@ -305,7 +304,7 @@ def _serialize_title_list(
             ratings.append(float(m.ipdb_rating))
 
     if machines:
-        thumbnail_url, _ = _extract_image_urls(
+        thumbnail_url, _ = extract_image_urls(
             machines[0].extra_data or {}, min_rank=min_rank
         )
         first = machines[0]
@@ -536,7 +535,7 @@ def _select_title_hero_image_url(
     if not models:
         return None
 
-    _, hero_image_url = _extract_image_urls(
+    _, hero_image_url = extract_image_urls(
         models[0].extra_data or {}, min_rank=min_rank
     )
     return hero_image_url
@@ -545,7 +544,7 @@ def _select_title_hero_image_url(
 def _serialize_title_detail(title: Title) -> TitleDetailSchema:
     min_rank = get_minimum_display_rank()
     model_objs = list(title.machine_models.all())
-    machines = [_serialize_title_machine(pm, min_rank=min_rank) for pm in model_objs]
+    machines = [serialize_title_machine(pm, min_rank=min_rank) for pm in model_objs]
     series = (
         EntityRef(name=title.series.name, slug=title.series.slug)
         if title.series
@@ -563,7 +562,7 @@ def _serialize_title_detail(title: Title) -> TitleDetailSchema:
         for c in pm.credits.all():
             key = CreditKey(c.person.slug, c.role.slug)
             model_keys.add(key)
-            credit_data.setdefault(key, _serialize_credit(c))
+            credit_data.setdefault(key, serialize_credit(c))
         credit_sets.append(model_keys)
 
     if credit_sets:
@@ -589,7 +588,7 @@ def _serialize_title_detail(title: Title) -> TitleDetailSchema:
         pm = _model_detail_qs().get(slug=machines[0].slug)
         model_detail = _serialize_model_detail(pm)
 
-    description = _build_rich_text(title, "description", active_claims(title))
+    description = build_rich_text(title, "description", active_claims(title))
 
     return TitleDetailSchema(
         name=title.name,
@@ -648,7 +647,7 @@ def _title_models_prefetch() -> Prefetch[str, Any, str]:
             "credits__person",
             "credits__role",
             "variants",
-            _media_prefetch(),
+            media_prefetch(),
         )
         .order_by("year", "name"),
     )
@@ -795,7 +794,7 @@ def list_all_titles(request: HttpRequest) -> HttpResponse:
         id__in=primary_model_ids
     ).values_list("id", "extra_data"):
         if extra_data:
-            thumb, _ = _extract_image_urls(extra_data, min_rank=min_rank)
+            thumb, _ = extract_image_urls(extra_data, min_rank=min_rank)
             thumb_data[mid] = thumb
         else:
             thumb_data[mid] = None

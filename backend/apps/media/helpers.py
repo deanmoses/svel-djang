@@ -13,12 +13,12 @@ def all_media(entity: models.Model) -> list[EntityMedia]:
     """Return all ready EntityMedia rows prefetched onto *entity*.
 
     Raises AssertionError if the queryset wasn't set up with
-    ``_media_prefetch()`` (to_attr="all_media").
+    ``media_prefetch()`` (to_attr="all_media").
     """
     media = getattr(entity, "all_media", None)
     if media is None:
         raise AssertionError(
-            f"{type(entity).__name__} was not loaded with _media_prefetch()"
+            f"{type(entity).__name__} was not loaded with media_prefetch()"
         )
     return cast(list[EntityMedia], media)
 

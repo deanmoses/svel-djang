@@ -7,7 +7,7 @@ from constance.test import override_config
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 
-from apps.catalog.api.helpers import _extract_image_attribution, _extract_image_urls
+from apps.catalog.api.images import extract_image_attribution, extract_image_urls
 from apps.catalog.models import MachineModel
 from apps.catalog.tests.conftest import make_machine_model
 from apps.media.models import EntityMedia, MediaAsset
@@ -100,7 +100,7 @@ OPDB_EXTRA_DATA = {
 
 
 # ---------------------------------------------------------------------------
-# _extract_image_urls — uploaded-first fallback
+# extract_image_urls — uploaded-first fallback
 # ---------------------------------------------------------------------------
 
 
@@ -109,7 +109,7 @@ class TestUploadedFirstFallback:
         em = _attach(ct_mm, machine_model, asset, category="backglass")
         primary_media = [em]
 
-        thumb, hero = _extract_image_urls({}, primary_media)
+        thumb, hero = extract_image_urls({}, primary_media)
 
         assert thumb == _expected_thumb(asset)
         assert hero == _expected_hero(asset)
@@ -119,7 +119,7 @@ class TestUploadedFirstFallback:
         em = _attach(ct_mm, machine_model, asset, category="playfield")
         primary_media = [em]
 
-        thumb, hero = _extract_image_urls({}, primary_media)
+        thumb, hero = extract_image_urls({}, primary_media)
 
         assert thumb == _expected_thumb(asset)
         assert hero == _expected_hero(asset)
@@ -141,7 +141,7 @@ class TestUploadedFirstFallback:
         # Playfield listed first to test preference logic.
         primary_media = [em_playfield, em_backglass]
 
-        thumb, hero = _extract_image_urls({}, primary_media)
+        thumb, hero = extract_image_urls({}, primary_media)
 
         assert thumb == _expected_thumb(asset)
         assert hero == _expected_hero(asset)
@@ -151,7 +151,7 @@ class TestUploadedFirstFallback:
         em = _attach(ct_mm, machine_model, asset, category="backglass")
         primary_media = [em]
 
-        thumb, hero = _extract_image_urls(OPDB_EXTRA_DATA, primary_media)
+        thumb, hero = extract_image_urls(OPDB_EXTRA_DATA, primary_media)
 
         assert thumb == _expected_thumb(asset)
         assert hero == _expected_hero(asset)
@@ -161,20 +161,20 @@ class TestUploadedFirstFallback:
         is empty and we fall through to external."""
         # In the real queryset, failed assets are filtered out by
         # asset__status="ready". Here we simulate that by passing an empty list.
-        thumb, hero = _extract_image_urls(OPDB_EXTRA_DATA, primary_media=[])
+        thumb, hero = extract_image_urls(OPDB_EXTRA_DATA, primary_media=[])
 
         assert thumb == "https://img.opdb.org/m.jpg"
         assert hero == "https://img.opdb.org/l.jpg"
 
     def test_no_uploaded_no_external(self):
-        thumb, hero = _extract_image_urls({}, primary_media=[])
+        thumb, hero = extract_image_urls({}, primary_media=[])
 
         assert thumb is None
         assert hero is None
 
     def test_no_primary_media_param_uses_external(self):
         """When primary_media is not passed (None), falls through to external."""
-        thumb, hero = _extract_image_urls(OPDB_EXTRA_DATA)
+        thumb, hero = extract_image_urls(OPDB_EXTRA_DATA)
 
         assert thumb == "https://img.opdb.org/m.jpg"
         assert hero == "https://img.opdb.org/l.jpg"
@@ -190,14 +190,14 @@ class TestUploadedFirstFallback:
             ],
             "opdb.images.__permissiveness_rank": 50,
         }
-        thumb, hero = _extract_image_urls(extra_data, primary_media=[])
+        thumb, hero = extract_image_urls(extra_data, primary_media=[])
 
         assert thumb is None
         assert hero is None
 
 
 # ---------------------------------------------------------------------------
-# _extract_image_attribution — uploaded vs external
+# extract_image_attribution — uploaded vs external
 # ---------------------------------------------------------------------------
 
 
@@ -206,19 +206,19 @@ class TestImageAttribution:
         em = _attach(ct_mm, machine_model, asset, category="backglass")
         primary_media = [em]
 
-        attr = _extract_image_attribution(OPDB_EXTRA_DATA, primary_media)
+        attr = extract_image_attribution(OPDB_EXTRA_DATA, primary_media)
 
         assert attr is None
 
     def test_external_media_returns_attribution(self):
-        attr = _extract_image_attribution(OPDB_EXTRA_DATA, primary_media=[])
+        attr = extract_image_attribution(OPDB_EXTRA_DATA, primary_media=[])
 
         assert attr is not None
         assert attr.license_slug == "cc-by-sa-4-0"
         assert attr.permissiveness_rank == 50
 
     def test_no_media_returns_none(self):
-        attr = _extract_image_attribution({}, primary_media=[])
+        attr = extract_image_attribution({}, primary_media=[])
 
         assert attr is None
 
@@ -235,7 +235,7 @@ class TestLicenseGating:
         primary_media = [em]
 
         with override_config(CONTENT_DISPLAY_POLICY="licensed-only"):
-            thumb, hero = _extract_image_urls({}, primary_media)
+            thumb, hero = extract_image_urls({}, primary_media)
 
         assert thumb == _expected_thumb(asset)
         assert hero == _expected_hero(asset)
@@ -255,7 +255,7 @@ class TestLicenseGating:
             "opdb.images.__permissiveness_rank": 0,
         }
         with override_config(CONTENT_DISPLAY_POLICY="licensed-only"):
-            thumb, hero = _extract_image_urls(extra_data, primary_media=[])
+            thumb, hero = extract_image_urls(extra_data, primary_media=[])
 
         assert thumb is None
         assert hero is None

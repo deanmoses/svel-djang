@@ -49,12 +49,8 @@ from .entity_create import (
     validate_name,
     validate_slug_format,
 )
-from .helpers import (
-    _build_rich_text,
-    _extract_image_urls,
-    _media_prefetch,
-    _serialize_uploaded_media,
-)
+from .images import extract_image_urls, media_prefetch, serialize_uploaded_media
+from .rich_text import build_rich_text
 from .schemas import (
     AlreadyDeletedSchema,
     ClaimPatchSchema,
@@ -142,9 +138,9 @@ def _serialize_person_detail(person: Person) -> PersonDetailSchema:
             continue
         title = c.model.title
         key = title.slug
-        thumbnail_url = _extract_image_urls(
-            c.model.extra_data or {}, min_rank=min_rank
-        )[0]
+        thumbnail_url = extract_image_urls(c.model.extra_data or {}, min_rank=min_rank)[
+            0
+        ]
         if key not in accum:
             accum[key] = _PersonTitleAccum(
                 name=title.name,
@@ -177,7 +173,7 @@ def _serialize_person_detail(person: Person) -> PersonDetailSchema:
     return PersonDetailSchema(
         name=person.name,
         slug=person.slug,
-        description=_build_rich_text(person, "description", active_claims(person)),
+        description=build_rich_text(person, "description", active_claims(person)),
         birth_year=person.birth_year,
         birth_month=person.birth_month,
         birth_day=person.birth_day,
@@ -188,7 +184,7 @@ def _serialize_person_detail(person: Person) -> PersonDetailSchema:
         nationality=person.nationality,
         photo_url=person.photo_url,
         titles=titles,
-        uploaded_media=_serialize_uploaded_media(all_media(person)),
+        uploaded_media=serialize_uploaded_media(all_media(person)),
     )
 
 
@@ -203,7 +199,7 @@ def _person_qs() -> QuerySet[Person]:
             .order_by(F("model__year").desc(nulls_last=True), "model__name"),
         ),
         claims_prefetch(),
-        _media_prefetch(),
+        media_prefetch(),
     )
 
 
@@ -282,7 +278,7 @@ def list_all_people(
         tm_id = person_thumb_model.get(person_id)
         tm = thumb_models.get(tm_id) if tm_id else None
         if tm and tm.extra_data:
-            t, _ = _extract_image_urls(tm.extra_data, min_rank=min_rank)
+            t, _ = extract_image_urls(tm.extra_data, min_rank=min_rank)
             if t:
                 thumb = t
         result.append(

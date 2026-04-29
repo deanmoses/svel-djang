@@ -78,16 +78,18 @@ from .edit_claims import (
     raise_form_error,
 )
 from .helpers import (
-    _build_rich_text,
-    _extract_image_attribution,
-    _extract_image_urls,
     _extract_variant_features,
     _get_feature_descendant_slugs,
-    _media_prefetch,
-    _serialize_credit,
-    _serialize_title_machine,
-    _serialize_uploaded_media,
+    serialize_credit,
+    serialize_title_machine,
 )
+from .images import (
+    extract_image_attribution,
+    extract_image_urls,
+    media_prefetch,
+    serialize_uploaded_media,
+)
+from .rich_text import build_rich_text
 from .schemas import (
     AlreadyDeletedSchema,
     CreditSchema,
@@ -302,7 +304,7 @@ def _build_model_list_qs(
 def _serialize_model_list(
     pm: MachineModel, *, min_rank: int | None = None
 ) -> dict[str, Any]:
-    thumbnail_url, _ = _extract_image_urls(
+    thumbnail_url, _ = extract_image_urls(
         pm.extra_data or {}, primary_media(pm), min_rank=min_rank
     )
     mfr = (
@@ -347,18 +349,18 @@ def _serialize_model_detail(pm: MachineModel) -> ModelDetailSchema:
     """
     min_rank = get_minimum_display_rank()
 
-    credits = [_serialize_credit(c) for c in pm.credits.all()]
+    credits = [serialize_credit(c) for c in pm.credits.all()]
 
     claims = active_claims(pm)
 
     media = all_media(pm)
     primary = [em for em in media if em.is_primary]
-    thumbnail_url, hero_image_url = _extract_image_urls(
+    thumbnail_url, hero_image_url = extract_image_urls(
         pm.extra_data or {}, primary or None, min_rank=min_rank
     )
-    image_attribution = _extract_image_attribution(pm.extra_data or {}, primary or None)
-    uploaded_media = _serialize_uploaded_media(media)
-    description = _build_rich_text(pm, "description", claims)
+    image_attribution = extract_image_attribution(pm.extra_data or {}, primary or None)
+    uploaded_media = serialize_uploaded_media(media)
+    description = build_rich_text(pm, "description", claims)
     variant_features = _extract_variant_features(pm.extra_data or {})
 
     variants = [
@@ -525,7 +527,7 @@ def _serialize_model_detail(pm: MachineModel) -> ModelDetailSchema:
             else None
         ),
         title_models=[
-            _serialize_title_machine(sibling, min_rank=min_rank)
+            serialize_title_machine(sibling, min_rank=min_rank)
             for sibling in (pm.title.machine_models.all() if pm.title else [])
             if sibling.variant_of_id is None
         ],
@@ -585,7 +587,7 @@ def _model_detail_qs() -> QuerySet[MachineModel]:
                 ),
             ),
             claims_prefetch(),
-            _media_prefetch(),
+            media_prefetch(),
         )
     )
 
@@ -709,7 +711,7 @@ def list_recent_models(request: HttpRequest) -> list[ModelRecentSchema]:
         if title_id in seen_titles:
             continue
         seen_titles.add(title_id)
-        thumbnail_url, _ = _extract_image_urls(m.extra_data or {}, min_rank=min_rank)
+        thumbnail_url, _ = extract_image_urls(m.extra_data or {}, min_rank=min_rank)
         results.append(
             ModelRecentSchema(
                 name=m.name,
@@ -851,7 +853,7 @@ def list_all_models(
     result: list[dict[str, Any]] = []
     for r in rows:
         mid = r.id
-        thumbnail_url, _ = _extract_image_urls(r.extra_data or {}, min_rank=min_rank)
+        thumbnail_url, _ = extract_image_urls(r.extra_data or {}, min_rank=min_rank)
 
         # Build search_text from bulk maps
         parts: list[str] = []

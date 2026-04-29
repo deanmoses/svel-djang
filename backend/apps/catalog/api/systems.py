@@ -39,10 +39,8 @@ from .entity_create import (
     validate_slug_format,
 )
 from .entity_crud import register_entity_delete_restore
-from .helpers import (
-    _build_rich_text,
-    _extract_image_urls,
-)
+from .images import extract_image_urls
+from .rich_text import build_rich_text
 from .schemas import (
     ClaimPatchSchema,
     EntityCreateInputSchema,
@@ -114,7 +112,7 @@ def _serialize_system_detail(system: System) -> SystemDetailSchema:
         if m.title is None:
             continue
         key = m.title.slug
-        thumbnail_url = _extract_image_urls(m.extra_data or {}, min_rank=min_rank)[0]
+        thumbnail_url = extract_image_urls(m.extra_data or {}, min_rank=min_rank)[0]
         if key not in accum:
             mfr = (
                 m.corporate_entity.manufacturer
@@ -156,7 +154,7 @@ def _serialize_system_detail(system: System) -> SystemDetailSchema:
     return SystemDetailSchema(
         name=system.name,
         slug=system.slug,
-        description=_build_rich_text(system, "description", active_claims(system)),
+        description=build_rich_text(system, "description", active_claims(system)),
         manufacturer=(
             EntityRef(name=system.manufacturer.name, slug=system.manufacturer.slug)
             if system.manufacturer

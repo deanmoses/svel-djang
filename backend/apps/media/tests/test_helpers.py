@@ -13,7 +13,7 @@ pytestmark = pytest.mark.django_db
 class TestAllMedia:
     def test_returns_list_when_prefetched(self):
         pm = make_machine_model(name="X", slug="x")
-        # simulate _media_prefetch() attaching the attr — it lives on
+        # simulate media_prefetch() attaching the attr — it lives on
         # prefetched querysets, not on bare model instances, so we don't
         # type it at the class level. setattr (vs direct attribute
         # assignment) silences mypy's attr-defined error.
@@ -24,7 +24,7 @@ class TestAllMedia:
     def test_raises_when_not_prefetched(self):
         pm = make_machine_model(name="X", slug="x")
 
-        with pytest.raises(AssertionError, match="_media_prefetch"):
+        with pytest.raises(AssertionError, match="media_prefetch"):
             all_media(pm)
 
 

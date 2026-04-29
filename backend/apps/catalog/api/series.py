@@ -23,11 +23,11 @@ from ._typing import HasTitleCount
 from .edit_claims import execute_claims, plan_scalar_field_claims
 from .entity_crud import register_entity_create, register_entity_delete_restore
 from .helpers import (
-    _build_rich_text,
-    _extract_image_urls,
-    _serialize_credit,
-    _serialize_title_ref,
+    serialize_credit,
+    serialize_title_ref,
 )
+from .images import extract_image_urls
+from .rich_text import build_rich_text
 from .schemas import (
     ClaimPatchSchema,
     CreditSchema,
@@ -100,11 +100,9 @@ def _serialize_series_detail(series: Series) -> SeriesDetailSchema:
     return SeriesDetailSchema(
         name=series.name,
         slug=series.slug,
-        description=_build_rich_text(series, "description", active_claims(series)),
-        titles=[
-            _serialize_title_ref(t, min_rank=min_rank) for t in series.titles.all()
-        ],
-        credits=[_serialize_credit(c) for c in series.credits.all()],
+        description=build_rich_text(series, "description", active_claims(series)),
+        titles=[serialize_title_ref(t, min_rank=min_rank) for t in series.titles.all()],
+        credits=[serialize_credit(c) for c in series.credits.all()],
     )
 
 
@@ -140,7 +138,7 @@ def list_series(request: HttpRequest) -> list[SeriesListItemSchema]:
         thumb = None
         for title in s.titles.all():
             for pm in title.machine_models.all():
-                t, _ = _extract_image_urls(pm.extra_data or {}, min_rank=min_rank)
+                t, _ = extract_image_urls(pm.extra_data or {}, min_rank=min_rank)
                 if t:
                     thumb = t
                     break
@@ -150,7 +148,7 @@ def list_series(request: HttpRequest) -> list[SeriesListItemSchema]:
             SeriesListItemSchema(
                 name=s.name,
                 slug=s.slug,
-                description=_build_rich_text(s, "description"),
+                description=build_rich_text(s, "description"),
                 title_count=cast(HasTitleCount, s).title_count,
                 thumbnail_url=thumb,
             )

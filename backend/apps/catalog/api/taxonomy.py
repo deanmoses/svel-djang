@@ -40,8 +40,10 @@ from .entity_crud import (
     register_entity_create,
     register_entity_delete_restore,
 )
-from .helpers import _build_rich_text, _extract_image_urls, _serialize_title_machine
+from .helpers import serialize_title_machine
+from .images import extract_image_urls
 from .people import PersonGridItemSchema
+from .rich_text import build_rich_text
 from .schemas import (
     ClaimPatchSchema,
     TitleModelSchema,
@@ -120,14 +122,14 @@ def _serialize_taxonomy(
         aliases = [a.value for a in obj.aliases.all()]
     # Dual-use serializer: called from list endpoints (no claims prefetch)
     # and detail endpoints (claims_prefetch applied). `getattr` with None
-    # lets _build_rich_text skip attribution for list callers; detail
+    # lets build_rich_text skip attribution for list callers; detail
     # callers get full attribution. Don't replace with active_claims() —
     # it would raise on the list path.
     return TaxonomySchema(
         name=obj.name,
         slug=obj.slug,
         display_order=obj.display_order,
-        description=_build_rich_text(
+        description=build_rich_text(
             obj, "description", getattr(obj, "active_claims", None)
         ),
         aliases=aliases,
@@ -507,7 +509,7 @@ def _serialize_reward_type_detail(rt: RewardType) -> RewardTypeDetailSchema:
     return RewardTypeDetailSchema(
         **_serialize_taxonomy(rt).model_dump(),
         machines=[
-            _serialize_title_machine(pm, min_rank=min_rank)
+            serialize_title_machine(pm, min_rank=min_rank)
             for pm in rt.machine_models.all()
         ],
     )
@@ -649,7 +651,7 @@ def _credit_role_people(cr: CreditRole) -> list[PersonGridItemSchema]:
         tm_id = person_thumb_model.get(pid)
         tm = thumb_models.get(tm_id) if tm_id else None
         if tm and tm.extra_data:
-            t, _ = _extract_image_urls(tm.extra_data, min_rank=min_rank)
+            t, _ = extract_image_urls(tm.extra_data, min_rank=min_rank)
             if t:
                 thumbnail = t
         out.append(

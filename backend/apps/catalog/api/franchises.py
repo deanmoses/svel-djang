@@ -22,10 +22,8 @@ from ..models import Franchise, MachineModel, Title
 from ._typing import HasTitleCount
 from .edit_claims import execute_claims, plan_scalar_field_claims
 from .entity_crud import register_entity_create, register_entity_delete_restore
-from .helpers import (
-    _build_rich_text,
-    _serialize_title_ref,
-)
+from .helpers import serialize_title_ref
+from .rich_text import build_rich_text
 from .schemas import ClaimPatchSchema, TitleRef
 
 # ---------------------------------------------------------------------------
@@ -106,11 +104,9 @@ def _serialize_franchise_detail(franchise: Franchise) -> FranchiseDetailSchema:
     return FranchiseDetailSchema(
         name=franchise.name,
         slug=franchise.slug,
-        description=_build_rich_text(
-            franchise, "description", active_claims(franchise)
-        ),
+        description=build_rich_text(franchise, "description", active_claims(franchise)),
         titles=[
-            _serialize_title_ref(t, min_rank=min_rank) for t in franchise.titles.all()
+            serialize_title_ref(t, min_rank=min_rank) for t in franchise.titles.all()
         ],
     )
 

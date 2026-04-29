@@ -25,10 +25,8 @@ from .edit_claims import (
     validate_scalar_fields,
 )
 from .entity_crud import register_entity_create, register_entity_delete_restore
-from .helpers import (
-    _build_rich_text,
-    _serialize_title_machine,
-)
+from .helpers import serialize_title_machine
+from .rich_text import build_rich_text
 from .schemas import (
     EntityRef,
     HierarchyClaimPatchSchema,
@@ -84,14 +82,14 @@ def _serialize_detail(theme: Theme) -> ThemeDetailSchema:
     return ThemeDetailSchema(
         name=theme.name,
         slug=theme.slug,
-        description=_build_rich_text(theme, "description", active_claims(theme)),
+        description=build_rich_text(theme, "description", active_claims(theme)),
         aliases=[a.value for a in theme.aliases.all()],
         parents=[EntityRef(name=t.name, slug=t.slug) for t in theme.parents.all()],
         children=[
             EntityRef(name=t.name, slug=t.slug) for t in theme.children.order_by("name")
         ],
         machines=[
-            _serialize_title_machine(pm, min_rank=min_rank)
+            serialize_title_machine(pm, min_rank=min_rank)
             for pm in theme.machine_models.all()
         ],
     )

@@ -26,11 +26,8 @@ from .edit_claims import (
     validate_scalar_fields,
 )
 from .entity_crud import register_entity_create, register_entity_delete_restore
-from .helpers import (
-    _build_rich_text,
-    _media_prefetch,
-    _serialize_uploaded_media,
-)
+from .images import media_prefetch, serialize_uploaded_media
+from .rich_text import build_rich_text
 from .schemas import (
     EntityRef,
     HierarchyClaimPatchSchema,
@@ -70,7 +67,7 @@ def _detail_qs() -> QuerySet[GameplayFeature]:
         Prefetch("children", queryset=GameplayFeature.objects.active()),
         "aliases",
         claims_prefetch(),
-        _media_prefetch(),
+        media_prefetch(),
     )
 
 
@@ -78,14 +75,14 @@ def _serialize_detail(feature: GameplayFeature) -> GameplayFeatureDetailSchema:
     return GameplayFeatureDetailSchema(
         name=feature.name,
         slug=feature.slug,
-        description=_build_rich_text(feature, "description", active_claims(feature)),
+        description=build_rich_text(feature, "description", active_claims(feature)),
         aliases=[a.value for a in feature.aliases.all()],
         parents=[EntityRef(name=p.name, slug=p.slug) for p in feature.parents.all()],
         children=[
             EntityRef(name=c.name, slug=c.slug)
             for c in feature.children.order_by("name")
         ],
-        uploaded_media=_serialize_uploaded_media(all_media(feature)),
+        uploaded_media=serialize_uploaded_media(all_media(feature)),
     )
 
 

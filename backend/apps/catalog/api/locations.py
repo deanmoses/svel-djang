@@ -30,7 +30,8 @@ from ..models import (
 )
 from ..services.location_paths import lookup_child_division
 from ._typing import HasModelCount
-from .helpers import _build_rich_text, _first_thumbnail
+from .images import first_thumbnail
+from .rich_text import build_rich_text
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -99,7 +100,7 @@ class _LocationNode:
     aliases: tuple[str, ...]
     # Pre-rendered at cache-build time so public detail reads stay
     # zero-query. Description rendering has no rank dependency
-    # (``_build_rich_text`` only consults claims for attribution; rank
+    # (``build_rich_text`` only consults claims for attribution; rank
     # gating in this module is image-only and runs per-request via
     # ``_get_manufacturers_for_pks``), so caching the rendered schema
     # is safe.
@@ -128,7 +129,7 @@ def _get_location_tree() -> _LocationTree:
         return cast(_LocationTree, result)
 
     # Load all locations with parent chains (up to 4 levels deep).
-    # ``aliases`` + ``claims_prefetch()`` feed ``_build_rich_text`` so
+    # ``aliases`` + ``claims_prefetch()`` feed ``build_rich_text`` so
     # the rendered description can be cached per node.
     all_locs = list(
         Location.objects.active()
@@ -170,7 +171,7 @@ def _get_location_tree() -> _LocationTree:
             short_name=loc.short_name,
             code=loc.code,
             aliases=tuple(a.value for a in loc.aliases.all()),
-            description=_build_rich_text(loc, "description", active_claims(loc)),
+            description=build_rich_text(loc, "description", active_claims(loc)),
             divisions=tuple(loc.divisions or ()),
         )
         children_index.setdefault(parent_path, []).append(loc.location_path)
@@ -253,7 +254,7 @@ def _get_manufacturers_for_pks(pks: Iterable[int]) -> list[LocationManufacturerS
             name=mfr.name,
             slug=mfr.slug,
             model_count=cast(HasModelCount, mfr).model_count,
-            thumbnail_url=_first_thumbnail(mfr.entities.all(), min_rank=min_rank),
+            thumbnail_url=first_thumbnail(mfr.entities.all(), min_rank=min_rank),
         )
         for mfr in qs
     ]
