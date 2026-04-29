@@ -1,4 +1,4 @@
-"""Contract tests for the wikilinks two-registry split.
+"""Tests for the wikilinks renderer/picker registries.
 
 Covers the four invariants the WikilinkableModel hoist locks in:
 - non-Wikilinkable LinkableModels render but are absent from the picker;
@@ -7,6 +7,8 @@ Covers the four invariants the WikilinkableModel hoist locks in:
   ``(public_id, name)`` shape;
 - the renderer's ``LinkType`` registry and the ingest validator's
   catalog-model lookup agree on type-key → model resolution.
+
+Plus smoke tests on registry contents (``TestLinkRegistry``).
 """
 
 from __future__ import annotations
@@ -15,9 +17,13 @@ import pytest
 from django.apps import apps as django_apps
 
 from apps.catalog._walks import catalog_models
-from apps.core.markdown_links import get_enabled_link_types, get_link_type
 from apps.core.schemas import LinkTargetSchema
-from apps.core.wikilinks import get_picker_type, get_picker_types
+from apps.core.wikilinks import (
+    get_enabled_link_types,
+    get_link_type,
+    get_picker_type,
+    get_picker_types,
+)
 
 # Explicit post-hoist target — every model that should appear in the
 # wikilink picker, by ``entity_type`` (kebab-case singular). Hard-coded so a
@@ -137,3 +143,41 @@ def test_every_catalog_picker_type_has_matching_link_type(name):
         f"PickerType {name!r} has no matching LinkType — the renderer "
         f"can't resolve [[{name}:public-id]]"
     )
+
+
+class TestLinkRegistry:
+    """Smoke tests on ``LinkType`` registry contents."""
+
+    def test_manufacturer_registered(self):
+        lt = get_link_type("manufacturer")
+        assert lt is not None
+        assert lt.public_id_field == "slug"
+        assert lt.url_pattern == "/manufacturers/{public_id}"
+
+    def test_system_registered(self):
+        lt = get_link_type("system")
+        assert lt is not None
+        assert lt.url_pattern == "/systems/{public_id}"
+
+    def test_enabled_link_types_non_empty(self):
+        types = get_enabled_link_types()
+        names = [lt.name for lt in types]
+        assert "manufacturer" in names
+        assert "system" in names
+
+    def test_picker_types_include_custom_flow(self):
+        """``get_picker_types()`` includes types with ``flow='custom'``
+        (citations) alongside standard-flow types."""
+        types = get_picker_types()
+        types_by_name = {t["name"]: t for t in types}
+        assert "cite" in types_by_name
+        assert types_by_name["cite"]["flow"] == "custom"
+
+    def test_picker_types_have_flow_field(self):
+        for t in get_picker_types():
+            assert "flow" in t, f"Missing 'flow' field on {t['name']}"
+
+    def test_standard_types_have_standard_flow(self):
+        types = get_picker_types()
+        types_by_name = {t["name"]: t for t in types}
+        assert types_by_name["manufacturer"]["flow"] == "standard"

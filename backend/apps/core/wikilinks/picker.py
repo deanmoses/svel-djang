@@ -1,6 +1,6 @@
 """Wikilink picker registry — the type-picker the markdown editor surfaces.
 
-Sibling to :mod:`apps.core.markdown_links`, which owns the *renderer* registry
+Sibling to :mod:`apps.core.wikilinks.types`, which owns the *renderer* registry
 (every URL-addressable entity that ``[[<entity-type>:<public-id>]]`` can resolve to). This
 module owns the *picker* registry — the strict subset of types the authoring
 UI offers when a user types ``[[``.

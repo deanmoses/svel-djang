@@ -168,7 +168,7 @@ def validate_cross_entity_wikilinks(export_dir: Path, stdout, stderr) -> None:
 
     # Permissive on the id capture group — Location's ``location_path``
     # contains ``/``. The rendering parser at
-    # ``apps/core/markdown_links.py`` is equally permissive (``[^\]]+``);
+    # ``apps/core/markdown/render.py`` is equally permissive (``[^\]]+``);
     # well-formedness is a lookup concern, not a tokenization concern, so
     # broken/malformed refs surface as broken-ref warnings rather than
     # being silently skipped.

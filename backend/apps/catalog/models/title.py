@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING, ClassVar
 from django.core.validators import MinValueValidator
 from django.db import models
 
+from apps.core.markdown import MarkdownField
 from apps.core.models import (
-    MarkdownField,
     SluggedModel,
     TimeStampedModel,
     field_not_blank,

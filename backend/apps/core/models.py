@@ -12,8 +12,6 @@ from django.db.models.functions import Lower, Now
 from django.db.models.signals import post_delete
 from django.utils.text import slugify
 
-from .validators import validate_no_mojibake as _validate_no_mojibake
-
 
 class TimeStampedModel(models.Model):
     """Abstract base adding created_at / updated_at timestamps."""
@@ -303,35 +301,6 @@ def status_valid() -> models.CheckConstraint:
         ),
         name="%(app_label)s_%(class)s_status_valid",
     )
-
-
-# ---------------------------------------------------------------------------
-# Markdown field
-# ---------------------------------------------------------------------------
-
-
-class MarkdownField(models.TextField[str, str]):
-    """A TextField containing markdown with ``[[<entity-type>:<public-id>]]`` links.
-
-    The system introspects models for MarkdownField instances to:
-    - Auto-discover which fields need reference syncing
-    - Auto-generate ``{field}_html`` rendered output in API responses
-
-    Includes ``validate_no_mojibake`` as a default validator to reject
-    encoding-corrupted text at the model level.
-    """
-
-    default_validators = [_validate_no_mojibake]
-
-    # Django's migration protocol; see Field.deconstruct.
-    def deconstruct(self) -> Any:  # noqa: ANN401
-        name, _path, args, kwargs = super().deconstruct()
-        return name, "django.db.models.TextField", args, kwargs
-
-
-def get_markdown_fields(model: type[models.Model]) -> list[str]:
-    """Return field names of all MarkdownField instances on a model."""
-    return [f.name for f in model._meta.get_fields() if isinstance(f, MarkdownField)]
 
 
 # ---------------------------------------------------------------------------

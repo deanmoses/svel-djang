@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from django.db import models
 
+from apps.core.markdown import MarkdownField
 from apps.core.models import (
-    MarkdownField,
     SluggedModel,
     TimeStampedModel,
     field_not_blank,

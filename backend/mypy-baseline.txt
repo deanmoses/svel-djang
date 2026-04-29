@@ -24,7 +24,6 @@ apps/catalog/ingestion/fandom_wiki.py:0: error: Missing type arguments for gener
 apps/catalog/ingestion/fandom_wiki.py:0: error: Missing type arguments for generic type "dict"  [type-arg]
 apps/catalog/ingestion/fandom_wiki.py:0: error: Missing type arguments for generic type "dict"  [type-arg]
 apps/catalog/ingestion/fandom_wiki.py:0: error: Missing type arguments for generic type "dict"  [type-arg]
-apps/core/markdown.py:0: error: Missing type arguments for generic type "Match"  [type-arg]
 apps/catalog/management/commands/validate_catalog.py:0: error: Function is missing a type annotation for one or more parameters  [no-untyped-def]
 apps/catalog/management/commands/validate_catalog.py:0: error: Value of type "Person@AnnotatedWith[TypedDict({'lower_name': Any, 'cnt': int})]" is not indexable  [index]
 apps/catalog/management/commands/validate_catalog.py:0: error: Value of type "Person@AnnotatedWith[TypedDict({'lower_name': Any, 'cnt': int})]" is not indexable  [index]

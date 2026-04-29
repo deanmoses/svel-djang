@@ -23,7 +23,7 @@ def _format_citation_link(
 
 
 # Return is dict[str, Any] (not a TypedDict) because LinkType.collect_metadata
-# is typed as ``Callable[[Any, int], dict]`` in apps.core.markdown_links; a
+# is typed as ``Callable[[Any, int], dict]`` in apps.core.wikilinks.types; a
 # TypedDict isn't assignable to a bare ``dict`` parameter under strict mypy.
 def _collect_citation_metadata(obj: CitationInstance, index: int) -> dict[str, Any]:
     """Collect structured metadata for a citation instance.
@@ -52,8 +52,12 @@ class ProvenanceConfig(AppConfig):
     verbose_name = "Provenance"
 
     def ready(self) -> None:
-        from apps.core.markdown_links import LinkType, register
-        from apps.core.wikilinks import PickerType, register_picker
+        from apps.core.wikilinks import (
+            LinkType,
+            PickerType,
+            register,
+            register_picker,
+        )
 
         register(
             LinkType(

@@ -36,8 +36,8 @@ def _sync_markdown_references(obj: models.Model) -> None:
     Always calls sync_references, even for empty fields, so that stale
     references are cleaned up when a field is blanked.
     """
-    from apps.core.markdown_links import sync_references
-    from apps.core.models import get_markdown_fields
+    from apps.core.markdown import get_markdown_fields
+    from apps.core.markdown.references import sync_references
 
     for field_name in get_markdown_fields(type(obj)):
         sync_references(obj, getattr(obj, field_name, "") or "")
@@ -250,7 +250,7 @@ def _resolve_bulk(
     model_class.objects.bulk_update(all_objs, update_fields, batch_size=100)  # type: ignore[attr-defined]
 
     # Sync markdown backlinks (RecordReference) for bulk-resolved objects.
-    from apps.core.models import get_markdown_fields
+    from apps.core.markdown import get_markdown_fields
 
     if get_markdown_fields(model_class):
         for obj in all_objs:

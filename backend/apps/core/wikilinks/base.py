@@ -10,15 +10,15 @@ must not appear in the picker (e.g. Location) inherit
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Any, ClassVar
+from typing import ClassVar
 
 from apps.core.models import LinkableModel
 from apps.core.schemas import LinkTargetSchema
 
 
-def _default_link_serialize(obj: Any) -> LinkTargetSchema:  # noqa: ANN401
+def _default_link_serialize(linkable: LinkableModel) -> LinkTargetSchema:
     """Default serializer for autocomplete results."""
-    return LinkTargetSchema(ref=obj.public_id, label=str(obj.name))
+    return LinkTargetSchema(ref=linkable.public_id, label=linkable.name)
 
 
 class WikilinkableModel(LinkableModel):
@@ -38,9 +38,9 @@ class WikilinkableModel(LinkableModel):
     link_autocomplete_search_fields: ClassVar[tuple[str, ...]] = ("name__icontains",)
     link_autocomplete_ordering: ClassVar[tuple[str, ...]] = ("name",)
     link_autocomplete_select_related: ClassVar[tuple[str, ...]] = ()
-    link_autocomplete_serialize: ClassVar[Callable[[Any], LinkTargetSchema]] = (
-        staticmethod(_default_link_serialize)
-    )
+    link_autocomplete_serialize: ClassVar[
+        Callable[[LinkableModel], LinkTargetSchema]
+    ] = staticmethod(_default_link_serialize)
 
     class Meta:
         abstract = True

@@ -20,7 +20,8 @@ class CatalogConfig(AppConfig):
     def _register_reference_cleanup() -> None:
         from django.apps import apps
 
-        from apps.core.models import MarkdownField, register_reference_cleanup
+        from apps.core.markdown import MarkdownField
+        from apps.core.models import register_reference_cleanup
 
         models_with_markdown = [
             model
@@ -40,7 +41,7 @@ class CatalogConfig(AppConfig):
         wikilink picker (Location). Picker presentation is a separate registry;
         see :meth:`_register_picker_types`.
         """
-        from apps.core.markdown_links import LinkType, register
+        from apps.core.wikilinks import LinkType, register
 
         from ._walks import linkable_models
 
