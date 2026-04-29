@@ -10,18 +10,16 @@ This is the second of three sequential plans in the Location-promotion chain:
 2. **This plan** — the full Location CRUD surface (write router, frontend, tests).
 3. [ModelDrivenWikilinkableMetadata.md](ModelDrivenWikilinkableMetadata.md) — the wikilink picker mixin (Location stays out by absent inheritance).
 
-This plan ships as a set of **sequential PRs**. Three are contained, cross-cutting prerequisites that touch every existing caller and must stay behavior-identical for shipped entities; bundling any of them with the Location surface would force a reviewer to evaluate independent abstractions in one diff. Each prerequisite gets its own focused PR and a fresh AI session implements against the landed result:
+All cross-cutting prerequisites have landed; this plan now covers only the Location CRUD surface itself. For reference, the prework was:
 
-1. Backend: extend `register_entity_create` with extension hooks. **DONE** — see §"Prerequisite (DONE): extension hooks on `register_entity_create`" for the API reference Location uses.
-2. Frontend: preserve slashes in `public_id` path params at the openapi-fetch boundary (see §"Prerequisite: preserve slashes in `public_id` path params").
-3. Frontend: make `catalog-meta.test.ts` segment-aware (see §"Prerequisite: make `catalog-meta.test.ts` segment-aware").
-4. The Location CRUD surface itself — everything else in this plan.
-
-The frontend `slug` → `public_id` rename in the shared delete / provenance / DeletePage layer landed separately on this branch as a self-contained cleanup; the shared layer now consistently uses `public_id`, so Location's wrappers can pass `public_id={path}` without naming drift.
+1. Backend: extension hooks on `register_entity_create` — see §"Create-factory hooks" below for the API Location uses.
+2. Frontend: `client.ts` preserves slashes in `public_id` path params (decodes `%2F` → `/` in `URL.pathname` via the existing `onRequest` middleware). Invisible to callers; Location's multi-segment `public_id` reaches the server as `/api/locations/usa/il/chicago/…` automatically.
+3. Frontend: `catalog-meta.test.ts` is segment-aware (`ROUTE_DIR_TO_KEY` carries `{ key, segment }`; both `[slug]` and `[...path]` are discovered). `'location'` remains in `DEFERRED_KEYS` and the Location PR drops it.
+4. Shared delete / provenance / DeletePage layer was renamed `slug` → `public_id`. Location's wrappers pass `public_id={path}`.
 
 Foundational work landed earlier in [ModelDrivenLinkability.md](ModelDrivenLinkability.md): generic URL identity and shared CRUD-factory contracts (`public_id_field`, `public_id`, `:path` route params, page-level edit-history / sources lookup by `(entity_type, public_id)`, and factory support for non-`slug` public IDs).
 
-Location CRUD is the proof that that work actually generalized. Location is the first model that needs a multi-segment `public_id` (`location_path`) and a non-`slug` FK claim lookup (`claim_fk_lookups = {"parent": "location_path"}`). If Location can reach create, restore, edit-history, and sources through the shared factories/endpoints without Location-specific overrides, the Linkability abstraction is doing real work.
+Location CRUD needs to be the proof that that work actually generalized. Location is the first model that needs a multi-segment `public_id` (`location_path`) and a non-`slug` FK claim lookup (`claim_fk_lookups = {"parent": "location_path"}`). If Location can reach create, restore, edit-history, and sources through the shared factories/endpoints without Location-specific overrides, the Linkability abstraction is doing real work.
 
 The validation criterion:
 
@@ -65,11 +63,9 @@ class Location(CatalogModel, TimeStampedModel):
 
 The M2M is the join-table reverse manager Theme uses for `machine_models` — `location.corporate_entities.active()` resolves through `CorporateEntityLocation` and filters by the CE's status, which is exactly the "block if any row in the subtree has an active `CorporateEntityLocation`" semantic. No data migration is required (the through table already exists); only the Django-side relationship descriptor is added.
 
-### Prerequisite (DONE): extension hooks on `register_entity_create`
+### Create-factory hooks
 
-The shared create factory at [`entity_crud.py`](../../../backend/apps/catalog/api/entity_crud.py) gained the hooks Location needs, plus a primitive extraction. The "Write router" section below uses these directly.
-
-API available to Location's create routes:
+API available to Location's create routes on the shared factory at [`entity_crud.py`](../../../backend/apps/catalog/api/entity_crud.py):
 
 - `body_schema: type[EntityCreateInputSchema] | None` — replaces the request body type. Subclass-checked at registration. Used by Location top-level (carries `divisions`) and child create.
 - `extra_create_fields_builder: (data, parent) -> (row_kwargs, claim_specs)` — derived columns + matching claims, merged into the standard row/claim trio. One builder, not two, so callers derive shared values (e.g. `location_type`) once.
@@ -186,31 +182,6 @@ Populate it with `try_derive_child_location_type(location)` — `None` when divi
 
 ## Frontend
 
-### Prerequisite: preserve slashes in `public_id` path params
-
-**This prerequisite ships in its own PR, before any of the Location frontend work below.** Like the `slug` → `public_id` rename that landed earlier on this branch, it's a cross-cutting shared-layer change that must stay byte-equivalent for shipped entities and unblocks the first multi-segment caller (Location). After it lands, a fresh AI session implements the Location frontend against the slash-safe shared layer.
-
-The typed client uses [`openapi-fetch`](../../../frontend/src/lib/api/client.ts), which percent-encodes `/` in path parameters by default — verified: `params.path.public_id = 'usa/il/chicago'` produces `/api/.../usa%2Fil%2Fchicago/`. No shipped entity has a multi-segment `public_id` today, so the bug is latent. Location is the first caller for which it manifests, and the fix has nothing Location-specific about it; it belongs at the shared boundary.
-
-The fix lives in `createApiClient` in [`client.ts`](../../../frontend/src/lib/api/client.ts) as an `onRequest` middleware that rewrites the outgoing request's URL pathname, decoding `%2F` → `/` before the request is sent. We already have an `onRequest` middleware there for CSRF; the URL rewrite is a sibling concern and can sit in the same middleware (or a second `client.use()` — either is fine).
-
-This is a one-place change with zero caller migration: every shared loader (`delete-flow.ts`, `provenance-loaders.ts`, `delete-preview-loader.ts`, `media-api.ts`, and every future loader) goes through `client`, so they all pick up the fix for free without losing openapi-fetch's templated-path typing.
-
-Why the rewrite is safe:
-
-- `/` is a reserved URL character. No single-segment `public_id` can ever contain a literal `/`, so a `%2F` appearing in the pathname always came from openapi-fetch encoding a `/` we want preserved. Decoding it back is a no-op for shipped entities and the intended behavior for multi-segment ones.
-- Other reserved characters (`?`, `#`, `%`) stay encoded because we only target `%2F` (and `%2f`). The middleware is not a general "decode reserved chars" hammer.
-- The query string is untouched — only `URL.pathname` is rewritten.
-
-The "server round-trip" question (does Caddy / gunicorn preserve `%2F` in `PATH_INFO`?) is moot: the middleware sends `/` literal, so the server never sees `%2F` to mishandle.
-
-Tests (all in `client.test.ts`):
-
-- Unit: a request to a templated path with a multi-segment param (`/api/locations/{public_id}/delete/` with `public_id: 'usa/il/chicago'`) hits `fetch` with URL pathname `/api/locations/usa/il/chicago/delete/`, slashes preserved.
-- Unit: a single-segment `public_id` (`'usa'`) is byte-identical before and after — regression check that shipped entities are untouched.
-- Negative: a `public_id` containing `?`, `#`, `%`, or other reserved characters stays correctly encoded — the middleware decodes only `%2F`/`%2f`, not arbitrary percent-escapes.
-- Negative: `%2F` in the **query string** is left alone (only `URL.pathname` is rewritten).
-
 ### Routes and components
 
 Add the missing write routes under `frontend/src/routes/locations/`.
@@ -242,18 +213,9 @@ Remove the frontend `EXPECTED_CHILD` fallback. `newChildLabel(profile)` should p
 2. `profile.expected_child_type`, when there are no children.
 3. `null`, which suppresses the "+ New ..." action rather than showing a wrong label.
 
-### Prerequisite: make `catalog-meta.test.ts` segment-aware
+### Un-defer Location in `catalog-meta.test.ts`
 
-**This prerequisite ships in its own PR, before un-deferring Location.** It's a contained change to a single test file, but it touches the discovery shape every other entity already passes under, so it deserves its own focused diff against the existing callers (where `'location'` stays in `DEFERRED_KEYS` until the Location frontend lands).
-
-The parity test in [`catalog-meta.test.ts`](../../../frontend/src/lib/api/catalog-meta.test.ts) currently hardcodes `[slug]` in its discovery glob, regex, subroute glob, and subroute path construction (lines 39, 42, 93, 99). Location uses `[...path]`, so just removing `'location'` from `DEFERRED_KEYS` (line 35) is not enough — the test would either silently miss Location (the `[slug]` glob doesn't match) or fail at the subroute check looking for `locations/[slug]/edit-history` instead of `locations/[...path]/edit-history`.
-
-Extend the test to be segment-aware before un-deferring Location. Replace `ROUTE_DIR_TO_KEY: Record<string, CatalogEntityKey>` with `Record<string, { key: CatalogEntityKey; segment: '[slug]' | '[...path]' }>`, set `locations: { key: 'location', segment: '[...path]' }`, and update both the discovery and subroute checks:
-
-- Discovery: union two globs (`'/src/routes/*/[slug]/+*'` and `'/src/routes/*/[...path]/+*'`) and update the regex to capture either segment.
-- Subroute: read `segment` from the entry instead of literal `[slug]` when constructing `${plural}/${segment}/${subroute}`.
-
-After the test extension lands, drop `'location'` from `DEFERRED_KEYS` so Location parity is enforced like every other entity.
+The test is already segment-aware and `locations: { key: 'location', segment: '[...path]' }` is registered in `ROUTE_DIR_TO_KEY`. Drop `'location'` from `DEFERRED_KEYS` once Location's edit-history and sources subroutes exist so parity is enforced like every other entity.
 
 ## Tests
 
@@ -280,7 +242,7 @@ Frontend tests:
 - Location helper tests cover existing-child label, server-supplied `expected_child_type`, and `null` suppression.
 - `saveLocationClaims` sends `public_id`, not `slug`.
 - Delete page renders blocked and unblocked states.
-- `catalog-meta.test.ts` is segment-aware: `ROUTE_DIR_TO_KEY` carries a `segment` per entity, both `[slug]` and `[...path]` are discovered, and the subroute test reads the per-entity segment rather than hardcoding `[slug]`. Verified by `'location'` being absent from `DEFERRED_KEYS` and Location's edit-history/sources subroutes passing under `[...path]`.
+- `catalog-meta.test.ts` passes Location parity: `'location'` is dropped from `DEFERRED_KEYS` and Location's edit-history/sources subroutes are discovered under `[...path]`.
 
 ## Verification
 
