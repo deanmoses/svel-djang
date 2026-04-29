@@ -311,7 +311,7 @@ def status_valid() -> models.CheckConstraint:
 
 
 class MarkdownField(models.TextField[str, str]):
-    """A TextField containing markdown with ``[[entity:public_id]]`` links.
+    """A TextField containing markdown with ``[[<entity-type>:<public-id>]]`` links.
 
     The system introspects models for MarkdownField instances to:
     - Auto-discover which fields need reference syncing
@@ -496,7 +496,7 @@ def register_reference_cleanup(*model_classes: type[models.Model]) -> None:
     """Connect post_delete signals to clean up RecordReference rows for the given models.
 
     Call from AppConfig.ready() for every model whose text fields can contain
-    ``[[type:ref]]`` markdown links (i.e. any model passed to ``sync_references``).
+    ``[[<entity-type>:<public-id>]]`` markdown links (i.e. any model passed to ``sync_references``).
     """
 
     def _cleanup_references(
