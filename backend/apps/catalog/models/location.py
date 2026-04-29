@@ -46,13 +46,9 @@ class Location(CatalogModel, TimeStampedModel):
     # ``location_path`` from ``parent.location_path + slug``. Surface
     # collision errors keyed under ``slug`` so the form binds them.
     public_id_form_field: ClassVar[str] = "slug"
-    # Suppress Location from the wikilink-picker autocomplete until
-    # WikilinkableModel (see ModelDrivenWikilinkableMetadata.md) makes
-    # picker presentation an explicit opt-in. Existing ``[[location:...]]``
-    # references still render — only authoring through the picker is gated.
-    # ``link_autocomplete_serialize = None`` makes the picker filter in
-    # ``apps.core.markdown_links.get_autocomplete_types`` exclude this type.
-    link_autocomplete_serialize: ClassVar[None] = None
+    # Location is intentionally absent from the wikilink picker: it does not
+    # inherit ``WikilinkableModel``. Existing ``[[location:...]]`` markdown
+    # still renders — only authoring through the picker is gated.
 
     claims_exempt: ClassVar[frozenset[str]] = frozenset({"location_path"})
     claim_fk_lookups: ClassVar[dict[str, str]] = {"parent": "location_path"}

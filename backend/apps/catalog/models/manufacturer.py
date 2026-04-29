@@ -19,6 +19,7 @@ from apps.core.models import (
     unique_ci,
 )
 from apps.core.validators import validate_no_mojibake
+from apps.core.wikilinks import WikilinkableModel
 from apps.media.models import MediaSupportedModel
 
 from .base import AliasModel, CatalogModel
@@ -39,6 +40,7 @@ class Manufacturer(
     SluggedModel,
     MediaSupportedModel,
     TimeStampedModel,
+    WikilinkableModel,
 ):
     """A pinball machine brand (user-facing grouping).
 
@@ -131,6 +133,7 @@ class CorporateEntity(
     CatalogModel,
     SluggedModel,
     TimeStampedModel,
+    WikilinkableModel,
 ):
     """A specific corporate incarnation of a manufacturer brand.
 

@@ -18,6 +18,7 @@ from apps.core.models import (
     status_valid,
 )
 from apps.core.validators import validate_no_mojibake
+from apps.core.wikilinks import WikilinkableModel
 from apps.media.models import MediaSupportedModel
 
 from .base import AliasModel, CatalogModel
@@ -34,6 +35,7 @@ class Person(
     SluggedModel,
     MediaSupportedModel,
     TimeStampedModel,
+    WikilinkableModel,
 ):
     """A person involved in pinball machine design (designer, artist, etc.)."""
 

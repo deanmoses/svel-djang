@@ -18,6 +18,7 @@ from apps.core.models import (
     unique_ci,
 )
 from apps.core.validators import validate_no_mojibake
+from apps.core.wikilinks import WikilinkableModel
 
 from .base import AliasModel, CatalogModel
 
@@ -28,6 +29,7 @@ class Theme(
     CatalogModel,
     SluggedModel,
     TimeStampedModel,
+    WikilinkableModel,
 ):
     """A thematic tag for pinball machines (e.g., Sports, Horror, Licensed).
 

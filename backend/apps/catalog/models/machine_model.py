@@ -19,6 +19,7 @@ from apps.core.models import (
     status_valid,
 )
 from apps.core.validators import validate_no_mojibake
+from apps.core.wikilinks import WikilinkableModel
 from apps.media.models import MediaSupportedModel
 
 from .base import CatalogModel
@@ -51,6 +52,7 @@ class MachineModel(
     SluggedModel,
     MediaSupportedModel,
     TimeStampedModel,
+    WikilinkableModel,
 ):
     """A pinball machine title/design — the resolved/materialized view.
 

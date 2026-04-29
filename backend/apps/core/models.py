@@ -366,14 +366,10 @@ class LinkableModel(models.Model):
     UI labels derive from them; they do not drive backend behavior beyond
     URL and UI consistency.
 
-    Class attributes for link registration (all optional):
-    - link_type_name: str — overrides the auto-derived type name
-    - link_label: str — human-readable label for type picker
-    - link_description: str — brief description
-    - link_sort_order: int — display order in type picker (lower = higher)
-    - link_autocomplete_search_fields: tuple[str, ...] — model fields to search
-    - link_autocomplete_ordering: tuple[str, ...] — result ordering
-    - link_autocomplete_select_related: tuple[str, ...] — eager loading
+    Subclasses that should appear in the wikilink autocomplete picker
+    additionally inherit ``apps.core.wikilinks.WikilinkableModel``, which
+    carries the picker-presentation contract (label, sort order, autocomplete
+    config).
 
     ``link_url_pattern`` is derived from ``entity_type_plural`` at subclass
     creation time — do not declare it by hand.

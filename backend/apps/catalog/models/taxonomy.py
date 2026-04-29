@@ -18,6 +18,7 @@ from apps.core.models import (
     unique_ci,
 )
 from apps.core.validators import validate_no_mojibake
+from apps.core.wikilinks import WikilinkableModel
 
 from .base import AliasModel, CatalogModel
 
@@ -46,6 +47,7 @@ class TechnologyGeneration(
     CatalogModel,
     SluggedModel,
     TimeStampedModel,
+    WikilinkableModel,
 ):
     """A major technological era: Pure Mechanical, Electromechanical, Solid State.
 
@@ -77,6 +79,7 @@ class TechnologySubgeneration(
     CatalogModel,
     SluggedModel,
     TimeStampedModel,
+    WikilinkableModel,
 ):
     """A subdivision within a TechnologyGeneration.
 
@@ -114,6 +117,7 @@ class DisplayType(
     CatalogModel,
     SluggedModel,
     TimeStampedModel,
+    WikilinkableModel,
 ):
     """A display technology category: Score Reels, DMD, LCD, etc.
 
@@ -145,6 +149,7 @@ class DisplaySubtype(
     CatalogModel,
     SluggedModel,
     TimeStampedModel,
+    WikilinkableModel,
 ):
     """A subdivision within a DisplayType.
 
@@ -182,6 +187,7 @@ class Cabinet(
     CatalogModel,
     SluggedModel,
     TimeStampedModel,
+    WikilinkableModel,
 ):
     """Physical cabinet form factor: Floor, Tabletop, Countertop, Cocktail."""
 
@@ -210,6 +216,7 @@ class GameFormat(
     CatalogModel,
     SluggedModel,
     TimeStampedModel,
+    WikilinkableModel,
 ):
     """Game format: Pinball, Bagatelle, Shuffle Alley, Pitch-and-Bat."""
 
@@ -238,6 +245,7 @@ class RewardType(
     CatalogModel,
     SluggedModel,
     TimeStampedModel,
+    WikilinkableModel,
 ):
     """A pinball reward mechanism: replay, add-a-ball, free-play, etc.
 
@@ -309,6 +317,7 @@ class Tag(
     CatalogModel,
     SluggedModel,
     TimeStampedModel,
+    WikilinkableModel,
 ):
     """A classification tag: Home Use, Prototype, Widebody, Remake, etc.
 
@@ -360,6 +369,7 @@ class CreditRole(
     CatalogModel,
     SluggedModel,
     TimeStampedModel,
+    WikilinkableModel,
 ):
     """A credit role category: Design, Art, Software, etc."""
 

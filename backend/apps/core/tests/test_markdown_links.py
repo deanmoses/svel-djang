@@ -7,13 +7,13 @@ import pytest
 from apps.core.markdown_links import (
     convert_authoring_to_storage,
     convert_storage_to_authoring,
-    get_autocomplete_types,
     get_enabled_link_types,
     get_link_type,
     render_all_links,
     sync_references,
 )
 from apps.core.models import RecordReference
+from apps.core.wikilinks import get_picker_types
 
 
 @pytest.fixture(autouse=True)
@@ -92,21 +92,20 @@ class TestLinkRegistry:
         assert "manufacturer" in names
         assert "system" in names
 
-    def test_autocomplete_types_include_custom_flow(self):
-        """get_autocomplete_types() includes types with autocomplete_flow='custom'
-        even if they have no autocomplete_serialize."""
-        types = get_autocomplete_types()
+    def test_picker_types_include_custom_flow(self):
+        """``get_picker_types()`` includes types with ``flow='custom'``
+        (citations) alongside standard-flow types."""
+        types = get_picker_types()
         types_by_name = {t["name"]: t for t in types}
         assert "cite" in types_by_name
         assert types_by_name["cite"]["flow"] == "custom"
 
-    def test_autocomplete_types_have_flow_field(self):
-        """Every type returned by get_autocomplete_types() has a 'flow' field."""
-        for t in get_autocomplete_types():
+    def test_picker_types_have_flow_field(self):
+        for t in get_picker_types():
             assert "flow" in t, f"Missing 'flow' field on {t['name']}"
 
     def test_standard_types_have_standard_flow(self):
-        types = get_autocomplete_types()
+        types = get_picker_types()
         types_by_name = {t["name"]: t for t in types}
         assert types_by_name["manufacturer"]["flow"] == "standard"
 
@@ -214,7 +213,6 @@ class TestCitationLinkType:
         assert lt is not None
         assert lt.public_id_field is None
         assert lt.format_link is not None
-        assert lt.sort_order == 1
 
     def test_render_single_citation(self, citation_instance):
         text = f"Production was 4,000 units.[[cite:{citation_instance.pk}]]"

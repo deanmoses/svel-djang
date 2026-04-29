@@ -39,8 +39,13 @@ def check_linkable_models(
     seen_entity_type: dict[str, type] = {}
     seen_entity_type_plural: dict[str, type] = {}
 
+    visited: set[type] = set()
+
     def walk(cls: type[LinkableModel]) -> None:
         for subclass in cls.__subclasses__():
+            if subclass in visited:
+                continue
+            visited.add(subclass)
             walk(subclass)
             meta = getattr(subclass, "_meta", None)
             if meta is None or meta.abstract:

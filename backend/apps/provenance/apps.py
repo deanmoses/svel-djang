@@ -53,19 +53,28 @@ class ProvenanceConfig(AppConfig):
 
     def ready(self) -> None:
         from apps.core.markdown_links import LinkType, register
+        from apps.core.wikilinks import PickerType, register_picker
 
         register(
             LinkType(
                 name="cite",
                 model_path="provenance.CitationInstance",
-                label="Citation",
-                description="Cite a source (book, web, magazine)",
                 public_id_field=None,
                 format_link=_format_citation_link,
                 collect_metadata=_collect_citation_metadata,
                 select_related=("citation_source",),
                 prefetch_related=("citation_source__links",),
+            )
+        )
+        # Citation is offered in the wikilink picker via the custom flow:
+        # the frontend drives a multi-step source/locator selection; the
+        # standard autocomplete query path (model + search fields) is unused.
+        register_picker(
+            PickerType(
+                name="cite",
+                label="Citation",
+                description="Cite a source (book, web, magazine)",
                 sort_order=1,
-                autocomplete_flow="custom",
+                flow="custom",
             )
         )

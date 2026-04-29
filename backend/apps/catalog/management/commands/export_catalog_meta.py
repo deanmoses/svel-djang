@@ -20,8 +20,7 @@ from typing import Any, NamedTuple
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from apps.catalog._walks import catalog_app_subclasses
-from apps.catalog.models import CatalogModel
+from apps.catalog._walks import catalog_models
 
 
 class CatalogEntry(NamedTuple):
@@ -41,7 +40,7 @@ class Command(BaseCommand):
         catalog_meta: list[CatalogEntry] = []
         media_categories: dict[str, list[str]] = {}
 
-        for cls in catalog_app_subclasses(CatalogModel):
+        for cls in catalog_models():
             key = cls.entity_type
             label = str(cls._meta.verbose_name).title()
             label_plural = str(cls._meta.verbose_name_plural).title()

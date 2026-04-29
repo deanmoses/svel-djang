@@ -11,11 +11,11 @@ from django.http import HttpRequest
 from ninja import Router
 from ninja.errors import HttpError
 
-from apps.core.markdown_links import get_autocomplete_types, get_link_type
 from apps.core.schemas import (
     LinkTargetListSchema,
     LinkTypeSchema,
 )
+from apps.core.wikilinks import get_picker_type, get_picker_types
 
 AUTOCOMPLETE_RESULT_LIMIT = 20
 
@@ -29,8 +29,8 @@ link_types_router = Router(tags=["private"])
 
 @link_types_router.get("/", response=list[LinkTypeSchema])
 def list_link_types(request: HttpRequest) -> list[dict[str, str]]:
-    """Return all link types that support autocomplete, for the type picker."""
-    return get_autocomplete_types()
+    """Return all link types offered in the wikilink picker."""
+    return get_picker_types()
 
 
 @link_types_router.get("/targets/", response=LinkTargetListSchema)
@@ -39,12 +39,21 @@ def search_link_targets(
     type: str,
     q: str = "",
 ) -> LinkTargetListSchema:
-    """Search within a link type for autocomplete results."""
-    lt = get_link_type(type)
-    if lt is None or not lt.is_enabled() or not lt.autocomplete_serialize:
+    """Search within a picker type for autocomplete results.
+
+    Standard-flow types only — custom-flow picker types (citations) drive
+    their own frontend flow and never hit this endpoint.
+    """
+    pt = get_picker_type(type)
+    if (
+        pt is None
+        or not pt.is_enabled()
+        or pt.flow != "standard"
+        or pt.autocomplete_serialize is None
+    ):
         raise HttpError(400, f"Invalid or unsupported link type: {type!r}")
 
-    model = lt.get_model()
+    model = pt.get_model()
 
     # Use .active() when available (LifecycleStatusModel models) to exclude
     # soft-deleted entities; fall back to .all() for models without it.
@@ -54,19 +63,19 @@ def search_link_targets(
         else model.objects.all()
     )
 
-    if lt.autocomplete_select_related:
-        qs = qs.select_related(*lt.autocomplete_select_related)
+    if pt.autocomplete_select_related:
+        qs = qs.select_related(*pt.autocomplete_select_related)
 
-    if lt.autocomplete_ordering:
-        qs = qs.order_by(*lt.autocomplete_ordering)
+    if pt.autocomplete_ordering:
+        qs = qs.order_by(*pt.autocomplete_ordering)
 
-    if q and lt.autocomplete_search_fields:
+    if q and pt.autocomplete_search_fields:
         q_filter = Q()
-        for field in lt.autocomplete_search_fields:
+        for field in pt.autocomplete_search_fields:
             q_filter |= Q(**{field: q})
         qs = qs.filter(q_filter)
 
-    results = [lt.autocomplete_serialize(obj) for obj in qs[:AUTOCOMPLETE_RESULT_LIMIT]]
+    results = [pt.autocomplete_serialize(obj) for obj in qs[:AUTOCOMPLETE_RESULT_LIMIT]]
     return LinkTargetListSchema(results=results)
 
 

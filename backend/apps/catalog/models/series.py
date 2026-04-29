@@ -17,6 +17,7 @@ from apps.core.models import (
     unique_ci,
 )
 from apps.core.validators import validate_no_mojibake
+from apps.core.wikilinks import WikilinkableModel
 
 from .base import CatalogModel
 
@@ -30,6 +31,7 @@ class Franchise(
     CatalogModel,
     SluggedModel,
     TimeStampedModel,
+    WikilinkableModel,
 ):
     """An IP grouping that spans manufacturers and eras.
 
@@ -61,6 +63,7 @@ class Series(
     CatalogModel,
     SluggedModel,
     TimeStampedModel,
+    WikilinkableModel,
 ):
     """A manually-curated grouping of related Titles sharing a thematic lineage.
 

@@ -27,7 +27,6 @@ from apps.catalog.claims import build_relationship_claim, make_authoritative_sco
 from apps.catalog.ingestion.bulk_utils import generate_unique_slug
 from apps.catalog.models import (
     Cabinet,
-    CatalogModel,
     CorporateEntity,
     Credit,
     CreditRole,
@@ -109,9 +108,9 @@ def _normalize_credit_role(raw: str) -> str:
 # automatically. Lazy because the catalog-app helper requires the app registry
 # to be ready, which it isn't at module import time.
 def _ai_desc_source_registry() -> Sequence[tuple[type, str]]:
-    from apps.catalog._walks import catalog_app_subclasses
+    from apps.catalog._walks import catalog_models
 
-    return tuple((cls, cls.entity_type) for cls in catalog_app_subclasses(CatalogModel))
+    return tuple((cls, cls.entity_type) for cls in catalog_models())
 
 
 # Taxonomy ingest registry: (json_filename, model_class, has_display_order, parent_config)
@@ -152,22 +151,20 @@ def validate_cross_entity_wikilinks(export_dir: Path, stdout, stderr) -> None:
     import json
     import re
 
-    from apps.catalog._walks import catalog_app_subclasses
+    from apps.catalog._walks import catalog_models as get_catalog_models
 
     # Values are concrete CatalogModel subclasses, but mypy/django-stubs
     # treats ``type[Model]`` as lacking ``.objects`` (managers are added
     # to concrete subclasses); leaving the value type open avoids needing
     # ``# type: ignore`` on every ``.objects`` access below.
     #
-    # Keys mirror the names the markdown renderer registers in
-    # ``apps/catalog/apps.py:_register_link_types`` (``link_type_name`` if
-    # declared, else ``model.__name__.lower()``). Using ``entity_type``
-    # here would diverge from the renderer — pindata uses the
-    # non-hyphenated form (``[[gameplayfeature:...]]``).
+    # Keys are ``entity_type`` (kebab-case singular), matching the names
+    # the markdown renderer registers in
+    # ``apps/catalog/apps.py:_register_link_types``. Pindata authors
+    # ``[[<entity-type>:<public-id>]]`` against this same key.
     catalog_models: dict[str, Any] = {}
-    for model in catalog_app_subclasses(CatalogModel):
-        link_type = getattr(model, "link_type_name", model.__name__.lower())
-        catalog_models[link_type] = model
+    for model in get_catalog_models():
+        catalog_models[model.entity_type] = model
 
     # Permissive on the id capture group — Location's ``location_path``
     # contains ``/``. The rendering parser at

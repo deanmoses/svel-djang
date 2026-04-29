@@ -35,7 +35,6 @@ from django.db import models, transaction
 from django.db.models import Q
 
 from apps.core.models import RecordReference, get_markdown_fields
-from apps.core.schemas import LinkTargetSchema
 
 
 class FormatLinkCallback(Protocol):
@@ -80,16 +79,19 @@ class CollectMetadataCallback(Protocol):
 
 @dataclass(frozen=True)
 class LinkType:
-    """Configuration for one link type (e.g., 'manufacturer', 'title').
+    """Configuration for one rendered link type (e.g., 'manufacturer', 'title').
 
-    Most fields have defaults so only irregular types need overrides.
+    Carries everything the renderer needs to resolve ``[[name:ref]]`` to a
+    URL and label. Picker presentation (label, sort order, autocomplete
+    config) lives separately on
+    :class:`apps.core.wikilinks.PickerType` — only types offered for
+    authoring need a PickerType, and not every PickerType has the same
+    underlying renderer shape (citations have no URL).
     """
 
     # --- Identity ---
     name: str  # The string in [[name:...]]
     model_path: str  # "catalog.Manufacturer" — resolved via apps.get_model()
-    label: str = ""  # Human-readable name for type picker (e.g., "Manufacturer")
-    description: str = ""  # Brief description (e.g., "Link to a manufacturer")
 
     # --- Public-id-based vs ID-based ---
     # If set, this type uses [[name:public_id]] authoring / [[name:id:N]]
@@ -122,24 +124,8 @@ class LinkType:
     # Default: getattr(obj, public_id_field)
     get_authoring_key: Callable[[Any], str] | None = None
 
-    # --- Autocomplete ---
-    autocomplete_search_fields: tuple[str, ...] = ()
-    autocomplete_ordering: tuple[str, ...] = ()
-    autocomplete_select_related: tuple[str, ...] = ()
-    # `Any` input: concrete obj type varies per registered link type (idiom #3).
-    autocomplete_serialize: Callable[[Any], LinkTargetSchema] | None = None
-
     # --- Runtime toggle (evaluated at usage time, not registration time) ---
     is_enabled: Callable[[], bool] = field(default=lambda: True)
-
-    # --- Display order in type picker (lower = higher in list) ---
-    sort_order: int = 100
-
-    # --- Autocomplete flow ---
-    # "standard" = generic search via /api/link-types/targets/
-    # "custom" = frontend handles the flow (e.g., citation multi-step)
-    AUTOCOMPLETE_FLOWS = ("standard", "custom")
-    autocomplete_flow: str = "standard"
 
     def get_model(self) -> type[Any]:
         """Resolve the model class lazily via Django's app registry."""
@@ -173,11 +159,6 @@ def register(link_type: LinkType) -> None:
     """Register a link type. Called from each app's AppConfig.ready()."""
     if link_type.name in _registry:
         raise ValueError(f"Link type '{link_type.name}' is already registered")
-    if link_type.autocomplete_flow not in LinkType.AUTOCOMPLETE_FLOWS:
-        raise ValueError(
-            f"Link type '{link_type.name}': autocomplete_flow must be one of "
-            f"{LinkType.AUTOCOMPLETE_FLOWS}, got {link_type.autocomplete_flow!r}"
-        )
     _registry[link_type.name] = link_type
     # Compile regex patterns eagerly
     name = re.escape(link_type.name)
@@ -206,26 +187,6 @@ def get_link_type(name: str) -> LinkType | None:
 def get_enabled_link_types() -> list[LinkType]:
     """Return all currently enabled link types."""
     return [lt for lt in _registry.values() if lt.is_enabled()]
-
-
-def get_autocomplete_types() -> list[dict[str, str]]:
-    """Return enabled link types that support autocomplete, for the type picker API."""
-    types = [
-        lt
-        for lt in _registry.values()
-        if lt.is_enabled()
-        and (lt.autocomplete_serialize or lt.autocomplete_flow == "custom")
-    ]
-    types.sort(key=lambda lt: lt.sort_order)
-    return [
-        {
-            "name": lt.name,
-            "label": lt.label,
-            "description": lt.description,
-            "flow": lt.autocomplete_flow,
-        }
-        for lt in types
-    ]
 
 
 def get_enabled_public_id_types() -> list[LinkType]:

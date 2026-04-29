@@ -18,6 +18,7 @@ from apps.core.models import (
     status_valid,
 )
 from apps.core.validators import validate_no_mojibake
+from apps.core.wikilinks import WikilinkableModel
 
 from .base import CatalogModel
 
@@ -33,6 +34,7 @@ class Title(
     CatalogModel,
     SluggedModel,
     TimeStampedModel,
+    WikilinkableModel,
 ):
     """The canonical identity of a pinball game, independent of edition or variant.
 
