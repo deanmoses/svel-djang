@@ -254,3 +254,42 @@ class TestLocationsCacheInvalidation:
             c for c in refreshed.json()["children"] if c["slug"] == "usa"
         )
         assert usa_refreshed["name"] == "United States"
+
+
+# ---------------------------------------------------------------------------
+# expected_child_type — frontend-facing label for the "+ New ..." action.
+# Cache-derived from the country ancestor's ``divisions`` list, so a
+# regression in ``_LocationNode.divisions`` population or in
+# ``lookup_child_division`` would silently degrade the API. These five
+# cases pin the contract.
+# ---------------------------------------------------------------------------
+
+
+class TestExpectedChildType:
+    def test_root_returns_country(self, client, locations):
+        resp = client.get("/api/pages/locations/")
+        assert resp.json()["expected_child_type"] == "country"
+
+    def test_country_returns_first_division(self, client, locations):
+        # USA carries divisions=["state", "city"]; depth 0 -> "state"
+        resp = client.get("/api/pages/locations/usa")
+        assert resp.json()["expected_child_type"] == "state"
+
+    def test_subdivision_returns_next_division(self, client, locations):
+        # state under USA -> depth 1 -> "city"
+        resp = client.get("/api/pages/locations/usa/il")
+        assert resp.json()["expected_child_type"] == "city"
+
+    def test_exhausted_divisions_returns_null(self, client, locations):
+        # Chicago is at depth 2; USA only declares 2 division levels,
+        # so a level-3 child has no derivable type.
+        resp = client.get("/api/pages/locations/usa/il/chicago")
+        assert resp.json()["expected_child_type"] is None
+
+    def test_missing_divisions_returns_null(self, client, locations):
+        # Netherlands has no divisions declared (None).
+        resp = client.get("/api/pages/locations/netherlands")
+        assert resp.json()["expected_child_type"] is None
+        # And any child of a no-divisions country also resolves to null.
+        resp = client.get("/api/pages/locations/netherlands/reuver")
+        assert resp.json()["expected_child_type"] is None

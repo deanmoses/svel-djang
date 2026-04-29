@@ -6,7 +6,7 @@
   import { submitDelete } from './corporate-entity-delete';
 
   let { data } = $props();
-  let { preview, slug } = $derived(data);
+  let { preview, public_id } = $derived(data);
 
   let blockedReferrers = $derived(preview.blocked_by ?? []);
 
@@ -39,13 +39,13 @@
 <DeletePage
   entityLabel="Corporate Entity"
   entityName={preview.name}
-  {slug}
+  {public_id}
   submit={submitDelete}
-  cancelHref={`/corporate-entities/${slug}`}
+  cancelHref={`/corporate-entities/${public_id}`}
   redirectAfterDelete={preview.parent
     ? `/manufacturers/${preview.parent.slug}`
     : '/corporate-entities'}
-  editHistoryHref={`/corporate-entities/${slug}/edit-history`}
+  editHistoryHref={`/corporate-entities/${public_id}/edit-history`}
   parentBreadcrumb={preview.parent
     ? { text: preview.parent.name, href: `/manufacturers/${preview.parent.slug}` }
     : undefined}

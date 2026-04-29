@@ -27,19 +27,19 @@ beforeEach(() => {
 });
 
 describe('loadDeletePreview', () => {
-  it('returns the preview body and slug on success', async () => {
+  it('returns the preview body and public_id on success', async () => {
     const preview = { name: 'Theme', changeset_count: 3 };
     GET.mockResolvedValueOnce(ok({ is_authenticated: true })).mockResolvedValueOnce(ok(preview));
 
     const result = await loadDeletePreview({
       fetch: fetchStub,
       url: new URL('http://localhost/themes/x/delete'),
-      slug: 'cosmic',
+      public_id: 'cosmic',
       entity: 'themes',
       notFoundRedirect: '/themes',
     });
 
-    expect(result).toEqual({ preview, slug: 'cosmic' });
+    expect(result).toEqual({ preview, public_id: 'cosmic' });
     expect(GET).toHaveBeenNthCalledWith(1, '/api/auth/me/');
     expect(GET).toHaveBeenNthCalledWith(2, '/api/themes/{public_id}/delete-preview/', {
       params: { path: { public_id: 'cosmic' } },
@@ -53,7 +53,7 @@ describe('loadDeletePreview', () => {
       loadDeletePreview({
         fetch: fetchStub,
         url: new URL('http://localhost/themes/x/delete'),
-        slug: 'cosmic',
+        public_id: 'cosmic',
         entity: 'themes',
         notFoundRedirect: '/themes',
       }),
@@ -67,7 +67,7 @@ describe('loadDeletePreview', () => {
       loadDeletePreview({
         fetch: fetchStub,
         url: new URL('http://localhost/themes/x/delete'),
-        slug: 'missing',
+        public_id: 'missing',
         entity: 'themes',
         notFoundRedirect: '/themes',
       }),
@@ -81,7 +81,7 @@ describe('loadDeletePreview', () => {
       loadDeletePreview({
         fetch: fetchStub,
         url: new URL('http://localhost/themes/x/delete'),
-        slug: 'cosmic',
+        public_id: 'cosmic',
         entity: 'themes',
         notFoundRedirect: '/themes',
       }),
@@ -95,11 +95,11 @@ describe('loadDeletePreview', () => {
     const result = await loadDeletePreview({
       fetch: fetchStub,
       url: new URL('http://localhost/themes/x/delete'),
-      slug: 'cosmic',
+      public_id: 'cosmic',
       entity: 'themes',
       notFoundRedirect: '/themes',
     });
 
-    expect(result).toEqual({ preview, slug: 'cosmic' });
+    expect(result).toEqual({ preview, public_id: 'cosmic' });
   });
 });

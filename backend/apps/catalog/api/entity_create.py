@@ -23,15 +23,18 @@ machinery itself (see :mod:`.edit_claims`).
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Any, cast
+from typing import Any
 
 from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
 from django.db import IntegrityError, transaction
 from django.db import models as db_models
 from django.db.models import Q
 
+from apps.catalog.models import CatalogModel
+from apps.catalog.naming import normalize_catalog_name
+from apps.core.models import meta_unique_fields
 from apps.core.validators import SLUG_FORMAT_MESSAGE, SLUG_RE
-from apps.provenance.models import ChangeSetAction, ClaimControlledModel
+from apps.provenance.models import ChangeSetAction
 from apps.provenance.schemas import CitationReferenceInputSchema
 
 from .edit_claims import (
@@ -39,6 +42,7 @@ from .edit_claims import (
     StructuredValidationError,
     execute_claims,
 )
+from .schemas import EntityCreateInputSchema
 
 _UserLike = AbstractBaseUser | AnonymousUser
 
@@ -106,7 +110,7 @@ def _resolve_alias_relation(
 
 
 def assert_name_available(
-    model_cls: type[db_models.Model],
+    model_cls: type[CatalogModel],
     name: str,
     *,
     normalize: Callable[[str], str],
@@ -157,11 +161,14 @@ def assert_name_available(
             field_errors={"name": "Name cannot be blank."},
         )
 
-    manager = cast(Any, model_cls)._default_manager
+    manager = model_cls._default_manager
     qs = manager.all() if include_deleted else manager.active()
     if scope_filter is not None:
         qs = qs.filter(scope_filter)
-    for pk, other_name in qs.values_list("pk", "name"):
+    # ``name`` is declared on each concrete subclass; the django-stubs
+    # plugin can't see it on abstract ``CatalogModel`` (see
+    # ``LinkableModel`` docstring for the rationale).
+    for pk, other_name in qs.values_list("pk", "name"):  # type: ignore[misc]
         if exclude_pk is not None and pk == exclude_pk:
             continue
         if normalize(other_name) == normalized:
@@ -218,40 +225,119 @@ def _rewrite_scope_for_alias(scope_filter: Q, parent_fk_name: str) -> Q:
             if isinstance(child, Q):
                 new.children.append(_walk(child))
             else:
-                lookup, value = cast(tuple[str, Any], child)
+                # ``Q.children`` holds nested ``Q`` nodes or ``(lookup,
+                # value)`` tuples. After the ``Q`` check above, the only
+                # remaining shape is the tuple — the assert narrows for
+                # mypy and tripwires any future django-internals shape
+                # change.
+                assert isinstance(child, tuple)
+                lookup, value = child
                 new.children.append((f"{parent_fk_name}__{lookup}", value))
         return new
 
     return _walk(scope_filter)
 
 
-def assert_slug_available(model_cls: type[db_models.Model], slug: str) -> None:
-    """Raise a field-level 422 if *slug* is already taken on *model_cls*.
+def validate_create_input(
+    data: EntityCreateInputSchema,
+    model_cls: type[CatalogModel],
+    *,
+    scope_filter: Q | None = None,
+    include_deleted_name_check: bool | None = None,
+) -> tuple[str, str]:
+    """Run the standard name + slug validation suite for a create.
 
-    Slug uniqueness is DB-enforced (including against soft-deleted rows,
-    whose DB rows still exist). This pre-check produces a nice field-scoped
-    error for the common case; the DB constraint remains the authoritative
-    backstop and is translated to the same shape by
-    :func:`create_entity_with_claims` if a concurrent create wins the race.
+    Composes :func:`validate_name`, :func:`validate_slug_format`, and
+    :func:`assert_name_available` against ``data.name`` / ``data.slug``,
+    deriving ``name`` max-length and the ``include_deleted_name_check``
+    default from ``model_cls`` metadata. Returns the validated
+    ``(name, slug)`` tuple; raises 422 on any failure.
+
+    *scope_filter* narrows the name-collision scan (sibling-scoped or
+    root-tier checks). ``None`` means global.
+
+    *include_deleted_name_check* defaults to ``True`` when ``name`` is
+    DB-unique on the model, matching the factory's logic. Pass an
+    explicit bool to override.
+
+    This is the primitive the create factory composes; outlier entities
+    that need to roll their own create handler call it directly to stay
+    aligned with the standard validation phase.
     """
-    if model_cls._default_manager.filter(slug=slug).exists():
+    # ``name`` is registered as a Django field on each concrete subclass;
+    # the django-stubs plugin can't see it on abstract ``CatalogModel``
+    # (see ``LinkableModel`` docstring for the rationale).
+    name_field = model_cls._meta.get_field("name")  # type: ignore[misc]
+    assert isinstance(name_field, db_models.Field)
+    name_max = name_field.max_length
+    assert name_max is not None
+    if include_deleted_name_check is None:
+        include_deleted_name_check = bool(
+            getattr(name_field, "unique", False)
+        ) or "name" in meta_unique_fields(model_cls)
+    friendly = model_cls.entity_type.replace("-", " ")
+
+    name = validate_name(data.name, max_length=name_max)
+    slug = validate_slug_format(data.slug)
+    assert_name_available(
+        model_cls,
+        name,
+        normalize=normalize_catalog_name,
+        scope_filter=scope_filter,
+        friendly_label=friendly,
+        include_deleted=include_deleted_name_check,
+    )
+    return name, slug
+
+
+def assert_public_id_available(
+    model_cls: type[CatalogModel], value: str, *, form_value: str | None = None
+) -> None:
+    """Raise a field-level 422 if *value* collides on the model's public-id field.
+
+    Public-id uniqueness is DB-enforced (including against soft-deleted
+    rows, whose DB rows still exist). This pre-check produces a nice
+    field-scoped error for the common case; the DB constraint remains the
+    authoritative backstop and is translated to the same shape by
+    :func:`create_entity_with_claims` if a concurrent create wins the race.
+
+    ``model_cls.public_id_field`` selects the column to query — ``"slug"``
+    for every shipped catalog model, but Location uses ``"location_path"``
+    so the freshly-built path is what's checked, not the bare slug.
+
+    ``form_value`` (defaulting to *value*) is what the error message
+    echoes back to the user. Pair with ``model_cls.public_id_form_field``
+    to surface the collision under the form input the user can edit:
+    for shipped models the form input *is* the public-id, so the two
+    coincide; Location's public-id is server-derived from the ``slug``
+    input, so the route passes ``data.slug`` as ``form_value`` and the
+    error binds under ``"slug"``.
+    """
+    public_id_field = model_cls.public_id_field
+    form_field = model_cls.public_id_form_field or public_id_field
+    if form_value is None:
+        form_value = value
+    if model_cls._default_manager.filter(**{public_id_field: value}).exists():
         raise StructuredValidationError(
-            message="Slug collision.",
+            message=f"{public_id_field.capitalize()} collision.",
             field_errors={
-                "slug": f"The slug {slug!r} is already taken. Edit the slug field."
+                form_field: (
+                    f"The {form_field} {form_value!r} is already taken. "
+                    f"Edit the {form_field} field."
+                )
             },
         )
 
 
 def create_entity_with_claims(
-    model_cls: type[ClaimControlledModel],
+    model_cls: type[CatalogModel],
     *,
     row_kwargs: dict[str, Any],
     claim_specs: list[ClaimSpec],
     user: _UserLike,
     note: str = "",
     citation: CitationReferenceInputSchema | None = None,
-) -> ClaimControlledModel:
+) -> CatalogModel:
     """Create a new catalog row + its initial claims atomically.
 
     * Opens a ``transaction.atomic`` block so that a claim-write failure
@@ -261,17 +347,18 @@ def create_entity_with_claims(
       *claim_specs* via :func:`.edit_claims.execute_claims`.
     * Translates a DB ``IntegrityError`` on the slug into the same
       field-level 422 that the pre-check produces. This covers the tiny
-      TOCTOU window between ``assert_slug_available`` and the insert.
+      TOCTOU window between ``assert_public_id_available`` and the insert.
 
     Callers are responsible for name/slug validation and rate-limiting
-    before invoking this helper. ``row_kwargs`` must contain ``slug`` —
-    it's the only unique-constrained column this helper expects to be
-    writing, and its value is echoed into the TOCTOU fallback error.
+    before invoking this helper. ``row_kwargs`` must contain a value for
+    ``model_cls.public_id_field`` — the unique-constrained column this
+    helper expects to be writing, whose value is echoed into the TOCTOU
+    fallback error.
 
     .. warning::
 
-        The IntegrityError handler unconditionally reports "slug
-        collision." Reaching it implies a TOCTOU race (the matching
+        The IntegrityError handler unconditionally reports a public-id
+        collision. Reaching it implies a TOCTOU race (the matching
         pre-check just succeeded), so in practice the misreport surfaces
         only when a name-uniqueness or CHECK constraint trips here
         instead — paths that require concurrent writes or callers
@@ -279,7 +366,15 @@ def create_entity_with_claims(
         then produce the right field-level message. If those paths
         become common, swap this for constraint-name-based dispatch.
     """
-    slug = row_kwargs["slug"]
+    public_id_field = model_cls.public_id_field
+    public_id_value = row_kwargs[public_id_field]
+    form_field = model_cls.public_id_form_field or public_id_field
+    # ``form_field`` and ``public_id_field`` coincide for every shipped
+    # model (both ``"slug"``); on Location the form input is ``slug`` and
+    # the public-id is the server-derived ``location_path``. Pull the
+    # form-side value from row_kwargs when available so the echoed
+    # collision message reads "slug 'chicago'", not "slug 'usa/il/chicago'".
+    form_value = row_kwargs.get(form_field, public_id_value)
     try:
         with transaction.atomic():
             entity = model_cls._default_manager.create(**row_kwargs)
@@ -293,9 +388,12 @@ def create_entity_with_claims(
             )
     except IntegrityError as err:
         raise StructuredValidationError(
-            message="Slug collision.",
+            message=f"{public_id_field.capitalize()} collision.",
             field_errors={
-                "slug": f"The slug {slug!r} is already taken. Edit the slug field."
+                form_field: (
+                    f"The {form_field} {form_value!r} is already taken. "
+                    f"Edit the {form_field} field."
+                )
             },
         ) from err
     return entity

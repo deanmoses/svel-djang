@@ -6,7 +6,7 @@
   import { submitDelete } from './tag-delete';
 
   let { data } = $props();
-  let { preview, slug } = $derived(data);
+  let { preview, public_id } = $derived(data);
 
   let blockedReferrers = $derived(preview.blocked_by ?? []);
 
@@ -32,11 +32,11 @@
 <DeletePage
   entityLabel="Tag"
   entityName={preview.name}
-  {slug}
+  {public_id}
   submit={submitDelete}
-  cancelHref={`/tags/${slug}`}
+  cancelHref={`/tags/${public_id}`}
   redirectAfterDelete="/tags"
-  editHistoryHref={`/tags/${slug}/edit-history`}
+  editHistoryHref={`/tags/${public_id}/edit-history`}
   {blocked}
   {impact}
 />

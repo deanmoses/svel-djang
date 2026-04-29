@@ -23,7 +23,7 @@ function makeEvent(fetch: typeof globalThis.fetch, path: string) {
 }
 
 describe('loadEditHistory', () => {
-  it('calls the edit-history page API for the given entity type and slug', async () => {
+  it('calls the edit-history page API for the given entity type and public_id', async () => {
     const fetch = vi.fn().mockResolvedValue(
       new Response(JSON.stringify(MOCK_CHANGESETS), {
         status: 200,

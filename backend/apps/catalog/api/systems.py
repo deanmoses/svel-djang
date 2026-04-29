@@ -33,7 +33,7 @@ from .edit_claims import (
 )
 from .entity_create import (
     assert_name_available,
-    assert_slug_available,
+    assert_public_id_available,
     create_entity_with_claims,
     validate_name,
     validate_slug_format,
@@ -301,7 +301,7 @@ def create_system(
         friendly_label="system",
         include_deleted=True,
     )
-    assert_slug_available(System, slug)
+    assert_public_id_available(System, slug)
 
     create_entity_with_claims(
         System,

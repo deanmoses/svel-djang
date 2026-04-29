@@ -12,14 +12,23 @@ All wire schemas used here — ``CreateSchema``, ``ChangeSetInputSchema``,
 ``TaxonomyDeletePreviewSchema``, ``DeleteResponseSchema`` — live in the
 shared catalog/provenance schema modules. This module owns no schemas of
 its own.
-"""
 
-from __future__ import annotations
+.. note::
+
+    This module deliberately does **not** use ``from __future__ import
+    annotations``. The closure-defined create handlers below carry a
+    ``data: request_body_schema`` annotation where ``request_body_schema``
+    is a closure variable bound at registration time. Ninja resolves
+    body annotations via ``get_type_hints``, which evaluates string
+    annotations against module globals only — so stringified
+    annotations would fail to resolve closure-bound types. With eager
+    evaluation, the annotation captures the right class at closure
+    creation and Ninja sees the per-registration body schema directly.
+"""
 
 from collections.abc import Callable
 from typing import Any
 
-from django.db import models as db_models
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
@@ -28,8 +37,6 @@ from ninja.responses import Status
 from ninja.security import django_auth
 
 from apps.catalog.models import CatalogModel
-from apps.catalog.naming import normalize_catalog_name
-from apps.core.models import meta_unique_fields
 from apps.core.schemas import (
     ErrorDetailSchema,
     RateLimitErrorSchema,
@@ -45,11 +52,9 @@ from apps.provenance.schemas import ChangeSetInputSchema
 
 from .edit_claims import ClaimSpec, execute_claims
 from .entity_create import (
-    assert_name_available,
-    assert_slug_available,
+    assert_public_id_available,
     create_entity_with_claims,
-    validate_name,
-    validate_slug_format,
+    validate_create_input,
 )
 from .schemas import (
     AlreadyDeletedSchema,
@@ -96,8 +101,11 @@ def register_entity_delete_restore[ModelT: CatalogModel, SchemaT: Schema](
     * ``child_related_name`` — set on entities with active-child blocking
       (tech-gen → subgenerations, display-type → subtypes). The accessor
       name is the ``related_name=`` declared on the child FK.
-    * ``parent_field`` — set on subgen/subtype so the preview surfaces the
-      parent name / slug and restore refuses while the parent is deleted.
+    * ``parent_field`` — set on entities whose parent FK should drive the
+      preview's parent ref and the restore-while-parent-deleted guard
+      (subgen/subtype, Location). Nullable parent FKs are tolerated:
+      rows with ``parent=None`` (e.g. Location countries) skip both
+      checks rather than dereferencing a missing row.
     """
     entity_label = model_cls.__name__
     friendly = model_cls.entity_type.replace("-", " ")
@@ -121,8 +129,12 @@ def register_entity_delete_restore[ModelT: CatalogModel, SchemaT: Schema](
 
         parent_ref: EntityRef | None = None
         if parent_field is not None:
+            # Parent FK may be nullable (e.g. Location countries have
+            # ``parent=None``); leave ``parent_ref`` as ``None`` in that
+            # case rather than dereferencing a missing row.
             parent = getattr(obj, parent_field)
-            parent_ref = EntityRef(name=parent.name, slug=parent.slug)
+            if parent is not None:
+                parent_ref = EntityRef(name=parent.name, slug=parent.slug)
 
         return TaxonomyDeletePreviewSchema(
             name=obj.name,
@@ -222,8 +234,10 @@ def register_entity_delete_restore[ModelT: CatalogModel, SchemaT: Schema](
             )
 
         if parent_field is not None:
+            # Parent FK may be nullable (e.g. Location countries have
+            # ``parent=None``); skip the parent-status guard in that case.
             parent = getattr(obj, parent_field)
-            if parent.status == "deleted":
+            if parent is not None and parent.status == "deleted":
                 return Status(
                     422, ErrorDetailSchema(detail=f"Restore {parent.name} first.")
                 )
@@ -264,8 +278,16 @@ def register_entity_create[ModelT: CatalogModel, SchemaT: Schema](
     parent_field: str | None = None,
     parent_model: type[CatalogModel] | None = None,
     route_suffix: str = "",
-    scope_filter_builder: Callable[[Any], Q] | None = None,
+    scope_filter_builder: Callable[[EntityCreateInputSchema, CatalogModel | None], Q]
+    | None = None,
     include_deleted_name_check: bool | None = None,
+    body_schema: type[EntityCreateInputSchema] | None = None,
+    extra_create_fields_builder: Callable[
+        [EntityCreateInputSchema, CatalogModel | None],
+        tuple[dict[str, Any], list[ClaimSpec]],
+    ]
+    | None = None,
+    op_id_suffix: str = "",
 ) -> None:
     """Attach a POST create route.
 
@@ -275,17 +297,39 @@ def register_entity_create[ModelT: CatalogModel, SchemaT: Schema](
     ``POST /{path:parent_public_id}/<route_suffix>/`` on the *parent's*
     router — mirroring the Title → Model nesting.
 
+    .. note:: When to add a new hook here
+
+        The factory's value is **guaranteed convergence**: every catalog
+        create routes through one pipeline, so two callers can't drift.
+        A new keyword-only hook is justified when a caller needs a
+        contained variation on that pipeline (e.g. a derived column, a
+        custom body field) and the alternative is a parallel handler
+        that copies 80%+ of this code. Single-caller hooks are fine on
+        that basis — they keep the caller on the canonical path.
+
+        A new hook is *not* justified for hypothetical future callers
+        (no current caller, no hook). For entities whose create is
+        *structurally* different — different transactional shape,
+        different side effects, fundamentally different unit of work —
+        write a custom handler over the primitives in
+        :mod:`apps.catalog.api.entity_create` (``validate_create_input``,
+        ``assert_public_id_available``, ``create_entity_with_claims``,
+        …) instead of extending this factory.
+
     FK claim values come from ``model_cls.claim_fk_lookups`` (defaults to
     the parent's ``slug`` when unset; Location overrides ``parent`` to
     ``location_path``). Hardcoding ``parent.slug`` anywhere on the write
     path is a field-on-model antipattern.
 
-    *scope_filter_builder* (parented mode only) narrows the name-collision
-    scan to rows related to the resolved parent. Required for entities
-    whose names are unique per-parent rather than globally (e.g.
-    CorporateEntity: two manufacturers may each own a "Productions"
-    entity, but not the same manufacturer). Receives the resolved parent
-    instance and returns a ``Q`` to pass to ``assert_name_available``.
+    *scope_filter_builder* narrows the name-collision scan to a subset
+    of rows. Required for entities whose names are unique per-parent
+    rather than globally (e.g. CorporateEntity: two manufacturers may
+    each own a "Productions" entity, but not the same manufacturer), and
+    for unparented sibling-scoped tiers (e.g. top-level Location:
+    ``Q(parent__isnull=True)`` keeps the country-tier check from
+    scanning every descendant). Receives the parsed body schema and the
+    resolved parent (``None`` in unparented mode) and returns a ``Q`` to
+    pass to ``assert_name_available``.
 
     *include_deleted_name_check* forwards to ``assert_name_available``'s
     ``include_deleted``. Defaults to ``True`` whenever the model carries
@@ -293,6 +337,35 @@ def register_entity_create[ModelT: CatalogModel, SchemaT: Schema](
     field or a ``UniqueConstraint`` covering it) so a soft-deleted-name
     collision surfaces as a name error before the insert. Pass an
     explicit bool to override.
+
+    *body_schema* replaces ``EntityCreateInputSchema`` as the request
+    body type. Constrained to subclasses (the factory reads ``data.name``,
+    ``data.slug``, ``data.note``, ``data.citation``) so a non-conforming
+    schema fails at registration. Used by Location's top-level country
+    create to accept ``divisions`` alongside the standard fields.
+
+    Callers: Location top-level country create only. Re-evaluate
+    naming / shape if a second caller appears with a different
+    extension pattern.
+
+    *extra_create_fields_builder* returns ``(extra_row_kwargs,
+    extra_claim_specs)``. The row kwargs are merged into the row
+    ``model_cls.objects.create`` call; the claim specs are appended to
+    the per-create claim list. One builder rather than two so callers
+    derive shared values once (e.g. Location derives ``location_type``
+    and uses it both as a row column and as a claim).
+
+    Callers: Location top-level + child create only. Re-evaluate the
+    tuple-return shape vs. a ``CreateExtras`` dataclass if a second
+    caller appears.
+
+    *op_id_suffix* is appended to the OpenAPI ``operationId`` for this
+    route. Used by entities that register the factory twice on the same
+    router (Location: top-level country + child) so the two routes don't
+    collide on the default name. Empty by default — every other caller
+    keeps the stable ``{entity}_create`` op_id.
+
+    Callers: Location's child create only (passes ``"_child"``).
     """
     parented = parent_field is not None
     if parented and not (parent_model and route_suffix):
@@ -300,26 +373,25 @@ def register_entity_create[ModelT: CatalogModel, SchemaT: Schema](
             "register_entity_create: when parent_field is set, "
             "parent_model and route_suffix are required."
         )
-    if scope_filter_builder is not None and not parented:
+    if body_schema is not None and not issubclass(body_schema, EntityCreateInputSchema):
+        # The factory's pipeline reads ``data.name``, ``data.slug``,
+        # ``data.note``, ``data.citation``. mypy enforces this at the
+        # type level via the ``type[EntityCreateInputSchema]`` annotation,
+        # but bypassing the type checker (e.g. dynamic dispatch in tests)
+        # would silently register a route that 500s on the first request.
+        # Fail loudly at registration instead.
         raise TypeError(
-            "register_entity_create: scope_filter_builder requires parent_field."
+            f"register_entity_create: body_schema must subclass "
+            f"EntityCreateInputSchema; got {body_schema.__name__}."
         )
 
     entity_label = model_cls.__name__
-    # django-stubs returns ``Any`` for ``_meta.get_field`` on a TypeVar'd
-    # model; the assert is the runtime narrowing to ``Field``.
-    name_field = model_cls._meta.get_field("name")
-    assert isinstance(name_field, db_models.Field)
-    name_max = name_field.max_length
-    assert name_max is not None
-    if include_deleted_name_check is None:
-        include_deleted_name_check = bool(
-            getattr(name_field, "unique", False)
-        ) or "name" in meta_unique_fields(model_cls)
-    friendly = model_cls.entity_type.replace("-", " ")
     parent_lookup_field: str | None = None
     if parent_field is not None and parent_model is not None:
         parent_lookup_field = parent_model.public_id_field
+    request_body_schema: type[EntityCreateInputSchema] = (
+        body_schema if body_schema is not None else EntityCreateInputSchema
+    )
 
     def _do_create(
         request: HttpRequest,
@@ -328,22 +400,17 @@ def register_entity_create[ModelT: CatalogModel, SchemaT: Schema](
     ) -> Status[Any]:
         check_and_record(request.user, CREATE_RATE_LIMIT_SPEC)
 
-        name = validate_name(data.name, max_length=name_max)
-        slug = validate_slug_format(data.slug)
         scope_filter = (
-            scope_filter_builder(parent)
-            if scope_filter_builder is not None and parent is not None
+            scope_filter_builder(data, parent)
+            if scope_filter_builder is not None
             else None
         )
-        assert_name_available(
+        name, slug = validate_create_input(
+            data,
             model_cls,
-            name,
-            normalize=normalize_catalog_name,
             scope_filter=scope_filter,
-            friendly_label=friendly,
-            include_deleted=include_deleted_name_check,
+            include_deleted_name_check=include_deleted_name_check,
         )
-        assert_slug_available(model_cls, slug)
 
         row_kwargs: dict[str, Any] = {"name": name, "slug": slug, "status": "active"}
         claim_specs = [
@@ -361,6 +428,25 @@ def register_entity_create[ModelT: CatalogModel, SchemaT: Schema](
             claim_specs.append(
                 ClaimSpec(field_name=parent_field, value=getattr(parent, fk_lookup))
             )
+
+        if extra_create_fields_builder is not None:
+            extra_row_kwargs, extra_claim_specs = extra_create_fields_builder(
+                data, parent
+            )
+            row_kwargs.update(extra_row_kwargs)
+            claim_specs.extend(extra_claim_specs)
+
+        # Pre-check the public-id column (slug for shipped models;
+        # location_path for Location). Runs after extra_create_fields_builder
+        # so derived public-ids (Location: ``compute_location_path``) are
+        # populated in row_kwargs before the lookup. ``form_value`` is the
+        # user-typed value the error message echoes; for shipped models
+        # this is the same as the public-id (both ``slug``), for Location
+        # it's the bare ``slug`` rather than the full path.
+        public_id_value = row_kwargs[model_cls.public_id_field]
+        form_field = model_cls.public_id_form_field or model_cls.public_id_field
+        form_value = row_kwargs.get(form_field, public_id_value)
+        assert_public_id_available(model_cls, public_id_value, form_value=form_value)
 
         entity = create_entity_with_claims(
             model_cls,
@@ -386,7 +472,7 @@ def register_entity_create[ModelT: CatalogModel, SchemaT: Schema](
         def _create_parented(
             request: HttpRequest,
             parent_public_id: str,
-            data: EntityCreateInputSchema,
+            data: request_body_schema,  # type: ignore[valid-type]
         ) -> Status[Any]:
             parent = get_object_or_404(
                 parent_model.objects.active(),
@@ -394,7 +480,7 @@ def register_entity_create[ModelT: CatalogModel, SchemaT: Schema](
             )
             return _do_create(request, data, parent=parent)
 
-        _create_parented.__name__ = f"{entity_label.lower()}_create"
+        _create_parented.__name__ = f"{entity_label.lower()}_create{op_id_suffix}"
         router.post(
             f"/{{path:parent_public_id}}/{route_suffix}/",
             auth=django_auth,
@@ -408,11 +494,12 @@ def register_entity_create[ModelT: CatalogModel, SchemaT: Schema](
     else:
 
         def _create_unparented(
-            request: HttpRequest, data: EntityCreateInputSchema
+            request: HttpRequest,
+            data: request_body_schema,  # type: ignore[valid-type]
         ) -> Status[Any]:
             return _do_create(request, data)
 
-        _create_unparented.__name__ = f"{entity_label.lower()}_create"
+        _create_unparented.__name__ = f"{entity_label.lower()}_create{op_id_suffix}"
         router.post(
             "/",
             auth=django_auth,

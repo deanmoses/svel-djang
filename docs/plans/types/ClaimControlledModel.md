@@ -39,7 +39,7 @@ Introduce a new abstract base — `ClaimControlledModel` — in `apps/provenance
 **Hierarchy shape — `LinkableModel`, `CatalogModel`, and `ClaimControlledModel` stay separate.** They describe orthogonal capabilities:
 
 - `LinkableModel` = "I have a public URL" (URL-addressability).
-- `CatalogModel` = "I am a catalog entity" (marker for catalog-specific code paths; combines `LinkableModel` + `EntityStatusMixin`).
+- `CatalogModel` = "I am a catalog entity" (marker for catalog-specific code paths; combines `LinkableModel` + `LifecycleStatusModel`).
 - `ClaimControlledModel` = "I have provenance claims attached."
 
 The overlap on the current concrete set is coincidental: every `LinkableModel` today happens to be a `CatalogModel` and every `CatalogModel` is claim-controlled, but neither inclusion is structural. `Location` is claim-controlled but not linkable. A future `UserProfile` could be linkable but not claim-controlled. Keeping the bases independent lets each capability evolve without dragging the others.
@@ -49,7 +49,7 @@ The overlap on the current concrete set is coincidental: every `LinkableModel` t
 - `MachineModel(CatalogModel, ClaimControlledModel, ...)` — URL-addressable + status-tracked + claim-controlled.
 - `Manufacturer(CatalogModel, ClaimControlledModel, ...)` — same.
 - ...20+ concrete catalog models, all already being touched to remove `claims = GenericRelation`.
-- `Location(EntityStatusMixin, ClaimControlledModel)` — claim-controlled and status-tracked, but not linkable.
+- `Location(LifecycleStatusModel, ClaimControlledModel)` — claim-controlled and status-tracked, but not linkable.
 
 The shared `name: str` / `slug: str` annotations on `LinkableModel` and `ClaimControlledModel` are independently justified — `LinkableModel` needs them because URLs are built from slugs; `ClaimControlledModel` needs them because the resolver reads them generically. The duplication is harmless at the MRO level.
 
@@ -62,7 +62,7 @@ class ClaimControlledModel(models.Model):
     Declares the reverse-accessor to provenance claims and the typed ``slug``
     / ``name`` shape that claim-resolver helpers read generically.  Does NOT
     imply URL-addressability, globally-unique slugs, or status tracking —
-    those are ``LinkableModel`` / ``SluggedModel`` / ``EntityStatusMixin``
+    those are ``LinkableModel`` / ``SluggedModel`` / ``LifecycleStatusModel``
     concerns and are layered in independently at the concrete class.
     """
 
@@ -81,7 +81,7 @@ class ClaimControlledModel(models.Model):
 Then:
 
 - Each concrete catalog model: add `ClaimControlledModel` to its base list (e.g. `class MachineModel(CatalogModel, ClaimControlledModel, SluggedModel, TimeStampedModel): ...`). `CatalogModel` and `LinkableModel` themselves are unchanged.
-- `Location`: change from `class Location(EntityStatusMixin, models.Model)` to `class Location(EntityStatusMixin, ClaimControlledModel)`.
+- `Location`: change from `class Location(LifecycleStatusModel, models.Model)` to `class Location(LifecycleStatusModel, ClaimControlledModel)`.
 - Remove `claims = GenericRelation("provenance.Claim")` from every concrete catalog model (20+ sites) — now inherited from `ClaimControlledModel`.
 
 Once those are in place, generic helpers switch from `type[CatalogModel]` (or `type[models.Model]`) to `type[ClaimControlledModel]`:
@@ -95,9 +95,9 @@ Once those are in place, generic helpers switch from `type[CatalogModel]` (or `t
 - **`GenericRelation` inheritance semantics.** Django's `GenericRelation` is a descriptor; confirm it survives abstract-base inheritance cleanly (it should, given how many projects do this). Run the migration and check that removing the per-model declaration doesn't produce a phantom migration.
 - **Check-constraint name collisions.** Concrete subclasses use `field_not_blank("slug")` / `slug_not_blank()` which embed `%(app_label)s_%(class)s` — those stay on the concrete subclass, so no collision. But verify that no `constraints` list on a subclass refers to `slug` in a way that collides with anything the new base might add (the proposed base adds nothing).
 - **`claims_exempt` / `claim_fk_lookups`.** These are concrete-class `ClassVar`s and stay on the concrete subclass. The new base does not declare them. Confirm `get_claim_fields` still works against the new hierarchy (it introspects `model_class._meta.get_fields()` which is unaffected).
-- **Manager compatibility.** `CatalogManager[Self]` is declared on `EntityStatusMixin` (see [core/models.py:248](../../../backend/apps/core/models.py#L248)), so every concrete subclass that mixes in `EntityStatusMixin` — including `Location` — already has `CatalogManager`, not the default `models.Manager`. The new `ClaimControlledModel` base should NOT declare `objects`; the existing `EntityStatusMixin`-supplied manager continues to apply unchanged.
+- **Manager compatibility.** `CatalogManager[Self]` is declared on `LifecycleStatusModel` (see [core/models.py:248](../../../backend/apps/core/models.py#L248)), so every concrete subclass that mixes in `LifecycleStatusModel` — including `Location` — already has `CatalogManager`, not the default `models.Manager`. The new `ClaimControlledModel` base should NOT declare `objects`; the existing `LifecycleStatusModel`-supplied manager continues to apply unchanged.
 - **Existing typing on `LinkableModel`.** `LinkableModel` already declares `name: str` / `slug: str`. With multi-inheritance at the leaf, both `LinkableModel` and `ClaimControlledModel` declare the same annotations — harmless but redundant at the MRO level. Leave `LinkableModel`'s declarations alone for this PR; touching `core` is also forbidden by the boundary rules that drove the provenance-home decision.
-- **MRO and `Meta` inheritance.** Multi-inheriting two abstract bases (e.g. `EntityStatusMixin` and `ClaimControlledModel`) is standard Django but verify Django doesn't complain about ambiguous `Meta` resolution. Both should declare only `abstract = True`, so there's nothing to merge.
+- **MRO and `Meta` inheritance.** Multi-inheriting two abstract bases (e.g. `LifecycleStatusModel` and `ClaimControlledModel`) is standard Django but verify Django doesn't complain about ambiguous `Meta` resolution. Both should declare only `abstract = True`, so there's nothing to merge.
 
 ## Scope and ordering
 
@@ -126,7 +126,7 @@ Keep this PR purely structural — see "Reuse" below for tempting additions to d
 
 - Does NOT promote `Location` to `CatalogModel` / `LinkableModel`. Location's non-unique slug and non-public-addressability are real semantic differences that the narrower base respects.
 - Does NOT unify the `extra_data` field — it remains per-model (some have it, some don't) and stays behind the existing `hasattr(obj, "extra_data")` runtime guard in the resolver.
-- Does NOT introduce a shared manager class. `CatalogManager[Self]` continues to come from `EntityStatusMixin` for every entity that mixes it in (including both `CatalogModel` subclasses and `Location`). The new `ClaimControlledModel` base does not declare `objects`.
+- Does NOT introduce a shared manager class. `CatalogManager[Self]` continues to come from `LifecycleStatusModel` for every entity that mixes it in (including both `CatalogModel` subclasses and `Location`). The new `ClaimControlledModel` base does not declare `objects`.
 
 ## Verification
 

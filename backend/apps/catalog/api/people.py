@@ -44,7 +44,7 @@ from .constants import DEFAULT_PAGE_SIZE
 from .edit_claims import ClaimSpec, execute_claims, plan_scalar_field_claims
 from .entity_create import (
     assert_name_available,
-    assert_slug_available,
+    assert_public_id_available,
     create_entity_with_claims,
     validate_name,
     validate_slug_format,
@@ -368,7 +368,7 @@ def create_person(
         normalize=normalize_catalog_name,
         friendly_label="person",
     )
-    assert_slug_available(Person, slug)
+    assert_public_id_available(Person, slug)
 
     create_entity_with_claims(
         Person,

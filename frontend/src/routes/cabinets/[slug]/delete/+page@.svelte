@@ -6,7 +6,7 @@
   import { submitDelete } from './cabinet-delete';
 
   let { data } = $props();
-  let { preview, slug } = $derived(data);
+  let { preview, public_id } = $derived(data);
 
   let blockedReferrers = $derived(preview.blocked_by ?? []);
 
@@ -32,11 +32,11 @@
 <DeletePage
   entityLabel="Cabinet"
   entityName={preview.name}
-  {slug}
+  {public_id}
   submit={submitDelete}
-  cancelHref={`/cabinets/${slug}`}
+  cancelHref={`/cabinets/${public_id}`}
   redirectAfterDelete="/cabinets"
-  editHistoryHref={`/cabinets/${slug}/edit-history`}
+  editHistoryHref={`/cabinets/${public_id}/edit-history`}
   {blocked}
   {impact}
 />

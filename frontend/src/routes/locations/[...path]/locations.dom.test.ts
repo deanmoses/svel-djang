@@ -163,13 +163,17 @@ describe('locations layout — country', () => {
     expect(screen.getByText('States')).toBeInTheDocument();
   });
 
-  it('edit menu has Name / Description / Parent / Aliases / + New State / Delete', async () => {
+  it('edit menu has Description / Basics / Divisions / Aliases / + New State / Delete on a country', async () => {
     const user = userEvent.setup();
     renderLayout(COUNTRY);
     await user.click(screen.getByRole('button', { name: 'Edit' }));
-    expect(screen.getByRole('menuitem', { name: 'Name' })).toBeInTheDocument();
+    // Name / parent / slug / location_type are intentionally absent — see
+    // docs/plans/model_driven_metadata/LocationCrud.md §"Decisions".
+    expect(screen.queryByRole('menuitem', { name: 'Name' })).toBeNull();
+    expect(screen.queryByRole('menuitem', { name: 'Parent' })).toBeNull();
     expect(screen.getByRole('menuitem', { name: 'Description' })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: 'Parent' })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'Basics' })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'Divisions' })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Aliases' })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: '+ New State' })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Delete United States' })).toBeInTheDocument();
@@ -193,7 +197,10 @@ describe('locations layout — city (no expected child)', () => {
     const user = userEvent.setup();
     renderLayout(CITY);
     await user.click(screen.getByRole('button', { name: 'Edit' }));
-    expect(screen.getByRole('menuitem', { name: 'Name' })).toBeInTheDocument();
+    // The other edit sections still appear; only the conditional "+ New …"
+    // item is suppressed.
+    expect(screen.getByRole('menuitem', { name: 'Description' })).toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Divisions' })).toBeNull();
     expect(screen.queryByRole('menuitem', { name: /\+ New/ })).toBeNull();
   });
 });

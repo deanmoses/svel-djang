@@ -6,7 +6,7 @@
   import { submitDelete } from './theme-delete';
 
   let { data } = $props();
-  let { preview, slug } = $derived(data);
+  let { preview, public_id } = $derived(data);
 
   let blockedReferrers = $derived(preview.blocked_by ?? []);
 
@@ -32,11 +32,11 @@
 <DeletePage
   entityLabel="Theme"
   entityName={preview.name}
-  {slug}
+  {public_id}
   submit={submitDelete}
-  cancelHref={`/themes/${slug}`}
+  cancelHref={`/themes/${public_id}`}
   redirectAfterDelete="/themes"
-  editHistoryHref={`/themes/${slug}/edit-history`}
+  editHistoryHref={`/themes/${public_id}/edit-history`}
   {blocked}
   {impact}
 />

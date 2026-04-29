@@ -6,7 +6,7 @@
   import { submitDelete } from './credit-role-delete';
 
   let { data } = $props();
-  let { preview, slug } = $derived(data);
+  let { preview, public_id } = $derived(data);
 
   let blockedReferrers = $derived(preview.blocked_by ?? []);
 
@@ -32,11 +32,11 @@
 <DeletePage
   entityLabel="Credit Role"
   entityName={preview.name}
-  {slug}
+  {public_id}
   submit={submitDelete}
-  cancelHref={`/credit-roles/${slug}`}
+  cancelHref={`/credit-roles/${public_id}`}
   redirectAfterDelete="/credit-roles"
-  editHistoryHref={`/credit-roles/${slug}/edit-history`}
+  editHistoryHref={`/credit-roles/${public_id}/edit-history`}
   {blocked}
   {impact}
 />

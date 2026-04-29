@@ -6,7 +6,7 @@
   import { submitDelete } from './technology-generation-delete';
 
   let { data } = $props();
-  let { preview, slug } = $derived(data);
+  let { preview, public_id } = $derived(data);
 
   let blockedReferrers = $derived(preview.blocked_by ?? []);
   let activeChildren = $derived(preview.active_children_count ?? 0);
@@ -39,11 +39,11 @@
 <DeletePage
   entityLabel="Technology Generation"
   entityName={preview.name}
-  {slug}
+  {public_id}
   submit={submitDelete}
-  cancelHref={`/technology-generations/${slug}`}
+  cancelHref={`/technology-generations/${public_id}`}
   redirectAfterDelete="/technology-generations"
-  editHistoryHref={`/technology-generations/${slug}/edit-history`}
+  editHistoryHref={`/technology-generations/${public_id}/edit-history`}
   {blocked}
   {impact}
 />

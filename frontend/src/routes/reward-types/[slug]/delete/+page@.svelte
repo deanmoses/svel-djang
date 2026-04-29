@@ -6,7 +6,7 @@
   import { submitDelete } from './reward-type-delete';
 
   let { data } = $props();
-  let { preview, slug } = $derived(data);
+  let { preview, public_id } = $derived(data);
 
   let blockedReferrers = $derived(preview.blocked_by ?? []);
 
@@ -33,11 +33,11 @@
 <DeletePage
   entityLabel="Reward Type"
   entityName={preview.name}
-  {slug}
+  {public_id}
   submit={submitDelete}
-  cancelHref={`/reward-types/${slug}`}
+  cancelHref={`/reward-types/${public_id}`}
   redirectAfterDelete="/reward-types"
-  editHistoryHref={`/reward-types/${slug}/edit-history`}
+  editHistoryHref={`/reward-types/${public_id}/edit-history`}
   {blocked}
   {impact}
 />

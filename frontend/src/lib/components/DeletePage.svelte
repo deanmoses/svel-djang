@@ -13,9 +13,9 @@
   type Props = {
     entityLabel: string;
     entityName: string;
-    slug: string;
+    public_id: string;
     submit: (
-      slug: string,
+      public_id: string,
       opts: { note: string; citation: EditCitationSelection | null },
     ) => Promise<DeleteOutcome<TResponse>>;
     cancelHref: string;
@@ -30,7 +30,7 @@
   let {
     entityLabel,
     entityName,
-    slug,
+    public_id,
     submit,
     cancelHref,
     redirectAfterDelete,
@@ -47,6 +47,8 @@
   let submitting = $state(false);
 
   let isBlocked = $derived(blocked !== null);
+  let heading = $derived(isBlocked ? `Can't delete “${entityName}”` : `Delete “${entityName}”?`);
+  let headTitle = $derived(isBlocked ? `Can't delete ${entityName}` : `Delete ${entityName}?`);
   let placeholder = $derived(
     notePlaceholder ?? `Why are you deleting this ${entityLabel.toLowerCase()}?`,
   );
@@ -55,7 +57,7 @@
     formError = '';
     submitting = true;
     try {
-      const outcome = await submit(slug, { note, citation });
+      const outcome = await submit(public_id, { note, citation });
       switch (outcome.kind) {
         case 'ok': {
           const name = entityName;
@@ -111,12 +113,12 @@
 </script>
 
 <svelte:head>
-  <title>{pageTitle(`Delete ${entityName}?`)}</title>
+  <title>{pageTitle(headTitle)}</title>
 </svelte:head>
 
 <div class="delete-page">
   <header class="hdr">
-    <h1>Delete “{entityName}”?</h1>
+    <h1>{heading}</h1>
     {#if parentBreadcrumb}
       <p class="parent-ref">
         under <a href={resolveHref(parentBreadcrumb.href)}>{parentBreadcrumb.text}</a>

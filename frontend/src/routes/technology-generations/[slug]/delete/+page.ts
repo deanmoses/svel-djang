@@ -6,7 +6,7 @@ export const load: PageLoad = ({ fetch, params, url }) =>
   loadDeletePreview({
     fetch,
     url,
-    slug: params.slug,
+    public_id: params.slug,
     entity: 'technology-generations',
     notFoundRedirect: resolve('/technology-generations'),
   });

@@ -6,7 +6,7 @@
   import { submitDelete } from './game-format-delete';
 
   let { data } = $props();
-  let { preview, slug } = $derived(data);
+  let { preview, public_id } = $derived(data);
 
   let blockedReferrers = $derived(preview.blocked_by ?? []);
 
@@ -33,11 +33,11 @@
 <DeletePage
   entityLabel="Game Format"
   entityName={preview.name}
-  {slug}
+  {public_id}
   submit={submitDelete}
-  cancelHref={`/game-formats/${slug}`}
+  cancelHref={`/game-formats/${public_id}`}
   redirectAfterDelete="/game-formats"
-  editHistoryHref={`/game-formats/${slug}/edit-history`}
+  editHistoryHref={`/game-formats/${public_id}/edit-history`}
   {blocked}
   {impact}
 />

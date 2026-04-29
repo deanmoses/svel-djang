@@ -72,7 +72,7 @@ from .edit_claims import (
 )
 from .entity_create import (
     assert_name_available,
-    assert_slug_available,
+    assert_public_id_available,
     create_entity_with_claims,
     validate_name,
     validate_slug_format,
@@ -1011,7 +1011,7 @@ def create_title(
     name = validate_name(data.name, max_length=MAX_CATALOG_NAME_LENGTH)
     slug = validate_slug_format(data.slug)
     _assert_title_name_available(name)
-    assert_slug_available(Title, slug)
+    assert_public_id_available(Title, slug)
 
     create_entity_with_claims(
         Title,
@@ -1071,7 +1071,7 @@ def create_model(
         scope_filter=Q(title_id=title.pk),
         friendly_label="model",
     )
-    assert_slug_available(MachineModel, slug)
+    assert_public_id_available(MachineModel, slug)
 
     create_entity_with_claims(
         MachineModel,

@@ -13,9 +13,12 @@ from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
 from ninja.errors import HttpError
+from pydantic import Field
 
 from apps.core.licensing import get_minimum_display_rank
 from apps.core.models import active_status_q
+from apps.provenance.helpers import active_claims, claims_prefetch
+from apps.provenance.schemas import RichTextSchema
 
 from ..cache import LOCATIONS_TREE_KEY
 from ..models import (
@@ -25,8 +28,9 @@ from ..models import (
     MachineModel,
     Manufacturer,
 )
+from ..services.location_paths import lookup_child_division
 from ._typing import HasModelCount
-from .helpers import _first_thumbnail
+from .helpers import _build_rich_text, _first_thumbnail
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -59,6 +63,16 @@ class LocationDetailSchema(Schema):
     slug: str
     location_path: str
     location_type: str | None = None
+    # Server-derived label for the next tier of children (e.g. "state",
+    # "city"). ``None`` when divisions are missing or exhausted; the
+    # frontend uses this to suppress the "+ New …" action rather than
+    # show a wrong label.
+    expected_child_type: str | None = None
+    description: RichTextSchema = Field(default_factory=RichTextSchema)
+    short_name: str | None = None
+    code: str | None = None
+    divisions: list[str] | None = None
+    aliases: list[str] = []
     manufacturer_count: int = 0
     ancestors: list[LocationAncestorRef] = []
     children: list[LocationChildRef] = []
@@ -80,6 +94,21 @@ class _LocationNode:
     location_type: str
     parent_path: str | None
     manufacturer_pks: frozenset[int]
+    short_name: str
+    code: str
+    aliases: tuple[str, ...]
+    # Pre-rendered at cache-build time so public detail reads stay
+    # zero-query. Description rendering has no rank dependency
+    # (``_build_rich_text`` only consults claims for attribution; rank
+    # gating in this module is image-only and runs per-request via
+    # ``_get_manufacturers_for_pks``), so caching the rendered schema
+    # is safe.
+    description: RichTextSchema
+    # Country rows declare a list of division-level labels (e.g.
+    # ``("state", "city")``); empty tuple on non-country rows. Cached
+    # alongside the rest of the tree so the detail serializer can
+    # derive ``expected_child_type`` without a per-request DB hit.
+    divisions: tuple[str, ...] = ()
 
 
 _LocationTree = tuple[dict[str, _LocationNode], dict[str | None, list[str]]]
@@ -99,8 +128,13 @@ def _get_location_tree() -> _LocationTree:
         return cast(_LocationTree, result)
 
     # Load all locations with parent chains (up to 4 levels deep).
+    # ``aliases`` + ``claims_prefetch()`` feed ``_build_rich_text`` so
+    # the rendered description can be cached per node.
     all_locs = list(
-        Location.objects.active().select_related("parent__parent__parent__parent").all()
+        Location.objects.active()
+        .select_related("parent__parent__parent__parent")
+        .prefetch_related("aliases", claims_prefetch())
+        .all()
     )
 
     # Accumulate manufacturer PKs at each location and all its ancestors.
@@ -133,6 +167,11 @@ def _get_location_tree() -> _LocationTree:
             location_type=loc.location_type,
             parent_path=parent_path,
             manufacturer_pks=frozenset(mfr_pks_by_path.get(loc.location_path, set())),
+            short_name=loc.short_name,
+            code=loc.code,
+            aliases=tuple(a.value for a in loc.aliases.all()),
+            description=_build_rich_text(loc, "description", active_claims(loc)),
+            divisions=tuple(loc.divisions or ()),
         )
         children_index.setdefault(parent_path, []).append(loc.location_path)
 
@@ -245,6 +284,9 @@ def _get_location_detail(location_path: str) -> LocationDetailSchema:
             slug="",
             location_path="",
             location_type=None,
+            # Top-level "+ New …" creates a country; the form has its
+            # own divisions input so no derivation is needed here.
+            expected_child_type="country",
             manufacturer_count=len(global_pks),
             ancestors=[],
             children=[_to_child_ref(c) for c in children],
@@ -258,11 +300,25 @@ def _get_location_detail(location_path: str) -> LocationDetailSchema:
     ancestors = _ancestors_of(location_path, nodes)
     children = _children_of(location_path, nodes, children_index)
 
+    # Country ancestor is at the root of the ancestor chain; for country
+    # rows it's the node itself. ``divisions`` lives only on country
+    # rows, so we read it from there.
+    country = ancestors[0] if ancestors else node
+    expected_child_type = lookup_child_division(
+        country.divisions, location_path.count("/")
+    )
+
     return LocationDetailSchema(
         name=node.name,
         slug=node.slug,
         location_path=location_path,
         location_type=node.location_type,
+        expected_child_type=expected_child_type,
+        description=node.description,
+        short_name=node.short_name or None,
+        code=node.code or None,
+        divisions=list(node.divisions) if node.divisions else None,
+        aliases=list(node.aliases),
         manufacturer_count=len(node.manufacturer_pks),
         ancestors=[
             LocationAncestorRef(name=a.name, slug=a.slug, location_path=a.location_path)
@@ -273,12 +329,13 @@ def _get_location_detail(location_path: str) -> LocationDetailSchema:
     )
 
 
-# Hand-fan-out: one route per supported hierarchy depth (root + 1–4 segments).
-# Pindata's maximum depth is 4 (e.g. france/idf/essonne/marcoussis). Ninja's
-# ``{path:name}`` converter (curly-brace form, inverse of Django's
-# ``<path:name>``) would collapse this to a single route — see
-# ``apps/provenance/page_endpoints.py`` for that pattern. Worth folding when
-# Location's read API moves under the shared detail-page registrar.
+# Two routes only: ``/`` for the global root (no segments) and
+# ``/{path:location_path}`` for any concrete location. Ninja's
+# ``{path:...}`` converter accepts slashes, so a single non-empty route
+# covers every supported depth — same pattern used by the page-endpoints
+# router and the new write/delete-restore routes. Pindata's max depth is
+# 4 today; this code does not enforce depth (the 422 / 404 falls out of
+# the cached tree lookup).
 
 
 @locations_router.get("/", response=LocationDetailSchema)
@@ -288,33 +345,10 @@ def get_location_root(request: HttpRequest) -> LocationDetailSchema:
     return _get_location_detail("")
 
 
-@locations_router.get("/{s1}", response=LocationDetailSchema)
+@locations_router.get("/{path:location_path}", response=LocationDetailSchema)
 @decorate_view(cache_control(no_cache=True))
-def get_location_1(request: HttpRequest, s1: str) -> LocationDetailSchema:
-    """Return detail for a single-segment location (e.g. 'usa')."""
-    return _get_location_detail(s1)
-
-
-@locations_router.get("/{s1}/{s2}", response=LocationDetailSchema)
-@decorate_view(cache_control(no_cache=True))
-def get_location_2(request: HttpRequest, s1: str, s2: str) -> LocationDetailSchema:
-    """Return detail for a two-segment location (e.g. 'usa/il')."""
-    return _get_location_detail(f"{s1}/{s2}")
-
-
-@locations_router.get("/{s1}/{s2}/{s3}", response=LocationDetailSchema)
-@decorate_view(cache_control(no_cache=True))
-def get_location_3(
-    request: HttpRequest, s1: str, s2: str, s3: str
+def get_location_detail(
+    request: HttpRequest, location_path: str
 ) -> LocationDetailSchema:
-    """Return detail for a three-segment location (e.g. 'usa/il/chicago')."""
-    return _get_location_detail(f"{s1}/{s2}/{s3}")
-
-
-@locations_router.get("/{s1}/{s2}/{s3}/{s4}", response=LocationDetailSchema)
-@decorate_view(cache_control(no_cache=True))
-def get_location_4(
-    request: HttpRequest, s1: str, s2: str, s3: str, s4: str
-) -> LocationDetailSchema:
-    """Return detail for a four-segment location (e.g. 'france/idf/essonne/marcoussis')."""
-    return _get_location_detail(f"{s1}/{s2}/{s3}/{s4}")
+    """Return detail for any concrete location (1–N segments)."""
+    return _get_location_detail(location_path)

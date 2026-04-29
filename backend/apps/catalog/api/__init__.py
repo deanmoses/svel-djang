@@ -9,6 +9,7 @@ from .corporate_entities import corporate_entities_router
 from .franchises import franchises_router
 from .gameplay_features import gameplay_features_router
 from .locations import locations_router
+from .locations_write import locations_write_router
 from .machine_models import models_router
 from .manufacturers import manufacturers_router
 from .page_endpoints import pages_router
@@ -39,6 +40,7 @@ __all__ = [
     "game_formats_router",
     "gameplay_features_router",
     "locations_router",
+    "locations_write_router",
     "manufacturers_router",
     "models_router",
     "pages_router",
@@ -72,6 +74,7 @@ routers = [
     ("/game-formats/", game_formats_router),
     ("/gameplay-features/", gameplay_features_router),
     ("/pages/locations/", locations_router),
+    ("/locations/", locations_write_router),
     ("/reward-types/", reward_types_router),
     ("/tags/", tags_router),
     ("/technology-subgenerations/", technology_subgenerations_router),

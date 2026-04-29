@@ -22,6 +22,8 @@ function profile(overrides: Partial<LocationDetail>): LocationDetail {
     slug: '',
     location_path: '',
     location_type: null,
+    description: { text: '', html: '', citations: [], attribution: null },
+    aliases: [],
     manufacturer_count: 0,
     ancestors: [],
     children: [],
@@ -59,16 +61,21 @@ describe('newChildLabel', () => {
     ).toBe('State');
   });
 
-  it('falls back to EXPECTED_CHILD when there are no children yet', () => {
-    expect(newChildLabel(profile({ location_type: 'country' }))).toBe('State');
-    expect(newChildLabel(profile({ location_type: 'state' }))).toBe('City');
+  it('falls back to server-supplied expected_child_type when there are no children', () => {
+    expect(newChildLabel(profile({ location_type: 'country', expected_child_type: 'state' }))).toBe(
+      'State',
+    );
+    expect(
+      newChildLabel(profile({ location_type: 'country', expected_child_type: 'region' })),
+    ).toBe('Region');
   });
 
-  it('returns null for a city (no expected child)', () => {
+  it('returns null when expected_child_type is absent (divisions exhausted/missing)', () => {
+    expect(newChildLabel(profile({ location_type: 'city', expected_child_type: null }))).toBeNull();
     expect(newChildLabel(profile({ location_type: 'city' }))).toBeNull();
   });
 
-  it('returns null at the root (no location_type) when no children', () => {
+  it('returns null at the root with no children and no expected type', () => {
     expect(newChildLabel(profile({ location_type: null }))).toBeNull();
   });
 
@@ -76,5 +83,25 @@ describe('newChildLabel', () => {
     expect(
       newChildLabel(profile({ location_type: null, children: [child('USA', 'country')] })),
     ).toBe('Country');
+  });
+
+  it('humanizes unknown server-supplied types instead of suppressing the action', () => {
+    // ``divisions`` is validated as a non-empty list of non-blank strings on
+    // the backend — no enum check — so a country can declare any label
+    // (e.g. ``oblast`` or ``Municipality``). Suppressing "+ New …" for
+    // unknown labels would hide the action on a parent that can validly
+    // have children. Humanize instead.
+    expect(
+      newChildLabel(profile({ location_type: 'country', expected_child_type: 'oblast' })),
+    ).toBe('Oblast');
+    expect(
+      newChildLabel(profile({ location_type: 'country', expected_child_type: 'Municipality' })),
+    ).toBe('Municipality');
+  });
+
+  it('humanizes unknown existing-children types', () => {
+    expect(
+      newChildLabel(profile({ location_type: 'country', children: [child('Sakha', 'oblast')] })),
+    ).toBe('Oblast');
   });
 });

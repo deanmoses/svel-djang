@@ -67,10 +67,17 @@ class TestSharedSchemaOwnership:
             f"found {sorted(delete_matches)}"
         )
 
+        # Schemas with ``additionalProperties: false`` are intentionally
+        # tightening the base (e.g. ``LocationChildCreateSchema`` with
+        # ``extra='forbid'`` to surface client-supplied ``divisions`` /
+        # ``location_type`` as 422s rather than silently ignoring them).
+        # Allow those — the test's purpose is to catch silent forks of
+        # the shared shape, not to forbid deliberate hardening.
         create_matches = {
             name
             for name, comp in components.items()
             if frozenset(comp.get("properties", {})) == create_input_shape
+            and comp.get("additionalProperties") is not False
         }
         assert create_matches == {"EntityCreateInputSchema"}, (
             "Expected only EntityCreateInputSchema to have shape "

@@ -55,7 +55,7 @@ type DeleteResponse<E extends DeleteEntity> = paths[`/api/${E}/{public_id}/delet
 export function createDeleteSubmitter<E extends DeleteEntity>(entity: E) {
   const endpoint = `/api/${entity}/{public_id}/delete/`;
   return async (
-    slug: string,
+    public_id: string,
     opts: DeleteSubmitOptions = {},
   ): Promise<DeleteOutcome<DeleteResponse<E>>> => {
     // openapi-fetch can't resolve a typed body for a path it sees as a
@@ -64,7 +64,7 @@ export function createDeleteSubmitter<E extends DeleteEntity>(entity: E) {
     const { data, error, response } = await client.POST(
       endpoint as never,
       {
-        params: { path: { public_id: slug } },
+        params: { path: { public_id } },
         body: {
           note: opts.note ?? '',
           citation: buildEditCitationRequest(opts.citation ?? null),

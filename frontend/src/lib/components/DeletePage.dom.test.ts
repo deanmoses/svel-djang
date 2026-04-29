@@ -21,7 +21,7 @@ vi.mock('$lib/undo-delete', () => ({ submitUndoDelete }));
 
 type Response = { changeset_id: number };
 type Submit = (
-  slug: string,
+  public_id: string,
   opts: { note: string; citation: import('$lib/edit-citation').EditCitationSelection | null },
 ) => Promise<DeleteOutcome<Response>>;
 
@@ -33,7 +33,7 @@ function renderUnblocked(submit: Submit) {
   return render(DeletePage<Response>, {
     entityLabel: 'Title',
     entityName: 'Attack from Mars',
-    slug: 'attack-from-mars',
+    public_id: 'attack-from-mars',
     submit,
     cancelHref: '/titles/attack-from-mars',
     redirectAfterDelete: '/titles',
@@ -137,7 +137,7 @@ describe('DeletePage', () => {
     render(DeletePage<Response>, {
       entityLabel: 'Title',
       entityName: 'Attack from Mars',
-      slug: 'attack-from-mars',
+      public_id: 'attack-from-mars',
       submit: vi.fn(),
       cancelHref: '/titles/attack-from-mars',
       redirectAfterDelete: '/titles',
@@ -177,7 +177,7 @@ describe('DeletePage', () => {
     const { container } = render(DeletePage<Response>, {
       entityLabel: 'Person',
       entityName: 'Steve Ritchie',
-      slug: 'steve-ritchie',
+      public_id: 'steve-ritchie',
       submit: vi.fn(),
       cancelHref: '/people/steve-ritchie',
       redirectAfterDelete: '/people',

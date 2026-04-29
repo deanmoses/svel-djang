@@ -72,4 +72,4 @@ No semantic change. Existing tests covering name-based behavior carry over.
 
 ## Why this lives in `apps.core.models`
 
-`NamedModel` is generic infrastructure — not catalog-specific, not claim-specific, not soft-delete-specific. Living in `apps/core/models.py` alongside `LinkableModel` and `EntityStatusMixin` keeps the core per-capability mixins co-located. Catalog models import and inherit from it; nothing about `NamedModel` itself reaches into the catalog layer. Claim-specific capability now lives with provenance on `ClaimControlledModel`.
+`NamedModel` is generic infrastructure — not catalog-specific, not claim-specific, not soft-delete-specific. Living in `apps/core/models.py` alongside `LinkableModel` and `LifecycleStatusModel` keeps the core per-capability mixins co-located. Catalog models import and inherit from it; nothing about `NamedModel` itself reaches into the catalog layer. Claim-specific capability now lives with provenance on `ClaimControlledModel`.

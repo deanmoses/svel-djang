@@ -4,14 +4,14 @@
 
 This work is an instance of the broader pattern in [ModelDrivenMetadata.md](ModelDrivenMetadata.md): encode per-model behavior on the model itself, consume it generically from shared infrastructure.
 
-`EntityStatusMixin` is the base for soft-deletable catalog entities. Its soft-delete behavior has two per-model knobs that today live as bare `ClassVar`s on individual subclasses, read via `getattr` from the soft-delete machinery in [`apps/catalog/api/soft_delete.py`](../../backend/apps/catalog/api/soft_delete.py). This doc covers the hoist of both knobs onto `EntityStatusMixin` in a single step — same shape, same recipe, no reason to split.
+`LifecycleStatusModel` is the base for soft-deletable catalog entities. Its soft-delete behavior has two per-model knobs that today live as bare `ClassVar`s on individual subclasses, read via `getattr` from the soft-delete machinery in [`apps/catalog/api/soft_delete.py`](../../backend/apps/catalog/api/soft_delete.py). This doc covers the hoist of both knobs onto `LifecycleStatusModel` in a single step — same shape, same recipe, no reason to split.
 
 ## The contracts
 
-`EntityStatusMixin` declares both as typed ClassVars with empty defaults:
+`LifecycleStatusModel` declares both as typed ClassVars with empty defaults:
 
 ```python
-class EntityStatusMixin(models.Model):
+class LifecycleStatusModel(models.Model):
     soft_delete_cascade_relations: ClassVar[frozenset[str]] = frozenset()
     soft_delete_usage_blockers: ClassVar[frozenset[str]] = frozenset()
     # ...
@@ -27,10 +27,10 @@ class EntityStatusMixin(models.Model):
 Default empty — every existing subclass without an explicit declaration is unaffected. Subclasses with cascade or block requirements override:
 
 ```python
-class Title(ClaimControlledModel, EntityStatusMixin):
+class Title(ClaimControlledModel, LifecycleStatusModel):
     soft_delete_cascade_relations: ClassVar[frozenset[str]] = frozenset({"machine_models", ...})
 
-class Theme(ClaimControlledModel, EntityStatusMixin):
+class Theme(ClaimControlledModel, LifecycleStatusModel):
     soft_delete_usage_blockers: ClassVar[frozenset[str]] = frozenset({...})
 ```
 
@@ -52,12 +52,12 @@ Declarations today:
 
 Hoist:
 
-1. Add both ClassVars to `EntityStatusMixin` in `apps/core/models.py` with `frozenset()` defaults.
+1. Add both ClassVars to `LifecycleStatusModel` in `apps/core/models.py` with `frozenset()` defaults.
 2. Subclass declarations remain — they become typed overrides of the base default rather than ad-hoc additions.
 3. Replace the two `getattr(type(entity), "<attr>", frozenset())` reads in `apps/catalog/api/soft_delete.py` with direct attribute access (`type(entity).<attr>`).
-4. Update the module docstring in `soft_delete.py` (lines 9, 22, 29) to describe the attrs as `EntityStatusMixin` ClassVars rather than "opt-in attributes on the model."
+4. Update the module docstring in `soft_delete.py` (lines 9, 22, 29) to describe the attrs as `LifecycleStatusModel` ClassVars rather than "opt-in attributes on the model."
 5. No semantic change. Existing soft-delete cascade and blocker tests carry over.
 
-## Why this lives on `EntityStatusMixin`
+## Why this lives on `LifecycleStatusModel`
 
-Both attrs are meaningful only for models that participate in the soft-delete lifecycle. `EntityStatusMixin` is the smallest base that captures the audience — every soft-deletable entity inherits from it, and nothing else does. Hoisting puts the contract on the class the consumer already knows about, lets the type checker enforce the shape, and brings soft-delete metadata in line with the rest of the model-driven metadata work (see [ModelDrivenClaimsMetadata.md](ModelDrivenClaimsMetadata.md) for the parallel hoists in the claims family).
+Both attrs are meaningful only for models that participate in the soft-delete lifecycle. `LifecycleStatusModel` is the smallest base that captures the audience — every soft-deletable entity inherits from it, and nothing else does. Hoisting puts the contract on the class the consumer already knows about, lets the type checker enforce the shape, and brings soft-delete metadata in line with the rest of the model-driven metadata work (see [ModelDrivenClaimsMetadata.md](ModelDrivenClaimsMetadata.md) for the parallel hoists in the claims family).

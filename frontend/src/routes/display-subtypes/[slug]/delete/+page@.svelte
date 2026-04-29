@@ -6,7 +6,7 @@
   import { submitDelete } from './display-subtype-delete';
 
   let { data } = $props();
-  let { preview, slug } = $derived(data);
+  let { preview, public_id } = $derived(data);
 
   let blockedReferrers = $derived(preview.blocked_by ?? []);
 
@@ -41,11 +41,11 @@
 <DeletePage
   entityLabel="Subtype"
   entityName={preview.name}
-  {slug}
+  {public_id}
   submit={submitDelete}
-  cancelHref={`/display-subtypes/${slug}`}
+  cancelHref={`/display-subtypes/${public_id}`}
   redirectAfterDelete="/display-types"
-  editHistoryHref={`/display-subtypes/${slug}/edit-history`}
+  editHistoryHref={`/display-subtypes/${public_id}/edit-history`}
   {parentBreadcrumb}
   {blocked}
   {impact}

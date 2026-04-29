@@ -17,13 +17,13 @@ type LoadEvent = {
 export async function loadEditHistory(
   event: LoadEvent,
   entityType: CatalogEntityKey,
-  slug: string,
+  public_id: string,
 ) {
   const client = createServerClient(event.fetch, event.url);
   const { data, response } = await client.GET(
     '/api/pages/edit-history/{entity_type}/{public_id}/',
     {
-      params: { path: { entity_type: entityType, public_id: slug } },
+      params: { path: { entity_type: entityType, public_id } },
     },
   );
 
@@ -34,10 +34,14 @@ export async function loadEditHistory(
   return { changesets: data };
 }
 
-export async function loadSources(event: LoadEvent, entityType: CatalogEntityKey, slug: string) {
+export async function loadSources(
+  event: LoadEvent,
+  entityType: CatalogEntityKey,
+  public_id: string,
+) {
   const client = createServerClient(event.fetch, event.url);
   const { data, response } = await client.GET('/api/pages/sources/{entity_type}/{public_id}/', {
-    params: { path: { entity_type: entityType, public_id: slug } },
+    params: { path: { entity_type: entityType, public_id } },
   });
 
   if (!data) {

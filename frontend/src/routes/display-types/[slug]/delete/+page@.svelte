@@ -6,7 +6,7 @@
   import { submitDelete } from './display-type-delete';
 
   let { data } = $props();
-  let { preview, slug } = $derived(data);
+  let { preview, public_id } = $derived(data);
 
   let blockedReferrers = $derived(preview.blocked_by ?? []);
   let activeChildren = $derived(preview.active_children_count ?? 0);
@@ -39,11 +39,11 @@
 <DeletePage
   entityLabel="Display Type"
   entityName={preview.name}
-  {slug}
+  {public_id}
   submit={submitDelete}
-  cancelHref={`/display-types/${slug}`}
+  cancelHref={`/display-types/${public_id}`}
   redirectAfterDelete="/display-types"
-  editHistoryHref={`/display-types/${slug}/edit-history`}
+  editHistoryHref={`/display-types/${public_id}/edit-history`}
   {blocked}
   {impact}
 />

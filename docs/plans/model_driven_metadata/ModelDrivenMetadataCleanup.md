@@ -14,11 +14,12 @@ Each item has its own per-feature doc with the full design, examples, and step-b
 | 2   | `immutable_after_create` (new)          | New behavior      | [ModelDrivenImmutableAfterCreate.md](ModelDrivenImmutableAfterCreate.md) | Small-medium       | —          |
 | 3   | Linkability (LinkableModel + factories) | Steel thread      | [ModelDrivenLinkability.md](ModelDrivenLinkability.md)                   | Large (in flight)  | #2         |
 | 4   | Location CRUD validation                | Steel thread      | [LocationCrud.md](LocationCrud.md)                                       | Large              | #3         |
-| 5   | `WikilinkableModel` mixin               | New mixin + hoist | [ModelDrivenWikilinkableMetadata.md](ModelDrivenWikilinkableMetadata.md) | Medium             | (after #3) |
-| 6   | `NamedModel` base                       | New base          | [ModelDrivenNamedMetadata.md](ModelDrivenNamedMetadata.md)               | Large (~14 models) | —          |
-| 7   | Resolver signature standardization      | Cleanup           | (inline below)                                                           | Small              | —          |
+| 5   | API endpoint ownership                  | Reconcile plan    | [ModelDrivenEntityContract.md](ModelDrivenEntityContract.md)             | Large              | #3, #4     |
+| 6   | `WikilinkableModel` mixin               | New mixin + hoist | [ModelDrivenWikilinkableMetadata.md](ModelDrivenWikilinkableMetadata.md) | Medium             | (after #3) |
+| 7   | `NamedModel` base                       | New base          | [ModelDrivenNamedMetadata.md](ModelDrivenNamedMetadata.md)               | Large (~14 models) | —          |
+| 8   | Resolver signature standardization      | Cleanup           | (inline below)                                                           | Small              | —          |
 
-**Suggested order:** **1** (remaining small hoist), then **2** (pre-condition for #3), then **3** (the active steel thread), then **4** (proves #3 against Location's multi-segment public ID), then **5** (uses Linkability outputs), then **6** (broadest reach, lowest urgency, save for after the patterns and tooling are well-exercised). Item **7** is independent and can land any time.
+**Suggested order:** **1** (remaining small hoist), then **2** (pre-condition for #3), then **3** (the active steel thread), then **4** (proves #3 against Location's multi-segment public ID), then **5** (reconciles endpoint ownership around a framework-neutral entity contract before any API-shaped model spec is treated as chosen direction), then **6** (uses Linkability outputs), then **7** (broadest reach, lowest urgency, save for after the patterns and tooling are well-exercised). Item **8** is independent and can land any time.
 
 ### Resolver signature standardization
 

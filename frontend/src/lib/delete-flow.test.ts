@@ -28,7 +28,7 @@ beforeEach(() => {
 describe('createDeleteSubmitter', () => {
   const submit = createDeleteSubmitter('themes');
 
-  it('passes the slug through to the configured endpoint', async () => {
+  it('passes the public_id through to the configured endpoint', async () => {
     POST.mockResolvedValue({
       data: { changeset_id: 1 },
       error: undefined,

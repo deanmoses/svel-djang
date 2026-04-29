@@ -396,7 +396,7 @@ Implemented in `catalog/ingestion/opdb/adapter.py` with `build_opdb_plan()` + `p
 
 Add claim-controlled `status` field (`active`, `deleted`) to all catalog entities. Wire `status=active` assertion into `create_entity` consistency check. Filter catalog queries on `status='active'`. Duplicate handling (`status=duplicate`, `duplicate_of` relationship claim) deferred to a follow-up.
 
-Implemented via `EntityStatusMixin` in `core/models.py` with `EntityStatus` enum (`active`, `deleted`), `status_valid()` DB constraint, and null allowed for entities with no remaining status claim.
+Implemented via `LifecycleStatusModel` in `core/models.py` with `EntityStatus` enum (`active`, `deleted`), `status_valid()` DB constraint, and null allowed for entities with no remaining status claim.
 
 ### Phase 4: Relationship claim PK migration ✓ (implemented)
 

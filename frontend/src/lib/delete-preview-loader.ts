@@ -27,7 +27,7 @@ interface DeletePreviewLoadOptions<E extends DeletePreviewEntity> {
   // rejects relative URLs during SSR. We pass `url.origin` as the
   // typed client's baseUrl so the path resolves on both SSR and CSR.
   url: URL;
-  slug: string;
+  public_id: string;
   entity: E;
   notFoundRedirect: string;
 }
@@ -35,10 +35,13 @@ interface DeletePreviewLoadOptions<E extends DeletePreviewEntity> {
 export async function loadDeletePreview<E extends DeletePreviewEntity>({
   fetch,
   url,
-  slug,
+  public_id,
   entity,
   notFoundRedirect,
-}: DeletePreviewLoadOptions<E>): Promise<{ preview: DeletePreviewResponse<E>; slug: string }> {
+}: DeletePreviewLoadOptions<E>): Promise<{
+  preview: DeletePreviewResponse<E>;
+  public_id: string;
+}> {
   const endpoint = `/api/${entity}/{public_id}/delete-preview/`;
   const client = createApiClient(fetch, url.origin);
 
@@ -55,7 +58,7 @@ export async function loadDeletePreview<E extends DeletePreviewEntity>({
   const { data, error, response } = await client.GET(
     endpoint as never,
     {
-      params: { path: { public_id: slug } },
+      params: { path: { public_id } },
     } as never,
   );
   const status = response.status;
@@ -66,5 +69,5 @@ export async function loadDeletePreview<E extends DeletePreviewEntity>({
     throw new Error(`Failed to load delete preview (${status})`);
   }
 
-  return { preview: data as DeletePreviewResponse<E>, slug };
+  return { preview: data as DeletePreviewResponse<E>, public_id };
 }

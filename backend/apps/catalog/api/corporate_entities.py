@@ -18,6 +18,7 @@ from apps.provenance.helpers import active_claims, claims_prefetch
 from apps.provenance.schemas import RichTextSchema
 
 from ..models import (
+    CatalogModel,
     CorporateEntity,
     CorporateEntityLocation,
     MachineModel,
@@ -40,6 +41,7 @@ from .manufacturers import manufacturers_router
 from .schemas import (
     CorporateEntityClaimPatchSchema,
     CorporateEntityLocationSchema,
+    EntityCreateInputSchema,
     EntityRef,
     RelatedTitleSchema,
 )
@@ -202,6 +204,15 @@ def patch_corporate_entity_claims(
 # Create / delete / restore wiring
 # ---------------------------------------------------------------------------
 
+
+def _scope_by_manufacturer(
+    _data: EntityCreateInputSchema, parent: CatalogModel | None
+) -> Q:
+    # CE create is parented; the factory always passes a resolved parent.
+    assert parent is not None
+    return Q(manufacturer_id=parent.pk)
+
+
 # Create is parented: ``POST /api/manufacturers/{parent_public_id}/corporate-entities/``
 # mounted on the manufacturer router. Name collisions are scoped per parent —
 # two manufacturers may each own a corporate entity with the same name, but
@@ -215,7 +226,7 @@ register_entity_create(
     parent_field="manufacturer",
     parent_model=Manufacturer,
     route_suffix="corporate-entities",
-    scope_filter_builder=lambda m: Q(manufacturer_id=m.pk),
+    scope_filter_builder=_scope_by_manufacturer,
 )
 register_entity_delete_restore(
     corporate_entities_router,
