@@ -349,6 +349,90 @@ Location's PATCH route adds one more instance to the pile. Once it lands, the ne
 
 Doing it now would be scope creep — the factory's right shape will be clearer with N+1 concrete callers than with N. Doing it never means accepting hand-rolled PATCH handlers as the steady state.
 
+### Split `apps/catalog/api/helpers.py` by concern
+
+[`apps/catalog/api/helpers.py`](../../../backend/apps/catalog/api/helpers.py) is a kitchen-sink module that grew by accretion. Many of its functions are nominally underscore-private (e.g. `_build_rich_text`, `_first_thumbnail`, `_extract_image_urls`, `_serialize_title_machine`) but are imported across most siblings in `apps/catalog/api/`. The underscore is a lie — Python convention reads it as "private to this module," and the actual usage pattern is "shared across the whole API surface." Symptom: a fresh reader can't tell which functions are local helpers vs. de facto public utilities.
+
+Don't fix it as a rename. The underscore is a symptom of the kitchen-sink shape; the right fix is to split the module by concern and let each function's natural home dictate its visibility. Roughly three clusters:
+
+1. **Image / media extraction** — `_first_thumbnail`, `_extract_image_urls`, `_extract_image_attribution`, `_uploaded_image_urls`, `_serialize_uploaded_media`, `_media_prefetch`. Cohesive set with one well-defined consumer pattern (every entity's detail serializer that surfaces thumbnails). Lift into `apps/catalog/api/images.py` (or `media_helpers.py`); the functions that actually are shared across siblings get public names; the truly-local ones keep their underscore.
+2. **Rich-text rendering** — `_build_rich_text`, `_extract_description_attribution`. Explicitly shared across every entity's detail serializer. Lift into `apps/catalog/api/rich_text.py` and rename to `build_rich_text` / `extract_description_attribution`. This is the cluster Location's caching change in this PR adds another caller to.
+3. **Per-entity serialization fragments** — `_serialize_credit`, `_serialize_title_ref`, `_serialize_title_machine`, `_collect_titles`, `_location_ancestors`, `_serialize_locations`. These shouldn't be in a shared helpers module at all — each belongs next to its primary owner (`titles.py` for the title fragments, `locations.py` for the location fragments, the people/credit surface for credits). Once each lives next to its owner, the cross-import disappears: a sibling module that wants a title ref reaches the one in `titles.py` through a published function, not by snooping into helpers.
+
+Note: `apps/catalog` is at the top of [AppBoundaries.md](../../AppBoundaries.md)'s dependency graph — only `media.api` (a structural exception) depends on it. So this split is purely a catalog-internal organizational change; no cross-app contracts move. Behavior-preserving, validated by the existing test suite.
+
+Doing it now is scope creep — it touches every entity's detail serializer file, and the split is much clearer with Location's rich-text caller in the pile. Right shape for a focused standalone PR after this one lands.
+
+### Consolidate per-entity delete-page wrappers
+
+Every entity's `[entity]/[id]/delete/+page@.svelte` is ~40–60 lines of formulaic `BlockedState` construction. The template is uniform across themes, manufacturers, series, corporate-entities, gameplay-features, taxonomy, and (after this PR) locations:
+
+- Lead: `"This {label} can't be deleted because active {referrer-type} still point at it:"`
+- Hint: `"references this {label} via {relation}"`
+- Footer: `"Resolve these references, then try again."`
+- Href builder: `(r) => r.slug ? '/{plural}/' + r.slug : null`
+
+The only per-entity bits are the entity label, the plural URL segment for hrefs, and the impact copy. Backend delete-preview already returns the data the page needs (`blocked_by`, `active_children_count`, `changeset_count`); the frontend is just templating it.
+
+The follow-up:
+
+1. Add a `BlockedStateBuilder` (or a `defaultBlockedState` helper) to `$lib/components/delete-page` that takes `entityLabel`, `pluralRouteSegment`, and `preview`, and returns a `BlockedState | null` covering both the `active_children_count > 0` branch and the `blocked_by` branch.
+2. Optionally extend the helper with overrides — Location's "child locations are unaffected" impact line, the tier-dependent `redirectAfterDelete`, and any other per-entity lead-copy variations.
+3. Per-entity wrappers shrink to ~15 lines: `entityLabel`, `entityName`, `cancelHref`, `redirectAfterDelete`, `editHistoryHref`, plus a one-line call to the builder. Location's tier-dependent redirect stays as a `$derived.by` in the wrapper — it's the only non-formulaic piece across the catalog today.
+
+Doing this in the Location PR would mean refactoring every shipped delete page in the same diff. The right shape is clearer once Location is in the pile (8 wrappers) than before (7) — same logic as the PATCH-claims factory follow-up. Touch every wrapper in one focused PR with the same `delete-page.dom.test.ts` running before/after to prove parity.
+
+### Switch `catalog-meta.test.ts` route enumeration from `import.meta.glob` to `node:fs`
+
+The test currently casts a broad Vite glob (`/src/routes/**/+*`) and re-narrows with a regex because `import.meta.glob` treats `[` / `]` as character classes — useless when the directory names you're hunting for are literally `[slug]` and `[...path]`. The workaround is documented in a comment, but a reader has to reconstruct it every time.
+
+The job the test is doing is a directory enumeration, not a Vite-bundling concern. Vitest runs in Node, so `node:fs` does what's wanted directly:
+
+```ts
+import { existsSync, readdirSync } from "node:fs";
+import { resolve } from "node:path";
+
+const ROUTES_DIR = resolve(__dirname, "../../routes");
+const PARAM_DIRS = new Set(["[slug]", "[...path]"]);
+
+const routeDirs = readdirSync(ROUTES_DIR, { withFileTypes: true })
+  .filter((d) => d.isDirectory())
+  .filter((d) =>
+    readdirSync(resolve(ROUTES_DIR, d.name)).some((c) => PARAM_DIRS.has(c)),
+  )
+  .map((d) => d.name);
+```
+
+That reads as "entity directories with a detail route" without commentary. Same for the subroute scan: `existsSync(resolve(ROUTES_DIR, dir, segment, subroute, '+page.svelte'))` replaces the second broadened glob.
+
+Why deferred: the project's `package.json` doesn't depend directly on `@types/node` (it's a transitive only), so tightening this test currently fails type-check on `node:fs` / `node:path` / `__dirname`. The follow-up is the rewrite **plus** adding `@types/node` as a dev dependency.
+
+### Drop redundant `note: ''` / `fields: {}` defaults from `save-*-claims.ts`
+
+Every catalog `save-*-claims.ts` file (locations, themes, manufacturers, corporate-entities, people, titles, models, plus the shared `save-claims-shared.ts`) PATCHes with `body: { fields: {}, note: '', ...body }`. Both defaults are duplicating backend-side defaults:
+
+- `note: ''` is set by `ChangeSetInputSchema.note: str = ""` ([`apps/provenance/schemas.py`](../../../backend/apps/provenance/schemas.py)) — every PATCH-claims schema inherits it. Omitting `note` and sending `note: ''` are wire-identical.
+- `fields: {}` is set by every PATCH-claims subclass (`HierarchyClaimPatchSchema`, `CorporateEntityClaimPatchSchema`, `ModelClaimPatchSchema`, `TitleClaimPatchSchema`, plus Location's). The base `ClaimPatchSchema` keeps `fields: dict[str, Any]` _required_, so `fields: {}` stays needed on routes that bind directly to the base.
+
+The follow-up:
+
+1. Drop `note: ''` from every `save-*-claims.ts` (uniformly safe).
+2. Drop `fields: {}` from each save-claims file whose backend schema defaults `fields` — audit per file via the generated `LocationPatchClaimSchema` / `HierarchyClaimsBody` / etc. types in `schema.d.ts` (they expose the optional/required boundary directly).
+3. Update each file's `*.test.ts` to drop the corresponding keys from the asserted `body` shape — these assertions currently pin the redundant defaults rather than the contract.
+
+Doing it now is scope creep: it touches ~10 files plus their tests, and the redundancy is harmless. Worth doing as its own focused cleanup PR — small, mechanical, and the tests get cleaner (each assertion describes only what the caller actually sent).
+
+### Rename `SectionEditorProps.slug` → `publicId`
+
+The shared editor contract at [`editor-contract.ts`](../../../frontend/src/lib/components/editors/editor-contract.ts) declares `slug: string` on `SectionEditorProps<TData>`, consumed by ~10 shared editors (`BasicsEditor`, `AliasesSectionEditor`, `PeopleEditor`, `ExternalDataEditor`, `TitleFranchiseEditor`, `RelatedModelsEditor`, `DisplayOrderEditor`, `SystemManufacturerEditor`, `FeaturesEditor`, `TitleExternalDataEditor`). For every shipped entity the value _is_ a slug, so the name is accurate. Location is the first entity where the value is a multi-segment `location_path`; its local editors (`LocationBasicsEditor`, `LocationDivisionsEditor`) implement the contract and rename the prop locally via `slug: publicId` in `$props()`, then pass `slug={publicId}` back into shared editors from `LocationEditorSwitch`.
+
+This works but documents nothing at the contract layer. The follow-up:
+
+1. Rename `SectionEditorProps.slug` → `SectionEditorProps.publicId` in [`editor-contract.ts`](../../../frontend/src/lib/components/editors/editor-contract.ts).
+2. Update each of the ~10 shared editors and their per-entity switch components to use `publicId`.
+3. Drop Location's local `slug: publicId` aliases in `LocationBasicsEditor` and `LocationDivisionsEditor`.
+4. The same `SaveResult` contract carries `updatedSlug` (returned by `saveLocationClaims` and friends) — rename to `updatedPublicId` in the same sweep.
+
 ## Out of Scope
 
 - **Model-level `immutable_after_create` enforcement.** Re-parenting and slug-renaming are blocked at the UI / route level in this PR (see Decisions). The model-level frozen-fields enforcement is its own follow-up; once it lands, drop the UI/route workarounds.

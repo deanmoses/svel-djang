@@ -1,5 +1,7 @@
 # Model-Driven Linkability
 
+> **Status: DONE** — main body landed; only [§Follow-ups](#follow-ups) remain. Location proved the abstraction via [LocationCrud.md](LocationCrud.md).
+
 ## Context
 
 ### The Ultimate Goal
@@ -180,6 +182,19 @@ That makes a typing cleanup possible:
 - Return `type[CatalogModel]` and rename to match (`get_entity_model` or `get_catalog_model`).
 - Delete the `issubclass(model_class, ClaimControlledModel)` guard at [`backend/config/api.py:196`](../../../backend/config/api.py#L196) — `type[CatalogModel]` is already a `type[ClaimControlledModel]`.
 - Leave `LinkableModel` as a pure structural contract (no registry, no `__subclasses__()` walk), so a future linkable-but-not-CCM model can still adopt it independently.
+
+### Migrate System's bespoke create handler off hardcoded `slug=slug`
+
+[`apps/catalog/api/systems.py:327`](../../../backend/apps/catalog/api/systems.py#L327) does `get_object_or_404(_system_detail_qs(), slug=slug)` inside System's bespoke create handler. System's `public_id_field == "slug"` so the call is correct today, but the lookup hardcodes the field name rather than reading it from the model — exactly the [field-on-model antipattern](ModelDrivenMetadata.md#antipattern-field-on-model) §"The generic write surface" warns about ("Hardcoding `parent.slug` anywhere in the write path is a field-on-model antipattern waiting to happen").
+
+The acceptance criterion only constrains entities reaching the shared factories; System's hand-written create is grandfathered, so this isn't a Linkability blocker. But it's a latent footgun: if System ever overrides `public_id_field`, or if this handler is copied as a template for a non-slug-keyed model, the lookup silently misses.
+
+Two options:
+
+1. **Cheap fix in place**: replace `slug=slug` with `**{System.public_id_field: slug}` (or the slug-named local variable). One-line change, removes the hardcoded reference, no behavior change today.
+2. **Migrate System onto `register_entity_create`**: the right long-term shape — System's bespoke handler exists because the factory didn't support `extra_create_fields_builder` when it was written; that gap closed in [LocationCrud.md](LocationCrud.md). System could fold in alongside Location with the same hooks.
+
+Option (2) is the real fix; option (1) is the holdover for as long as System keeps the bespoke handler. Worth doing one or the other before the next non-slug-keyed `LinkableModel` arrives — at that point, copy-paste from System's handler becomes a real risk.
 
 ### Drop the duplicate `entity_type` raise in `get_linkable_model._build_map`
 
