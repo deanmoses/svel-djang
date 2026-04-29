@@ -12,8 +12,6 @@ from django.db.models.functions import Lower, Now
 from django.db.models.signals import post_delete
 from django.utils.text import slugify
 
-from .validators import validate_no_mojibake as _validate_no_mojibake
-
 
 class TimeStampedModel(models.Model):
     """Abstract base adding created_at / updated_at timestamps."""
@@ -306,35 +304,6 @@ def status_valid() -> models.CheckConstraint:
 
 
 # ---------------------------------------------------------------------------
-# Markdown field
-# ---------------------------------------------------------------------------
-
-
-class MarkdownField(models.TextField[str, str]):
-    """A TextField containing markdown with ``[[<entity-type>:<public-id>]]`` links.
-
-    The system introspects models for MarkdownField instances to:
-    - Auto-discover which fields need reference syncing
-    - Auto-generate ``{field}_html`` rendered output in API responses
-
-    Includes ``validate_no_mojibake`` as a default validator to reject
-    encoding-corrupted text at the model level.
-    """
-
-    default_validators = [_validate_no_mojibake]
-
-    # Django's migration protocol; see Field.deconstruct.
-    def deconstruct(self) -> Any:  # noqa: ANN401
-        name, _path, args, kwargs = super().deconstruct()
-        return name, "django.db.models.TextField", args, kwargs
-
-
-def get_markdown_fields(model: type[models.Model]) -> list[str]:
-    """Return field names of all MarkdownField instances on a model."""
-    return [f.name for f in model._meta.get_fields() if isinstance(f, MarkdownField)]
-
-
-# ---------------------------------------------------------------------------
 # LinkableModel (link target registration)
 # ---------------------------------------------------------------------------
 
@@ -366,14 +335,10 @@ class LinkableModel(models.Model):
     UI labels derive from them; they do not drive backend behavior beyond
     URL and UI consistency.
 
-    Class attributes for link registration (all optional):
-    - link_type_name: str — overrides the auto-derived type name
-    - link_label: str — human-readable label for type picker
-    - link_description: str — brief description
-    - link_sort_order: int — display order in type picker (lower = higher)
-    - link_autocomplete_search_fields: tuple[str, ...] — model fields to search
-    - link_autocomplete_ordering: tuple[str, ...] — result ordering
-    - link_autocomplete_select_related: tuple[str, ...] — eager loading
+    Subclasses that should appear in the wikilink autocomplete picker
+    additionally inherit ``apps.core.wikilinks.WikilinkableModel``, which
+    carries the picker-presentation contract (label, sort order, autocomplete
+    config).
 
     ``link_url_pattern`` is derived from ``entity_type_plural`` at subclass
     creation time — do not declare it by hand.

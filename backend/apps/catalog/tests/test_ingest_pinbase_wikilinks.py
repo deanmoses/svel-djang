@@ -79,18 +79,16 @@ class TestValidateCrossEntityWikilinks:
         out = stderr.getvalue()
         assert "[[location:does/not/exist]] not found" in out
 
-    def test_resolves_non_hyphenated_link_type(self, tmp_path):
+    def test_resolves_kebab_case_link_type(self, tmp_path):
         """Validator keys must match the markdown renderer's registration.
 
-        ``GameplayFeature.entity_type`` is ``"gameplay-feature"``, but the
-        renderer (``apps/catalog/apps.py:_register_link_types``) registers
-        it under ``model.__name__.lower()`` = ``"gameplayfeature"``, and
-        pindata follows suit. Keying the validator by ``entity_type``
-        instead would diverge from the renderer and flag every authored
-        ``[[gameplayfeature:...]]`` ref as broken.
+        Both the validator and the renderer key on ``model.entity_type``
+        (kebab-case singular). Pindata authors the same form. A multi-word
+        entity type like ``gameplay-feature`` exercises the case where
+        ``__name__.lower()`` and ``entity_type`` diverge.
         """
         GameplayFeature.objects.create(slug="multiball", name="Multiball")
-        _write_taxonomy_with_link(tmp_path, "[[gameplayfeature:multiball]]")
+        _write_taxonomy_with_link(tmp_path, "[[gameplay-feature:multiball]]")
         stderr = io.StringIO()
         validate_cross_entity_wikilinks(tmp_path, io.StringIO(), stderr)
         assert stderr.getvalue() == ""

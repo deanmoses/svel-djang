@@ -6,8 +6,7 @@ from collections.abc import Iterable
 
 from django.db.models import Model
 
-from apps.core.markdown import render_markdown_field
-from apps.core.markdown_links import convert_storage_to_authoring
+from apps.core.markdown import convert_storage_to_authoring, render_markdown_field
 from apps.provenance.licensing import (
     build_source_field_license_map,
     resolve_effective_license,

@@ -372,7 +372,7 @@ def validate_claim_value(
     - Null/blank clearability (request-level concern)
     - FK target existence (see ``validate_fk_claims_batch``)
     """
-    from apps.core.markdown_links import prepare_markdown_claim_value
+    from apps.core.markdown import prepare_markdown_claim_value
     from apps.core.validators import validate_no_mojibake
 
     field = model_class._meta.get_field(field_name)

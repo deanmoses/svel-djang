@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.apps import AppConfig
 
 
@@ -15,13 +13,15 @@ class CatalogConfig(AppConfig):
         signals.connect()
         register_catalog_relationship_schemas()
         self._register_link_types()
+        self._register_picker_types()
         self._register_reference_cleanup()
 
     @staticmethod
     def _register_reference_cleanup() -> None:
         from django.apps import apps
 
-        from apps.core.models import MarkdownField, register_reference_cleanup
+        from apps.core.markdown import MarkdownField
+        from apps.core.models import register_reference_cleanup
 
         models_with_markdown = [
             model
@@ -34,55 +34,58 @@ class CatalogConfig(AppConfig):
 
     @staticmethod
     def _register_link_types() -> None:
-        from apps.core.markdown_links import LinkType, register
-        from apps.core.models import LinkableModel
-        from apps.core.schemas import LinkTargetSchema
+        """Register one ``LinkType`` per addressable catalog entity.
 
-        from ._walks import catalog_app_subclasses
+        Walks ``LinkableModel`` so every URL-addressable entity is renderable
+        via ``[[<entity-type>:<public-id>]]`` markdown — even ones absent from the
+        wikilink picker (Location). Picker presentation is a separate registry;
+        see :meth:`_register_picker_types`.
+        """
+        from apps.core.wikilinks import LinkType, register
 
-        def _default_serialize(
-            obj: Any,  # noqa: ANN401 - matches LinkType.autocomplete_serialize callback contract
-        ) -> LinkTargetSchema:
-            return LinkTargetSchema(ref=obj.public_id, label=str(obj.name))
+        from ._walks import linkable_models
 
-        for model in catalog_app_subclasses(LinkableModel):
-            name = getattr(model, "link_type_name", model.__name__.lower())
+        for model in linkable_models():
             register(
                 LinkType(
-                    name=name,
+                    name=model.entity_type,
                     model_path=f"catalog.{model.__name__}",
                     public_id_field=model.public_id_field,
-                    label=getattr(
-                        model, "link_label", str(model._meta.verbose_name).title()
-                    ),
-                    description=getattr(
-                        model,
-                        "link_description",
-                        f"Link to a {model._meta.verbose_name}",
-                    ),
                     url_pattern=model.link_url_pattern,
                     url_field="public_id",
                     label_field="name",
-                    sort_order=getattr(model, "link_sort_order", 100),
-                    autocomplete_search_fields=getattr(
-                        model,
-                        "link_autocomplete_search_fields",
-                        ("name__icontains",),
-                    ),
-                    autocomplete_ordering=getattr(
-                        model,
-                        "link_autocomplete_ordering",
-                        ("name",),
-                    ),
-                    autocomplete_select_related=getattr(
-                        model,
-                        "link_autocomplete_select_related",
-                        (),
-                    ),
-                    autocomplete_serialize=getattr(
-                        model,
-                        "link_autocomplete_serialize",
-                        _default_serialize,
-                    ),
+                )
+            )
+
+    @staticmethod
+    def _register_picker_types() -> None:
+        """Register one ``PickerType`` per catalog model that opts into the picker.
+
+        Walks ``WikilinkableModel`` (a strict subset of ``LinkableModel``).
+        Models that are URL-addressable but absent from the picker — Location
+        is the live case — inherit ``LinkableModel`` only and so register a
+        ``LinkType`` (renderer) but no ``PickerType``.
+        """
+        from apps.core.wikilinks import PickerType, register_picker
+
+        from ._walks import wikilinkable_models
+
+        for model in wikilinkable_models():
+            label = model.link_label or str(model._meta.verbose_name).title()
+            description = (
+                model.link_description or f"Link to a {model._meta.verbose_name}"
+            )
+            register_picker(
+                PickerType(
+                    name=model.entity_type,
+                    label=label,
+                    description=description,
+                    sort_order=model.link_sort_order,
+                    model_path=f"catalog.{model.__name__}",
+                    public_id_field=model.public_id_field,
+                    autocomplete_search_fields=model.link_autocomplete_search_fields,
+                    autocomplete_ordering=model.link_autocomplete_ordering,
+                    autocomplete_select_related=model.link_autocomplete_select_related,
+                    autocomplete_serialize=model.link_autocomplete_serialize,
                 )
             )

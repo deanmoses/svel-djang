@@ -7,8 +7,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator, RegexVa
 from django.db import models
 from django.db.models.functions import Lower
 
+from apps.core.markdown import MarkdownField
 from apps.core.models import (
-    MarkdownField,
     SluggedModel,
     TimeStampedModel,
     field_not_blank,
@@ -18,6 +18,7 @@ from apps.core.models import (
     status_valid,
 )
 from apps.core.validators import validate_no_mojibake
+from apps.core.wikilinks import WikilinkableModel
 from apps.media.models import MediaSupportedModel
 
 from .base import AliasModel, CatalogModel
@@ -34,6 +35,7 @@ class Person(
     SluggedModel,
     MediaSupportedModel,
     TimeStampedModel,
+    WikilinkableModel,
 ):
     """A person involved in pinball machine design (designer, artist, etc.)."""
 

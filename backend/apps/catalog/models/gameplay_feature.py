@@ -9,8 +9,8 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models.functions import Lower
 
+from apps.core.markdown import MarkdownField
 from apps.core.models import (
-    MarkdownField,
     SluggedModel,
     TimeStampedModel,
     field_not_blank,
@@ -20,6 +20,7 @@ from apps.core.models import (
     unique_ci,
 )
 from apps.core.validators import validate_no_mojibake
+from apps.core.wikilinks import WikilinkableModel
 from apps.media.models import MediaSupportedModel
 
 from .base import AliasModel, CatalogModel
@@ -32,6 +33,7 @@ class GameplayFeature(
     SluggedModel,
     MediaSupportedModel,
     TimeStampedModel,
+    WikilinkableModel,
 ):
     """A gameplay mechanism: Flippers, Pop Bumpers, Ramps, Multiball, etc.
 

@@ -23,7 +23,7 @@ def _format_citation_link(
 
 
 # Return is dict[str, Any] (not a TypedDict) because LinkType.collect_metadata
-# is typed as ``Callable[[Any, int], dict]`` in apps.core.markdown_links; a
+# is typed as ``Callable[[Any, int], dict]`` in apps.core.wikilinks.types; a
 # TypedDict isn't assignable to a bare ``dict`` parameter under strict mypy.
 def _collect_citation_metadata(obj: CitationInstance, index: int) -> dict[str, Any]:
     """Collect structured metadata for a citation instance.
@@ -52,20 +52,33 @@ class ProvenanceConfig(AppConfig):
     verbose_name = "Provenance"
 
     def ready(self) -> None:
-        from apps.core.markdown_links import LinkType, register
+        from apps.core.wikilinks import (
+            LinkType,
+            PickerType,
+            register,
+            register_picker,
+        )
 
         register(
             LinkType(
                 name="cite",
                 model_path="provenance.CitationInstance",
-                label="Citation",
-                description="Cite a source (book, web, magazine)",
                 public_id_field=None,
                 format_link=_format_citation_link,
                 collect_metadata=_collect_citation_metadata,
                 select_related=("citation_source",),
                 prefetch_related=("citation_source__links",),
+            )
+        )
+        # Citation is offered in the wikilink picker via the custom flow:
+        # the frontend drives a multi-step source/locator selection; the
+        # standard autocomplete query path (model + search fields) is unused.
+        register_picker(
+            PickerType(
+                name="cite",
+                label="Citation",
+                description="Cite a source (book, web, magazine)",
                 sort_order=1,
-                autocomplete_flow="custom",
+                flow="custom",
             )
         )

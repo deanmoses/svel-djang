@@ -16,8 +16,8 @@ import json
 import logging
 import time
 from collections.abc import Sequence
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand, CommandError
@@ -108,36 +108,52 @@ def _normalize_credit_role(raw: str) -> str:
 # Derived from CatalogModel subclasses so new catalog entities are picked up
 # automatically. Lazy because the catalog-app helper requires the app registry
 # to be ready, which it isn't at module import time.
-def _ai_desc_source_registry() -> Sequence[tuple[type, str]]:
-    from apps.catalog._walks import catalog_app_subclasses
+def _ai_desc_source_registry() -> Sequence[tuple[type[CatalogModel], str]]:
+    from apps.catalog._walks import catalog_models
 
-    return tuple((cls, cls.entity_type) for cls in catalog_app_subclasses(CatalogModel))
+    return tuple((cls, cls.entity_type) for cls in catalog_models())
 
 
-# Taxonomy ingest registry: (json_filename, model_class, has_display_order, parent_config)
-# parent_config: (model_fk_field, parent_model, json_fk_key) or None
-TAXONOMY_REGISTRY = [
-    # Top-level (no parent FK) — order matters: parents before children.
-    ("technology_generation.json", TechnologyGeneration, True, None),
-    ("display_type.json", DisplayType, True, None),
-    ("cabinet.json", Cabinet, True, None),
-    ("game_format.json", GameFormat, True, None),
-    ("reward_type.json", RewardType, True, None),
-    ("tag.json", Tag, True, None),
-    ("credit_role.json", CreditRole, True, None),
-    ("franchise.json", Franchise, False, None),
-    # Child models (parents must be seeded first).
-    (
+@dataclass(frozen=True)
+class ParentConfig:
+    fk_field: str
+    parent_model: type[CatalogModel]
+    json_fk_key: str
+
+
+@dataclass(frozen=True)
+class TaxonomyEntry:
+    json_file: str
+    model_class: type[CatalogModel]
+    has_display_order: bool
+    parent: ParentConfig | None = None
+
+
+# Order matters: parents must be seeded before children.
+TAXONOMY_REGISTRY: list[TaxonomyEntry] = [
+    TaxonomyEntry("technology_generation.json", TechnologyGeneration, True),
+    TaxonomyEntry("display_type.json", DisplayType, True),
+    TaxonomyEntry("cabinet.json", Cabinet, True),
+    TaxonomyEntry("game_format.json", GameFormat, True),
+    TaxonomyEntry("reward_type.json", RewardType, True),
+    TaxonomyEntry("tag.json", Tag, True),
+    TaxonomyEntry("credit_role.json", CreditRole, True),
+    TaxonomyEntry("franchise.json", Franchise, False),
+    TaxonomyEntry(
         "technology_subgeneration.json",
         TechnologySubgeneration,
         True,
-        ("technology_generation", TechnologyGeneration, "technology_generation_slug"),
+        ParentConfig(
+            "technology_generation",
+            TechnologyGeneration,
+            "technology_generation_slug",
+        ),
     ),
-    (
+    TaxonomyEntry(
         "display_subtype.json",
         DisplaySubtype,
         True,
-        ("display_type", DisplayType, "display_type_slug"),
+        ParentConfig("display_type", DisplayType, "display_type_slug"),
     ),
 ]
 
@@ -152,34 +168,27 @@ def validate_cross_entity_wikilinks(export_dir: Path, stdout, stderr) -> None:
     import json
     import re
 
-    from apps.catalog._walks import catalog_app_subclasses
+    from apps.catalog._walks import catalog_models as get_catalog_models
 
-    # Values are concrete CatalogModel subclasses, but mypy/django-stubs
-    # treats ``type[Model]`` as lacking ``.objects`` (managers are added
-    # to concrete subclasses); leaving the value type open avoids needing
-    # ``# type: ignore`` on every ``.objects`` access below.
-    #
-    # Keys mirror the names the markdown renderer registers in
-    # ``apps/catalog/apps.py:_register_link_types`` (``link_type_name`` if
-    # declared, else ``model.__name__.lower()``). Using ``entity_type``
-    # here would diverge from the renderer — pindata uses the
-    # non-hyphenated form (``[[gameplayfeature:...]]``).
-    catalog_models: dict[str, Any] = {}
-    for model in catalog_app_subclasses(CatalogModel):
-        link_type = getattr(model, "link_type_name", model.__name__.lower())
-        catalog_models[link_type] = model
+    # Keys are ``entity_type`` (kebab-case singular), matching the names
+    # the markdown renderer registers in
+    # ``apps/catalog/apps.py:_register_link_types``. Pindata authors
+    # ``[[<entity-type>:<public-id>]]`` against this same key.
+    catalog_models: dict[str, type[CatalogModel]] = {}
+    for model in get_catalog_models():
+        catalog_models[model.entity_type] = model
 
     # Permissive on the id capture group — Location's ``location_path``
     # contains ``/``. The rendering parser at
-    # ``apps/core/markdown_links.py`` is equally permissive (``[^\]]+``);
+    # ``apps/core/markdown/render.py`` is equally permissive (``[^\]]+``);
     # well-formedness is a lookup concern, not a tokenization concern, so
     # broken/malformed refs surface as broken-ref warnings rather than
     # being silently skipped.
     pattern = re.compile(r"\[\[([a-z0-9-]+):([a-zA-Z0-9_/-]+)\]\]")
     broken: list[str] = []
 
-    for json_file, _, _, _ in TAXONOMY_REGISTRY:
-        path = export_dir / json_file
+    for taxonomy_entry in TAXONOMY_REGISTRY:
+        path = export_dir / taxonomy_entry.json_file
         if not path.exists():
             continue
         data = json.loads(path.read_text())
@@ -191,13 +200,15 @@ def validate_cross_entity_wikilinks(export_dir: Path, stdout, stderr) -> None:
                 target_model = catalog_models.get(link_type)
                 if target_model is None:
                     broken.append(
-                        f"  {json_file} {entry['slug']}: unknown link type {link_type!r}"
+                        f"  {taxonomy_entry.json_file} {entry['slug']}: "
+                        f"unknown link type {link_type!r}"
                     )
                 else:
                     lookup = {target_model.public_id_field: public_id}
                     if not target_model.objects.filter(**lookup).exists():
                         broken.append(
-                            f"  {json_file} {entry['slug']}: [[{link_type}:{public_id}]] not found"
+                            f"  {taxonomy_entry.json_file} {entry['slug']}: "
+                            f"[[{link_type}:{public_id}]] not found"
                         )
 
     if broken:
@@ -241,7 +252,7 @@ class Command(BaseCommand):
 
         # Per-entity-type AI description sources. Each can be toggled
         # independently via is_enabled in admin.
-        self._ai_desc_sources: dict[type, Source] = {}
+        self._ai_desc_sources: dict[type[CatalogModel], Source] = {}
         for model_class, slug_suffix in _ai_desc_source_registry():
             src, _ = Source.objects.get_or_create(
                 slug=f"pinbase-ai-desc-{slug_suffix}",
@@ -256,7 +267,7 @@ class Command(BaseCommand):
         # Description claims contain wikilinks like [[manufacturer:williams]]
         # that are converted to [[manufacturer:id:42]] during validation.
         # Defer them until all entities exist so the lookups succeed.
-        self._deferred_desc_claims: list[tuple[type, Claim]] = []
+        self._deferred_desc_claims: list[tuple[type[CatalogModel], Claim]] = []
 
         for phase in [
             self._ingest_locations,
@@ -291,7 +302,7 @@ class Command(BaseCommand):
 
     def _assert_claims_split_descriptions(
         self,
-        model_class: type,
+        model_class: type[CatalogModel],
         pending_claims: list[Claim],
         **kwargs,
     ) -> dict[str, int]:
@@ -331,7 +342,7 @@ class Command(BaseCommand):
             return
 
         # Group by model class so each batch goes to the right AI source.
-        by_model: dict[type, list[Claim]] = {}
+        by_model: dict[type[CatalogModel], list[Claim]] = {}
         for model_class, claim in self._deferred_desc_claims:
             by_model.setdefault(model_class, []).append(claim)
 
@@ -522,21 +533,18 @@ class Command(BaseCommand):
     # ------------------------------------------------------------------
 
     def _ingest_taxonomy(self):
-        for (
-            json_file,
-            model_class,
-            has_display_order,
-            parent_config,
-        ) in TAXONOMY_REGISTRY:
-            data = self._load(json_file)
+        for taxonomy_entry in TAXONOMY_REGISTRY:
+            data = self._load(taxonomy_entry.json_file)
             if not data:
                 continue
 
+            model_class = taxonomy_entry.model_class
+            parent = taxonomy_entry.parent
+
             # Resolve parent FK lookup if needed.
             parent_lookup = {}
-            if parent_config:
-                _, parent_model, _ = parent_config
-                parent_lookup = {p.slug: p for p in parent_model.objects.all()}
+            if parent:
+                parent_lookup = {p.slug: p for p in parent.parent_model.objects.all()}
 
             # Build model instances, tracking entries that survive filtering.
             objs = []
@@ -552,12 +560,11 @@ class Command(BaseCommand):
                     "name": name,
                     "description": description,
                 }
-                if has_display_order:
+                if taxonomy_entry.has_display_order:
                     kwargs["display_order"] = display_order
 
-                if parent_config:
-                    fk_field, _, json_fk_key = parent_config
-                    parent_slug = entry[json_fk_key]
+                if parent:
+                    parent_slug = entry[parent.json_fk_key]
                     parent_obj = parent_lookup.get(parent_slug)
                     if parent_obj is None:
                         logger.warning(
@@ -567,18 +574,17 @@ class Command(BaseCommand):
                             slug,
                         )
                         continue
-                    kwargs[fk_field] = parent_obj
+                    kwargs[parent.fk_field] = parent_obj
 
                 objs.append(model_class(**kwargs))
                 entries_used.append(entry)
 
             # Bulk upsert.
             update_fields = ["name", "description"]
-            if has_display_order:
+            if taxonomy_entry.has_display_order:
                 update_fields.append("display_order")
-            if parent_config:
-                fk_field, _, _ = parent_config
-                update_fields.append(fk_field)
+            if parent:
+                update_fields.append(parent.fk_field)
 
             objs = bulk_create_validated(
                 model_class,
@@ -597,17 +603,18 @@ class Command(BaseCommand):
                 pending_claims.append(
                     Claim.for_object(obj, field_name="name", value=obj.name)
                 )
-                if has_display_order:
+                if taxonomy_entry.has_display_order:
                     pending_claims.append(
                         Claim.for_object(
                             obj, field_name="display_order", value=obj.display_order
                         )
                     )
-                if parent_config:
-                    fk_field, _, json_fk_key = parent_config
+                if parent:
                     pending_claims.append(
                         Claim.for_object(
-                            obj, field_name=fk_field, value=entry[json_fk_key]
+                            obj,
+                            field_name=parent.fk_field,
+                            value=entry[parent.json_fk_key],
                         )
                     )
                 description = entry.get("description", "")

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from django.db import models
 
+from apps.core.markdown import MarkdownField
 from apps.core.models import (
-    MarkdownField,
     SluggedModel,
     TimeStampedModel,
     field_not_blank,
@@ -15,6 +15,7 @@ from apps.core.models import (
     unique_ci,
 )
 from apps.core.validators import validate_no_mojibake
+from apps.core.wikilinks import WikilinkableModel
 
 from .base import CatalogModel
 
@@ -25,6 +26,7 @@ class System(
     CatalogModel,
     SluggedModel,
     TimeStampedModel,
+    WikilinkableModel,
 ):
     """An electronic hardware generation for pinball machines.
 
