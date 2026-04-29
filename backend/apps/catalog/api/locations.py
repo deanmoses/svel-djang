@@ -13,9 +13,12 @@ from django.views.decorators.cache import cache_control
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
 from ninja.errors import HttpError
+from pydantic import Field
 
 from apps.core.licensing import get_minimum_display_rank
 from apps.core.models import active_status_q
+from apps.provenance.helpers import active_claims, claims_prefetch
+from apps.provenance.schemas import RichTextSchema
 
 from ..cache import LOCATIONS_TREE_KEY
 from ..models import (
@@ -27,7 +30,7 @@ from ..models import (
 )
 from ..services.location_paths import lookup_child_division
 from ._typing import HasModelCount
-from .helpers import _first_thumbnail
+from .helpers import _build_rich_text, _first_thumbnail
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -65,6 +68,11 @@ class LocationDetailSchema(Schema):
     # frontend uses this to suppress the "+ New …" action rather than
     # show a wrong label.
     expected_child_type: str | None = None
+    description: RichTextSchema = Field(default_factory=RichTextSchema)
+    short_name: str | None = None
+    code: str | None = None
+    divisions: list[str] | None = None
+    aliases: list[str] = []
     manufacturer_count: int = 0
     ancestors: list[LocationAncestorRef] = []
     children: list[LocationChildRef] = []
@@ -86,6 +94,16 @@ class _LocationNode:
     location_type: str
     parent_path: str | None
     manufacturer_pks: frozenset[int]
+    short_name: str
+    code: str
+    aliases: tuple[str, ...]
+    # Pre-rendered at cache-build time so public detail reads stay
+    # zero-query. Description rendering has no rank dependency
+    # (``_build_rich_text`` only consults claims for attribution; rank
+    # gating in this module is image-only and runs per-request via
+    # ``_get_manufacturers_for_pks``), so caching the rendered schema
+    # is safe.
+    description: RichTextSchema
     # Country rows declare a list of division-level labels (e.g.
     # ``("state", "city")``); empty tuple on non-country rows. Cached
     # alongside the rest of the tree so the detail serializer can
@@ -110,8 +128,13 @@ def _get_location_tree() -> _LocationTree:
         return cast(_LocationTree, result)
 
     # Load all locations with parent chains (up to 4 levels deep).
+    # ``aliases`` + ``claims_prefetch()`` feed ``_build_rich_text`` so
+    # the rendered description can be cached per node.
     all_locs = list(
-        Location.objects.active().select_related("parent__parent__parent__parent").all()
+        Location.objects.active()
+        .select_related("parent__parent__parent__parent")
+        .prefetch_related("aliases", claims_prefetch())
+        .all()
     )
 
     # Accumulate manufacturer PKs at each location and all its ancestors.
@@ -144,6 +167,10 @@ def _get_location_tree() -> _LocationTree:
             location_type=loc.location_type,
             parent_path=parent_path,
             manufacturer_pks=frozenset(mfr_pks_by_path.get(loc.location_path, set())),
+            short_name=loc.short_name,
+            code=loc.code,
+            aliases=tuple(a.value for a in loc.aliases.all()),
+            description=_build_rich_text(loc, "description", active_claims(loc)),
             divisions=tuple(loc.divisions or ()),
         )
         children_index.setdefault(parent_path, []).append(loc.location_path)
@@ -287,6 +314,11 @@ def _get_location_detail(location_path: str) -> LocationDetailSchema:
         location_path=location_path,
         location_type=node.location_type,
         expected_child_type=expected_child_type,
+        description=node.description,
+        short_name=node.short_name or None,
+        code=node.code or None,
+        divisions=list(node.divisions) if node.divisions else None,
+        aliases=list(node.aliases),
         manufacturer_count=len(node.manufacturer_pks),
         ancestors=[
             LocationAncestorRef(name=a.name, slug=a.slug, location_path=a.location_path)

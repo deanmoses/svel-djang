@@ -4,7 +4,8 @@
 	which otherwise has no UI of its own. This component forwards them to the
 	platform-appropriate default section URL: `?edit=<default>` on desktop
 	(modal editor over the detail page) or `/edit/<default>` on mobile
-	(dedicated edit shell).
+	(dedicated edit shell). Going straight to the final URL avoids a second
+	`replaceState` hop on desktop.
 
 	Consumed by each entity's /edit/+page.svelte. The companion +page.ts sets
 	`ssr = false` so `createIsMobileFlag` can return the browser's synchronous
@@ -20,21 +21,24 @@
   let {
     basePath,
     defaultSegment,
+    publicId,
   }: {
     basePath: string;
     defaultSegment: string;
+    /** Override for entities whose route param isn't `slug` (e.g. Location's `[...path]`). */
+    publicId?: string;
   } = $props();
 
-  let slug = $derived(page.params.slug);
   const isMobileFlag = createIsMobileFlag(LAYOUT_BREAKPOINT);
   let isMobile = $derived<boolean | null>(isMobileFlag.current);
 
   $effect(() => {
+    const id = publicId ?? page.params.slug;
     if (isMobile === false) {
-      goto(resolveHref(`${basePath}/${slug}?edit=${defaultSegment}`), { replaceState: true });
+      goto(resolveHref(`${basePath}/${id}?edit=${defaultSegment}`), { replaceState: true });
     }
     if (isMobile === true) {
-      goto(resolveHref(`${basePath}/${slug}/edit/${defaultSegment}`), { replaceState: true });
+      goto(resolveHref(`${basePath}/${id}/edit/${defaultSegment}`), { replaceState: true });
     }
   });
 </script>

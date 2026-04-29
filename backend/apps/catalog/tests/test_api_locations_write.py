@@ -519,6 +519,38 @@ class TestRestore:
         chicago.refresh_from_db()
         assert chicago.status == "deleted"
 
+    def test_country_restore_succeeds(self, client, user, usa):
+        """Top-level countries have ``parent=None``. The shared restore
+        factory must tolerate a null parent rather than dereferencing it."""
+        usa.status = "deleted"
+        usa.save(update_fields=["status"])
+        client.force_login(user)
+        resp = _post(client, "/api/locations/usa/restore/", {})
+        assert resp.status_code == 200, resp.content
+        usa.refresh_from_db()
+        assert usa.status != "deleted"
+
+
+class TestDeletePreview:
+    def test_country_delete_preview_succeeds(self, client, user, usa, il):
+        """Top-level countries have ``parent=None``. The shared
+        delete-preview factory must tolerate a null parent."""
+        client.force_login(user)
+        resp = client.get("/api/locations/usa/delete-preview/")
+        assert resp.status_code == 200, resp.content
+        body = resp.json()
+        assert body["parent"] is None
+        # Active child (IL) should still surface in the preview.
+        assert body["active_children_count"] >= 1
+
+    def test_child_delete_preview_includes_parent(self, client, user, chicago):
+        client.force_login(user)
+        resp = client.get("/api/locations/usa/il/chicago/delete-preview/")
+        assert resp.status_code == 200, resp.content
+        body = resp.json()
+        assert body["parent"] is not None
+        assert body["parent"]["slug"] == "il"
+
 
 # ---------------------------------------------------------------------------
 # Edit-history / sources resolution by multi-segment public_id

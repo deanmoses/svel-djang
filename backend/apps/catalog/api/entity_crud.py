@@ -101,8 +101,11 @@ def register_entity_delete_restore[ModelT: CatalogModel, SchemaT: Schema](
     * ``child_related_name`` — set on entities with active-child blocking
       (tech-gen → subgenerations, display-type → subtypes). The accessor
       name is the ``related_name=`` declared on the child FK.
-    * ``parent_field`` — set on subgen/subtype so the preview surfaces the
-      parent name / slug and restore refuses while the parent is deleted.
+    * ``parent_field`` — set on entities whose parent FK should drive the
+      preview's parent ref and the restore-while-parent-deleted guard
+      (subgen/subtype, Location). Nullable parent FKs are tolerated:
+      rows with ``parent=None`` (e.g. Location countries) skip both
+      checks rather than dereferencing a missing row.
     """
     entity_label = model_cls.__name__
     friendly = model_cls.entity_type.replace("-", " ")
@@ -126,8 +129,12 @@ def register_entity_delete_restore[ModelT: CatalogModel, SchemaT: Schema](
 
         parent_ref: EntityRef | None = None
         if parent_field is not None:
+            # Parent FK may be nullable (e.g. Location countries have
+            # ``parent=None``); leave ``parent_ref`` as ``None`` in that
+            # case rather than dereferencing a missing row.
             parent = getattr(obj, parent_field)
-            parent_ref = EntityRef(name=parent.name, slug=parent.slug)
+            if parent is not None:
+                parent_ref = EntityRef(name=parent.name, slug=parent.slug)
 
         return TaxonomyDeletePreviewSchema(
             name=obj.name,
@@ -227,8 +234,10 @@ def register_entity_delete_restore[ModelT: CatalogModel, SchemaT: Schema](
             )
 
         if parent_field is not None:
+            # Parent FK may be nullable (e.g. Location countries have
+            # ``parent=None``); skip the parent-status guard in that case.
             parent = getattr(obj, parent_field)
-            if parent.status == "deleted":
+            if parent is not None and parent.status == "deleted":
                 return Status(
                     422, ErrorDetailSchema(detail=f"Restore {parent.name} first.")
                 )

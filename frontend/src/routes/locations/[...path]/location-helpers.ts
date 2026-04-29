@@ -36,18 +36,28 @@ export function childrenHeading(children: LocationChild[]): string {
   return allSame ? (CHILD_TYPE_LABELS[first] ?? 'Subdivisions') : 'Subdivisions';
 }
 
+export function childLabelFor(type: string): string {
+  // ``divisions`` accepts any non-blank string, so the backend can
+  // legitimately return a label not in our hardcoded singular table
+  // (e.g. ``oblast``). Capitalize the first character so unknown labels
+  // still produce a usable "+ New …" action rather than getting
+  // suppressed as if the parent had no valid child type.
+  return CHILD_TYPE_SINGULAR[type] ?? type.charAt(0).toUpperCase() + type.slice(1);
+}
+
 export function newChildLabel(profile: LocationDetail): string | null {
   // Existing children are the most reliable signal — whatever type they
   // are is what a new sibling will be.
   if (profile.children.length > 0) {
-    return CHILD_TYPE_SINGULAR[profile.children[0].location_type] ?? null;
+    return childLabelFor(profile.children[0].location_type);
   }
   // No children: trust the backend's server-derived label, which reads
   // from the country ancestor's ``divisions`` list. ``null`` means
-  // divisions are missing or exhausted; the caller suppresses the
-  // "+ New …" action rather than guess at a wrong label.
+  // divisions are missing or exhausted (a structural reason no child
+  // type exists); the caller suppresses the "+ New …" action only in
+  // that case. Unknown-but-valid labels fall through the humanizer.
   if (profile.expected_child_type) {
-    return CHILD_TYPE_SINGULAR[profile.expected_child_type] ?? null;
+    return childLabelFor(profile.expected_child_type);
   }
   return null;
 }

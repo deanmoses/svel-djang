@@ -47,6 +47,8 @@
   let submitting = $state(false);
 
   let isBlocked = $derived(blocked !== null);
+  let heading = $derived(isBlocked ? `Can't delete “${entityName}”` : `Delete “${entityName}”?`);
+  let headTitle = $derived(isBlocked ? `Can't delete ${entityName}` : `Delete ${entityName}?`);
   let placeholder = $derived(
     notePlaceholder ?? `Why are you deleting this ${entityLabel.toLowerCase()}?`,
   );
@@ -111,12 +113,12 @@
 </script>
 
 <svelte:head>
-  <title>{pageTitle(`Delete ${entityName}?`)}</title>
+  <title>{pageTitle(headTitle)}</title>
 </svelte:head>
 
 <div class="delete-page">
   <header class="hdr">
-    <h1>Delete “{entityName}”?</h1>
+    <h1>{heading}</h1>
     {#if parentBreadcrumb}
       <p class="parent-ref">
         under <a href={resolveHref(parentBreadcrumb.href)}>{parentBreadcrumb.text}</a>

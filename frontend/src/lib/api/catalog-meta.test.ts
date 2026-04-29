@@ -36,16 +36,18 @@ const UNMAPPED_ROUTE_DIRS = new Set<string>([]);
 
 // CATALOG_META keys whose frontend routes are deferred. The backend registers
 // these (via LinkableModel) but the SvelteKit routes don't exist yet.
-// See docs/plans/model_driven_metadata/LocationCrud.md for the location plan.
-const DEFERRED_KEYS = new Set<CatalogEntityKey>(['location']);
+const DEFERRED_KEYS = new Set<CatalogEntityKey>([]);
 
 describe('catalog-meta vs route tree', () => {
   it('every detail route directory is either mapped or explicitly unmapped', async () => {
-    const slugRoutes = import.meta.glob('/src/routes/*/[slug]/+*', { eager: false });
-    const pathRoutes = import.meta.glob('/src/routes/*/[...path]/+*', { eager: false });
+    // Vite's `import.meta.glob` treats `[slug]` / `[...path]` as glob
+    // character classes, so a pattern like `[...path]` matches a single
+    // character rather than the literal SvelteKit param directory. Cast a
+    // broader net and filter to detail-route paths in JS.
+    const allRoutes = import.meta.glob('/src/routes/**/+*', { eager: false });
     const detailRouteRe = /\/src\/routes\/([^/]+)\/\[(?:slug|\.\.\.path)\]/;
     const routeDirs = new Set(
-      [...Object.keys(slugRoutes), ...Object.keys(pathRoutes)]
+      Object.keys(allRoutes)
         .map((p) => p.match(detailRouteRe)?.[1])
         .filter((d): d is string => typeof d === 'string'),
     );
@@ -97,9 +99,10 @@ describe('catalog-meta vs route tree', () => {
   // requirement is ~10 lines of boilerplate per entity; the cost of forgetting
   // is an invisible UX gap (see credit-role, missing for an unknown period).
   describe.each(['edit-history', 'sources'])('%s subroute', (subroute) => {
-    const slugFiles = import.meta.glob('/src/routes/*/[slug]/*/+page.*', { eager: false });
-    const pathFiles = import.meta.glob('/src/routes/*/[...path]/*/+page.*', { eager: false });
-    const files = { ...slugFiles, ...pathFiles };
+    // See note above on Vite glob bracket handling — broaden the pattern
+    // and trust the assertion's exact-path lookup (`toHaveProperty`) to
+    // pick the right files.
+    const files = import.meta.glob('/src/routes/**/+page.*', { eager: false });
 
     const segmentByKey = new Map<CatalogEntityKey, RouteSegment>(
       Object.values(ROUTE_DIR_TO_KEY).map((entry) => [entry.key, entry.segment]),
