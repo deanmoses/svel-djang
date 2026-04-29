@@ -16,6 +16,7 @@ from apps.core.models import (
 from apps.core.validators import validate_no_mojibake
 
 from .base import AliasModel, CatalogModel
+from .manufacturer import CorporateEntity
 
 __all__ = [
     "CorporateEntityLocation",
@@ -41,6 +42,10 @@ class Location(CatalogModel, TimeStampedModel):
     # Location's slug is non-unique (only unique within parent); the
     # globally-unique URL identity lives on ``location_path``.
     public_id_field: ClassVar[str] = "location_path"
+    # The user types ``slug`` in the create form; the server builds
+    # ``location_path`` from ``parent.location_path + slug``. Surface
+    # collision errors keyed under ``slug`` so the form binds them.
+    public_id_form_field: ClassVar[str] = "slug"
     # Suppress Location from the wikilink-picker autocomplete until
     # WikilinkableModel (see ModelDrivenWikilinkableMetadata.md) makes
     # picker presentation an explicit opt-in. Existing ``[[location:...]]``
@@ -51,6 +56,9 @@ class Location(CatalogModel, TimeStampedModel):
 
     claims_exempt: ClassVar[frozenset[str]] = frozenset({"location_path"})
     claim_fk_lookups: ClassVar[dict[str, str]] = {"parent": "location_path"}
+    soft_delete_usage_blockers: ClassVar[frozenset[str]] = frozenset(
+        {"corporate_entities"}
+    )
 
     # system-derived from ``parent.location_path + "/" + slug`` — the
     # underlying claims live on ``slug`` and ``parent``, so this field is
@@ -82,6 +90,18 @@ class Location(CatalogModel, TimeStampedModel):
         blank=True,
         on_delete=models.PROTECT,
         related_name="children",
+    )
+    # Reverse accessor intentionally suppressed (``related_name="+"``);
+    # CorporateEntity already reaches Location through ``CorporateEntityLocation``
+    # via ``corporate_entity_locations``. The forward side gives Location's
+    # soft-delete walker a ``location.corporate_entities.active()`` accessor
+    # for the ``soft_delete_usage_blockers`` entry above.
+    corporate_entities: models.ManyToManyField[
+        CorporateEntity, CorporateEntityLocation
+    ] = models.ManyToManyField(
+        "catalog.CorporateEntity",
+        through="CorporateEntityLocation",
+        related_name="+",
     )
 
     class Meta:

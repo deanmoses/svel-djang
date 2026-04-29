@@ -351,6 +351,14 @@ class LinkableModel(models.Model):
     - public_id_field: str — name of the field carrying URL identity. Defaults
       to ``"slug"``. Multi-segment models materialize the path into a
       ``unique=True`` field and point this at it (Location: ``"location_path"``).
+    - public_id_form_field: str — name of the form input from which
+      ``public_id_field`` is derived at create time. Defaults to
+      ``public_id_field`` itself (the form input is the public id directly,
+      as for every shipped model that uses ``"slug"``). Override on models
+      whose public id is server-derived from another input — Location's
+      ``location_path`` is built from the user's ``slug`` input plus the
+      parent's path. Used by collision pre-checks to surface the error
+      keyed under the form field the user can actually fix.
 
     ``entity_type`` and ``entity_type_plural`` together are the linguistic
     identity of a kind of entity — the single source of truth consumed by
@@ -374,6 +382,9 @@ class LinkableModel(models.Model):
     entity_type: ClassVar[str]  # required on concrete subclasses
     entity_type_plural: ClassVar[str]  # required on concrete subclasses
     public_id_field: ClassVar[str] = "slug"
+    # Empty default means "use ``public_id_field`` itself". Resolve with
+    # ``cls.public_id_form_field or cls.public_id_field`` at the call site.
+    public_id_form_field: ClassVar[str] = ""
     # ``name`` is declared per-concrete-subclass (different max_length /
     # validators per entity); the instance-level annotation lets
     # ``type[LinkableModel]`` introspection code read ``.name`` without

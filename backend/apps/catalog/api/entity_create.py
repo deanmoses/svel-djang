@@ -290,7 +290,9 @@ def validate_create_input(
     return name, slug
 
 
-def assert_public_id_available(model_cls: type[CatalogModel], value: str) -> None:
+def assert_public_id_available(
+    model_cls: type[CatalogModel], value: str, *, form_value: str | None = None
+) -> None:
     """Raise a field-level 422 if *value* collides on the model's public-id field.
 
     Public-id uniqueness is DB-enforced (including against soft-deleted
@@ -303,25 +305,25 @@ def assert_public_id_available(model_cls: type[CatalogModel], value: str) -> Non
     for every shipped catalog model, but Location uses ``"location_path"``
     so the freshly-built path is what's checked, not the bare slug.
 
-    .. note::
-
-        The ``field_errors`` key is the public-id column name. For shipped
-        models that's ``"slug"`` (matches the form field). For Location,
-        the user-input field is ``slug`` but the column is
-        ``location_path`` — the path collision is a sibling-uniqueness
-        violation the user fixes by editing the slug. Location's create
-        route should map the ``location_path`` error key back to ``slug``
-        for the frontend, or this helper should grow a ``form_field``
-        param when Location ships. Today only ``slug`` is used.
+    ``form_value`` (defaulting to *value*) is what the error message
+    echoes back to the user. Pair with ``model_cls.public_id_form_field``
+    to surface the collision under the form input the user can edit:
+    for shipped models the form input *is* the public-id, so the two
+    coincide; Location's public-id is server-derived from the ``slug``
+    input, so the route passes ``data.slug`` as ``form_value`` and the
+    error binds under ``"slug"``.
     """
     public_id_field = model_cls.public_id_field
+    form_field = model_cls.public_id_form_field or public_id_field
+    if form_value is None:
+        form_value = value
     if model_cls._default_manager.filter(**{public_id_field: value}).exists():
         raise StructuredValidationError(
             message=f"{public_id_field.capitalize()} collision.",
             field_errors={
-                public_id_field: (
-                    f"The {public_id_field} {value!r} is already taken. "
-                    f"Edit the {public_id_field} field."
+                form_field: (
+                    f"The {form_field} {form_value!r} is already taken. "
+                    f"Edit the {form_field} field."
                 )
             },
         )
@@ -366,6 +368,13 @@ def create_entity_with_claims(
     """
     public_id_field = model_cls.public_id_field
     public_id_value = row_kwargs[public_id_field]
+    form_field = model_cls.public_id_form_field or public_id_field
+    # ``form_field`` and ``public_id_field`` coincide for every shipped
+    # model (both ``"slug"``); on Location the form input is ``slug`` and
+    # the public-id is the server-derived ``location_path``. Pull the
+    # form-side value from row_kwargs when available so the echoed
+    # collision message reads "slug 'chicago'", not "slug 'usa/il/chicago'".
+    form_value = row_kwargs.get(form_field, public_id_value)
     try:
         with transaction.atomic():
             entity = model_cls._default_manager.create(**row_kwargs)
@@ -381,9 +390,9 @@ def create_entity_with_claims(
         raise StructuredValidationError(
             message=f"{public_id_field.capitalize()} collision.",
             field_errors={
-                public_id_field: (
-                    f"The {public_id_field} {public_id_value!r} is already taken. "
-                    f"Edit the {public_id_field} field."
+                form_field: (
+                    f"The {form_field} {form_value!r} is already taken. "
+                    f"Edit the {form_field} field."
                 )
             },
         ) from err

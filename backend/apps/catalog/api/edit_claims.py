@@ -22,6 +22,7 @@ from apps.catalog.models import (
     CorporateEntity,
     CreditRole,
     GameplayFeature,
+    Location,
     MachineModel,
     Person,
     Theme,
@@ -50,7 +51,7 @@ _RequestUser = AbstractBaseUser | AnonymousUser
 # ``aliases`` relation, typed as unions rather than a structural protocol
 # because the two helpers are only called from a handful of sites.
 _ParentEntity = GameplayFeature | Theme
-_AliasEntity = GameplayFeature | Theme | CorporateEntity
+_AliasEntity = GameplayFeature | Theme | CorporateEntity | Location
 
 
 @dataclass(frozen=True)

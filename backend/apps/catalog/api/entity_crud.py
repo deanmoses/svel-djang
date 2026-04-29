@@ -421,9 +421,14 @@ def register_entity_create[ModelT: CatalogModel, SchemaT: Schema](
         # Pre-check the public-id column (slug for shipped models;
         # location_path for Location). Runs after extra_create_fields_builder
         # so derived public-ids (Location: ``compute_location_path``) are
-        # populated in row_kwargs before the lookup.
+        # populated in row_kwargs before the lookup. ``form_value`` is the
+        # user-typed value the error message echoes; for shipped models
+        # this is the same as the public-id (both ``slug``), for Location
+        # it's the bare ``slug`` rather than the full path.
         public_id_value = row_kwargs[model_cls.public_id_field]
-        assert_public_id_available(model_cls, public_id_value)
+        form_field = model_cls.public_id_form_field or model_cls.public_id_field
+        form_value = row_kwargs.get(form_field, public_id_value)
+        assert_public_id_available(model_cls, public_id_value, form_value=form_value)
 
         entity = create_entity_with_claims(
             model_cls,
