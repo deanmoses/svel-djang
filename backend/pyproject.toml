@@ -173,6 +173,7 @@ num_workers = 4
 enable_error_code = [
     # Guards the model-driven catalog: a match that misses a new entity type.
     "exhaustive-match",
+    "explicit-override",
     "possibly-undefined",
     "unused-awaitable",
     "redundant-self",

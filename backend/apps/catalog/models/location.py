@@ -152,6 +152,7 @@ class Location(CatalogModel, TimeStampedModel):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.name or self.location_path
 
@@ -270,5 +271,6 @@ class CorporateEntityLocation(ClaimThroughModel):
         verbose_name = "corporate entity location"
         verbose_name_plural = "corporate entity locations"
 
+    @override
     def __str__(self) -> str:
         return f"{self.corporate_entity} → {self.location}"

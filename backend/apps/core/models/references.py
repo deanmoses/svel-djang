@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import override
+
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -42,6 +44,7 @@ class RecordReference(models.Model):
             models.Index(fields=["source_type", "source_id"]),  # Cleanup on delete
         ]
 
+    @override
     def __str__(self) -> str:
         return (
             f"{self.source_type.model}:{self.source_id}"

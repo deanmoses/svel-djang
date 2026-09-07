@@ -65,6 +65,7 @@ class EntityMedia(models.Model):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         return f"EntityMedia {self.pk}: asset {self.asset_id} on {self.content_type_id}:{self.object_id}"
 

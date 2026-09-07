@@ -195,6 +195,7 @@ class Title(
             self.autocomplete_mfr_name, self.autocomplete_year
         )
 
+    @override
     def __str__(self) -> str:
         return self.name
 
@@ -227,5 +228,6 @@ class TitleAbbreviation(ClaimThroughModel):
             field_not_blank("value"),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.value

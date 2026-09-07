@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from django.db import models
 
@@ -53,6 +53,7 @@ class Franchise(
             unique_ci("name"),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.name
 
@@ -88,5 +89,6 @@ class Series(
             unique_ci("name"),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.name

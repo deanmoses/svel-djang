@@ -72,6 +72,7 @@ class RateLimitExceededError(StructuredApiError):
         self.bucket = bucket
         self.retry_after = max(1, retry_after)
 
+    @override
     def __str__(self) -> str:
         # Server-side repr (logs / tracebacks) keeps the bucket; the wire
         # ``message`` is the user-facing string set via ``super().__init__``.

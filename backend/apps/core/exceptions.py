@@ -32,6 +32,7 @@ class StructuredApiError(Exception):
     kind: ClassVar[str]
     status: ClassVar[int]
 
+    @override
     def __init_subclass__(cls, **kw: object) -> None:
         super().__init_subclass__(**kw)
         for attr in ("kind", "status"):

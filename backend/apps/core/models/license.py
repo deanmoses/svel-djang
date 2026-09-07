@@ -58,6 +58,7 @@ class License(SluggedModel, TimeStampedModel):
             unique_ci("short_name"),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.short_name
 

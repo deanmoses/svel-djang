@@ -662,6 +662,7 @@ class MachineModel(
         )
         return f"{self.name} ({context})" if context else self.name
 
+    @override
     def __str__(self) -> str:
         parts = [self.name]
         if self.corporate_entity:
@@ -699,5 +700,6 @@ class ModelAbbreviation(ClaimThroughModel):
             field_not_blank("value"),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.value

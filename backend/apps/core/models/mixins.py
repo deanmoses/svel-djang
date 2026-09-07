@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from datetime import datetime
-from typing import ClassVar, Self, TypeVar, cast
+from typing import ClassVar, Self, TypeVar, cast, override
 
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models
@@ -419,6 +419,7 @@ class LinkableModel(LabeledIdentityModel):
     class Meta:
         abstract = True
 
+    @override
     def __init_subclass__(cls, **kwargs: object) -> None:
         super().__init_subclass__(**kwargs)
         # __init_subclass__ fires before Django's ModelBase sets up ``_meta``,

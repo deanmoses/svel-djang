@@ -14,7 +14,7 @@ chain, untouched. Nesting is expressed by ``parent:``, never by structure.
 from __future__ import annotations
 
 from collections.abc import Collection, Sequence
-from typing import TYPE_CHECKING, NamedTuple, NotRequired, TypedDict
+from typing import TYPE_CHECKING, NamedTuple, NotRequired, TypedDict, override
 from urllib.parse import urlparse
 
 from apps.citation.citation_types import (
@@ -187,6 +187,7 @@ class DeclaredDomain(NamedTuple):
     host: Host
     path_prefix: PathPrefix
 
+    @override
     def __str__(self) -> str:
         return f"{self.host}{self.path_prefix}"
 

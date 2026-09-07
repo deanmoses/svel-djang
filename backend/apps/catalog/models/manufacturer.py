@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from typing import override
 
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
@@ -143,6 +144,7 @@ class Manufacturer(
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.name
 
@@ -275,6 +277,7 @@ class CorporateEntity(
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         if self.year_start:
             end = self.year_end or "present"

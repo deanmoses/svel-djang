@@ -513,6 +513,7 @@ class CitationSource(TimeStampedModel, ActorAttributedModel):
                 }
             )
 
+    @override
     def __str__(self) -> str:
         if self.author and self.year:
             return f"{self.name} ({self.author}, {self.year})"
@@ -607,6 +608,7 @@ class CitationSourceLink(TimeStampedModel, ActorAttributedModel):
         """The link's human text: its label, or its link-type name when blank."""
         return self.label or self.get_link_type_display()
 
+    @override
     def __str__(self) -> str:
         if self.label:
             return f"{self.label} ({self.url})"
@@ -791,6 +793,7 @@ class CitationSourceRootDomain(TimeStampedModel, ActorAttributedModel):
                 }
             )
 
+    @override
     def __str__(self) -> str:
         return f"{self.host}{self.path_prefix}"
 
@@ -967,6 +970,7 @@ class CitationInstance(models.Model):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         loc = f" @ {self.locator}" if self.locator else ""
         return f"Citation: {self.citation_source_id}{loc}"
@@ -1052,6 +1056,7 @@ class ReservedCitationSlug(models.Model):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         return f"Reserved citation slug: {self.slug}"
 

@@ -84,6 +84,7 @@ class Source(ActorModel, SluggedModel, TimeStampedModel):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.name
 
@@ -146,5 +147,6 @@ class SourceFieldLicense(models.Model):
             field_not_blank("field_name"),
         ]
 
+    @override
     def __str__(self) -> str:
         return f"{self.source.name}: {self.field_name} → {self.license.short_name}"

@@ -170,6 +170,7 @@ class User(ActorModel, AbstractUser):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.username or self.email
 

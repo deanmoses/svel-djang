@@ -51,6 +51,7 @@ class RateLimitExceededError(StructuredApiError):
         self.bucket = bucket
         self.retry_after = max(1, retry_after)
 
+    @override
     def __str__(self) -> str:
         return f"Rate limit exceeded for bucket {self.bucket!r}"
 
