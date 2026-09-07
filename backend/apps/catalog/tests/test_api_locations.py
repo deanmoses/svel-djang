@@ -17,6 +17,7 @@ from apps.catalog.models import (
     Manufacturer,
 )
 from apps.catalog.tests.conftest import make_machine_model
+from apps.core.fetch_guard import block_lazy_fetches
 
 # ---------------------------------------------------------------------------
 # Fixture helpers
@@ -328,7 +329,7 @@ class TestManufacturersQueryCount:
 
         # Warm caches at the small-N dataset, then measure on warm cache.
         client.get("/api/pages/locations/usa")
-        with CaptureQueriesContext(connection) as small_ctx:
+        with block_lazy_fetches(), CaptureQueriesContext(connection) as small_ctx:
             resp = client.get("/api/pages/locations/usa")
             assert resp.status_code == 200
         small_count = len(small_ctx.captured_queries)
@@ -341,7 +342,7 @@ class TestManufacturersQueryCount:
         self._add_models(manufacturers["stern"], 9, "stern-extra")
 
         client.get("/api/pages/locations/usa")
-        with CaptureQueriesContext(connection) as big_ctx:
+        with block_lazy_fetches(), CaptureQueriesContext(connection) as big_ctx:
             resp = client.get("/api/pages/locations/usa")
             assert resp.status_code == 200
         big_count = len(big_ctx.captured_queries)

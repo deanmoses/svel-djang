@@ -13,6 +13,7 @@ from django.test.utils import CaptureQueriesContext
 
 from apps.catalog.models import Series, Title
 from apps.catalog.tests.conftest import make_machine_model
+from apps.core.fetch_guard import block_lazy_fetches
 
 
 def _seed(start: int, count: int) -> None:
@@ -28,7 +29,7 @@ def _seed(start: int, count: int) -> None:
 def test_list_series_query_count_does_not_scale_with_rows(client):
     """Adding more rows to the response must not add queries."""
     _seed(start=0, count=2)
-    with CaptureQueriesContext(connection) as small_ctx:
+    with block_lazy_fetches(), CaptureQueriesContext(connection) as small_ctx:
         resp = client.get("/api/series/")
         assert resp.status_code == 200
         assert len(resp.json()["items"]) == 2
@@ -36,7 +37,7 @@ def test_list_series_query_count_does_not_scale_with_rows(client):
 
     _seed(start=2, count=8)
 
-    with CaptureQueriesContext(connection) as big_ctx:
+    with block_lazy_fetches(), CaptureQueriesContext(connection) as big_ctx:
         resp = client.get("/api/series/")
         assert resp.status_code == 200
         assert len(resp.json()["items"]) == 10

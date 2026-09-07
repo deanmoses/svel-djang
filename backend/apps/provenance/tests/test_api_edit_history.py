@@ -9,6 +9,7 @@ from django.test.utils import CaptureQueriesContext
 from apps.accounts.test_factories import make_user
 from apps.catalog.tests.conftest import make_machine_model
 from apps.citation.test_factories import make_citation_link, make_citation_source
+from apps.core.fetch_guard import block_lazy_fetches
 from apps.provenance.test_factories import (
     cite_claim,
     make_citation_instance,
@@ -486,14 +487,14 @@ class TestEditHistoryQueryCount:
         edit(1998)
         client.get(url)  # warm the ContentType cache
 
-        with CaptureQueriesContext(connection) as one_changeset:
+        with block_lazy_fetches(), CaptureQueriesContext(connection) as one_changeset:
             client.get(url)
 
         for year in range(1999, 2011):
             edit(year)
         assert len(_user_changesets(client.get(url))) == 13
 
-        with CaptureQueriesContext(connection) as many_changesets:
+        with block_lazy_fetches(), CaptureQueriesContext(connection) as many_changesets:
             client.get(url)
 
         assert len(many_changesets) == len(one_changeset), (

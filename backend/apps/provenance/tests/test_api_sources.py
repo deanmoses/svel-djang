@@ -15,6 +15,7 @@ from apps.catalog.models import Title
 from apps.catalog.tests.conftest import make_machine_model
 from apps.citation.test_factories import make_citation_link, make_citation_source
 from apps.claim_edit.claim_write import ClaimSpec, execute_claims
+from apps.core.fetch_guard import block_lazy_fetches
 from apps.provenance.models import ClaimCitationInstance
 from apps.provenance.schemas import CitationInstanceCreateSchema
 from apps.provenance.test_factories import (
@@ -291,7 +292,7 @@ class TestScalarCitationJoin:
 
 
 def _q(fn: Callable[[], object]) -> int:
-    with CaptureQueriesContext(connection) as ctx:
+    with block_lazy_fetches(), CaptureQueriesContext(connection) as ctx:
         fn()
     return len(ctx.captured_queries)
 

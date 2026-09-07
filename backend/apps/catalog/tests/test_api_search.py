@@ -20,6 +20,7 @@ from django.test.utils import CaptureQueriesContext
 
 from apps.catalog.models import Credit, CreditRole, Manufacturer, Person, Title
 from apps.catalog.tests.conftest import SAMPLE_IMAGES, make_machine_model
+from apps.core.fetch_guard import block_lazy_fetches
 from apps.provenance.models import Source
 from apps.provenance.test_factories import make_claim
 
@@ -190,7 +191,7 @@ def test_query_count_is_constant_across_result_size(
         Credit.objects.create(model=model, person=person, role=design)
 
     def query_count() -> int:
-        with CaptureQueriesContext(connection) as ctx:
+        with block_lazy_fetches(), CaptureQueriesContext(connection) as ctx:
             client.get("/api/pages/search?q=scale")
         return len(ctx)
 
