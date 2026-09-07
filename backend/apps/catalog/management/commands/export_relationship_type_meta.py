@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, override
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -32,9 +32,10 @@ from apps.catalog.models.model_relationship import (
 class Command(BaseCommand):
     help = "Generate frontend/src/lib/entities/relationship-type-meta.ts."
 
+    @override
     def handle(
         self,
-        **options: Any,  # noqa: ANN401 - argparse-driven Django command kwargs
+        **options: Any,
     ) -> None:
         # Sorted by value for stable codegen diffs, independent of enum order.
         types = sorted(RelationshipType, key=lambda t: t.value)

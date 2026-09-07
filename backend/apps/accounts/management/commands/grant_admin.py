@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import argparse
 import logging
-from typing import Any
+from typing import Any, override
 
 from django.core.management.base import BaseCommand, CommandError
 
@@ -26,16 +26,18 @@ log = logging.getLogger(__name__)
 class Command(BaseCommand):
     help = "Grant Django admin access (is_staff + is_superuser) to an existing user."
 
+    @override
     def add_arguments(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
             "email",
             help="Email of the user to promote (case-insensitive).",
         )
 
+    @override
     def handle(
         self,
         *args: object,
-        **options: Any,  # noqa: ANN401 - argparse-driven Django command kwargs
+        **options: Any,
     ) -> None:
         email = options["email"]
         try:

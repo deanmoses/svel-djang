@@ -22,6 +22,7 @@ from __future__ import annotations
 import math
 import time
 from dataclasses import dataclass
+from typing import override
 
 from django.conf import settings
 from django.core.cache import cache
@@ -53,9 +54,11 @@ class RateLimitExceededError(StructuredApiError):
     def __str__(self) -> str:
         return f"Rate limit exceeded for bucket {self.bucket!r}"
 
+    @override
     def to_body(self) -> JsonBody:
         return {"bucket": self.bucket, "retry_after": self.retry_after}
 
+    @override
     def extra_headers(self) -> dict[str, str]:
         return {"Retry-After": str(self.retry_after)}
 

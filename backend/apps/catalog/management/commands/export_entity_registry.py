@@ -22,7 +22,7 @@ Run via ``make codegen``.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, override
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
@@ -287,9 +287,10 @@ def _aliases_view(rows: list[AliasRow]) -> list[str]:
 class Command(BaseCommand):
     help = f"Generate {OUTPUT_PATH} from linkable models."
 
+    @override
     def handle(
         self,
-        **options: Any,  # noqa: ANN401 - argparse-driven Django command kwargs
+        **options: Any,
     ) -> None:
         rows: list[EntityRow] = []
         for cls in all_linkable_models():

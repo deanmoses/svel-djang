@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, override
 
 from django.apps import AppConfig
 
@@ -77,6 +77,7 @@ class CitationConfig(AppConfig):
     name = "apps.citation"
     verbose_name = "Citation"
 
+    @override
     def ready(self) -> None:
         from apps.core.wikilinks import (
             LinkType,

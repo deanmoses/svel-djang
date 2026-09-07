@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, override
 
 from django.db import models
 
@@ -61,7 +61,8 @@ class License(SluggedModel, TimeStampedModel):
     def __str__(self) -> str:
         return self.short_name
 
-    def save(self, *args: Any, **kwargs: Any) -> None:  # noqa: ANN401 - matches Model.save's overloaded signature
+    @override
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.slug:
             self.slug = unique_slug(self, self.short_name, "license")
         super().save(*args, **kwargs)

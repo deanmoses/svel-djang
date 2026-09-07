@@ -38,7 +38,7 @@ import sqlite3
 from contextlib import closing
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Final, NamedTuple, assert_never
+from typing import Any, Final, NamedTuple, assert_never, override
 
 from django.contrib.auth.hashers import make_password
 from django.contrib.sessions.models import Session
@@ -149,6 +149,7 @@ class Command(BaseCommand):
         "Scrub user PII from a restored prod dump and carry dev WorkOS links forward."
     )
 
+    @override
     def add_arguments(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
             "--carry-forward-from",
@@ -159,10 +160,11 @@ class Command(BaseCommand):
             ),
         )
 
+    @override
     def handle(
         self,
         *args: object,
-        **options: Any,  # noqa: ANN401 - argparse-driven Django command kwargs
+        **options: Any,
     ) -> None:
         _assert_local_database()
 

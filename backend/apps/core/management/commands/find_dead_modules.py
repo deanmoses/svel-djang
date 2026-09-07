@@ -32,7 +32,7 @@ Caveats
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 import grimp
 from django.apps import apps as django_apps
@@ -82,6 +82,7 @@ def _is_migration(name: str) -> bool:
 class Command(BaseCommand):
     help = "Find dead modules and modules kept alive only by tests (via grimp)."
 
+    @override
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument(
             "--verbose",
@@ -94,6 +95,7 @@ class Command(BaseCommand):
             help="Don't filter migration modules out of the report (noisy).",
         )
 
+    @override
     def handle(
         self,
         *args: object,

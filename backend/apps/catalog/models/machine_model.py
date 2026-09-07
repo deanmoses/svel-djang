@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from enum import Enum, auto
-from typing import TYPE_CHECKING, ClassVar, Literal, Self
+from typing import TYPE_CHECKING, ClassVar, Literal, Self, override
 
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -619,6 +619,7 @@ class MachineModel(
         return models.Q(variant_of__isnull=True)
 
     @classmethod
+    @override
     def sitemap_queryset(cls) -> models.QuerySet[Self]:
         # Single-Model-Title rule (docs/SingleModelTitles.md): a Title with
         # one active MachineModel collapses to the Title page and
@@ -633,6 +634,7 @@ class MachineModel(
         )
         return super().sitemap_queryset().filter(models.Exists(has_active_sibling))
 
+    @override
     def autocomplete_sublabel(self) -> str | None:
         """Disambiguate same-named models with a "manufacturer · year" line.
 
@@ -644,6 +646,7 @@ class MachineModel(
         )
         return manufacturer_year_sublabel(manufacturer, self.year)
 
+    @override
     def claim_display_label(self) -> str:
         """Concise label when this model is the target of another claim."""
         manufacturer = (

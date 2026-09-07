@@ -16,7 +16,7 @@ and Actor is the uniform resolution read-model.
 
 from __future__ import annotations
 
-from typing import Any, ClassVar
+from typing import Any, ClassVar, override
 
 from django.db import models, transaction
 from django.db.models.signals import pre_delete
@@ -55,10 +55,11 @@ class ActorModel(models.Model):
 
     # Django's Model.save signature is owned by the framework; the override only
     # adds Actor mint-on-create and sync-on-update around the upstream call.
+    @override
     def save(
         self,
-        *args: Any,  # noqa: ANN401
-        **kwargs: Any,  # noqa: ANN401
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         creating = self._state.adding
         with transaction.atomic():

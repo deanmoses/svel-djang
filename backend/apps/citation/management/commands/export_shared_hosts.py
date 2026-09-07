@@ -17,7 +17,7 @@ Run via ``make codegen``.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, override
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
@@ -62,9 +62,10 @@ def _view(rows: list[tuple[str, str]]) -> list[str]:
 class Command(BaseCommand):
     help = f"Generate {OUTPUT_PATH} from the shared-host table."
 
+    @override
     def handle(
         self,
-        **options: Any,  # noqa: ANN401 - argparse-driven Django command kwargs
+        **options: Any,
     ) -> None:
         rows = _rows()
         # An empty table would generate a view that reports every host ordinary,

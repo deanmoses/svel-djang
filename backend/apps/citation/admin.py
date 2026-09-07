@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, override
 
 from django.contrib import admin
 from django.contrib.admin.options import InlineModelAdmin
@@ -45,6 +45,7 @@ class CitationSourceAdmin(admin.ModelAdmin[CitationSource]):
     readonly_fields = ("created_by", "updated_by")
     inlines = [CitationSourceLinkInline, CitationSourceRootDomainInline]
 
+    @override
     def get_readonly_fields(
         self,
         request: HttpRequest,
@@ -54,6 +55,7 @@ class CitationSourceAdmin(admin.ModelAdmin[CitationSource]):
             return (*self.readonly_fields, "parent")
         return tuple(self.readonly_fields)
 
+    @override
     def get_inline_instances(
         self,
         request: HttpRequest,
@@ -70,6 +72,7 @@ class CitationSourceAdmin(admin.ModelAdmin[CitationSource]):
             ]
         return instances
 
+    @override
     def has_delete_permission(
         self,
         request: HttpRequest,
@@ -77,12 +80,13 @@ class CitationSourceAdmin(admin.ModelAdmin[CitationSource]):
     ) -> bool:
         return False
 
+    @override
     def save_model(
         self,
         request: HttpRequest,
         obj: CitationSource,
         form: ModelForm[CitationSource],
-        change: bool,  # noqa: FBT001 - Django ModelAdmin.save_model signature
+        change: bool,
     ) -> None:
         assert request.user.is_authenticated
         actor = request.user.actor
@@ -91,6 +95,7 @@ class CitationSourceAdmin(admin.ModelAdmin[CitationSource]):
         obj.updated_by = actor
         super().save_model(request, obj, form, change)
 
+    @override
     def save_formset(
         self,
         request: HttpRequest,
@@ -103,7 +108,7 @@ class CitationSourceAdmin(admin.ModelAdmin[CitationSource]):
             CitationSource,
             ModelForm[CitationSourceRootDomain],
         ],
-        change: bool,  # noqa: FBT001 - Django ModelAdmin.save_formset signature
+        change: bool,
     ) -> None:
         assert request.user.is_authenticated
         actor = request.user.actor

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import Any
+from typing import Any, override
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -440,6 +440,7 @@ class CitationSource(TimeStampedModel, ActorAttributedModel):
         # not the work itself (a book, a movie).
         return citation_type_spec(self.source_type).schemeless_parentless_abstract
 
+    @override
     def clean(self) -> None:
         super().clean()
         # Guards that read through the parent FK, which a CHECK can't express.
@@ -695,6 +696,7 @@ class CitationSourceRootDomain(TimeStampedModel, ActorAttributedModel):
             ),
         ]
 
+    @override
     def clean(self) -> None:
         super().clean()
         self.host = normalize_host(self.host)
@@ -971,10 +973,11 @@ class CitationInstance(models.Model):
 
     # Django's Model.save signature is owned by the framework; the override
     # only enforces immutability before delegating upstream.
+    @override
     def save(
         self,
-        *args: Any,  # noqa: ANN401
-        **kwargs: Any,  # noqa: ANN401
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         if self.pk is not None:
             raise ValueError(
@@ -1054,10 +1057,11 @@ class ReservedCitationSlug(models.Model):
 
     # Django's Model.save signature is owned by the framework; the override
     # only validates the slug grammar before delegating upstream.
+    @override
     def save(
         self,
-        *args: Any,  # noqa: ANN401
-        **kwargs: Any,  # noqa: ANN401
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         validate_citation_slug(self.slug)
         super().save(*args, **kwargs)

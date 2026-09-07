@@ -1,3 +1,5 @@
+from typing import override
+
 from django.apps import AppConfig
 
 
@@ -5,6 +7,7 @@ class CoreConfig(AppConfig):
     name = "apps.core"
     verbose_name = "Core"
 
+    @override
     def ready(self) -> None:
         from django.db.models import CharField, TextField
         from django.db.models.functions import Length

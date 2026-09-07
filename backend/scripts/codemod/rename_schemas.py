@@ -20,6 +20,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import override
 
 import libcst as cst
 
@@ -33,9 +34,8 @@ class RenameTransformer(cst.CSTTransformer):
         super().__init__()
         self.rename_map = rename_map
 
-    def leave_Name(  # noqa: N802 — libcst dispatch method name
-        self, original_node: cst.Name, updated_node: cst.Name
-    ) -> cst.Name:
+    @override
+    def leave_Name(self, original_node: cst.Name, updated_node: cst.Name) -> cst.Name:
         new = self.rename_map.get(updated_node.value)
         if new is None:
             return updated_node

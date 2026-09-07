@@ -9,6 +9,7 @@ from __future__ import annotations
 import html.parser
 import logging
 from dataclasses import dataclass
+from typing import override
 
 from django.core.cache import cache
 
@@ -57,6 +58,7 @@ class _MetaParser(html.parser.HTMLParser):
         self._title_parts: list[str] = []
         self._done = False
 
+    @override
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         if self._done:
             return
@@ -86,6 +88,7 @@ class _MetaParser(html.parser.HTMLParser):
             ):
                 self.meta.isbn = content
 
+    @override
     def handle_endtag(self, tag: str) -> None:
         if self._done:
             return
@@ -96,6 +99,7 @@ class _MetaParser(html.parser.HTMLParser):
             self._in_title = False
             self.meta.title = "".join(self._title_parts).strip()
 
+    @override
     def handle_data(self, data: str) -> None:
         if self._in_title and not self._done:
             self._title_parts.append(data)

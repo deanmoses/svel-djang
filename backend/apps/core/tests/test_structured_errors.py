@@ -14,7 +14,7 @@ Locks in three invariants future variants depend on:
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, override
 
 import pytest
 from django.http import HttpRequest, HttpResponse
@@ -48,9 +48,11 @@ class _TeapotError(StructuredApiError):
         super().__init__(message)
         self.flavor = flavor
 
+    @override
     def to_body(self) -> dict[str, Any]:
         return {"flavor": self.flavor}
 
+    @override
     def extra_headers(self) -> dict[str, str]:
         return {"X-Teapot": self.flavor}
 

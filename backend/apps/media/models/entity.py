@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import override
+
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
@@ -66,6 +68,7 @@ class EntityMedia(models.Model):
     def __str__(self) -> str:
         return f"EntityMedia {self.pk}: asset {self.asset_id} on {self.content_type_id}:{self.object_id}"
 
+    @override
     def clean(self) -> None:
         model_class = self.content_type.model_class()
         if model_class is None or not issubclass(model_class, MediaSupportedModel):

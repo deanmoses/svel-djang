@@ -1,3 +1,5 @@
+from typing import override
+
 from django.apps import AppConfig
 
 
@@ -6,6 +8,7 @@ class MediaConfig(AppConfig):
     name = "apps.media"
     verbose_name = "Media"
 
+    @override
     def ready(self) -> None:
         # Registers authz rules and the image-codec system checks at startup.
         from . import authz, checks  # noqa: F401

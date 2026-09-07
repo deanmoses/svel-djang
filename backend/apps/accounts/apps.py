@@ -1,3 +1,5 @@
+from typing import override
+
 from django.apps import AppConfig
 
 
@@ -6,6 +8,7 @@ class AccountsConfig(AppConfig):
     name = "apps.accounts"
     label = "accounts"
 
+    @override
     def ready(self) -> None:
         # Patch AnonymousUser with the attributes the PolicyUser Protocol
         # declares but Django's AnonymousUser lacks, so anonymous requests

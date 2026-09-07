@@ -21,7 +21,7 @@ import json
 import logging
 import math
 from datetime import UTC, datetime
-from typing import Any, TypeIs
+from typing import Any, TypeIs, override
 
 # Derived from a live record rather than hand-listed so the set tracks the
 # interpreter — `taskName` arrived in 3.12, and a literal set would leak
@@ -83,6 +83,7 @@ def railway_level(levelno: int) -> str:
 class RailwayJSONFormatter(logging.Formatter):
     """Render a record as one JSON line Railway can classify and filter."""
 
+    @override
     def format(self, record: logging.LogRecord) -> str:
         # Extras first so the fields below win a name collision. `logging`
         # rejects an `extra` key that shadows a record attribute, but `level`,

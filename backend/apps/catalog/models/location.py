@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, ClassVar, Self
+from typing import TYPE_CHECKING, ClassVar, Self, override
 
 from django.db import models
 from django.db.models import Exists, OuterRef, Q, Value
@@ -169,6 +169,7 @@ class Location(CatalogModel, TimeStampedModel):
         return MachineModel.objects.filter(export_markets__target_market_location=self)
 
     @classmethod
+    @override
     def sitemap_queryset(cls) -> models.QuerySet[Self]:
         # Narrow sitemap membership to locations with at least one
         # manufacturer at or below them. A location page's primary content is
@@ -191,6 +192,7 @@ class Location(CatalogModel, TimeStampedModel):
         return super().sitemap_queryset().filter(Exists(has_manufacturer_at_or_below))
 
     @classmethod
+    @override
     def compose_public_id(cls, authored_fields: Mapping[str, object]) -> str:
         """Compose ``location_path`` from a create's authored ``slug`` + ``parent``.
 

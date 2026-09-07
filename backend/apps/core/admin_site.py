@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, override
 from urllib.parse import urlencode
 
 from django.contrib import admin
@@ -34,6 +34,7 @@ class FlipAdminSite(admin.AdminSite):
     that reference them by name don't ``NoReverseMatch``.
     """
 
+    @override
     def login(
         self, request: HttpRequest, extra_context: dict[str, Any] | None = None
     ) -> HttpResponse:
@@ -63,11 +64,13 @@ class FlipAdminSite(admin.AdminSite):
 
     # Return type matches the supertype (which is never actually returned —
     # both bodies raise — but mypy enforces signature compatibility).
+    @override
     def password_change(
         self, request: HttpRequest, extra_context: dict[str, Any] | None = None
     ) -> TemplateResponse:
         raise Http404
 
+    @override
     def password_change_done(
         self, request: HttpRequest, extra_context: dict[str, Any] | None = None
     ) -> TemplateResponse:
