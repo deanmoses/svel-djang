@@ -72,7 +72,8 @@ class TestSchemaSuffixDiscipline:
     """Every name in components.schemas conforms to the rationalized rules."""
 
     @pytest.fixture(scope="class")
-    def schema_names(self) -> list[str]:
+    @classmethod
+    def schema_names(cls) -> list[str]:
         return list(api.get_openapi_schema()["components"]["schemas"].keys())
 
     def test_all_names_use_allowed_suffix_or_bare(self, schema_names: list[str]):

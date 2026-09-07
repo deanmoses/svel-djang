@@ -48,11 +48,13 @@ def _view(rows: list[tuple[str, str]]) -> list[str]:
     lines += [
         "  ) AS t(host, label);",
         "COMMENT ON VIEW shared_hosts IS",
-        "  'One row per declared shared multi-tenant host — the host and the platform"
-        " that serves tenants on it. The widest honest host, matched by label-boundary"
-        " suffix: a URL is on a shared host when its host equals or ends in one of"
-        " these. Recognition there is path-scoped, so citation_root_for_host() returns"
-        " NULL and only citation_root_for_url() can attribute a tenant.';",
+        (
+            "  'One row per declared shared multi-tenant host — the host and the platform"
+            " that serves tenants on it. The widest honest host, matched by label-boundary"
+            " suffix: a URL is on a shared host when its host equals or ends in one of"
+            " these. Recognition there is path-scoped, so citation_root_for_host() returns"
+            " NULL and only citation_root_for_url() can attribute a tenant.';"
+        ),
     ]
     return lines
 

@@ -199,7 +199,7 @@ def extract_isbn(isbn: str) -> ExtractionResult:
     if urlparse(edition_url).scheme != "https":
         return ExtractionResult(error="api_error")
     try:
-        req = Request(edition_url, headers={"User-Agent": USER_AGENT})  # noqa: S310 — scheme checked above
+        req = Request(edition_url, headers={"User-Agent": USER_AGENT})
         with urlopen(req, timeout=_OL_TIMEOUT) as resp:  # noqa: S310 — scheme checked above
             edition = json.loads(resp.read())
     except HTTPError as exc:

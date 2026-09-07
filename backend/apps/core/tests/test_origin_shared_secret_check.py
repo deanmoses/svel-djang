@@ -10,7 +10,7 @@ rename in the message string doesn't silently break log greps.
 from __future__ import annotations
 
 import pytest
-from pytest_django.fixtures import SettingsWrapper
+from pytest_django.fixtures import Settings
 
 from apps.core.checks import check_origin_shared_secret
 
@@ -19,7 +19,7 @@ MonkeyPatch = pytest.MonkeyPatch
 
 class TestOriginSharedSecretCheck:
     def test_passes_when_debug_is_true(
-        self, settings: SettingsWrapper, monkeypatch: MonkeyPatch
+        self, settings: Settings, monkeypatch: MonkeyPatch
     ) -> None:
         # `make dev` runs no Caddy, so a local value would gate nothing.
         settings.DEBUG = True
@@ -31,14 +31,14 @@ class TestOriginSharedSecretCheck:
         ["a", "0123456789", "abc_DEF-123", "-_-", "x" * 200],
     )
     def test_passes_on_the_caddy_safe_charset(
-        self, settings: SettingsWrapper, monkeypatch: MonkeyPatch, value: str
+        self, settings: Settings, monkeypatch: MonkeyPatch, value: str
     ) -> None:
         settings.DEBUG = False
         monkeypatch.setenv("ORIGIN_SHARED_SECRET", value)
         assert check_origin_shared_secret(app_configs=None) == []
 
     def test_errors_when_unset(
-        self, settings: SettingsWrapper, monkeypatch: MonkeyPatch
+        self, settings: Settings, monkeypatch: MonkeyPatch
     ) -> None:
         settings.DEBUG = False
         monkeypatch.delenv("ORIGIN_SHARED_SECRET", raising=False)
@@ -46,7 +46,7 @@ class TestOriginSharedSecretCheck:
         assert [m.id for m in messages] == ["core.E305"]
 
     def test_whitespace_only_counts_as_empty(
-        self, settings: SettingsWrapper, monkeypatch: MonkeyPatch
+        self, settings: Settings, monkeypatch: MonkeyPatch
     ) -> None:
         settings.DEBUG = False
         monkeypatch.setenv("ORIGIN_SHARED_SECRET", "   ")
@@ -71,7 +71,7 @@ class TestOriginSharedSecretCheck:
     )
     def test_errors_when_malformed(
         self,
-        settings: SettingsWrapper,
+        settings: Settings,
         monkeypatch: MonkeyPatch,
         bad_value: str,
     ) -> None:
@@ -81,7 +81,7 @@ class TestOriginSharedSecretCheck:
         assert [m.id for m in messages] == ["core.E306"]
 
     def test_messages_never_echo_the_value(
-        self, settings: SettingsWrapper, monkeypatch: MonkeyPatch
+        self, settings: Settings, monkeypatch: MonkeyPatch
     ) -> None:
         # Deploy logs are shared; a malformed secret is still a secret.
         settings.DEBUG = False

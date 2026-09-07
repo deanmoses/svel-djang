@@ -25,18 +25,21 @@ dependencies = [
 ]
 
 [dependency-groups]
+# Tool floors track the locked version rather than the oldest version that
+# happens to work: a checker or codemod that differs between developers
+# returns different verdicts on identical code. Libraries stay loose.
 dev = [
-    "django-stubs-ext>=6.0.3",
+    "django-stubs-ext>=6.1",
     "httpx>=0.28",
-    "django-stubs[compatible-mypy]>=6.0.3",
-    "import-linter>=2.11",
-    "libcst>=1.8.6",
-    "mypy>=1.20.2",
-    "pytest>=9.0.3",
-    "pytest-django>=4.9",
+    "django-stubs[compatible-mypy]>=6.1",
+    "import-linter>=2.15",
+    "libcst>=1.9",
+    "mypy>=2.3",
+    "pytest>=9.1",
+    "pytest-django>=4.14",
     "pytest-xdist>=3.8.0",
-    "ruff>=0.8",
-    "types-pyyaml>=6.0",
+    "ruff>=0.16",
+    "types-pyyaml>=6.0.12.20260906",
 ]
 
 [tool.ruff]

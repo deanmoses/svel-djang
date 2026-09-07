@@ -148,16 +148,22 @@ class Command(BaseCommand):
             *[f"\t'{key}'," for key in catalog_keys],
             "] as const;",
             "",
-            "/** Union of catalog entity `entity_type`s — the `CatalogModel` subset"
-            " of {@link EntityKey}. */",
+            (
+                "/** Union of catalog entity `entity_type`s — the `CatalogModel` subset"
+                " of {@link EntityKey}. */"
+            ),
             "export type CatalogEntityKey = (typeof CATALOG_ENTITY_KEYS)[number];",
             "",
-            "/** Union of every entity `entity_type` — the catalog keys plus any"
-            " non-catalog linkable entities (e.g. a future SSR `user`). */",
+            (
+                "/** Union of every entity `entity_type` — the catalog keys plus any"
+                " non-catalog linkable entities (e.g. a future SSR `user`). */"
+            ),
             f"export type EntityKey = {entity_key_def};",
             "",
-            "/** Identity type that fails to compile unless `S` is a subset of `U`;"
-            " keeps a generated key subset within {@link EntityKey}. */",
+            (
+                "/** Identity type that fails to compile unless `S` is a subset of `U`;"
+                " keeps a generated key subset within {@link EntityKey}. */"
+            ),
             "type SubsetOf<S extends U, U> = S;",
             "",
             "/** Union of entity `entity_type`s that support media uploads. */",

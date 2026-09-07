@@ -131,7 +131,7 @@ def _construct_mapping_no_duplicates(
     # by ``_assert_json`` after the document is built.
     mapping: dict[object, object] = {}
     for key_node, value_node in node.value:
-        key = loader.construct_object(key_node, deep=deep)  # type: ignore[no-untyped-call]
+        key = loader.construct_object(key_node, deep=deep)
         if key in mapping:
             raise yaml.constructor.ConstructorError(
                 "while constructing a mapping",
@@ -139,7 +139,7 @@ def _construct_mapping_no_duplicates(
                 f"found duplicate key {key!r}",
                 key_node.start_mark,
             )
-        mapping[key] = loader.construct_object(value_node, deep=deep)  # type: ignore[no-untyped-call]
+        mapping[key] = loader.construct_object(value_node, deep=deep)
     return mapping
 
 
@@ -162,7 +162,7 @@ _JSON_RESOLVERS: list[tuple[str, re.Pattern[str], str]] = [
 ]
 for _tag, _pattern, _first_chars in _JSON_RESOLVERS:
     for _ch in _first_chars:
-        _StrictPatchLoader.add_implicit_resolver(_tag, _pattern, _ch)  # type: ignore[no-untyped-call]
+        _StrictPatchLoader.add_implicit_resolver(_tag, _pattern, _ch)
 
 
 def _assert_json(value: object, path: str = "<root>") -> None:

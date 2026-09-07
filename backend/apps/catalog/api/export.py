@@ -449,11 +449,14 @@ def _build_qs(spec: ExportSpec) -> QuerySet[Any]:
     qs: QuerySet[Any] = (
         model.objects.active()
         .annotate(_last_modified=model.lastmod_expression())
-        .select_related(*fk_names)
         # Only description claims — attribution needs no other field, and the
         # full claims_prefetch would drag the whole claim table at bulk scale.
         .prefetch_related(claims_prefetch(field_names=("description",)))
     )
+    # Guarded: a no-argument select_related() means "follow every FK", which is
+    # the opposite of the intent for an entity that has no claimed FKs.
+    if fk_names:
+        qs = qs.select_related(*fk_names)
     if issubclass(spec.model, MediaSupportedModel):
         qs = qs.prefetch_related(media_prefetch())
     for rel in spec.relations.values():
