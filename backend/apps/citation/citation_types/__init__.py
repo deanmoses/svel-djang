@@ -68,7 +68,8 @@ from apps.citation.citation_types.vocabulary import (
     citation_source_type,
 )
 
-__all__ = [
+# Grouped by audience rather than sorted; the section comments are the point.
+__all__ = [  # noqa: RUF022
     # ----- Scheme-author surface: pure configuration, nothing else -----
     "SchemeSpec",
     "SchemeRootCitationSourceInfo",

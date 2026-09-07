@@ -54,7 +54,8 @@ class MarkdownField(models.TextField[str, str]):
         self,
         cls: type[models.Model],
         name: str,
-        private_only: bool = False,
+        # Django's Field.contribute_to_class signature.
+        private_only: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
         super().contribute_to_class(cls, name, private_only=private_only)
         _contribute_max_length_check(self, cls, name)

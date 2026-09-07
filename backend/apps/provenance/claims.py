@@ -115,6 +115,7 @@ def resolve_fk_target_pk(
 def build_relationship_claim(
     field_name: ClaimFieldName,
     values: Mapping[ClaimValueKey, IdentityPartValue],
+    *,
     exists: bool = True,
 ) -> RelationshipClaim:
     """Return ``(claim_key, value)`` for a relationship claim.

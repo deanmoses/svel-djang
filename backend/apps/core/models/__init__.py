@@ -51,6 +51,7 @@ from .mixins import (
 from .references import RecordReference, register_reference_cleanup
 
 __all__ = [
+    "LIFECYCLE_STATUS_FIELD",
     "BoundedTextField",
     "DescribedModel",
     "EntityStatus",
@@ -58,7 +59,6 @@ __all__ = [
     "LabeledIdentityModel",
     "LabeledModel",
     "LastUpdatedModel",
-    "LIFECYCLE_STATUS_FIELD",
     "License",
     "LifecycleManager",
     "LifecycleQuerySet",

@@ -158,7 +158,7 @@ def apply_plan(plan: IngestPlan) -> RunReport:
     except Exception as exc:
         run.status = IngestRun.Status.FAILED
         run.claims_rejected = report.rejected
-        run.errors = report.errors if report.errors else [str(exc)]
+        run.errors = report.errors or [str(exc)]
         run.finished_at = timezone.now()
         run.save(
             update_fields=["status", "claims_rejected", "errors", "finished_at"],

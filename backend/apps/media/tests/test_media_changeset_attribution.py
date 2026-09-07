@@ -74,8 +74,7 @@ def _upload(client: Client, machine_model, category: str = "backglass") -> Media
         },
     )
     assert resp.status_code == 200, resp.content
-    asset = MediaAsset.objects.latest("pk")
-    return asset
+    return MediaAsset.objects.latest("pk")
 
 
 def _latest_active_media_claim(machine_model) -> Claim:

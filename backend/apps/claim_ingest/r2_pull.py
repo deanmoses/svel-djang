@@ -12,18 +12,18 @@ from __future__ import annotations
 import hashlib
 import http.client
 import json
-import os
 import socket
 import tempfile
 import urllib.request
 from collections.abc import Callable, Collection
+from pathlib import Path
 from typing import Any, NamedTuple, cast
 from urllib.error import HTTPError
 
 from apps.core.user_agent import USER_AGENT
 
 # Default local download directory, shared by the pull commands.
-DEFAULT_DEST = os.path.join(tempfile.gettempdir(), "ingest_sources")
+DEFAULT_DEST = Path(tempfile.gettempdir()) / "ingest_sources"
 
 # Force IPv4 for all socket lookups in this process. stdlib's urllib has no
 # Happy Eyeballs (RFC 8305): when DNS returns both v4 and v6 records and the
@@ -71,9 +71,9 @@ def _urlopen(url: str) -> http.client.HTTPResponse:
     return cast(http.client.HTTPResponse, _OPENER.open(url, timeout=_TIMEOUT_SECONDS))
 
 
-def sha256(path: str) -> str:
+def sha256(path: Path) -> str:
     h = hashlib.sha256()
-    with open(path, "rb") as f:
+    with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1 << 16), b""):
             h.update(chunk)
     return h.hexdigest()
@@ -84,7 +84,7 @@ def download_manifest(
     base_url: str,
     manifest_path: str,
     local_prefix: str,
-    dest: str,
+    dest: Path,
     needed_files: Collection[str] | None = None,
     required: bool = False,
     log: Callable[[str], None],
@@ -130,21 +130,21 @@ def download_manifest(
 
         expected_size = entry["size"]
         expected_sha = entry["sha256"]
-        local_path = os.path.join(dest, local_prefix + rel_path)
+        local_path = dest / (local_prefix + rel_path)
 
         # Skip if local file already matches size and checksum.
         if (
-            os.path.exists(local_path)
-            and os.path.getsize(local_path) == expected_size
+            local_path.exists()
+            and local_path.stat().st_size == expected_size
             and sha256(local_path) == expected_sha
         ):
             up_to_date += 1
             continue
 
-        os.makedirs(os.path.dirname(local_path), exist_ok=True)
+        local_path.parent.mkdir(parents=True, exist_ok=True)
         file_url = f"{manifest_base}/{rel_path}"
         log(f"  {local_prefix}{rel_path}")
-        with _urlopen(file_url) as resp, open(local_path, "wb") as f:
+        with _urlopen(file_url) as resp, local_path.open("wb") as f:
             f.write(resp.read())
 
         actual_sha = sha256(local_path)

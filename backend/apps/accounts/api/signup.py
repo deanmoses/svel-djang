@@ -84,7 +84,7 @@ def _require_pending(request: HttpRequest) -> PendingPayload:
     """
     payload = get_pending(request)
     if payload is None:
-        raise PendingInvalidError()
+        raise PendingInvalidError
     return payload
 
 
@@ -251,7 +251,7 @@ def signup_submit(
         # it onto the wire-shaped exception would leak the constraint
         # message into logs without informing the response. Same rationale
         # at the earlier UsernameRejectedError raise.
-        raise UsernameTakenError() from None
+        raise UsernameTakenError from None
 
     clear_pending(request)
     login(request, user, backend="apps.accounts.backends.WorkOSBackend")

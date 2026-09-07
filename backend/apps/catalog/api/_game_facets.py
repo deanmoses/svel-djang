@@ -428,7 +428,7 @@ def _player_value_rows(f: GameFilters, shared: _SharedFanout) -> list[_FacetValu
     for pk, title_id, variant_of_id, count in raw:
         if count is None:  # excluded above; narrows the type
             continue
-        bucket = 6 if count >= 6 else count
+        bucket = min(6, count)
         if bucket not in PLAYER_BUCKETS:
             continue
         rows.append(

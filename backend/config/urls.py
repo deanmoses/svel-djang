@@ -35,7 +35,7 @@ def _serve_media(
     if response.get("Content-Type", "").startswith("application/octet-stream"):
         assert document_root is not None
         filepath = Path(document_root) / path
-        with open(filepath, "rb") as f:
+        with filepath.open("rb") as f:
             head = f.read(16)
         detected = sniff_image_content_type(head)
         if detected:

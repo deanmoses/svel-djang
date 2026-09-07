@@ -146,7 +146,7 @@ def extract_image_urls(
 
     def _abs(url: str | None) -> str | None:
         """Return *url* only if it's an absolute HTTP(S) URL, else None."""
-        if url and (url.startswith("http://") or url.startswith("https://")):
+        if url and url.startswith(("http://", "https://")):
             return url
         return None
 

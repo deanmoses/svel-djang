@@ -154,11 +154,15 @@ def build_through_projection(
                 )
                 return None
             member_infos.append(
-                _MemberInfo(value_key, True, valid_pks, member.nullable)
+                _MemberInfo(
+                    value_key, is_fk=True, valid_pks=valid_pks, nullable=member.nullable
+                )
             )
             key_columns.append(f"{member.field}_id")
         elif member.identity is not None:
-            member_infos.append(_MemberInfo(value_key, False, frozenset()))
+            member_infos.append(
+                _MemberInfo(value_key, is_fk=False, valid_pks=frozenset())
+            )
             key_columns.append(member.field)
         else:
             # Non-identity literal member: reconciled by value, not by key.

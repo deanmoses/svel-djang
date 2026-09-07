@@ -262,6 +262,7 @@ def register_relationship_schema(
     payload: tuple[PayloadSpec, ...],
     valid_subjects: Iterable[type[ClaimControlledModel]],
     xor_groups: tuple[tuple[ClaimValueKey, ...], ...] | None = None,
+    *,
     xor_required: bool = True,
 ) -> None:
     """Register a relationship schema. Idempotent; conflicting re-registration raises.
@@ -547,7 +548,7 @@ def validate_single_relationship_claim(
     # T` rather than `isinstance(v, T)` rejects `bool` where `int` is expected
     # (PKs, counts) and rejects enum / numpy scalars that would slip past
     # `isinstance`. For `nullable=True`, accept `None` in addition.
-    def check_scalar(name: ClaimValueKey, scalar_type: type, nullable: bool) -> bool:
+    def check_scalar(name: ClaimValueKey, scalar_type: type, *, nullable: bool) -> bool:
         """Type-check one present key; returns False when the value is null."""
         v = value[name]
         if v is None:
@@ -565,11 +566,11 @@ def validate_single_relationship_claim(
 
     for member in schema.members:
         if member.name in value:
-            check_scalar(member.name, member.scalar_type, member.nullable)
+            check_scalar(member.name, member.scalar_type, nullable=member.nullable)
     for pspec in schema.payload:
         if pspec.name not in value:
             continue
-        if not check_scalar(pspec.name, pspec.scalar_type, pspec.nullable):
+        if not check_scalar(pspec.name, pspec.scalar_type, nullable=pspec.nullable):
             continue
         if pspec.choices is not None and value[pspec.name] not in pspec.choices:
             raise ValidationError(

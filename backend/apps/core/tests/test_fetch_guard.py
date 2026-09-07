@@ -23,7 +23,7 @@ def test_blocks_an_on_demand_fk_fetch():
     make_machine_model(name="MM", slug="mm-fetch-guard")
     with block_lazy_fetches():
         model = MachineModel.objects.get(slug="mm-fetch-guard")
-        with pytest.raises(FieldFetchBlocked, match="MachineModel.title"):
+        with pytest.raises(FieldFetchBlocked, match=r"MachineModel\.title"):
             _ = model.title
 
 

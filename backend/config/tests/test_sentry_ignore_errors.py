@@ -36,7 +36,9 @@ def test_ignore_errors_drops_each_listed_class() -> None:
         for exc_class in IGNORE_ERRORS:
             try:
                 raise exc_class("test")
-            except BaseException:
+            # BaseException on purpose: IGNORE_ERRORS contains classes that
+            # do not descend from Exception.
+            except BaseException:  # noqa: BLE001
                 sentry_sdk.capture_exception()
         assert transport.events == [], (
             f"ignore_errors did not drop: "

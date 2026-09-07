@@ -45,7 +45,7 @@ def test_detail_registrar_rejects_media_model_without_mixin():
         register_entity_detail_page(
             router,
             GameplayFeature,
-            detail_qs=lambda: GameplayFeature.objects.all(),
+            detail_qs=GameplayFeature.objects.all,
             serialize_page=plain_page(lambda _o: _PlainSchema()),
             response_schema=_PlainSchema,
         )
@@ -58,7 +58,7 @@ def test_detail_registrar_accepts_media_model_with_mixin():
     register_entity_detail_page(
         router,
         GameplayFeature,
-        detail_qs=lambda: GameplayFeature.objects.all(),
+        detail_qs=GameplayFeature.objects.all,
         serialize_page=plain_page(lambda _o: _MediaSchema()),
         response_schema=_MediaSchema,
     )
@@ -71,7 +71,7 @@ def test_detail_registrar_ignores_non_media_model():
     register_entity_detail_page(
         router,
         Theme,
-        detail_qs=lambda: Theme.objects.all(),
+        detail_qs=Theme.objects.all,
         serialize_page=plain_page(lambda _o: _PlainSchema()),
         response_schema=_PlainSchema,
     )

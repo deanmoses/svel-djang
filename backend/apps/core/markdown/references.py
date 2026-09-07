@@ -87,15 +87,15 @@ def sync_references(source: models.Model) -> None:
         )
 
         # Refs to add
-        for target_id in valid_ids - existing_ids:
-            to_create.append(
-                RecordReference(
-                    source_type=source_ct,
-                    source_id=source.pk,
-                    target_type=target_ct,
-                    target_id=target_id,
-                )
+        to_create.extend(
+            RecordReference(
+                source_type=source_ct,
+                source_id=source.pk,
+                target_type=target_ct,
+                target_id=target_id,
             )
+            for target_id in valid_ids - existing_ids
+        )
 
         # Refs to remove
         ids_to_remove = existing_ids - target_ids

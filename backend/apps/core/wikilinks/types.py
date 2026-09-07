@@ -44,6 +44,7 @@ class FormatLinkCallback(Protocol):
         obj: Any,  # noqa: ANN401 - concrete model type varies per link type
         index: int,
         base_url: str,
+        *,
         plain_text: bool,
     ) -> str: ...
 

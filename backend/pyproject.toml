@@ -94,6 +94,20 @@ select = [
     "INT",    # flake8-gettext (f-strings in translation calls)
     "TC010",  # runtime string annotation in a union — fails at runtime
     "TID251", # banned-api; add entries under lint.flake8-tidy-imports.banned-api
+    "A",      # flake8-builtins (shadowing builtins)
+    "BLE",    # flake8-blind-except
+    "FBT",    # flake8-boolean-trap
+    "FURB",   # refurb
+    "PERF",   # perflint
+    "PIE",    # flake8-pie
+    "PLC0206", # dict iterated by index without .items()
+    "PLW",    # pylint warnings
+    "PTH",    # flake8-use-pathlib
+    "PYI",    # flake8-pyi
+    "RET",    # flake8-return
+    "RSE",    # flake8-raise
+    "RUF",    # ruff-specific
+    "SLOT",   # flake8-slots
 ]
 ignore = [
     "E501",  # Line too long — handled by formatter
@@ -102,6 +116,16 @@ ignore = [
     "S311",  # Use of random — not cryptographic in this app
     "PT019", # Underscore-prefix fixtures are the pytest idiom for side-effect-only fixtures
     "SIM118", # Django SessionStore has .keys() but non-dict iteration
+    "RUF012", # ClassVar for mutable defaults — fights Django's Meta/field idiom
+    "RUF001", # Ambiguous unicode in strings — en/em dashes are deliberate
+    "RUF002", # ...in docstrings
+    "RUF003", # ...in comments
+    "PLW0603", # global — the model-driven registries are lazily-warmed module caches
+    "PLW2901", # loop-var rebinding is how the claim-value pipeline normalizes in place
+    # Call-site rule: fires on Pydantic's `Field(False, ...)` and on booleans
+    # passed as claim *values*, not as flags. FBT001/FBT002 still guard the
+    # definition side, which is where a boolean trap actually gets built.
+    "FBT003",
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -113,6 +137,17 @@ ignore = [
 "scripts/*.py" = ["T201"]
 "apps/catalog/tests/benchmark_game_rows.py" = ["T201"]  # a __main__ CLI harness, not a test
 "**/__init__.py" = ["F401"]  # re-exports from barrel modules are the whole point of __init__.py
+# Django system checks accumulate Error objects with long multi-line messages
+# behind a guard. Folding those into a generator expression puts the condition
+# after the six-line message, for no measurable gain at startup.
+"**/checks.py" = ["PERF401"]
+
+[tool.ruff.lint.flake8-builtins]
+# `type` and `id` are django-ninja query-parameter names, so they're the wire
+# contract rather than a local naming choice; `license` mirrors Claim.license.
+# `credits` is the domain noun, and the builtin it shadows is the REPL's help
+# object — irrelevant in server code.
+ignorelist = ["credits", "id", "license", "type"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["apps", "config"]

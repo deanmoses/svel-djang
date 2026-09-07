@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import os
+from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError
 
@@ -42,6 +43,7 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--dest",
+            type=Path,
             default=DEFAULT_DEST,
             help=f"Local directory to download into (default: {DEFAULT_DEST}).",
         )

@@ -95,5 +95,5 @@ def test_evaluator_does_not_short_circuit(empty_registry):
 
 
 def test_unregistered_activity_raises_lookup_error(empty_registry):
-    with pytest.raises(LookupError, match="catalog.edit"):
+    with pytest.raises(LookupError, match=r"catalog\.edit"):
         check(StubPolicyUser(), Activity.CATALOG_EDIT)
