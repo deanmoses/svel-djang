@@ -11,6 +11,14 @@ import { getCsrfToken } from '../csrf';
 // `import { auth }` here would form `client → auth → client`. The
 // setter inverts the runtime callback flow without forming a static
 // import cycle.
+/** Whether a 403 body is the backend's structured `policy_denied` error. */
+function isPolicyDenied(body: unknown): boolean {
+  if (typeof body !== 'object' || body === null || !('detail' in body)) return false;
+  const { detail } = body;
+  if (typeof detail !== 'object' || detail === null || !('kind' in detail)) return false;
+  return detail.kind === 'policy_denied';
+}
+
 let onPolicyDenied: (() => void) | null = null;
 export function registerOnPolicyDenied(cb: () => void): void {
   onPolicyDenied = cb;
@@ -67,8 +75,8 @@ export function createApiClient(
       // explicit `auth.refresh()` on auth mutations.
       if (response.status !== 403 || !onPolicyDenied) return;
       try {
-        const body = await response.clone().json();
-        if (body?.detail?.kind === 'policy_denied') onPolicyDenied();
+        const body: unknown = await response.clone().json();
+        if (isPolicyDenied(body)) onPolicyDenied();
       } catch {
         // Body wasn't JSON or didn't match — ignore.
       }
