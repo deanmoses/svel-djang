@@ -1,3 +1,4 @@
+import js from '@eslint/js';
 import prettier from 'eslint-config-prettier';
 import svelte from 'eslint-plugin-svelte';
 import globals from 'globals';
@@ -68,6 +69,7 @@ const SRC_FILES = [
 ];
 
 export default ts.config(
+  js.configs.recommended,
   ...ts.configs.recommended,
   ...svelte.configs.recommended,
   prettier,
@@ -223,6 +225,14 @@ export default ts.config(
     files: ['src/**/*.test.ts', 'src/**/*.spec.ts'],
     rules: {
       'no-restricted-imports': ['error', { paths: [NO_POSTHOG], patterns: [NO_API_INTERNAL] }],
+    },
+  },
+  {
+    // The page injects the @scalar/api-reference bundle from jsdelivr at
+    // runtime and calls the `Scalar` global it defines.
+    files: ['src/routes/api-docs/+page.svelte'],
+    languageOptions: {
+      globals: { Scalar: 'readonly' },
     },
   },
   {

@@ -102,7 +102,7 @@ function rewriteFile(path) {
     const tail = rewritten.slice(importMatch.index + line.length);
     const head = rewritten.slice(0, importMatch.index);
     const restOfFile = head + tail;
-    if (!/\bcomponents\s*[\[\.,>]/.test(restOfFile)) {
+    if (!/\bcomponents\s*[[.,>]/.test(restOfFile)) {
       specSet.delete('components');
     }
 

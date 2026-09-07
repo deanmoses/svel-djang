@@ -139,15 +139,15 @@ repos:
         pass_filenames: false
 
       # Frontend, split across two git stages like the backend tests:
-      #   commit -> lint only. It autofixes formatting/style (prettier --write),
-      #             which is exactly what you want applied before a commit.
+      #   commit -> format + lint. `pnpm lint` only verifies, so prettier's
+      #             rewrites have to be applied separately before it runs.
       #   push   -> type check + vitest. svelte-check has no incremental cache
       #             (unlike backend mypy) so it's a ~40s cold check, and vitest's
       #             jsdom setup dominates the ~85s suite. Both are expensive
       #             comprehensive verification -> run once per push, not per commit.
       - id: frontend-lint
         name: frontend lint
-        entry: bash -c 'cd frontend && pnpm lint'
+        entry: bash -c 'cd frontend && pnpm format && pnpm lint'
         language: system
         files: ^frontend/
         pass_filenames: false
