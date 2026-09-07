@@ -23,8 +23,11 @@ RUN npm install -g pnpm@12.3.4
 
 WORKDIR /frontend
 
-# Install dependencies (cached layer)
-COPY frontend/package.json frontend/pnpm-lock.yaml ./
+# Install dependencies (cached layer). pnpm-workspace.yaml carries the settings
+# the install itself depends on — the dependency overrides, the build allow-list
+# and `pmOnFail`, without which pnpm tries to record its own resolution in the
+# lockfile and --frozen-lockfile rejects the write.
+COPY frontend/package.json frontend/pnpm-lock.yaml frontend/pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 # Copy source and build. RAILWAY_GIT_COMMIT_SHA is auto-injected by Railway
