@@ -497,34 +497,33 @@ def _process_entry(
         # guard, not by registration timing.
         registry.register_create(model_class, entry.public_id, handle=entry.ref)
         target = _Target(handle=entry.ref)
-    else:
-        if existing is None:
-            # Not in the seed or an earlier patch — but it may be created earlier
-            # in *this* patch. Resolve against the same-patch create registry by
-            # the FK-style key (_add_create's own field claims resolve this way),
-            # and emit this entry's field asserts handle-targeted: a second,
-            # separately-attributed ChangeSet of refinements on the new record.
-            ref_handle = registry.created_handle(model_class, entry.public_id)
-            if ref_handle is None:
-                raise PatchError(
-                    _no_such_record_message(entry, model_class, all_created_ids)
-                )
-            # Only field assertions are meaningful on a brand-new record: there's
-            # no prior DB state to retract or remove against.
-            _reject_directives_on_same_patch_create(entry)
-            target = _Target(handle=ref_handle)
-        else:
-            retracted_any = _add_retractions(
-                plan,
-                model_class,
-                existing,
-                entry,
-                ct_id,
-                source,
-                rel_namespaces,
-                note=note,
+    elif existing is None:
+        # Not in the seed or an earlier patch — but it may be created earlier
+        # in *this* patch. Resolve against the same-patch create registry by
+        # the FK-style key (_add_create's own field claims resolve this way),
+        # and emit this entry's field asserts handle-targeted: a second,
+        # separately-attributed ChangeSet of refinements on the new record.
+        ref_handle = registry.created_handle(model_class, entry.public_id)
+        if ref_handle is None:
+            raise PatchError(
+                _no_such_record_message(entry, model_class, all_created_ids)
             )
-            target = _Target(content_type_id=ct_id, object_id=existing.pk)
+        # Only field assertions are meaningful on a brand-new record: there's
+        # no prior DB state to retract or remove against.
+        _reject_directives_on_same_patch_create(entry)
+        target = _Target(handle=ref_handle)
+    else:
+        retracted_any = _add_retractions(
+            plan,
+            model_class,
+            existing,
+            entry,
+            ct_id,
+            source,
+            rel_namespaces,
+            note=note,
+        )
+        target = _Target(content_type_id=ct_id, object_id=existing.pk)
 
     # Inline-citation markers in the entry's markdown fields: validate grammar +
     # marker↔``cites:`` correspondence (DB-free) and get the per-field new-cite

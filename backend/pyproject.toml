@@ -95,6 +95,7 @@ select = [
     "PERF",   # perflint
     "PIE",    # flake8-pie
     "PLC0206", # dict iterated by index without .items()
+    "PLR5501", # else-then-if that should be elif
     "PLW",    # pylint warnings
     "PTH",    # flake8-use-pathlib
     "PYI",    # flake8-pyi
