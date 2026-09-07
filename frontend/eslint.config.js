@@ -303,7 +303,6 @@ export default ts.config(
       '@typescript-eslint/no-deprecated': 'off',
       '@typescript-eslint/no-dynamic-delete': 'off',
       '@typescript-eslint/no-floating-promises': 'off',
-      '@typescript-eslint/no-misused-promises': 'off',
       '@typescript-eslint/no-misused-spread': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/no-redundant-type-constituents': 'off',
