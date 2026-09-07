@@ -2,15 +2,19 @@
 
 ## Type Checking
 
-The backend uses **mypy** with the **django-stubs** plugin. Pre-commit runs mypy in daemon mode (`dmypy`) so full-project analysis stays fast on every commit. `strict = true` is global; pre-commit and CI fail on any error.
+The backend uses **mypy** with the **django-stubs** plugin. `strict = true` is global; pre-commit and CI fail on any error. Run it with `make mypy` (or `./scripts/mypy`, which the pre-commit hook and the VS Code mypy extension both call) — always the full backend tree, never a single file, because a partial run can't see cross-module breakage.
 
-**If local mypy disagrees with CI,** the daemon is likely out of sync (common after branch switches or rebases). Run:
+Every run is a one-shot `mypy`; there is no daemon. `num_workers` in [backend/pyproject.toml](../backend/pyproject.toml) parallelizes the check, so a cold full run is a few seconds and a warm incremental one is under a second.
+
+**If local mypy disagrees with CI,** suspect the incremental cache: `rm -rf backend/.mypy_cache` and re-run.
+
+`warn_unused_configs` is deliberately **not** on in the config: on an incremental run it reports a cached module's override as unused, which is a false positive. To audit the overrides for dead sections, run it cold:
 
 ```sh
-make mypy-restart
+uv run --directory backend mypy --config-file pyproject.toml . --no-incremental --warn-unused-configs
 ```
 
-Other daemon commands: `make mypy-warm` (pays cold-start up front), `make mypy-status` (is the daemon alive?).
+On top of `strict`, `enable_error_code` turns on a set of opt-in codes that were clean when adopted, so they only ever fire on new code. The notable one is `exhaustive-match`: a `match` that doesn't cover every member of a model or enum set is a type error rather than a silent fallthrough — the failure mode when a catalog entity is added.
 
 ## Typing
 

@@ -1,4 +1,4 @@
-.PHONY: bootstrap dev test test-edge lint quality agent-docs codegen ingest-patches pull-patches mypy mypy-warm mypy-restart mypy-status
+.PHONY: bootstrap dev test test-edge lint quality agent-docs codegen ingest-patches pull-patches mypy
 
 bootstrap:
 	./scripts/bootstrap
@@ -45,17 +45,4 @@ pull-patches:
 	./scripts/pull_patches.sh
 
 mypy:
-	uv run --directory backend mypy --config-file pyproject.toml .
-
-# dmypy ergonomics. dmypy holds the project type graph in memory across runs;
-# `mypy-warm` pays the cold-start cost up front, `mypy-restart` is the recovery
-# lever when the daemon gets out of sync (after branch switches / rebases —
-# symptom: local mypy result disagrees with CI).
-mypy-warm:
-	uv run --directory backend dmypy start -- --config-file pyproject.toml
-
-mypy-restart:
-	uv run --directory backend dmypy restart -- --config-file pyproject.toml
-
-mypy-status:
-	uv run --directory backend dmypy status
+	./scripts/mypy

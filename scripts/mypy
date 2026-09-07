@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# One-shot mypy over the whole backend tree, with the django-stubs plugin.
+# Used by the pre-commit hook and the VS Code mypy extension. Callers may pass
+# paths; they're ignored, because a partial run can't see cross-module breakage.
+set -eu
+
+uv run --directory backend mypy --config-file pyproject.toml .

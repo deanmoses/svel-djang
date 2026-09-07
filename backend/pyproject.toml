@@ -25,9 +25,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-# Tool floors track the locked version rather than the oldest version that
-# happens to work: a checker or codemod that differs between developers
-# returns different verdicts on identical code. Libraries stay loose.
+# Tool floors track the locked version, libs stay loose.
 dev = [
     "django-stubs-ext>=6.1",
     "httpx>=0.28",
@@ -119,20 +117,30 @@ exclude = [
     "^media/",  # MEDIA_ROOT at backend/media — anchored so apps/media/ is still type-checked
     "^cache/",
 ]
-warn_unused_ignores = true
-warn_redundant_casts = true
 # Barrel __init__.py files re-export symbols via `from X import Y`. Treat these
 # as intentional public API rather than requiring `__all__` on every barrel.
 implicit_reexport = true
+# Parallel checking. Four workers is the knee of the curve on an 8-core laptop;
+# above that the run gets no faster.
+num_workers = 4
+# Opt-in error codes that are clean today, so they only ever fire on new code.
+enable_error_code = [
+    # A non-exhaustive `match` over a model/enum set is a silent fallthrough
+    # otherwise — the failure mode when a new catalog entity is added.
+    "exhaustive-match",
+    "possibly-undefined",
+    "unused-awaitable",
+    "redundant-self",
+    "ignore-without-code",
+    "truthy-iterable",
+    "unimported-reveal",
+    # PEP 702: using an API that typeshed or django-stubs marks @deprecated.
+    "deprecated",
+]
 
 [tool.django-stubs]
 django_settings_module = "config.settings"
 strict_settings = true
-
-# Migrations are generated; don't type-check them.
-[[tool.mypy.overrides]]
-module = "*.migrations.*"
-ignore_errors = true
 
 # Tests and conftest: relax annotation requirements for fixtures. Type correctness
 # of the code under test still matters; per-function annotations in tests do not.
