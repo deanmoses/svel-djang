@@ -80,7 +80,10 @@ fi
 STAGED_MD=$(git diff --cached --name-only --diff-filter=ACM -- '*.md' | grep -v '^CLAUDE\.md$' | grep -v '^AGENTS\.md$')
 if [ -n "$STAGED_MD" ]; then
   rc=0
-  echo "$STAGED_MD" | xargs npx prettier@3.8.1 --write >>"$LOG" 2>&1 || rc=$?
+  # Same binary the pre-commit `prettier-markdown` hook runs. A version of its
+  # own formats some embedded code blocks differently, and the two then rewrite
+  # each other on every commit attempt, which no amount of re-staging resolves.
+  echo "$STAGED_MD" | xargs frontend/node_modules/.bin/prettier --write >>"$LOG" 2>&1 || rc=$?
   if [ "$rc" -eq 0 ]; then
     note "prettier(md) ok"
   else
