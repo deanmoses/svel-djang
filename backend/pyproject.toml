@@ -123,10 +123,8 @@ implicit_reexport = true
 # Parallel checking. Four workers is the knee of the curve on an 8-core laptop;
 # above that the run gets no faster.
 num_workers = 4
-# Opt-in error codes that are clean today, so they only ever fire on new code.
 enable_error_code = [
-    # A non-exhaustive `match` over a model/enum set is a silent fallthrough
-    # otherwise — the failure mode when a new catalog entity is added.
+    # Guards the model-driven catalog: a match that misses a new entity type.
     "exhaustive-match",
     "possibly-undefined",
     "unused-awaitable",

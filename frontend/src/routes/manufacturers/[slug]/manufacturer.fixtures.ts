@@ -78,6 +78,7 @@ export const MOCK_MANUFACTURER = {
       asset_uuid: 'asset-1',
       category: 'cabinet',
       is_primary: true,
+      uploaded_by_username: 'moses',
       renditions: {
         thumb: 'https://example.com/thumb.jpg',
         display: 'https://example.com/display.jpg',

@@ -18,7 +18,7 @@ class UploadedMediaSchema(Schema):
     asset_uuid: str
     category: str | None = None
     is_primary: bool
-    uploaded_by_username: str | None = None
+    uploaded_by_username: str
     renditions: MediaRenditionsSchema
 
 

@@ -19,5 +19,5 @@ export function makeMedia(index: number, overrides: Partial<UploadedMedia> = {})
 export const MEDIA_ITEMS = [
   makeMedia(1, { category: 'cabinet', is_primary: true }),
   makeMedia(2, { category: 'backglass', uploaded_by_username: 'jane' }),
-  makeMedia(3, { category: 'cabinet', uploaded_by_username: null as never }),
+  makeMedia(3, { category: 'cabinet' }),
 ];
