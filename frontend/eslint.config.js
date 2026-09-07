@@ -334,6 +334,7 @@ export default ts.config(
       '@typescript-eslint/require-await': 'error',
       '@typescript-eslint/no-unsafe-assignment': 'error',
       '@typescript-eslint/no-unsafe-member-access': 'error',
+      '@typescript-eslint/no-deprecated': 'error',
       '@typescript-eslint/no-unsafe-call': 'error',
       '@typescript-eslint/unbound-method': 'error',
     },
