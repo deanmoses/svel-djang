@@ -11,7 +11,7 @@ function callGet(origin = 'http://localhost:5173'): Response {
 
 describe('GET /robots.txt', () => {
   beforeEach(() => {
-    for (const key of Object.keys(mockEnv)) delete mockEnv[key];
+    for (const key of Object.keys(mockEnv)) Reflect.deleteProperty(mockEnv, key);
   });
 
   it('returns the disallow-all body when ALLOW_SEARCH_ENGINE_INDEXING is unset', async () => {

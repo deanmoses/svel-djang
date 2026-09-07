@@ -301,7 +301,6 @@ export default ts.config(
       '@typescript-eslint/only-throw-error': 'off',
       // Off pending cleanup.
       '@typescript-eslint/no-deprecated': 'off',
-      '@typescript-eslint/no-dynamic-delete': 'off',
       '@typescript-eslint/no-floating-promises': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/no-unnecessary-condition': 'off',

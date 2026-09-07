@@ -26,13 +26,13 @@ describe('SSR Sentry init (instrumentation.server.ts)', () => {
     vi.clearAllMocks();
     for (const key of ENV_KEYS) {
       originalEnv[key] = process.env[key];
-      delete process.env[key];
+      Reflect.deleteProperty(process.env, key);
     }
   });
 
   afterEach(() => {
     for (const key of ENV_KEYS) {
-      if (originalEnv[key] === undefined) delete process.env[key];
+      if (originalEnv[key] === undefined) Reflect.deleteProperty(process.env, key);
       else process.env[key] = originalEnv[key];
     }
   });
