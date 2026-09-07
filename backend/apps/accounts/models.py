@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, ClassVar
+from typing import Any, ClassVar, override
 
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AbstractUser
@@ -27,6 +27,7 @@ class UserManager(BaseUserManager["User"]):
 
     use_in_migrations = True
 
+    @override
     def get_by_natural_key(self, username: str | None) -> User:
         """Look up a user for password authentication.
 
@@ -66,21 +67,23 @@ class UserManager(BaseUserManager["User"]):
 
     # Signature override is intentional: USERNAME_FIELD = "email", so the
     # first positional is the email (username is supplied via kwargs).
+    @override
     def create_user(  # type: ignore[override]
         self,
         email: str,
         password: str | None = None,
-        **extra_fields: Any,  # noqa: ANN401 - Django manager pattern.
+        **extra_fields: Any,
     ) -> User:
         extra_fields.setdefault("is_staff", False)
         extra_fields.setdefault("is_superuser", False)
         return self._create_user(email, password, **extra_fields)
 
+    @override
     def create_superuser(  # type: ignore[override]
         self,
         email: str,
         password: str | None = None,
-        **extra_fields: Any,  # noqa: ANN401 - Django manager pattern.
+        **extra_fields: Any,
     ) -> User:
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
@@ -167,15 +170,18 @@ class User(ActorModel, AbstractUser):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.username or self.email
 
     # ActorModel hooks: the user's Actor mirrors these fields for resolution.
     @property
+    @override
     def actor_priority(self) -> ActorResolutionPriority:
         return self.priority
 
     @property
+    @override
     def actor_resolution_status(self) -> ActorResolutionStatus:
         # Users have no resolution-suppression input in v1.
         return ActorResolutionStatus.ACTIVE

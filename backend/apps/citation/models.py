@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import Any
+from typing import Any, override
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -440,6 +440,7 @@ class CitationSource(TimeStampedModel, ActorAttributedModel):
         # not the work itself (a book, a movie).
         return citation_type_spec(self.source_type).schemeless_parentless_abstract
 
+    @override
     def clean(self) -> None:
         super().clean()
         # Guards that read through the parent FK, which a CHECK can't express.
@@ -512,6 +513,7 @@ class CitationSource(TimeStampedModel, ActorAttributedModel):
                 }
             )
 
+    @override
     def __str__(self) -> str:
         if self.author and self.year:
             return f"{self.name} ({self.author}, {self.year})"
@@ -606,6 +608,7 @@ class CitationSourceLink(TimeStampedModel, ActorAttributedModel):
         """The link's human text: its label, or its link-type name when blank."""
         return self.label or self.get_link_type_display()
 
+    @override
     def __str__(self) -> str:
         if self.label:
             return f"{self.label} ({self.url})"
@@ -695,6 +698,7 @@ class CitationSourceRootDomain(TimeStampedModel, ActorAttributedModel):
             ),
         ]
 
+    @override
     def clean(self) -> None:
         super().clean()
         self.host = normalize_host(self.host)
@@ -789,6 +793,7 @@ class CitationSourceRootDomain(TimeStampedModel, ActorAttributedModel):
                 }
             )
 
+    @override
     def __str__(self) -> str:
         return f"{self.host}{self.path_prefix}"
 
@@ -965,16 +970,18 @@ class CitationInstance(models.Model):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         loc = f" @ {self.locator}" if self.locator else ""
         return f"Citation: {self.citation_source_id}{loc}"
 
     # Django's Model.save signature is owned by the framework; the override
     # only enforces immutability before delegating upstream.
+    @override
     def save(
         self,
-        *args: Any,  # noqa: ANN401
-        **kwargs: Any,  # noqa: ANN401
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         if self.pk is not None:
             raise ValueError(
@@ -1049,15 +1056,17 @@ class ReservedCitationSlug(models.Model):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         return f"Reserved citation slug: {self.slug}"
 
     # Django's Model.save signature is owned by the framework; the override
     # only validates the slug grammar before delegating upstream.
+    @override
     def save(
         self,
-        *args: Any,  # noqa: ANN401
-        **kwargs: Any,  # noqa: ANN401
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         validate_citation_slug(self.slug)
         super().save(*args, **kwargs)

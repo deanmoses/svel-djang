@@ -26,7 +26,7 @@ Run via ``make codegen`` or directly::
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, override
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
@@ -83,9 +83,10 @@ def _union(keys: list[str]) -> str:
 class Command(BaseCommand):
     help = "Generate frontend/src/lib/entities/entity-meta.ts from linkable models."
 
+    @override
     def handle(
         self,
-        **options: Any,  # noqa: ANN401 - argparse-driven Django command kwargs
+        **options: Any,
     ) -> None:
         entries = [
             EntityEntry(

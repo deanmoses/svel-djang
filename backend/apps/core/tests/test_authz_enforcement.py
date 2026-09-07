@@ -23,7 +23,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, override
 
 import pytest
 from django.http import HttpRequest, HttpResponse
@@ -72,6 +72,7 @@ class _CaptureHandler(logging.Handler):
         super().__init__(level=logging.DEBUG)
         self.records: list[CapturedAuthzLog] = []
 
+    @override
     def emit(self, record: logging.LogRecord) -> None:
         self.records.append(
             CapturedAuthzLog(

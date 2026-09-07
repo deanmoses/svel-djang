@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import ClassVar, override
 
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.validators import MinValueValidator
@@ -88,6 +88,7 @@ class GameplayFeature(
             unique_ci("name"),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.name
 
@@ -134,6 +135,7 @@ class MachineModelGameplayFeature(ClaimThroughModel):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         label = f"{self.machinemodel} → {self.gameplayfeature}"
         if self.count is not None:
@@ -171,6 +173,7 @@ class GameplayFeatureParent(ClaimThroughModel):
         db_table = "catalog_gameplayfeature_parents"
         unique_together = (("from_gameplayfeature", "to_gameplayfeature"),)
 
+    @override
     def __str__(self) -> str:
         return f"{self.from_gameplayfeature} → {self.to_gameplayfeature}"
 

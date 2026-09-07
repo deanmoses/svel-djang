@@ -9,6 +9,8 @@ their ``Actor`` via :class:`apps.actors.models.base.ActorModel`.
 
 from __future__ import annotations
 
+from typing import override
+
 from django.db import models
 from django.db.models.functions import Now
 
@@ -73,5 +75,6 @@ class Actor(models.Model):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         return f"Actor #{self.pk} ({self.backing_model}, priority={self.priority})"

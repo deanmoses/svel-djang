@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -112,6 +112,7 @@ class ChangeSet(models.Model):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         try:
             label = str(getattr(self.actor, self.actor.backing_model))

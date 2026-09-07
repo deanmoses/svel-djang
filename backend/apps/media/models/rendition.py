@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid as uuid_lib
+from typing import override
 
 from django.db import models
 
@@ -79,5 +80,6 @@ class MediaRendition(TimeStampedModel):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         return f"{self.rendition_type} for {self.asset_id}"

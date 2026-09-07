@@ -40,7 +40,7 @@ import time
 import types
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TypeVar, cast
+from typing import TypeVar, cast, override
 
 from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
 from django.core.cache import cache
@@ -72,14 +72,17 @@ class RateLimitExceededError(StructuredApiError):
         self.bucket = bucket
         self.retry_after = max(1, retry_after)
 
+    @override
     def __str__(self) -> str:
         # Server-side repr (logs / tracebacks) keeps the bucket; the wire
         # ``message`` is the user-facing string set via ``super().__init__``.
         return f"Rate limit exceeded for bucket {self.bucket!r}"
 
+    @override
     def to_body(self) -> JsonBody:
         return {"bucket": self.bucket, "retry_after": self.retry_after}
 
+    @override
     def extra_headers(self) -> dict[str, str]:
         return {"Retry-After": str(self.retry_after)}
 

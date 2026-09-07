@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import ClassVar, override
 
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
@@ -203,6 +203,7 @@ class Person(
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.name
 
@@ -294,6 +295,7 @@ class Credit(ClaimThroughModel):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         if self.model is not None:
             target = self.model.name

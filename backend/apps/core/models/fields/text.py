@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, override
 
 from django.db import models
 from django.forms import Textarea
@@ -28,21 +28,24 @@ class BoundedTextField(models.TextField[str, str]):
         super().__init__(*args, **kwargs)
 
     # Django's migration protocol; see Field.deconstruct.
-    def deconstruct(self) -> Any:  # noqa: ANN401
+    @override
+    def deconstruct(self) -> Any:
         name, _path, args, kwargs = super().deconstruct()
         return name, "django.db.models.TextField", args, kwargs
 
+    @override
     def contribute_to_class(
         self,
         cls: type[models.Model],
         name: str,
         # Django's Field.contribute_to_class signature.
-        private_only: bool = False,  # noqa: FBT001, FBT002
+        private_only: bool = False,
     ) -> None:
         super().contribute_to_class(cls, name, private_only=private_only)
         _contribute_max_length_check(self, cls, name)
 
-    def formfield(self, **kwargs: Any) -> Any:  # noqa: ANN401
+    @override
+    def formfield(self, **kwargs: Any) -> Any:
         # Django's TextField.formfield() does not propagate max_length to
         # the form field — without this override, admin form validation
         # would skip the length check and let an over-cap value through

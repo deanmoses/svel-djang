@@ -7,6 +7,8 @@ docs/Provenance.md).
 
 from __future__ import annotations
 
+from typing import override
+
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -66,6 +68,7 @@ class KioskConfig(TimeStampedModel):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         return (
             f"#{self.pk} — {self.page_heading}" if self.page_heading else f"#{self.pk}"
@@ -110,5 +113,6 @@ class KioskConfigItem(TimeStampedModel):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         return f"#{self.config_id} pos {self.position}: {self.title.name}"

@@ -16,7 +16,7 @@ from __future__ import annotations
 import json
 from collections.abc import Callable, Sequence
 from dataclasses import replace
-from typing import Annotated, Any, Literal, NamedTuple
+from typing import Annotated, Any, Literal, NamedTuple, override
 
 from django.db.models import F, Max, Prefetch, Q
 from django.http import HttpRequest, HttpResponse
@@ -297,6 +297,7 @@ class GameFilterQuerySchema(GameDimensionQuerySchema):
         ),
     )
 
+    @override
     def to_filters(self) -> GameFilters:
         return replace(super().to_filters(), q=self.q or "")
 

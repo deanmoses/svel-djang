@@ -16,7 +16,7 @@ SQLite can't express the cross-row CHECK), not a hard DB constraint.
 
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import ClassVar, override
 
 from django.db import models
 
@@ -153,6 +153,7 @@ class ModelExportMarket(ClaimThroughModel):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         if self.target_market_location_id is not None:
             market = str(self.target_market_location)

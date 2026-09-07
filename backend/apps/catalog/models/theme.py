@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import ClassVar, override
 
 from django.db import models
 from django.db.models.functions import Lower
@@ -73,6 +73,7 @@ class Theme(
             unique_ci("name"),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.name
 
@@ -98,6 +99,7 @@ class MachineModelTheme(ClaimThroughModel):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         return f"{self.machinemodel} → {self.theme}"
 
@@ -126,6 +128,7 @@ class ThemeParent(ClaimThroughModel):
         db_table = "catalog_theme_parents"
         unique_together = (("from_theme", "to_theme"),)
 
+    @override
     def __str__(self) -> str:
         return f"{self.from_theme} → {self.to_theme}"
 

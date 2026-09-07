@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid as uuid_lib
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from django.conf import settings
 from django.db import models
@@ -123,5 +123,6 @@ class MediaAsset(TimeStampedModel):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         return f"{self.original_filename} ({self.uuid})"

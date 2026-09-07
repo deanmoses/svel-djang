@@ -21,7 +21,7 @@ user-owned winning claim is an error unless ``--attribution`` is supplied.
 
 from __future__ import annotations
 
-from typing import NamedTuple
+from typing import NamedTuple, override
 
 import yaml
 from django.core.management.base import BaseCommand, CommandError, CommandParser
@@ -74,6 +74,7 @@ class Command(BaseCommand):
         "(authoring-format text, real citation slugs in place)."
     )
 
+    @override
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument(
             "entity_ref",
@@ -89,6 +90,7 @@ class Command(BaseCommand):
             ),
         )
 
+    @override
     def handle(self, *args: object, **options: object) -> None:
         entity_ref = str(options["entity_ref"])
         attribution_opt = options["attribution"]

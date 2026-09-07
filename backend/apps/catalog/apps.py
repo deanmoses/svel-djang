@@ -1,3 +1,5 @@
+from typing import override
+
 from django.apps import AppConfig
 
 
@@ -6,6 +8,7 @@ class CatalogConfig(AppConfig):
     name = "apps.catalog"
     verbose_name = "Catalog"
 
+    @override
     def ready(self) -> None:
         from . import (
             authz,  # noqa: F401  # registers authz rules at startup

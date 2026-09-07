@@ -15,6 +15,8 @@ immutable class constant.
 
 from __future__ import annotations
 
+from typing import override
+
 from apps.core.exceptions import StructuredApiError
 from apps.core.types import JsonBody
 
@@ -44,6 +46,7 @@ class UsernameRejectedError(StructuredApiError):
         super().__init__("Username rejected.")
         self.reason = reason
 
+    @override
     def to_body(self) -> JsonBody:
         return {"reason": self.reason}
 

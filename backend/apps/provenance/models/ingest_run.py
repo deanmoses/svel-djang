@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import override
+
 from django.db import models
 from django.db.models.functions import Lower, Now
 
@@ -140,5 +142,6 @@ class IngestRun(models.Model):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         return f"IngestRun #{self.pk} ({self.source.name}, {self.status})"

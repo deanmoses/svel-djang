@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, ClassVar
+from typing import Any, ClassVar, override
 
 from django.db import models
 
@@ -84,15 +84,18 @@ class Source(ActorModel, SluggedModel, TimeStampedModel):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.name
 
     # ActorModel hooks: the source's Actor mirrors these fields for resolution.
     @property
+    @override
     def actor_priority(self) -> ActorResolutionPriority:
         return self.priority
 
     @property
+    @override
     def actor_resolution_status(self) -> ActorResolutionStatus:
         return (
             ActorResolutionStatus.ACTIVE
@@ -102,10 +105,11 @@ class Source(ActorModel, SluggedModel, TimeStampedModel):
 
     # Django's Model.save signature is owned by the framework; the override
     # only adds slug autofill before delegating upstream.
+    @override
     def save(
         self,
-        *args: Any,  # noqa: ANN401
-        **kwargs: Any,  # noqa: ANN401
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         if not self.slug:
             self.slug = unique_slug(self, self.name, "source")
@@ -143,5 +147,6 @@ class SourceFieldLicense(models.Model):
             field_not_blank("field_name"),
         ]
 
+    @override
     def __str__(self) -> str:
         return f"{self.source.name}: {self.field_name} → {self.license.short_name}"

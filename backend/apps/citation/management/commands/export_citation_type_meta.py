@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, override
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -28,9 +28,10 @@ from apps.citation.citation_types import CITATION_TYPE_SPECS
 class Command(BaseCommand):
     help = "Generate frontend/src/lib/citation-types/citation-type-meta.ts."
 
+    @override
     def handle(
         self,
-        **options: Any,  # noqa: ANN401 - argparse-driven Django command kwargs
+        **options: Any,
     ) -> None:
         # Sorted by key for stable codegen diffs, independent of registration
         # order (which is load-bearing for recognition, not for display).

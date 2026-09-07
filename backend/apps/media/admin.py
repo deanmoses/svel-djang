@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, override
 
 from django.contrib import admin
 from django.http import HttpRequest
@@ -26,24 +26,27 @@ class MediaRenditionInline(admin.TabularInline[MediaRendition, MediaAsset]):
     # (parent), so a concrete annotation here triggers an LSP override error from
     # whichever side it doesn't match. `Any` is the only signature that satisfies
     # both. Idiom #3 (3rd-party API constraint).
+    @override
     def has_add_permission(
         self,
         request: HttpRequest,
-        obj: Any = None,  # noqa: ANN401
+        obj: Any = None,
     ) -> bool:
         return False
 
+    @override
     def has_change_permission(
         self,
         request: HttpRequest,
-        obj: Any = None,  # noqa: ANN401
+        obj: Any = None,
     ) -> bool:
         return False
 
+    @override
     def has_delete_permission(
         self,
         request: HttpRequest,
-        obj: Any = None,  # noqa: ANN401
+        obj: Any = None,
     ) -> bool:
         return False
 
@@ -77,14 +80,17 @@ class MediaAssetAdmin(admin.ModelAdmin[MediaAsset]):
     )
     inlines = [MediaRenditionInline]
 
+    @override
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
+    @override
     def has_change_permission(
         self, request: HttpRequest, obj: MediaAsset | None = None
     ) -> bool:
         return False
 
+    @override
     def has_delete_permission(
         self, request: HttpRequest, obj: MediaAsset | None = None
     ) -> bool:
@@ -112,14 +118,17 @@ class MediaRenditionAdmin(admin.ModelAdmin[MediaRendition]):
         "updated_at",
     )
 
+    @override
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
+    @override
     def has_change_permission(
         self, request: HttpRequest, obj: MediaRendition | None = None
     ) -> bool:
         return False
 
+    @override
     def has_delete_permission(
         self, request: HttpRequest, obj: MediaRendition | None = None
     ) -> bool:

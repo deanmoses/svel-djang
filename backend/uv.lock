@@ -141,36 +141,36 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "dj-database-url", specifier = ">=2.3" },
-    { name = "django", specifier = ">=6.0.7" },
-    { name = "django-constance", specifier = ">=4.0" },
+    { name = "dj-database-url", specifier = ">=3.1.2" },
+    { name = "django", specifier = ">=6.1.1" },
+    { name = "django-constance", specifier = ">=4.3.5" },
     { name = "django-ninja", specifier = ">=1.7,<2" },
-    { name = "django-storages", extras = ["s3"], specifier = ">=1.14" },
+    { name = "django-storages", extras = ["s3"], specifier = ">=1.14.6" },
     { name = "gunicorn", specifier = ">=26.2" },
-    { name = "markdown-it-py", extras = ["linkify"], specifier = ">=3.0" },
-    { name = "nh3", specifier = ">=0.2" },
+    { name = "markdown-it-py", extras = ["linkify"], specifier = ">=4.2" },
+    { name = "nh3", specifier = ">=0.3.7" },
     { name = "pillow", specifier = ">=12.3.0" },
-    { name = "pillow-heif", specifier = ">=1.2" },
-    { name = "psycopg", extras = ["binary"], specifier = ">=3.2" },
-    { name = "publicsuffixlist", specifier = "==1.0.2.20260821" },
-    { name = "pyyaml", specifier = ">=6.0" },
-    { name = "sentry-sdk", extras = ["django"], specifier = ">=2.0" },
-    { name = "whitenoise", specifier = ">=6.8" },
-    { name = "workos", specifier = ">=5.0" },
+    { name = "pillow-heif", specifier = ">=1.7" },
+    { name = "psycopg", extras = ["binary"], specifier = ">=3.3.5" },
+    { name = "publicsuffixlist", specifier = "==1.0.2.20260904" },
+    { name = "pyyaml", specifier = ">=6.0.3" },
+    { name = "sentry-sdk", extras = ["django"], specifier = ">=2.68.1" },
+    { name = "whitenoise", specifier = ">=6.12" },
+    { name = "workos", specifier = ">=5.46" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "django-stubs", extras = ["compatible-mypy"], specifier = ">=6.1" },
     { name = "django-stubs-ext", specifier = ">=6.1" },
-    { name = "httpx", specifier = ">=0.28" },
+    { name = "httpx", specifier = ">=0.28.1" },
     { name = "import-linter", specifier = ">=2.15" },
     { name = "libcst", specifier = ">=1.9" },
-    { name = "mypy", specifier = ">=2.3" },
-    { name = "pytest", specifier = ">=9.1" },
+    { name = "mypy", specifier = ">=2.3.1" },
+    { name = "pytest", specifier = ">=9.1.1" },
     { name = "pytest-django", specifier = ">=4.14" },
     { name = "pytest-xdist", specifier = ">=3.8.0" },
-    { name = "ruff", specifier = ">=0.16" },
+    { name = "ruff", specifier = ">=0.16.6" },
     { name = "types-pyyaml", specifier = ">=6.0.12.20260906" },
 ]
 
@@ -967,11 +967,11 @@ wheels = [
 
 [[package]]
 name = "publicsuffixlist"
-version = "1.0.2.20260821"
+version = "1.0.2.20260904"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/61/b4/50577ffe90de235263342c2b07993681b5395818a30a99fcede54069fe93/publicsuffixlist-1.0.2.20260821.tar.gz", hash = "sha256:ba6454a4959216e2d080fd2ab2f498d96916c9072cc6ba735f7d16df6aaefbe1", size = 108942, upload-time = "2026-08-21T03:56:31.186Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/3a/dd/2dec03dc9afb59c5970c760be1953596c87dc0e9794bebb904b267b51ec9/publicsuffixlist-1.0.2.20260904.tar.gz", hash = "sha256:20ba05378dc9a0206266ea93aacb6779d8e77b6ba1be227c494bad85ce539a1d", size = 109395, upload-time = "2026-09-04T07:54:59.754Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/de/fd/224f6e4d143decf2f4d01200eb728e167b1fb7075e25029563bbe52374dd/publicsuffixlist-1.0.2.20260821-py2.py3-none-any.whl", hash = "sha256:1242f7d2923d44e21eb8341fe1368645e331bda4b606403cf319dddace036504", size = 108704, upload-time = "2026-08-21T03:56:30.047Z" },
+    { url = "https://files.pythonhosted.org/packages/3c/e0/bf3f2e37858b95dbe2376b622ac38a002eefce07bbe23fd43bedae3b42fc/publicsuffixlist-1.0.2.20260904-py2.py3-none-any.whl", hash = "sha256:8dd405d398f207c2944b89a753f63bae4b0a5f80069ce6cd5e67df2a67be7fec", size = 108745, upload-time = "2026-09-04T07:54:58.402Z" },
 ]
 
 [[package]]

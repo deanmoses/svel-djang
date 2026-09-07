@@ -1,3 +1,5 @@
+from typing import override
+
 from django.apps import AppConfig
 
 
@@ -7,6 +9,7 @@ class ActorsConfig(AppConfig):
     label = "actors"
     verbose_name = "Actors"
 
+    @override
     def ready(self) -> None:
         # Import for side effects: registers the class-shape system check
         # (DB-free; validates the ActorModel registry, not Actor rows).

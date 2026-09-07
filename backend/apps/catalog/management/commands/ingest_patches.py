@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
-from typing import Any
+from typing import Any, override
 
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
@@ -46,6 +46,7 @@ _MUTED = make_style(fg="black", opts=("bold",))
 class Command(BaseCommand):
     help = "Apply numbered data patches (NNNN-slug.yaml) through the ingest engine."
 
+    @override
     def add_arguments(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
             "--patches-dir",
@@ -53,10 +54,11 @@ class Command(BaseCommand):
             help="Directory of NNNN-slug.yaml patch files.",
         )
 
+    @override
     def handle(
         self,
         *args: object,
-        **options: Any,  # noqa: ANN401 - argparse-driven Django command kwargs
+        **options: Any,
     ) -> None:
         patches_dir = Path(options["patches_dir"])
 

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import override
+
 from django.db import models
 
 from apps.core.models import (
@@ -61,6 +63,7 @@ class System(
             unique_ci("name"),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.name
 
@@ -87,5 +90,6 @@ class SystemMpuString(TimeStampedModel):
             field_not_blank("value"),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.value

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, ClassVar, Literal
+from typing import TYPE_CHECKING, ClassVar, Literal, override
 
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -131,6 +131,7 @@ class Title(
         ]
 
     @classmethod
+    @override
     def lastmod_expression(cls) -> Combinable:
         # Title is the only catalog page whose primary content aggregates
         # other catalog entities (the Model list, plus — for single-Model
@@ -171,6 +172,7 @@ class Title(
         return MachineModel.first_model_candidates().filter(title=OuterRef("pk"))
 
     @classmethod
+    @override
     def autocomplete_annotations(cls) -> Mapping[str, Combinable]:
         """First-model manufacturer + year, so :meth:`autocomplete_sublabel`
         reads them without an N+1 (see :meth:`first_model_subquery` for the
@@ -183,6 +185,7 @@ class Title(
             "autocomplete_year": Subquery(first_model.values("year")[:1]),
         }
 
+    @override
     def autocomplete_sublabel(self) -> str | None:
         """Disambiguate same-named titles with a "manufacturer · year" line,
         read from the annotations :meth:`autocomplete_annotations` adds. Raises if
@@ -192,6 +195,7 @@ class Title(
             self.autocomplete_mfr_name, self.autocomplete_year
         )
 
+    @override
     def __str__(self) -> str:
         return self.name
 
@@ -224,5 +228,6 @@ class TitleAbbreviation(ClaimThroughModel):
             field_not_blank("value"),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.value

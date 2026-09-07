@@ -10,7 +10,7 @@ its own relationship kind.
 
 from __future__ import annotations
 
-from typing import ClassVar, NamedTuple
+from typing import ClassVar, NamedTuple, override
 
 from django.db import models
 
@@ -275,6 +275,7 @@ class ModelRelationship(ClaimThroughModel):
             models.Index(fields=["relationship_type", "license_status"]),
         ]
 
+    @override
     def __str__(self) -> str:
         target = (
             str(self.target_machine)

@@ -2,51 +2,47 @@
 name = "backend"
 version = "0.1.0"
 requires-python = ">=3.14"
+# Floors match locked version. Installs are all `uv sync --frozen`, so a
+# floor only guards re-resolution against picking a release we've never run.
 dependencies = [
-    "django>=6.0.7",
+    "django>=6.1.1",
     "django-ninja>=1.7,<2",
-    "dj-database-url>=2.3",
+    "dj-database-url>=3.1.2",
     "gunicorn>=26.2",
-    "psycopg[binary]>=3.2",
-    "whitenoise>=6.8",
-    "django-constance>=4.0",
-    "markdown-it-py[linkify]>=3.0",
-    "nh3>=0.2",
+    "psycopg[binary]>=3.3.5",
+    "whitenoise>=6.12",
+    "django-constance>=4.3.5",
+    "markdown-it-py[linkify]>=4.2",
+    "nh3>=0.3.7",
     "Pillow>=12.3.0",
-    "pillow-heif>=1.2",
-    "django-storages[s3]>=1.14",
-    "workos>=5.0",
-    "sentry-sdk[django]>=2.0",
-    "pyyaml>=6.0",
-    # Pinned exactly: the package bundles a Public Suffix List snapshot in its
-    # version, so `==` keeps the snapshot deliberate — it moves only via a
-    # reviewed dependabot bump, never a silent `uv sync`. See apps/citation/psl.py.
+    "pillow-heif>=1.7",
+    "django-storages[s3]>=1.14.6",
+    "workos>=5.46",
+    "sentry-sdk[django]>=2.68.1",
+    "pyyaml>=6.0.3",
+    # Exact pin: the version *is* a Public Suffix List snapshot.
     "publicsuffixlist==1.0.2.20260904",
 ]
 
 [dependency-groups]
-# Tool floors track the locked version, libs stay loose.
 dev = [
     "django-stubs-ext>=6.1",
-    "httpx>=0.28",
+    "httpx>=0.28.1",
     "django-stubs[compatible-mypy]>=6.1",
     "import-linter>=2.15",
     "libcst>=1.9",
-    "mypy>=2.3",
-    "pytest>=9.1",
+    "mypy>=2.3.1",
+    "pytest>=9.1.1",
     "pytest-django>=4.14",
     "pytest-xdist>=3.8.0",
-    "ruff>=0.16",
+    "ruff>=0.16.6",
     "types-pyyaml>=6.0.12.20260906",
 ]
 
 [tool.ruff]
-# Pins the binary, not just the dependency floor. Pre-commit and CI shell out to
-# `uv run ruff`, so a ruff that predates this config fails loudly instead of
-# quietly resolving a different rule set.
-required-version = ">=0.16"
-# `extend-exclude`, not `exclude`: the latter replaces ruff's built-in defaults
-# (.venv, node_modules, dist, .tox, build dirs) rather than adding to them.
+# Not just a floor: makes ruff itself refuse to run if it predates this config.
+required-version = ">=0.16.6"
+# `extend-exclude`, not `exclude`: `exclude` would drop ruff's own defaults.
 extend-exclude = [
     "__pycache__",
     "*/migrations/*",
@@ -55,7 +51,6 @@ extend-exclude = [
 ]
 
 [tool.ruff.lint]
-# Mirrors flipfix (~/dev/flipfix) so both Django projects share a linting surface.
 select = [
     "E",      # pycodestyle errors
     "W",      # pycodestyle warnings
@@ -173,12 +168,12 @@ exclude = [
     "^media/",  # MEDIA_ROOT at backend/media — anchored so apps/media/ is still type-checked
     "^cache/",
 ]
-# Parallel checking. Four workers is the knee of the curve on an 8-core laptop;
-# above that the run gets no faster.
+# Four workers is the knee of the curve on an 8-core laptop; above gets no faster.
 num_workers = 4
 enable_error_code = [
     # Guards the model-driven catalog: a match that misses a new entity type.
     "exhaustive-match",
+    "explicit-override",
     "possibly-undefined",
     "unused-awaitable",
     "redundant-self",
@@ -193,8 +188,8 @@ enable_error_code = [
 django_settings_module = "config.settings"
 strict_settings = true
 
-# Tests and conftest: relax annotation requirements for fixtures. Type correctness
-# of the code under test still matters; per-function annotations in tests do not.
+# Relax annotation requirements for fixtures. Type correctness of the code under
+# test still matters; per-function annotations in tests do not.
 [[tool.mypy.overrides]]
 module = ["*.tests.*", "tests.*", "conftest"]
 disallow_untyped_defs = false

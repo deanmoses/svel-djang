@@ -21,7 +21,7 @@ module (e.g. ``accounts.auth_errors``, ``core.rate_limits``).
 
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import ClassVar, override
 
 from apps.core.types import JsonBody
 
@@ -32,6 +32,7 @@ class StructuredApiError(Exception):
     kind: ClassVar[str]
     status: ClassVar[int]
 
+    @override
     def __init_subclass__(cls, **kw: object) -> None:
         super().__init_subclass__(**kw)
         for attr in ("kind", "status"):
@@ -85,6 +86,7 @@ class StructuredValidationError(StructuredApiError):
         self.field_errors = field_errors or {}
         self.form_errors = form_errors or []
 
+    @override
     def to_body(self) -> JsonBody:
         return {
             "field_errors": self.field_errors,

@@ -22,7 +22,7 @@ from __future__ import annotations
 import argparse
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, override
 from urllib.error import HTTPError
 
 from django.core.management.base import BaseCommand, CommandError
@@ -33,6 +33,7 @@ from apps.claim_ingest.r2_pull import DEFAULT_DEST, download_manifest
 class Command(BaseCommand):
     help = "Download data patches from Cloudflare R2 (the flippatch/ prefix)."
 
+    @override
     def add_arguments(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
             "--url",
@@ -48,9 +49,10 @@ class Command(BaseCommand):
             help=f"Local directory to download into (default: {DEFAULT_DEST}).",
         )
 
+    @override
     def handle(
         self,
-        **options: Any,  # noqa: ANN401 - argparse-driven Django command kwargs
+        **options: Any,
     ) -> None:
         base_url = options["url"].rstrip("/")
         dest = options["dest"]

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, override
 
 from django.db import models
 from django.db.models.functions import Lower
@@ -85,6 +85,7 @@ class TechnologyGeneration(
             unique_ci("name"),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.name
 
@@ -122,6 +123,7 @@ class TechnologySubgeneration(
             unique_ci("name"),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.name
 
@@ -156,6 +158,7 @@ class DisplayType(
             unique_ci("name"),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.name
 
@@ -193,6 +196,7 @@ class DisplaySubtype(
             unique_ci("name"),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.name
 
@@ -246,6 +250,7 @@ class Cabinet(
             unique_ci("name"),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.name
 
@@ -275,6 +280,7 @@ class GameFormat(
             unique_ci("name"),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.name
 
@@ -308,6 +314,7 @@ class ProductionStatus(
             unique_ci("name"),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.name
 
@@ -353,6 +360,7 @@ class RewardType(
             unique_ci("name"),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.name
 
@@ -382,6 +390,7 @@ class MachineModelRewardType(ClaimThroughModel):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         return f"{self.machinemodel} → {self.rewardtype}"
 
@@ -433,6 +442,7 @@ class Tag(
             unique_ci("name"),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.name
 
@@ -458,6 +468,7 @@ class MachineModelTag(ClaimThroughModel):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         return f"{self.machinemodel} → {self.tag}"
 
@@ -508,5 +519,6 @@ class CreditRole(
             unique_ci("name"),
         ]
 
+    @override
     def __str__(self) -> str:
         return self.name

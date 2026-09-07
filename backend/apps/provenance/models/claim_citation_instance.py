@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import override
+
 from django.db import models
 
 from apps.core.types import CitationInstanceId
@@ -43,5 +45,6 @@ class ClaimCitationInstance(models.Model):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         return f"Claim {self.claim_id} -> CitationInstance {self.citation_instance_id}"

@@ -1,6 +1,6 @@
 import logging
 from collections.abc import Iterator
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 import pytest
 import sentry_sdk
@@ -139,6 +139,7 @@ class SentryRecordingTransport(Transport):
         super().__init__()
         self.events: list[Event] = []
 
+    @override
     def capture_envelope(self, envelope: Envelope) -> None:
         for item in envelope.items:
             event = item.payload.json

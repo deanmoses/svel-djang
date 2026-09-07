@@ -11,7 +11,7 @@ not a package, until a second generic base actually joins it.
 
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import ClassVar, override
 
 from django.db import models
 
@@ -41,6 +41,7 @@ class AliasModel(models.Model):
         abstract = True
         ordering = ["value"]
 
+    @override
     def __init_subclass__(cls, **kwargs: object) -> None:
         # We can't gate on ``cls._meta.abstract`` here — Django's ModelBase
         # runs ``__init_subclass__`` with ``abstract`` still inherited as True
@@ -55,5 +56,6 @@ class AliasModel(models.Model):
                 'class attr (e.g. `alias_claim_field = "theme_alias"`)'
             )
 
+    @override
     def __str__(self) -> str:
         return self.value

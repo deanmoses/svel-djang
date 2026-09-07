@@ -7,7 +7,7 @@ see that module and ``tests/test_single_claim_write_path.py``.
 
 from __future__ import annotations
 
-from typing import NamedTuple
+from typing import NamedTuple, override
 
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -219,6 +219,7 @@ class Claim(models.Model):
             ),
         ]
 
+    @override
     def __str__(self) -> str:
         try:
             author = str(getattr(self.actor, self.actor.backing_model))
