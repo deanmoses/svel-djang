@@ -378,7 +378,7 @@ def _manufacturer_ref(model: MachineModel | None) -> EntityRef | None:
     if model is None:
         return None
     ce = model.corporate_entity
-    mfr = ce.manufacturer if ce and ce.manufacturer else None
+    mfr = ce.manufacturer if ce else None
     if mfr is None:
         return None
     return EntityRef(public_id=mfr.public_id, name=mfr.name)

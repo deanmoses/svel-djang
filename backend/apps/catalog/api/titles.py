@@ -391,9 +391,7 @@ def _collect_aggregated_media(
                     asset_uuid=str(em.asset.uuid),
                     category=em.category,
                     is_primary=em.asset_id in primary_ids,
-                    uploaded_by_username=(
-                        em.asset.uploaded_by.username if em.asset.uploaded_by else None
-                    ),
+                    uploaded_by_username=em.asset.uploaded_by.username,
                     renditions=MediaRenditionsSchema(
                         thumb=build_public_url(
                             build_storage_key(em.asset.uuid, "thumb")

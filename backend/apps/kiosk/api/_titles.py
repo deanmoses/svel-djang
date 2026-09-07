@@ -56,11 +56,7 @@ def first_model_summary(title: Title) -> FirstModelSummary:
     first = next(iter(title.machine_models.all()), None)
     if first is None:
         return FirstModelSummary(None, None, None)
-    mfr = (
-        first.corporate_entity.manufacturer
-        if first.corporate_entity and first.corporate_entity.manufacturer
-        else None
-    )
+    mfr = first.corporate_entity.manufacturer if first.corporate_entity else None
     manufacturer = (
         EntityRef(name=mfr.name, public_id=mfr.public_id) if mfr is not None else None
     )

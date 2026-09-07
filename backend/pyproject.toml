@@ -133,8 +133,8 @@ enable_error_code = [
     "redundant-self",
     "ignore-without-code",
     "truthy-iterable",
+    "truthy-bool",
     "unimported-reveal",
-    # PEP 702: using an API that typeshed or django-stubs marks @deprecated.
     "deprecated",
 ]
 

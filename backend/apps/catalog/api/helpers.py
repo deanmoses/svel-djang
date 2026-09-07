@@ -204,11 +204,7 @@ def serialize_title_model(
         for v in variant_qs
     ]
 
-    mfr = (
-        pm.corporate_entity.manufacturer
-        if pm.corporate_entity and pm.corporate_entity.manufacturer
-        else None
-    )
+    mfr = pm.corporate_entity.manufacturer if pm.corporate_entity else None
     return TitleModelSchema(
         name=pm.name,
         public_id=pm.public_id,
