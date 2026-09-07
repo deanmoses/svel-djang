@@ -9,6 +9,7 @@ dist/
 build/
 .venv/
 .mypy_cache/
+.mypy_worker.*.json
 
 # uv
 .python-version.tmp
