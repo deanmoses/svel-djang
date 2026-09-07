@@ -46,9 +46,12 @@ from apps.catalog.api._game_rows import (
 )
 from apps.catalog.engine.query.facet_helpers import FacetOption
 from apps.catalog.models import (
+    Credit,
+    CreditRole,
     LicenseStatus,
     MachineModel,
     ModelRelationship,
+    Person,
     RelationshipType,
     Title,
 )
@@ -501,6 +504,14 @@ def _build_catalog() -> None:
         cabinet="cocktail",
         production_status="announced",
     )
+    # Lawlor credited twice on Gamma under two roles: the person facet's
+    # ``.distinct()`` is what keeps the second credit from tallying a second
+    # card, and no other Model carries two credits by one person.
+    Credit.objects.create(
+        model=gamma,
+        person=Person.objects.get(slug="lawlor"),
+        role=CreditRole.objects.create(slug="art", name="Art", display_order=20),
+    )
     # Gamma bootlegs Alpha's design on converted Alpha Encore cabinets — one
     # Model satisfying two edge keys (plus the composite), the shape that
     # gives the edge facet a second click while a first selection is active.
@@ -544,36 +555,33 @@ def _build_catalog() -> None:
 
 
 class TestBadgeEqualsResultCount:
+    # One ambient state per branch the engine takes on the ambient filter set.
+    # Every other state is a combination of these, and the cell algebra they
+    # combine is pinned by the hand-written cases above — so a state earns a
+    # place here only by reaching a branch none of the others reach.
     FILTERS = (
+        # The bare bindings: each facet counted off its registry path and
+        # clicked through its narrower, with no ambient selection in play.
         GameFilters(),
+        # ``q`` splits carding from matching — the unanimity clause reads
+        # ``own_q_titles`` and the tally reads ``q_match_models``.
         GameFilters(q="Alpha"),
-        GameFilters(q="Encore"),
-        GameFilters(manufacturer="stern"),
+        # A Title-only dimension active: every value-rows builder must apply
+        # the title gate, which is unreachable with only Model dimensions set.
         GameFilters(franchise="alpha-verse"),
-        GameFilters(series="gamma-saga"),
+        # A replacing Model dimension active: N-1 in effect and the Title-only
+        # facets leave the vacuity branch.
+        GameFilters(manufacturer="stern"),
+        # One value chosen per accumulating dimension, so the loop reaches each
+        # narrower's second-click path — they are four separate narrowers, so
+        # one state can't stand in for another. The theme is the leaf: with the
+        # root active, every click is a subset of it and AND agrees with OR.
         GameFilters(themes=("water",)),
-        GameFilters(player_count=4),
-        GameFilters(person="lawlor", themes=("liquid",)),
-        # One per accumulating dimension, so the loop reaches the second-click
-        # path each of them takes.
         GameFilters(gameplay_features=("multiball",)),
         GameFilters(reward_types=("replay",)),
-        GameFilters(themes=("liquid",), reward_types=("extra-ball",)),
         GameFilters(edge=("copy",)),
-        GameFilters(edge=("bootleg", "conversion")),
-        GameFilters(edge=("copy:in",), q="Alpha"),
-        # The one single-select over a multivalued join: facet_exclude("tag")
-        # drops an M2M path from a facet base, a combination no other
-        # dimension reaches (the other M2Ms accumulate, the other
-        # single-selects are FKs).
-        GameFilters(tag="widebody"),
-        # The sparse states: the canonical preset pair, a lone true-null
-        # selection, a minority value, and the preset composed with another
-        # dimension.
+        # The sparse preset pair, the click every default-bucket badge writes.
         GameFilters(game_format=("pinball", UNCLASSIFIED)),
-        GameFilters(game_format=(UNCLASSIFIED,)),
-        GameFilters(cabinet=("cocktail",)),
-        GameFilters(production_status=("produced", UNCLASSIFIED), themes=("water",)),
     )
 
     def test_narrowers_cover_every_facet(self):
@@ -633,6 +641,13 @@ class TestBadgeEqualsResultCount:
                 NARROWERS[facet](NARROWERS[facet](GameFilters(), "one"), "two"), field
             )
             assert after == ("one", "two"), facet
+
+    def test_filters_offer_a_state_per_multi_dimension(self):
+        """Each accumulating dimension needs its own ambient state in
+        ``FILTERS`` — they are separate narrowers, so one can't stand in for
+        another, and the loop only reaches a second click under a first."""
+        for field in ACCUMULATING_DIMENSIONS:
+            assert any(getattr(f, field) for f in self.FILTERS), field
 
     def test_fixture_exercises_every_facet(self, db):
         """A dimension the fixture yields zero options for turns the invariant

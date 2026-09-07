@@ -1,7 +1,6 @@
 {
   "StatsSchema": "SiteStatsSchema",
   "LinkTargetsResponseSchema": "LinkTargetListSchema",
-  "PaginationParams": "PaginationParamsSchema",
 
   "AttachmentMetaOut": "AttachmentMetaSchema",
   "MediaAssetRefIn": "MediaAssetInputSchema",
