@@ -42,15 +42,20 @@ dev = [
 
 [tool.ruff]
 target-version = "py314"
-exclude = [
-    ".git",
-    ".venv",
+# Pins the binary, not just the dependency floor. Pre-commit and CI shell out to
+# `uv run ruff`, so a ruff that predates this config fails loudly instead of
+# quietly resolving a different rule set.
+required-version = ">=0.16"
+# Report rules by code, matching how `select`, `ignore` and every `noqa` comment
+# in the tree addresses them.
+output-prefer-rule-codes = true
+# `extend-exclude`, not `exclude`: the latter replaces ruff's built-in defaults
+# (.venv, node_modules, dist, .tox, build dirs) rather than adding to them.
+extend-exclude = [
     "__pycache__",
     "*/migrations/*",
     "/media",  # MEDIA_ROOT at backend/media — anchored so apps/media/ is still linted
     ".pytest_cache",
-    ".mypy_cache",
-    ".ruff_cache",
 ]
 
 [tool.ruff.lint]
@@ -77,6 +82,18 @@ select = [
     "RUF100", # unused-noqa
     "RUF059", # unused-unpacked-variable
     "ANN401", # no Any/object in annotations
+    # Rules with no violations in the tree: enabled as ratchets, so the first
+    # one written is caught in review rather than accumulating into a backlog.
+    "PLE",    # pylint errors (genuine bugs, not style)
+    "ASYNC",  # flake8-async (blocking calls inside async defs)
+    "T10",    # flake8-debugger (a stray breakpoint() reaching main)
+    "YTT",    # flake8-2020 (sys.version comparisons that break on 3.10+)
+    "FA",     # flake8-future-annotations
+    "FLY",    # flynt (static str.join of literals -> f-string)
+    "ICN",    # flake8-import-conventions
+    "INT",    # flake8-gettext (f-strings in translation calls)
+    "TC010",  # runtime string annotation in a union — fails at runtime
+    "TID251", # banned-api; add entries under lint.flake8-tidy-imports.banned-api
 ]
 ignore = [
     "E501",  # Line too long — handled by formatter
