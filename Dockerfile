@@ -14,7 +14,12 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-RUN corepack enable
+# Install pnpm directly rather than through Corepack, which resolves pnpm's bin
+# to a hardcoded path pnpm no longer uses and cannot install the platform
+# executable pnpm 12 ships as an optional dependency. Keep this version in sync
+# with frontend/package.json#packageManager: `pmOnFail: ignore` in
+# frontend/pnpm-workspace.yaml means a mismatch is not reported.
+RUN npm install -g pnpm@12.3.4
 
 WORKDIR /frontend
 

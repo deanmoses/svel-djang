@@ -1,0 +1,25 @@
+# pnpm settings. As of pnpm 11 this file is the only home for them: .npmrc is
+# read for auth/registry only, and the `pnpm` field in package.json is ignored.
+
+# Don't let pnpm download the version pinned in package.json#packageManager.
+# With the default (`download`), pnpm records itself and its eight @pnpm/exe.*
+# platform binaries in a second YAML document at the head of pnpm-lock.yaml,
+# which Dependabot's parser rejects as dependency_file_not_parseable — that
+# would silently stop every frontend dependency PR. Drop this once
+# https://github.com/dependabot/dependabot-core/issues/14794 ships. CI installs
+# the pinned version via pnpm/action-setup; the Dockerfile installs it directly.
+pmOnFail: ignore
+
+# esrap 2.2.10 has a printer regression: it drops the parentheses around a
+# `||` subexpression that is an operand of `&&`, silently flipping
+# precedence. Excluding only 2.2.10 picks up a fixed release automatically.
+overrides:
+  esrap: <2.2.10 || >2.2.10
+
+# Dependency build scripts. Every package that wants to run one must appear
+# here: `strictDepBuilds` defaults to true, so an unlisted build script fails
+# the install rather than printing the warning it used to.
+allowBuilds:
+  esbuild: true
+  '@sentry/cli': false
+  core-js: false

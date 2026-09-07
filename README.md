@@ -16,7 +16,7 @@ This is a Django + SvelteKit monorepo. SvelteKit handles the user-facing fronten
 
 ## Getting started
 
-**Requirements**: Python 3.14+, Node 24+, [uv](https://docs.astral.sh/uv/), [pnpm](https://pnpm.io/) (or enable via `corepack enable`)
+**Requirements**: Python 3.14+, Node 24+, [uv](https://docs.astral.sh/uv/), [pnpm](https://pnpm.io/) 12+
 
 ```bash
 cp .env.example .env
