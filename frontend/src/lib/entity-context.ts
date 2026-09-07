@@ -1,4 +1,4 @@
-import { getContext, setContext } from 'svelte';
+import { createContext } from 'svelte';
 
 /**
  * Context exposed by every entity `[slug]/+layout.svelte` so descendant
@@ -16,16 +16,15 @@ export type EntityContext = {
   readonly detailHref: string;
 };
 
-const ENTITY_CONTEXT_KEY = Symbol('entity');
+const [read, write, has] = createContext<EntityContext>();
 
 export function setEntityContext(context: EntityContext): void {
-  setContext(ENTITY_CONTEXT_KEY, context);
+  write(context);
 }
 
 export function getEntityContext(): EntityContext {
-  const context = getContext<EntityContext | undefined>(ENTITY_CONTEXT_KEY);
-  if (!context) {
+  if (!has()) {
     throw new Error('entity context missing — must be rendered inside an entity [slug] layout');
   }
-  return context;
+  return read();
 }
