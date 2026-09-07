@@ -25,7 +25,6 @@ tests.
 
 from apps.citation.citation_types.citation_scheme_driver import SchemeDriver
 from apps.citation.citation_types.citation_scheme_specs import (
-    SchemeKey,
     SchemeRootCitationSourceInfo,
     SchemeSpec,
     StartSecondsSource,
@@ -63,6 +62,7 @@ from apps.citation.citation_types.registry import (
 from apps.citation.citation_types.vocabulary import (
     ISBN_CITE_PREFIX,
     CitationSourceTypeValue,
+    SchemeKey,
     SourceType,
     StartSeconds,
     citation_source_type,

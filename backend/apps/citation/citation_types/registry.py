@@ -21,14 +21,17 @@ from apps.citation.citation_types.citation_scheme_driver import (
     start_seconds_hint_values,
 )
 from apps.citation.citation_types.citation_scheme_specs import (
-    SchemeKey,
     SchemeRootCitationSourceInfo,
     SchemeSpec,
 )
 from apps.citation.citation_types.citation_type_driver import CitationTypeDriver
 from apps.citation.citation_types.citation_type_specs import CitationTypeSpec
 from apps.citation.citation_types.plugin_discovery import discover_package_exports
-from apps.citation.citation_types.vocabulary import SourceType, StartSeconds
+from apps.citation.citation_types.vocabulary import (
+    SchemeKey,
+    SourceType,
+    StartSeconds,
+)
 
 _CITATION_TYPES: Final[tuple[CitationTypeSpec, ...]] = (
     book.BOOK,

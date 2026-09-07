@@ -136,7 +136,6 @@ ignore = [
 "apps/*/management/commands/*.py" = ["T20", "S603", "S607", "B904"]  # print, subprocess, raise-from in commands
 "scripts/*.py" = ["T201"]
 "apps/catalog/tests/benchmark_game_rows.py" = ["T201"]  # a __main__ CLI harness, not a test
-"**/__init__.py" = ["F401"]  # re-exports from barrel modules are the whole point of __init__.py
 # Django system checks accumulate Error objects with long multi-line messages
 # behind a guard. Folding those into a generator expression puts the condition
 # after the six-line message, for no measurable gain at startup.
@@ -169,9 +168,6 @@ exclude = [
     "^media/",  # MEDIA_ROOT at backend/media — anchored so apps/media/ is still type-checked
     "^cache/",
 ]
-# Barrel __init__.py files re-export symbols via `from X import Y`. Treat these
-# as intentional public API rather than requiring `__all__` on every barrel.
-implicit_reexport = true
 # Parallel checking. Four workers is the knee of the curve on an 8-core laptop;
 # above that the run gets no faster.
 num_workers = 4
@@ -203,10 +199,12 @@ disallow_untyped_calls = false
 
 # Third-party libraries without py.typed markers or upstream stubs.
 # Suppresses import-untyped errors at the import site; the libraries themselves
-# are still treated as Any at use sites.
+# are still treated as Any at use sites. They also declare no explicit
+# re-exports, so the strict check is relaxed for them alone.
 [[tool.mypy.overrides]]
 module = ["pillow_heif", "constance", "constance.*", "publicsuffixlist", "publicsuffixlist.*"]
 ignore_missing_imports = true
+implicit_reexport = true
 
 # ===========================================================================
 # Import boundary enforcement
