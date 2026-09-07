@@ -110,7 +110,7 @@ repos:
         name: mypy
         entry: ./scripts/mypy
         language: system
-        files: ^backend/.*\.py$
+        files: (^backend/.*\.py$|^backend/pyproject\.toml$|^scripts/mypy$)
         pass_filenames: false
 
   # Secret detection

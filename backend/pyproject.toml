@@ -85,6 +85,7 @@ select = [
     "FA",     # flake8-future-annotations
     "FLY",    # flynt (static str.join of literals -> f-string)
     "ICN",    # flake8-import-conventions
+    "INP",    # flake8-no-pep420 (implicit namespace packages)
     "INT",    # flake8-gettext (f-strings in translation calls)
     "TC010",  # runtime string annotation in a union — fails at runtime
     "A",      # flake8-builtins (shadowing builtins)
@@ -94,13 +95,16 @@ select = [
     "PERF",   # perflint
     "PIE",    # flake8-pie
     "PLC0206", # dict iterated by index without .items()
+    "PLR5501", # else-then-if that should be elif
     "PLW",    # pylint warnings
     "PTH",    # flake8-use-pathlib
     "PYI",    # flake8-pyi
     "RET",    # flake8-return
     "RSE",    # flake8-raise
     "RUF",    # ruff-specific
+    "SLF",    # flake8-self (private member access)
     "SLOT",   # flake8-slots
+    "TRY",    # tryceratops
 ]
 ignore = [
     "E501",  # Line too long — handled by formatter
@@ -119,18 +123,27 @@ ignore = [
     # passed as claim *values*, not as flags. FBT001/FBT002 still guard the
     # definition side, which is where a boolean trap actually gets built.
     "FBT003",
+    "TRY003", # error copy belongs at the raise site, not in an exception class
+    # Pydantic field validators must raise ValueError to become a 422; a
+    # TypeError escapes as a 500.
+    "TRY004",
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"*/tests/*.py" = ["S106", "S603", "S607"]  # hardcoded test passwords, subprocess in tests
+"*/tests/*.py" = ["S106", "S603", "S607", "TRY301", "SLF001"]  # hardcoded test passwords, subprocess, raise-in-try as the test subject, reaching into internals
 "manage.py" = ["T20"]
 "apps/*/management/commands/*.py" = ["T20", "S603", "S607", "B904"]  # print, subprocess, raise-from in commands
 "scripts/*.py" = ["T201"]
+"tests/*.py" = ["SLF001"]  # the `*/tests/*.py` glob above does not reach the top-level suite
 "apps/catalog/tests/benchmark_game_rows.py" = ["T201"]  # a __main__ CLI harness, not a test
 # Django system checks accumulate Error objects with long multi-line messages
 # behind a guard. Folding those into a generator expression puts the condition
 # after the six-line message, for no measurable gain at startup.
 "**/checks.py" = ["PERF401"]
+
+[tool.ruff.lint.flake8-self]
+# Django's introspection API. The model-driven catalog is built on walking it.
+extend-ignore-names = ["_meta", "_default_manager"]
 
 [tool.ruff.lint.flake8-builtins]
 # `type` and `id` are django-ninja query-parameter names, so they're the wire
@@ -151,6 +164,7 @@ line-ending = "lf"
 [tool.mypy]
 python_version = "3.14"
 strict = true
+extra_checks = true
 plugins = ["mypy_django_plugin.main"]
 explicit_package_bases = true
 exclude = [

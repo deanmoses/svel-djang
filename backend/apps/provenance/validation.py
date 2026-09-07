@@ -645,9 +645,10 @@ def _has_extra_data(model_class: type[ClaimControlledModel]) -> bool:
         # abstract ``ClaimControlledModel`` we accept here, so the literal
         # lookup type-fails at the base — runtime semantics are correct.
         model_class._meta.get_field("extra_data")  # type: ignore[misc]
-        return True
     except FieldDoesNotExist:
         return False
+    else:
+        return True
 
 
 def validate_claim_value(

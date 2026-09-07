@@ -882,10 +882,11 @@ class CitationInstanceManager(models.Manager["CitationInstance"]):
             try:
                 with transaction.atomic():
                     self.bulk_create(instances)
-                return instances
             except IntegrityError:
                 if attempt == _MINT_MAX_ATTEMPTS - 1:
                     raise
+            else:
+                return instances
         raise IntegrityError(
             f"Could not mint unique citation slugs after {_MINT_MAX_ATTEMPTS} attempts."
         )
