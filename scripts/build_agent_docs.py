@@ -55,7 +55,7 @@ def generate_output(source_lines: list[str], target: str) -> str:
         if stripped == "START_IGNORE":
             skip_until_end = "END_IGNORE"
             continue
-        elif stripped == "END_IGNORE":
+        if stripped == "END_IGNORE":
             skip_until_end = None
             continue
 
@@ -63,7 +63,7 @@ def generate_output(source_lines: list[str], target: str) -> str:
         if stripped == f"START_{target}":
             # Start including content for our target (skip the marker itself)
             continue
-        elif stripped == f"START_{other_target}":
+        if stripped == f"START_{other_target}":
             # Start skipping content for other target
             skip_until_end = f"END_{other_target}"
             continue
@@ -71,7 +71,7 @@ def generate_output(source_lines: list[str], target: str) -> str:
         # Check for end markers
         if stripped == f"END_{target}":
             continue
-        elif stripped == f"END_{other_target}":
+        if stripped == f"END_{other_target}":
             skip_until_end = None
             continue
 

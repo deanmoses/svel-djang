@@ -35,12 +35,13 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from collections.abc import Iterator
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Iterator, NamedTuple
+from typing import NamedTuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from pull_common import (  # noqa: E402
+from pull_common import (
     USER_AGENT,
     Row,
     add_window_args,
@@ -150,7 +151,7 @@ def event_time(row: Row) -> str:
     return str(row.get("timestamp") or row.get("dateCreated") or "")
 
 
-def write_events(path: Path, rows: list[Row], kind: str, complete: bool) -> Row:
+def write_events(path: Path, rows: list[Row], kind: str, *, complete: bool) -> Row:
     """Merge an event stream into its dump and describe it for the manifest."""
     merged = merge_ndjson(path, rows, key=event_key, ts_of=event_time)
     log(f"  {path.name}: {merged.rows} rows ({merged.carried} carried over)")
