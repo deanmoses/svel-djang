@@ -331,6 +331,7 @@ export default ts.config(
       '@typescript-eslint/no-non-null-assertion': 'error',
       '@typescript-eslint/no-unsafe-argument': 'error',
       '@typescript-eslint/no-unsafe-return': 'error',
+      '@typescript-eslint/require-await': 'error',
       '@typescript-eslint/no-unsafe-call': 'error',
       '@typescript-eslint/unbound-method': 'error',
     },

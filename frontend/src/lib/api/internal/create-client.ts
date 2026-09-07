@@ -36,7 +36,7 @@ export function createApiClient(
   const forwardedCookie = incomingRequest?.headers.get('cookie') ?? null;
 
   client.use({
-    async onRequest({ request }) {
+    onRequest({ request }) {
       // openapi-fetch percent-encodes `/` in path params, breaking Django's `:path`
       // converter for multi-segment public_ids. `/` is reserved, so `%2F` in pathname is always ours to decode.
       const url = new URL(request.url);
