@@ -25,14 +25,13 @@
   }
 
   $effect(() => {
-    if (open) {
-      document.body.style.overflow = 'hidden';
-      const closeBtn = drawerEl?.querySelector<HTMLElement>('.drawer-close');
-      closeBtn?.focus();
-      return () => {
-        document.body.style.overflow = '';
-      };
-    }
+    if (!open) return;
+    document.body.style.overflow = 'hidden';
+    const closeBtn = drawerEl?.querySelector<HTMLElement>('.drawer-close');
+    closeBtn?.focus();
+    return () => {
+      document.body.style.overflow = '';
+    };
   });
 
   $effect(() => {

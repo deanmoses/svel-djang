@@ -51,8 +51,7 @@
 </script>
 
 <FieldGroup label="Evidence for this edit" optional>
-  <!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
-  {#snippet children(inputId, errorId)}
+  {#snippet children(inputId, _errorId)}
     <div class="citation-field" id={inputId}>
       {#each citations as citation, index (citation)}
         <CitationInstanceFields {citation} onremove={() => removeCitation(index)} />

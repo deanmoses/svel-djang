@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import vitest from '@vitest/eslint-plugin';
 import prettier from 'eslint-config-prettier';
 import svelte from 'eslint-plugin-svelte';
 import globals from 'globals';
@@ -93,6 +94,14 @@ export default ts.config(
   {
     rules: {
       'svelte/no-navigation-without-resolve': 'off',
+      eqeqeq: ['error', 'always', { null: 'ignore' }],
+      // Every component's <script> is TypeScript; a block that omits the
+      // attribute silently opts out of type checking.
+      'svelte/block-lang': ['error', { enforceScriptPresent: false, script: 'ts' }],
+      'svelte/no-bind-value-on-checkable-inputs': 'error',
+      'svelte/no-nested-style-tag': 'error',
+      'svelte/require-event-prefix': 'error',
+      'svelte/valid-style-parse': 'error',
       // Standard convention: `_`-prefixed args/vars are intentionally unused.
       // Lets snippets accept required arguments they don't need to reference.
       '@typescript-eslint/no-unused-vars': [
@@ -233,6 +242,20 @@ export default ts.config(
     files: ['src/routes/api-docs/+page.svelte'],
     languageOptions: {
       globals: { Scalar: 'readonly' },
+    },
+  },
+  {
+    files: ['src/**/*.test.ts', 'src/**/*.spec.ts'],
+    ...vitest.configs.recommended,
+    rules: {
+      ...vitest.configs.recommended.rules,
+      'vitest/no-disabled-tests': 'error',
+      // Off pending cleanup — each has real hits in the current suite.
+      'vitest/expect-expect': 'off',
+      'vitest/no-conditional-expect': 'off',
+      'vitest/prefer-called-exactly-once-with': 'off',
+      'vitest/valid-expect': 'off',
+      'vitest/valid-title': 'off',
     },
   },
   {
