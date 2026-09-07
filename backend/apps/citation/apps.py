@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 def _format_citation_link(
-    obj: CitationInstance | None, index: int, base_url: str, plain_text: bool
+    obj: CitationInstance | None, index: int, base_url: str, *, plain_text: bool
 ) -> str:
     """Render a citation marker as a superscript footnote number."""
     if obj is None:

@@ -125,6 +125,11 @@ class MfrFilters:
     technology_generation: str | None = None
 
 
+# `Bounds` is a NamedTuple, so one shared instance is safe as a dataclass default
+# and keeps the call out of the field declaration.
+_UNBOUNDED_YEARS: Bounds[int] = Bounds(None, None)
+
+
 @dataclass(frozen=True)
 class FilterOptions:
     """The sidebar option lists — value-pruned and counted (year is a range, so it
@@ -133,7 +138,7 @@ class FilterOptions:
     location: list[FacetOption] = field(default_factory=list)
     person: list[FacetOption] = field(default_factory=list)
     technology_generation: list[FacetOption] = field(default_factory=list)
-    year: Bounds[int] = Bounds(None, None)
+    year: Bounds[int] = _UNBOUNDED_YEARS
 
 
 # ---------------------------------------------------------------------------

@@ -34,12 +34,13 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, NamedTuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from pull_common import (  # noqa: E402
+from pull_common import (
     Row,
     Window,
     add_window_args,
@@ -124,7 +125,10 @@ def resolve_ids(token: str) -> tuple[str, str]:
 
 
 def page_backwards(
-    fetch_page: Any, win: Window, ts_of: Any, row_key: Any
+    fetch_page: Callable[[str, str], list[Row]],
+    win: Window,
+    ts_of: Callable[[Row], str],
+    row_key: Callable[[Row], str],
 ) -> list[Row]:
     """Drain a window by paging backwards from its end.
 
@@ -189,10 +193,9 @@ def pick_deployments(deployments: list[Deployment], win: Window) -> list[Deploym
             continue
         if dep.created_at >= floor:
             picked.append(dep)
-        elif dep.service not in spanned:
-            if dep.status in ("SUCCESS", "REMOVED"):
-                spanned.add(dep.service)
-                picked.append(dep)
+        elif dep.service not in spanned and dep.status in ("SUCCESS", "REMOVED"):
+            spanned.add(dep.service)
+            picked.append(dep)
     return picked
 
 
@@ -211,7 +214,7 @@ def main() -> None:
     today = datetime.now(UTC).date()
     records: list[Row] = []
 
-    def write_days(rows: list[Row], kind: str, merge_key: Any) -> None:
+    def write_days(rows: list[Row], kind: str, merge_key: Callable[[Row], object]) -> None:
         for day, day_rows in sorted(bucket_by_day(rows, lambda r: str(r["timestamp"])).items()):
             dest = args.out / f"{kind}.{day}.ndjson"
             merged = merge_ndjson(dest, day_rows, key=merge_key, ts_of=lambda r: str(r["timestamp"]))
@@ -257,7 +260,7 @@ def main() -> None:
     http_rows: list[Row] = []
     for dep in picked:
         rows = page_backwards(
-            lambda anchor, floor: gql(
+            lambda anchor, floor, dep=dep: gql(
                 token, HTTP_LOGS_QUERY,
                 {"dep": dep.id, "anchor": anchor, "floor": floor, "limit": HTTP_PAGE},
             )["httpLogs"],

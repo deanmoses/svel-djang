@@ -183,7 +183,7 @@ def test_unknown_entity_type_errors(db):
 
 
 def test_malformed_ref_errors(db):
-    with pytest.raises(CommandError, match="type.public_id"):
+    with pytest.raises(CommandError, match=r"type\.public_id"):
         _dump("model")
 
 

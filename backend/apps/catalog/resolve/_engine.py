@@ -315,7 +315,9 @@ def _one_column(value: object) -> ColumnValues:
 
 def _no_payload(columns: ColumnValues) -> None:
     """Set membership: no payload columns → ``None`` payload."""
-    return None
+    # Explicit, to stay symmetric with the sibling adapters below, which all
+    # end in a `return <expr>`.
+    return None  # noqa: RET501
 
 
 def _no_columns(payload: object) -> ColumnValues:

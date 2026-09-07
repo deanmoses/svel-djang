@@ -122,7 +122,7 @@ class _StrictPatchLoader(yaml.SafeLoader):
 def _construct_mapping_no_duplicates(
     loader: _StrictPatchLoader,
     node: yaml.MappingNode,
-    deep: bool = False,
+    deep: bool = False,  # noqa: FBT001, FBT002 - PyYAML construct_mapping signature
 ) -> dict[object, object]:
     loader.flatten_mapping(node)
     # Keys are deliberately ``object``, not ``str``: at construct time a YAML

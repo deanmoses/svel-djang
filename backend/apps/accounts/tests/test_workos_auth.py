@@ -161,9 +161,7 @@ class TestAuthCallback:
             mock_client.user_management.authenticate_with_code.return_value = (
                 auth_response
             )
-            resp = client.get(f"/api/auth/callback/?code=fake&state={state}")
-
-        return resp
+            return client.get(f"/api/auth/callback/?code=fake&state={state}")
 
     def test_callback_new_user_redirects_to_signup_without_creating_row(self, client):
         """Brand-new user stashes pending payload and redirects to /signup.

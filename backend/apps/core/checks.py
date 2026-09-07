@@ -19,7 +19,8 @@ from urllib.parse import urlparse
 
 from django.apps.config import AppConfig
 from django.conf import settings
-from django.core.checks import CheckMessage, Error, Tags, Warning, register
+from django.core.checks import CheckMessage, Error, Tags, register
+from django.core.checks import Warning as CheckWarning
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models
 
@@ -510,7 +511,7 @@ def check_rate_limit_proxy_trust(
     if settings.DEBUG or settings.RATE_LIMIT_TRUST_PROXY_HEADERS:
         return []
     return [
-        Warning(
+        CheckWarning(
             "RATE_LIMIT_TRUST_PROXY_HEADERS is False in a non-DEBUG "
             "environment. IP-keyed rate limiters will silently degrade to "
             "one shared bucket (REMOTE_ADDR=127.0.0.1 behind Caddy on "

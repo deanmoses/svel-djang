@@ -34,7 +34,7 @@ from pathlib import Path
 from typing import Any, NamedTuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from pull_common import (  # noqa: E402
+from pull_common import (
     Row,
     add_window_args,
     http_request,

@@ -145,7 +145,7 @@ def test_cite_locator_still_rejects_mojibake(flipcommons_catalog, ipdb_root, pm)
         '        locator: "Sky�Line"\n'
         "      production_year: 1998\n"
     )
-    with pytest.raises(PatchError, match="mojibake|replacement character"):
+    with pytest.raises(PatchError, match=r"mojibake|replacement character"):
         _apply(text)
 
 
@@ -1286,7 +1286,7 @@ def test_ipdb_url_cite_rejected(flipcommons_catalog, pm):
         "      cite: https://www.ipdb.org/machine.cgi?id=4443\n"
         "      production_year: 1998\n"
     )
-    with pytest.raises(PatchError, match="matches the ipdb scheme.*ipdb:4443"):
+    with pytest.raises(PatchError, match=r"matches the ipdb scheme.*ipdb:4443"):
         _apply(text)
 
 

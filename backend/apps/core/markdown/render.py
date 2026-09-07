@@ -124,6 +124,7 @@ def _convert_task_list_items(html: str) -> str:
 def render_all_links(
     text: str,
     base_url: str = "",
+    *,
     plain_text: bool = False,
     metadata_out: list[dict[str, Any]] | None = None,
 ) -> str:
@@ -151,20 +152,30 @@ def render_all_links(
         pats = get_patterns(lt)
         if lt.public_id_field is not None:
             text = _render_by_id(
-                text, lt, pats["storage"], base_url, plain_text, metadata_out
+                text,
+                lt,
+                pats["storage"],
+                base_url,
+                plain_text=plain_text,
+                metadata_out=metadata_out,
             )
             text = _render_by_public_id(
-                text, lt, pats["authoring"], base_url, plain_text
+                text, lt, pats["authoring"], base_url, plain_text=plain_text
             )
         else:
             text = _render_by_id(
-                text, lt, pats["id"], base_url, plain_text, metadata_out
+                text,
+                lt,
+                pats["id"],
+                base_url,
+                plain_text=plain_text,
+                metadata_out=metadata_out,
             )
     return text
 
 
 def _format_link(
-    lt: LinkType, obj: models.Model | None, base_url: str, plain_text: bool
+    lt: LinkType, obj: models.Model | None, base_url: str, *, plain_text: bool
 ) -> str:
     """Format a single resolved link as markdown or plain text."""
     if obj is None:
@@ -183,6 +194,7 @@ def _render_by_id(
     lt: LinkType,
     pattern: re.Pattern[str],
     base_url: str = "",
+    *,
     plain_text: bool = False,
     metadata_out: list[dict[str, Any]] | None = None,
 ) -> str:
@@ -221,9 +233,11 @@ def _render_by_id(
         obj_id = int(match.group(1))
         obj = by_id.get(obj_id)
         if lt.format_link:
-            replacement = lt.format_link(obj, index_by_id[obj_id], base_url, plain_text)
+            replacement = lt.format_link(
+                obj, index_by_id[obj_id], base_url, plain_text=plain_text
+            )
         else:
-            replacement = _format_link(lt, obj, base_url, plain_text)
+            replacement = _format_link(lt, obj, base_url, plain_text=plain_text)
         result = result[: match.start()] + replacement + result[match.end() :]
     return result
 
@@ -233,6 +247,7 @@ def _render_by_public_id(
     lt: LinkType,
     pattern: re.Pattern[str],
     base_url: str = "",
+    *,
     plain_text: bool = False,
 ) -> str:
     """Render ``[[type:public_id]]`` links by batch lookup keyed on
@@ -260,7 +275,7 @@ def _render_by_public_id(
     for match in reversed(matches):
         key = match.group(1)
         obj = by_key.get(key)
-        replacement = _format_link(lt, obj, base_url, plain_text)
+        replacement = _format_link(lt, obj, base_url, plain_text=plain_text)
         result = result[: match.start()] + replacement + result[match.end() :]
     return result
 

@@ -59,7 +59,7 @@ def ct_mm(db):
     return ContentType.objects.get_for_model(MachineModel)
 
 
-def _attach(ct, entity, asset, category=None, is_primary=True):
+def _attach(ct, entity, asset, category=None, *, is_primary=True):
     """Create an EntityMedia row directly (bypassing claims for unit tests)."""
     return EntityMedia.objects.create(
         content_type=ct,

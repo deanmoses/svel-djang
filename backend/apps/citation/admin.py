@@ -82,7 +82,7 @@ class CitationSourceAdmin(admin.ModelAdmin[CitationSource]):
         request: HttpRequest,
         obj: CitationSource,
         form: ModelForm[CitationSource],
-        change: bool,
+        change: bool,  # noqa: FBT001 - Django ModelAdmin.save_model signature
     ) -> None:
         assert request.user.is_authenticated
         actor = request.user.actor
@@ -103,7 +103,7 @@ class CitationSourceAdmin(admin.ModelAdmin[CitationSource]):
             CitationSource,
             ModelForm[CitationSourceRootDomain],
         ],
-        change: bool,
+        change: bool,  # noqa: FBT001 - Django ModelAdmin.save_formset signature
     ) -> None:
         assert request.user.is_authenticated
         actor = request.user.actor

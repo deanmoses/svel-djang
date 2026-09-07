@@ -44,7 +44,7 @@ def test_parented_without_parent_model_still_raises():
         register_entity_create(
             router,
             Theme,
-            detail_qs=lambda: Theme.objects.all(),
+            detail_qs=Theme.objects.all,
             serialize_detail=lambda _t: DummySchema(),
             response_schema=DummySchema,
             parent_field="parent",
@@ -60,7 +60,7 @@ def test_body_schema_must_subclass_entity_create_input():
         register_entity_create(
             router,
             Theme,
-            detail_qs=lambda: Theme.objects.all(),
+            detail_qs=Theme.objects.all,
             serialize_detail=lambda _t: DummySchema(),
             response_schema=DummySchema,
             body_schema=DummySchema,  # type: ignore[arg-type]  # intentional
@@ -79,7 +79,7 @@ def test_body_schema_overrides_data_annotation():
     register_entity_create(
         router,
         Theme,
-        detail_qs=lambda: Theme.objects.all(),
+        detail_qs=Theme.objects.all,
         serialize_detail=lambda _t: DummySchema(),
         response_schema=DummySchema,
         body_schema=CustomBody,
@@ -95,7 +95,7 @@ def test_body_schema_default_is_entity_create_input_schema():
     register_entity_create(
         router,
         Theme,
-        detail_qs=lambda: Theme.objects.all(),
+        detail_qs=Theme.objects.all,
         serialize_detail=lambda _t: DummySchema(),
         response_schema=DummySchema,
     )
@@ -147,7 +147,7 @@ def test_scope_filter_builder_unparented_invoked(user):
     register_entity_create(
         router,
         Theme,
-        detail_qs=lambda: Theme.objects.all(),
+        detail_qs=Theme.objects.all,
         serialize_detail=lambda _t: DummySchema(),
         response_schema=DummySchema,
         scope_filter_builder=_scope,
@@ -180,7 +180,7 @@ def test_extra_create_fields_builder_row_kwargs_and_claims_reach_row(user):
     register_entity_create(
         router,
         Theme,
-        detail_qs=lambda: Theme.objects.all(),
+        detail_qs=Theme.objects.all,
         serialize_detail=lambda _t: DummySchema(),
         response_schema=DummySchema,
         extra_create_fields_builder=_build_extras,

@@ -385,24 +385,22 @@ def _collect_aggregated_media(
         source_ref = EntityRef(public_id=m.public_id, name=m.name)
         rows = all_media(m)
         primary_ids = displayed_primary_asset_ids(rows)
-        for em in rows:
-            items.append(
-                AggregatedMediaSchema(
-                    asset_uuid=str(em.asset.uuid),
-                    category=em.category,
-                    is_primary=em.asset_id in primary_ids,
-                    uploaded_by_username=em.asset.uploaded_by.username,
-                    renditions=MediaRenditionsSchema(
-                        thumb=build_public_url(
-                            build_storage_key(em.asset.uuid, "thumb")
-                        ),
-                        display=build_public_url(
-                            build_storage_key(em.asset.uuid, "display")
-                        ),
+        items.extend(
+            AggregatedMediaSchema(
+                asset_uuid=str(em.asset.uuid),
+                category=em.category,
+                is_primary=em.asset_id in primary_ids,
+                uploaded_by_username=em.asset.uploaded_by.username,
+                renditions=MediaRenditionsSchema(
+                    thumb=build_public_url(build_storage_key(em.asset.uuid, "thumb")),
+                    display=build_public_url(
+                        build_storage_key(em.asset.uuid, "display")
                     ),
-                    source_model=source_ref,
-                )
+                ),
+                source_model=source_ref,
             )
+            for em in rows
+        )
     return items
 
 

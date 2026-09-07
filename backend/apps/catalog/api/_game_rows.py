@@ -197,7 +197,7 @@ def _bucket_q(bucket: int, *, prefix: str = "") -> Q:
 
 
 def _children_map(
-    model_cls: type[Theme] | type[GameplayFeature],
+    model_cls: type[Theme | GameplayFeature],
 ) -> dict[str, set[str]]:
     """parent slug → direct child slugs, from one ``(slug, parents__slug)`` scan."""
     children: dict[str, set[str]] = {}
@@ -222,7 +222,7 @@ def _descendants(slug: str, children: dict[str, set[str]]) -> frozenset[str]:
 
 
 def _taxonomy_expansion(
-    slugs: tuple[str, ...], taxonomy: type[Theme] | type[GameplayFeature]
+    slugs: tuple[str, ...], taxonomy: type[Theme | GameplayFeature]
 ) -> tuple[frozenset[str], ...]:
     """Each selected slug expanded to itself + descendants (one ``frozenset``
     per selection; AND across selections, OR within one)."""
@@ -273,7 +273,7 @@ class TaxonomyFacet(NamedTuple):
     every ancestor value (``_hierarchical_value_rows``)."""
 
     name: str
-    taxonomy: type[Theme] | type[GameplayFeature]
+    taxonomy: type[Theme | GameplayFeature]
     path: str
 
 
@@ -301,7 +301,7 @@ class SparseFacet(NamedTuple):
     :data:`UNCLASSIFIED` is never an option."""
 
     name: str
-    vocabulary: type[Cabinet] | type[GameFormat] | type[ProductionStatus]
+    vocabulary: type[Cabinet | GameFormat | ProductionStatus]
     # The FK's field name on ``MachineModel`` (``"game_format"``).
     path: str
 

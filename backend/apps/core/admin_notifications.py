@@ -53,9 +53,11 @@ def notify_admins(code: str, message: str) -> None:
         )
         with urlopen(req, timeout=_TIMEOUT_SECONDS):  # noqa: S310 — settings validation guarantees https://
             pass
-    except Exception as exc:
-        # Wrapped so the issue is titled by what failed, a notification,
-        # rather than by whatever urllib raised; the cause stays in the value.
+    except Exception as exc:  # noqa: BLE001
+        # Blind by design: a failed notification must never break the action
+        # that triggered it. Wrapped so the issue is titled by what failed, a
+        # notification, rather than by whatever urllib raised; the cause stays
+        # in the value.
         error = f"{type(exc).__name__}: {exc}"
         logger.error("admin_notification.failed", extra={"code": code, "error": error})
         sentry_sdk.capture_exception(AdminNotificationError(error))

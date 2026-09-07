@@ -61,7 +61,7 @@ def renditions(db, asset):
     ]
 
 
-def _attach_via_claims(entity, asset, user, category="backglass", is_primary=True):
+def _attach_via_claims(entity, asset, user, category="backglass", *, is_primary=True):
     """Create a media attachment through the claims system."""
     claim_key, claim_value = build_media_attachment_claim(
         entity, asset.pk, category=category, is_primary=is_primary

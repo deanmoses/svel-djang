@@ -54,6 +54,7 @@ def runner_env(tmp_path_factory: pytest.TempPathFactory) -> dict[str, str]:
         env={**os.environ, "DATABASE_URL": f"sqlite:///{source}"},
         capture_output=True,
         text=True,
+        check=False,
     )
     assert migrate.returncode == 0, (
         f"migrating the throwaway catalog failed:\n{migrate.stderr}"

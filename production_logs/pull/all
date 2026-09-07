@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from pull_common import add_window_args, log, preflight, window  # noqa: E402
+from pull_common import add_window_args, log, preflight, window
 
 PULLERS = [
     ("bunny", "BUNNY_API_KEY"),
@@ -42,7 +42,9 @@ def main() -> None:
     results: dict[str, int] = {}
     for name, _ in PULLERS:
         log(f"==== {name}")
-        results[name] = subprocess.run([str(here / name), *flags]).returncode
+        results[name] = subprocess.run(
+            [str(here / name), *flags], check=False
+        ).returncode
         log("")
 
     for name, code in results.items():

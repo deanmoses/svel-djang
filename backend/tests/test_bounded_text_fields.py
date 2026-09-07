@@ -134,12 +134,12 @@ def _iter_bounded_fields() -> list[
 ]:
     from django.apps import apps
 
-    out: list[tuple[type[models.Model], BoundedTextField | MarkdownField]] = []
-    for model in apps.get_models():
-        for field in model._meta.get_fields():
-            if isinstance(field, BoundedTextField | MarkdownField):
-                out.append((model, field))
-    return out
+    return [
+        (model, field)
+        for model in apps.get_models()
+        for field in model._meta.get_fields()
+        if isinstance(field, BoundedTextField | MarkdownField)
+    ]
 
 
 def test_every_bounded_field_has_max_length_check() -> None:

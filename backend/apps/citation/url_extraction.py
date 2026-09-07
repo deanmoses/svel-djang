@@ -141,7 +141,7 @@ def _fetch_page_meta(url: str) -> PageMeta:
 
     if resp.status < 200 or resp.status >= 300:
         if resp.status == 404:
-            raise _NotFoundError()
+            raise _NotFoundError
         raise _HttpStatusError(resp.status)
 
     content_type = resp.headers.get("content-type", "")

@@ -78,7 +78,7 @@ class TestCitationInstanceQuoteMojibake:
             citation_source=citation_source,
             locator="Sky�Line",
         )
-        with pytest.raises(ValidationError, match="mojibake|replacement character"):
+        with pytest.raises(ValidationError, match=r"mojibake|replacement character"):
             ci.full_clean(exclude=["slug"])
 
 

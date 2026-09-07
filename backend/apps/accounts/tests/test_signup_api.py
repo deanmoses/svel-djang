@@ -165,7 +165,7 @@ class TestSignupCheck:
 
 @pytest.mark.django_db
 class TestSignupSubmit:
-    def _submit(self, client, username, csrf=True):
+    def _submit(self, client, username, *, csrf=True):
         kwargs = {}
         if csrf:
             client.cookies["csrftoken"] = "x" * 32
@@ -376,9 +376,7 @@ class TestSignupCancel:
         class _FakeClient:
             user_management = _FakeUserManagement()
 
-        monkeypatch.setattr(
-            "apps.accounts.api.signup.get_workos_client", lambda: _FakeClient()
-        )
+        monkeypatch.setattr("apps.accounts.api.signup.get_workos_client", _FakeClient)
         resp = self._cancel(client)
         assert resp.status_code == 200
         assert resp.json()["logout_url"].startswith("https://auth.workos.com/")
@@ -408,9 +406,7 @@ class TestSignupCancel:
         class _FakeClient:
             user_management = _FakeUserManagement()
 
-        monkeypatch.setattr(
-            "apps.accounts.api.signup.get_workos_client", lambda: _FakeClient()
-        )
+        monkeypatch.setattr("apps.accounts.api.signup.get_workos_client", _FakeClient)
         resp = self._cancel(client, HTTP_HOST="cdn-origin.example")
         assert resp.status_code == 200
         assert captured["return_to"] == "https://flipcommons.org/"
@@ -432,9 +428,7 @@ class TestSignupCancel:
         class _FakeClient:
             user_management = _FakeUserManagement()
 
-        monkeypatch.setattr(
-            "apps.accounts.api.signup.get_workos_client", lambda: _FakeClient()
-        )
+        monkeypatch.setattr("apps.accounts.api.signup.get_workos_client", _FakeClient)
         resp = self._cancel(client)
         assert resp.status_code == 200
         assert captured["return_to"] == "https://elsewhere.test/bye"
@@ -454,9 +448,7 @@ class TestSignupCancel:
         class _FakeClient:
             user_management = _FakeUserManagement()
 
-        monkeypatch.setattr(
-            "apps.accounts.api.signup.get_workos_client", lambda: _FakeClient()
-        )
+        monkeypatch.setattr("apps.accounts.api.signup.get_workos_client", _FakeClient)
         resp = self._cancel(client)
         assert resp.status_code == 200
         assert resp.json() == {"logout_url": "/"}

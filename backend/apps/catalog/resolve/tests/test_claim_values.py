@@ -81,7 +81,7 @@ def _check_against_schema(td: type, schema: RelationshipSchema) -> None:
     )
 
     def check_key(
-        name: str, scalar_type: type, nullable: bool, spec_required: bool
+        name: str, scalar_type: type, *, nullable: bool, spec_required: bool
     ) -> None:
         annotation = hints[name]
         is_required = name in required
@@ -102,9 +102,19 @@ def _check_against_schema(td: type, schema: RelationshipSchema) -> None:
 
     # Members are required by construction; payload declares it per-spec.
     for member in schema.members:
-        check_key(member.name, member.scalar_type, member.nullable, True)
+        check_key(
+            member.name,
+            member.scalar_type,
+            nullable=member.nullable,
+            spec_required=True,
+        )
     for pspec in schema.payload:
-        check_key(pspec.name, pspec.scalar_type, pspec.nullable, pspec.required)
+        check_key(
+            pspec.name,
+            pspec.scalar_type,
+            nullable=pspec.nullable,
+            spec_required=pspec.required,
+        )
 
 
 def test_every_typeddict_has_at_least_one_namespace() -> None:

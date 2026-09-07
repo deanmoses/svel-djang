@@ -43,7 +43,7 @@ def _make_asset(user, filename="photo.jpg"):
     )
 
 
-def _attach_via_claims(entity, asset, user, category="backglass", is_primary=False):
+def _attach_via_claims(entity, asset, user, category="backglass", *, is_primary=False):
     """Create a media attachment through the claims system (not directly)."""
     from django.contrib.contenttypes.models import ContentType
 

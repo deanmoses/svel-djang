@@ -52,11 +52,11 @@ __all__ = [
     "ClaimSpec",
     "EntityClaims",
     "ValidationErrors",
-    "raise_form_error",
-    "plan_scalar_field_claims",
-    "validate_scalar_fields",
     "execute_claims",
     "execute_multi_entity_claims",
+    "plan_scalar_field_claims",
+    "raise_form_error",
+    "validate_scalar_fields",
 ]
 
 # ``request.user`` is typed as ``AbstractBaseUser | AnonymousUser``; callers
@@ -262,18 +262,16 @@ def _write_claims_in_changeset(
     newly-created active Claim rows so the caller can attach citations.
     Attribution rides on ``changeset.actor``.
     """
-    created_claims: list[Claim] = []
-    for spec in specs:
-        created_claims.append(
-            _assert_claim(
-                entity,
-                spec.field_name,
-                spec.value,
-                claim_key=spec.claim_key,
-                changeset=changeset,
-            )
+    return [
+        _assert_claim(
+            entity,
+            spec.field_name,
+            spec.value,
+            claim_key=spec.claim_key,
+            changeset=changeset,
         )
-    return created_claims
+        for spec in specs
+    ]
 
 
 def _mint_inline_citations(

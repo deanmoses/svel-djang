@@ -1533,7 +1533,7 @@ claims:
       {bad}
 """
     with pytest.raises(
-        PatchError, match="non-empty list of mappings|item must be a mapping"
+        PatchError, match=r"non-empty list of mappings|item must be a mapping"
     ):
         load_patch(text)
 
@@ -1839,7 +1839,7 @@ claims:
   - corporate-entity.williams-electronics:
       delete: true
 """
-    with pytest.raises(PatchError, match="cannot delete.*still referenced"):
+    with pytest.raises(PatchError, match=r"cannot delete.*still referenced"):
         _apply(text, patch_id="0001-del")
     assert not Claim.objects.filter(
         actor__source__slug="flipcommons-catalog", field_name="status"
@@ -4402,7 +4402,7 @@ claims:
       production_year: 1990
       cite: williams:wpc-95-schematic-manual
 """
-    with pytest.raises(PatchError, match="declare\\s+the child"):
+    with pytest.raises(PatchError, match=r"declare\s+the child"):
         _apply(text, patch_id="0001-undeclared-doc")
 
 
@@ -4495,7 +4495,7 @@ claims:
       production_year: 1990
       cite: billboard:1945-09-29
 """
-    with pytest.raises(PatchError, match="declare\\s+the child"):
+    with pytest.raises(PatchError, match=r"declare\s+the child"):
         _apply(text, patch_id="0001-undeclared")
 
 

@@ -17,14 +17,15 @@ from __future__ import annotations
 import argparse
 import gzip
 import json
+import os
 import sys
 import time
-import os
 import urllib.error
 import urllib.request
+from collections.abc import Callable, Iterable
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
-from typing import Any, Callable, Iterable, NamedTuple
+from typing import Any, NamedTuple
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -96,7 +97,7 @@ def window(args: argparse.Namespace) -> Window:
         end_day = date.fromisoformat(args.end) if args.end else today
     except ValueError as error:
         die(2, f"--start/--end must be YYYY-MM-DD UTC dates: {error}")
-        raise AssertionError  # unreachable; die() always raises
+        raise AssertionError from error  # unreachable; die() always raises
     if start_day > end_day:
         die(2, f"--start {start_day} is after --end {end_day}")
     if start_day > today:
@@ -212,7 +213,7 @@ def bucket_by_day(rows: Iterable[Row], ts_of: Callable[[Row], str]) -> dict[date
     """Rows grouped by the UTC day of their own timestamp."""
     buckets: dict[date, list[Row]] = {}
     for row in rows:
-        day = datetime.fromisoformat(ts_of(row).replace("Z", "+00:00")).astimezone(UTC).date()
+        day = datetime.fromisoformat(ts_of(row)).astimezone(UTC).date()
         buckets.setdefault(day, []).append(row)
     return buckets
 
@@ -228,6 +229,7 @@ def manifest_record(
     rows: int,
     first_ts: str | None,
     last_ts: str | None,
+    *,
     complete: bool,
     **extras: Any,
 ) -> Row:

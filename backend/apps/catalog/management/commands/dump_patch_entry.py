@@ -42,6 +42,8 @@ class _LiteralStr(str):
     stay unquoted.
     """
 
+    __slots__ = ()
+
 
 class _PatchDumper(yaml.SafeDumper):
     """SafeDumper with a literal-block representer for ``_LiteralStr`` only."""

@@ -47,9 +47,9 @@ __all__ = [
     "link_preview",
     "prepare_markdown_claim_value",
     "render_all_links",
-    "resolve_wikilink_authoring",
     "render_markdown_field",
     "render_markdown_fields",
     "render_markdown_html",
     "render_markdown_plain",
+    "resolve_wikilink_authoring",
 ]

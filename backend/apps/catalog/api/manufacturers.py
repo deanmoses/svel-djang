@@ -34,6 +34,7 @@ from ..engine.entity_api.create import register_entity_create
 from ..engine.entity_api.delete import register_entity_delete_restore
 from ..engine.entity_api.own_media import own_media
 from ..engine.query.constants import DEFAULT_PAGE_SIZE
+from ..engine.query.facet_helpers import FacetOption
 from ..models import (
     CorporateEntity,
     CorporateEntityLocation,
@@ -43,7 +44,6 @@ from ..models import (
     System,
 )
 from ._manufacturer_facets import (
-    FacetOption,
     FilterOptions,
     MfrFilters,
     facet_counts,

@@ -37,7 +37,7 @@ def _make_asset(user, filename="photo.jpg"):
     )
 
 
-def _attach_via_claims(entity, asset, user, category="backglass", is_primary=False):
+def _attach_via_claims(entity, asset, user, category="backglass", *, is_primary=False):
     claim_key, claim_value = build_media_attachment_claim(
         entity, asset.pk, category=category, is_primary=is_primary
     )

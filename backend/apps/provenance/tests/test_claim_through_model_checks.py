@@ -322,7 +322,8 @@ def test_member_xor_uniqueness_rejects_stray_field() -> None:
             frozenset({"machine_model", "target_machine", "license_status"}),
             Q(target_machine__isnull=False),
         ),
-    ) + _LADDER_UNIQUES[1:]
+        *_LADDER_UNIQUES[1:],
+    )
     assert _ids(_ladder_facts(uniques=stray)) == ["provenance.E008"]
 
 

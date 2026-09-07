@@ -101,10 +101,11 @@ class _HasChildren(Protocol):
 def _validation_detail(exc: ValidationError) -> str:
     """Flatten a ``ValidationError`` into a human-readable 422 detail string."""
     if hasattr(exc, "message_dict"):
-        parts = []
-        for field, messages in exc.message_dict.items():
-            for msg in messages:
-                parts.append(f"{field}: {msg}" if field != "__all__" else msg)
+        parts = [
+            f"{field}: {msg}" if field != "__all__" else msg
+            for field, messages in exc.message_dict.items()
+            for msg in messages
+        ]
         return "; ".join(parts)
     return str(exc)
 
@@ -226,7 +227,7 @@ def _serialize_detail(source: CitationSource) -> CitationSourceDetailSchema:
 
 
 def _is_url(q: str) -> bool:
-    return q.startswith("http://") or q.startswith("https://")
+    return q.startswith(("http://", "https://"))
 
 
 def _build_recognition(rec: Recognition) -> CitationRecognitionSchema:
