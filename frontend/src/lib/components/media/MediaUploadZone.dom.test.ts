@@ -15,7 +15,7 @@ vi.mock('$lib/api/media-api', () => ({
 
 function makeFileList(files: File[]): FileList {
   return {
-    ...files,
+    ...Object.fromEntries(files.entries()),
     length: files.length,
     item(index: number) {
       return files[index] ?? null;
