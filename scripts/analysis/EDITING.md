@@ -209,6 +209,16 @@ scripts/analysis/analysis run foundation
 
 Prints a row-count-per-view health readout, then fails if any invariant broke — two classes: data-independent structural checks (union integrity, grain, the live filter, the `model_edges` license/source contract, subject + target resolution) and coverage meta-checks that fail when a new entity, alias table or view is added without the exposure the layer promises. No check logic leaks into `catalog.sql`; the checks live in the `*_checks.sql` files beside it.
 
+## Editing the runner? Its tests are deselected by default
+
+`backend/scripts/tests/test_analysis_runner.py` covers the runner itself — what `browse` materializes and how `describe` groups it — and each of its three tests builds a foundation from scratch, so `backend/pytest.ini` deselects the `analytics` marker they carry and a bare `pytest` skips them. Ask for them by name:
+
+```bash
+cd backend && uv run pytest -m analytics -n 0
+```
+
+`-n 0` because they share one build through a session fixture, which every xdist worker would otherwise repeat. `scripts/test-backend` runs them as a second pass, and a pre-push hook runs them on any backend or analysis change — CI never does, having no DuckDB CLI. They build from a migrated-but-empty catalog, so they also fail when a migration moves a column the sql/ files read.
+
 ## Editing the checks? Mutation-test them
 
 ```bash

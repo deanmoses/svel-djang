@@ -5,3 +5,9 @@ cd "$(dirname "$0")/../backend"
 echo "==> Backend tests..."
 # -n auto lives in backend/pytest.ini addopts, so a bare invocation is parallel.
 uv run pytest
+
+# The analytics marker is deselected by those same addopts. Serial on purpose: the
+# three share one DuckDB foundation through a session fixture, and spreading them
+# over workers rebuilds it per worker.
+echo "==> Analysis runner tests..."
+uv run pytest -m analytics -n 0
