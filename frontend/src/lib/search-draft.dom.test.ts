@@ -5,7 +5,7 @@
  */
 import { render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import Harness from './search-draft.fixture.svelte';
 
@@ -15,6 +15,12 @@ const props = (committed: string, commit: (next: string) => void = vi.fn()) => (
 });
 
 describe('searchDraft', () => {
+  // Only the abandonment test installs fake timers; the rest wait on the real
+  // debounce. Restoring unconditionally keeps that opt-in from leaking.
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('seeds the draft from the committed query', () => {
     render(Harness, { props: props('star') });
     expect(screen.getByRole('searchbox')).toHaveValue('star');
@@ -57,8 +63,11 @@ describe('searchDraft', () => {
     expect(screen.getByRole('searchbox')).toHaveValue('addams');
   });
 
+  // Fake timers because the assertion is a negative: sleeping past the debounce
+  // for real would pass just as happily if the commit were merely late.
   it('abandons a scheduled commit when an outside query arrives', async () => {
-    const user = userEvent.setup();
+    vi.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     const commit = vi.fn();
     const { rerender } = render(Harness, { props: props('star', commit) });
     const box = screen.getByRole('searchbox');
@@ -67,7 +76,7 @@ describe('searchDraft', () => {
     await rerender(props('addams', commit));
     expect(box).toHaveValue('addams');
 
-    await new Promise((resolve) => setTimeout(resolve, 400));
+    await vi.advanceTimersByTimeAsync(400);
     expect(box).toHaveValue('addams');
     expect(commit).not.toHaveBeenCalled();
   });
