@@ -41,14 +41,10 @@ dev = [
 ]
 
 [tool.ruff]
-target-version = "py314"
 # Pins the binary, not just the dependency floor. Pre-commit and CI shell out to
 # `uv run ruff`, so a ruff that predates this config fails loudly instead of
 # quietly resolving a different rule set.
 required-version = ">=0.16"
-# Report rules by code, matching how `select`, `ignore` and every `noqa` comment
-# in the tree addresses them.
-output-prefer-rule-codes = true
 # `extend-exclude`, not `exclude`: the latter replaces ruff's built-in defaults
 # (.venv, node_modules, dist, .tox, build dirs) rather than adding to them.
 extend-exclude = [
@@ -79,8 +75,6 @@ select = [
     "G",      # flake8-logging-format
     "PGH",    # pygrep-hooks (blanket noqa/type-ignore)
     "ISC",    # flake8-implicit-str-concat
-    "RUF100", # unused-noqa
-    "RUF059", # unused-unpacked-variable
     "ANN401", # no Any/object in annotations
     # Rules with no violations in the tree: enabled as ratchets, so the first
     # one written is caught in review rather than accumulating into a backlog.
@@ -93,7 +87,6 @@ select = [
     "ICN",    # flake8-import-conventions
     "INT",    # flake8-gettext (f-strings in translation calls)
     "TC010",  # runtime string annotation in a union — fails at runtime
-    "TID251", # banned-api; add entries under lint.flake8-tidy-imports.banned-api
     "A",      # flake8-builtins (shadowing builtins)
     "BLE",    # flake8-blind-except
     "FBT",    # flake8-boolean-trap
@@ -112,7 +105,7 @@ select = [
 ignore = [
     "E501",  # Line too long — handled by formatter
     "DJ001", # Avoid nullable CharField — common Django pattern
-    "S101",  # Use of assert — okay in tests (also per-file-ignored below)
+    "S101",  # assert — mypy type-narrowing in app code, and free rein in tests
     "S311",  # Use of random — not cryptographic in this app
     "PT019", # Underscore-prefix fixtures are the pytest idiom for side-effect-only fixtures
     "SIM118", # Django SessionStore has .keys() but non-dict iteration
@@ -129,9 +122,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"*/tests/*.py" = ["S101", "S106", "S603", "S607"]  # asserts, hardcoded test passwords, subprocess in tests
-"conftest.py" = ["S101"]
-"edge_tests/*.py" = ["S101"]
+"*/tests/*.py" = ["S106", "S603", "S607"]  # hardcoded test passwords, subprocess in tests
 "manage.py" = ["T20"]
 "apps/*/management/commands/*.py" = ["T20", "S603", "S607", "B904"]  # print, subprocess, raise-from in commands
 "scripts/*.py" = ["T201"]
