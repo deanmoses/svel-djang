@@ -60,7 +60,7 @@
     ".worktreeinclude": "gitignore"
   },
 
-  "mypy-type-checker.path": ["${workspaceFolder}/scripts/dmypy"],
+  "mypy-type-checker.path": ["${workspaceFolder}/scripts/mypy"],
   "mypy-type-checker.cwd": "${workspaceFolder}",
   "mypy-type-checker.importStrategy": "fromEnvironment",
   "mypy-type-checker.reportingScope": "workspace",

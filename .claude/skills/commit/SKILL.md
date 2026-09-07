@@ -55,7 +55,7 @@ test(api): add health endpoint integration test
 
 ## Verifying the commit actually happened
 
-Pre-commit hooks fail often in this repo (ruff, mypy/dmypy, prettier, markdownlint, detect-secrets, frontend lint+check+test, backend pytest, agent-docs-regen). A failed commit does NOT advance HEAD — but the failure is easy to miss if you only skim `git commit` output.
+Pre-commit hooks fail often in this repo (ruff, mypy, prettier, markdownlint, detect-secrets, frontend lint+check+test, backend pytest, agent-docs-regen). A failed commit does NOT advance HEAD — but the failure is easy to miss if you only skim `git commit` output.
 
 After every `git commit`, run this in the same Bash call so the result is unambiguous:
 
@@ -84,7 +84,7 @@ Look for `"files were modified by this hook"` or `"Failed"` in the output. Recov
 
 ### Other common failures
 
-- **mypy daemon out of sync** — symptom: errors that don't match the code. Fix: `make mypy-restart`, then retry.
+- **mypy incremental cache out of sync** — symptom: errors that don't match the code. Fix: `rm -rf backend/.mypy_cache`, then retry.
 - **frontend tests / backend pytest fail** — fix the test or the code; do not skip with `--no-verify`.
 - **`no-commit-to-branch`** — you're on `main`. Switch to a feature branch.
 - **`check-added-large-files`** — a file exceeds 1000 KB. Don't commit it; reconsider whether it belongs in git.

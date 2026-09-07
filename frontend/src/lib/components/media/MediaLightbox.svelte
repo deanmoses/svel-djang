@@ -60,14 +60,11 @@
         {#if item.category}
           <span class="category">{item.category}</span>
         {/if}
-        {#if item.uploaded_by_username}
-          <span class="uploader">
-            Uploaded by <a
-              href={resolve(`/users/${item.uploaded_by_username}`)}
-              class="uploader-link">{item.uploaded_by_username}</a
-            >
-          </span>
-        {/if}
+        <span class="uploader">
+          Uploaded by <a href={resolve(`/users/${item.uploaded_by_username}`)} class="uploader-link"
+            >{item.uploaded_by_username}</a
+          >
+        </span>
         <span class="counter">{index + 1} / {media.length}</span>
       </div>
     {/if}

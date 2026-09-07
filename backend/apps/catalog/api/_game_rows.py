@@ -51,8 +51,6 @@ ordering runs on a diacritic- and case-folded name key in Python, so it does
 not vary with the database's collation.
 """
 
-from __future__ import annotations
-
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import (
@@ -62,7 +60,6 @@ from typing import (
     TypedDict,
     get_args,
     get_origin,
-    get_type_hints,
 )
 
 from django.db import connection
@@ -167,10 +164,7 @@ TitleDimension = Literal["franchise", "series"]
 # of the three is a Model-only dimension.
 MODEL_DIMENSIONS: tuple[ModelDimension, ...] = get_args(ModelDimension)
 
-# Filter-field types, resolved once. ``get_type_hints`` rather than raw
-# ``__annotations__`` because this module uses ``from __future__ import
-# annotations``, so the annotations are strings until resolved.
-_FILTER_TYPES: Final[Mapping[str, object]] = get_type_hints(GameFilters)
+_FILTER_TYPES: Final[Mapping[str, object]] = GameFilters.__annotations__
 
 # ``year`` is the one dimension key naming no field of its own (it spans
 # ``year_min``/``year_max``). Pin that, so a renamed or retyped field can't

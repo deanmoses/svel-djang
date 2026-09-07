@@ -106,14 +106,18 @@ def _registry_view(rows: list[EntityRow]) -> list[str]:
         tail = "" if i == len(rows) - 1 else ","
         lines.append(f"    ({', '.join(cells)}){tail}")
     lines += [
-        "  ) AS t(entity_type, entity_type_plural, django_label, db_table,"
-        " public_id_field, is_wikilinkable);",
+        (
+            "  ) AS t(entity_type, entity_type_plural, django_label, db_table,"
+            " public_id_field, is_wikilinkable);"
+        ),
         "COMMENT ON VIEW entity_registry IS",
-        "  'One row per catalog entity type — the entity_type this layer speaks and its"
-        " plural, and the content-type label, table name and public id field the"
-        " physical schema speaks. is_wikilinkable says whether prose may link it at all"
-        " (Location cannot). Join it to raw.django_content_type to decode a polymorphic"
-        " reference; _entity_type_of(table) spells a single one.';",
+        (
+            "  'One row per catalog entity type — the entity_type this layer speaks and its"
+            " plural, and the content-type label, table name and public id field the"
+            " physical schema speaks. is_wikilinkable says whether prose may link it at all"
+            " (Location cannot). Join it to raw.django_content_type to decode a polymorphic"
+            " reference; _entity_type_of(table) spells a single one.';"
+        ),
     ]
     return lines
 
@@ -147,10 +151,12 @@ def _subjects_view(rows: list[EntityRow]) -> list[str]:
     lines += [
         "  );",
         "COMMENT ON VIEW entity_subjects IS",
-        "  'One row per catalog entity of ANY type, keyed (subject_type, subject_id)"
-        " the way a polymorphic reference names it — public id, name and status for"
-        " resolving a claim, changeset or patch entry subject without branching on its"
-        " type. NOT live-filtered; predicate on subject_status.';",
+        (
+            "  'One row per catalog entity of ANY type, keyed (subject_type, subject_id)"
+            " the way a polymorphic reference names it — public id, name and status for"
+            " resolving a claim, changeset or patch entry subject without branching on its"
+            " type. NOT live-filtered; predicate on subject_status.';"
+        ),
     ]
     return lines
 
@@ -182,11 +188,13 @@ def _prose_view(rows: list[EntityRow]) -> list[str]:
     lines += [
         "  ) AS t(entity_type, entity_id, public_id, field, text);",
         "COMMENT ON VIEW entity_prose IS",
-        "  'One row per live entity per markdown field, of ANY entity type — the"
-        " authored-prose corpus. For questions that SPAN entity types; a question about"
-        " one type reads that entity view, which carries description already. text IS"
-        " NULL where the field is unset, and every MarkdownField is a row, so predicate"
-        " on `field` rather than assuming description.';",
+        (
+            "  'One row per live entity per markdown field, of ANY entity type — the"
+            " authored-prose corpus. For questions that SPAN entity types; a question about"
+            " one type reads that entity view, which carries description already. text IS"
+            " NULL where the field is unset, and every MarkdownField is a row, so predicate"
+            " on `field` rather than assuming description.';"
+        ),
     ]
     return lines
 
@@ -265,11 +273,13 @@ def _aliases_view(rows: list[AliasRow]) -> list[str]:
     lines += [
         "  ) AS t(entity_type, entity_id, alias);",
         "COMMENT ON VIEW entity_aliases IS",
-        "  'One row per alias of ANY entity type, keyed (entity_type, entity_id) to match"
-        " entity_subjects — the alternate names prose might use. NOT live-filtered and it"
-        " carries no parent name: join entity_subjects for liveness, public id and the"
-        " canonical name. The per-type views (theme_aliases, person_aliases, …) stay the"
-        " way to ask about ONE type, since they decode the parent slug.';",
+        (
+            "  'One row per alias of ANY entity type, keyed (entity_type, entity_id) to match"
+            " entity_subjects — the alternate names prose might use. NOT live-filtered and it"
+            " carries no parent name: join entity_subjects for liveness, public id and the"
+            " canonical name. The per-type views (theme_aliases, person_aliases, …) stay the"
+            " way to ask about ONE type, since they decode the parent slug.';"
+        ),
     ]
     return lines
 

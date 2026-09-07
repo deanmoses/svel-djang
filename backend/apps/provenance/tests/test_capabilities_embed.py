@@ -22,6 +22,7 @@ from django.test.utils import CaptureQueriesContext
 
 from apps.accounts.test_factories import make_user
 from apps.catalog.tests.conftest import make_machine_model
+from apps.core.fetch_guard import block_lazy_fetches
 from apps.provenance.test_factories import make_claim, user_changeset
 
 pytestmark = pytest.mark.django_db
@@ -40,7 +41,7 @@ def _seed_changesets(user, pm, n: int, *, start: int = 0) -> None:
 
 
 def _q(fn: Callable[[], object]) -> int:
-    with CaptureQueriesContext(connection) as ctx:
+    with block_lazy_fetches(), CaptureQueriesContext(connection) as ctx:
         fn()
     return len(ctx.captured_queries)
 

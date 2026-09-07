@@ -6,7 +6,7 @@ dependencies = [
     "django>=6.0.7",
     "django-ninja>=1.3,<2",
     "dj-database-url>=2.3",
-    "gunicorn>=23.0",
+    "gunicorn>=26.2",
     "psycopg[binary]>=3.2",
     "whitenoise>=6.8",
     "django-constance>=4.0",
@@ -25,18 +25,19 @@ dependencies = [
 ]
 
 [dependency-groups]
+# Tool floors track the locked version, libs stay loose.
 dev = [
-    "django-stubs-ext>=6.0.3",
+    "django-stubs-ext>=6.1",
     "httpx>=0.28",
-    "django-stubs[compatible-mypy]>=6.0.3",
-    "import-linter>=2.11",
-    "libcst>=1.8.6",
-    "mypy>=1.20.2",
-    "pytest>=9.0.3",
-    "pytest-django>=4.9",
+    "django-stubs[compatible-mypy]>=6.1",
+    "import-linter>=2.15",
+    "libcst>=1.9",
+    "mypy>=2.3",
+    "pytest>=9.1",
+    "pytest-django>=4.14",
     "pytest-xdist>=3.8.0",
-    "ruff>=0.8",
-    "types-pyyaml>=6.0",
+    "ruff>=0.16",
+    "types-pyyaml>=6.0.12.20260906",
 ]
 
 [tool.ruff]
@@ -116,20 +117,28 @@ exclude = [
     "^media/",  # MEDIA_ROOT at backend/media — anchored so apps/media/ is still type-checked
     "^cache/",
 ]
-warn_unused_ignores = true
-warn_redundant_casts = true
 # Barrel __init__.py files re-export symbols via `from X import Y`. Treat these
 # as intentional public API rather than requiring `__all__` on every barrel.
 implicit_reexport = true
+# Parallel checking. Four workers is the knee of the curve on an 8-core laptop;
+# above that the run gets no faster.
+num_workers = 4
+enable_error_code = [
+    # Guards the model-driven catalog: a match that misses a new entity type.
+    "exhaustive-match",
+    "possibly-undefined",
+    "unused-awaitable",
+    "redundant-self",
+    "ignore-without-code",
+    "truthy-iterable",
+    "truthy-bool",
+    "unimported-reveal",
+    "deprecated",
+]
 
 [tool.django-stubs]
 django_settings_module = "config.settings"
 strict_settings = true
-
-# Migrations are generated; don't type-check them.
-[[tool.mypy.overrides]]
-module = "*.migrations.*"
-ignore_errors = true
 
 # Tests and conftest: relax annotation requirements for fixtures. Type correctness
 # of the code under test still matters; per-function annotations in tests do not.
@@ -716,7 +725,7 @@ layers = [
     "cache_control | wikilinks | middleware",
     "admin | admin_notifications | api_helpers | authz | autocomplete | checks | entity_types | licensing | rate_limits | sitemap | soft_delete",
     "exceptions | models",
-    "admin_apps | admin_site | response_cache | schemas | search | site_origin | types | user_agent | validators",
+    "admin_apps | admin_site | fetch_guard | response_cache | schemas | search | site_origin | types | user_agent | validators",
 ]
 
 # ----- media -----

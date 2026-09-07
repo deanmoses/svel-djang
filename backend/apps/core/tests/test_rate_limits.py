@@ -20,7 +20,7 @@ import pytest
 from django.core.cache import cache
 from django.http import HttpRequest
 from django.test import RequestFactory
-from pytest_django.fixtures import SettingsWrapper
+from pytest_django.fixtures import Settings
 
 from apps.core.exceptions import StructuredApiError
 from apps.core.rate_limits import (
@@ -85,7 +85,7 @@ class TestTrustDisabled:
     """
 
     @pytest.fixture(autouse=True)
-    def _disable_trust(self, settings: SettingsWrapper) -> None:
+    def _disable_trust(self, settings: Settings) -> None:
         settings.RATE_LIMIT_TRUST_PROXY_HEADERS = False
 
     def test_real_ip_header_is_ignored(self, rf: RequestFactory) -> None:
@@ -123,7 +123,7 @@ class TestTrustEnabled:
     """Production posture: X-Real-IP is trusted; XFF is still ignored."""
 
     @pytest.fixture(autouse=True)
-    def _enable_trust(self, settings: SettingsWrapper) -> None:
+    def _enable_trust(self, settings: Settings) -> None:
         settings.RATE_LIMIT_TRUST_PROXY_HEADERS = True
 
     def test_real_ip_is_used(self, rf: RequestFactory) -> None:

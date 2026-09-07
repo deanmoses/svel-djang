@@ -46,6 +46,7 @@ from apps.catalog.models import (
     TechnologyGeneration,
     Title,
 )
+from apps.core.fetch_guard import block_lazy_fetches
 from apps.core.models import EntityStatus
 
 from .conftest import SAMPLE_IMAGES
@@ -800,7 +801,7 @@ class TestCardsEndpoint:
         # Discarded: the first request of the process pays one-off warm-up queries
         # (ContentType cache population) that would otherwise inflate ``a``.
         client.get("/api/manufacturers/")
-        with CaptureQueriesContext(connection) as a:
+        with block_lazy_fetches(), CaptureQueriesContext(connection) as a:
             client.get("/api/manufacturers/")
         for i in range(3, 9):
             _model(
@@ -808,7 +809,7 @@ class TestCardsEndpoint:
                 production_year=2000,
                 extra_data={"opdb.images": SAMPLE_IMAGES},
             )
-        with CaptureQueriesContext(connection) as b:
+        with block_lazy_fetches(), CaptureQueriesContext(connection) as b:
             client.get("/api/manufacturers/")
         assert len(a) == len(b)
 
@@ -912,11 +913,11 @@ class TestPageEndpoint:
             _model(_ce(_mfr(f"a{i}", name=f"A{i}"), f"a{i}-ce"))
         url = "/api/pages/manufacturers?location=usa&q=A"
         client.get(url)  # discarded: absorbs one-off process warm-up queries
-        with CaptureQueriesContext(connection) as a:
+        with block_lazy_fetches(), CaptureQueriesContext(connection) as a:
             client.get(url)
         for i in range(3, 9):
             _model(_ce(_mfr(f"a{i}", name=f"A{i}"), f"a{i}-ce"))
-        with CaptureQueriesContext(connection) as b:
+        with block_lazy_fetches(), CaptureQueriesContext(connection) as b:
             client.get(url)
         assert len(a) == len(b)
         assert len(a) < 30

@@ -266,8 +266,7 @@ def _serialize_manufacturer_detail(mfr: Manufacturer) -> ManufacturerDetailSchem
                 p = credit.person
                 if p.public_id not in person_roles:
                     person_roles[p.public_id] = _PersonAccum(name=p.name)
-                if credit.role:
-                    person_roles[p.public_id].roles.add(credit.role.name)
+                person_roles[p.public_id].roles.add(credit.role.name)
 
     persons = sorted(
         (

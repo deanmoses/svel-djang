@@ -20,6 +20,7 @@ from apps.catalog.models import (
     Theme,
 )
 from apps.catalog.tests.conftest import make_machine_model
+from apps.core.fetch_guard import block_lazy_fetches
 from apps.provenance.display import (
     ClaimDisplayContext,
     FieldValue,
@@ -630,7 +631,7 @@ class TestClaimValue:
 
 
 def _q(fn: Callable[[], object]) -> int:
-    with CaptureQueriesContext(connection) as ctx:
+    with block_lazy_fetches(), CaptureQueriesContext(connection) as ctx:
         fn()
     return len(ctx.captured_queries)
 

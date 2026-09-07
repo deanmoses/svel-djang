@@ -41,7 +41,7 @@ class BoundedTextField(models.TextField[str, str]):
         super().contribute_to_class(cls, name, private_only=private_only)
         _contribute_max_length_check(self, cls, name)
 
-    def formfield(self, **kwargs: Any) -> Any:  # type: ignore[override]  # noqa: ANN401
+    def formfield(self, **kwargs: Any) -> Any:  # noqa: ANN401
         # Django's TextField.formfield() does not propagate max_length to
         # the form field — without this override, admin form validation
         # would skip the length check and let an over-cap value through

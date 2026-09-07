@@ -69,8 +69,10 @@ class Command(BaseCommand):
             "  requiresMachineTarget: boolean;",
             "}",
             "",
-            "export const RELATIONSHIP_TYPE_META: "
-            "Record<RelationshipTypeKey, RelationshipTypeMeta> = {",
+            (
+                "export const RELATIONSHIP_TYPE_META: "
+                "Record<RelationshipTypeKey, RelationshipTypeMeta> = {"
+            ),
             *entries,
             "};",
             "",

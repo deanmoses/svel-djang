@@ -103,13 +103,12 @@ repos:
         # Re-validate on any backend .py change OR an edit to the contracts.
         files: (^backend/.*\.py$|^backend/pyproject\.toml$)
         pass_filenames: false
-      # Static type checking via mypy (with django-stubs plugin) in daemon mode.
-      # dmypy holds the project type graph in memory across commits — cold start
-      # is slow (~30-60s) but every subsequent run is fast and full-project.
-      # If the daemon gets out of sync: run `make mypy-restart`.
+      # Static type checking via mypy (with django-stubs plugin). Always the
+      # full backend tree: incremental cache plus parallel workers keep a
+      # no-change run under a second.
       - id: mypy
-        name: mypy (dmypy)
-        entry: ./scripts/dmypy
+        name: mypy
+        entry: ./scripts/mypy
         language: system
         files: ^backend/.*\.py$
         pass_filenames: false
@@ -142,8 +141,8 @@ repos:
       # Frontend, split across two git stages like the backend tests:
       #   commit -> lint only. It autofixes formatting/style (prettier --write),
       #             which is exactly what you want applied before a commit.
-      #   push   -> type check + vitest. svelte-check has no daemon (unlike
-      #             backend mypy/dmypy) so it's a ~40s cold check, and vitest's
+      #   push   -> type check + vitest. svelte-check has no incremental cache
+      #             (unlike backend mypy) so it's a ~40s cold check, and vitest's
       #             jsdom setup dominates the ~85s suite. Both are expensive
       #             comprehensive verification -> run once per push, not per commit.
       - id: frontend-lint

@@ -192,11 +192,7 @@ def _manufacturer_ref(pm: MachineModel | None) -> EntityRef | None:
     entity (the manufacturer is a property of the corporate entity, not the model)."""
     if pm is None:
         return None
-    mfr = (
-        pm.corporate_entity.manufacturer
-        if pm.corporate_entity and pm.corporate_entity.manufacturer
-        else None
-    )
+    mfr = pm.corporate_entity.manufacturer if pm.corporate_entity else None
     return EntityRef(name=mfr.name, public_id=mfr.public_id) if mfr else None
 
 
@@ -479,12 +475,12 @@ def _serialize_model_detail(pm: MachineModel) -> ModelDetailSchema:
             EntityRef(
                 name=pm.title.franchise.name, public_id=pm.title.franchise.public_id
             )
-            if pm.title and pm.title.franchise
+            if pm.title.franchise
             else None
         ),
         series=(
             EntityRef(name=pm.title.series.name, public_id=pm.title.series.public_id)
-            if pm.title and pm.title.series
+            if pm.title.series
             else None
         ),
         title_models=_serialize_title_models(pm, min_rank=min_rank),
@@ -494,8 +490,6 @@ def _serialize_model_detail(pm: MachineModel) -> ModelDetailSchema:
 def _serialize_title_models(
     pm: MachineModel, *, min_rank: int
 ) -> list[TitleModelSchema]:
-    if pm.title is None:
-        return []
     siblings = [s for s in pm.title.machine_models.all() if s.variant_of_id is None]
     media_by_model = fetch_model_media_map(s.pk for s in siblings)
     return [
@@ -677,9 +671,7 @@ def list_recent_models(request: HttpRequest) -> list[ModelRecentSchema]:
                 name=m.name,
                 slug=m.slug,
                 manufacturer_name=(
-                    m.corporate_entity.manufacturer.name
-                    if m.corporate_entity and m.corporate_entity.manufacturer
-                    else None
+                    m.corporate_entity.manufacturer.name if m.corporate_entity else None
                 ),
                 year=m.year,
                 thumbnail_url=thumbnail_url,

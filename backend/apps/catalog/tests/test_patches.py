@@ -2667,13 +2667,17 @@ def _bad_source(node_body: str) -> str:
         ("name: X\n    source_type: blog", "source_type"),
         ("name: X\n    source_type: web\n    year: 9999", "year"),
         (
-            "name: X\n    source_type: web\n"
-            "    links:\n      - { url: not-a-url, link_type: homepage }",
+            (
+                "name: X\n    source_type: web\n"
+                "    links:\n      - { url: not-a-url, link_type: homepage }"
+            ),
             "url",
         ),
         (
-            "name: X\n    source_type: web\n"
-            "    links:\n      - { url: 'https://a.test/', link_type: bogus }",
+            (
+                "name: X\n    source_type: web\n"
+                "    links:\n      - { url: 'https://a.test/', link_type: bogus }"
+            ),
             "link_type",
         ),
     ],

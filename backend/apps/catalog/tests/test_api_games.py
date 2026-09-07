@@ -27,6 +27,7 @@ from apps.catalog.api.games import (
 )
 from apps.catalog.models import Title
 from apps.catalog.tests.conftest import SAMPLE_IMAGES, make_machine_model
+from apps.core.fetch_guard import block_lazy_fetches
 
 CARD_KEYS = {
     "entity_type",
@@ -176,7 +177,7 @@ class TestGamesList:
             )
 
         def query_count() -> int:
-            with CaptureQueriesContext(connection) as ctx:
+            with block_lazy_fetches(), CaptureQueriesContext(connection) as ctx:
                 client.get("/api/games/?q=Scale%20Encore")
             return len(ctx)
 

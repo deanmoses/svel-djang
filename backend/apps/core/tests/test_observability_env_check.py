@@ -9,7 +9,7 @@ so a rename in the message string doesn't silently break log greps.
 from __future__ import annotations
 
 import pytest
-from pytest_django.fixtures import SettingsWrapper
+from pytest_django.fixtures import Settings
 
 from apps.core.checks import check_observability_env
 
@@ -34,7 +34,7 @@ def sentry_env(monkeypatch: MonkeyPatch) -> None:
 
 class TestObservabilityEnvCheck:
     def test_passes_when_debug_is_true(
-        self, settings: SettingsWrapper, monkeypatch: MonkeyPatch
+        self, settings: Settings, monkeypatch: MonkeyPatch
     ) -> None:
         # DEBUG short-circuits the check before any env reads.
         settings.DEBUG = True
@@ -43,7 +43,7 @@ class TestObservabilityEnvCheck:
         assert check_observability_env(app_configs=None) == []
 
     def test_passes_when_all_env_set(
-        self, settings: SettingsWrapper, sentry_env: None
+        self, settings: Settings, sentry_env: None
     ) -> None:
         _ = sentry_env
         settings.DEBUG = False
@@ -61,7 +61,7 @@ class TestObservabilityEnvCheck:
     )
     def test_errors_per_missing_required_var(
         self,
-        settings: SettingsWrapper,
+        settings: Settings,
         sentry_env: None,
         monkeypatch: MonkeyPatch,
         missing_var: str,
@@ -77,7 +77,7 @@ class TestObservabilityEnvCheck:
 
     def test_whitespace_only_counts_as_empty(
         self,
-        settings: SettingsWrapper,
+        settings: Settings,
         sentry_env: None,
         monkeypatch: MonkeyPatch,
     ) -> None:
@@ -97,7 +97,7 @@ class TestObservabilityEnvCheck:
     )
     def test_dsn_must_have_https_scheme(
         self,
-        settings: SettingsWrapper,
+        settings: Settings,
         sentry_env: None,
         monkeypatch: MonkeyPatch,
         var: str,
@@ -129,7 +129,7 @@ class TestObservabilityEnvCheck:
     )
     def test_dsn_must_have_host_and_project(
         self,
-        settings: SettingsWrapper,
+        settings: Settings,
         sentry_env: None,
         monkeypatch: MonkeyPatch,
         var: str,
@@ -146,7 +146,7 @@ class TestObservabilityEnvCheck:
 
     def test_errors_when_dsns_are_equal(
         self,
-        settings: SettingsWrapper,
+        settings: Settings,
         sentry_env: None,
         monkeypatch: MonkeyPatch,
     ) -> None:
@@ -162,7 +162,7 @@ class TestObservabilityEnvCheck:
 
     def test_errors_when_commit_sha_missing(
         self,
-        settings: SettingsWrapper,
+        settings: Settings,
         sentry_env: None,
         monkeypatch: MonkeyPatch,
     ) -> None:
@@ -179,7 +179,7 @@ class TestObservabilityEnvCheck:
 
     def test_accepts_django_kwargs_forward_compat(
         self,
-        settings: SettingsWrapper,
+        settings: Settings,
         sentry_env: None,
     ) -> None:
         _ = sentry_env

@@ -113,17 +113,15 @@ def _system_detail_qs() -> QuerySet[System]:
 
 
 def _serialize_system_detail(system: System) -> SystemDetailSchema:
-    sibling_systems: list[EntityRef] = []
-    if system.manufacturer:
-        sibling_systems = [
-            EntityRef(name=row["name"], public_id=row["slug"])
-            for row in System.objects.active()
-            .filter(manufacturer=system.manufacturer)
-            .exclude(pk=system.pk)
-            .annotate(latest_year=Max("machine_models__year"))
-            .order_by(F("latest_year").desc(nulls_last=True), "name")
-            .values("name", "slug")
-        ]
+    sibling_systems = [
+        EntityRef(name=row["name"], public_id=row["slug"])
+        for row in System.objects.active()
+        .filter(manufacturer=system.manufacturer)
+        .exclude(pk=system.pk)
+        .annotate(latest_year=Max("machine_models__year"))
+        .order_by(F("latest_year").desc(nulls_last=True), "name")
+        .values("name", "slug")
+    ]
 
     return SystemDetailSchema(
         name=system.name,

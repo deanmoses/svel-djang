@@ -9,7 +9,7 @@ echo "==> Backend import boundaries..."
 (cd backend && uv run lint-imports)
 
 echo "==> Backend type check..."
-(cd backend && uv run mypy --config-file pyproject.toml .)
+./scripts/mypy
 
 echo "==> Frontend lint..."
 (cd frontend && pnpm lint)
