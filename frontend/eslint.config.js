@@ -61,6 +61,8 @@ const NO_NON_UI = {
   group: ['$lib/components/**', '!$lib/components/ui', '!$lib/components/ui/**'],
   message: 'ui/ is primitives-only — it may not import from any sibling components folder.',
 };
+// Files that get type-aware linting; see the typed block near the bottom.
+const TYPED_FILES = ['src/**/*.ts'];
 const SRC_FILES = [
   'src/**/*.ts',
   'src/**/*.js',
@@ -256,6 +258,66 @@ export default ts.config(
       'vitest/prefer-called-exactly-once-with': 'off',
       'vitest/valid-expect': 'off',
       'vitest/valid-title': 'off',
+    },
+  },
+  //
+  // Type-aware rules. Scoped to src TypeScript: pulling type information into
+  // `.svelte` takes lint from ~14s to ~85s, and svelte-eslint-parser types
+  // snippet and callback-prop parameters as `any` where the compiler types them
+  // properly, so the unsafe-* family reports over a thousand phantom findings
+  // there.
+  //
+  ...ts.configs.strictTypeChecked.map((c) => ({ ...c, files: TYPED_FILES })),
+  {
+    files: TYPED_FILES,
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {
+      // strictTypeChecked resets this to bare `error`, dropping the `^_`
+      // convention configured above.
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+      '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true }],
+      '@typescript-eslint/no-confusing-void-expression': [
+        'error',
+        {
+          ignoreArrowShorthand: true,
+          ignoreVoidOperator: true,
+          ignoreVoidReturningFunctions: true,
+        },
+      ],
+      // SvelteKit declares error() and redirect() as returning `never`, so
+      // every `throw error(...)` trips this and no configuration satisfies it.
+      '@typescript-eslint/only-throw-error': 'off',
+      // Off pending cleanup.
+      '@typescript-eslint/no-deprecated': 'off',
+      '@typescript-eslint/no-dynamic-delete': 'off',
+      '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/no-misused-promises': 'off',
+      '@typescript-eslint/no-misused-spread': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/no-redundant-type-constituents': 'off',
+      '@typescript-eslint/no-unnecessary-boolean-literal-compare': 'off',
+      '@typescript-eslint/no-unnecessary-condition': 'off',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+      '@typescript-eslint/no-unnecessary-type-parameters': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/unbound-method': 'off',
     },
   },
   {
