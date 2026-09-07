@@ -1908,6 +1908,13 @@ class TestExtractEndpoint:
 
         resp = _post(client, EXTRACT_URL, {"input": "9780596517748"})
         assert resp.status_code == 429
+        assert int(resp["Retry-After"]) > 0
+        # Ninja's throttle 429 is routed into the same structured body every
+        # other rate-limited route emits, so one frontend branch handles both.
+        detail = resp.json()["detail"]
+        assert detail["kind"] == "rate_limit"
+        assert detail["bucket"] == "extract_citation_source"
+        assert detail["retry_after"] == int(resp["Retry-After"])
 
     @patch("apps.citation.api.extract_url")
     def test_extract_url_returns_draft(self, mock_extract, client, user):
