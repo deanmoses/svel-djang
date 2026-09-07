@@ -8,7 +8,6 @@ export default defineConfig({
   test: {
     projects: [
       {
-        extends: true,
         test: {
           name: 'unit',
           include: ['src/**/*.{test,spec}.{js,ts}'],
@@ -16,7 +15,6 @@ export default defineConfig({
         },
       },
       {
-        extends: true,
         test: {
           name: 'dom',
           environment: 'jsdom',

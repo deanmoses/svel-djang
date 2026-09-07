@@ -4,14 +4,24 @@
 // the behavior the first two tests pin.
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { GET, POST, registerOnPolicyDenied, setUser, setTag, isInitialized } = vi.hoisted(() => ({
-  GET: vi.fn(),
-  POST: vi.fn(),
-  registerOnPolicyDenied: vi.fn(),
-  setUser: vi.fn(),
-  setTag: vi.fn(),
-  isInitialized: vi.fn(() => true),
-}));
+const { GET, POST, policyDeniedCallbacks, registerOnPolicyDenied, setUser, setTag, isInitialized } =
+  vi.hoisted(() => {
+    // The registration happens once, at module-import time, so it can't be
+    // asserted through the mock's own call history — that is cleared before
+    // every test. Record the callback in a plain array instead.
+    const policyDeniedCallbacks: Array<() => void> = [];
+    return {
+      GET: vi.fn(),
+      POST: vi.fn(),
+      policyDeniedCallbacks,
+      registerOnPolicyDenied: vi.fn((cb: () => void) => {
+        policyDeniedCallbacks.push(cb);
+      }),
+      setUser: vi.fn(),
+      setTag: vi.fn(),
+      isInitialized: vi.fn(() => true),
+    };
+  });
 
 vi.mock('$lib/api/client', () => ({
   default: { GET, POST },
@@ -41,12 +51,12 @@ describe('auth store', () => {
     // The auth store wires `auth.refresh()` into the client's policy-
     // denied hook at import time. If this assertion ever fails, the
     // browser-side 403 invalidation is silently disabled.
-    expect(registerOnPolicyDenied).toHaveBeenCalledTimes(1);
-    expect(registerOnPolicyDenied).toHaveBeenCalledWith(expect.any(Function));
+    expect(policyDeniedCallbacks).toHaveLength(1);
+    expect(policyDeniedCallbacks[0]).toBeTypeOf('function');
   });
 
   it('the registered callback triggers auth.refresh()', async () => {
-    const cb = registerOnPolicyDenied.mock.calls[0]?.[0] as () => void;
+    const cb = policyDeniedCallbacks[0];
     expect(cb).toBeDefined();
 
     const callsBefore = GET.mock.calls.length;

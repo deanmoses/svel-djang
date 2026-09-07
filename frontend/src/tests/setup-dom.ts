@@ -2,6 +2,13 @@
 
 import '@testing-library/jest-dom/vitest';
 
+// Registers Testing Library's DOM auto-cleanup. The `svelteTesting()` Vite
+// plugin also tries to inject this by appending to `test.setupFiles`, but that
+// runs against the root config only — this project's own `setupFiles` wins, so
+// without the explicit import nothing ever unmounts and renders pile up in one
+// `<body>`.
+import '@testing-library/svelte/vitest';
+
 // jsdom does not implement scrollIntoView
 Element.prototype.scrollIntoView ??= function () {};
 
