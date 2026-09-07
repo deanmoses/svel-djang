@@ -67,7 +67,7 @@ export function createPaginatedLoader<T>(
   function loadMore() {
     if (loadingMore || !hasMore) return;
     loadingMore = true;
-    fetchNextPage().finally(() => {
+    void fetchNextPage().finally(() => {
       loadingMore = false;
     });
   }

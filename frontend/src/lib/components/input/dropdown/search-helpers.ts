@@ -32,7 +32,7 @@ export function createDebouncedSearch<T>(
       if (query) {
         timer = setTimeout(() => void run(), delay);
       } else {
-        run();
+        void run();
       }
     },
     cancel() {
