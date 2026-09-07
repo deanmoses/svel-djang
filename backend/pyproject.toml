@@ -151,6 +151,7 @@ line-ending = "lf"
 [tool.mypy]
 python_version = "3.14"
 strict = true
+extra_checks = true
 plugins = ["mypy_django_plugin.main"]
 explicit_package_bases = true
 exclude = [
