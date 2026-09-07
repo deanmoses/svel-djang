@@ -36,7 +36,7 @@ class RouteOperation(NamedTuple):
 
 def iter_operations(api: NinjaAPI) -> Iterator[RouteOperation]:
     """Yield a :class:`RouteOperation` for every registered operation."""
-    for prefix, router in api._routers:
+    for prefix, router in api._routers:  # noqa: SLF001 — django-ninja exposes no public router enumeration
         for path, path_view in router.path_operations.items():
             for op in path_view.operations:
                 # Most apps register a router prefix that ends in `/`

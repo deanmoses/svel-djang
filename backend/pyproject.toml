@@ -102,6 +102,7 @@ select = [
     "RET",    # flake8-return
     "RSE",    # flake8-raise
     "RUF",    # ruff-specific
+    "SLF",    # flake8-self (private member access)
     "SLOT",   # flake8-slots
     "TRY",    # tryceratops
 ]
@@ -129,15 +130,20 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"*/tests/*.py" = ["S106", "S603", "S607", "TRY301"]  # hardcoded test passwords, subprocess, raise-in-try as the test subject
+"*/tests/*.py" = ["S106", "S603", "S607", "TRY301", "SLF001"]  # hardcoded test passwords, subprocess, raise-in-try as the test subject, reaching into internals
 "manage.py" = ["T20"]
 "apps/*/management/commands/*.py" = ["T20", "S603", "S607", "B904"]  # print, subprocess, raise-from in commands
 "scripts/*.py" = ["T201"]
+"tests/*.py" = ["SLF001"]  # the `*/tests/*.py` glob above does not reach the top-level suite
 "apps/catalog/tests/benchmark_game_rows.py" = ["T201"]  # a __main__ CLI harness, not a test
 # Django system checks accumulate Error objects with long multi-line messages
 # behind a guard. Folding those into a generator expression puts the condition
 # after the six-line message, for no measurable gain at startup.
 "**/checks.py" = ["PERF401"]
+
+[tool.ruff.lint.flake8-self]
+# Django's introspection API. The model-driven catalog is built on walking it.
+extend-ignore-names = ["_meta", "_default_manager"]
 
 [tool.ruff.lint.flake8-builtins]
 # `type` and `id` are django-ninja query-parameter names, so they're the wire
