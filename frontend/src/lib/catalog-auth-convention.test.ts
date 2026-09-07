@@ -55,16 +55,12 @@ const NEW_GATE_HELPERS: readonly GateHelper[] = [
   { module: '$lib/catalog-new-with-parent-page.server', entry: 'loadCreateWithParent' },
 ];
 
-function escapeRegExp(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 function importsRequireCapability(src: string): boolean {
   return /from\s+['"]\$lib\/require-capability\.server['"]/.test(src);
 }
 
 function usesActivity(src: string, activity: string): boolean {
-  return new RegExp(`activity:\\s*['"]${activity.replace('.', '\\.')}['"]`).test(src);
+  return new RegExp(`activity:\\s*['"]${RegExp.escape(activity)}['"]`).test(src);
 }
 
 // True only if the route actually delegates to the helper — re-exports its
@@ -72,14 +68,14 @@ function usesActivity(src: string, activity: string): boolean {
 // the route's load is NOT delegation (the route could still export its own
 // ungated load), so it must not satisfy the convention.
 function delegatesTo(src: string, helper: GateHelper): boolean {
-  const mod = escapeRegExp(helper.module);
+  const mod = RegExp.escape(helper.module);
   // Re-export form: `export { ssr, load } from '<module>'`.
   if (new RegExp(`export\\s*\\{[^}]*\\bload\\b[^}]*\\}\\s*from\\s+['"]${mod}['"]`).test(src)) {
     return true;
   }
   // Call form: import the entry from <module> and invoke it.
   if (helper.entry && new RegExp(`from\\s+['"]${mod}['"]`).test(src)) {
-    return new RegExp(`\\b${escapeRegExp(helper.entry)}\\s*\\(`).test(src);
+    return new RegExp(`\\b${RegExp.escape(helper.entry)}\\s*\\(`).test(src);
   }
   return false;
 }

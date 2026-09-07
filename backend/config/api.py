@@ -1,4 +1,5 @@
 import importlib
+import math
 from typing import Never
 
 from django.apps import apps
@@ -7,7 +8,7 @@ from django.db import connection
 from django.db.models import Max
 from django.http import HttpRequest, JsonResponse
 from ninja import NinjaAPI, Schema
-from ninja.errors import HttpError, ValidationError
+from ninja.errors import HttpError, Throttled, ValidationError
 from ninja.security import django_auth
 
 from apps.catalog.api.export import export_rate_limit_summary, export_router
@@ -18,6 +19,7 @@ from apps.core.authz.types import Activity
 from apps.core.cache_control import public_api_freshness_summary
 from apps.core.exceptions import StructuredApiError, StructuredValidationError
 from apps.provenance.models import IngestRun
+from apps.provenance.rate_limits import RateLimitExceededError
 
 # Internal API: every listing/read/write endpoint that powers this site's own UI.
 # Its OpenAPI + docs endpoints are DISABLED, so the internal surface is never
@@ -207,6 +209,31 @@ def _handle_structured_api_error(
     request: HttpRequest, exc: StructuredApiError
 ) -> JsonResponse:
     return _structured_error_response(exc)
+
+
+# Ninja's own ``throttle=`` rejection raises ``Throttled``, whose default body
+# is a bare ``{"detail": "Too many requests."}`` — a second 429 shape alongside
+# the ``{detail: {kind: "rate_limit", ...}}`` every ``@rate_limited`` route
+# emits. Rendering it through the shared helper collapses the two, so the
+# frontend has one 429 branch regardless of which limiter fired.
+@api.exception_handler(Throttled)
+@public_api.exception_handler(Throttled)
+def _handle_throttled(request: HttpRequest, exc: Throttled) -> JsonResponse:
+    # ``Throttled`` carries only ``wait``, so the bucket name comes from the
+    # resolved route rather than the throttle class. Ninja names each URL after
+    # its view function, which reads as well as the hand-picked bucket strings
+    # ("create", "export") the decorator-based limiter uses.
+    match = request.resolver_match
+    bucket = (match.url_name if match else None) or "request"
+    # Ninja stamps its own Retry-After over ours after this returns; both are
+    # ``ceil(wait)``, so header and body agree. A ``wait`` of None means the
+    # throttle declined to estimate — claim the shortest retry we can express.
+    return _structured_error_response(
+        RateLimitExceededError(
+            bucket=bucket,
+            retry_after=math.ceil(exc.wait) if exc.wait is not None else 1,
+        )
+    )
 
 
 # Pydantic ``loc`` paths begin with the request source — strip these so the

@@ -25,7 +25,7 @@ from apps.actors.models import Actor
 from apps.core.api_helpers import authed_user
 from apps.core.authz.markers import requires
 from apps.core.authz.types import Activity
-from apps.core.schemas import ErrorDetailSchema
+from apps.core.schemas import ErrorDetailSchema, RateLimitErrorSchema
 from apps.core.types import CitationSourceId
 
 from .citation_types import citation_type_spec
@@ -604,7 +604,7 @@ class _ExtractThrottle(AuthRateThrottle):
     response={
         200: CitationExtractResultSchema,
         422: ErrorDetailSchema,
-        429: ErrorDetailSchema,
+        429: RateLimitErrorSchema,
     },
     auth=django_auth,
     throttle=[_ExtractThrottle("10/m")],

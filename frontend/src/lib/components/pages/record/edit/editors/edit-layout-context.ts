@@ -1,19 +1,18 @@
-import { getContext, setContext } from 'svelte';
+import { createContext } from 'svelte';
 
 type EditLayoutContext = {
   setDirty: (dirty: boolean) => void;
 };
 
-const EDIT_LAYOUT_CONTEXT_KEY = Symbol('editLayout');
+const [read, write, has] = createContext<EditLayoutContext>();
 
 export function setEditLayoutContext(context: EditLayoutContext): void {
-  setContext(EDIT_LAYOUT_CONTEXT_KEY, context);
+  write(context);
 }
 
 export function getEditLayoutContext(): EditLayoutContext {
-  const context = getContext<EditLayoutContext | undefined>(EDIT_LAYOUT_CONTEXT_KEY);
-  if (!context) {
+  if (!has()) {
     throw new Error('editLayout context missing — must be rendered inside an edit section layout');
   }
-  return context;
+  return read();
 }

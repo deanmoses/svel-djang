@@ -81,6 +81,7 @@ module.exports = {
     'font-family-no-missing-generic-family-keyword': true,
     'keyframe-block-no-duplicate-selectors': true,
     'selector-anb-no-unmatchable': true,
+    'selector-no-unmatchable': true,
     'selector-type-no-unknown': true,
     'selector-pseudo-class-no-unknown': true,
     'selector-pseudo-element-no-unknown': true,

@@ -1,13 +1,14 @@
 <script lang="ts">
-  import { setContext, untrack, type Snippet } from 'svelte';
+  import { untrack, type Snippet } from 'svelte';
 
   import { floating } from '$lib/actions/floating';
+  import { setMenuRole, type MenuRole } from './menu-context';
 
   type Props = {
     label: string;
     disabled?: boolean;
     variant?: 'default' | 'heading' | 'pill' | 'bare';
-    role?: 'menu' | 'listbox';
+    role?: MenuRole;
     ariaLabel?: string;
     trigger?: Snippet;
     children: Snippet;
@@ -23,16 +24,13 @@
     children,
   }: Props = $props();
 
-  const role: 'menu' | 'listbox' = $derived(roleProp ?? (variant === 'pill' ? 'listbox' : 'menu'));
+  const role: MenuRole = $derived(roleProp ?? (variant === 'pill' ? 'listbox' : 'menu'));
   const placement = $derived(
     variant === 'pill' ? 'top-start' : variant === 'heading' ? 'bottom-start' : 'bottom-end',
   );
   // Context captures the role at construction time and is read once by descendants;
   // role is stable for the lifetime of the component for all current call sites.
-  setContext<'menu' | 'listbox'>(
-    'action-menu-role',
-    untrack(() => role),
-  );
+  setMenuRole(untrack(() => role));
 
   let open = $state(false);
   let triggerEl: HTMLButtonElement | undefined = $state();

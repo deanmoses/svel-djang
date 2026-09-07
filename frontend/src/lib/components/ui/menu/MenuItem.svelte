@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { getContext, type Snippet } from 'svelte';
+  import type { Snippet } from 'svelte';
+
+  import { getMenuRole } from './menu-context';
 
   let {
     href = undefined,
@@ -20,7 +22,7 @@
     children: Snippet;
   } = $props();
 
-  const parentRole = getContext<'menu' | 'listbox'>('action-menu-role') ?? 'menu';
+  const parentRole = getMenuRole();
   const itemRole = parentRole === 'listbox' ? 'option' : 'menuitem';
   const ariaSelected = $derived(parentRole === 'listbox' ? current : undefined);
 </script>
