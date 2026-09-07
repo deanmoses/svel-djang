@@ -39,6 +39,25 @@ jobs:
     defaults:
       run:
         working-directory: backend
+    # CI is the only place the Postgres query paths run; dev and the hooks stay
+    # on SQLite so the DuckDB analytics layer and Docker-free setup keep working.
+    env:
+      DATABASE_URL: postgres://postgres@127.0.0.1:5432/postgres
+    services:
+      postgres:
+        # Matches Railway prod, and PG_IMAGE in scripts/prod-to-sqlite.sh.
+        image: postgres:17
+        # No password to leak. Safe only because this container is reachable
+        # from its own single-tenant runner; don't copy it to a shared host.
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7

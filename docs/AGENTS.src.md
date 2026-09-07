@@ -320,6 +320,10 @@ Do NOT skip step 1. Do NOT write the fix first "to understand the problem" and b
 
 For new behavior, include tests. Consider writing the test first, though sometimes that's more trouble than it's worth.
 
+### The test database: Postgres in CI, SQLite locally
+
+CI runs the backend suite against Postgres, while `make test`, the pre-commit hooks and dev all use SQLite, so a test can pass locally and fail in CI. For a local Postgres, see [docs/Data.md](Data.md#postgres).
+
 ## Strong Typing (backend)
 
 Code MUST be as strongly typed as possible. Types do two jobs: **catch errors** and **document intent** — so a named type can be worth it even when it adds no checker safety (e.g. a semantic alias `Slug = str`). See [docs/Python.md](Python.md) for the strictness-vs-intent split.
