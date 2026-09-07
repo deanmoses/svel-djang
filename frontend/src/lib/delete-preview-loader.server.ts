@@ -69,5 +69,5 @@ export async function loadDeletePreview<E extends DeletePreviewEntity>({
     throw new Error(`Failed to load delete preview (${status})`);
   }
 
-  return { preview: data as DeletePreviewResponse<E>, public_id };
+  return { preview: data, public_id };
 }

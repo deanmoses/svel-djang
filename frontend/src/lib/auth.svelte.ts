@@ -45,7 +45,7 @@ function createAuthStore() {
       username: data.username ?? null,
       firstName: data.first_name ?? '',
       lastName: data.last_name ?? '',
-      capabilities: (data.capabilities ?? {}) as Partial<Record<Activity, boolean>>,
+      capabilities: data.capabilities ?? {},
     };
     loaded = true;
     syncSentryUser(state);

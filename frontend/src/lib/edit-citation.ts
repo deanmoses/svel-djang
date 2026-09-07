@@ -48,7 +48,7 @@ export function countPendingChanges(body: PatchBody | null): number {
     if (key === 'note' || key === 'citations' || value == null) continue;
 
     if (key === 'fields' && typeof value === 'object' && !Array.isArray(value)) {
-      count += Object.keys(value as Record<string, unknown>).length;
+      count += Object.keys(value).length;
       continue;
     }
 

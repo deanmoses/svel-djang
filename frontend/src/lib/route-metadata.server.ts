@@ -123,7 +123,7 @@ function buildAuthGatedPrefixes(): ReadonlySet<string> {
     eager: true,
     query: '?raw',
     import: 'default',
-  }) as Record<string, string>;
+  });
   const prefixes = new Set<string>();
   for (const [path, source] of Object.entries(modules)) {
     if (!/from\s+['"]\$lib\/require-capability\.server['"]/.test(source)) continue;
