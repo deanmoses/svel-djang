@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import os
 import re
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
+
+pytestmark = pytest.mark.analytics
 
 DUCKDB = shutil.which("duckdb")
 RUNNER = Path(__file__).parents[3] / "scripts" / "analysis" / "analysis"
@@ -28,9 +32,42 @@ def table_names(database: Path) -> list[str]:
     ).splitlines()
 
 
+@pytest.fixture(scope="session")
+def runner_env(tmp_path_factory: pytest.TempPathFactory) -> dict[str, str]:
+    """Run the analysis runner against a throwaway empty catalog.
+
+    Its defaults are the developer's own ``db.sqlite3`` and ``db.analytics.duckdb``.
+    Pointing both somewhere else leaves that snapshot alone and drops what these
+    tests spend on rows they never read: they assert on relation names and
+    structure, while ``browse`` materializes every public relation -- over the real
+    catalog, a hundred and thirty megabytes, three times in one test.
+
+    Migrating the source rather than reusing the real one also keeps the schema the
+    build reads in step with the migrations in the tree, which is what makes these
+    tests the gate on foundation-vs-model drift.
+    """
+    workdir = tmp_path_factory.mktemp("analysis")
+    source = workdir / "catalog.sqlite3"
+    migrate = subprocess.run(
+        [sys.executable, "manage.py", "migrate", "--noinput"],
+        cwd=Path(__file__).parents[2],
+        env={**os.environ, "DATABASE_URL": f"sqlite:///{source}"},
+        capture_output=True,
+        text=True,
+    )
+    assert migrate.returncode == 0, (
+        f"migrating the throwaway catalog failed:\n{migrate.stderr}"
+    )
+    return {
+        **os.environ,
+        "FLIPCOMMONS_ANALYSIS_SOURCE_DB": str(source),
+        "FLIPCOMMONS_ANALYSIS_SNAPSHOT": str(workdir / "analytics.duckdb"),
+    }
+
+
 @pytest.mark.skipif(DUCKDB is None, reason="DuckDB CLI is not installed")
 def test_browse_materializes_public_relations_and_replaces_previous_output(
-    tmp_path: Path,
+    tmp_path: Path, runner_env: dict[str, str]
 ) -> None:
     analysis = tmp_path / "example.sql"
     output = tmp_path / "example.browse.duckdb"
@@ -45,6 +82,7 @@ def test_browse_materializes_public_relations_and_replaces_previous_output(
 
     first = subprocess.run(
         [RUNNER, "browse", analysis],
+        env=runner_env,
         check=True,
         capture_output=True,
         text=True,
@@ -74,6 +112,7 @@ def test_browse_materializes_public_relations_and_replaces_previous_output(
     )
     subprocess.run(
         [RUNNER, "browse", analysis],
+        env=runner_env,
         check=True,
         capture_output=True,
         text=True,
@@ -89,6 +128,7 @@ def test_browse_materializes_public_relations_and_replaces_previous_output(
     )
     failed = subprocess.run(
         [RUNNER, "browse", analysis],
+        env=runner_env,
         check=False,
         capture_output=True,
         text=True,
@@ -99,9 +139,10 @@ def test_browse_materializes_public_relations_and_replaces_previous_output(
     assert list(tmp_path.glob("*.tmp.*")) == []
 
 
-def describe() -> str:
+def describe(env: dict[str, str]) -> str:
     return subprocess.run(
         [RUNNER, "describe"],
+        env=env,
         check=True,
         capture_output=True,
         text=True,
@@ -109,8 +150,10 @@ def describe() -> str:
 
 
 @pytest.mark.skipif(DUCKDB is None, reason="DuckDB CLI is not installed")
-def test_describe_groups_the_foundation_and_leads_with_the_spine() -> None:
-    relations, _, macros = describe().partition("— macros —")
+def test_describe_groups_the_foundation_and_leads_with_the_spine(
+    runner_env: dict[str, str],
+) -> None:
+    relations, _, macros = describe(runner_env).partition("— macros —")
 
     headers = [ln for ln in relations.splitlines() if ln.startswith("═══")]
     assert headers, "the foundation listing is not grouped"
@@ -131,7 +174,7 @@ def test_describe_groups_the_foundation_and_leads_with_the_spine() -> None:
 
 
 @pytest.mark.skipif(DUCKDB is None, reason="DuckDB CLI is not installed")
-def test_every_public_relation_is_grouped() -> None:
+def test_every_public_relation_is_grouped(runner_env: dict[str, str]) -> None:
     # UNGROUPED is what a relation the index missed lists under, so its absence is the
     # anchor for the source parse behind the index: a rotted regex empties the groups.
-    assert "UNGROUPED" not in describe()
+    assert "UNGROUPED" not in describe(runner_env)

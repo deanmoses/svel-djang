@@ -170,6 +170,8 @@ repos:
       #   commit -> the suite, parallelized by `-n auto` in backend/pytest.ini.
       #   push   -> the same suite again, as the comprehensive gate for the code
       #             being pushed (pre-commit-stage hooks don't re-run on push).
+      # Both leave out the `analytics` marker, which pytest.ini deselects by default;
+      # the hook below is what runs it.
       - id: backend-test
         name: backend tests
         entry: uv run --directory backend pytest
@@ -181,5 +183,25 @@ repos:
         entry: uv run --directory backend pytest
         language: system
         files: ^backend/
+        pass_filenames: false
+        stages: [pre-push]
+      # Push-stage, like the expensive suites before it: three tests that each build a
+      # DuckDB foundation from scratch and together cost as much as the other 5000.
+      #
+      # The scope reaches past the analysis layer because what these catch is DRIFT
+      # between it and the models: the sql/ files read Django's tables column by
+      # column, so a schema change breaks the build as readily as an edit to the SQL
+      # does. Migrations are the whole of that channel -- a model edit that produces
+      # none changes nothing the build can see -- and entity_registry.sql, which bakes
+      # db_table names, is generated into scripts/analysis/ and covered already. The
+      # rest of backend/ cannot reach the foundation, so it does not pay for this.
+      #
+      # `-n 0` because the three share one foundation through a session fixture, and
+      # spreading them over workers rebuilds it per worker -- serial is faster here.
+      - id: backend-test-analytics
+        name: analysis runner tests
+        entry: uv run --directory backend pytest -m analytics -n 0
+        language: system
+        files: ^(scripts/analysis/|backend/scripts/tests/|backend/pytest\.ini|backend/apps/.*/migrations/)
         pass_filenames: false
         stages: [pre-push]

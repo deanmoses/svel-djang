@@ -59,8 +59,12 @@ root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 
 need() { command -v duckdb >/dev/null 2>&1 || { echo "duckdb not on PATH" >&2; exit 127; }; }
 
-source_db="$root/backend/db.sqlite3"
-snapshot="$root/backend/db.analytics.duckdb"
+# Overridable together, so a caller can build a whole foundation somewhere else: an
+# empty catalog and a scratch snapshot leave the developer's own alone, and every
+# per-relation materialization downstream -- `browse` above all -- costs a fraction of
+# what it costs over the real catalog.
+source_db="${FLIPCOMMONS_ANALYSIS_SOURCE_DB:-$root/backend/db.sqlite3}"
+snapshot="${FLIPCOMMONS_ANALYSIS_SNAPSHOT:-$root/backend/db.analytics.duckdb}"
 sqldir="$root/scripts/analysis/sql"
 entry="scripts/analysis/sql/analytics.sql"
 

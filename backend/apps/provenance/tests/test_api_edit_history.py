@@ -15,6 +15,7 @@ from apps.provenance.test_factories import (
     make_claim,
     make_ingest_source,
     source_changeset,
+    user_changeset,
 )
 
 
@@ -478,10 +479,8 @@ class TestEditHistoryQueryCount:
         url = f"/api/pages/edit-history/model/{pm.slug}/"
 
         def edit(year: int) -> None:
-            client.patch(
-                f"/api/models/{pm.slug}/claims/",
-                data=f'{{"fields": {{"production_year": {year}}}}}',
-                content_type="application/json",
+            make_claim(
+                pm, "production_year", year, user=user, changeset=user_changeset(user)
             )
 
         edit(1998)
