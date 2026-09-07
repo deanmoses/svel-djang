@@ -101,6 +101,7 @@ select = [
     "RSE",    # flake8-raise
     "RUF",    # ruff-specific
     "SLOT",   # flake8-slots
+    "TRY",    # tryceratops
 ]
 ignore = [
     "E501",  # Line too long — handled by formatter
@@ -119,10 +120,14 @@ ignore = [
     # passed as claim *values*, not as flags. FBT001/FBT002 still guard the
     # definition side, which is where a boolean trap actually gets built.
     "FBT003",
+    "TRY003", # error copy belongs at the raise site, not in an exception class
+    # Pydantic field validators must raise ValueError to become a 422; a
+    # TypeError escapes as a 500.
+    "TRY004",
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"*/tests/*.py" = ["S106", "S603", "S607"]  # hardcoded test passwords, subprocess in tests
+"*/tests/*.py" = ["S106", "S603", "S607", "TRY301"]  # hardcoded test passwords, subprocess, raise-in-try as the test subject
 "manage.py" = ["T20"]
 "apps/*/management/commands/*.py" = ["T20", "S603", "S607", "B904"]  # print, subprocess, raise-from in commands
 "scripts/*.py" = ["T201"]
