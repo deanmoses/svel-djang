@@ -85,6 +85,7 @@ select = [
     "FA",     # flake8-future-annotations
     "FLY",    # flynt (static str.join of literals -> f-string)
     "ICN",    # flake8-import-conventions
+    "INP",    # flake8-no-pep420 (implicit namespace packages)
     "INT",    # flake8-gettext (f-strings in translation calls)
     "TC010",  # runtime string annotation in a union — fails at runtime
     "A",      # flake8-builtins (shadowing builtins)
