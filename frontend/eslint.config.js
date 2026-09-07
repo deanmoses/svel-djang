@@ -63,6 +63,13 @@ const NO_NON_UI = {
 };
 // Files that get type-aware linting; see the typed block near the bottom.
 const TYPED_FILES = ['src/**/*.ts'];
+// Test code exercised by the production-only typed rules below.
+const TYPED_TEST_FILES = [
+  'src/**/*.test.ts',
+  'src/**/*.spec.ts',
+  'src/tests/**',
+  'src/**/*.fixture.ts',
+];
 const SRC_FILES = [
   'src/**/*.ts',
   'src/**/*.js',
@@ -312,6 +319,19 @@ export default ts.config(
       '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/require-await': 'off',
       '@typescript-eslint/unbound-method': 'off',
+    },
+  },
+  {
+    // Rules whose findings are almost entirely stub casts when pointed at
+    // tests — `as unknown as Parameters<typeof load>[0]` and the like, which
+    // are deliberate. Production code is where they earn their keep.
+    files: TYPED_FILES,
+    ignores: TYPED_TEST_FILES,
+    rules: {
+      '@typescript-eslint/no-non-null-assertion': 'error',
+      '@typescript-eslint/no-unsafe-argument': 'error',
+      '@typescript-eslint/no-unsafe-call': 'error',
+      '@typescript-eslint/unbound-method': 'error',
     },
   },
   {
