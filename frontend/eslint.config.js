@@ -330,6 +330,7 @@ export default ts.config(
     rules: {
       '@typescript-eslint/no-non-null-assertion': 'error',
       '@typescript-eslint/no-unsafe-argument': 'error',
+      '@typescript-eslint/no-unsafe-return': 'error',
       '@typescript-eslint/no-unsafe-call': 'error',
       '@typescript-eslint/unbound-method': 'error',
     },

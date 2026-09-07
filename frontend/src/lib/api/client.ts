@@ -37,7 +37,7 @@ function getBrowserClient(): ApiClient {
 // Do not replace this Proxy with a direct createApiClient() call at module scope.
 const client = new Proxy({} as ApiClient, {
   get(_target, prop, receiver) {
-    return Reflect.get(getBrowserClient(), prop, receiver);
+    return Reflect.get(getBrowserClient(), prop, receiver) as ApiClient[keyof ApiClient];
   },
 });
 
