@@ -106,7 +106,7 @@
       const { data } = await client.GET('/api/citation-sources/search/', {
         params: { query: { q } },
       });
-      return (data as CitationSourceSearchResponseSchema | undefined) ?? emptyResponse;
+      return data ?? emptyResponse;
     },
     (response) => {
       recognition = response.recognition ?? null;

@@ -97,16 +97,16 @@
   async function fetchChildren() {
     loading = true;
     loadError = false;
-    const { data, error } = await client.GET('/api/citation-sources/{source_id}/children/', {
+    const { data } = await client.GET('/api/citation-sources/{source_id}/children/', {
       params: { path: { source_id: parentContext.id } },
     });
-    if (error || !data) {
+    if (!data) {
       loading = false;
       loadError = true;
       return;
     }
     // Already newest-first (year desc, undated last) from the endpoint.
-    allChildren = data as ChildSource[];
+    allChildren = data;
     children = allChildren;
     loading = false;
   }
@@ -121,7 +121,7 @@
       const { data } = await client.GET('/api/citation-sources/{source_id}/children/', {
         params: { path: { source_id: parentContext.id }, query: { q } },
       });
-      return (data as ChildSource[] | undefined) ?? [];
+      return data ?? [];
     },
     (results) => {
       children = results;

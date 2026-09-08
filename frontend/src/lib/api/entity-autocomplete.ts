@@ -28,15 +28,11 @@ export const AUTOCOMPLETE_RESULT_LIMIT = 20;
  * blank. Throws on a non-2xx response (e.g. an unknown `type` → 400).
  */
 export async function autocompleteEntities(type: string, q: string): Promise<EntityOption[]> {
-  const { data, error, response } = await client.GET('/api/entity-autocomplete/', {
+  const { data, response } = await client.GET('/api/entity-autocomplete/', {
     params: { query: { type, q } },
   });
-  // Read status before the guard: this endpoint declares no error response, so
-  // `error` is typed `never` and narrowing inside the guard would make
-  // `response` unreachable (matches the searchLinkTargets pattern).
-  const status = response.status;
-  if (error || !data) {
-    throw new Error(`Failed to autocomplete ${type}: ${status}`);
+  if (!data) {
+    throw new Error(`Failed to autocomplete ${type}: ${response.status}`);
   }
   return data.results;
 }

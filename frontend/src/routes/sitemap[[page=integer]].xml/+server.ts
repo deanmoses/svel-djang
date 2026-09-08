@@ -144,8 +144,8 @@ export const GET: RequestHandler = async ({ fetch, url, request, params }) => {
   }
 
   const client = createServerClient(fetch, url, request);
-  const { data, error } = await client.GET('/api/sitemap/');
-  if (error || !data) {
+  const { data } = await client.GET('/api/sitemap/');
+  if (!data) {
     return new Response('Sitemap unavailable', {
       status: 502,
       headers: { 'Cache-Control': NO_STORE },
