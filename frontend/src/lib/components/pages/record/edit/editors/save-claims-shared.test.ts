@@ -39,7 +39,7 @@ describe('saveSimpleTaxonomyClaims', () => {
       params: { path: { public_id: 'wide-body' } },
       body: { fields: { slug: 'widebody' }, note: '', citations: [], inline_citations: [] },
     });
-    expect(invalidateAll).toHaveBeenCalledTimes(1);
+    expect(invalidateAll).toHaveBeenCalledOnce();
     expect(result).toEqual({ ok: true, updatedSlug: 'widebody' });
   });
 
@@ -113,7 +113,7 @@ describe('saveHierarchicalTaxonomyClaims', () => {
       params: { path: { public_id: 'medieval' } },
       body: { fields: { name: 'Medieval' }, note: '', citations: [], inline_citations: [] },
     });
-    expect(invalidateAll).toHaveBeenCalledTimes(1);
+    expect(invalidateAll).toHaveBeenCalledOnce();
     expect(result).toEqual({ ok: true, updatedSlug: 'medieval' });
   });
 

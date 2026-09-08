@@ -31,7 +31,7 @@ describe('saveLocationClaims', () => {
       fields: { description: 'Windy City' },
     });
 
-    expect(PATCH).toHaveBeenCalledTimes(1);
+    expect(PATCH).toHaveBeenCalledOnce();
     const [path, options] = PATCH.mock.calls[0];
     expect(path).toBe('/api/locations/{public_id}/claims/');
     // Multi-segment public_id rides through unchanged — the openapi-fetch
@@ -45,7 +45,7 @@ describe('saveLocationClaims', () => {
       citations: [],
       inline_citations: [],
     });
-    expect(invalidateAll).toHaveBeenCalledTimes(1);
+    expect(invalidateAll).toHaveBeenCalledOnce();
     expect(result).toEqual({ ok: true, updatedSlug: 'usa/il/chicago' });
   });
 

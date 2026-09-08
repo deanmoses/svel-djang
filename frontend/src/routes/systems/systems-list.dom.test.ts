@@ -71,7 +71,7 @@ describe('/systems route — extraFilter axis', () => {
 
     await user.selectOptions(screen.getByLabelText('Manufacturer'), 'williams');
 
-    await waitFor(() => expect(goto).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(goto).toHaveBeenCalledOnce());
     expect(goto.mock.calls[0][0]).toContain('manufacturer=williams');
   });
 

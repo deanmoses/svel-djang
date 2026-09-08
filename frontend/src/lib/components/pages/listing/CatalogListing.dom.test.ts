@@ -65,7 +65,7 @@ describe('CatalogListing', () => {
     await user.type(screen.getByRole('searchbox'), 'star');
 
     // One navigation per pause, not per keystroke.
-    await waitFor(() => expect(goto).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(goto).toHaveBeenCalledOnce());
     expect(goto.mock.calls[0][0]).toContain('q=star');
   });
 
@@ -82,7 +82,7 @@ describe('CatalogListing', () => {
 
       // Type, pause: the debounce commits `?q=star` and the navigation starts.
       await user.type(box, 'star');
-      await waitFor(() => expect(goto).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(goto).toHaveBeenCalledOnce());
       expect(goto.mock.calls[0][0]).toContain('q=star');
 
       // The user types on while that navigation is still in flight, then it

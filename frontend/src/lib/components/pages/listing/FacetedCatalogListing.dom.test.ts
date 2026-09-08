@@ -79,7 +79,7 @@ describe('FacetedCatalogListing', () => {
 
     // One navigation per pause, not per keystroke; the target is the entity base
     // path with the engine-serialized query.
-    await waitFor(() => expect(goto).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(goto).toHaveBeenCalledOnce());
     expect(goto.mock.calls[0][0]).toContain('q=will');
     expect(goto.mock.calls[0][0]).toContain('/manufacturers');
   });
@@ -91,12 +91,12 @@ describe('FacetedCatalogListing', () => {
     });
 
     await user.type(screen.getByRole('searchbox'), 'will');
-    await waitFor(() => expect(goto).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(goto).toHaveBeenCalledOnce());
 
     await land(gotoCalls[0]);
 
     expect(screen.getByRole('searchbox')).toHaveValue('will');
-    expect(goto).toHaveBeenCalledTimes(1);
+    expect(goto).toHaveBeenCalledOnce();
   });
 
   it('navigates when a sidebar filter changes', async () => {
@@ -107,7 +107,7 @@ describe('FacetedCatalogListing', () => {
 
     await user.click(await screen.findByTestId('sb-set'));
 
-    await waitFor(() => expect(goto).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(goto).toHaveBeenCalledOnce());
     expect(goto.mock.calls[0][0]).toContain('foo=bar');
   });
 
@@ -181,7 +181,7 @@ describe('FacetedCatalogListing', () => {
 
     await land(gotoCalls[0]);
     expect(screen.getByTestId('sb-foo')).toHaveTextContent('bar');
-    expect(goto).toHaveBeenCalledTimes(1);
+    expect(goto).toHaveBeenCalledOnce();
   });
 
   it('composes a second intent on the pending target of the first', async () => {
@@ -249,7 +249,7 @@ describe('FacetedCatalogListing', () => {
 
     // The draft survives (its committed value didn't change) and its commit
     // composes on the landed state.
-    await waitFor(() => expect(goto).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(goto).toHaveBeenCalledOnce());
     expect(goto.mock.calls[0][0]).toContain('foo=bar');
     expect(goto.mock.calls[0][0]).toContain('q=wi');
   });
@@ -263,7 +263,7 @@ describe('FacetedCatalogListing', () => {
 
     await user.click(await screen.findByRole('button', { name: /remove filter/i }));
 
-    await waitFor(() => expect(goto).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(goto).toHaveBeenCalledOnce());
     expect(goto.mock.calls[0][0]).not.toContain('foo=');
     expect(goto.mock.calls[0][0]).toContain('q=will');
   });
@@ -291,7 +291,7 @@ describe('FacetedCatalogListing', () => {
 
     const retry = await screen.findByRole('button', { name: /retry/i });
     await user.click(retry);
-    expect(invalidateAll).toHaveBeenCalledTimes(1);
+    expect(invalidateAll).toHaveBeenCalledOnce();
   });
 
   it('renders active chips from the resolved options', async () => {
@@ -364,7 +364,7 @@ describe('FacetedCatalogListing', () => {
 
       await user.click(await screen.findByTestId('sb-set'));
 
-      await waitFor(() => expect(goto).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(goto).toHaveBeenCalledOnce());
       expect(goto.mock.calls[0][0]).toMatch(/^\/games\?/);
     });
 

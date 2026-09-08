@@ -50,7 +50,7 @@ describe('createPaginatedLoader — seeded with initial', () => {
     const loader = createPaginatedLoader(fetchPage, { items: [1, 2], count: 5 });
 
     loader.loadMore();
-    await vi.waitFor(() => expect(loader.error).toBeTruthy());
+    await vi.waitFor(() => expect(loader.error).toBe('boom'));
 
     // Retryable: items untouched, still more to load, no degraded count.
     expect(loader.items).toEqual([1, 2]);

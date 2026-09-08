@@ -374,7 +374,7 @@ describe('WikilinkAutocomplete', () => {
         .mockImplementationOnce(
           () => new Promise((resolve) => setTimeout(() => resolve({ results: slowResults }), 500)),
         )
-        .mockImplementationOnce(() => Promise.resolve({ results: fastResults }));
+        .mockResolvedValueOnce({ results: fastResults });
 
       // Type 'a' and let the debounce fire (200ms)
       await user.click(input);

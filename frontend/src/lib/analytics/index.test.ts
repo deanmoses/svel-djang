@@ -87,10 +87,9 @@ describe('analytics adapter selection', () => {
       browser: true,
     });
     expect(index.analytics).toBe(posthog.posthogAdapter);
-    expect(posthogInitMock).toHaveBeenCalledTimes(1);
 
     const { config } = await import('./config');
-    expect(posthogInitMock).toHaveBeenCalledWith('phc_real_key', config);
+    expect(posthogInitMock).toHaveBeenCalledExactlyOnceWith('phc_real_key', config);
   });
 });
 

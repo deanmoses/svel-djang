@@ -41,7 +41,7 @@ describe('SectionEditHarness', () => {
     render(SectionEditHarnessFixture);
 
     await user.click(screen.getByRole('button', { name: 'Cancel' }));
-    expect(goto).toHaveBeenCalledTimes(1);
+    expect(goto).toHaveBeenCalledOnce();
   });
 
   it('confirms before cancelling a dirty editor and stays put when declined', async () => {
@@ -68,7 +68,7 @@ describe('SectionEditHarness', () => {
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
     await waitFor(() => expect(toastSuccess).toHaveBeenCalledWith('Saved.'));
-    expect(onsaved).toHaveBeenCalledTimes(1);
+    expect(onsaved).toHaveBeenCalledOnce();
     // The editor remounts clean after save, so Save disables again.
     await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled());
     expect(screen.getByTestId('context-dirty')).toHaveTextContent('false');
@@ -83,6 +83,6 @@ describe('SectionEditHarness', () => {
     expect(screen.queryByRole('button', { name: 'Cancel' })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Done' }));
-    expect(goto).toHaveBeenCalledTimes(1);
+    expect(goto).toHaveBeenCalledOnce();
   });
 });

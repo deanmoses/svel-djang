@@ -40,7 +40,7 @@ describe('saveCorporateEntityClaims', () => {
         inline_citations: [],
       },
     });
-    expect(invalidateAll).toHaveBeenCalledTimes(1);
+    expect(invalidateAll).toHaveBeenCalledOnce();
     expect(result).toEqual({ ok: true, updatedSlug: 'williams-electronics' });
   });
 

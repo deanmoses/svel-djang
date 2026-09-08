@@ -139,7 +139,7 @@ describe('route-metadata', () => {
     });
 
     it.each(ENTRIES)('%s → %s: entity is a known CatalogEntityKey', (_routeId, entity) => {
-      expect(CATALOG_ENTITY_KEYS.includes(entity)).toBe(true);
+      expect(CATALOG_ENTITY_KEYS).toContain(entity);
     });
 
     it.each(ENTRIES)('%s: classifies as listed-indexable, not catalog-*', (routeId) => {

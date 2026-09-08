@@ -61,12 +61,11 @@ describe('createDebouncedSearch', () => {
     // Resolve second first, then first
     resolveSecond!(['second']);
     await vi.advanceTimersByTimeAsync(0);
-    expect(onResults).toHaveBeenCalledWith(['second']);
+    expect(onResults).toHaveBeenCalledExactlyOnceWith(['second']);
 
     resolveFirst!(['first']);
     await vi.advanceTimersByTimeAsync(0);
     // onResults should NOT have been called again with the stale result
-    expect(onResults).toHaveBeenCalledTimes(1);
   });
 
   it('cancels pending search and ignores in-flight responses', async () => {
@@ -113,8 +112,7 @@ describe('createDebouncedSearch', () => {
     expect(fetchFn).not.toHaveBeenCalled();
 
     await vi.advanceTimersByTimeAsync(50);
-    expect(fetchFn).toHaveBeenCalledTimes(1);
-    expect(fetchFn).toHaveBeenCalledWith('ab');
+    expect(fetchFn).toHaveBeenCalledExactlyOnceWith('ab');
   });
 
   it('uses default delay of 200ms', async () => {

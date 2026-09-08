@@ -16,7 +16,7 @@ describe('railwayLogLine', () => {
   it('names the logger and stamps the time', () => {
     const line = parse('sitemap', 'info', 'hello');
     expect(line.logger).toBe('sitemap');
-    expect(typeof line.time).toBe('string');
+    expect(line.time).toBeTypeOf('string');
     expect(Number.isNaN(Date.parse(line.time as string))).toBe(false);
   });
 

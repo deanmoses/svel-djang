@@ -372,7 +372,7 @@ describe('CitationAutocomplete (component-level)', () => {
       resolveComplete();
 
       await vi.waitFor(() => {
-        expect(oncomplete).toHaveBeenCalledTimes(1);
+        expect(oncomplete).toHaveBeenCalledOnce();
       });
     });
   });
@@ -1379,8 +1379,7 @@ describe('deliverer teaching flow', () => {
     expect(screen.getByLabelText(/Year/)).toBeInTheDocument();
 
     // The only write so far is the extract lookup itself.
-    expect(mockPOST).toHaveBeenCalledTimes(1);
-    expect(mockPOST).toHaveBeenCalledWith('/api/citation-sources/extract/', {
+    expect(mockPOST).toHaveBeenCalledExactlyOnceWith('/api/citation-sources/extract/', {
       body: { input: 'https://www.netflix.com/title/80057281' },
     });
   });

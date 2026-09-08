@@ -55,7 +55,7 @@ describe('SSR Sentry init (instrumentation.server.ts)', () => {
     const Sentry = await import('@sentry/sveltekit');
     await import('../../instrumentation.server');
 
-    expect(Sentry.init).toHaveBeenCalledTimes(1);
+    expect(Sentry.init).toHaveBeenCalledOnce();
     const initArgs = vi.mocked(Sentry.init).mock.calls[0][0]!;
     expect(initArgs.dsn).toBe('https://frontend-project@sentry.example/2');
     // Mirrors the option instrumentation.server.ts still passes. Sentry 10.73
@@ -98,7 +98,7 @@ describe('Browser Sentry init (hooks.client.ts)', () => {
     const Sentry = await import('@sentry/sveltekit');
     await import('../../hooks.client');
 
-    expect(Sentry.init).toHaveBeenCalledTimes(1);
+    expect(Sentry.init).toHaveBeenCalledOnce();
     const initArgs = vi.mocked(Sentry.init).mock.calls[0][0]!;
     expect(initArgs.dsn).toBe('https://example@sentry.example/2');
     expect(initArgs.release).toBe('def456');

@@ -44,7 +44,7 @@ describe('SourceDebugPanel', () => {
 
   it('joins string arrays into a comma-separated list', () => {
     render(SourceDebugPanel, { extraData: { 'opdb.keywords': ['tv', 'movie'] } });
-    expect(screen.getByText('tv, movie')).toBeTruthy();
+    expect(screen.getByText('tv, movie')).toBeInTheDocument();
   });
 
   it('preserves raw source text verbatim rather than rendering it as markdown', () => {

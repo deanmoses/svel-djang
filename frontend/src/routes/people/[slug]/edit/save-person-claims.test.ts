@@ -33,7 +33,7 @@ describe('savePersonClaims', () => {
       params: { path: { public_id: 'john' } },
       body: { fields: { name: 'Jane' }, note: '', citations: [], inline_citations: [] },
     });
-    expect(invalidateAll).toHaveBeenCalledTimes(1);
+    expect(invalidateAll).toHaveBeenCalledOnce();
     expect(result).toEqual({ ok: true, updatedSlug: 'jane' });
   });
 

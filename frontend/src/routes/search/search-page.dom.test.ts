@@ -144,7 +144,7 @@ describe('/search page', () => {
 
     await user.type(screen.getByRole('searchbox'), 'medieval');
 
-    await waitFor(() => expect(goto).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(goto).toHaveBeenCalledOnce());
     expect(goto.mock.calls[0][0]).toBe('/search?q=medieval');
     expect(goto.mock.calls[0][1]).toMatchObject({ replaceState: true, keepFocus: true });
   });
@@ -161,7 +161,7 @@ describe('/search page', () => {
 
     // Type, pause: the debounce commits `?q=god` and the navigation starts.
     await user.type(box, 'god');
-    await waitFor(() => expect(goto).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(goto).toHaveBeenCalledOnce());
     expect(goto.mock.calls[0][0]).toBe('/search?q=god');
 
     // The user types on while that navigation is still in flight, then it

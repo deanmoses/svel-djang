@@ -144,8 +144,7 @@ describe('CreatePage', () => {
 
     await user.click(screen.getByRole('button', { name: 'Create Person' }));
 
-    expect(submit).toHaveBeenCalledTimes(1);
-    expect(submit).toHaveBeenCalledWith({
+    expect(submit).toHaveBeenCalledExactlyOnceWith({
       name: 'Ada Lovelace',
       slug: 'ada-lovelace',
       note: '',

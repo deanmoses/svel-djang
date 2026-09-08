@@ -129,8 +129,7 @@ describe('auth store', () => {
       });
       await auth.refresh();
 
-      expect(setUser).toHaveBeenCalledTimes(1);
-      expect(setUser).toHaveBeenCalledWith({ id: 42, username: 'pinwizard' });
+      expect(setUser).toHaveBeenCalledExactlyOnceWith({ id: 42, username: 'pinwizard' });
       expect(setTag).toHaveBeenCalledWith('auth_state', 'auth');
     });
 
@@ -146,14 +145,14 @@ describe('auth store', () => {
       const c = auth.refresh();
 
       // Only one network call until the in-flight promise resolves.
-      expect(GET).toHaveBeenCalledTimes(1);
+      expect(GET).toHaveBeenCalledOnce();
 
       resolveGet({
         data: { is_authenticated: true, capabilities: { 'catalog.edit': true } },
       });
       await Promise.all([a, b, c]);
 
-      expect(GET).toHaveBeenCalledTimes(1);
+      expect(GET).toHaveBeenCalledOnce();
     });
   });
 
@@ -173,8 +172,7 @@ describe('auth store', () => {
       });
       await auth.logout();
 
-      expect(setUser).toHaveBeenCalledTimes(1);
-      expect(setUser).toHaveBeenCalledWith(null);
+      expect(setUser).toHaveBeenCalledExactlyOnceWith(null);
       expect(setTag).toHaveBeenCalledWith('auth_state', 'anon');
     });
   });

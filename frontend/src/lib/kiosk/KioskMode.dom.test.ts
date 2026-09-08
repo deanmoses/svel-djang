@@ -73,7 +73,7 @@ describe('KioskMode', () => {
     expect(goto).not.toHaveBeenCalled();
 
     vi.advanceTimersByTime(2000);
-    expect(goto).toHaveBeenCalledTimes(1);
+    expect(goto).toHaveBeenCalledOnce();
   });
 
   it('falls back to the default idle timeout when no cookie is set', () => {
@@ -82,7 +82,7 @@ describe('KioskMode', () => {
     vi.advanceTimersByTime(180 * 1000 - 1);
     expect(goto).not.toHaveBeenCalled();
     vi.advanceTimersByTime(1);
-    expect(goto).toHaveBeenCalledTimes(1);
+    expect(goto).toHaveBeenCalledOnce();
   });
 
   it('cleans up timer and listeners on unmount', () => {

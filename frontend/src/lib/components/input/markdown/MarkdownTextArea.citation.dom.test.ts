@@ -443,7 +443,7 @@ describe('MarkdownTextArea citation integration', () => {
 
     // Combobox should control a listbox
     const listboxId = searchInput.getAttribute('aria-controls');
-    expect(listboxId).toBeTruthy();
+    expect(listboxId).not.toBeNull();
     expect(document.getElementById(listboxId!)).toHaveAttribute('role', 'listbox');
 
     // No active descendant initially
@@ -472,7 +472,7 @@ describe('MarkdownTextArea citation integration', () => {
 
     // Combobox should control a listbox
     const listboxId = searchInput.getAttribute('aria-controls');
-    expect(listboxId).toBeTruthy();
+    expect(listboxId).not.toBeNull();
     expect(document.getElementById(listboxId!)).toHaveAttribute('role', 'listbox');
 
     // No active descendant initially

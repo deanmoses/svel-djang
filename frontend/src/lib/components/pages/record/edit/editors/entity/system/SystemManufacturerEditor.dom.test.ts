@@ -114,7 +114,7 @@ describe('SystemManufacturerEditor', () => {
 
     // Saving sends only the changed manufacturer field.
     await user.click(screen.getByRole('button', { name: 'Save' }));
-    await waitFor(() => expect(PATCH).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(PATCH).toHaveBeenCalledOnce());
     expect(PATCH).toHaveBeenCalledWith(
       '/api/systems/{public_id}/claims/',
       expect.objectContaining({

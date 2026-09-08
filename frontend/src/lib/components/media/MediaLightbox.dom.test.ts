@@ -35,7 +35,7 @@ describe('MediaLightbox', () => {
     expect(screen.getByRole('dialog', { name: /media viewer/i })).toBeInTheDocument();
 
     await user.keyboard('{Escape}');
-    expect(onclose).toHaveBeenCalledTimes(1);
+    expect(onclose).toHaveBeenCalledOnce();
 
     const backdrop = container.querySelector('.backdrop-dismiss');
     expect(backdrop).toBeInTheDocument();
