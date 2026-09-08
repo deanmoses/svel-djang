@@ -60,7 +60,10 @@ class TestSitemapEndpoint:
         call_count = {"n": 0}
         import apps.core.api.sitemap as sitemap_module
 
-        real_all = sitemap_module.all_sitemap_feeds
+        # Patch on sitemap_module, where the endpoint resolves the name — but
+        # read the original from the defining module, so the endpoint's import
+        # doesn't become a re-export.
+        from apps.core.sitemap import all_sitemap_feeds as real_all
 
         def counting_all():
             call_count["n"] += 1

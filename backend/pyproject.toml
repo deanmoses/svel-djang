@@ -108,9 +108,6 @@ ignore = [
     "RUF012", # ClassVar for mutable defaults — fights Django's Meta/field idiom
     "PLW0603", # global — the model-driven registries are lazily-warmed module caches
     "PLW2901", # loop-var rebinding is how the claim-value pipeline normalizes in place
-    # `from x import y as y` is how a module re-exports under mypy's
-    # no_implicit_reexport, so the "useless" alias is the load-bearing part.
-    "PLC0414",
     # Function-level imports are the standard Django answer to app-loading and
     # circular-import order, not a deferred-cost optimization.
     "PLC0415",

@@ -24,7 +24,7 @@ from apps.core.api.sitemap_schemas import (
     SitemapResponseSchema,
 )
 from apps.core.response_cache import get_cached_response, set_cached_response
-from apps.core.sitemap import all_sitemap_feeds as all_sitemap_feeds
+from apps.core.sitemap import all_sitemap_feeds
 
 sitemap_router = Router()
 
