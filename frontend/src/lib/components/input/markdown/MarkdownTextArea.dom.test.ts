@@ -86,7 +86,11 @@ describe('MarkdownTextArea', () => {
     const textarea = screen.getByRole('textbox', { name: /description/i }) as HTMLTextAreaElement;
 
     typeWikilinkTrigger(textarea);
-    await waitForDropdown();
+    // Spelled out rather than deferred to waitForDropdown(): the dropdown
+    // appearing is what this test is about, so it asserts it itself.
+    await vi.waitFor(() => {
+      expect(screen.getByText('Insert link')).toBeInTheDocument();
+    });
   });
 
   it('does not open dropdown for a single [', async () => {

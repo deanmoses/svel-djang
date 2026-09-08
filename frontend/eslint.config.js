@@ -299,8 +299,9 @@ export default ts.config(
       // may never run: the test then passes having verified nothing. Narrow a
       // union with `assert(x.kind === 'y')`, which fails the test outright.
       'vitest/no-conditional-expect': 'error',
-      // Off pending cleanup — each has real hits in the current suite.
-      'vitest/expect-expect': 'off',
+      // A test whose body never asserts passes by reaching the end.
+      'vitest/expect-expect': 'error',
+      // Off pending cleanup — real hits in the current suite.
       'vitest/prefer-called-exactly-once-with': 'off',
       // Vitest's `expect(value, message)` takes a second argument that Jest's
       // does not, and the convention tests use it to say how to fix a
