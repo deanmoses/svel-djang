@@ -16,6 +16,9 @@ if (typeof Element.prototype.scrollIntoView !== 'function') {
 
 // jsdom stubs execCommand but it doesn't work. Override unconditionally
 // to return false, which triggers MarkdownTextArea's manual fallback path.
+// The API is deprecated but is what MarkdownTextArea uses for native undo
+// support, so the stub has to match it.
+// eslint-disable-next-line @typescript-eslint/no-deprecated
 document.execCommand = () => false;
 
 // jsdom doesn't implement ResizeObserver.

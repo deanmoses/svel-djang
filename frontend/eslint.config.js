@@ -396,7 +396,6 @@ export default ts.config(
       // `expect(confirmSpy)`, not `expect(window.confirm)`.
       '@typescript-eslint/unbound-method': 'error',
       // Off pending cleanup.
-      '@typescript-eslint/no-deprecated': 'off',
       '@typescript-eslint/no-floating-promises': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/no-unnecessary-condition': 'off',
@@ -422,7 +421,6 @@ export default ts.config(
       '@typescript-eslint/require-await': 'error',
       '@typescript-eslint/no-unsafe-assignment': 'error',
       '@typescript-eslint/no-unsafe-member-access': 'error',
-      '@typescript-eslint/no-deprecated': 'error',
       '@typescript-eslint/no-unnecessary-type-assertion': 'error',
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-unsafe-call': 'error',
