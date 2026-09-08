@@ -1,17 +1,13 @@
 <script lang="ts">
   import DescriptionEditor from './DescriptionEditor.svelte';
   import type { SaveResult } from './save-claims-shared';
+  import type { SectionEditorHandle } from './editor-contract';
 
   let savedCount = $state(0);
   let lastError = $state('');
   let lastSaveBody = $state<unknown>(null);
 
-  let editorRef:
-    | {
-        save(meta?: unknown): Promise<void>;
-        readonly dirty: boolean;
-      }
-    | undefined = $state();
+  let editorRef: SectionEditorHandle | undefined = $state();
 
   let editorDirty = $derived(editorRef?.dirty ?? false);
 

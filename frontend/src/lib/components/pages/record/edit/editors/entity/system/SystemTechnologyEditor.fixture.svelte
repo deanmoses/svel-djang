@@ -1,6 +1,7 @@
 <script lang="ts">
   import SystemTechnologyEditor from './SystemTechnologyEditor.svelte';
   import { saveSystemClaims } from './save-system-claims';
+  import type { SectionEditorHandle } from '$lib/components/pages/record/edit/editors/editor-contract';
 
   type InitialData = {
     technology_subgeneration?: { public_id: string } | null;
@@ -17,12 +18,7 @@
   let savedCount = $state(0);
   let lastError = $state('');
 
-  let editorRef:
-    | {
-        save(meta?: unknown): Promise<void>;
-        readonly dirty: boolean;
-      }
-    | undefined = $state();
+  let editorRef: SectionEditorHandle | undefined = $state();
 
   let editorDirty = $derived(editorRef?.dirty ?? false);
 </script>

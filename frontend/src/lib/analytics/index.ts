@@ -22,10 +22,10 @@ import { noopAdapter } from './noop';
 import { posthogAdapter } from './posthog';
 
 export interface Analytics {
-  pageview(path: string): void;
-  capture<E extends EventName>(event: E, properties: EventProperties<E>): void;
-  identify(pseudonym: string): void;
-  reset(): void;
+  pageview: (path: string) => void;
+  capture: <E extends EventName>(event: E, properties: EventProperties<E>) => void;
+  identify: (pseudonym: string) => void;
+  reset: () => void;
 }
 
 function selectAdapter(): Analytics {

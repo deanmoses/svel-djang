@@ -23,7 +23,7 @@
 
   let editorRef:
     | {
-        save(meta?: SaveMeta): Promise<void>;
+        save: (meta?: SaveMeta) => Promise<void>;
         readonly dirty: boolean;
       }
     | undefined = $state();

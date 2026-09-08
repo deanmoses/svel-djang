@@ -1,7 +1,7 @@
 import type { SaveMeta } from './save-claims-shared';
 
 export type SectionEditorHandle = {
-  save(meta?: SaveMeta): Promise<void>;
+  save: (meta?: SaveMeta) => Promise<void>;
   /** Reactive: whether the editor holds unsaved changes. The single dirty
    *  channel — read it inside a reactive context (e.g. `$derived`) so the
    *  host chrome (Save button, section nav-lock, cancel guard) tracks it. */

@@ -107,6 +107,10 @@ export default ts.config(
       // Sequential awaits in a loop are usually an unintended serialization of
       // work that Promise.all would run concurrently.
       'no-await-in-loop': 'error',
+      // Method shorthand (`f(x): void`) is checked bivariantly, so
+      // `strictFunctionTypes` does not apply to it; the property form
+      // (`f: (x) => void`) gets the sound contravariant check.
+      '@typescript-eslint/method-signature-style': 'error',
       // An inline `import { type A, b }` where every specifier is a type still
       // emits a bare side-effect import. The top-level `import type` form
       // erases cleanly, which is what `verbatimModuleSyntax` assumes.

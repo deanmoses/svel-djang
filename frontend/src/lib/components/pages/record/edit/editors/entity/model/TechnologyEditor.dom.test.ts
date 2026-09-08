@@ -151,7 +151,7 @@ describe('TechnologyEditor', () => {
       body: {
         fields: { display_type: 'lcd' },
         note: 'Corrected per flyer',
-        citations: [{ citation_source_id: 7, locator: 'p. 2' }],
+        citations: [{ citation_source_id: 7, locator: 'p. 2', quote: '' }],
         inline_citations: [],
       },
     });

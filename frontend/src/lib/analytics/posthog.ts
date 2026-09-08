@@ -10,7 +10,7 @@ import { config } from './config';
 import type { Analytics } from './index';
 
 export interface PosthogAdapter extends Analytics {
-  init(key: string): void;
+  init: (key: string) => void;
 }
 
 export const posthogAdapter: PosthogAdapter = {

@@ -1,6 +1,7 @@
 <script lang="ts">
   import NameEditor from './NameEditor.svelte';
   import type { SaveMeta, SaveResult } from './save-claims-shared';
+  import type { SectionEditorHandle } from './editor-contract';
 
   let {
     initialData = { name: 'Williams', slug: 'williams' },
@@ -18,12 +19,7 @@
   let lastError = $state('');
   let lastSaveBody = $state<unknown>(null);
 
-  let editorRef:
-    | {
-        save(meta?: unknown): Promise<void>;
-        readonly dirty: boolean;
-      }
-    | undefined = $state();
+  let editorRef: SectionEditorHandle | undefined = $state();
 
   let editorDirty = $derived(editorRef?.dirty ?? false);
 

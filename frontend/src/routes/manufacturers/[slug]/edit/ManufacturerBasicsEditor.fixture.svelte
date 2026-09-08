@@ -1,6 +1,7 @@
 <script lang="ts">
   import ManufacturerBasicsEditor from './ManufacturerBasicsEditor.svelte';
   import type { ManufacturerEditView } from './manufacturer-edit-types';
+  import type { SectionEditorHandle } from '$lib/components/pages/record/edit/editors/editor-contract';
 
   let {
     initialData = {
@@ -24,12 +25,7 @@
   let savedCount = $state(0);
   let lastError = $state('');
 
-  let editorRef:
-    | {
-        save(meta?: unknown): Promise<void>;
-        readonly dirty: boolean;
-      }
-    | undefined = $state();
+  let editorRef: SectionEditorHandle | undefined = $state();
 
   let editorDirty = $derived(editorRef?.dirty ?? false);
 </script>
