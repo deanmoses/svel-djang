@@ -26,7 +26,7 @@
  */
 export function modelHasTitleOwnedIdentity(model: {
   title_models: readonly { variants: readonly unknown[] }[];
-  variant_of?: unknown | null;
+  variant_of?: unknown;
 }): boolean {
   if (model.variant_of) return false;
   if (model.title_models.length !== 1) return false;

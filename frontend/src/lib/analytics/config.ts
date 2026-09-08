@@ -56,14 +56,14 @@ export const config: Partial<PostHogConfig> = {
     if (!event || !event.properties) return event;
     const props = event.properties;
     for (const key of ['$current_url', '$referrer'] as const) {
-      const v = props[key];
+      const v: unknown = props[key];
       if (typeof v === 'string' && URL.canParse(v)) {
         const u = new URL(v);
         props[key] = u.origin + u.pathname;
       }
     }
     for (const key of ['$pathname', '$prev_pageview_pathname'] as const) {
-      const v = props[key];
+      const v: unknown = props[key];
       if (typeof v === 'string') {
         const q = v.indexOf('?');
         if (q !== -1) props[key] = v.slice(0, q);

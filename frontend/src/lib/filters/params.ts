@@ -142,7 +142,7 @@ export function fieldPatch<F, K extends keyof F>(field: K, value: F[K]): Partial
  * free-text `q`. The per-family `hasActive*` exports put a name and a doc on
  * this for their consumers.
  */
-export function hasActiveParams<F extends Record<string, ParamValue>>(f: F): boolean {
+export function hasActiveParams(f: Record<string, ParamValue>): boolean {
   return Object.entries(f).some(
     ([param, v]) => param !== 'q' && v != null && v !== '' && (!Array.isArray(v) || v.length > 0),
   );

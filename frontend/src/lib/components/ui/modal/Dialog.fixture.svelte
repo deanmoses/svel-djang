@@ -14,7 +14,6 @@
   let open = $state(false);
   let closeCount = $state(0);
 
-  let firstBtnEl: HTMLButtonElement | undefined = $state();
   let secondBtnEl: HTMLButtonElement | undefined = $state();
 
   // A detached element to simulate a stale ref
@@ -43,14 +42,14 @@
   <Dialog {open} onclose={closeDialog} ariaLabelledBy="dialog-title" initialFocus={initialFocusEl}>
     <div class="panel">
       <h2 id="dialog-title">Dialog Title</h2>
-      <button type="button" bind:this={firstBtnEl}>First</button>
+      <button type="button">First</button>
       <button type="button" bind:this={secondBtnEl}>Second</button>
     </div>
   </Dialog>
 {:else}
   <Dialog {open} onclose={closeDialog} ariaLabel="Test Dialog" initialFocus={initialFocusEl}>
     <div class="panel">
-      <button type="button" bind:this={firstBtnEl}>First</button>
+      <button type="button">First</button>
       <button type="button" bind:this={secondBtnEl}>Second</button>
     </div>
   </Dialog>

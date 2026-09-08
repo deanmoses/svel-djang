@@ -7,5 +7,5 @@
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface EventRegistry {}
 
-export type EventName = keyof EventRegistry & string;
+export type EventName = Extract<keyof EventRegistry, string>;
 export type EventProperties<E extends EventName> = EventRegistry[E];

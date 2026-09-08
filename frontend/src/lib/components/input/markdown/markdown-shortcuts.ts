@@ -361,6 +361,9 @@ export function applyResult(textarea: HTMLTextAreaElement, result: EditResult): 
   textarea.focus();
   textarea.setSelectionRange(result.replaceStart, result.replaceEnd);
 
+  // No replacement API preserves the browser's native undo stack; the branch
+  // below is the fallback for when it fails.
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   if (!document.execCommand('insertText', false, result.replacement)) {
     const before = textarea.value.substring(0, result.replaceStart);
     const after = textarea.value.substring(result.replaceEnd);

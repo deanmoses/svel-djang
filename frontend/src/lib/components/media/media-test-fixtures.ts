@@ -13,7 +13,7 @@ export function makeMedia(index: number, overrides: Partial<UploadedMedia> = {})
       display: `https://example.com/display-${index}.jpg`,
     },
     ...overrides,
-  } as UploadedMedia;
+  };
 }
 
 export const MEDIA_ITEMS = [

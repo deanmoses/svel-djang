@@ -21,7 +21,7 @@ const { pageState, auth } = vi.hoisted(() => ({
     load: () => Promise.resolve(),
     logout: vi.fn(() => Promise.resolve()),
     can(activity: string) {
-      return this.capabilities[activity] === true;
+      return this.capabilities[activity];
     },
   },
 }));

@@ -9,9 +9,9 @@
     "build": "vite build",
     "start": "node build/index.js",
     "preview": "vite preview",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "lint": "prettier --write . && eslint . && stylelint \"src/**/*.{css,svelte}\"",
+    "lint": "prettier --check . && eslint . --max-warnings=0 && stylelint --max-warnings=0 \"src/**/*.{css,svelte}\"",
     "format": "prettier --write .",
     "test": "vitest run",
     "test:unit": "vitest run --project unit",
@@ -21,6 +21,7 @@
     "knip": "knip"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@sveltejs/adapter-node": "^5.5.7",
     "@sveltejs/kit": "^2.70.3",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
@@ -28,6 +29,7 @@
     "@testing-library/svelte": "^5.4.2",
     "@testing-library/user-event": "^14.6.7",
     "@types/node": "^24.13.3",
+    "@vitest/eslint-plugin": "^1.6.27",
     "eslint": "^10.10.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-svelte": "^3.23.0",

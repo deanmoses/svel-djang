@@ -118,6 +118,6 @@ export function createDeleteSubmitter<E extends DeleteEntity>(entity: E) {
       return { kind: 'form_error', message: parsed.message || 'Could not delete record.' };
     }
 
-    return { kind: 'ok', data: data as DeleteResponse<E> };
+    return { kind: 'ok', data };
   };
 }

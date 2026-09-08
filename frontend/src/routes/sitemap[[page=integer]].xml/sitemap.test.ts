@@ -64,7 +64,7 @@ function setApiError() {
 
 describe('GET /sitemap.xml', () => {
   beforeEach(() => {
-    for (const key of Object.keys(mockEnv)) delete mockEnv[key];
+    for (const key of Object.keys(mockEnv)) Reflect.deleteProperty(mockEnv, key);
     mockEnv.ALLOW_SEARCH_ENGINE_INDEXING = 'true';
     mockEnv.SITE_ORIGIN = 'https://flipcommons.org';
     mockGet.mockReset();

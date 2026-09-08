@@ -53,5 +53,5 @@ export async function loadEntityPage<P extends EntityPagePath>(
     throw error(response?.status || 500, 'Failed to load page');
   }
 
-  return { profile: data as EntityPageData<P>, q };
+  return { profile: data, q };
 }

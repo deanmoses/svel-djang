@@ -1,3 +1,5 @@
+import js from '@eslint/js';
+import vitest from '@vitest/eslint-plugin';
 import prettier from 'eslint-config-prettier';
 import svelte from 'eslint-plugin-svelte';
 import globals from 'globals';
@@ -59,6 +61,15 @@ const NO_NON_UI = {
   group: ['$lib/components/**', '!$lib/components/ui', '!$lib/components/ui/**'],
   message: 'ui/ is primitives-only — it may not import from any sibling components folder.',
 };
+// Files that get type-aware linting; see the typed block near the bottom.
+const TYPED_FILES = ['src/**/*.ts'];
+// Test code exercised by the production-only typed rules below.
+const TYPED_TEST_FILES = [
+  'src/**/*.test.ts',
+  'src/**/*.spec.ts',
+  'src/tests/**',
+  'src/**/*.fixture.ts',
+];
 const SRC_FILES = [
   'src/**/*.ts',
   'src/**/*.js',
@@ -68,6 +79,7 @@ const SRC_FILES = [
 ];
 
 export default ts.config(
+  js.configs.recommended,
   ...ts.configs.recommended,
   ...svelte.configs.recommended,
   prettier,
@@ -91,6 +103,14 @@ export default ts.config(
   {
     rules: {
       'svelte/no-navigation-without-resolve': 'off',
+      eqeqeq: ['error', 'always', { null: 'ignore' }],
+      // Every component's <script> is TypeScript; a block that omits the
+      // attribute silently opts out of type checking.
+      'svelte/block-lang': ['error', { enforceScriptPresent: false, script: 'ts' }],
+      'svelte/no-bind-value-on-checkable-inputs': 'error',
+      'svelte/no-nested-style-tag': 'error',
+      'svelte/require-event-prefix': 'error',
+      'svelte/valid-style-parse': 'error',
       // Standard convention: `_`-prefixed args/vars are intentionally unused.
       // Lets snippets accept required arguments they don't need to reference.
       '@typescript-eslint/no-unused-vars': [
@@ -223,6 +243,102 @@ export default ts.config(
     files: ['src/**/*.test.ts', 'src/**/*.spec.ts'],
     rules: {
       'no-restricted-imports': ['error', { paths: [NO_POSTHOG], patterns: [NO_API_INTERNAL] }],
+    },
+  },
+  {
+    // The page injects the @scalar/api-reference bundle from jsdelivr at
+    // runtime and calls the `Scalar` global it defines.
+    files: ['src/routes/api-docs/+page.svelte'],
+    languageOptions: {
+      globals: { Scalar: 'readonly' },
+    },
+  },
+  {
+    files: ['src/**/*.test.ts', 'src/**/*.spec.ts'],
+    ...vitest.configs.recommended,
+    rules: {
+      ...vitest.configs.recommended.rules,
+      'vitest/no-disabled-tests': 'error',
+      // Off pending cleanup — each has real hits in the current suite.
+      'vitest/expect-expect': 'off',
+      'vitest/no-conditional-expect': 'off',
+      'vitest/prefer-called-exactly-once-with': 'off',
+      'vitest/valid-expect': 'off',
+      'vitest/valid-title': 'off',
+    },
+  },
+  //
+  // Type-aware rules. Scoped to src TypeScript: pulling type information into
+  // `.svelte` takes lint from ~14s to ~85s, and svelte-eslint-parser types
+  // snippet and callback-prop parameters as `any` where the compiler types them
+  // properly, so the unsafe-* family reports over a thousand phantom findings
+  // there.
+  //
+  ...ts.configs.strictTypeChecked.map((c) => ({ ...c, files: TYPED_FILES })),
+  {
+    files: TYPED_FILES,
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {
+      // strictTypeChecked resets this to bare `error`, dropping the `^_`
+      // convention configured above.
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+      '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true }],
+      '@typescript-eslint/no-confusing-void-expression': [
+        'error',
+        {
+          ignoreArrowShorthand: true,
+          ignoreVoidOperator: true,
+          ignoreVoidReturningFunctions: true,
+        },
+      ],
+      // SvelteKit declares error() and redirect() as returning `never`, so
+      // every `throw error(...)` trips this and no configuration satisfies it.
+      '@typescript-eslint/only-throw-error': 'off',
+      // Off pending cleanup.
+      '@typescript-eslint/no-deprecated': 'off',
+      '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/no-unnecessary-condition': 'off',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+    },
+  },
+  {
+    // Rules whose findings are almost entirely stub casts when pointed at
+    // tests — `as unknown as Parameters<typeof load>[0]` and the like, which
+    // are deliberate. Production code is where they earn their keep.
+    files: TYPED_FILES,
+    ignores: TYPED_TEST_FILES,
+    rules: {
+      '@typescript-eslint/no-non-null-assertion': 'error',
+      '@typescript-eslint/no-unsafe-argument': 'error',
+      '@typescript-eslint/no-unsafe-return': 'error',
+      '@typescript-eslint/require-await': 'error',
+      '@typescript-eslint/no-unsafe-assignment': 'error',
+      '@typescript-eslint/no-unsafe-member-access': 'error',
+      '@typescript-eslint/no-deprecated': 'error',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+      '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/no-unsafe-call': 'error',
+      '@typescript-eslint/unbound-method': 'error',
     },
   },
   {

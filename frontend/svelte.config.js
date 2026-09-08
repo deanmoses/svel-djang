@@ -44,7 +44,7 @@ function parseSentryDsn(dsn) {
   try {
     u = new URL(dsn);
   } catch (err) {
-    throw new Error(`PUBLIC_SENTRY_DSN is not a valid URL: ${err.message}`);
+    throw new Error(`PUBLIC_SENTRY_DSN is not a valid URL: ${err.message}`, { cause: err });
   }
   const project = u.pathname.replace(/^\//, '');
   if (!u.username || !project) {

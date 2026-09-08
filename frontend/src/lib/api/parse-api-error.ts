@@ -60,7 +60,7 @@ function plain(message: string): ParsedError {
  */
 export function parseApiError(error: unknown): ParsedError {
   if (typeof error === 'object' && error !== null && 'detail' in error) {
-    const { detail } = error as { detail: unknown };
+    const { detail } = error;
 
     if (typeof detail === 'string') return plain(detail);
 

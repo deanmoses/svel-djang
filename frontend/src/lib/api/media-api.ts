@@ -26,12 +26,12 @@ export interface UploadOptions {
 }
 
 class UploadError extends Error {
-  constructor(
-    message: string,
-    public readonly status: number,
-  ) {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
     super(message);
     this.name = 'UploadError';
+    this.status = status;
   }
 }
 
@@ -69,7 +69,7 @@ export function uploadMedia(
       } else {
         let message = `Upload failed (${xhr.status})`;
         try {
-          const body = JSON.parse(xhr.responseText);
+          const body: unknown = JSON.parse(xhr.responseText);
           const parsed = parseApiError(body).message;
           if (parsed) message = parsed;
         } catch {

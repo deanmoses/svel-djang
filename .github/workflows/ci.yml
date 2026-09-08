@@ -68,7 +68,7 @@ jobs:
         run: uv run mypy --config-file pyproject.toml .
       - run: uv run pytest
 
-  frontend:
+  frontend-tests:
     needs: changes
     if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
@@ -86,10 +86,14 @@ jobs:
           cache: pnpm
           cache-dependency-path: frontend/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm lint
       - run: pnpm test
 
-  api-types:
+  # ESLint is type-aware, so it needs the same generated inputs svelte-check
+  # does: `.svelte-kit/` from svelte-kit sync and the API types from the
+  # backend schema. Both are gitignored, which is why linting lives here
+  # rather than alongside the frontend tests -- and why a backend schema
+  # change can now fail frontend lint.
+  frontend-static:
     needs: changes
     if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
@@ -112,6 +116,10 @@ jobs:
         run: test -f frontend/src/lib/api/schema.d.ts
       - name: Svelte type check
         run: cd frontend && pnpm check
+      # After `pnpm check`, which runs svelte-kit sync and so creates the
+      # `.svelte-kit/tsconfig.json` that frontend/tsconfig.json extends.
+      - name: Lint
+        run: cd frontend && pnpm lint
 
   # Deliberately NOT behind `needs: changes`. The paths filter above covers
   # backend/, frontend/, scripts/ and a few root files -- a docs-only PR would
@@ -139,7 +147,7 @@ jobs:
 
   ci:
     if: always()
-    needs: [backend, frontend, api-types, control-characters]
+    needs: [backend, frontend-tests, frontend-static, control-characters]
     runs-on: ubuntu-latest
     steps:
       - name: All checks passed
