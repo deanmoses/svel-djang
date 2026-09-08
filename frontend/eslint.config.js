@@ -306,7 +306,10 @@ export default ts.config(
       // does not, and the convention tests use it to say how to fix a
       // violation. maxArgs:2 keeps the arity check without banning that.
       'vitest/valid-expect': ['error', { maxArgs: 2 }],
-      'vitest/valid-title': 'off',
+      // `describe(key)` over a codegen'd key list is how the convention tests
+      // fan out per entity. Only describe names are exempt — an `it` title
+      // still has to be a literal, so a test can't hide behind a variable.
+      'vitest/valid-title': ['error', { ignoreTypeOfDescribeName: true }],
     },
   },
   //
