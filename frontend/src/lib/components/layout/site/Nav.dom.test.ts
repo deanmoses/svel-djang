@@ -178,24 +178,24 @@ describe('Nav', () => {
   });
 
   describe('mobile (width <= 40rem)', () => {
-    let originalMatchMedia: typeof window.matchMedia;
-
     beforeEach(() => {
-      originalMatchMedia = window.matchMedia;
-      window.matchMedia = ((query: string) => ({
-        matches: query === '(max-width: 40rem)',
-        media: query,
-        addEventListener: () => {},
-        removeEventListener: () => {},
-        addListener: () => {},
-        removeListener: () => {},
-        dispatchEvent: () => false,
-        onchange: null,
-      })) as unknown as typeof window.matchMedia;
+      vi.spyOn(window, 'matchMedia').mockImplementation(
+        (query: string) =>
+          ({
+            matches: query === '(max-width: 40rem)',
+            media: query,
+            addEventListener: () => {},
+            removeEventListener: () => {},
+            addListener: () => {},
+            removeListener: () => {},
+            dispatchEvent: () => false,
+            onchange: null,
+          }) as unknown as MediaQueryList,
+      );
     });
 
     afterEach(() => {
-      window.matchMedia = originalMatchMedia;
+      vi.restoreAllMocks();
     });
 
     it('hamburger menu includes Titles / Manufacturers / People plus Changelog', async () => {
@@ -240,11 +240,7 @@ describe('Nav', () => {
       render(Nav);
 
       const link = screen.getByRole('link', { name: 'Games' });
-      if (active) {
-        expect(link).toHaveClass('active');
-      } else {
-        expect(link).not.toHaveClass('active');
-      }
+      expect(link.classList.contains('active')).toBe(active);
     });
   });
 });

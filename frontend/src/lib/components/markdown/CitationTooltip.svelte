@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { on } from 'svelte/events';
   import { SvelteMap } from 'svelte/reactivity';
   import client from '$lib/api/client';
   import { floating } from '$lib/actions/floating';
@@ -26,7 +27,7 @@
     onNavigate?: (index: number) => void;
   } = $props();
 
-  let citationData = new SvelteMap<number, CitationInfo>();
+  const citationData = new SvelteMap<number, CitationInfo>();
 
   // Populate from prop data when available
   $effect(() => {
@@ -93,8 +94,7 @@
       if (target.closest('[data-cite-id]')) return;
       dispatch({ type: 'click-outside' });
     }
-    document.addEventListener('click', onClick, true);
-    return () => document.removeEventListener('click', onClick, true);
+    return on(document, 'click', onClick, { capture: true });
   });
 
   // Scan container for citation elements and attach listeners
@@ -177,20 +177,17 @@
         }
       };
 
-      sup.addEventListener('mouseenter', onMouseenter);
-      sup.addEventListener('mouseleave', onMouseleave);
-      sup.addEventListener('click', onClick);
-      sup.addEventListener('focus', onFocus);
-      sup.addEventListener('blur', onBlur);
-      sup.addEventListener('keydown', onKeydown);
+      const offs = [
+        on(sup, 'mouseenter', onMouseenter),
+        on(sup, 'mouseleave', onMouseleave),
+        on(sup, 'click', onClick),
+        on(sup, 'focus', onFocus),
+        on(sup, 'blur', onBlur),
+        on(sup, 'keydown', onKeydown),
+      ];
 
       cleanups.push(() => {
-        sup.removeEventListener('mouseenter', onMouseenter);
-        sup.removeEventListener('mouseleave', onMouseleave);
-        sup.removeEventListener('click', onClick);
-        sup.removeEventListener('focus', onFocus);
-        sup.removeEventListener('blur', onBlur);
-        sup.removeEventListener('keydown', onKeydown);
+        for (const off of offs) off();
       });
     }
 

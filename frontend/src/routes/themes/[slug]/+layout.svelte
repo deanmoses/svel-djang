@@ -21,7 +21,7 @@
   // Unlike gameplay-features, themes has historically shown aliases verbatim
   // (no near-duplicate filter against the canonical name). Preserve that.
   let aliases = $derived(theme.aliases ?? []);
-  let childHeading = 'Sub-themes';
+  const childHeading = 'Sub-themes';
 </script>
 
 <TaxonomyDetailBaseLayout

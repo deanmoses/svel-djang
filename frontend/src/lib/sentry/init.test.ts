@@ -58,6 +58,10 @@ describe('SSR Sentry init (instrumentation.server.ts)', () => {
     expect(Sentry.init).toHaveBeenCalledTimes(1);
     const initArgs = vi.mocked(Sentry.init).mock.calls[0][0]!;
     expect(initArgs.dsn).toBe('https://frontend-project@sentry.example/2');
+    // Mirrors the option instrumentation.server.ts still passes. Sentry 10.73
+    // deprecates it in favour of `dataCollection`; migrating is a change to
+    // what the SDK collects, so it happens on its own, not here.
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     expect(initArgs.sendDefaultPii).toBe(false);
     expect(initArgs.tracesSampleRate).toBe(0);
     expect(initArgs.release).toBe('abc123');
@@ -98,6 +102,8 @@ describe('Browser Sentry init (hooks.client.ts)', () => {
     const initArgs = vi.mocked(Sentry.init).mock.calls[0][0]!;
     expect(initArgs.dsn).toBe('https://example@sentry.example/2');
     expect(initArgs.release).toBe('def456');
+    // As above: mirrors what hooks.client.ts passes.
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     expect(initArgs.sendDefaultPii).toBe(false);
     expect(initArgs.tracesSampleRate).toBe(0);
     // No replay or feedback integrations.

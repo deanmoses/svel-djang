@@ -32,7 +32,7 @@
   }
 
   const original = untrack(() => extractFields(initialData));
-  let fields = $state<ExternalDataFormFields>({ ...original });
+  const fields = $state<ExternalDataFormFields>({ ...original });
   let dirty = $derived(Object.keys(diffScalarFields(fields, original)).length > 0);
 
   export { dirty };

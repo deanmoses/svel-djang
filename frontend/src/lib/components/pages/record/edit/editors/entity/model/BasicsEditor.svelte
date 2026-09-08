@@ -71,7 +71,7 @@
   const initialFields = untrack(() => extractFields(initialData));
   const initialCorporateEntity = untrack(() => initialData.corporate_entity?.public_id ?? '');
   const original = { ...initialFields, corporate_entity: initialCorporateEntity };
-  let fields = $state<BasicsFormFields>({ ...initialFields });
+  const fields = $state<BasicsFormFields>({ ...initialFields });
   // corporate_entity is optional: bind `string | null`, normalize null → '' at
   // the diff boundary so clearing it diffs as '' → null. title is required.
   let corporateEntity = $state<string | null>(initialCorporateEntity || null);

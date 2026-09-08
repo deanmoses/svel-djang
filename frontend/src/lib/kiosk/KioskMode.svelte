@@ -8,6 +8,7 @@
   doesn't need a server load on every navigation.
 -->
 <script lang="ts">
+  import { on } from 'svelte/events';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
   import { DEFAULT_IDLE_SECONDS, getKioskIdleSecondsFromCookie } from './config';
@@ -32,16 +33,12 @@
     }
 
     const events = ['pointerdown', 'keydown', 'touchstart'] as const;
-    for (const ev of events) {
-      window.addEventListener(ev, reset, { passive: true });
-    }
+    const offs = events.map((ev) => on(window, ev, reset, { passive: true }));
     reset();
 
     return () => {
       if (timer !== undefined) clearTimeout(timer);
-      for (const ev of events) {
-        window.removeEventListener(ev, reset);
-      }
+      for (const off of offs) off();
     };
   });
 </script>

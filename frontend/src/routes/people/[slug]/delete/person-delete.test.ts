@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { assert, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const POST = vi.fn();
 
@@ -50,10 +50,8 @@ describe('person submitDelete', () => {
       }),
     });
     const out = await submitDelete('pat-lawlor');
-    expect(out.kind).toBe('blocked');
-    if (out.kind === 'blocked') {
-      expect(out.extra.active_credit_count).toBe(5);
-      expect(out.message).toContain('5 active machines');
-    }
+    assert(out.kind === 'blocked');
+    expect(out.extra.active_credit_count).toBe(5);
+    expect(out.message).toContain('5 active machines');
   });
 });

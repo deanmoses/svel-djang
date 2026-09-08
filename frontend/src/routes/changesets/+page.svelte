@@ -80,9 +80,9 @@
   let fetchGeneration = 0;
 
   // Detail cache (changeset diffs are immutable)
-  let detailCache = new SvelteMap<number, ChangeSetDetail>();
-  let expandedIds = new SvelteSet<number>();
-  let loadingDetailIds = new SvelteSet<number>();
+  const detailCache = new SvelteMap<number, ChangeSetDetail>();
+  const expandedIds = new SvelteSet<number>();
+  const loadingDetailIds = new SvelteSet<number>();
 
   // Sentinel for infinite scroll
   let sentinel: HTMLDivElement | undefined = $state();

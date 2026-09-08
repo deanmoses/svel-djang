@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { assert, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { BlockingReferrer } from './delete-flow';
 
 const POST = vi.fn();
@@ -48,8 +48,8 @@ describe('createDeleteSubmitter', () => {
       response: makeResponse(null, 200),
     });
     const out = await submit('abc');
-    expect(out.kind).toBe('ok');
-    if (out.kind === 'ok') expect(out.data.changeset_id).toBe(42);
+    assert(out.kind === 'ok');
+    expect(out.data.changeset_id).toBe(42);
   });
 
   it('classifies 429 as rate_limited and formats Retry-After as hours', async () => {
@@ -59,11 +59,9 @@ describe('createDeleteSubmitter', () => {
       response: makeResponse(null, 429, { 'Retry-After': '86400' }),
     });
     const out = await submit('abc');
-    expect(out.kind).toBe('rate_limited');
-    if (out.kind === 'rate_limited') {
-      expect(out.retryAfterSeconds).toBe(86400);
-      expect(out.message).toMatch(/\d+ hour/);
-    }
+    assert(out.kind === 'rate_limited');
+    expect(out.retryAfterSeconds).toBe(86400);
+    expect(out.message).toMatch(/\d+ hour/);
   });
 
   it('defaults Retry-After to one day when the header is missing', async () => {
@@ -73,7 +71,8 @@ describe('createDeleteSubmitter', () => {
       response: makeResponse(null, 429),
     });
     const out = await submit('abc');
-    if (out.kind === 'rate_limited') expect(out.retryAfterSeconds).toBe(86400);
+    assert(out.kind === 'rate_limited');
+    expect(out.retryAfterSeconds).toBe(86400);
   });
 
   it('classifies 422 with blocked_by as a blocked outcome', async () => {
@@ -96,12 +95,10 @@ describe('createDeleteSubmitter', () => {
       response: makeResponse(JSON.stringify(body), 422, { 'content-type': 'application/json' }),
     });
     const out = await submit('target');
-    expect(out.kind).toBe('blocked');
-    if (out.kind === 'blocked') {
-      expect(out.blockedBy).toHaveLength(1);
-      expect(out.blockedBy[0].public_id).toBe('other');
-      expect(out.message).toContain('active references');
-    }
+    assert(out.kind === 'blocked');
+    expect(out.blockedBy).toHaveLength(1);
+    expect(out.blockedBy[0].public_id).toBe('other');
+    expect(out.message).toContain('active references');
   });
 
   it('exposes entity-specific 422 fields on the blocked outcome.extra', async () => {
@@ -116,12 +113,10 @@ describe('createDeleteSubmitter', () => {
       response: makeResponse(JSON.stringify(body), 422, { 'content-type': 'application/json' }),
     });
     const out = await submit('keith-johnson');
-    expect(out.kind).toBe('blocked');
-    if (out.kind === 'blocked') {
-      expect(out.blockedBy).toEqual([]);
-      expect(out.extra.active_credit_count).toBe(3);
-      expect(out.message).toContain('3 active machines');
-    }
+    assert(out.kind === 'blocked');
+    expect(out.blockedBy).toEqual([]);
+    expect(out.extra.active_credit_count).toBe(3);
+    expect(out.message).toContain('3 active machines');
   });
 
   it('falls back to form_error for unexpected failures', async () => {
@@ -131,8 +126,8 @@ describe('createDeleteSubmitter', () => {
       response: makeResponse(null, 500),
     });
     const out = await submit('abc');
-    expect(out.kind).toBe('form_error');
-    if (out.kind === 'form_error') expect(out.message).toContain('server blew up');
+    assert(out.kind === 'form_error');
+    expect(out.message).toContain('server blew up');
   });
 
   it('falls back to form_error when a 422 body has no blocked_by', async () => {

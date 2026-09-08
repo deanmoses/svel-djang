@@ -59,12 +59,12 @@ describe('MediaCard', () => {
     const user = userEvent.setup();
     const onclick = vi.fn();
     const ondelete = vi.fn();
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
     renderCard({ onclick, ondelete });
 
     await user.click(screen.getByRole('button', { name: /remove/i }));
 
-    expect(window.confirm).toHaveBeenCalledWith('Remove this image from this machine?');
+    expect(confirmSpy).toHaveBeenCalledWith('Remove this image from this machine?');
     expect(ondelete).toHaveBeenCalledWith('asset-1');
     expect(onclick).not.toHaveBeenCalled();
   });

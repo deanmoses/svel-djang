@@ -123,11 +123,24 @@ export default ts.config(
       // through different import specifiers and reading one as the other is a
       // silent import mistake.
       'svelte/no-conflicting-module-names': 'error',
+      // `<slot name={x}>` is a legacy-slot construct with no runes equivalent.
+      'svelte/no-dynamic-slot-name': 'error',
+      // `{{ expr }}` is a single mustache wrapping a parenthesized expression,
+      // not interpolation — the extra braces render as literal braces.
+      'svelte/no-extra-reactive-curlies': 'error',
       'svelte/no-nested-style-tag': 'error',
+      // The runes-aware counterpart to core `prefer-const`, which does not see
+      // into a component's <script>. A `$state` object that is only ever
+      // mutated wants `const` — the proxy carries the mutations. `$props` and
+      // `$derived` are exempt by default, being the two that can need `let`.
+      'svelte/prefer-const': 'error',
       // `$derived.by()` is for multi-statement bodies; a callback that is one
       // return statement reads as `$derived()`.
       'svelte/prefer-derived-over-derived-by': 'error',
       'svelte/require-event-prefix': 'error',
+      // A `style` attribute carrying a mustache is re-parsed on every update;
+      // the `style:` directive patches the one property that changed.
+      'svelte/require-optimized-style-attribute': 'error',
       'svelte/valid-style-parse': 'error',
       //
       // Store rules. The app is runes-only, so these report nothing today —
@@ -178,6 +191,17 @@ export default ts.config(
         },
       ],
     },
+  },
+  {
+    // Component code only. `on()` from svelte/events returns its own
+    // unsubscriber, so a listener and its teardown are declared together
+    // instead of as a matching pair that can drift, and it fires in the same
+    // order as `onclick` and friends. Neither property helps outside a
+    // component: plain modules wire up XHR and one-shot `{ once: true }`
+    // listeners, where `on()` resolves to the untyped EventTarget overload and
+    // there is no teardown to own.
+    files: ['src/**/*.svelte', 'src/**/*.svelte.ts'],
+    rules: { 'svelte/no-add-event-listener': 'error' },
   },
   //
   // `no-restricted-imports` blocks below. Flat config does NOT union this rule
@@ -287,12 +311,22 @@ export default ts.config(
     rules: {
       ...vitest.configs.recommended.rules,
       'vitest/no-disabled-tests': 'error',
-      // Off pending cleanup — each has real hits in the current suite.
-      'vitest/expect-expect': 'off',
-      'vitest/no-conditional-expect': 'off',
+      // An `expect` reachable only through a branch is an assertion the suite
+      // may never run: the test then passes having verified nothing. Narrow a
+      // union with `assert(x.kind === 'y')`, which fails the test outright.
+      'vitest/no-conditional-expect': 'error',
+      // A test whose body never asserts passes by reaching the end.
+      'vitest/expect-expect': 'error',
+      // Off pending cleanup — real hits in the current suite.
       'vitest/prefer-called-exactly-once-with': 'off',
-      'vitest/valid-expect': 'off',
-      'vitest/valid-title': 'off',
+      // Vitest's `expect(value, message)` takes a second argument that Jest's
+      // does not, and the convention tests use it to say how to fix a
+      // violation. maxArgs:2 keeps the arity check without banning that.
+      'vitest/valid-expect': ['error', { maxArgs: 2 }],
+      // `describe(key)` over a codegen'd key list is how the convention tests
+      // fan out per entity. Only describe names are exempt — an `it` title
+      // still has to be a literal, so a test can't hide behind a variable.
+      'vitest/valid-title': ['error', { ignoreTypeOfDescribeName: true }],
     },
   },
   //
@@ -322,6 +356,38 @@ export default ts.config(
           caughtErrorsIgnorePattern: '^_',
         },
       ],
+      // A union member added to a codegen'd type — an EntityKey from
+      // export_entity_meta, a schema `reason` literal — has to break every
+      // switch that needs a new arm, or the frontend silently drops the case.
+      // A `default` arm counts as exhaustive, so switches that legitimately
+      // want a catch-all are unaffected.
+      '@typescript-eslint/switch-exhaustiveness-check': [
+        'error',
+        { considerDefaultExhaustiveForUnions: true, allowDefaultCaseForExhaustiveSwitch: true },
+      ],
+      // The write side of `no-import-type-side-effects`: that rule fixes the
+      // inline `{ type A }` form, this one keeps a type from being imported as
+      // a value in the first place. `disallowTypeAnnotations: false` leaves
+      // inline `import('./x').Y` alone — tests use it to type vi.mock factories.
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+          fixStyle: 'separate-type-imports',
+          disallowTypeAnnotations: false,
+        },
+      ],
+      '@typescript-eslint/consistent-type-exports': 'error',
+      // `.sort()` with no comparator sorts by string codepoint, so [1, 10, 2]
+      // is the sorted order for numbers. String arrays are exempt: codepoint
+      // order is what they want, and `localeCompare` would be wrong for slugs.
+      '@typescript-eslint/require-array-sort-compare': ['error', { ignoreStringArrays: true }],
+      // `.filter(p)[0]` walks the whole array and allocates; `.find(p)` stops.
+      '@typescript-eslint/prefer-find': 'error',
+      // A parameter after a defaulted one can never be omitted, so the default
+      // is unreachable and every caller must pass `undefined` positionally.
+      '@typescript-eslint/default-param-last': 'error',
+      '@typescript-eslint/no-useless-empty-export': 'error',
       // `||` falls back on every falsy value, so a legitimate 0 or false is
       // silently replaced by the default. `??` only covers null/undefined.
       //
@@ -348,8 +414,11 @@ export default ts.config(
       // SvelteKit declares error() and redirect() as returning `never`, so
       // every `throw error(...)` trips this and no configuration satisfies it.
       '@typescript-eslint/only-throw-error': 'off',
+      // Reading a method off its object drops `this`. In tests this mostly
+      // means asserting on a global rather than on the spy that replaced it —
+      // `expect(confirmSpy)`, not `expect(window.confirm)`.
+      '@typescript-eslint/unbound-method': 'error',
       // Off pending cleanup.
-      '@typescript-eslint/no-deprecated': 'off',
       '@typescript-eslint/no-floating-promises': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/no-unnecessary-condition': 'off',
@@ -360,7 +429,6 @@ export default ts.config(
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/require-await': 'off',
-      '@typescript-eslint/unbound-method': 'off',
     },
   },
   {
@@ -376,11 +444,9 @@ export default ts.config(
       '@typescript-eslint/require-await': 'error',
       '@typescript-eslint/no-unsafe-assignment': 'error',
       '@typescript-eslint/no-unsafe-member-access': 'error',
-      '@typescript-eslint/no-deprecated': 'error',
       '@typescript-eslint/no-unnecessary-type-assertion': 'error',
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-unsafe-call': 'error',
-      '@typescript-eslint/unbound-method': 'error',
     },
   },
   {

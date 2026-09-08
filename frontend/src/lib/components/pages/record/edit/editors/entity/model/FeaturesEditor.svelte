@@ -57,7 +57,7 @@
 
   // untrack: intentional one-time capture; component re-mounts when modal reopens
   const original = untrack(() => extractFields(initialData));
-  let fields = $state<FeaturesFormFields>({ ...original });
+  const fields = $state<FeaturesFormFields>({ ...original });
 
   // Simple M2M fields — stored as slug arrays
   const originalThemes = untrack(() => initialData.themes);

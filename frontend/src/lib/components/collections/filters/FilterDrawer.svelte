@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { on } from 'svelte/events';
   import type { Snippet } from 'svelte';
   import FaIcon from '$lib/components/ui/FaIcon.svelte';
   import { faSliders, faXmark } from '@fortawesome/free-solid-svg-icons';
@@ -39,8 +40,7 @@
     function handleKeydown(e: KeyboardEvent) {
       if (e.key === 'Escape') closeDrawer();
     }
-    document.addEventListener('keydown', handleKeydown);
-    return () => document.removeEventListener('keydown', handleKeydown);
+    return on(document, 'keydown', handleKeydown);
   });
 </script>
 

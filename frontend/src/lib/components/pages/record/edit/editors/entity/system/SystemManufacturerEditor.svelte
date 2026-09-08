@@ -36,7 +36,7 @@
   const original = untrack(() => ({
     manufacturer: initialData.manufacturer?.public_id ?? '',
   }));
-  let fields = $state<ManufacturerFields>({ ...original });
+  const fields = $state<ManufacturerFields>({ ...original });
   let fieldErrors = $state<FieldErrors>({});
   let dirty = $derived(Object.keys(diffScalarFields(fields, original)).length > 0);
 

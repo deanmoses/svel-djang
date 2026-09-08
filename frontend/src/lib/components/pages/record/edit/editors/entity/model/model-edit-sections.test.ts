@@ -41,8 +41,8 @@ describe('model edit sections', () => {
     const keys = modelSectionsFor(true).map((s) => s.key);
     expect(keys).not.toContain('name');
     // Every other section stays.
-    for (const s of MODEL_EDIT_SECTIONS) {
-      if (s.key !== 'name') expect(keys).toContain(s.key);
+    for (const key of MODEL_EDIT_SECTIONS.map((s) => s.key).filter((k) => k !== 'name')) {
+      expect(keys).toContain(key);
     }
   });
 });

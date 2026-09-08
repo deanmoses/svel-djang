@@ -15,7 +15,7 @@
 
   let { data } = $props();
   let mfr = $derived(data.profile);
-  let editAction = manufacturerEditActionContext.get();
+  const editAction = manufacturerEditActionContext.get();
   const richTextState = createRichTextAccordionState();
 
   let yearsActive = $derived(

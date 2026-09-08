@@ -12,14 +12,17 @@ function makeEvent(modeCookie: string | undefined): LoadEvent {
 
 describe('homepage server load', () => {
   it('redirects to /kiosk when mode=kiosk cookie is set', () => {
+    let thrown: unknown;
     try {
       load(makeEvent('kiosk'));
-      throw new Error('expected redirect');
     } catch (err) {
-      if (!isRedirect(err)) throw err;
-      expect(err.status).toBe(307);
-      expect(err.location).toBe('/kiosk');
+      thrown = err;
     }
+    // Rethrow anything that isn't the redirect, so a real fault surfaces as
+    // itself rather than as a failed assertion about a redirect.
+    if (!isRedirect(thrown)) throw thrown ?? new Error('expected a redirect');
+    expect(thrown.status).toBe(307);
+    expect(thrown.location).toBe('/kiosk');
   });
 
   it('returns empty object when no mode cookie', () => {

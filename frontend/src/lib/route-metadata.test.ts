@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { assert, describe, it, expect } from 'vitest';
 import type { RouteId } from '$app/types';
 import {
   classifyRoute,
@@ -200,21 +200,28 @@ describe('route-metadata', () => {
     });
   });
 
-  it.each(ANCHORS)(
+  it.each(ANCHORS.filter(([, , , entity]) => entity === null))(
+    'classifies %s as %s (indexable=%s, not a catalog route)',
+    (id, kind, indexable) => {
+      const cls = classifyRoute(id);
+      expect(cls.kind).toBe(kind);
+      expect(isSearchEngineIndexable(id)).toBe(indexable);
+      expect(isCatalogRoute(cls)).toBe(false);
+    },
+  );
+
+  it.each(ANCHORS.filter(([, , , entity]) => entity !== null))(
     'classifies %s as %s (indexable=%s, entity=%s)',
     (id, kind, indexable, entity) => {
       const cls = classifyRoute(id);
       expect(cls.kind).toBe(kind);
       expect(isSearchEngineIndexable(id)).toBe(indexable);
-      if (entity === null) {
-        expect(isCatalogRoute(cls)).toBe(false);
-      } else {
-        // Two-step check so a regression to a non-catalog kind reports
-        // "expected false to be true" (clear), not "expected false to be
-        // 'title'" from a short-circuited `cls && cls.entity` expression.
-        expect(isCatalogRoute(cls)).toBe(true);
-        if (isCatalogRoute(cls)) expect(cls.entity).toBe(entity);
-      }
+      // Two-step check so a regression to a non-catalog kind reports
+      // "expected false to be true" (clear), not "expected false to be
+      // 'title'" from a short-circuited `cls && cls.entity` expression.
+      expect(isCatalogRoute(cls)).toBe(true);
+      assert(isCatalogRoute(cls));
+      expect(cls.entity).toBe(entity);
     },
   );
 });

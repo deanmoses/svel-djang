@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { on } from 'svelte/events';
   import { normalizeText } from '$lib/utils';
   import ComboboxListbox from './dropdown/ComboboxListbox.svelte';
   import SelectedChips from './dropdown/SelectedChips.svelte';
@@ -201,11 +202,11 @@
     function onFocusIn(e: FocusEvent) {
       if (isOutside(e.target as Node)) close();
     }
-    document.addEventListener('pointerdown', onPointerDown);
-    document.addEventListener('focusin', onFocusIn);
+    const offPointerDown = on(document, 'pointerdown', onPointerDown);
+    const offFocusIn = on(document, 'focusin', onFocusIn);
     return () => {
-      document.removeEventListener('pointerdown', onPointerDown);
-      document.removeEventListener('focusin', onFocusIn);
+      offPointerDown();
+      offFocusIn();
     };
   });
 

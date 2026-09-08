@@ -35,44 +35,49 @@ function runHandle(
 }
 
 describe('noindexHandle', () => {
-  const CASES: ReadonlyArray<readonly [RouteId, boolean]> = [
-    // Indexable.
-    ['/', false],
-    ['/about', false],
-    ['/titles/[slug]', false],
-    ['/games', false], // the games listing — catalog-listing via the route override
-    // Listed non-indexable.
-    ['/login', true],
-    ['/search', true],
-    ['/users/[username]', true],
-    // Auth-gated (via prefix scan).
-    ['/admin/dashboard', true],
-    ['/kiosk/edit', true],
-    // Catalog non-indexable kinds.
-    ['/titles/new', true],
-    ['/titles/[slug]/edit', true],
-    ['/titles/[slug]/delete', true],
-    ['/titles/[slug]/edit-history', true],
-    ['/titles/[slug]/sources', true],
+  const INDEXABLE: readonly RouteId[] = [
+    '/',
+    '/about',
+    '/titles/[slug]',
+    '/games', // the games listing — catalog-listing via the route override
   ];
 
-  it.each(CASES)('classifies %s (noindex=%s)', async (routeId, expectedNoindex) => {
+  const NOINDEX: readonly RouteId[] = [
+    // Listed non-indexable.
+    '/login',
+    '/search',
+    '/users/[username]',
+    // Auth-gated (via prefix scan).
+    '/admin/dashboard',
+    '/kiosk/edit',
+    // Catalog non-indexable kinds.
+    '/titles/new',
+    '/titles/[slug]/edit',
+    '/titles/[slug]/delete',
+    '/titles/[slug]/edit-history',
+    '/titles/[slug]/sources',
+  ];
+
+  it.each(INDEXABLE)('leaves %s indexable', async (routeId) => {
     const { resolve, promise } = runHandle(routeId);
     const response = await promise;
 
-    if (expectedNoindex) {
-      expect(response.headers.get('X-Robots-Tag')).toBe('noindex');
-      expect(await response.text()).toContain('<meta name="robots" content="noindex"');
-      expect(resolve).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({ transformPageChunk: expect.any(Function) }),
-      );
-    } else {
-      expect(response.headers.get('X-Robots-Tag')).toBeNull();
-      expect(await response.text()).not.toContain('name="robots"');
-      // No options passed at all on the indexable path.
-      expect(resolve).toHaveBeenCalledWith(expect.anything());
-    }
+    expect(response.headers.get('X-Robots-Tag')).toBeNull();
+    expect(await response.text()).not.toContain('name="robots"');
+    // No options passed at all on the indexable path.
+    expect(resolve).toHaveBeenCalledWith(expect.anything());
+  });
+
+  it.each(NOINDEX)('marks %s noindex', async (routeId) => {
+    const { resolve, promise } = runHandle(routeId);
+    const response = await promise;
+
+    expect(response.headers.get('X-Robots-Tag')).toBe('noindex');
+    expect(await response.text()).toContain('<meta name="robots" content="noindex"');
+    expect(resolve).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ transformPageChunk: expect.any(Function) }),
+    );
   });
 
   it('treats route.id === null (unmatched URLs / 404s) as noindex', async () => {

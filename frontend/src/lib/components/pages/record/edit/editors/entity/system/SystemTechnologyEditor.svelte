@@ -37,7 +37,7 @@
   const original = untrack(() => ({
     technology_subgeneration: initialData.technology_subgeneration?.public_id ?? '',
   }));
-  let fields = $state<TechnologyFields>({ ...original });
+  const fields = $state<TechnologyFields>({ ...original });
   let fieldErrors = $state<FieldErrors>({});
   let options = $state<SystemEditOption[]>([]);
   let dirty = $derived(Object.keys(diffScalarFields(fields, original)).length > 0);
