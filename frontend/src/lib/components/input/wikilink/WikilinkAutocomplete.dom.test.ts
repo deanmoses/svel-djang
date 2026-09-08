@@ -277,8 +277,7 @@ describe('WikilinkAutocomplete', () => {
     await user.keyboard('{ArrowDown}');
     await user.keyboard('{Enter}');
 
-    expect(oncomplete).toHaveBeenCalledOnce();
-    expect(oncomplete).toHaveBeenCalledWith(`[[title:${SEARCH_RESULTS[0].ref}]]`);
+    expect(oncomplete).toHaveBeenCalledExactlyOnceWith(`[[title:${SEARCH_RESULTS[0].ref}]]`);
   });
 
   it('sets aria-activedescendant on the search input during keyboard navigation', async () => {
@@ -375,7 +374,7 @@ describe('WikilinkAutocomplete', () => {
         .mockImplementationOnce(
           () => new Promise((resolve) => setTimeout(() => resolve({ results: slowResults }), 500)),
         )
-        .mockImplementationOnce(() => Promise.resolve({ results: fastResults }));
+        .mockResolvedValueOnce({ results: fastResults });
 
       // Type 'a' and let the debounce fire (200ms)
       await user.click(input);

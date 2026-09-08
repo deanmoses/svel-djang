@@ -46,8 +46,7 @@ describe('PillSelect', () => {
     await user.click(screen.getByRole('button', { name: 'Image category: playfield' }));
     await user.click(screen.getByRole('option', { name: 'cabinet' }));
 
-    expect(onchange).toHaveBeenCalledTimes(1);
-    expect(onchange).toHaveBeenCalledWith('cabinet');
+    expect(onchange).toHaveBeenCalledExactlyOnceWith('cabinet');
   });
 
   it('does NOT fire onchange when the current option is re-selected', async () => {

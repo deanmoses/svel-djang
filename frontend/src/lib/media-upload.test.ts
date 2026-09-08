@@ -143,7 +143,7 @@ describe('createUploadManager', () => {
     expect(mgr.files[0].status).toBe('success');
     expect(mgr.files[1].status).toBe('error');
     expect(mgr.files[1].error).toMatch(/size/i);
-    expect(mockUpload).toHaveBeenCalledTimes(1);
+    expect(mockUpload).toHaveBeenCalledOnce();
   });
 
   // --- Options forwarding ---

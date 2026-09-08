@@ -38,7 +38,7 @@ describe('handleServerError', () => {
     // 4xx is an expected outcome, not a server fault — it must log at info,
     // not error, so log aggregators don't tag it as severity=error.
     expect(errorSpy).not.toHaveBeenCalled();
-    expect(infoSpy).toHaveBeenCalledTimes(1);
+    expect(infoSpy).toHaveBeenCalledOnce();
     // No second argument at all: the error carrying the stack is never passed,
     // so no sink can reach the frames.
     expect(infoSpy.mock.calls[0]).toHaveLength(1);
@@ -56,7 +56,7 @@ describe('handleServerError', () => {
       event: fakeEvent('POST', '/api/bar'),
     });
 
-    expect(errorSpy).toHaveBeenCalledTimes(1);
+    expect(errorSpy).toHaveBeenCalledOnce();
     expect(errorSpy.mock.calls[0][0] as string).toContain('[500] POST /api/bar');
     // The stack rides as the cause, which the console sink passes through and
     // the Railway sink folds into the JSON `message`.

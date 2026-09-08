@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   buildSchemaOrgNode,
   buildEntityJsonLd,
@@ -61,14 +61,14 @@ function buildNode(
 }
 
 describe('buildSchemaOrgNode', () => {
-  test('single type emits @type as a string', () => {
+  it('single type emits @type as a string', () => {
     const node = buildSchemaOrgNode(entity(), info({ types: ['DefinedTerm'] }), PAGE);
     expect(node['@type']).toBe('DefinedTerm');
     expect(node.name).toBe('Fantasy');
     expect(node.description).toBe('Dragons and wizards.');
   });
 
-  test('emits dateModified from last_modified (ISO string, as-is)', () => {
+  it('emits dateModified from last_modified (ISO string, as-is)', () => {
     const node = buildSchemaOrgNode(
       entity({ last_modified: '2026-05-29T16:12:08.340Z' }),
       info({ types: ['DefinedTerm'] }),
@@ -77,7 +77,7 @@ describe('buildSchemaOrgNode', () => {
     expect(node.dateModified).toBe('2026-05-29T16:12:08.340Z');
   });
 
-  test('omits dateModified when last_modified is empty', () => {
+  it('omits dateModified when last_modified is empty', () => {
     const node = buildSchemaOrgNode(
       entity({ last_modified: '' }),
       info({ types: ['DefinedTerm'] }),
@@ -86,12 +86,12 @@ describe('buildSchemaOrgNode', () => {
     expect(node.dateModified).toBeUndefined();
   });
 
-  test('multiple types emit @type as an array', () => {
+  it('multiple types emit @type as an array', () => {
     const node = buildSchemaOrgNode(entity(), info({ types: ['Game', 'ProductModel'] }), PAGE);
     expect(node['@type']).toEqual(['Game', 'ProductModel']);
   });
 
-  test('function-form types are evaluated against the entity', () => {
+  it('function-form types are evaluated against the entity', () => {
     const node = buildSchemaOrgNode(
       entity({ public_id: 'sci-fi' }),
       info({ types: (e) => (e.public_id === 'sci-fi' ? ['DefinedTerm'] : ['Thing']) }),
@@ -100,7 +100,7 @@ describe('buildSchemaOrgNode', () => {
     expect(node['@type']).toBe('DefinedTerm');
   });
 
-  test('@id is the canonical /{plural}/{public_id} URL, independent of the page path', () => {
+  it('@id is the canonical /{plural}/{public_id} URL, independent of the page path', () => {
     const node = buildSchemaOrgNode(
       entity(),
       info({ types: ['DefinedTerm'] }),
@@ -109,7 +109,7 @@ describe('buildSchemaOrgNode', () => {
     expect(node['@id']).toBe(`${ORIGIN}/themes/fantasy`);
   });
 
-  test('@id uses the entity_type_plural of the declared entityType', () => {
+  it('@id uses the entity_type_plural of the declared entityType', () => {
     const node = buildSchemaOrgNode(
       entity({ public_id: 'design' }),
       info({ types: ['Occupation'] }, 'credit-role'),
@@ -118,7 +118,7 @@ describe('buildSchemaOrgNode', () => {
     expect(node['@id']).toBe(`${ORIGIN}/credit-roles/design`);
   });
 
-  test('@id uses the full public_id path (Location), not a collapsed last segment', () => {
+  it('@id uses the full public_id path (Location), not a collapsed last segment', () => {
     const node = buildSchemaOrgNode(
       entity({ public_id: 'usa/il/chicago', name: 'Chicago' }),
       info({ types: ['City'] }, 'location'),
@@ -127,7 +127,7 @@ describe('buildSchemaOrgNode', () => {
     expect(node['@id']).toBe(`${ORIGIN}/locations/usa/il/chicago`);
   });
 
-  test('description is omitted when .plain is empty', () => {
+  it('description is omitted when .plain is empty', () => {
     const node = buildSchemaOrgNode(
       entity({ description: { text: '', html: '', plain: '', citations: [] } }),
       info({ types: ['DefinedTerm'] }),
@@ -136,7 +136,7 @@ describe('buildSchemaOrgNode', () => {
     expect(node).not.toHaveProperty('description');
   });
 
-  test('description is omitted when .plain is only whitespace', () => {
+  it('description is omitted when .plain is only whitespace', () => {
     const node = buildSchemaOrgNode(
       entity({ description: { text: '', html: '', plain: '   ', citations: [] } }),
       info({ types: ['DefinedTerm'] }),
@@ -147,7 +147,7 @@ describe('buildSchemaOrgNode', () => {
 });
 
 describe('buildEntityJsonLd', () => {
-  test('emits a @graph of the entity node plus a Home › name breadcrumb', () => {
+  it('emits a @graph of the entity node plus a Home › name breadcrumb', () => {
     const graph = buildEntityJsonLd(entity(), info({ types: ['DefinedTerm'] }), PAGE);
     expect(graph['@context']).toBe('https://schema.org');
     const nodes = graph['@graph'] as Record<string, unknown>[];
@@ -165,7 +165,7 @@ describe('buildEntityJsonLd', () => {
 });
 
 describe('listingMeta', () => {
-  test('defaults title, heading and breadcrumb to the plural label when no overrides are set', () => {
+  it('defaults title, heading and breadcrumb to the plural label when no overrides are set', () => {
     expect(listingMeta('franchise')).toEqual({
       title: 'Franchises',
       heading: 'Franchises',
@@ -176,7 +176,7 @@ describe('listingMeta', () => {
     });
   });
 
-  test('uses listing.title, with heading and breadcrumb defaulting to it when unset', () => {
+  it('uses listing.title, with heading and breadcrumb defaulting to it when unset', () => {
     expect(listingMeta('theme')).toEqual({
       title: 'Pinball Machine Themes',
       heading: 'Pinball Machine Themes',
@@ -187,7 +187,7 @@ describe('listingMeta', () => {
     });
   });
 
-  test('the games listing resolves every label from its title', () => {
+  it('the games listing resolves every label from its title', () => {
     // No entity currently overrides `heading`; if one returns, cover the
     // heading-independent-of-title branch with it here.
     expect(listingMeta('title')).toEqual({
@@ -200,7 +200,7 @@ describe('listingMeta', () => {
     });
   });
 
-  test('breadcrumb overrides the crumb independently of title and heading', () => {
+  it('breadcrumb overrides the crumb independently of title and heading', () => {
     expect(listingMeta('person')).toEqual({
       title: 'Notable Pinball People',
       heading: 'Notable Pinball People',
@@ -218,7 +218,7 @@ describe('buildListingJsonLd', () => {
     { slug: 'horror', name: 'Horror' },
   ];
 
-  test('emits a CollectionPage whose mainEntity is a named ItemList, plus a breadcrumb', () => {
+  it('emits a CollectionPage whose mainEntity is a named ItemList, plus a breadcrumb', () => {
     const graph = buildListingJsonLd('theme', items, new URL(`${ORIGIN}/themes`), 137)[
       '@graph'
     ] as Record<string, unknown>[];
@@ -248,14 +248,14 @@ describe('buildListingJsonLd', () => {
     expect(citems.map((i) => i.name)).toEqual(['Home', 'Pinball Machine Themes']);
   });
 
-  test('numberOfItems defaults to the listed count when no total is given', () => {
+  it('numberOfItems defaults to the listed count when no total is given', () => {
     const graph = buildListingJsonLd('theme', items, new URL(`${ORIGIN}/themes`))[
       '@graph'
     ] as Record<string, unknown>[];
     expect(graph[1].numberOfItems).toBe(2);
   });
 
-  test('omits the ItemList on a filtered/paginated URL (canonical to base)', () => {
+  it('omits the ItemList on a filtered/paginated URL (canonical to base)', () => {
     // The filtered subset must not be published under the bare-listing @id.
     const graph = buildListingJsonLd('theme', items, new URL(`${ORIGIN}/themes?q=foo&page=2`))[
       '@graph'
@@ -268,7 +268,7 @@ describe('buildListingJsonLd', () => {
 });
 
 describe('fieldMap', () => {
-  test('maps source fields to their schema.org property names', () => {
+  it('maps source fields to their schema.org property names', () => {
     const node = buildNode(
       { ...entity(), logo_url: 'https://cdn.example/logo.png', website: 'https://stern.example' },
       { types: ['Brand'], fieldMap: { logo_url: 'logo', website: 'url' } },
@@ -278,7 +278,7 @@ describe('fieldMap', () => {
     expect(node.url).toBe('https://stern.example');
   });
 
-  test('null or empty source values are dropped', () => {
+  it('null or empty source values are dropped', () => {
     const node = buildNode(
       { ...entity(), logo_url: null, website: '' },
       { types: ['Brand'], fieldMap: { logo_url: 'logo', website: 'url' } },
@@ -288,7 +288,7 @@ describe('fieldMap', () => {
     expect(node).not.toHaveProperty('url');
   });
 
-  test('transform "year" coerces an int year to a partial-ISO string', () => {
+  it('transform "year" coerces an int year to a partial-ISO string', () => {
     const node = buildNode(
       { ...entity(), year: 1992 },
       { types: ['Game'], fieldMap: { year: { property: 'releaseDate', transform: 'year' } } },
@@ -297,7 +297,7 @@ describe('fieldMap', () => {
     expect(node.releaseDate).toBe('1992');
   });
 
-  test('a bare-string entry still copies the value as-is', () => {
+  it('a bare-string entry still copies the value as-is', () => {
     const node = buildNode(
       { ...entity(), hero_image_url: 'https://cdn.example/hero.png' },
       { types: ['Game'], fieldMap: { hero_image_url: 'image' } },
@@ -306,7 +306,7 @@ describe('fieldMap', () => {
     expect(node.image).toBe('https://cdn.example/hero.png');
   });
 
-  test('transform "year" still drops a null source value', () => {
+  it('transform "year" still drops a null source value', () => {
     const node = buildNode(
       { ...entity(), year_start: null },
       {
@@ -320,7 +320,7 @@ describe('fieldMap', () => {
 });
 
 describe('relationshipMap (single FK)', () => {
-  test('emits a single @id ref using the target entity_type_plural', () => {
+  it('emits a single @id ref using the target entity_type_plural', () => {
     const node = buildNode(
       { ...entity({ public_id: 'spike-2' }), manufacturer: { name: 'Stern', public_id: 'stern' } },
       { types: ['CreativeWork'], relationshipMap: { manufacturer: 'producer' } },
@@ -330,7 +330,7 @@ describe('relationshipMap (single FK)', () => {
     expect(node.producer).toEqual({ '@id': `${ORIGIN}/manufacturers/stern` });
   });
 
-  test('a null ref drops the property', () => {
+  it('a null ref drops the property', () => {
     const node = buildNode(
       { ...entity(), manufacturer: null },
       { types: ['CreativeWork'], relationshipMap: { manufacturer: 'producer' } },
@@ -341,7 +341,7 @@ describe('relationshipMap (single FK)', () => {
 });
 
 describe('relationshipMap (many)', () => {
-  test('emits an array of @id refs', () => {
+  it('emits an array of @id refs', () => {
     const node = buildNode(
       {
         ...entity(),
@@ -359,7 +359,7 @@ describe('relationshipMap (many)', () => {
     ]);
   });
 
-  test('an empty list drops the property', () => {
+  it('an empty list drops the property', () => {
     const node = buildNode(
       { ...entity(), parents: [] },
       { types: ['DefinedTerm'], relationshipMap: { parents: 'isPartOf' } },
@@ -370,7 +370,7 @@ describe('relationshipMap (many)', () => {
 });
 
 describe('relationshipMap guard', () => {
-  test('mapping a non-relationship (scalar) field throws', () => {
+  it('mapping a non-relationship (scalar) field throws', () => {
     expect(() =>
       buildNode(
         { ...entity() },
@@ -382,46 +382,46 @@ describe('relationshipMap guard', () => {
 });
 
 describe('per-model declarations', () => {
-  test('theme is a DefinedTerm', () => {
+  it('theme is a DefinedTerm', () => {
     expect(theme.entityType).toBe('theme');
     expect(theme.schemaOrg.types).toEqual(['DefinedTerm']);
   });
 
-  test('credit-role is an Occupation', () => {
+  it('credit-role is an Occupation', () => {
     expect(creditRole.entityType).toBe('credit-role');
     expect(creditRole.schemaOrg.types).toEqual(['Occupation']);
   });
 
-  test('manufacturer is a Brand with a logo/url fieldMap', () => {
+  it('manufacturer is a Brand with a logo/url fieldMap', () => {
     expect(manufacturer.entityType).toBe('manufacturer');
     expect(manufacturer.schemaOrg.types).toEqual(['Brand']);
     expect(manufacturer.schemaOrg.fieldMap).toEqual({ logo_url: 'logo', website: 'url' });
   });
 
-  test('system is a CreativeWork mapping manufacturer → producer', () => {
+  it('system is a CreativeWork mapping manufacturer → producer', () => {
     expect(system.entityType).toBe('system');
     expect(system.schemaOrg.types).toEqual(['CreativeWork']);
     expect(system.schemaOrg.relationshipMap).toEqual({ manufacturer: 'producer' });
   });
 
-  test('theme maps parents → isPartOf', () => {
+  it('theme maps parents → isPartOf', () => {
     expect(theme.schemaOrg.relationshipMap).toEqual({ parents: 'isPartOf' });
   });
 
-  test('corporate-entity is an Organization mapping manufacturer → brand', () => {
+  it('corporate-entity is an Organization mapping manufacturer → brand', () => {
     expect(corporateEntity.schemaOrg.types).toEqual(['Organization']);
     expect(corporateEntity.schemaOrg.fieldMap).toBeUndefined();
     expect(corporateEntity.schemaOrg.relationshipMap).toEqual({ manufacturer: 'brand' });
   });
 
-  test('series and franchise are bare CreativeWork(Series) with no maps', () => {
+  it('series and franchise are bare CreativeWork(Series) with no maps', () => {
     expect(series.schemaOrg.types).toEqual(['CreativeWorkSeries']);
     expect(series.schemaOrg.fieldMap).toBeUndefined();
     expect(franchise.schemaOrg.types).toEqual(['CreativeWork']);
     expect(franchise.schemaOrg.relationshipMap).toBeUndefined();
   });
 
-  test('model is Game+ProductModel with releaseDate/image and FK refs', () => {
+  it('model is Game+ProductModel with releaseDate/image and FK refs', () => {
     expect(model.schemaOrg.types).toEqual(['Game', 'ProductModel']);
     expect(model.schemaOrg.fieldMap).toEqual({
       year: { property: 'releaseDate', transform: 'year' },
@@ -434,7 +434,7 @@ describe('per-model declarations', () => {
     });
   });
 
-  test('title maps series/franchise to distinct properties (no key collision)', () => {
+  it('title maps series/franchise to distinct properties (no key collision)', () => {
     expect(title.schemaOrg.types).toEqual(['Game']);
     expect(title.schemaOrg.relationshipMap).toEqual({
       series: 'isPartOf',
@@ -442,7 +442,7 @@ describe('per-model declarations', () => {
     });
   });
 
-  test('person maps birth/death years and photo', () => {
+  it('person maps birth/death years and photo', () => {
     expect(person.schemaOrg.types).toEqual(['Person']);
     expect(person.schemaOrg.fieldMap).toEqual({
       birth_year: { property: 'birthDate', transform: 'year' },
@@ -459,13 +459,13 @@ describe('location per-row types', () => {
     return fn({ location_type } as unknown as LocationDetailSchema);
   };
 
-  test('country/state/city map to their schema.org types', () => {
+  it('country/state/city map to their schema.org types', () => {
     expect(typesFor('country')).toEqual(['Country']);
     expect(typesFor('state')).toEqual(['State']);
     expect(typesFor('city')).toEqual(['City']);
   });
 
-  test('both null and empty-string fall through to AdministrativeArea', () => {
+  it('both null and empty-string fall through to AdministrativeArea', () => {
     expect(typesFor(null)).toEqual(['AdministrativeArea']);
     expect(typesFor('')).toEqual(['AdministrativeArea']);
   });

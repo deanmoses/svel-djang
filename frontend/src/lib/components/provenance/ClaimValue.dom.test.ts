@@ -214,7 +214,7 @@ describe('ClaimValue', () => {
           },
         });
         expect(container.textContent).toBe('Widget (weirdkey: hello)');
-        expect(warnSpy).toHaveBeenCalledTimes(1);
+        expect(warnSpy).toHaveBeenCalledOnce();
         expect(warnSpy.mock.calls[0][0]).toContain('weirdkey');
       });
 

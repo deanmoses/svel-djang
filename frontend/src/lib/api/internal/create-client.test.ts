@@ -131,7 +131,7 @@ describe('createApiClient', () => {
 
       await apiClient.GET('/api/auth/me/');
 
-      expect(cb).toHaveBeenCalledTimes(1);
+      expect(cb).toHaveBeenCalledOnce();
     });
 
     it('does not fire on 403 without a policy_denied body', async () => {

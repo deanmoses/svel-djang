@@ -75,7 +75,7 @@ describe('MediaUploadZone', () => {
     await user.selectOptions(screen.getByRole('combobox'), 'backglass');
     await user.click(screen.getByRole('button', { name: /select images/i }));
 
-    expect(clickSpy).toHaveBeenCalledTimes(1);
+    expect(clickSpy).toHaveBeenCalledOnce();
   });
 
   it('uploads selected files and calls onuploaded with new uuids on success', async () => {

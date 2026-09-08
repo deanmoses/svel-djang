@@ -317,8 +317,10 @@ export default ts.config(
       'vitest/no-conditional-expect': 'error',
       // A test whose body never asserts passes by reaching the end.
       'vitest/expect-expect': 'error',
-      // Off pending cleanup — real hits in the current suite.
-      'vitest/prefer-called-exactly-once-with': 'off',
+      // A separate `toHaveBeenCalledOnce()` next to `toHaveBeenCalledWith(...)`
+      // asserts that the spy ran once and that *some* call matched — not that
+      // the one call was the matching one. The merged matcher asserts both.
+      'vitest/prefer-called-exactly-once-with': 'error',
       // Vitest's `expect(value, message)` takes a second argument that Jest's
       // does not, and the convention tests use it to say how to fix a
       // violation. maxArgs:2 keeps the arity check without banning that.
@@ -327,6 +329,67 @@ export default ts.config(
       // fan out per entity. Only describe names are exempt — an `it` title
       // still has to be a literal, so a test can't hide behind a variable.
       'vitest/valid-title': ['error', { ignoreTypeOfDescribeName: true }],
+      //
+      // Matcher choice. Each of these picks the matcher that says what the
+      // test means, so a reader doesn't have to reconstruct the intent from a
+      // generic assertion.
+      //
+      // `toHaveBeenCalledTimes(1)` states a count; `toHaveBeenCalledOnce()`
+      // states the thing the test cares about, and pairs with the
+      // `…ExactlyOnceWith` form above.
+      'vitest/prefer-called-once': 'error',
+      // A blanket ban on `toBeTruthy`/`toBeFalsy` — the rule does not consult
+      // the subject's type, and that is the point: every use in this suite was
+      // standing in for a sharper assertion (`toBe('boom')`,
+      // `toBeInTheDocument()`, `not.toBeNull()`), each of which says what is
+      // expected and prints something useful when it fails. `toBeTruthy` on a
+      // non-boolean reports only "expected <el> to be truthy".
+      // Its inverse, `prefer-to-be-truthy`/`-falsy`, wants the loose form and
+      // is deliberately off.
+      'vitest/prefer-strict-boolean-matchers': 'error',
+      // `mockImplementation(() => Promise.resolve(x))` spells out a function
+      // body to express a value; `mockResolvedValue(x)` names the intent.
+      // Its sibling `prefer-mock-return-shorthand` is deliberately off: the
+      // suite's `mockImplementation(() => new Promise(r => resolve = r))`
+      // sites are lazy on purpose, and `mockReturnValue` would construct one
+      // shared promise up front instead of a fresh one per call.
+      'vitest/prefer-mock-promise-shorthand': 'error',
+      // `expect(arr.includes(x)).toBe(true)` fails with "expected false to be
+      // true"; `toContain` fails with the array and the missing member.
+      'vitest/prefer-to-contain': 'error',
+      // `expectTypeOf` for type assertions — a runtime matcher on a type-level
+      // check asserts nothing.
+      'vitest/prefer-expect-type-of': 'error',
+      // `it` everywhere. The suite is overwhelmingly `it` already.
+      'vitest/consistent-test-it': ['error', { fn: 'it', withinDescribe: 'it' }],
+      //
+      // Conventions the suite already follows without exception. They report
+      // nothing today; they exist to keep the first divergence from landing.
+      //
+      'vitest/consistent-each-for': 'error',
+      'vitest/consistent-test-filename': 'error',
+      'vitest/consistent-vitest-vi': 'error',
+      'vitest/hoisted-apis-on-top': 'error',
+      'vitest/no-alias-methods': 'error',
+      'vitest/no-done-callback': 'error',
+      'vitest/no-duplicate-hooks': 'error',
+      'vitest/no-large-snapshots': 'error',
+      'vitest/no-test-prefixes': 'error',
+      'vitest/no-test-return-statement': 'error',
+      'vitest/prefer-comparison-matcher': 'error',
+      'vitest/prefer-equality-matcher': 'error',
+      'vitest/prefer-hooks-on-top': 'error',
+      // Tests import from 'vitest' explicitly; `globals: true` is not set.
+      'vitest/prefer-importing-vitest-globals': 'error',
+      'vitest/prefer-snapshot-hint': 'error',
+      'vitest/prefer-spy-on': 'error',
+      'vitest/prefer-to-be': 'error',
+      'vitest/prefer-to-be-object': 'error',
+      'vitest/prefer-to-have-been-called-times': 'error',
+      'vitest/prefer-to-have-length': 'error',
+      'vitest/prefer-todo': 'error',
+      'vitest/prefer-vi-mocked': 'error',
+      'vitest/require-awaited-expect-poll': 'error',
     },
   },
   //

@@ -148,7 +148,7 @@ describe('RelatedModelsEditor', () => {
     expect(screen.getByTestId('dirty')).toHaveTextContent('true');
 
     await user.click(screen.getByRole('button', { name: 'Save' }));
-    await waitFor(() => expect(PATCH).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(PATCH).toHaveBeenCalledOnce());
     expect(PATCH).toHaveBeenCalledWith(
       '/api/models/{public_id}/claims/',
       expect.objectContaining({
@@ -183,7 +183,7 @@ describe('RelatedModelsEditor', () => {
     );
 
     await user.click(screen.getByRole('button', { name: 'Save' }));
-    await waitFor(() => expect(PATCH).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(PATCH).toHaveBeenCalledOnce());
     expect(PATCH).toHaveBeenCalledWith(
       '/api/models/{public_id}/claims/',
       expect.objectContaining({
@@ -213,7 +213,7 @@ describe('RelatedModelsEditor', () => {
     expect(screen.getByTestId('dirty')).toHaveTextContent('true');
 
     await user.click(screen.getByRole('button', { name: 'Save' }));
-    await waitFor(() => expect(PATCH).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(PATCH).toHaveBeenCalledOnce());
     expect(PATCH).toHaveBeenCalledWith(
       '/api/models/{public_id}/claims/',
       expect.objectContaining({
@@ -242,7 +242,7 @@ describe('RelatedModelsEditor', () => {
     expect(screen.getByTestId('dirty')).toHaveTextContent('true');
 
     await user.click(screen.getByRole('button', { name: 'Save' }));
-    await waitFor(() => expect(PATCH).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(PATCH).toHaveBeenCalledOnce());
     expect(PATCH).toHaveBeenCalledWith(
       '/api/models/{public_id}/claims/',
       expect.objectContaining({
@@ -266,7 +266,7 @@ describe('RelatedModelsEditor', () => {
     await pickTarget(user, /Attack from Mars/);
 
     await user.click(screen.getByRole('button', { name: 'Save' }));
-    await waitFor(() => expect(PATCH).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(PATCH).toHaveBeenCalledOnce());
     expect(PATCH).toHaveBeenCalledWith(
       '/api/models/{public_id}/claims/',
       expect.objectContaining({
@@ -486,7 +486,7 @@ describe('RelatedModelsEditor', () => {
     await pickTarget(user, /Attack from Mars/);
 
     await user.click(screen.getByRole('button', { name: 'Save' }));
-    await waitFor(() => expect(PATCH).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(PATCH).toHaveBeenCalledOnce());
     expect(PATCH).toHaveBeenCalledWith(
       '/api/models/{public_id}/claims/',
       expect.objectContaining({
@@ -531,7 +531,7 @@ describe('RelatedModelsEditor', () => {
     expect(screen.getByTestId('dirty')).toHaveTextContent('true');
 
     await user.click(screen.getByRole('button', { name: 'Save' }));
-    await waitFor(() => expect(PATCH).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(PATCH).toHaveBeenCalledOnce());
     expect(PATCH).toHaveBeenCalledWith(
       '/api/models/{public_id}/claims/',
       expect.objectContaining({
@@ -551,7 +551,7 @@ describe('RelatedModelsEditor', () => {
     await user.type(screen.getByRole('textbox', { name: 'Describe the market' }), 'Europe');
 
     await user.click(screen.getByRole('button', { name: 'Save' }));
-    await waitFor(() => expect(PATCH).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(PATCH).toHaveBeenCalledOnce());
     expect(PATCH).toHaveBeenCalledWith(
       '/api/models/{public_id}/claims/',
       expect.objectContaining({
@@ -605,7 +605,7 @@ describe('RelatedModelsEditor', () => {
     expect(screen.getByTestId('dirty')).toHaveTextContent('true');
 
     await user.click(screen.getByRole('button', { name: 'Save' }));
-    await waitFor(() => expect(PATCH).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(PATCH).toHaveBeenCalledOnce());
     expect(PATCH).toHaveBeenCalledWith(
       '/api/models/{public_id}/claims/',
       expect.objectContaining({

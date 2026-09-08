@@ -33,7 +33,7 @@ describe('searchDraft', () => {
 
     await user.type(screen.getByRole('searchbox'), '  star ');
 
-    await waitFor(() => expect(commit).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(commit).toHaveBeenCalledOnce());
     expect(commit).toHaveBeenCalledWith('star');
   });
 

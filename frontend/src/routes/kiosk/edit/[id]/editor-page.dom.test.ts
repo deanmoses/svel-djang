@@ -74,7 +74,7 @@ describe('/kiosk/edit/[id] editor — delete handler', () => {
     render(Page, { data: makeData() });
     await user.click(screen.getAllByRole('button', { name: 'Delete Kiosk' })[0]);
 
-    await waitFor(() => expect(DELETE).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(DELETE).toHaveBeenCalledOnce());
     expect(DELETE).toHaveBeenCalledWith('/api/kiosk/configs/{config_id}/', {
       params: { path: { config_id: 7 } },
     });
@@ -170,14 +170,14 @@ describe('/kiosk/edit/[id] editor — autosave on blur', () => {
     await user.clear(headingInput);
     await user.type(headingInput, 'H');
     await user.tab(); // blur heading → first save starts and hangs
-    await waitFor(() => expect(PATCH).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(PATCH).toHaveBeenCalledOnce());
 
     // While the first is still pending, edit + blur a second field.
     await user.clear(idleInput);
     await user.type(idleInput, '90');
     await user.tab();
     // No second PATCH yet — coalescer should be holding it.
-    expect(PATCH).toHaveBeenCalledTimes(1);
+    expect(PATCH).toHaveBeenCalledOnce();
 
     // Resolve the first save. The trailing save should fire with the
     // current state (both fields).
@@ -339,7 +339,7 @@ describe('/kiosk/edit/[id] editor — "Add a machine" typeahead', () => {
     await user.click(screen.getByRole('button', { name: /Medieval Madness/ }));
 
     // Selecting a row appends it and auto-saves with both title slugs.
-    await waitFor(() => expect(PATCH).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(PATCH).toHaveBeenCalledOnce());
     expect(PATCH).toHaveBeenCalledWith(
       '/api/kiosk/configs/{config_id}/',
       expect.objectContaining({

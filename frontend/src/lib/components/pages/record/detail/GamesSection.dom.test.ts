@@ -71,7 +71,7 @@ describe('GamesSection', () => {
 
     observers.forEach((o) => o.callback([{ isIntersecting: true }]));
 
-    await waitFor(() => expect(mockGET).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(mockGET).toHaveBeenCalledOnce());
     expect(mockGET).toHaveBeenCalledWith('/api/games/', {
       params: { query: { game_format: ['pinball', 'unclassified'], page: 2 } },
     });
@@ -91,7 +91,7 @@ describe('GamesSection', () => {
 
     observers.forEach((o) => o.callback([{ isIntersecting: true }]));
 
-    await waitFor(() => expect(mockGET).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(mockGET).toHaveBeenCalledOnce());
     expect(mockGET).toHaveBeenCalledWith('/api/games/', {
       params: { query: { manufacturer: 'williams', q: 'whirl', page: 2 } },
     });
@@ -107,7 +107,7 @@ describe('GamesSection', () => {
 
       // Type, pause: the debounce commits `?q=god` and the navigation starts.
       await user.type(box, 'god');
-      await waitFor(() => expect(goto).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(goto).toHaveBeenCalledOnce());
       expect(goto.mock.calls[0][0]).toBe('/game-formats/pinball?q=god');
 
       // The user types on while that navigation is still in flight, then it

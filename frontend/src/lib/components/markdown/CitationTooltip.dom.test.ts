@@ -112,12 +112,12 @@ describe('CitationTooltip', () => {
     });
 
     await vi.advanceTimersByTimeAsync(0);
-    expect(GET).toHaveBeenCalledTimes(1);
+    expect(GET).toHaveBeenCalledOnce();
   });
 
   it('shows the tooltip on hover and hides it after the hide delay', async () => {
     renderTooltip('<p>Hover <sup data-cite-id="1" tabindex="0">[1]</sup>.</p>');
-    await vi.waitFor(() => expect(GET).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(GET).toHaveBeenCalledOnce());
 
     await fireEvent.mouseEnter(getCitation('1'));
     const tooltip = await screen.findByRole('tooltip');
@@ -135,7 +135,7 @@ describe('CitationTooltip', () => {
 
   it('leads a cited issue with its parent periodical', async () => {
     renderTooltip('<p>Fact <sup data-cite-id="2" tabindex="0">[2]</sup>.</p>');
-    await vi.waitFor(() => expect(GET).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(GET).toHaveBeenCalledOnce());
 
     await fireEvent.mouseEnter(getCitation('2'));
     const tooltip = await screen.findByRole('tooltip');
@@ -160,7 +160,7 @@ describe('CitationTooltip', () => {
       ],
     });
     renderTooltip('<p>Hover <sup data-cite-id="1" tabindex="0">[1]</sup>.</p>');
-    await vi.waitFor(() => expect(GET).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(GET).toHaveBeenCalledOnce());
 
     await fireEvent.mouseEnter(getCitation('1'));
     const tooltip = await screen.findByRole('tooltip');
@@ -174,7 +174,7 @@ describe('CitationTooltip', () => {
 
   it('keeps the tooltip open when the pointer moves from anchor onto the tooltip', async () => {
     renderTooltip('<p>Keep <sup data-cite-id="1" tabindex="0">[1]</sup>.</p>');
-    await vi.waitFor(() => expect(GET).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(GET).toHaveBeenCalledOnce());
 
     await fireEvent.mouseEnter(getCitation('1'));
     const tooltip = await screen.findByRole('tooltip');
@@ -198,7 +198,7 @@ describe('CitationTooltip', () => {
 
   it('shows on focus and closes on escape', async () => {
     renderTooltip('<p>Focus <sup data-cite-id="1" tabindex="0">[1]</sup>.</p>');
-    await vi.waitFor(() => expect(GET).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(GET).toHaveBeenCalledOnce());
 
     const citation = getCitation('1');
     await fireEvent.focus(citation);
@@ -210,7 +210,7 @@ describe('CitationTooltip', () => {
 
   it('pins on click, unpins on second click, and dismisses on outside click', async () => {
     renderTooltip('<p>Click <sup data-cite-id="1" tabindex="0">[1]</sup>.</p>');
-    await vi.waitFor(() => expect(GET).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(GET).toHaveBeenCalledOnce());
 
     const citation = getCitation('1');
     await fireEvent.click(citation);

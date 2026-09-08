@@ -159,7 +159,7 @@ describe('Nav', () => {
     await user.click(screen.getByRole('button', { name: 'Account menu' }));
     await user.click(screen.getByRole('menuitem', { name: 'Sign Out' }));
 
-    expect(auth.logout).toHaveBeenCalledTimes(1);
+    expect(auth.logout).toHaveBeenCalledOnce();
     // Wait a microtask for the awaited logout to resolve before checking the toast.
     await Promise.resolve();
     expect(toast.messages.map((m) => m.text)).toContain('Signed out');

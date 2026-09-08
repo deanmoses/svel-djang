@@ -93,7 +93,7 @@ describe('TitleFranchiseEditor', () => {
 
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
-    await waitFor(() => expect(PATCH).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(PATCH).toHaveBeenCalledOnce());
     expect(PATCH).toHaveBeenCalledWith(
       '/api/titles/{public_id}/claims/',
       expect.objectContaining({
@@ -116,7 +116,7 @@ describe('TitleFranchiseEditor', () => {
     await user.click(await screen.findByRole('option', { name: 'Star Wars' }));
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
-    await waitFor(() => expect(PATCH).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(PATCH).toHaveBeenCalledOnce());
     expect(PATCH).toHaveBeenCalledWith(
       '/api/titles/{public_id}/claims/',
       expect.objectContaining({
