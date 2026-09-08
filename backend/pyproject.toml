@@ -120,14 +120,17 @@ ignore = [
     "PLR0913", # too many arguments
     "PLR0915", # too many statements
     "PLR0917", # too many positional arguments
-    # Moving imports into a TYPE_CHECKING block. Django and Pydantic evaluate
+    # The four rules that push a type out of the runtime namespace: TC001-003
+    # move imports into a TYPE_CHECKING block, TC006 quotes the cast() target so
+    # the name needn't be imported at all. Django and Pydantic evaluate
     # annotations at runtime, and the docs treat TYPE_CHECKING as a typing smell
-    # to justify, so the other TC rules — which catch what a TYPE_CHECKING block
-    # gets *wrong* — are the half worth having.
+    # to justify, so that trade buys nothing here — and `cast("Foo", x)` reads
+    # worse than `cast(Foo, x)` for it. The rest of TC, which catches what a
+    # TYPE_CHECKING block gets *wrong*, stays on.
     "TC001",
     "TC002",
     "TC003",
-    "TC006", # quoted cast() target — 44 call sites to convert first
+    "TC006",
     # Call-site rule: fires on Pydantic's `Field(False, ...)` and on booleans
     # passed as claim *values*, not as flags. FBT001/FBT002 still guard the
     # definition side, which is where a boolean trap actually gets built.
