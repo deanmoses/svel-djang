@@ -58,7 +58,7 @@
 
   // untrack: intentional one-time capture; component re-mounts when modal reopens
   const original = untrack(() => extractFields(initialData));
-  let fields = $state<TechnologyFormFields>({ ...original });
+  const fields = $state<TechnologyFormFields>({ ...original });
   let dirty = $derived(Object.keys(diffScalarFields(fields, original)).length > 0);
 
   let fieldErrors = $state<FieldErrors>({});

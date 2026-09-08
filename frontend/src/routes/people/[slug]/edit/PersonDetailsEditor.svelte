@@ -39,7 +39,7 @@
   }
 
   const original = untrack(() => extractFields(initialData));
-  let fields = $state<DetailsFields>({ ...original });
+  const fields = $state<DetailsFields>({ ...original });
   let fieldErrors = $state<FieldErrors>({});
   let changedFields = $derived(diffScalarFields(fields, original));
   let dirty = $derived(Object.keys(changedFields).length > 0);

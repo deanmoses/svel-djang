@@ -9,7 +9,7 @@
   let { data } = $props();
   let theme = $derived(data.profile);
 
-  let childHeading = 'Sub-themes';
+  const childHeading = 'Sub-themes';
 </script>
 
 {#if theme.description?.html}

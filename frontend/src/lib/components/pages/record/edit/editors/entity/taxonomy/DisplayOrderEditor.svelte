@@ -29,7 +29,7 @@
   const original = untrack<DisplayOrderFields>(() => ({
     display_order: initialData ?? '',
   }));
-  let fields = $state<DisplayOrderFields>({ ...original });
+  const fields = $state<DisplayOrderFields>({ ...original });
   let fieldErrors = $state<FieldErrors>({});
   let changedFields = $derived(diffScalarFields(fields, original));
   let dirty = $derived(Object.keys(changedFields).length > 0);

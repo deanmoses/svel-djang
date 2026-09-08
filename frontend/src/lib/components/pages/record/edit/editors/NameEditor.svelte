@@ -42,7 +42,7 @@
   const originalAbbreviations = untrack(() => [...(initialAbbreviations ?? [])]);
 
   const original = untrack(() => ({ ...initialData }));
-  let fields = $state<NameFields>({ ...original });
+  const fields = $state<NameFields>({ ...original });
   let abbreviations = $state<string[]>([...originalAbbreviations]);
   // Seeded with the projected slug (not the saved one) so that an editorially
   // customized slug starts out "pre-diverged" — reconcileSlug leaves it alone

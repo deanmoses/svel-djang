@@ -11,7 +11,7 @@
 
   let { data } = $props();
   let person = $derived(data.profile);
-  let editAction = personEditActionContext.get();
+  const editAction = personEditActionContext.get();
   const richTextState = createRichTextAccordionState();
 
   function formatDate(

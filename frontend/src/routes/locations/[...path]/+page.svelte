@@ -12,7 +12,7 @@
 
   let { data } = $props();
   let profile = $derived<LocationDetail>(data.profile);
-  let editAction = locationEditActionContext.get();
+  const editAction = locationEditActionContext.get();
   const richTextState = createRichTextAccordionState();
   let manufacturersHeading = $derived(`Manufacturers (${profile.manufacturer_count})`);
 </script>

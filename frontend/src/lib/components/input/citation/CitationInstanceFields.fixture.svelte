@@ -6,7 +6,7 @@
 
   let { withRemove = false }: { withRemove?: boolean } = $props();
 
-  let citation = $state({
+  const citation = $state({
     sourceName: 'The Encyclopedia of Pinball',
     sourceType: 'book',
     locator: '',

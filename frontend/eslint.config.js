@@ -129,6 +129,11 @@ export default ts.config(
       // not interpolation — the extra braces render as literal braces.
       'svelte/no-extra-reactive-curlies': 'error',
       'svelte/no-nested-style-tag': 'error',
+      // The runes-aware counterpart to core `prefer-const`, which does not see
+      // into a component's <script>. A `$state` object that is only ever
+      // mutated wants `const` — the proxy carries the mutations. `$props` and
+      // `$derived` are exempt by default, being the two that can need `let`.
+      'svelte/prefer-const': 'error',
       // `$derived.by()` is for multi-statement bodies; a callback that is one
       // return statement reads as `$derived()`.
       'svelte/prefer-derived-over-derived-by': 'error',

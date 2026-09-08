@@ -5,7 +5,7 @@
   import InlineCitationsPanel from './InlineCitationsPanel.svelte';
   import type { PendingInlineCitation } from '$lib/pending-citations';
 
-  let pending = $state<PendingInlineCitation[]>([
+  const pending = $state<PendingInlineCitation[]>([
     {
       slug: 'aaaaaaaa',
       sourceId: 1,

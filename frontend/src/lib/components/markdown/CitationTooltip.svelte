@@ -26,7 +26,7 @@
     onNavigate?: (index: number) => void;
   } = $props();
 
-  let citationData = new SvelteMap<number, CitationInfo>();
+  const citationData = new SvelteMap<number, CitationInfo>();
 
   // Populate from prop data when available
   $effect(() => {
