@@ -12,7 +12,7 @@
   import SidebarList from '$lib/components/layout/page/sidebar/SidebarList.svelte';
   import SidebarListItem from '$lib/components/layout/page/sidebar/SidebarListItem.svelte';
   import SidebarSection from '$lib/components/layout/page/sidebar/SidebarSection.svelte';
-  import { type EditSectionMenuItem } from '$lib/components/layout/page/edit-section-menu';
+  import type { EditSectionMenuItem } from '$lib/components/layout/page/edit-section-menu';
   import {
     findSystemSectionByKey,
     findSystemSectionBySegment,

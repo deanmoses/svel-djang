@@ -104,13 +104,34 @@ export default ts.config(
     rules: {
       'svelte/no-navigation-without-resolve': 'off',
       eqeqeq: ['error', 'always', { null: 'ignore' }],
+      // Sequential awaits in a loop are usually an unintended serialization of
+      // work that Promise.all would run concurrently.
+      'no-await-in-loop': 'error',
+      // An inline `import { type A, b }` where every specifier is a type still
+      // emits a bare side-effect import. The top-level `import type` form
+      // erases cleanly, which is what `verbatimModuleSyntax` assumes.
+      '@typescript-eslint/no-import-type-side-effects': 'error',
       // Every component's <script> is TypeScript; a block that omits the
       // attribute silently opts out of type checking.
       'svelte/block-lang': ['error', { enforceScriptPresent: false, script: 'ts' }],
       'svelte/no-bind-value-on-checkable-inputs': 'error',
+      // `Foo.svelte` alongside a `Foo.svelte.ts` runes module: the two resolve
+      // through different import specifiers and reading one as the other is a
+      // silent import mistake.
+      'svelte/no-conflicting-module-names': 'error',
       'svelte/no-nested-style-tag': 'error',
       'svelte/require-event-prefix': 'error',
       'svelte/valid-style-parse': 'error',
+      //
+      // Store rules. The app is runes-only, so these report nothing today —
+      // they exist to keep it that way, catching a legacy store pattern the
+      // first time one is written rather than after it has spread.
+      //
+      'svelte/derived-has-same-inputs-outputs': 'error',
+      'svelte/no-ignored-unsubscribe': 'error',
+      'svelte/prefer-destructured-store-props': 'error',
+      'svelte/require-store-callbacks-use-set-param': 'error',
+      'svelte/require-stores-init': 'error',
       // Standard convention: `_`-prefixed args/vars are intentionally unused.
       // Lets snippets accept required arguments they don't need to reference.
       '@typescript-eslint/no-unused-vars': [
@@ -294,6 +315,8 @@ export default ts.config(
           caughtErrorsIgnorePattern: '^_',
         },
       ],
+      // Private fields never reassigned outside the constructor.
+      '@typescript-eslint/prefer-readonly': 'error',
       '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true }],
       '@typescript-eslint/no-confusing-void-expression': [
         'error',

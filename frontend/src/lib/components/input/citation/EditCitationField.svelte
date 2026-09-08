@@ -3,7 +3,7 @@
   CitationInstanceFields body; "Add citation" opens the picker and appends —
   multiple separate sources backing one edit are first-class. -->
 <script lang="ts">
-  import { type EditCitationSelection } from '$lib/edit-citation';
+  import type { EditCitationSelection } from '$lib/edit-citation';
   import FieldGroup from '$lib/components/input/FieldGroup.svelte';
   import CitationAutocomplete from './CitationAutocomplete.svelte';
   import CitationInstanceFields from './CitationInstanceFields.svelte';
