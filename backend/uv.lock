@@ -156,7 +156,7 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "sentry-sdk", extras = ["django"], specifier = ">=2.68.1" },
     { name = "whitenoise", specifier = ">=6.12" },
-    { name = "workos", specifier = ">=5.46" },
+    { name = "workos", specifier = ">=10.3" },
 ]
 
 [package.metadata.requires-dev]
@@ -1281,15 +1281,14 @@ wheels = [
 
 [[package]]
 name = "workos"
-version = "5.46.0"
+version = "10.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cryptography" },
     { name = "httpx" },
-    { name = "pydantic" },
     { name = "pyjwt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/13/c7/8eb6f513a39a24544f28d0fd764db1c4a54b897885b9f0aede0b4a28d436/workos-5.46.0.tar.gz", hash = "sha256:db6ce0fa6924bfd7a790c2bdae97cf7be8a970eaaef04156ae554157d24376f2", size = 65693, upload-time = "2026-03-16T20:49:13.215Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ee/9c/566dfba09e4bc75bff5db93c00ea2b36ba467914280bf66a0e16a11f9b56/workos-10.3.0.tar.gz", hash = "sha256:cc981fe8c09a61219d1b00f5685661855bad1d4d9a2a2e57ef48b0bc91dafb33", size = 268969, upload-time = "2026-09-01T22:16:25.601Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/cf/8f/43b2345c7d0283660db4c205e93134c4a57406ee896782e7384431906493/workos-5.46.0-py3-none-any.whl", hash = "sha256:b83704d4d6fcafa57439e232f62944b619aabc1c632b0ced9f71501298be0c78", size = 121032, upload-time = "2026-03-16T20:49:11.905Z" },
+    { url = "https://files.pythonhosted.org/packages/52/5d/e0d1ebd226064b598755354890453eb61012960e620a26c2aceef6e0c230/workos-10.3.0-py3-none-any.whl", hash = "sha256:d03d0e462f0187753d9ce3bdcd6567bb1b36cafe6b372acc89f27bfd4c467ce0", size = 762429, upload-time = "2026-09-01T22:16:24.479Z" },
 ]

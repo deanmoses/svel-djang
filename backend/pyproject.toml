@@ -17,7 +17,7 @@ dependencies = [
     "Pillow>=12.3.0",
     "pillow-heif>=1.7",
     "django-storages[s3]>=1.14.6",
-    "workos>=5.46",
+    "workos>=10.3",
     "sentry-sdk[django]>=2.68.1",
     "pyyaml>=6.0.3",
     # Exact pin: the version *is* a Public Suffix List snapshot.

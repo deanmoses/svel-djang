@@ -21,7 +21,7 @@ from ninja import Router
 from apps.accounts.models import User
 from apps.accounts.pending import extract_workos_session_id, put_pending
 from apps.accounts.schemas import AuthStatusSchema
-from apps.accounts.workos_client import get_workos_client
+from apps.accounts.workos_client import WORKOS_HTTP_ERRORS, get_workos_client
 from apps.core.authz import compute_capability_map, policy_user
 from apps.core.authz.markers import public_mutation
 from apps.core.site_origin import site_host
@@ -125,10 +125,24 @@ def auth_callback(request: HttpRequest) -> HttpResponse:
         auth_response = client.user_management.authenticate_with_code(
             code=code,
         )
+    except WORKOS_HTTP_ERRORS as exc:
+        # `request_id` is the handle WorkOS support asks for, and status_code
+        # separates "they rejected the code" from "their API was down".
+        log.exception(
+            "WorkOS code exchange failed (reason=code_exchange_failed) "
+            "status=%s request_id=%s",
+            exc.status_code,
+            exc.request_id,
+        )
+        sentry_sdk.capture_exception()
+        return HttpResponseRedirect("/auth/error?reason=code_exchange_failed")
     except Exception:
-        # Swallowed so the visitor lands on the styled error page. Replays can't
-        # make this noisy: the state was popped above, so a reused callback URL
-        # is refused before this runs.
+        # Kept broad beneath the typed branch: the SDK documents its own error
+        # classes as the primary contract, not the only one, and a transport
+        # error escaping as itself must still land the visitor on the styled
+        # error page rather than a 500. Replays can't make this noisy: the
+        # state was popped above, so a reused callback URL is refused before
+        # this runs.
         log.exception("WorkOS code exchange failed (reason=code_exchange_failed)")
         sentry_sdk.capture_exception()
         return HttpResponseRedirect("/auth/error?reason=code_exchange_failed")
