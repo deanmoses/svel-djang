@@ -302,7 +302,10 @@ export default ts.config(
       // Off pending cleanup — each has real hits in the current suite.
       'vitest/expect-expect': 'off',
       'vitest/prefer-called-exactly-once-with': 'off',
-      'vitest/valid-expect': 'off',
+      // Vitest's `expect(value, message)` takes a second argument that Jest's
+      // does not, and the convention tests use it to say how to fix a
+      // violation. maxArgs:2 keeps the arity check without banning that.
+      'vitest/valid-expect': ['error', { maxArgs: 2 }],
       'vitest/valid-title': 'off',
     },
   },
