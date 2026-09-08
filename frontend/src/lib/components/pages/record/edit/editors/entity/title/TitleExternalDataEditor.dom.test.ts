@@ -72,8 +72,7 @@ describe('TitleExternalDataEditor dirty-state contract', () => {
 
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
-    expect(PATCH).toHaveBeenCalledOnce();
-    expect(PATCH).toHaveBeenCalledWith('/api/titles/{public_id}/claims/', {
+    expect(PATCH).toHaveBeenCalledExactlyOnceWith('/api/titles/{public_id}/claims/', {
       params: { path: { public_id: 'addams-family' } },
       body: { fields: { opdb_id: 'G9abc' }, note: '', citations: [], inline_citations: [] },
     });

@@ -277,8 +277,7 @@ describe('WikilinkAutocomplete', () => {
     await user.keyboard('{ArrowDown}');
     await user.keyboard('{Enter}');
 
-    expect(oncomplete).toHaveBeenCalledOnce();
-    expect(oncomplete).toHaveBeenCalledWith(`[[title:${SEARCH_RESULTS[0].ref}]]`);
+    expect(oncomplete).toHaveBeenCalledExactlyOnceWith(`[[title:${SEARCH_RESULTS[0].ref}]]`);
   });
 
   it('sets aria-activedescendant on the search input during keyboard navigation', async () => {

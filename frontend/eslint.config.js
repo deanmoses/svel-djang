@@ -317,8 +317,10 @@ export default ts.config(
       'vitest/no-conditional-expect': 'error',
       // A test whose body never asserts passes by reaching the end.
       'vitest/expect-expect': 'error',
-      // Off pending cleanup — real hits in the current suite.
-      'vitest/prefer-called-exactly-once-with': 'off',
+      // A separate `toHaveBeenCalledOnce()` next to `toHaveBeenCalledWith(...)`
+      // asserts that the spy ran once and that *some* call matched — not that
+      // the one call was the matching one. The merged matcher asserts both.
+      'vitest/prefer-called-exactly-once-with': 'error',
       // Vitest's `expect(value, message)` takes a second argument that Jest's
       // does not, and the convention tests use it to say how to fix a
       // violation. maxArgs:2 keeps the arity check without banning that.

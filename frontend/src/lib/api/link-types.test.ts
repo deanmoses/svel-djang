@@ -48,8 +48,7 @@ describe('fetchLinkTypes', () => {
     GET.mockResolvedValue(ok(MOCK_TYPES));
     const result = await fetchLinkTypes();
     expect(result).toEqual(MOCK_TYPES);
-    expect(GET).toHaveBeenCalledOnce();
-    expect(GET).toHaveBeenCalledWith('/api/link-types/');
+    expect(GET).toHaveBeenCalledExactlyOnceWith('/api/link-types/');
   });
 
   it('returns cached result on second call without fetching', async () => {

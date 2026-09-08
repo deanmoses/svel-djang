@@ -124,8 +124,7 @@ describe('BasicsEditor dirty-state contract', () => {
 
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
-    expect(PATCH).toHaveBeenCalledOnce();
-    expect(PATCH).toHaveBeenCalledWith('/api/models/{public_id}/claims/', {
+    expect(PATCH).toHaveBeenCalledExactlyOnceWith('/api/models/{public_id}/claims/', {
       params: { path: { public_id: 'medieval-madness' } },
       body: {
         fields: { title: 'attack-from-mars' },
@@ -151,8 +150,7 @@ describe('BasicsEditor dirty-state contract', () => {
 
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
-    expect(PATCH).toHaveBeenCalledOnce();
-    expect(PATCH).toHaveBeenCalledWith('/api/models/{public_id}/claims/', {
+    expect(PATCH).toHaveBeenCalledExactlyOnceWith('/api/models/{public_id}/claims/', {
       params: { path: { public_id: 'medieval-madness' } },
       body: {
         fields: { production_status: 'unreleased' },
@@ -177,8 +175,7 @@ describe('BasicsEditor dirty-state contract', () => {
 
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
-    expect(PATCH).toHaveBeenCalledOnce();
-    expect(PATCH).toHaveBeenCalledWith('/api/models/{public_id}/claims/', {
+    expect(PATCH).toHaveBeenCalledExactlyOnceWith('/api/models/{public_id}/claims/', {
       params: { path: { public_id: 'medieval-madness' } },
       body: {
         fields: { production_year: 1998 },
@@ -202,8 +199,7 @@ describe('BasicsEditor dirty-state contract', () => {
 
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
-    expect(PATCH).toHaveBeenCalledOnce();
-    expect(PATCH).toHaveBeenCalledWith('/api/models/{public_id}/claims/', {
+    expect(PATCH).toHaveBeenCalledExactlyOnceWith('/api/models/{public_id}/claims/', {
       params: { path: { public_id: 'medieval-madness' } },
       body: {
         fields: { project_year: 1996 },

@@ -126,8 +126,7 @@ describe('TechnologyEditor', () => {
 
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
-    expect(PATCH).toHaveBeenCalledOnce();
-    expect(PATCH).toHaveBeenCalledWith('/api/models/{public_id}/claims/', {
+    expect(PATCH).toHaveBeenCalledExactlyOnceWith('/api/models/{public_id}/claims/', {
       params: { path: { public_id: 'medieval-madness' } },
       body: { fields: { system: 'spike-2' }, note: '', citations: [], inline_citations: [] },
     });
@@ -145,8 +144,7 @@ describe('TechnologyEditor', () => {
 
     await user.click(screen.getByRole('button', { name: 'Save with meta' }));
 
-    expect(PATCH).toHaveBeenCalledOnce();
-    expect(PATCH).toHaveBeenCalledWith('/api/models/{public_id}/claims/', {
+    expect(PATCH).toHaveBeenCalledExactlyOnceWith('/api/models/{public_id}/claims/', {
       params: { path: { public_id: 'medieval-madness' } },
       body: {
         fields: { display_type: 'lcd' },
