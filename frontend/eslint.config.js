@@ -124,6 +124,9 @@ export default ts.config(
       // silent import mistake.
       'svelte/no-conflicting-module-names': 'error',
       'svelte/no-nested-style-tag': 'error',
+      // `$derived.by()` is for multi-statement bodies; a callback that is one
+      // return statement reads as `$derived()`.
+      'svelte/prefer-derived-over-derived-by': 'error',
       'svelte/require-event-prefix': 'error',
       'svelte/valid-style-parse': 'error',
       //
