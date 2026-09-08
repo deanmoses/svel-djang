@@ -1,4 +1,5 @@
 import { browser } from '$app/environment';
+import { on } from 'svelte/events';
 import { onMount } from 'svelte';
 
 /**
@@ -27,8 +28,7 @@ export function createBelowBreakpointFlag(
       isBelow = event.matches;
     }
 
-    mql.addEventListener('change', onChange);
-    return () => mql.removeEventListener('change', onChange);
+    return on(mql, 'change', onChange);
   });
 
   return {

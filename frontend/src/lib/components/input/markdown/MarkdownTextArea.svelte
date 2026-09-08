@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { on } from 'svelte/events';
   import { onDestroy } from 'svelte';
   import FieldGroup from '$lib/components/input/FieldGroup.svelte';
   import WikilinkAutocomplete from '$lib/components/input/wikilink/WikilinkAutocomplete.svelte';
@@ -270,8 +271,7 @@
         closeDropdown();
       }
     }
-    document.addEventListener('pointerdown', onPointerDown, true);
-    return () => document.removeEventListener('pointerdown', onPointerDown, true);
+    return on(document, 'pointerdown', onPointerDown, { capture: true });
   });
 
   // Clicking the textarea itself closes the dropdown

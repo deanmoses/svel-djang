@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { on } from 'svelte/events';
   import { invalidate } from '$app/navigation';
   import Page from '$lib/components/layout/page/Page.svelte';
   import { SITE_TITLE } from '$lib/constants';
@@ -22,10 +23,10 @@
     const onVisible = () => {
       if (document.visibilityState === 'visible') refresh();
     };
-    document.addEventListener('visibilitychange', onVisible);
+    const offVisible = on(document, 'visibilitychange', onVisible);
     return () => {
       clearInterval(id);
-      document.removeEventListener('visibilitychange', onVisible);
+      offVisible();
     };
   });
 </script>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { on } from 'svelte/events';
   import { untrack, type Snippet } from 'svelte';
 
   import { floating } from '$lib/actions/floating';
@@ -194,14 +195,14 @@
       closeMenu();
     }
 
-    document.addEventListener('keydown', handleKeydown);
-    document.addEventListener('pointerdown', handlePointerDown);
-    document.addEventListener('focusin', handleFocusIn);
+    const offs = [
+      on(document, 'keydown', handleKeydown),
+      on(document, 'pointerdown', handlePointerDown),
+      on(document, 'focusin', handleFocusIn),
+    ];
 
     return () => {
-      document.removeEventListener('keydown', handleKeydown);
-      document.removeEventListener('pointerdown', handlePointerDown);
-      document.removeEventListener('focusin', handleFocusIn);
+      for (const off of offs) off();
     };
   });
 

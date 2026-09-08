@@ -192,6 +192,17 @@ export default ts.config(
       ],
     },
   },
+  {
+    // Component code only. `on()` from svelte/events returns its own
+    // unsubscriber, so a listener and its teardown are declared together
+    // instead of as a matching pair that can drift, and it fires in the same
+    // order as `onclick` and friends. Neither property helps outside a
+    // component: plain modules wire up XHR and one-shot `{ once: true }`
+    // listeners, where `on()` resolves to the untyped EventTarget overload and
+    // there is no teardown to own.
+    files: ['src/**/*.svelte', 'src/**/*.svelte.ts'],
+    rules: { 'svelte/no-add-event-listener': 'error' },
+  },
   //
   // `no-restricted-imports` blocks below. Flat config does NOT union this rule
   // across overrides — the LAST matching block wins and silently drops earlier

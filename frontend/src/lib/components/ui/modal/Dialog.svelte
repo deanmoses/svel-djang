@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { on } from 'svelte/events';
   import { tick } from 'svelte';
   import type { Snippet } from 'svelte';
   import { acquireScrollLock } from './scroll-lock';
@@ -95,12 +96,12 @@
       }
     }
 
-    document.addEventListener('keydown', handleKeydown);
+    const offKeydown = on(document, 'keydown', handleKeydown);
 
     return () => {
       cancelled = true;
       releaseScrollLock();
-      document.removeEventListener('keydown', handleKeydown);
+      offKeydown();
       if (opener?.isConnected) {
         opener.focus();
       }

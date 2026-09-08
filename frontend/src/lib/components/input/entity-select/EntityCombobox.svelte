@@ -6,6 +6,7 @@ label cache so a saved value renders without a search. Not used directly —
 wrapped for single- vs multi-selection.
 -->
 <script lang="ts">
+  import { on } from 'svelte/events';
   import { onDestroy, untrack } from 'svelte';
   import { SvelteMap } from 'svelte/reactivity';
   import {
@@ -230,11 +231,11 @@ wrapped for single- vs multi-selection.
     function onFocusIn(e: FocusEvent) {
       if (isOutside(e.target as Node)) closeDropdown();
     }
-    document.addEventListener('pointerdown', onPointerDown);
-    document.addEventListener('focusin', onFocusIn);
+    const offPointerDown = on(document, 'pointerdown', onPointerDown);
+    const offFocusIn = on(document, 'focusin', onFocusIn);
     return () => {
-      document.removeEventListener('pointerdown', onPointerDown);
-      document.removeEventListener('focusin', onFocusIn);
+      offPointerDown();
+      offFocusIn();
     };
   });
 
