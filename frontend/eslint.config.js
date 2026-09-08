@@ -319,6 +319,18 @@ export default ts.config(
           caughtErrorsIgnorePattern: '^_',
         },
       ],
+      // `||` falls back on every falsy value, so a legitimate 0 or false is
+      // silently replaced by the default. `??` only covers null/undefined.
+      //
+      // Strings are exempt because the codebase uses `||` on them deliberately:
+      // `env.SITE_ORIGIN?.trim() || url.origin` has to treat an unset variable
+      // and a blank one alike, and `??` there would accept '' as the origin.
+      // Ternaries are exempt for the same reason — `x ? x : ''` is written when
+      // the empty case is the point.
+      '@typescript-eslint/prefer-nullish-coalescing': [
+        'error',
+        { ignorePrimitives: { string: true }, ignoreTernaryTests: true },
+      ],
       // Private fields never reassigned outside the constructor.
       '@typescript-eslint/prefer-readonly': 'error',
       '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true }],

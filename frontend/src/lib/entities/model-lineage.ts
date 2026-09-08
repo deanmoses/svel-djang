@@ -353,7 +353,7 @@ export function modelExportEditionSection(
     heading: 'Export Edition',
     original: original ? toModelLinkView(original, modelSubject(model)) : null,
     markets: rows
-      .filter((row) => row.target_location || row.target_label)
+      .filter((row) => row.target_location ?? row.target_label)
       .map((row) => ({
         location: row.target_location ?? null,
         label: row.target_label ?? '',
