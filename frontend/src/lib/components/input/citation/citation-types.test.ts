@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { assert, describe, it, expect } from 'vitest';
 import {
   suppressChildResults,
   emptyDraft,
@@ -240,18 +240,16 @@ describe('transition', () => {
       const state = searchState();
       const next = transition(state, { type: 'source_selected', source });
 
-      expect(next.stage).toBe('identify');
-      if (next.stage === 'identify') {
-        expect(next.parent).toEqual({
-          id: 10,
-          name: 'Book Series',
-          source_type: 'book',
-          author: 'Author A',
-          identifier_key: '',
-        });
-        expect(next.draft.sourceId).toBe(10);
-        expect(next.draft.sourceName).toBe('Book Series');
-      }
+      assert(next.stage === 'identify');
+      expect(next.parent).toEqual({
+        id: 10,
+        name: 'Book Series',
+        source_type: 'book',
+        author: 'Author A',
+        identifier_key: '',
+      });
+      expect(next.draft.sourceId).toBe(10);
+      expect(next.draft.sourceName).toBe('Book Series');
     });
 
     it('locator source → locator stage, not ready', () => {
@@ -261,7 +259,8 @@ describe('transition', () => {
       expect(next.draft.sourceId).toBe(5);
       expect(next.draft.sourceName).toBe('Concrete');
       expect(next.draft.skipLocator).toBe(false);
-      if (next.stage === 'locator') expect(next.ready).toBe(false);
+      assert(next.stage === 'locator');
+      expect(next.ready).toBe(false);
     });
 
     it('skip-locator source → ready immediately (no screen)', () => {
@@ -270,7 +269,8 @@ describe('transition', () => {
 
       expect(next.stage).toBe('locator');
       expect(next.draft.skipLocator).toBe(true);
-      if (next.stage === 'locator') expect(next.ready).toBe(true);
+      assert(next.stage === 'locator');
+      expect(next.ready).toBe(true);
     });
   });
 
@@ -289,7 +289,8 @@ describe('transition', () => {
       expect(next.draft.sourceId).toBe(11);
       expect(next.draft.sourceName).toBe('Child Edition');
       expect(next.draft.skipLocator).toBe(false);
-      if (next.stage === 'locator') expect(next.ready).toBe(false);
+      assert(next.stage === 'locator');
+      expect(next.ready).toBe(false);
     });
 
     it('threads sourceType and locatorHint into the draft', () => {
@@ -309,7 +310,8 @@ describe('transition', () => {
       // The hint is a prefill, not a submitted locator — it must not complete
       // the flow past the locator stage.
       expect(next.draft.locator).toBe('');
-      if (next.stage === 'locator') expect(next.ready).toBe(false);
+      assert(next.stage === 'locator');
+      expect(next.ready).toBe(false);
     });
 
     it('skip-locator child → ready immediately', () => {
@@ -324,7 +326,8 @@ describe('transition', () => {
 
       expect(next.stage).toBe('locator');
       expect(next.draft.skipLocator).toBe(true);
-      if (next.stage === 'locator') expect(next.ready).toBe(true);
+      assert(next.stage === 'locator');
+      expect(next.ready).toBe(true);
     });
 
     it('from search → locator stage (recognition path)', () => {
@@ -361,11 +364,9 @@ describe('transition', () => {
         seed: { kind: 'name', name: 'New Source' },
       });
 
-      expect(next.stage).toBe('create');
-      if (next.stage === 'create') {
-        expect(next.parent).toBeNull();
-        expect(next.seed).toEqual({ kind: 'name', name: 'New Source' });
-      }
+      assert(next.stage === 'create');
+      expect(next.parent).toBeNull();
+      expect(next.seed).toEqual({ kind: 'name', name: 'New Source' });
     });
 
     it('name seed from identify → create with parent carried over', () => {
@@ -376,11 +377,9 @@ describe('transition', () => {
         seed: { kind: 'name', name: 'New Edition' },
       });
 
-      expect(next.stage).toBe('create');
-      if (next.stage === 'create') {
-        expect(next.parent).toEqual(parent);
-        expect(next.seed).toEqual({ kind: 'name', name: 'New Edition' });
-      }
+      assert(next.stage === 'create');
+      expect(next.parent).toEqual(parent);
+      expect(next.seed).toEqual({ kind: 'name', name: 'New Edition' });
     });
 
     it('extraction seed from search → create carrying the draft, parent null', () => {
@@ -390,11 +389,9 @@ describe('transition', () => {
         seed: { kind: 'extraction', draft },
       });
 
-      expect(next.stage).toBe('create');
-      if (next.stage === 'create') {
-        expect(next.parent).toBeNull();
-        expect(next.seed).toEqual({ kind: 'extraction', draft });
-      }
+      assert(next.stage === 'create');
+      expect(next.parent).toBeNull();
+      expect(next.seed).toEqual({ kind: 'extraction', draft });
     });
 
     it('web seed from search → create carrying the seed, parent null', () => {
@@ -409,11 +406,9 @@ describe('transition', () => {
       } as const;
       const next = transition(state, { type: 'create_started', seed });
 
-      expect(next.stage).toBe('create');
-      if (next.stage === 'create') {
-        expect(next.parent).toBeNull();
-        expect(next.seed).toEqual(seed);
-      }
+      assert(next.stage === 'create');
+      expect(next.parent).toBeNull();
+      expect(next.seed).toEqual(seed);
     });
   });
 
@@ -437,7 +432,8 @@ describe('transition', () => {
       expect(next.draft.sourceId).toBe(50);
       expect(next.draft.sourceName).toBe('New Source');
       expect(next.draft.skipLocator).toBe(false);
-      if (next.stage === 'locator') expect(next.ready).toBe(false);
+      assert(next.stage === 'locator');
+      expect(next.ready).toBe(false);
     });
 
     it('abstract create (a parentless periodical) → identify under the new root', () => {
@@ -460,16 +456,14 @@ describe('transition', () => {
         author: '',
       });
 
-      expect(next.stage).toBe('identify');
-      if (next.stage === 'identify') {
-        expect(next.parent).toEqual({
-          id: 60,
-          name: 'Billboard',
-          source_type: 'periodical',
-          author: '',
-          identifier_key: '',
-        });
-      }
+      assert(next.stage === 'identify');
+      expect(next.parent).toEqual({
+        id: 60,
+        name: 'Billboard',
+        source_type: 'periodical',
+        author: '',
+        identifier_key: '',
+      });
     });
 
     it('skip-locator create → ready immediately', () => {
@@ -489,7 +483,8 @@ describe('transition', () => {
 
       expect(next.stage).toBe('locator');
       expect(next.draft.skipLocator).toBe(true);
-      if (next.stage === 'locator') expect(next.ready).toBe(true);
+      assert(next.stage === 'locator');
+      expect(next.ready).toBe(true);
     });
   });
 
@@ -551,7 +546,8 @@ describe('transition', () => {
       expect(next.stage).toBe('locator');
       expect(next.draft.locator).toBe('p. 42');
       expect(next.draft.sourceId).toBe(5);
-      if (next.stage === 'locator') expect(next.ready).toBe(true);
+      assert(next.stage === 'locator');
+      expect(next.ready).toBe(true);
     });
 
     it('empty locator still completes (skip path) — the stage is the signal, not the data', () => {
@@ -563,7 +559,8 @@ describe('transition', () => {
 
       expect(next.stage).toBe('locator');
       expect(next.draft.locator).toBe('');
-      if (next.stage === 'locator') expect(next.ready).toBe(true);
+      assert(next.stage === 'locator');
+      expect(next.ready).toBe(true);
     });
 
     it('from search → no-op', () => {

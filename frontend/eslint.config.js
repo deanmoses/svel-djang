@@ -295,9 +295,12 @@ export default ts.config(
     rules: {
       ...vitest.configs.recommended.rules,
       'vitest/no-disabled-tests': 'error',
+      // An `expect` reachable only through a branch is an assertion the suite
+      // may never run: the test then passes having verified nothing. Narrow a
+      // union with `assert(x.kind === 'y')`, which fails the test outright.
+      'vitest/no-conditional-expect': 'error',
       // Off pending cleanup — each has real hits in the current suite.
       'vitest/expect-expect': 'off',
-      'vitest/no-conditional-expect': 'off',
       'vitest/prefer-called-exactly-once-with': 'off',
       'vitest/valid-expect': 'off',
       'vitest/valid-title': 'off',
@@ -388,6 +391,10 @@ export default ts.config(
       // SvelteKit declares error() and redirect() as returning `never`, so
       // every `throw error(...)` trips this and no configuration satisfies it.
       '@typescript-eslint/only-throw-error': 'off',
+      // Reading a method off its object drops `this`. In tests this mostly
+      // means asserting on a global rather than on the spy that replaced it —
+      // `expect(confirmSpy)`, not `expect(window.confirm)`.
+      '@typescript-eslint/unbound-method': 'error',
       // Off pending cleanup.
       '@typescript-eslint/no-deprecated': 'off',
       '@typescript-eslint/no-floating-promises': 'off',
@@ -400,7 +407,6 @@ export default ts.config(
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/require-await': 'off',
-      '@typescript-eslint/unbound-method': 'off',
     },
   },
   {
@@ -420,7 +426,6 @@ export default ts.config(
       '@typescript-eslint/no-unnecessary-type-assertion': 'error',
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-unsafe-call': 'error',
-      '@typescript-eslint/unbound-method': 'error',
     },
   },
   {

@@ -10,7 +10,9 @@ import '@testing-library/jest-dom/vitest';
 import '@testing-library/svelte/vitest';
 
 // jsdom does not implement scrollIntoView
-Element.prototype.scrollIntoView ??= function () {};
+if (typeof Element.prototype.scrollIntoView !== 'function') {
+  Element.prototype.scrollIntoView = function () {};
+}
 
 // jsdom stubs execCommand but it doesn't work. Override unconditionally
 // to return false, which triggers MarkdownTextArea's manual fallback path.
@@ -26,16 +28,18 @@ window.ResizeObserver ??= class {
 // jsdom doesn't implement matchMedia. `createBelowBreakpointFlag` reads it at
 // module-eval time for a correct first-paint value, so any test that
 // touches a detail layout needs it defined.
-window.matchMedia ??= (() => ({
-  matches: false,
-  addEventListener: () => {},
-  removeEventListener: () => {},
-  addListener: () => {},
-  removeListener: () => {},
-  dispatchEvent: () => false,
-  media: '',
-  onchange: null,
-})) as unknown as typeof window.matchMedia;
+if (typeof window.matchMedia !== 'function') {
+  window.matchMedia = (() => ({
+    matches: false,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    addListener: () => {},
+    removeListener: () => {},
+    dispatchEvent: () => false,
+    media: '',
+    onchange: null,
+  })) as unknown as typeof window.matchMedia;
+}
 
 // In browser-transformed modules SvelteKit compiles `$env/dynamic/public` to
 // `export const env = globalThis.__sveltekit_dev.env;` — a global only the
