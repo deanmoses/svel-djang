@@ -22,9 +22,10 @@ describe('analytics config (locked-down PostHog init)', () => {
     expect(config.capture_pageleave).toBe('if_capture_pageview');
   });
 
-  it('disables session recording, surveys, and external script loading', () => {
+  it('disables session recording, surveys, product tours, and external script loading', () => {
     expect(config.disable_session_recording).toBe(true);
     expect(config.disable_surveys).toBe(true);
+    expect(config.disable_product_tours).toBe(true);
     expect(config.disable_external_dependency_loading).toBe(true);
   });
 
@@ -45,13 +46,15 @@ describe('analytics config (locked-down PostHog init)', () => {
     expect(config.save_campaign_params).toBe(false);
   });
 
-  it('strips IP at ingest', () => {
-    expect(config.ip).toBe(false);
+  it('opts out of the $device_model client-hints lookup', () => {
+    // Left at its default, the SDK calls
+    // navigator.userAgentData.getHighEntropyValues(['model']) at init and
+    // registers the raw OEM code as `$device_model`.
+    expect(config.disableDeviceModel).toBe(true);
   });
 
   it('denylists fingerprinting-grade and search-extracted properties', () => {
     expect(config.property_denylist).toEqual([
-      '$ip',
       '$screen_height',
       '$screen_width',
       '$viewport_height',

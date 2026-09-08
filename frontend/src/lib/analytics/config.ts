@@ -14,6 +14,7 @@ export const config: Partial<PostHogConfig> = {
   capture_pageleave: 'if_capture_pageview',
   disable_session_recording: true,
   disable_surveys: true,
+  disable_product_tours: true,
   // Stop the SDK from fetching session-recording.js, surveys.js, etc. at runtime.
   disable_external_dependency_loading: true,
   // Stop the SDK from POSTing to /flags for remote feature-flag / decide config.
@@ -30,10 +31,14 @@ export const config: Partial<PostHogConfig> = {
   // ship as separate props. Disable the extractor entirely.
   save_campaign_params: false,
 
-  // satisfies "no IP-based attribution"
-  ip: false,
+  // PostHog resolves the hardware model once at init via
+  // `navigator.userAgentData.getHighEntropyValues(['model'])` and registers it
+  // as the `$device_model` super-property — the raw OEM code (e.g. `Pixel 7`),
+  // Chromium-on-Android only. Opting out here skips the client-hints call
+  // itself, rather than denylisting the property once it has been resolved.
+  disableDeviceModel: true,
+
   property_denylist: [
-    '$ip', // belt-and-suspenders alongside ip: false
     '$screen_height', // satisfies "no fingerprinting-grade properties"
     '$screen_width',
     '$viewport_height',

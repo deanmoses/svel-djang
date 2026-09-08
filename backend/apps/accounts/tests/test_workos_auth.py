@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import logging
 from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
 from django.test import Client
+from workos import ServerError
 
 from apps.accounts.models import User
 from apps.accounts.test_factories import make_user
@@ -460,6 +462,35 @@ class TestAuthCallback:
         assert [
             e["exception"]["values"][-1]["type"] for e in sentry_recording.events
         ] == ["Exception"]
+
+    def test_callback_logs_diagnostics_for_workos_http_errors(
+        self, client, sentry_recording, caplog
+    ):
+        """An SDK HTTP error still redirects, and its request_id reaches the log."""
+        with patch("apps.accounts.api.auth.get_workos_client") as mock:
+            mock_client = mock.return_value
+            mock_client.user_management.get_authorization_url.side_effect = (
+                lambda **kwargs: (
+                    f"https://auth.workos.com/authorize?state={kwargs['state']}"
+                )
+            )
+            state, _ = _start_login(client, next_url="/")
+            mock_client.user_management.authenticate_with_code.side_effect = (
+                ServerError(
+                    "upstream is unwell",
+                    status_code=503,
+                    request_id="req_01ABC",
+                )
+            )
+            with caplog.at_level(logging.ERROR, logger="apps.accounts.api.auth"):
+                resp = client.get(f"/api/auth/callback/?code=expired&state={state}")
+
+        assert resp.status_code == 302
+        assert resp["Location"] == "/auth/error?reason=code_exchange_failed"
+        assert "status=503 request_id=req_01ABC" in caplog.text
+        assert [
+            e["exception"]["values"][-1]["type"] for e in sentry_recording.events
+        ] == ["ServerError"]
         # ``code`` is a local in the view; no frame may carry locals.
         frames = [
             frame
