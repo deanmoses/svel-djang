@@ -11,7 +11,7 @@
 
   type Part = { text: string; href?: string };
 
-  let parts = $derived.by((): Part[] =>
+  let parts: Part[] = $derived(
     buildLocationParts(loc).map((part) => ({
       ...part,
       href: part.href ? resolveHref(part.href) : undefined,

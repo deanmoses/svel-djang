@@ -16,18 +16,14 @@ export type SystemEditOption = {
 let cachedTechSubgens: Promise<SystemEditOption[]> | null = null;
 
 export function fetchTechnologySubgenerationOptions(): Promise<SystemEditOption[]> {
-  if (!cachedTechSubgens) {
-    cachedTechSubgens = client
-      .GET('/api/technology-generations/')
-      .then(({ data }) =>
-        (data ?? []).flatMap((g) =>
-          g.subgenerations.map((s) => ({ value: s.slug, label: s.name })),
-        ),
-      )
-      .catch(() => {
-        cachedTechSubgens = null;
-        return [];
-      });
-  }
+  cachedTechSubgens ??= client
+    .GET('/api/technology-generations/')
+    .then(({ data }) =>
+      (data ?? []).flatMap((g) => g.subgenerations.map((s) => ({ value: s.slug, label: s.name }))),
+    )
+    .catch(() => {
+      cachedTechSubgens = null;
+      return [];
+    });
   return cachedTechSubgens;
 }

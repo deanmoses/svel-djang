@@ -104,13 +104,41 @@ export default ts.config(
     rules: {
       'svelte/no-navigation-without-resolve': 'off',
       eqeqeq: ['error', 'always', { null: 'ignore' }],
+      // Sequential awaits in a loop are usually an unintended serialization of
+      // work that Promise.all would run concurrently.
+      'no-await-in-loop': 'error',
+      // Method shorthand (`f(x): void`) is checked bivariantly, so
+      // `strictFunctionTypes` does not apply to it; the property form
+      // (`f: (x) => void`) gets the sound contravariant check.
+      '@typescript-eslint/method-signature-style': 'error',
+      // An inline `import { type A, b }` where every specifier is a type still
+      // emits a bare side-effect import. The top-level `import type` form
+      // erases cleanly, which is what `verbatimModuleSyntax` assumes.
+      '@typescript-eslint/no-import-type-side-effects': 'error',
       // Every component's <script> is TypeScript; a block that omits the
       // attribute silently opts out of type checking.
       'svelte/block-lang': ['error', { enforceScriptPresent: false, script: 'ts' }],
       'svelte/no-bind-value-on-checkable-inputs': 'error',
+      // `Foo.svelte` alongside a `Foo.svelte.ts` runes module: the two resolve
+      // through different import specifiers and reading one as the other is a
+      // silent import mistake.
+      'svelte/no-conflicting-module-names': 'error',
       'svelte/no-nested-style-tag': 'error',
+      // `$derived.by()` is for multi-statement bodies; a callback that is one
+      // return statement reads as `$derived()`.
+      'svelte/prefer-derived-over-derived-by': 'error',
       'svelte/require-event-prefix': 'error',
       'svelte/valid-style-parse': 'error',
+      //
+      // Store rules. The app is runes-only, so these report nothing today —
+      // they exist to keep it that way, catching a legacy store pattern the
+      // first time one is written rather than after it has spread.
+      //
+      'svelte/derived-has-same-inputs-outputs': 'error',
+      'svelte/no-ignored-unsubscribe': 'error',
+      'svelte/prefer-destructured-store-props': 'error',
+      'svelte/require-store-callbacks-use-set-param': 'error',
+      'svelte/require-stores-init': 'error',
       // Standard convention: `_`-prefixed args/vars are intentionally unused.
       // Lets snippets accept required arguments they don't need to reference.
       '@typescript-eslint/no-unused-vars': [
@@ -294,6 +322,20 @@ export default ts.config(
           caughtErrorsIgnorePattern: '^_',
         },
       ],
+      // `||` falls back on every falsy value, so a legitimate 0 or false is
+      // silently replaced by the default. `??` only covers null/undefined.
+      //
+      // Strings are exempt because the codebase uses `||` on them deliberately:
+      // `env.SITE_ORIGIN?.trim() || url.origin` has to treat an unset variable
+      // and a blank one alike, and `??` there would accept '' as the origin.
+      // Ternaries are exempt for the same reason — `x ? x : ''` is written when
+      // the empty case is the point.
+      '@typescript-eslint/prefer-nullish-coalescing': [
+        'error',
+        { ignorePrimitives: { string: true }, ignoreTernaryTests: true },
+      ],
+      // Private fields never reassigned outside the constructor.
+      '@typescript-eslint/prefer-readonly': 'error',
       '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true }],
       '@typescript-eslint/no-confusing-void-expression': [
         'error',

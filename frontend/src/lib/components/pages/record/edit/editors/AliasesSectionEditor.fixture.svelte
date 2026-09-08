@@ -1,6 +1,7 @@
 <script lang="ts">
   import AliasesSectionEditor from './AliasesSectionEditor.svelte';
   import type { SaveMeta, SaveResult } from './save-claims-shared';
+  import type { SectionEditorHandle } from './editor-contract';
 
   let {
     initialData = { aliases: ['Slingshot'] },
@@ -16,12 +17,7 @@
   let lastError = $state('');
   let lastSaveBody = $state<unknown>(null);
 
-  let editorRef:
-    | {
-        save(meta?: unknown): Promise<void>;
-        readonly dirty: boolean;
-      }
-    | undefined = $state();
+  let editorRef: SectionEditorHandle | undefined = $state();
 
   let editorDirty = $derived(editorRef?.dirty ?? false);
 

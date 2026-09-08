@@ -28,7 +28,7 @@
   } = $props();
 
   const uniqueSuffix = Math.random().toString(36).slice(2, 8);
-  let inputId = $derived.by(() => id || `ef-${slugifyLabel(label)}-${uniqueSuffix}`);
+  let inputId = $derived(id || `ef-${slugifyLabel(label)}-${uniqueSuffix}`);
   let hintId = $derived(`${inputId}-hint`);
   let errorId = $derived(`${inputId}-error`);
   let describedBy = $derived(

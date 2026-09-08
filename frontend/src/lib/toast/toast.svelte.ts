@@ -49,8 +49,8 @@ export type ToastMessage = {
 
 export type ToastHandle = {
   id: string;
-  update(text: string, opts?: Omit<ToastOptions, 'persistUntilNav'>): void;
-  dismiss(): void;
+  update: (text: string, opts?: Omit<ToastOptions, 'persistUntilNav'>) => void;
+  dismiss: () => void;
 };
 
 let counter = 0;

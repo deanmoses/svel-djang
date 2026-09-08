@@ -133,9 +133,8 @@
     return JSON.stringify(clean) !== JSON.stringify(orig);
   }
 
-  let dirty = $derived.by(
-    () =>
-      Object.keys(diffScalarFields(fields, original)).length > 0 ||
+  let dirty = $derived(
+    Object.keys(diffScalarFields(fields, original)).length > 0 ||
       publicIdSetChanged(themes, originalThemes) ||
       publicIdSetChanged(tags, originalTags) ||
       publicIdSetChanged(rewardTypes, originalRewardTypes) ||

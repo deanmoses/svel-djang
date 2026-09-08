@@ -1,5 +1,6 @@
 <script lang="ts">
   import TechnologyEditor from './TechnologyEditor.svelte';
+  import type { SectionEditorHandle } from '$lib/components/pages/record/edit/editors/editor-contract';
 
   type TechnologyModel = {
     technology_generation?: { public_id: string } | null;
@@ -20,12 +21,7 @@
   let savedCount = $state(0);
   let lastError = $state('');
 
-  let editorRef:
-    | {
-        save(meta?: unknown): Promise<void>;
-        readonly dirty: boolean;
-      }
-    | undefined = $state();
+  let editorRef: SectionEditorHandle | undefined = $state();
 
   let editorDirty = $derived(editorRef?.dirty ?? false);
 
@@ -52,7 +48,7 @@
   onclick={() =>
     editorRef?.save({
       note: 'Corrected per flyer',
-      citations: [{ citation_source_id: 7, locator: 'p. 2' }],
+      citations: [{ citation_source_id: 7, locator: 'p. 2', quote: '' }],
     })}
 >
   Save with meta

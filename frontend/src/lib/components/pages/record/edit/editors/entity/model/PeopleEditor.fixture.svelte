@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { CreditSchema } from '$lib/api/schema';
   import PeopleEditor from './PeopleEditor.svelte';
+  import type { SectionEditorHandle } from '$lib/components/pages/record/edit/editors/editor-contract';
 
   type Credit = CreditSchema;
 
@@ -15,12 +16,7 @@
   let savedCount = $state(0);
   let lastError = $state('');
 
-  let editorRef:
-    | {
-        save(meta?: unknown): Promise<void>;
-        readonly dirty: boolean;
-      }
-    | undefined = $state();
+  let editorRef: SectionEditorHandle | undefined = $state();
 
   let editorDirty = $derived(editorRef?.dirty ?? false);
 

@@ -18,7 +18,7 @@ export interface CitationTypeFrontend {
    * unchanged; empty input never reaches this (a locator is optional on
    * every type).
    */
-  normalizeLocator(raw: string): string | null;
+  normalizeLocator: (raw: string) => string | null;
 }
 
 /** The freeform behavior shared by every type without a locator grammar. */

@@ -1,5 +1,6 @@
 <script lang="ts">
   import BasicsEditor from './BasicsEditor.svelte';
+  import type { SectionEditorHandle } from '$lib/components/pages/record/edit/editors/editor-contract';
 
   type BasicsModel = {
     production_year?: number | null;
@@ -25,12 +26,7 @@
   let savedCount = $state(0);
   let lastError = $state('');
 
-  let editorRef:
-    | {
-        save(meta?: unknown): Promise<void>;
-        readonly dirty: boolean;
-      }
-    | undefined = $state();
+  let editorRef: SectionEditorHandle | undefined = $state();
 
   let editorDirty = $derived(editorRef?.dirty ?? false);
 </script>
