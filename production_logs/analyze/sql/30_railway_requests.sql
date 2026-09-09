@@ -31,6 +31,16 @@ SELECT
   (httpStatus >= 500) AS is_server_error,
   totalDuration      AS total_ms,
   upstreamRqDuration AS upstream_ms,
+  -- The client gave up at the CDN mid-body: Bunny logged 499 and stopped
+  -- draining its side, so the origin's write blocked with a single buffer
+  -- delivered. Railway logs the request 200, with a multi-second totalDuration
+  -- and a ~1ms upstreamRqDuration, which reads as application latency and is
+  -- not -- the same page renders normally from the same instance seconds either
+  -- side. Corroborated by txBytes landing on a 4096-byte boundary against a
+  -- ~20 KB median for these routes, though that boundary is not part of the
+  -- test: the buffer size is not ours to depend on.
+  (upstreamRqDuration <= 5 AND totalDuration >= 1000 AND txBytes > 0)
+    AS is_abandoned_write,
   host,
   srcIp        AS src_ip,
   clientUa     AS client_ua,
@@ -57,7 +67,7 @@ FROM read_json('../../dumps/railway/http.*.ndjson',
     'requestId': 'VARCHAR', 'deploymentId': 'VARCHAR',
     'deploymentInstanceId': 'VARCHAR'});
 
-COMMENT ON TABLE railway_requests IS 'GRAIN: one row per HTTP request seen by Railway''s edge, merged by the puller on requestId. Shows outages as users met them -- a 502 never reaches the app and so leaves no container log line. `is_synthetic` marks this project''s own probes; railway_health and timeline exclude them, this relation does not.';
+COMMENT ON TABLE railway_requests IS 'GRAIN: one row per HTTP request seen by Railway''s edge, merged by the puller on requestId. Shows outages as users met them -- a 502 never reaches the app and so leaves no container log line. `is_synthetic` marks this project''s own probes; railway_health and timeline exclude them, this relation does not. `is_abandoned_write` marks a request whose client gave up at the CDN mid-body, leaving the origin writing into a socket nobody drains: it logs 200 with a multi-second total_ms and a ~1ms upstream_ms, so a latency scan surfaces it as an origin stall that it is not. Distinct from `is_client_abort`, which is a 499 at Railway''s own edge.';
 
 -- Per-minute health, the shape an outage actually has.
 CREATE OR REPLACE VIEW railway_health AS
